@@ -1,0 +1,60 @@
+name: update changelog
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  update:
+    if: "!contains(github.event.commits[0].message, 'Update CHANGELOG')"
+    runs-on: ubuntu-latest
+    env:
+      PAT: ${{ secrets.PAT }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          # Fetch entire history of repository to ensure relase date can be
+          # extracted from commit of the given tag.
+          fetch-depth: 0
+          # Checkout target branch of this release. Ensures that the CHANGELOG
+          # is not out of date.
+          ref: ${{ github.event.release.target_commitish }}
+          with:
+            token: ${{ env.PAT }}
+
+      - name: Extract release date from git tag
+        id: release_date
+        run: |
+          echo "::set-output name=date::$(git log -1 --date=short --format=%ad '${{ github.event.release.tag_name }}')"
+      - name: Update Changelog
+        uses: stefanzweifel/changelog-updater-action@v1
+        with:
+          # Pass extracted release date, release notes and version to the Action.
+          release-date: ${{ steps.release_date.outputs.date }}
+          release-notes: ${{ github.event.release.body }}
+          latest-version: ${{ github.event.release.tag_name }}
+          compare-url-target-revision: ${{ github.event.release.target_commitish }}
+
+      - name: Commit updated CHANGELOG
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          # Push updated CHANGELOG to release target branch.
+          branch: ${{ github.event.release.target_commitish }}
+          commit_message: Update CHANGELOG
+          file_pattern: CHANGELOG.md
+          push_options: --force
+
+      - name: Archive Release
+        uses: thedoctor0/zip-release@main
+        with:
+          type: 'tar'
+          filename: 'release_${{ github.event.release.tag_name }}.tar.gz'
+          exclusions: '*.git* /*node_modules/* .editorconfig'
+
+      - name: Upload Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "release_${{ github.event.release.tag_name }}.tar.gz"
+          token: ${{ secrets.GITHUB_TOKEN }}

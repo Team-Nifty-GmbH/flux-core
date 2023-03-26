@@ -1,0 +1,19 @@
+<?php
+
+namespace FluxErp\Traits\Livewire;
+
+use FluxErp\Models\Client;
+use Illuminate\Support\Facades\Auth;
+
+trait WithAddressAuth
+{
+    public array $customerClient = [];
+
+    public function mountWithAddressAuth(): void
+    {
+        $this->customerClient = Client::query()
+            ->whereKey(Auth::user()->contact->client_id)
+            ?->first()
+            ->toArray();
+    }
+}

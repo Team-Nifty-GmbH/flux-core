@@ -1,0 +1,25 @@
+<?php
+
+namespace FluxErp\Http\Requests;
+
+use FluxErp\Rules\Iban;
+
+class UpdateBankConnectionRequest extends BaseFormRequest
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [
+            'id' => 'required|integer|exists:bank_connections,id,deleted_at,NULL',
+            'contact_id' => 'integer|nullable|exists:contacts,id,deleted_at,NULL',
+            'iban' => ['sometimes', 'string', new Iban()],
+            'account_holder' => 'sometimes|string|nullable',
+            'bank_name' => 'sometimes|string|nullable',
+            'bic' => 'sometimes|string|nullable',
+        ];
+    }
+}

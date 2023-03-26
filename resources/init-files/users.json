@@ -1,0 +1,14 @@
+{
+    "model": "User",
+    "data": [
+        {
+            "email": "admin",
+            "firstname": "admin",
+            "lastname": "admin",
+            "password": "admin",
+            "user_code": "ADMIN",
+            "language_code": "en_US",
+            "is_active": 1
+        }
+    ]
+}

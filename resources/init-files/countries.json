@@ -1,0 +1,59 @@
+{
+    "model": "Country",
+    "data": [
+        {
+            "name": "United States of America",
+            "iso_alpha2": "US",
+            "iso_alpha3": "USA",
+            "iso_numeric": "840",
+            "language_code": "en_US",
+            "currency_iso": "USD",
+            "is_eu_country": 0
+        },
+        {
+            "name": "Germany",
+            "iso_alpha2": "DE",
+            "iso_alpha3": "DEU",
+            "iso_numeric": "276",
+            "language_code": "de_DE",
+            "currency_iso": "EUR",
+            "is_eu_country": 1
+        },
+        {
+            "name": "Italy",
+            "iso_alpha2": "IT",
+            "iso_alpha3": "ITA",
+            "iso_numeric": "380",
+            "language_code": "it_IT",
+            "currency_iso": "EUR",
+            "is_eu_country": 1
+        },
+        {
+            "name": "France",
+            "iso_alpha2": "FR",
+            "iso_alpha3": "FRA",
+            "iso_numeric": "250",
+            "language_code": "fr_FR",
+            "currency_iso": "EUR",
+            "is_eu_country": 1
+        },
+        {
+            "name": "Austria",
+            "iso_alpha2": "AT",
+            "iso_alpha3": "AUT",
+            "iso_numeric": "040",
+            "language_code": "de_AT",
+            "currency_iso": "EUR",
+            "is_eu_country": 1
+        },
+        {
+            "name": "Switzerland",
+            "iso_alpha2": "CH",
+            "iso_alpha3": "CHE",
+            "iso_numeric": "756",
+            "language_code": "de_CH",
+            "currency_iso": "CHF",
+            "is_eu_country": 0
+        }
+    ]
+}

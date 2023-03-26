@@ -1,0 +1,45 @@
+<?php
+
+namespace FluxErp\Models;
+
+use FluxErp\Traits\Commentable;
+use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasTranslations;
+use FluxErp\Traits\HasUserModification;
+use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\HasPackageFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Language extends Model
+{
+    use Commentable, Filterable, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
+
+    protected $hidden = [
+        'uuid',
+    ];
+
+    protected $casts = [
+        'uuid' => 'string',
+    ];
+
+    protected $guarded = [
+        'id',
+        'uuid',
+    ];
+
+    public $translatable = [
+        'name',
+    ];
+
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+}

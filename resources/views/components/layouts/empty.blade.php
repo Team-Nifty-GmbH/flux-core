@@ -1,0 +1,2 @@
+{{-- THIS FILE HAS TO BE EMPTY, ONLY SLOT! DONT CHANGE!! --}}
+{{ $slot }}

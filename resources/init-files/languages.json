@@ -1,0 +1,25 @@
+{
+    "model": "Language",
+    "data": [
+        {
+            "name": "English",
+            "iso_name": "English",
+            "language_code": "en_US"
+        },
+        {
+            "name": "German",
+            "iso_name": "German",
+            "language_code": "de_DE"
+        },
+        {
+            "name": "French",
+            "iso_name": "French",
+            "language_code": "fr_FR"
+        },
+        {
+            "name": "Italian",
+            "iso_name": "Italian",
+            "language_code": "it_IT"
+        }
+    ]
+}

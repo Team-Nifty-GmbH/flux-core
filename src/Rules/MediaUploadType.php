@@ -1,0 +1,62 @@
+<?php
+
+namespace FluxErp\Rules;
+
+use Illuminate\Contracts\Validation\DataAwareRule;
+use Illuminate\Contracts\Validation\InvokableRule;
+use Illuminate\Http\UploadedFile;
+
+class MediaUploadType implements InvokableRule, DataAwareRule
+{
+    protected array $data;
+
+    /**
+     * Run the validation rule.
+     *
+     * @param  string  $attribute
+     * @param  mixed  $value
+     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     */
+    public function __invoke($attribute, $value, $fail): void
+    {
+        $method = 'addMediaFrom' . ucfirst(strtolower($value));
+
+        $model = $this->data['model_type'] ?? null;
+
+        if (! $model) {
+            $fail('model_type is not defined.')->translate();
+
+            return;
+        }
+
+        if (class_exists($model)
+            && $value
+            && ! method_exists(new $model(), $method)
+        ) {
+            $fail(':input is not a valid :attribute.')->translate();
+        }
+
+        $valid = match ($value) {
+            'base64' => ! base64_decode($this->data['media']),
+            'url' => filter_var($this->data['media'], FILTER_VALIDATE_URL),
+            'string' => is_string($this->data['media']),
+            'stream' => is_resource($this->data['media']),
+            default => ($this->data['media'] ?? null) instanceof UploadedFile
+                || (is_string($this->data['media'] ?? null) && file_exists($this->data['media'] ?? null)),
+        };
+
+        if (! $valid) {
+            $fail(sprintf('Media is not a valid %s.', $value))->translate();
+        }
+    }
+
+    /**
+     * @return MediaUploadType|$this
+     */
+    public function setData($data): MediaUploadType|static
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+}

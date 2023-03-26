@@ -1,0 +1,13 @@
+{
+    "model": "CountryRegion",
+    "data": [
+        {
+            "name": "Bavaria",
+            "country_iso_alpha2": "DE"
+        },
+        {
+            "name": "Batman",
+            "country_iso_alpha2": "TR"
+        }
+    ]
+}

@@ -1,0 +1,44 @@
+<?php
+
+namespace FluxErp\Http\Controllers;
+
+use FluxErp\Helpers\ResponseHelper;
+use FluxErp\Http\Requests\CreateTransactionRequest;
+use FluxErp\Models\Transaction;
+use FluxErp\Services\TransactionService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class TransactionController extends BaseController
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->model = new Transaction();
+    }
+
+    public function create(CreateTransactionRequest $request, TransactionService $transactionService): JsonResponse
+    {
+        $transaction = $transactionService->create($request->validated());
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 201,
+            data: $transaction,
+            statusMessage: 'transaction created'
+        );
+    }
+
+    public function update(Request $request, TransactionService $transactionService): JsonResponse
+    {
+        $response = $transactionService->update($request->all());
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
+    public function delete(string $id, TransactionService $transactionService): JsonResponse
+    {
+        $response = $transactionService->delete($id);
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+}

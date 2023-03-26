@@ -1,0 +1,37 @@
+name: fix code styling
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  lint:
+    if: "!contains(github.event.commits[0].message, 'Fix code styling')"
+    runs-on: ubuntu-latest
+    env:
+      PAT: ${{ secrets.PAT }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ env.PAT }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: json, dom, curl, libxml, mbstring
+          coverage: none
+
+      - name: Install Pint
+        run: composer global require laravel/pint
+
+      - name: Run Pint
+        run: pint
+
+      - name: Commit linted files
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Fix code styling
+          push_options: --force

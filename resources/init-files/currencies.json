@@ -1,0 +1,15 @@
+{
+    "model": "Currency",
+    "data": [
+        {
+            "name": "Euro",
+            "iso": "EUR",
+            "symbol": "€"
+        },
+        {
+            "name": "US Dollar",
+            "iso": "USD",
+            "symbol": "$"
+        }
+    ]
+}

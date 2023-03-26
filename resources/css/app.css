@@ -1,0 +1,38 @@
+@import "/node_modules/@fontsource/inter/latin-300.css";
+@import "/node_modules/@fontsource/inter/latin-400.css";
+@import "/node_modules/@fontsource/inter/latin-600.css";
+@import "/node_modules/@fontsource/inter/latin-900.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none !important;
+}
+
+@layer components {
+    .indent-icon {
+        @apply after:content-['↳'];
+    }
+
+    .indent-icon::before {
+        @apply pr-1;
+    }
+
+    .sortable-chosen {
+        @apply !border-dashed border-2 !border-primary-500 !bg-primary-100;
+    }
+
+    .sortable-selected {
+        @apply !border-dashed border-2 !border-primary-500 !bg-primary-100;
+    }
+
+    .sortable-to {
+        @apply !border-dashed border-2 !border-primary-500 !bg-primary-100;
+    }
+
+    .text-secondary-400, .text-gray-400 {
+        @apply text-gray-200;
+    }
+}

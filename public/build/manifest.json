@@ -1,0 +1,73 @@
+{
+  "__commonjsHelpers-725317a4.js": {
+    "file": "assets/_commonjsHelpers-725317a4.js"
+  },
+  "node_modules/@fontsource/inter/files/inter-latin-300-normal.woff": {
+    "file": "assets/inter-latin-300-normal-48602fcd.woff",
+    "src": "node_modules/@fontsource/inter/files/inter-latin-300-normal.woff"
+  },
+  "node_modules/@fontsource/inter/files/inter-latin-300-normal.woff2": {
+    "file": "assets/inter-latin-300-normal-6b2cee46.woff2",
+    "src": "node_modules/@fontsource/inter/files/inter-latin-300-normal.woff2"
+  },
+  "node_modules/@fontsource/inter/files/inter-latin-400-normal.woff": {
+    "file": "assets/inter-latin-400-normal-3ea830d4.woff",
+    "src": "node_modules/@fontsource/inter/files/inter-latin-400-normal.woff"
+  },
+  "node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2": {
+    "file": "assets/inter-latin-400-normal-0364d368.woff2",
+    "src": "node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2"
+  },
+  "node_modules/@fontsource/inter/files/inter-latin-600-normal.woff": {
+    "file": "assets/inter-latin-600-normal-22b2f9fb.woff",
+    "src": "node_modules/@fontsource/inter/files/inter-latin-600-normal.woff"
+  },
+  "node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2": {
+    "file": "assets/inter-latin-600-normal-048d136d.woff2",
+    "src": "node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2"
+  },
+  "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff": {
+    "file": "assets/inter-latin-900-normal-c38e95e0.woff",
+    "src": "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff"
+  },
+  "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2": {
+    "file": "assets/inter-latin-900-normal-f2db7f82.woff2",
+    "src": "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-2fab7d56.css",
+    "isEntry": true,
+    "src": "resources/css/app.css"
+  },
+  "resources/js/alpine.js": {
+    "file": "assets/alpine-1357bc09.js",
+    "isEntry": true,
+    "src": "resources/js/alpine.js"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-b1e5a52f.js",
+    "imports": [
+      "__commonjsHelpers-725317a4.js"
+    ],
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  },
+  "resources/js/echo.js": {
+    "file": "assets/echo-09fe1120.js",
+    "imports": [
+      "__commonjsHelpers-725317a4.js"
+    ],
+    "isEntry": true,
+    "src": "resources/js/echo.js"
+  },
+  "resources/js/fullcalendar.js": {
+    "file": "assets/fullcalendar-54d55195.js",
+    "isEntry": true,
+    "src": "resources/js/fullcalendar.js"
+  },
+  "resources/js/tribute.js": {
+    "file": "assets/tribute-bdc1dd93.js",
+    "isEntry": true,
+    "src": "resources/js/tribute.js"
+  }
+}

@@ -1,0 +1,23 @@
+{
+    "model": "AddressType",
+    "data": [
+        {
+            "address_type_code": "INV",
+            "name": "Invoice",
+            "is_locked": true,
+            "is_unique": true
+        },
+        {
+            "address_type_code": "DEL",
+            "name": "Delivery",
+            "is_locked": true,
+            "is_unique": true
+        },
+        {
+            "address_type_code": "LOC",
+            "name": "Location",
+            "is_locked": false,
+            "is_unqiue": false
+        }
+    ]
+}

@@ -1,0 +1,53 @@
+name: compile assets
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  compile:
+    if: "!contains(github.event.commits[0].message, 'Compile Assets')"
+    runs-on: ubuntu-latest
+    env:
+      FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+      PAT: ${{ secrets.PAT }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ env.PAT }}
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: json, dom, curl, libxml, mbstring
+          coverage: none
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --ignore-platform-reqs
+
+      - name: Add Font Awesome NPM registry
+        run: |
+          echo "@fortawesome:registry=https://npm.fontawesome.com/" > ~/.npmrc
+          echo "//npm.fontawesome.com/:_authToken=${{ env.FONTAWESOME_NPM_AUTH_TOKEN }}" >> ~/.npmrc
+
+      - name: Install NPM dependencies
+        run: |
+          npm install -g npm
+          npm ci
+
+      - name: Compile assets
+        run: npm run build
+
+      - name: Commit compiled files
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Compile Assets
+          file_pattern: public/
+          push_options: --force
+

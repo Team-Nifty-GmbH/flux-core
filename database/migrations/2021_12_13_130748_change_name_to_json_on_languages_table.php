@@ -1,0 +1,61 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+class ChangeNameToJsonOnLanguagesTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('languages', function (Blueprint $table) {
+            $table->json('name')->change();
+        });
+
+        $this->migrateName();
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        $this->rollbackName();
+
+        Schema::table('languages', function (Blueprint $table) {
+            $table->string('name')->change();
+        });
+    }
+
+    private function migrateName()
+    {
+        $languages = DB::table('languages')->get()->toArray();
+
+        array_walk($languages, function (&$item) {
+            $item->name = json_encode([config('app.locale') => $item->name]);
+            $item = (array) $item;
+        });
+
+        DB::table('languages')->upsert($languages, ['id']);
+    }
+
+    private function rollbackName()
+    {
+        $languages = DB::table('languages')->get()->toArray();
+
+        array_walk($languages, function (&$item) {
+            $item->name = substr(json_decode($item->name)->{config('app.locale')}, 0, 255);
+            $item = (array) $item;
+        });
+
+        DB::table('languages')->upsert($languages, ['id']);
+    }
+}
