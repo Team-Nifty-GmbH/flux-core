@@ -1,6 +1,6 @@
 <div class="relative">
     @pushonce('scripts')
-        @vite('resources/js/tribute.js')
+        @vite('resources/js/tribute.js', '/flux/build')
     @endpushonce
     <section>
         <div class=""

@@ -1,7 +1,7 @@
-import {livewire_hot_reload} from 'virtual:livewire-hot-reload'
-
 import _ from 'lodash';
 import axios from 'axios';
+// import Echo from 'laravel-echo'
+// import Pusher from 'pusher-js';
 
 window._ = _;
 
@@ -13,17 +13,16 @@ window._ = _;
 window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-livewire_hot_reload();
-
-customElements.define(
-    "embedded-webview",
-    class extends HTMLElement {
-        constructor() {
-            super();
-            this.attachShadow({ mode: "open" });
-             axios.get(this.getAttribute("src")).then((response) => {
-                 this.shadowRoot.innerHTML = response.data;
-            });
-        }
-    }
-);
+// window.Pusher = Pusher;
+//
+// window.Echo = new Echo({
+//     broadcaster: 'pusher',
+//     key: import.meta.env.VITE_PUSHER_APP_KEY,
+//     cluster:import.meta.env.VITE_PUSHER_APP_CLUSTER,
+//     wsHost: import.meta.env.VITE_PUSHER_HOST ?? window.location.hostname,
+//     forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
+//     wsPort: import.meta.env.VITE_PUSHER_PORT ?? 6001,
+//     wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
+//     enabledTransports: ['ws', 'wss'],
+//     disableStats: true,
+// });

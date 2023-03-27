@@ -70,7 +70,7 @@ class RouteServiceProvider extends ServiceProvider
     {
         // Load the subdomain routes first.
         Route::middleware('web')
-            ->domain(config('app.portal_domain'))
+            ->domain(config('flux.portal_domain'))
             ->group(__DIR__ . '/../../routes/frontend/portal.php');
 
         // Load the default routes second.

@@ -60,7 +60,7 @@ class Service extends Component
     public function render(): mixed
     {
         return view('flux::livewire.portal.service')
-            ->layout('components.layouts.portal');
+            ->layout('flux::components.layouts.portal');
     }
 
     public function save(): RedirectResponse

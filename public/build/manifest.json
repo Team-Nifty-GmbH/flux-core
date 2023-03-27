@@ -1,7 +1,4 @@
 {
-  "__commonjsHelpers-725317a4.js": {
-    "file": "assets/_commonjsHelpers-725317a4.js"
-  },
   "node_modules/@fontsource/inter/files/inter-latin-300-normal.woff": {
     "file": "assets/inter-latin-300-normal-48602fcd.woff",
     "src": "node_modules/@fontsource/inter/files/inter-latin-300-normal.woff"
@@ -35,7 +32,7 @@
     "src": "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-2fab7d56.css",
+    "file": "assets/app-6e2bc4b0.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
@@ -45,20 +42,9 @@
     "src": "resources/js/alpine.js"
   },
   "resources/js/app.js": {
-    "file": "assets/app-b1e5a52f.js",
-    "imports": [
-      "__commonjsHelpers-725317a4.js"
-    ],
+    "file": "assets/app-17fd2b33.js",
     "isEntry": true,
     "src": "resources/js/app.js"
-  },
-  "resources/js/echo.js": {
-    "file": "assets/echo-09fe1120.js",
-    "imports": [
-      "__commonjsHelpers-725317a4.js"
-    ],
-    "isEntry": true,
-    "src": "resources/js/echo.js"
   },
   "resources/js/fullcalendar.js": {
     "file": "assets/fullcalendar-54d55195.js",

@@ -24,6 +24,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
@@ -45,6 +46,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
+        $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerCommands();
         $this->registerMiddleware();
@@ -53,6 +55,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerLivewireComponents();
         $this->registerconfig();
         $this->registerMarcos();
+
+        $this->offerPublishing();
 
         $this->app->extend('validator', function () {
             return $this->app->get(ValidatorFactory::class);
@@ -107,7 +111,7 @@ class FluxServiceProvider extends ServiceProvider
                 return $this->getHost() === preg_replace(
                         '(^https?://)',
                         '',
-                        config('app.portal_domain')
+                        config('flux.portal_domain')
                     );
             });
         }
@@ -129,25 +133,21 @@ class FluxServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../database/migrations' => database_path('migrations'),
         ], 'flux-migrations');
-
         $this->publishes([
             __DIR__ . '/../database/seeders' => database_path('seeders'),
         ], 'flux-seeders');
-
         $this->publishes([
             __DIR__ . '/../config/flux.php' => config_path('flux.php'),
         ], 'flux-config');
-
         $this->publishes([
-            __DIR__ . '/../resources/views' => resource_path('views/vendor/team-nifty-gmbh/flux'),
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/flux'),
         ], 'flux-views');
-
         $this->publishes([
             __DIR__ . '/../lang' => base_path('lang/vendor/team-nifty-gmbh/flux'),
         ], 'flux-translations');
         $this->publishes([
-            __DIR__ . '/../public' => public_path('vendor/team-nifty-gmbh/flux'),
-        ], 'public');
+            __DIR__ . '/../public/build' => public_path('vendor/team-nifty-gmbh/flux'),
+        ], 'flux-assets');
     }
 
     protected function registerConfig(): void
@@ -162,6 +162,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/logging.php', 'logging');
         $this->mergeConfigFrom(__DIR__ . '/../config/print.php', 'print');
         $loggingConfig = config('logging.channels');
+        config(['filesystems.links.' . public_path('flux') => __DIR__ . '/../public']);
         $loggingConfig['database'] = [
             'driver' => 'custom',
             'handler' => \FluxErp\Logging\DatabaseLoggingHandler::class,

@@ -11,6 +11,6 @@ class Orders extends Component
 {
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.portal.orders')->layout('components.layouts.portal');
+        return view('flux::livewire.portal.orders')->layout('flux::components.layouts.portal');
     }
 }

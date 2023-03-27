@@ -75,7 +75,7 @@ class Product extends Component
     public function render(): View
     {
         return view('flux::livewire.portal.product')
-            ->layout('components.layouts.portal');
+            ->layout('flux::components.layouts.portal');
     }
 
     public function save(): void

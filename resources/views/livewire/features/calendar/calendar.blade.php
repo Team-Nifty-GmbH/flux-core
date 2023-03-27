@@ -1,8 +1,8 @@
 <div class="overflow-auto lg:flex lg:h-full lg:flex-col" x-data="{calendarEvent: @entangle('calendarEvent')}">
     @pushonce('scripts')
-        @vite('resources/js/fullcalendar.js')
+        @vite('resources/js/fullcalendar.js', 'flux/build')
     @endpushonce
-    <script defer>
+    <script type="module">
         function goToPrev() {
             calendar.prev();
             document.getElementById('{{$this->id}}-view-title').innerText = calendar.currentData.viewTitle;
@@ -18,6 +18,10 @@
             @this.refreshCalendarEvents();
             document.getElementById('{{$this->id}}-view-title').innerText = calendar.currentData.viewTitle;
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCalendar();
+        });
 
         function renderCalendar() {
             var calendarEl = document.getElementById('{{'calendar-' . $this->id}}');
@@ -240,12 +244,7 @@
                     </div>
                 </header>
                 <x-card>
-                    <div
-                        id="{{'calendar-' . $this->id}}"
-                        wire:ignore
-                        x-data="{}"
-                        x-init="$nextTick(() => renderCalendar())">
-                    </div>
+                    <div id="{{'calendar-' . $this->id}}" />
                 </x-card>
             </div>
         </div>

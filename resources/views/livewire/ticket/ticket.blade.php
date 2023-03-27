@@ -10,7 +10,7 @@
         <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                 <div class="opacity-40 transition-opacity hover:opacity-100">
-                    <span x-text="ticket.ticket_type.name">
+                    <span x-text="ticket.ticket_type?.name">
                     </span>
                     <span x-text="ticket.ticket_number">
                     </span>

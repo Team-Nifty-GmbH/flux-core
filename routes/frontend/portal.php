@@ -14,7 +14,7 @@ use TeamNiftyGmbH\DataTable\Controllers\IconController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::view('/', 'livewire.portal.auth.login')->name('portal.loginform');
+Route::view('/', 'flux::livewire.portal.auth.login')->name('portal.loginform');
 
 Route::get('/icons/{name}/{variant?}', IconController::class)
     ->where('variant', '(outline|solid)')
