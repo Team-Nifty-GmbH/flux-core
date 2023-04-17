@@ -3,9 +3,9 @@
     "require": {
         "php": "^8.1",
         "ext-bcmath": "*",
-        "ext-pdo": "*",
         "ext-intl": "*",
         "ext-json": "*",
+        "ext-pdo": "*",
         "beyondcode/laravel-websockets": "^1.13.2",
         "laravel/fortify": "^1.13",
         "laravel/framework": "^10.0",
@@ -22,6 +22,7 @@
         "spatie/laravel-tags": "^4.3",
         "spatie/laravel-translatable": "^6.0",
         "spatie/laravel-translation-loader": "^2.7",
+        "team-nifty-gmbh/tall-calendar": "^0.0.1",
         "team-nifty-gmbh/tall-datatables": "^0.4.0",
         "wireui/heroicons": "^2.3",
         "wireui/wireui": "^1.12"

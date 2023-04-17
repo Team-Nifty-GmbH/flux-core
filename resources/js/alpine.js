@@ -121,5 +121,5 @@ Alpine.directive('percentage', (el, { expression }, { evaluate }) => {
 window.Alpine = Alpine;
 Alpine.start();
 
-import '../../../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
+import '../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
 

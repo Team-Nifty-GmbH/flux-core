@@ -3,7 +3,7 @@
 @import "/node_modules/@fontsource/inter/latin-600.css";
 @import "/node_modules/@fontsource/inter/latin-900.css";
 
-@import "../../../tall-calendar/resources/css/calendar.css";
+@import "../../vendor/team-nifty-gmbh/tall-calendar/resources/css/calendar.css";
 
 @tailwind base;
 @tailwind components;
