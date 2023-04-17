@@ -53,13 +53,13 @@ class FluxServiceProvider extends ServiceProvider
         } else {
             $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
             $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
-            $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
-            $this->registerMiddleware();
-
-            $this->registerBladeComponents();
-            $this->registerLivewireComponents();
         }
 
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
+
+        $this->registerBladeComponents();
+        $this->registerLivewireComponents();
+        $this->registerMiddleware();
         $this->registerconfig();
         $this->registerMarcos();
 
@@ -303,10 +303,10 @@ class FluxServiceProvider extends ServiceProvider
         $kernel->appendMiddlewareToGroup('web', Permissions::class);
         $kernel->appendMiddlewareToGroup('web', Localization::class);
 
+        $this->app['router']->aliasMiddleware('abilities', CheckAbilities::class);
         $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
         $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
         $this->app['router']->aliasMiddleware('permission', Permissions::class);
         $this->app['router']->aliasMiddleware('localization', Localization::class);
-        $this->app['router']->aliasMiddleware('abilities', CheckAbilities::class);
     }
 }

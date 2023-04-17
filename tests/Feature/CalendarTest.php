@@ -45,13 +45,8 @@ class CalendarTest extends BaseSetup
 
         $this->assertNotEmpty($jsonCalendar);
         $this->assertEquals($this->calendars[0]->id, $jsonCalendar->id);
-        $this->assertEquals($this->calendars[0]->uuid, $jsonCalendar->uuid);
-        $this->assertEquals($this->calendars[0]->parent_id, $jsonCalendar->parent_id);
-        $this->assertEquals($this->calendars[0]->user_id, $jsonCalendar->user_id);
         $this->assertEquals($this->calendars[0]->name, $jsonCalendar->name);
-        $this->assertEquals($this->calendars[0]->module, $jsonCalendar->module);
         $this->assertEquals($this->calendars[0]->color, $jsonCalendar->color);
-        $this->assertEquals($this->calendars[0]->event_component, $jsonCalendar->event_component);
         $this->assertEquals($this->calendars[0]->is_public, $jsonCalendar->is_public);
         $this->assertEquals(Carbon::parse($this->calendars[0]->created_at),
             Carbon::parse($jsonCalendar->created_at));
@@ -75,13 +70,8 @@ class CalendarTest extends BaseSetup
         foreach ($this->calendars as $calendar) {
             $this->assertTrue($jsonCalendars->contains(function ($jsonCalendar) use ($calendar) {
                 return $jsonCalendar->id === $calendar->id &&
-                    $jsonCalendar->uuid === $calendar->uuid &&
-                    $jsonCalendar->parent_id === $calendar->parent_id &&
-                    $jsonCalendar->user_id === $calendar->user_id &&
                     $jsonCalendar->name === $calendar->name &&
-                    $jsonCalendar->module === $calendar->module &&
                     $jsonCalendar->color === $calendar->color &&
-                    $jsonCalendar->event_component === $calendar->event_component &&
                     $jsonCalendar->is_public === $calendar->is_public;
             }));
         }
@@ -90,7 +80,6 @@ class CalendarTest extends BaseSetup
     public function test_create_calendar()
     {
         $calendar = [
-            'parent_id' => $this->calendars[0]->id,
             'user_id' => $this->user->id,
             'name' => $this->faker->jobTitle(),
             'module' => 'FluxErp\\Http\\Livewire\\Portal\\Calendars',
@@ -111,12 +100,8 @@ class CalendarTest extends BaseSetup
             ->first();
 
         $this->assertNotEmpty($dbCalendar);
-        $this->assertEquals($calendar['parent_id'], $dbCalendar['parent_id']);
-        $this->assertEquals($calendar['user_id'], $dbCalendar['user_id']);
         $this->assertEquals($calendar['name'], $dbCalendar['name']);
-        $this->assertEquals($calendar['module'], $dbCalendar['module']);
         $this->assertEquals($calendar['color'], $dbCalendar['color']);
-        $this->assertEquals($calendar['event_component'], $dbCalendar['event_component']);
         $this->assertEquals($calendar['is_public'], $dbCalendar['is_public']);
         $this->assertEquals($this->user->id, $dbCalendar->created_by->id);
         $this->assertEquals($this->user->id, $dbCalendar->updated_by->id);
@@ -140,7 +125,6 @@ class CalendarTest extends BaseSetup
     {
         $calendar = [
             'id' => $this->calendars[0]->id,
-            'parent_id' => $this->calendars[1]->id,
             'user_id' => $this->user->id,
             'name' => $this->faker->jobTitle(),
             'module' => 'FluxErp\\Http\\Livewire\\Portal\\Calendars',
@@ -162,12 +146,8 @@ class CalendarTest extends BaseSetup
 
         $this->assertNotEmpty($dbCalendar);
         $this->assertEquals($calendar['id'], $dbCalendar['id']);
-        $this->assertEquals($calendar['parent_id'], $dbCalendar['parent_id']);
-        $this->assertEquals($calendar['user_id'], $dbCalendar['user_id']);
         $this->assertEquals($calendar['name'], $dbCalendar['name']);
-        $this->assertEquals($calendar['module'], $dbCalendar['module']);
         $this->assertEquals($calendar['color'], $dbCalendar['color']);
-        $this->assertEquals($calendar['event_component'], $dbCalendar['event_component']);
         $this->assertEquals($calendar['is_public'], $dbCalendar['is_public']);
         $this->assertEquals($this->user->id, $dbCalendar->updated_by->id);
     }

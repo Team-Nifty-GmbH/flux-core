@@ -5,18 +5,16 @@ namespace FluxErp\Models;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\HasUserModification;
-use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\HasPackageFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\HasMedia;
+use TeamNiftyGmbH\Calendar\Models\CalendarEvent as BaseCalendarEvent;
 
-class CalendarEvent extends Model implements HasMedia
+class CalendarEvent extends BaseCalendarEvent implements HasMedia
 {
-    use BroadcastsEvents, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia;
+    use BroadcastsEvents, HasUserModification, InteractsWithMedia;
 
     protected $with = [
         'calendar',

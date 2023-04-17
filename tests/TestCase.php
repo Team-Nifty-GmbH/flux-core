@@ -10,6 +10,7 @@ use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use Hammerstone\FastPaginate\FastPaginateProvider;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;
@@ -17,6 +18,7 @@ use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
+use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
 
@@ -43,6 +45,7 @@ abstract class TestCase extends BaseTestCase
             ScoutServiceProvider::class,
             HeroiconsServiceProvider::class,
             MediaLibraryServiceProvider::class,
+            CalendarServiceProvider::class,
             LivewireServiceProvider::class,
             FastPaginateProvider::class,
             QueryBuilderServiceProvider::class,
