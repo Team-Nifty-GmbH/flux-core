@@ -32,7 +32,7 @@
     "src": "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-0773d1f8.css",
+    "file": "assets/app-d730936d.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
@@ -42,7 +42,7 @@
     "src": "resources/js/alpine.js"
   },
   "resources/js/app.js": {
-    "file": "assets/app-37f3b584.js",
+    "file": "assets/app-3c0e1d95.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },
