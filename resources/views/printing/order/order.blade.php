@@ -5,7 +5,7 @@
         $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
     @endphp
     <x-slot name="title">
-        {{ __('Retoure') . ' ' . $model->invoice_number }}
+        {{ $title ?? __('Order') }}
     </x-slot>
     <x-slot name="head">
         <style>
@@ -36,7 +36,7 @@
                 @top-center {
                     content: none;
                 }
-            }
+           }
 
             .page-count:after {
                 counter-increment: page;
@@ -128,7 +128,7 @@
             <div class="flex items-center justify-between">
                 <div class="text-left">
                     <h2 class="text-xl font-semibold uppercase">
-                        {{ __('Retoure') . ' ' . $model->invoice_number }}
+                        {{ $title ?? __('Order') }}
                     </h2>
                     <div class="page-count text-xs"></div>
                 </div>
@@ -193,10 +193,10 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                    </div>
             </div>
             <h1 class="pt-32 text-2xl font-semibold uppercase">
-                {{ __('Retoure') . ' ' . $model->invoice_number ?: __('Preview') }}
+                {{ $title ?? __('Order') }}
             </h1>
             <div class="pt-10 pb-16 text-sm">
                 {{ $model->header }}

@@ -21,6 +21,7 @@ class UpdateOrderTypeRequest extends BaseFormRequest
             ],
             'name' => 'string',
             'description' => 'string|nullable',
+            'print_layouts' => 'array|nullable',
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',
         ];

@@ -56,7 +56,7 @@ class OrderList extends DataTable
                 ->label(__('New order'))
                 ->icon('plus')
                 ->attributes([
-                    'x-on:click' => '$wire.showModal = true',
+                    'x-on:click' => "\$dispatch('create-order')",
                 ]),
         ];
     }

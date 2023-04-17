@@ -17,6 +17,11 @@ use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
+use FluxErp\Logging\DatabaseCustomLogger;
+use FluxErp\Logging\DatabaseLoggingHandler;
+use FluxErp\Models\Address;
+use FluxErp\Models\Token;
+use FluxErp\Models\User;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -24,7 +29,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
@@ -43,20 +47,21 @@ class FluxServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
-        $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
-        $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
-        $this->registerCommands();
-        $this->registerMiddleware();
+        if ($this->app->runningInConsole()) {
+            $this->offerPublishing();
+            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        } else {
+            $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
+            $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
+            $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
+            $this->registerMiddleware();
 
-        $this->registerBladeComponents();
-        $this->registerLivewireComponents();
+            $this->registerBladeComponents();
+            $this->registerLivewireComponents();
+        }
+
         $this->registerconfig();
         $this->registerMarcos();
-
-        $this->offerPublishing();
 
         $this->app->extend('validator', function () {
             return $this->app->get(ValidatorFactory::class);
@@ -92,6 +97,8 @@ class FluxServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerCommands();
+
         if (! Response::hasMacro('attachment')) {
             Response::macro('attachment', function ($content, $filename = 'download.pdf') {
                 $headers = [
@@ -148,6 +155,9 @@ class FluxServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../public/build' => public_path('vendor/team-nifty-gmbh/flux'),
         ], 'flux-assets');
+        $this->publishes([
+            __DIR__ . '/../docker' => base_path('docker'),
+        ], 'flux-docker');
     }
 
     protected function registerConfig(): void
@@ -165,8 +175,8 @@ class FluxServiceProvider extends ServiceProvider
         config(['filesystems.links.' . public_path('flux') => __DIR__ . '/../public']);
         $loggingConfig['database'] = [
             'driver' => 'custom',
-            'handler' => \FluxErp\Logging\DatabaseLoggingHandler::class,
-            'via' => \FluxErp\Logging\DatabaseCustomLogger::class,
+            'handler' => DatabaseLoggingHandler::class,
+            'via' => DatabaseCustomLogger::class,
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAYS', 30),
         ];
@@ -194,15 +204,15 @@ class FluxServiceProvider extends ServiceProvider
             'auth.providers' => [
                 'users' => [
                     'driver' => 'eloquent',
-                    'model' => \FluxErp\Models\User::class,
+                    'model' => User::class,
                 ],
                 'addresses' => [
                     'driver' => 'eloquent',
-                    'model' => \FluxErp\Models\Address::class,
+                    'model' => Address::class,
                 ],
                 'tokens' => [
                     'driver' => 'eloquent',
-                    'model' => \FluxErp\Models\Token::class,
+                    'model' => Token::class,
                 ],
             ],
         ]);
@@ -265,21 +275,23 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function registerCommands(): void
     {
-        if ($this->app->runningInConsole()) {
-            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__.'/Console/Commands'));
-            $commandClasses = [];
-
-            foreach ($iterator as $file) {
-                if ($file->isFile() && $file->getExtension() === 'php') {
-                    $classPath = str_replace([__DIR__.'/','/'],['','\\'],$file->getPathname());
-                    $classNamespace = '\\FluxErp\\';
-                    $class = $classNamespace . str_replace('.php', '', $classPath);
-                    $commandClasses[] = $class;
-                }
-            }
-
-            $this->commands($commandClasses);
+        if (! $this->app->runningInConsole()) {
+            return;
         }
+
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__.'/Console/Commands'));
+        $commandClasses = [];
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $classPath = str_replace([__DIR__.'/','/'],['','\\'],$file->getPathname());
+                $classNamespace = '\\FluxErp\\';
+                $class = $classNamespace . str_replace('.php', '', $classPath);
+                $commandClasses[] = $class;
+            }
+        }
+
+        $this->commands($commandClasses);
     }
 
     private function registerMiddleware()

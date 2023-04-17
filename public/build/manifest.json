@@ -32,24 +32,19 @@
     "src": "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-6e2bc4b0.css",
+    "file": "assets/app-0773d1f8.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
   "resources/js/alpine.js": {
-    "file": "assets/alpine-1357bc09.js",
+    "file": "assets/alpine-46b7105f.js",
     "isEntry": true,
     "src": "resources/js/alpine.js"
   },
   "resources/js/app.js": {
-    "file": "assets/app-17fd2b33.js",
+    "file": "assets/app-37f3b584.js",
     "isEntry": true,
     "src": "resources/js/app.js"
-  },
-  "resources/js/fullcalendar.js": {
-    "file": "assets/fullcalendar-54d55195.js",
-    "isEntry": true,
-    "src": "resources/js/fullcalendar.js"
   },
   "resources/js/tribute.js": {
     "file": "assets/tribute-bdc1dd93.js",

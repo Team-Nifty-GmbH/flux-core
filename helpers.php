@@ -385,3 +385,10 @@ if (! function_exists('bcround')) {
         return $number;
     }
 }
+
+if(! function_exists('flux_path')) {
+    function flux_path(string $path = ''): string
+    {
+        return __DIR__ . ($path ? DIRECTORY_SEPARATOR . $path : $path);
+    }
+}

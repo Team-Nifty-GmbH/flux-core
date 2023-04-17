@@ -11,21 +11,8 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class Retoure extends Component
+class Retoure extends OrderView
 {
-    public Order $model;
-
-    public array $summary = [];
-
-    public static array $pipelines = [
-        PdfCreatingEvent::class => [
-            CreateInvoiceNumber::class,
-        ],
-        PdfCreatedEvent::class => [
-            AttachInvoice::class,
-        ],
-    ];
-
     /**
      * Create a new component instance.
      *
@@ -50,33 +37,5 @@ class Retoure extends Component
             'model' => $this->model,
             'summary' => $this->summary,
         ]);
-    }
-
-    public function prepareModel(): void
-    {
-        $positions = to_flat_tree(
-            $this->model
-                ->orderPositions()
-                ->whereNull('parent_id')
-                ->whereNot('is_alternative', true)
-                ->with('tags')
-                ->get()
-                ->append('children')
-                ->toArray()
-        );
-
-        $flattened = collect($positions)->map(
-            function ($item) {
-                return (object) $item;
-            }
-        );
-
-        foreach ($flattened as $item) {
-            if ($item->depth === 0 && $item->is_free_text && $item->has_children) {
-                $this->summary[] = $item;
-            }
-        }
-
-        $this->model->setRelation('orderPositions', $flattened);
     }
 }

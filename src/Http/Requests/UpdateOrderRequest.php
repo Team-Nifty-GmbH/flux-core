@@ -110,7 +110,7 @@ class UpdateOrderRequest extends BaseFormRequest
             'footer' => 'sometimes|string|nullable',
             'logistic_note' => 'sometimes|string|nullable',
             'tracking_email' => 'sometimes|email|nullable',
-            'payment_texts' => 'sometimes|array',
+            'payment_texts' => 'sometimes|array|nullable',
 
             'order_date' => 'sometimes|date',
             'invoice_date' => 'sometimes|date|nullable',

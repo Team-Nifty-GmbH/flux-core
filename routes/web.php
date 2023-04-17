@@ -18,9 +18,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('print/public/{uuid}', [PrintDataController::class, 'showHtmlPublic'])->name('print.public-html-show');
 Route::get('presentation/public/{uuid}', [PresentationController::class, 'showHtmlPublic'])
     ->name('presentation.public-html-show');
-
-Route::group(['middleware' => ['auth:web']], function () {
-    Route::any('print/{view}/{model}/{id}/{asPdf?}', [\FluxErp\Http\Controllers\PrintController::class, 'render'])
-        ->where('model', '(.*)')
-        ->name('print.render');
-});
+Route::any('print/{view}/{model}/{id}/{asPdf?}', [\FluxErp\Http\Controllers\PrintController::class, 'render'])
+    ->where('model', '(.*)')
+    ->name('print.render');

@@ -10,5 +10,6 @@
                 </div>
             </div>
         </div>
+        <livewire:testcalendar />
     </div>
 </div>

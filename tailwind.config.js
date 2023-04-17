@@ -1,7 +1,10 @@
 const defaultTheme = require('tailwindcss/defaultTheme')
 
 module.exports = {
-    presets: [require('./vendor/wireui/wireui/tailwind.config.js')],
+    presets: [
+        require('./vendor/wireui/wireui/tailwind.config.js'),
+        require('./../../vendor/team-nifty-gmbh/tall-calendar/tailwind.config.js'),
+    ],
     content: [
         './resources/**/*.blade.php',
         './resources/**/*.js',

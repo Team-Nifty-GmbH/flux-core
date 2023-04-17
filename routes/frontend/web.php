@@ -1,11 +1,9 @@
 <?php
 
-use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Livewire\Calendars\Calendar;
 use FluxErp\Http\Livewire\Contacts\Contact;
 use FluxErp\Http\Livewire\Dashboard\Dashboard;
 use FluxErp\Http\Livewire\DataTables\ContactList;
-use FluxErp\Http\Livewire\DataTables\OrderList;
 use FluxErp\Http\Livewire\DataTables\ProductList;
 use FluxErp\Http\Livewire\DataTables\SerialNumberList;
 use FluxErp\Http\Livewire\DataTables\TicketList;
@@ -30,6 +28,7 @@ use FluxErp\Http\Livewire\Ticket\Ticket;
 use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
+use TeamNiftyGmbH\DataTable\Controllers\SearchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,7 +49,7 @@ Route::middleware(['auth:web'])->group(function () {
     Route::get('/calendars', Calendar::class)->name('calendars');
     Route::get('/contacts', ContactList::class)->name('contacts');
     Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
-    Route::get('/orders', OrderList::class)->name('orders');
+    Route::get('/orders', \FluxErp\Http\Livewire\Order\OrderList::class)->name('orders');
     Route::get('/orders/{id}', Order::class)->name('orders.id?');
     Route::get('/tickets', TicketList::class)->name('tickets');
     Route::get('/tickets/{id}', Ticket::class)->name('tickets.id');

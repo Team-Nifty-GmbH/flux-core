@@ -5,7 +5,6 @@ namespace FluxErp\Models;
 use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
-use FluxErp\Traits\HasCalendarEvents;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -26,12 +25,13 @@ use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use Spatie\Permission\Traits\HasRoles;
+use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
 class User extends Authenticatable implements HasMedia, HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasApiTokens, HasCalendarEvents, HasDatatableUserSettings,
+    use BroadcastsEvents, Commentable, Filterable, HasApiTokens, HasCalendars, HasDatatableUserSettings,
         HasPackageFactory, HasFrontendAttributes, HasRoles, HasUuid, InteractsWithMedia, Lockable, Notifiable, Searchable,
         SoftDeletes;
 

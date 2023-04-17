@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import axios from 'axios';
-// import Echo from 'laravel-echo'
-// import Pusher from 'pusher-js';
+import Echo from 'laravel-echo'
+import Pusher from 'pusher-js';
 
 window._ = _;
 
@@ -13,16 +13,17 @@ window._ = _;
 window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-// window.Pusher = Pusher;
-//
-// window.Echo = new Echo({
-//     broadcaster: 'pusher',
-//     key: import.meta.env.VITE_PUSHER_APP_KEY,
-//     cluster:import.meta.env.VITE_PUSHER_APP_CLUSTER,
-//     wsHost: import.meta.env.VITE_PUSHER_HOST ?? window.location.hostname,
-//     forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
-//     wsPort: import.meta.env.VITE_PUSHER_PORT ?? 6001,
-//     wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
-//     enabledTransports: ['ws', 'wss'],
-//     disableStats: true,
-// });
+window.Pusher = Pusher;
+
+window.Echo = new Echo({
+    broadcaster: 'pusher',
+    key: document.head.querySelector('meta[name="pusher-key"]').content,
+    cluster: document.head.querySelector('meta[name="pusher-cluster"]').content,
+    wsHost: window.location.hostname, // <-- important if you dont build the js file on the prod server
+    wsPort: 80, // <-- this ensures that nginx will receive the request
+    wssPort: 443, // <-- this ensures that nginx will receive the request
+    forceTLS: window.location.protocol === 'https:',
+    disableStats: true,
+    enabledTransports: ['ws', 'wss'],
+});
+

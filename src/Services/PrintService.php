@@ -7,15 +7,11 @@ use Dompdf\Dompdf;
 use FluxErp\Events\Print\PdfCreatedEvent;
 use FluxErp\Events\Print\PdfCreatingEvent;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Models\Order;
-use FluxErp\Models\Permission;
-use FluxErp\Models\Token;
 use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Spatie\Browsershot\Browsershot;
 
@@ -75,22 +71,6 @@ class PrintService
 
         $route = route('print.render', [$view, $model, $id]);
 
-        $token = new Token([
-            'max_uses' => 1,
-            'url' => parse_url($route, PHP_URL_PATH),
-        ]);
-        $token->save();
-
-        $permission = Permission::findOrCreate(
-            route_to_permission(Route::getRoutes()->getByName('print.render')),
-            'token'
-        );
-
-        $token->givePermissionTo($permission);
-
-        $route .= (parse_url($route, PHP_URL_QUERY) ? '&token=' : '?token=')
-            . $token->createToken('print')->plainTextToken;
-
         $url = config('flux.gotenberg.host') . ':' . config('flux.gotenberg.port');
         $endpoint = '/forms/chromium/convert/url';
 
@@ -98,13 +78,12 @@ class PrintService
             ->post($url . $endpoint, [
                 'url' => $route,
                 'preferCssPageSize' => true,
+                'printBackground' => true,
                 'marginTop' => 0,
                 'marginBottom' => 0,
                 'marginLeft' => 0,
                 'marginRight' => 0,
             ]);
-
-        $token->delete();
 
         if ($response->status() > 200) {
             abort($response->status(), $response->body());
@@ -117,7 +96,7 @@ class PrintService
 
     private function parseView(string $model, string $view): array
     {
-        $views = (new PrintService())->getPrintViews($model, $view)['data'];
+        $views = $this->getPrintViews($model, $view)['data'];
 
         if (count($views) !== 1) {
             abort(404, count($views) < 1 ? __('View not found') : __('Multiple views found'));

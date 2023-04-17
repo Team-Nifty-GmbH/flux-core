@@ -104,6 +104,11 @@
         <div class="flex flex-col-reverse md:flex-row">
             <div class="flex flex-col gap-4 pr-2">
                 <x-card x-show="calendars.length > 0">
+                    <x-slot name="title">
+                        <div class="flex justify-between pb-1.5 font-semibold dark:text-gray-50">
+                            {{ __('Public calendars') }}
+                        </div>
+                    </x-slot>
                     <div class="overflow-hidden text-ellipsis whitespace-nowrap">
                         <template x-for="calendar in calendars">
                             <div x-bind:style="calendar.slug ? 'padding-left: ' + ('str1-str2-str3-str4'.match(/-/g) || []).length * 8 + 'px' : '' " class="rounded-md p-1.5" x-bind:class="{'bg-primary-500 text-white': calendar.id === calendarEvent.calendar_id}">

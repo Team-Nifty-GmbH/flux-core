@@ -5,6 +5,8 @@ namespace FluxErp\Database\Seeders;
 use FluxErp\Console\Commands\Init\InitPermissions;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
+use TeamNiftyGmbH\Calendar\Database\Seeders\CalendarEventTableSeeder;
+use TeamNiftyGmbH\Calendar\Database\Seeders\CalendarTableSeeder;
 use Spatie\Activitylog\Facades\CauserResolver;
 
 class FluxSeeder extends Seeder

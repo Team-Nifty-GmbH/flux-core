@@ -23,6 +23,7 @@ class OrderType extends Model
 
     protected $casts = [
         'uuid' => 'string',
+        'print_layouts' => 'array',
         'order_type_enum' => OrderTypeEnum::class,
         'is_active' => 'boolean',
         'is_hidden' => 'boolean',
