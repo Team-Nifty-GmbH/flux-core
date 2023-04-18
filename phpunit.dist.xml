@@ -29,10 +29,10 @@
         <server name="DB_PORT" value="3306"/>
         <server name="DB_HOST" value="0.0.0.0"/>
         <server name="GOTENBERG_HOST" value="http://0.0.0.0"/>
-        <server name="GOTENBERG_PORT" value="3000"/>
-        <server name="MEILISEARCH_HOST" value="http://0.0.0.0:7700"/>
-        <server name="REDIS_PORT" value="6379"/>
-        <server name="REDIS_HOST" value="0.0.0.0"/>
+        <server name="GOTENBERG_PORT" value="{$GOTENBERG_PORT}"/>
+        <server name="MEILISEARCH_HOST" value="{$MEILISEARCH_HOST}"/>
+        <server name="REDIS_PORT" value="{$DB_PORT}"/>
+        <server name="REDIS_HOST" value="{$REDIS_PORT}"/>
     </php>
     <source>
         <include>
