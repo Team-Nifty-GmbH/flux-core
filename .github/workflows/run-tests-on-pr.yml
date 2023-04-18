@@ -28,7 +28,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: password
           MYSQL_DATABASE: laravel
         ports:
-          - 33306:3306/tcp
+          - 3306/tcp
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
       redis:
         image: redis
@@ -83,12 +83,8 @@ jobs:
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
       - name: Run Tests
-#        run: ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml
         run: ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml
         env:
-          DB_CONNECTION: mysql
-          DB_USERNAME: root
-          DB_PASSWORD: password
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
