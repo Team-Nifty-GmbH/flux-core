@@ -76,12 +76,6 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
-      - name: Copy Environment File
-        run: php -r "file_exists('.env') || copy('.env.testing', '.env');"
-
-      - name: Generate key
-        run: php artisan key:generate
-
       - name: Clear Config
         run: php artisan config:clear
 
@@ -95,7 +89,7 @@ jobs:
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
       - name: Run Tests
-        run: php artisan test --parallel
+        run: ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml
         env:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
