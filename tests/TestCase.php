@@ -28,6 +28,11 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUp(): void
     {
+        var_dump(getenv('DB_PORT'));
+        var_dump(getenv('REDIS_PORT'));
+        var_dump(getenv('MEILISEARCH_HOST'));
+        var_dump(getenv('GOTENBERG_PORT'));
+
         if (file_exists(__DIR__ . '/../../../.env')) {
             $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
             $dotenv->load();
