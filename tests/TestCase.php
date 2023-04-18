@@ -28,7 +28,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUp(): void
     {
-        if (file_exists(__DIR__ . '/../../..')) {
+        if (file_exists(__DIR__ . '/../../../.env')) {
             $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
             $dotenv->load();
         }
@@ -40,7 +40,7 @@ abstract class TestCase extends BaseTestCase
         ]);
     }
 
-    public function getPackageProviders($app): array
+    public function getPackageProviders($app)
     {
         return [
             PermissionServiceProvider::class,
@@ -61,10 +61,10 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    public function getEnvironmentSetUp($app): void
+    public function getEnvironmentSetUp($app)
     {
-        if (file_exists(base_path('../../../../../../'))) {
-            $dotenv = Dotenv::createImmutable();
+        if (file_exists(base_path('../../../../../../.env'))) {
+            $dotenv = Dotenv::createImmutable(base_path('../../../../../../'));
             $dotenv->load();
         }
     }
