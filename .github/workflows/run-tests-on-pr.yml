@@ -22,11 +22,11 @@ jobs:
     # Docs: https://docs.github.com/en/actions/using-containerized-services
     services:
       mysql:
-        image: mariadb:10
+        image: mysql:8.0
         env:
-          MARIADB_ALLOW_EMPTY_PASSWORD: false
-          MARIADB_ROOT_PASSWORD: password
-          MARIADB_DATABASE: laravel
+          MYSQL_ALLOW_EMPTY_PASSWORD: false
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: laravel
         ports:
           - 3306/tcp
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -86,6 +86,9 @@ jobs:
 #        run: ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml
         run: ./vendor/bin/testbench package:test --configuration ./phpunit.dist.xml
         env:
+          DB_CONNECTION: mysql
+          DB_USERNAME: root
+          DB_PASSWORD: password
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
