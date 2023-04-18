@@ -34,8 +34,8 @@ abstract class TestCase extends BaseTestCase
         }
 
         parent::setUp();
-        dd(config('database.mysql.host'), config('database.mysql.port'));
 
+        dd(config('database.mysql.host'), config('database.mysql.port'));
         config([
             'auth.defaults.guard' => 'sanctum',
         ]);
