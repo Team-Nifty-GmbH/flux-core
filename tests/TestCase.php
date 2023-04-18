@@ -28,6 +28,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUp(): void
     {
+        dd(config('database.mysql.host'), config('database.mysql.port'));
         if (file_exists(__DIR__ . '/../../../.env')) {
             $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
             $dotenv->load();

@@ -26,7 +26,7 @@
         <server name="DB_USERNAME" value="root"/>
         <server name="DB_PASSWORD" value="password"/>
         <server name="DB_DATABASE" value="laravel"/>
-        <env name="DB_PORT" value="{$DB_PORT}"/>
+        <server name="DB_PORT" value="{$DB_PORT}"/>
         <server name="DB_HOST" value="0.0.0.0"/>
         <server name="GOTENBERG_HOST" value="http://0.0.0.0"/>
         <server name="GOTENBERG_PORT" value="{$GOTENBERG_PORT}"/>
