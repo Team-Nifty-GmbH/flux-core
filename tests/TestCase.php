@@ -28,11 +28,6 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUp(): void
     {
-        var_dump(getenv('DB_PORT'));
-        var_dump(getenv('REDIS_PORT'));
-        var_dump(getenv('MEILISEARCH_HOST'));
-        var_dump(getenv('GOTENBERG_PORT'));
-
         if (file_exists(__DIR__ . '/../../../.env')) {
             $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
             $dotenv->load();
@@ -45,7 +40,7 @@ abstract class TestCase extends BaseTestCase
         ]);
     }
 
-    public function getPackageProviders($app)
+    public function getPackageProviders($app): array
     {
         return [
             PermissionServiceProvider::class,
@@ -66,7 +61,7 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    public function getEnvironmentSetUp($app)
+    public function getEnvironmentSetUp($app): void
     {
         if (file_exists(base_path('../../../../../../.env'))) {
             $dotenv = Dotenv::createImmutable(base_path('../../../../../../'));
