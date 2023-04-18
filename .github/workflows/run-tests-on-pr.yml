@@ -84,7 +84,7 @@ jobs:
 
       - name: Run Tests
 #        run: ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml
-        run: ./vendor/bin/testbench package:test --configuration ./phpunit.dist.xml
+        run: ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml
         env:
           DB_CONNECTION: mysql
           DB_USERNAME: root
