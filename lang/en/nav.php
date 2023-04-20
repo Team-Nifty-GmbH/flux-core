@@ -17,6 +17,7 @@ return [
         'notifications' => 'Notifications',
         'emails' => 'System emails',
         'languages' => 'Languages',
+        'order-types' => 'Order Types',
         'permissions' => 'Roles & Permissions',
         'ticket-types' => 'Ticket Types',
         'translations' => 'Translations',
