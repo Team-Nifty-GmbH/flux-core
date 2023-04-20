@@ -3,7 +3,7 @@
 namespace FluxErp\Http\Livewire\Settings;
 
 use FluxErp\Models\OrderType;
-use FluxErp\Services\OrderTypesService;
+use FluxErp\Services\OrderTypeService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -46,7 +46,7 @@ class OrderTypes extends Component
 
     public function save(): void
     {
-        $orderTypesService = new OrderTypesService();
+        $orderTypesService = new OrderTypeService();
         $response = $orderTypesService->update($this->orderTypeSettings);
 
         if ($response['status'] !== 200) {
