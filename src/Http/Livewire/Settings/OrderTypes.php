@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Livewire\Settings;
 
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\OrderType;
 use FluxErp\Services\OrderTypeService;
@@ -37,6 +38,8 @@ class OrderTypes extends Component
     ];
 
     public $clients;
+
+    public $enums;
 
     public function getRules(): array
     {
@@ -79,6 +82,8 @@ class OrderTypes extends Component
         $this->clients = Client::query()
             ->get()
             ->toArray();
+
+        $this->enums = OrderTypeEnum::values();
     }
 
     public function render(): View|Factory|Application

@@ -96,12 +96,9 @@
                                 @endforeach
                             </x-select>
                             <x-select label="{{ __('Order Type Enum') }}" placeholder="{{ __('Select Order Type Enum') }}" wire:model.defer="selectedOrderType.order_type_enum">
-                                <x-select.option label="{{ __('Order') }}" value="order" />
-                                <x-select.option label="{{ __('Split Order') }}" value="split-order" />
-                                <x-select.option label="{{ __('Retoure') }}" value="retoure" />
-                                <x-select.option label="{{ __('Purchase') }}" value="purchase" />
-                                <x-select.option label="{{ __('Purchase Refund') }}" value="purchase-refund" />
-                                <x-select.option label="{{ __('Subscription') }}" value="subscription" />
+                                @foreach($enums as $enum)
+                                    <x-select.option :label="$enum" :value="$enum" />
+                                @endforeach
                             </x-select>
                             <x-select label="{{ __('Print Layouts') }}" placeholder="{{ __('Select a Print Layout') }}" wire:model.defer="selectedOrderType.print_layouts" multiselect>
                                 @foreach ($orderTypes as $orderType)
