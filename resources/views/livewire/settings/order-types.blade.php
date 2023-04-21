@@ -27,6 +27,9 @@
                                     {{ __('Description') }}
                                 </th>
                                 <th scope="col" class="py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                    {{ __('Client ID') }}
+                                </th>
+                                <th scope="col" class="py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                                     {{ __('Order Type Enum') }}
                                 </th>
                                 <th scope="col" class="py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
@@ -44,6 +47,9 @@
                                     </td>
                                     <td class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6">
                                         {{ $orderType['description'] }}
+                                    </td>
+                                    <td class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6">
+                                        {{ $orderType['client_id'] }}
                                     </td>
                                     <td class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6">
                                         {{ $orderType['order_type_enum'] }}
@@ -83,12 +89,12 @@
                     <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">
                         <div class="space-y-3 sm:col-span-6">
                             <x-input wire:model="selectedOrderType.name" :label="__('Order Type Name')"/>
+                            <x-textarea wire:model="selectedOrderType.description" :label="__('Description')"/>
                             <x-select label="{{ __('Client ID') }}" placeholder="{{ __('Select a Client') }}" wire:model.defer="selectedOrderType.client_id">
                                 @foreach ($clients as $client)
                                     <x-select.option :label="$client['name']" :value="$client['id']" />
                                 @endforeach
                             </x-select>
-                            <x-textarea wire:model="selectedOrderType.description" :label="__('Description')"/>
                             <x-select label="{{ __('Order Type Enum') }}" placeholder="{{ __('Select Order Type Enum') }}" wire:model.defer="selectedOrderType.order_type_enum">
                                 <x-select.option label="{{ __('Order') }}" value="order" />
                                 <x-select.option label="{{ __('Split Order') }}" value="split-order" />
