@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Livewire\Settings;
 
+use FluxErp\Models\Client;
 use FluxErp\Models\OrderType;
 use FluxErp\Services\OrderTypeService;
 use Illuminate\Contracts\Foundation\Application;
@@ -27,12 +28,15 @@ class OrderTypes extends Component
     public array $selectedOrderType = [
         'id' => null,
         'name' => '',
+        'client_id' => '',
         'description' => '',
         'order_type_enum' => '',
         'print_layouts' => [],
         'is_active' => false,
         'is_hidden' => false,
     ];
+
+    public $clients;
 
     public function getRules(): array
     {
@@ -61,7 +65,7 @@ class OrderTypes extends Component
         ];
     }
 
-    public function boot(): void
+    public function mount(): void
     {
         $this->orderTypes = get_subclasses_of(
             extendingClass: 'FluxErp\View\Printing\Order\OrderView',
@@ -69,6 +73,10 @@ class OrderTypes extends Component
         );
 
         $this->orderTypeSettings = OrderType::query()
+            ->get()
+            ->toArray();
+
+        $this->clients = Client::query()
             ->get()
             ->toArray();
     }
@@ -92,6 +100,7 @@ class OrderTypes extends Component
         }
 
         $this->editModal = false;
+        $this->render();
     }
 
     public function show($orderTypeSlug): void

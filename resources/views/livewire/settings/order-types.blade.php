@@ -83,6 +83,11 @@
                     <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">
                         <div class="space-y-3 sm:col-span-6">
                             <x-input wire:model="selectedOrderType.name" :label="__('Order Type Name')"/>
+                            <x-select label="{{ __('Client ID') }}" placeholder="{{ __('Select a Client') }}" wire:model.defer="selectedOrderType.client_id">
+                                @foreach ($clients as $client)
+                                    <x-select.option :label="$client['name']" :value="$client['id']" />
+                                @endforeach
+                            </x-select>
                             <x-textarea wire:model="selectedOrderType.description" :label="__('Description')"/>
                             <x-select label="{{ __('Order Type Enum') }}" placeholder="{{ __('Select Order Type Enum') }}" wire:model.defer="selectedOrderType.order_type_enum">
                                 <x-select.option label="{{ __('Order') }}" value="order" />
@@ -92,8 +97,6 @@
                                 <x-select.option label="{{ __('Purchase Refund') }}" value="purchase-refund" />
                                 <x-select.option label="{{ __('Subscription') }}" value="subscription" />
                             </x-select>
-
-                            <!-- Print Layouts Select -->
                             <x-select label="{{ __('Print Layouts') }}" placeholder="{{ __('Select a Print Layout') }}" wire:model.defer="selectedOrderType.print_layouts" multiselect>
                                 @foreach ($orderTypes as $orderType)
                                     @php
@@ -102,7 +105,6 @@
                                     <x-select.option :label="$fileName" :value="$orderType" />
                                 @endforeach
                             </x-select>
-
                             <x-checkbox wire:model="selectedOrderType.is_active" :label="__('Is Active')"/>
                             <x-checkbox wire:model="selectedOrderType.is_hidden" :label="__('Is Hidden')"/>
                         </div>
