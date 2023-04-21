@@ -3,6 +3,8 @@
 namespace FluxErp\View\Printing\Order;
 
 use FluxErp\Models\Order;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
 class OrderView extends Component
@@ -28,7 +30,7 @@ class OrderView extends Component
         $this->prepareModel();
     }
 
-    public function prepareModel()
+    public function prepareModel(): void
     {
         $positions = to_flat_tree(
             $this->model
@@ -56,7 +58,7 @@ class OrderView extends Component
         $this->model->setRelation('orderPositions', $flattened);
     }
 
-    public function render()
+    public function render(): View|Factory
     {
         return view('print::order.order', [
             'model' => $this->model,

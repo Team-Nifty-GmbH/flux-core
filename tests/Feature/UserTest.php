@@ -2,11 +2,10 @@
 
 namespace FluxErp\Tests\Feature;
 
+use Carbon\Carbon;
 use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;
-use FluxErp\Services\UserService;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;

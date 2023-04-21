@@ -24,8 +24,8 @@ class CountryFactory extends Factory
     {
         $i = 0;
         while (Country::query()
-                ->where('iso_alpha2', $isoAlpha2 = $this->faker->unique()->countryCode())
-                ->exists() && $i < 100) {
+            ->where('iso_alpha2', $isoAlpha2 = $this->faker->unique()->countryCode())
+            ->exists() && $i < 100) {
             $i++;
         }
 

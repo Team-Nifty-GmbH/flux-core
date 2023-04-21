@@ -3,10 +3,10 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Laravel\Scout\Attributes\SearchUsingFullText;

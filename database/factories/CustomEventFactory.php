@@ -19,8 +19,8 @@ class CustomEventFactory extends Factory
     {
         $i = 0;
         while (CustomEvent::query()
-                ->where('name', $name = str_replace(' ', '', $this->faker->unique()->jobTitle()))
-                ->exists() && $i < 100) {
+            ->where('name', $name = str_replace(' ', '', $this->faker->unique()->jobTitle()))
+            ->exists() && $i < 100) {
             $i++;
         }
 

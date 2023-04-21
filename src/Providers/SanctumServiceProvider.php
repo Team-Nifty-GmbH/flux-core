@@ -11,8 +11,8 @@ class SanctumServiceProvider extends \Laravel\Sanctum\SanctumServiceProvider
     {
         parent::register();
 
-
     }
+
     /**
      * Register the guard.
      *

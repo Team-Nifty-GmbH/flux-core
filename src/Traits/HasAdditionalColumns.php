@@ -2,12 +2,12 @@
 
 namespace FluxErp\Traits;
 
+use Closure;
+use Exception;
 use FluxErp\Casts\MetaAttribute;
 use FluxErp\Exceptions\MetaException;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Meta;
-use Closure;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -199,10 +199,10 @@ trait HasAdditionalColumns
             ->setQuery(
                 self::additionalColumnsQuery()
                     ->toBase()
-                ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
-                    $query->where('model_type', $this->getMorphClass())
-                        ->where('model_id', $this->getKey());
-                })
+                    ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
+                        $query->where('model_type', $this->getMorphClass())
+                            ->where('model_id', $this->getKey());
+                    })
             );
     }
 

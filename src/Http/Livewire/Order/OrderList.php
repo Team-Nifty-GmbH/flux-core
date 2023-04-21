@@ -4,23 +4,20 @@ namespace FluxErp\Http\Livewire\Order;
 
 use Carbon\Carbon;
 use FluxErp\Http\Requests\CreateOrderRequest;
-use FluxErp\Http\Requests\UpdateOrderRequest;
-use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Services\OrderPositionService;
 use FluxErp\Services\OrderService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
-use WireUi\Traits\Actions;
+use Livewire\Redirector;
 
 class OrderList extends Component
 {
@@ -51,23 +48,23 @@ class OrderList extends Component
         return Arr::prependKeysWith((new CreateOrderRequest())->rules(), 'order.');
     }
 
-    public function updatedOrderContactId()
+    public function updatedOrderContactId(): void
     {
         $contact = Contact::query()->whereKey($this->order['contact_id'])->first();
 
         $this->order['client_id'] = $contact->client_id;
         $this->order['address_invoice_id'] = $contact->address_invoice_id;
         $this->order['address_delivery_id'] = $contact->address_delivery_id;
-        $this->order['payment_type_id'] = $contact->payment_type_id;
-        $this->order['price_list_id'] = $contact->price_list_id;
         $this->order['language_id'] = $contact->language_id;
+        $this->order['price_list_id'] = $contact->price_list_id;
+        $this->order['payment_type_id'] = $contact->payment_type_id;
         $this->order['payment_reminder_days_1'] = $contact->payment_reminder_days_1;
         $this->order['payment_reminder_days_2'] = $contact->payment_reminder_days_2;
         $this->order['payment_reminder_days_3'] = $contact->payment_reminder_days_3;
         $this->order['payment_target'] = $contact->payment_target + 0;
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->priceLists = PriceList::query()
             ->get(['id', 'name'])
@@ -95,12 +92,12 @@ class OrderList extends Component
         return view('flux::livewire.order.order-list');
     }
 
-    public function save()
+    public function save(): Redirector
     {
-        $this->validate();
+        $validated = $this->validate()['order'];
 
-        $this->order['order_date'] = Carbon::now()->format('Y-m-d');
-        $order = (new OrderService())->create($this->order);
+        $validated['order_date'] = Carbon::now()->format('Y-m-d');
+        $order = (new OrderService())->create($validated);
 
         return redirect()->to($order->detailRoute());
     }

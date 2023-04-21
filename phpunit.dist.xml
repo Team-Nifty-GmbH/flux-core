@@ -15,24 +15,15 @@
         <server name="APP_KEY" value="base64:JmJwcdxmKz/kTL2+02xm6q7/sFltCaz0VNRgVQAxjbo="/>
         <server name="APP_ENV" value="testing"/>
         <server name="BCRYPT_ROUNDS" value="4"/>
-        <server name="CACHE_DRIVER" value="redis"/>
+        <server name="CACHE_DRIVER" value="array"/>
         <server name="MAIL_MAILER" value="array"/>
-        <server name="QUEUE_CONNECTION" value="redis"/>
-        <server name="SESSION_DRIVER" value="redis"/>
+        <server name="QUEUE_CONNECTION" value="sync"/>
+        <server name="SESSION_DRIVER" value="array"/>
         <server name="TELESCOPE_ENABLED" value="false"/>
-        <server name="SCOUT_DRIVER" value="meilisearch"/>
-        <server name="SCOUT_QUEUE" value="meilisearch"/>
+        <server name="SCOUT_DRIVER" value="collection"/>
         <server name="BROADCAST_DRIVER" value="log"/>
         <server name="DB_USERNAME" value="root"/>
-        <server name="DB_PASSWORD" value="password"/>
-        <server name="DB_DATABASE" value="laravel"/>
-        <server name="DB_PORT" value="${DB_PORT}"/>
-        <server name="DB_HOST" value="0.0.0.0"/>
-        <server name="GOTENBERG_HOST" value="http://0.0.0.0"/>
-        <server name="GOTENBERG_PORT" value="${GOTENBERG_PORT}"/>
-        <server name="MEILISEARCH_HOST" value="${MEILISEARCH_HOST}"/>
-        <server name="REDIS_PORT" value="6379"/>
-        <server name="REDIS_HOST" value="0.0.0.0"/>
+        <server name="GOTENBERG_HOST" value="http://localhost"/>
     </php>
     <source>
         <include>

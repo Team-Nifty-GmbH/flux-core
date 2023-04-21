@@ -24,8 +24,8 @@ class UserFactory extends Factory
     {
         $i = 0;
         while (User::query()
-                ->where('user_code', $userCode = Str::upper($this->faker->firstName()))
-                ->exists() && $i < 100) {
+            ->where('user_code', $userCode = Str::upper($this->faker->firstName()))
+            ->exists() && $i < 100) {
             $i++;
         }
 

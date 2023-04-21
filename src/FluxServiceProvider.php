@@ -182,25 +182,24 @@ class FluxServiceProvider extends ServiceProvider
         ];
         config(['logging.channels' => $loggingConfig]);
         config([
-            'auth.guards' =>
-                [
-                    'sanctum' => [
-                        'driver' => 'sanctum',
-                        'provider' => 'users',
-                    ],
-                    'web' => [
-                        'driver' => 'session',
-                        'provider' => 'users',
-                    ],
-                    'token' => [
-                        'driver' => 'sanctum',
-                        'provider' => 'tokens',
-                    ],
-                    'address' => [
-                        'driver' => 'session',
-                        'provider' => 'addresses',
-                    ],
+            'auth.guards' => [
+                'sanctum' => [
+                    'driver' => 'sanctum',
+                    'provider' => 'users',
                 ],
+                'web' => [
+                    'driver' => 'session',
+                    'provider' => 'users',
+                ],
+                'token' => [
+                    'driver' => 'sanctum',
+                    'provider' => 'tokens',
+                ],
+                'address' => [
+                    'driver' => 'session',
+                    'provider' => 'addresses',
+                ],
+            ],
             'auth.providers' => [
                 'users' => [
                     'driver' => 'eloquent',
@@ -227,13 +226,12 @@ class FluxServiceProvider extends ServiceProvider
 
         foreach ($phpFiles as $phpFile) {
             $relativePath = Str::replace(__DIR__ . '/../resources/views/components/', '', $phpFile->getRealPath());
-            $relativePath = Str::replace(DIRECTORY_SEPARATOR, '.', Str::remove( '.blade.php', $relativePath));
+            $relativePath = Str::replace(DIRECTORY_SEPARATOR, '.', Str::remove('.blade.php', $relativePath));
             $relativePath = Str::afterLast($relativePath, 'views.components.');
             Blade::component('flux::components.' . $relativePath, Str::remove('.index', $relativePath));
         }
 
-        foreach($this->getViewClassAliasFromNmaespace('FluxErp\\View\\Components') as $alias => $class)
-        {
+        foreach ($this->getViewClassAliasFromNmaespace('FluxErp\\View\\Components') as $alias => $class) {
             Blade::component($class, $alias);
         }
     }
@@ -241,8 +239,7 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerLivewireComponents(): void
     {
         $livewireNamespace = 'FluxErp\\Http\\Livewire\\';
-        foreach ($this->getViewClassAliasFromNmaespace($livewireNamespace) as $alias => $class)
-        {
+        foreach ($this->getViewClassAliasFromNmaespace($livewireNamespace) as $alias => $class) {
             Livewire::component($alias, $class);
         }
     }
@@ -279,7 +276,7 @@ class FluxServiceProvider extends ServiceProvider
             return;
         }
 
-        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__.'/Console/Commands'));
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands'));
         $commandClasses = [];
 
         foreach ($iterator as $file) {

@@ -24,8 +24,8 @@ class CurrencyFactory extends Factory
     {
         $i = 0;
         while (Currency::query()
-                ->where('iso', $iso = $this->faker->unique()->currencyCode())
-                ->exists() && $i < 100) {
+            ->where('iso', $iso = $this->faker->unique()->currencyCode())
+            ->exists() && $i < 100) {
             $i++;
         }
 

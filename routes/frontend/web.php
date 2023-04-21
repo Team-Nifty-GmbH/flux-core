@@ -8,6 +8,7 @@ use FluxErp\Http\Livewire\DataTables\ProductList;
 use FluxErp\Http\Livewire\DataTables\SerialNumberList;
 use FluxErp\Http\Livewire\DataTables\TicketList;
 use FluxErp\Http\Livewire\Order\Order;
+use FluxErp\Http\Livewire\Order\OrderList;
 use FluxErp\Http\Livewire\Product\Product;
 use FluxErp\Http\Livewire\Product\SerialNumber\SerialNumber;
 use FluxErp\Http\Livewire\Settings\AdditionalColumns;
@@ -49,7 +50,7 @@ Route::middleware(['auth:web'])->group(function () {
     Route::get('/calendars', Calendar::class)->name('calendars');
     Route::get('/contacts', ContactList::class)->name('contacts');
     Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
-    Route::get('/orders', \FluxErp\Http\Livewire\Order\OrderList::class)->name('orders');
+    Route::get('/orders', OrderList::class)->name('orders');
     Route::get('/orders/{id}', Order::class)->name('orders.id?');
     Route::get('/tickets', TicketList::class)->name('tickets');
     Route::get('/tickets/{id}', Ticket::class)->name('tickets.id');

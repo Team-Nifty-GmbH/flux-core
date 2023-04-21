@@ -2,8 +2,8 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 

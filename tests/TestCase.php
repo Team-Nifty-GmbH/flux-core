@@ -2,7 +2,6 @@
 
 namespace FluxErp\Tests;
 
-use App\Providers\AppServiceProvider;
 use Dotenv\Dotenv;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\FortifyServiceProvider;
@@ -10,7 +9,6 @@ use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use Hammerstone\FastPaginate\FastPaginateProvider;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;

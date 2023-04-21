@@ -2,9 +2,9 @@
 
 namespace FluxErp\Tests\Feature;
 
+use Carbon\Carbon;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\Permission;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Collection;

@@ -10,7 +10,7 @@
 <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
 <livewire:scripts/>
 {!! WireUi::directives()->scripts(absolute: false) !!}
-<datatable:scripts />
+@dataTablesScripts()
 @vite([
     'resources/js/app.js',
     'resources/js/alpine.js',
