@@ -24,11 +24,12 @@ class OrderTypes extends Component
 
     public bool $editModal = false;
 
-    public $selectedOrderType = [
+    public array $selectedOrderType = [
         'id' => null,
         'name' => '',
         'description' => '',
         'order_type_enum' => '',
+        'print_layouts' => '',
         'is_active' => false,
         'is_hidden' => false,
     ];
