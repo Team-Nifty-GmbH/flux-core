@@ -6,8 +6,6 @@ use FluxErp\Models\Order;
 
 class Offer extends OrderView
 {
-    public string $title;
-
     public function __construct(Order $order)
     {
         parent::__construct($order);

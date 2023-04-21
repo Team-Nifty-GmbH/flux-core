@@ -82,9 +82,7 @@ class CalendarTest extends BaseSetup
         $calendar = [
             'user_id' => $this->user->id,
             'name' => $this->faker->jobTitle(),
-            'module' => 'FluxErp\\Http\\Livewire\\Portal\\Calendars',
             'color' => $this->faker->hexColor(),
-            'event_component' => 'FluxErp\\View\\Components\\Logo',
             'is_public' => $this->faker->boolean(),
         ];
 
@@ -127,9 +125,7 @@ class CalendarTest extends BaseSetup
             'id' => $this->calendars[0]->id,
             'user_id' => $this->user->id,
             'name' => $this->faker->jobTitle(),
-            'module' => 'FluxErp\\Http\\Livewire\\Portal\\Calendars',
             'color' => $this->faker->hexColor(),
-            'event_component' => 'FluxErp\\View\\Components\\Logo',
             'is_public' => $this->faker->boolean(),
         ];
 

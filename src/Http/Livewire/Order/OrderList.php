@@ -43,7 +43,7 @@ class OrderList extends Component
 
     public array $orderTypes = [];
 
-    public function getRules()
+    public function getRules(): array
     {
         return Arr::prependKeysWith((new CreateOrderRequest())->rules(), 'order.');
     }
