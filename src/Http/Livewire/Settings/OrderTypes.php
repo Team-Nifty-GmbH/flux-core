@@ -33,7 +33,7 @@ class OrderTypes extends Component
         'is_hidden' => false,
     ];
 
-    public function mount(): void
+    public function boot(): void
     {
         $this->orderTypes = get_subclasses_of(
             extendingClass: 'FluxErp\View\Printing\Order\OrderView',
@@ -42,7 +42,6 @@ class OrderTypes extends Component
 
         $this->orderTypeSettings = OrderType::query()
             ->get()
-            ->keyBy('print_layouts')
             ->toArray();
     }
 
@@ -53,18 +52,18 @@ class OrderTypes extends Component
 
     public function save(): void
     {
-        $orderTypesService = new OrderTypeService();
-        $response = $orderTypesService->update($this->orderTypeSettings);
+        // Validation logic here
 
-        if ($response['status'] !== 200) {
-            $this->notification()->error(
-                title: __('Order type setting could not be saved'),
-                description: implode(', ', Arr::flatten($response['errors']))
-            );
+        if ($this->selectedOrderType['id']) {
+            // Update the existing order type
+            $orderType = OrderType::find($this->selectedOrderType['id']);
+            $orderType->update($this->selectedOrderType);
+        } else {
+            // Create a new order type
+            OrderType::create($this->selectedOrderType);
         }
 
-        $this->detailModal = false;
-        $this->skipRender();
+        $this->editModal = false;
     }
 
     public function show($orderTypeSlug): void
