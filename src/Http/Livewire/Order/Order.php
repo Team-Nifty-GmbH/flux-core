@@ -183,7 +183,7 @@ class Order extends Component
                 ];
             }
 
-            if(count($pdfs) === 1) {
+            if (count($pdfs) === 1) {
                 return response()->streamDownload(function () use ($pdfs) {
                     echo $pdfs[0]['file'];
                 }, $pdfs[0]['filename']);

@@ -7,7 +7,7 @@
                     option-label="name"
                     option-value="id"
                     :label="__('Order type')"
-                    wire:model="order.order_type_id"
+                    wire:model.defer="order.order_type_id"
                 />
                 <x-select
                     :label="__('Contact')"

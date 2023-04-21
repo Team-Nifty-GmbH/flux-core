@@ -284,7 +284,7 @@ class FluxServiceProvider extends ServiceProvider
 
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === 'php') {
-                $classPath = str_replace([__DIR__.'/','/'],['','\\'],$file->getPathname());
+                $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
                 $classNamespace = '\\FluxErp\\';
                 $class = $classNamespace . str_replace('.php', '', $classPath);
                 $commandClasses[] = $class;
