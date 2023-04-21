@@ -22,21 +22,28 @@ class OrderTypes extends Component
 
     public string $orderTypeSlug = '';
 
-    public bool $detailModal = false;
+    public bool $editModal = false;
+
+    public $selectedOrderType = [
+        'id' => null,
+        'name' => '',
+        'description' => '',
+        'order_type_enum' => '',
+        'is_active' => false,
+        'is_hidden' => false,
+    ];
 
     public function mount(): void
     {
-        $this->orderTypes = config('order_types.available_order_types') ?? [];
+        $this->orderTypes = get_subclasses_of(
+            extendingClass: 'FluxErp\View\Printing\Order\OrderView',
+            namespace: 'FluxErp\View\Printing\Order'
+        );
 
-        $orderTypeSettings = data_get($this->orderTypes, '*');
-
-        foreach ($orderTypeSettings as $orderTypeSetting) {
-            $this->orderTypeSettings[$orderTypeSetting] = [
-                'is_enabled' => OrderType::query()
-                    ->where('slug', $orderTypeSetting)
-                    ->value('is_enabled')
-            ];
-        }
+        $this->orderTypeSettings = OrderType::query()
+            ->get()
+            ->keyBy('print_layouts')
+            ->toArray();
     }
 
     public function render(): View|Factory|Application
@@ -77,5 +84,34 @@ class OrderTypes extends Component
         }
 
         $this->skipRender();
+    }
+
+    public function showEditModal($orderTypeId = null)
+    {
+        if ($orderTypeId) {
+            $orderType = OrderType::find($orderTypeId);
+
+            if ($orderType) {
+                $this->selectedOrderType = [
+                    'id' => $orderType->id,
+                    'name' => $orderType->name,
+                    'description' => $orderType->description,
+                    'order_type_enum' => $orderType->order_type_enum,
+                    'is_active' => $orderType->is_active,
+                    'is_hidden' => $orderType->is_hidden,
+                ];
+            }
+        } else {
+            $this->selectedOrderType = [
+                'id' => null,
+                'name' => '',
+                'description' => '',
+                'order_type_enum' => '',
+                'is_active' => false,
+                'is_hidden' => false,
+            ];
+        }
+
+        $this->editModal = true;
     }
 }
