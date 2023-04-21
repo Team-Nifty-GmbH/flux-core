@@ -29,10 +29,37 @@ class OrderTypes extends Component
         'name' => '',
         'description' => '',
         'order_type_enum' => '',
-        'print_layouts' => '',
+        'print_layouts' => [],
         'is_active' => false,
         'is_hidden' => false,
     ];
+
+    public function getRules(): array
+    {
+        return [
+            'selectedOrderType.name' => 'required|string|max:255',
+            'selectedOrderType.description' => 'nullable|string|max:500',
+            'selectedOrderType.order_type_enum' => 'required|string|max:255',
+            'selectedOrderType.print_layouts.*' => 'required|string|max:255',
+            'selectedOrderType.is_active' => 'required|boolean',
+            'selectedOrderType.is_hidden' => 'required|boolean',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'selectedOrderType.name.required' => 'Order Type Name is required.',
+            'selectedOrderType.description.max' => 'Description can have a maximum of 500 characters.',
+            'selectedOrderType.order_type_enum.required' => 'Order Type Enum is required.',
+            'selectedOrderType.print_layouts.*.required' =>
+                'Print layout is required for each item in the print_layouts array.',
+            'selectedOrderType.print_layouts.*.max' =>
+                'Print layout can have a maximum of 255 characters for each item in the print_layouts array.',
+            'selectedOrderType.is_active.required' => 'Is Active is required.',
+            'selectedOrderType.is_hidden.required' => 'Is Hidden is required.',
+        ];
+    }
 
     public function boot(): void
     {
@@ -53,7 +80,7 @@ class OrderTypes extends Component
 
     public function save(): void
     {
-        // Validation logic here
+        $this->validate();
 
         if ($this->selectedOrderType['id']) {
             // Update the existing order type

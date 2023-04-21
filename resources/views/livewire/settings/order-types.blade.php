@@ -49,7 +49,11 @@
                                         {{ $orderType['order_type_enum'] }}
                                     </td>
                                     <td class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6">
-                                        {{ $orderType['print_layouts'] }}
+                                        @if (is_array($orderType['print_layouts']))
+                                            {{ implode(', ', $orderType['print_layouts']) }}
+                                        @else
+                                            {{ $orderType['print_layouts'] }}
+                                        @endif
                                     </td>
                                     <td class="whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm text-gray-500">
                                         <button wire:click="showEditModal({{ $orderType['id'] }})" type="button"
@@ -90,7 +94,7 @@
                             </x-select>
 
                             <!-- Print Layouts Select -->
-                            <x-select label="{{ __('Print Layouts') }}" placeholder="{{ __('Select a Print Layout') }}" wire:model.defer="selectedOrderType.print_layouts">
+                            <x-select label="{{ __('Print Layouts') }}" placeholder="{{ __('Select a Print Layout') }}" wire:model.defer="selectedOrderType.print_layouts" multiselect>
                                 @foreach ($orderTypes as $orderType)
                                     @php
                                         $fileName = class_basename($orderType);
