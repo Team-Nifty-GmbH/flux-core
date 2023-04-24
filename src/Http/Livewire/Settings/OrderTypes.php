@@ -21,9 +21,11 @@ class OrderTypes extends Component
 
     public array $orderTypes;
 
-    public bool $editModal = false;
+    public array $clients;
 
-    public array $selectedOrderType = [
+    public array $enum;
+
+    public array $orderType = [
         'id' => null,
         'name' => null,
         'client_id' => null,
@@ -34,18 +36,15 @@ class OrderTypes extends Component
         'is_hidden' => false,
     ];
 
-    public array $clients;
+    public bool $editModal = false;
 
-    public array $enum;
-
-    public function getRules(): mixed
+    public function getRules(): array
     {
         $orderTypeRequest = ($this->selectedOrderType['id'] ?? false)
             ? new UpdateOrderTypeRequest()
             : new CreateOrderTypeRequest();
 
-        return Arr::prependKeysWith($orderTypeRequest->getRules($this->selectedOrderType),
-            'selectedOrderType.');
+        return Arr::prependKeysWith($orderTypeRequest->rules(), 'orderType.');
     }
 
     public function messages(): array
@@ -60,7 +59,7 @@ class OrderTypes extends Component
             'is_hidden.required' => 'Is Hidden is required.',
         ];
 
-        return Arr::prependKeysWith($orderTypeMessages, 'selectedOrderType.');
+        return Arr::prependKeysWith($orderTypeMessages, 'orderType.');
     }
 
     public function mount(): void
@@ -84,17 +83,17 @@ class OrderTypes extends Component
 
     public function save(): void
     {
-        $validatedData = $this->validate();
+        $validated = $this->validate()['orderType'];
 
-        if (isset($validatedData['id'])) {
-            $orderType = OrderType::find($validatedData['id']);
-            $orderType->update($validatedData);
-        } else {
-            OrderType::create($validatedData);
-        }
+        $orderType = OrderType::query()
+            ->whereKey($validated['id'] ?? null)
+            ->firstOrNew();
+
+        $orderType->fill($validated);
+        $orderType->save();
 
         $this->editModal = false;
-        $this->render();
+        $this->skipRender();
     }
 
     public function showEditModal(?int $orderTypeId = null): void

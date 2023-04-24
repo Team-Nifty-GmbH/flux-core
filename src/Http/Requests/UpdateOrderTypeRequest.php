@@ -2,7 +2,6 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Rules\ExistsWithIgnore;
 use Illuminate\Validation\Rules\Enum;
 
@@ -25,10 +24,6 @@ class UpdateOrderTypeRequest extends BaseFormRequest
             'description' => 'string|nullable',
             'print_layouts' => 'array|nullable',
             'print_layouts.*' => 'required|string',
-            'order_type_enum' => [
-                'required',
-                new Enum(OrderTypeEnum::class),
-            ],
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',
         ];
