@@ -3,12 +3,15 @@
 namespace FluxErp\Http\Livewire\Settings;
 
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Http\Requests\CreateOrderTypeRequest;
+use FluxErp\Http\Requests\UpdateOrderTypeRequest;
 use FluxErp\Models\Client;
 use FluxErp\Models\OrderType;
 use FluxErp\Services\OrderTypeService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -18,52 +21,46 @@ class OrderTypes extends Component
 
     public array $orderTypes;
 
-    public array $orderTypeSettings = [];
-
-    public array $orderType = [];
-
-    public string $orderTypeSlug = '';
-
     public bool $editModal = false;
 
     public array $selectedOrderType = [
         'id' => null,
-        'name' => '',
-        'client_id' => '',
-        'description' => '',
-        'order_type_enum' => '',
+        'name' => null,
+        'client_id' => null,
+        'description' => null,
+        'order_type_enum' => null,
         'print_layouts' => [],
         'is_active' => false,
         'is_hidden' => false,
     ];
 
-    public $clients;
+    public array $clients;
 
-    public $enums;
+    public array $enum;
 
-    public function getRules(): array
+    public function getRules(): mixed
     {
-        return [
-            'selectedOrderType.name' => 'required|string|max:255',
-            'selectedOrderType.description' => 'nullable|string|max:500',
-            'selectedOrderType.order_type_enum' => 'required|string|max:255',
-            'selectedOrderType.print_layouts.*' => 'required|string|max:255',
-            'selectedOrderType.is_active' => 'required|boolean',
-            'selectedOrderType.is_hidden' => 'required|boolean',
-        ];
+        $orderTypeRequest = ($this->selectedOrderType['id'] ?? false)
+            ? new UpdateOrderTypeRequest()
+            : new CreateOrderTypeRequest();
+
+        return Arr::prependKeysWith($orderTypeRequest->getRules($this->selectedOrderType),
+            'selectedOrderType.');
     }
 
     public function messages(): array
     {
-        return [
-            'selectedOrderType.name.required' => 'Order Type Name is required.',
-            'selectedOrderType.description.max' => 'Description can have a maximum of 500 characters.',
-            'selectedOrderType.order_type_enum.required' => 'Order Type Enum is required.',
-            'selectedOrderType.print_layouts.*.required' => 'Print layout is required for each item in the print_layouts array.',
-            'selectedOrderType.print_layouts.*.max' => 'Print layout can have a maximum of 255 characters for each item in the print_layouts array.',
-            'selectedOrderType.is_active.required' => 'Is Active is required.',
-            'selectedOrderType.is_hidden.required' => 'Is Hidden is required.',
+        $orderTypeMessages = [
+            'name.required' => 'Order Type Name is required.',
+            'description.max' => 'Description can have a maximum of 500 characters.',
+            'order_type_enum.required' => 'Order Type Enum is required.',
+            'print_layouts.*.required' => 'Print layout is required for each item in the print_layouts array.',
+            'print_layouts.*.max' => 'Print layout can have a maximum of 255 characters for each item in the print_layouts array.',
+            'is_active.required' => 'Is Active is required.',
+            'is_hidden.required' => 'Is Hidden is required.',
         ];
+
+        return Arr::prependKeysWith($orderTypeMessages, 'selectedOrderType.');
     }
 
     public function mount(): void
@@ -73,15 +70,11 @@ class OrderTypes extends Component
             namespace: 'FluxErp\View\Printing\Order'
         );
 
-        $this->orderTypeSettings = OrderType::query()
-            ->get()
-            ->toArray();
-
         $this->clients = Client::query()
-            ->get()
+            ->get(['id', 'name'])
             ->toArray();
 
-        $this->enums = OrderTypeEnum::values();
+        $this->enum = OrderTypeEnum::values();
     }
 
     public function render(): View|Factory|Application
@@ -91,42 +84,40 @@ class OrderTypes extends Component
 
     public function save(): void
     {
-        $this->validate();
+        $validatedData = $this->validate();
 
-        if ($this->selectedOrderType['id']) {
-            // Update the existing order type
-            $orderType = OrderType::find($this->selectedOrderType['id']);
-            $orderType->update($this->selectedOrderType);
+        if (isset($validatedData['id'])) {
+            $orderType = OrderType::find($validatedData['id']);
+            $orderType->update($validatedData);
         } else {
-            // Create a new order type
-            OrderType::create($this->selectedOrderType);
+            OrderType::create($validatedData);
         }
 
         $this->editModal = false;
         $this->render();
     }
 
-    public function showEditModal($orderTypeId = null)
+    public function showEditModal(?int $orderTypeId = null): void
     {
-        if ($orderTypeId) {
-            $orderType = OrderType::find($orderTypeId);
+        $orderType = OrderType::query()
+            ->whereKey($orderTypeId)
+            ->first();
 
-            if ($orderType) {
-                $this->selectedOrderType = [
-                    'id' => $orderType->id,
-                    'name' => $orderType->name,
-                    'description' => $orderType->description,
-                    'order_type_enum' => $orderType->order_type_enum,
-                    'is_active' => $orderType->is_active,
-                    'is_hidden' => $orderType->is_hidden,
-                ];
-            }
+        if ($orderType) {
+            $this->selectedOrderType = [
+                'id' => $orderType->id,
+                'name' => $orderType->name,
+                'description' => $orderType->description,
+                'order_type_enum' => $orderType->order_type_enum,
+                'is_active' => $orderType->is_active,
+                'is_hidden' => $orderType->is_hidden,
+            ];
         } else {
             $this->selectedOrderType = [
                 'id' => null,
-                'name' => '',
-                'description' => '',
-                'order_type_enum' => '',
+                'name' => null,
+                'description' => null,
+                'order_type_enum' => null,
                 'is_active' => false,
                 'is_hidden' => false,
             ];
@@ -143,6 +134,5 @@ class OrderTypes extends Component
         (new OrderTypeService())->delete($this->selectedOrderType['id']);
 
         $this->skipRender();
-        $this->emitUp('closeModal', $this->orderType, true);
     }
 }

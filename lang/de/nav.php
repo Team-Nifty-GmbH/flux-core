@@ -17,7 +17,7 @@ return [
         'emails' => 'System emails',
         'languages' => 'Sprachen',
         'notifications' => 'Benachrichtigungen',
-        'order-types' => 'Bestelltypen',
+        'order-types' => 'Auftragstypen',
         'permissions' => 'Rollen & Rechte',
         'ticket-types' => 'Tickettypen',
         'translations' => 'Übersetzungen',

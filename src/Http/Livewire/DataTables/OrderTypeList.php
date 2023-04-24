@@ -24,20 +24,11 @@ class OrderTypeList extends DataTable
         'name' => 'Name',
         'description' => 'Description',
         'client.name' => 'Client',
-        'order_type_enum' => 'Enum',
+        'order_type_enum' => 'Order Type',
         'print_layouts' => 'Print Layouts',
     ];
 
     public array $sortable = ['*'];
-
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel(OrderType::class)->attributes;
-
-        $this->availableCols = $attributes->pluck('name')->toArray();
-
-        parent::mount();
-    }
 
     public function getTableActions(): array
     {

@@ -31,7 +31,7 @@ class OrderTypeTableSeeder extends Seeder
         }
     }
 
-    protected function findPrintLayouts($orderType)
+    protected function findPrintLayouts($orderType): array
     {
         $printLayouts = get_subclasses_of(
             extendingClass: 'FluxErp\View\Printing\Order\OrderView',

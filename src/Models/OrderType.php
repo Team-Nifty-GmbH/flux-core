@@ -40,13 +40,13 @@ class OrderType extends Model
         'description',
     ];
 
-    public function documentGenerationSettings(): HasMany
-    {
-        return $this->hasMany(DocumentGenerationSetting::class, 'order_type_id');
-    }
-
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function documentGenerationSettings(): HasMany
+    {
+        return $this->hasMany(DocumentGenerationSetting::class, 'order_type_id');
     }
 }
