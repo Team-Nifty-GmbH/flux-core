@@ -30,8 +30,8 @@ class OrderTypes extends Component
         'name' => null,
         'client_id' => null,
         'description' => null,
-        'order_type_enum' => null,
         'print_layouts' => [],
+        'order_type_enum' => null,
         'is_active' => false,
         'is_hidden' => false,
     ];
@@ -40,9 +40,9 @@ class OrderTypes extends Component
 
     public function getRules(): array
     {
-        $orderTypeRequest = ($this->selectedOrderType['id'] ?? false)
-            ? new UpdateOrderTypeRequest()
-            : new CreateOrderTypeRequest();
+        $orderTypeRequest = $this->orderType['id'] ?
+            new UpdateOrderTypeRequest() :
+            new CreateOrderTypeRequest();
 
         return Arr::prependKeysWith($orderTypeRequest->rules(), 'orderType.');
     }
@@ -52,9 +52,9 @@ class OrderTypes extends Component
         $orderTypeMessages = [
             'name.required' => 'Order Type Name is required.',
             'description.max' => 'Description can have a maximum of 500 characters.',
-            'order_type_enum.required' => 'Order Type Enum is required.',
             'print_layouts.*.required' => 'Print layout is required for each item in the print_layouts array.',
             'print_layouts.*.max' => 'Print layout can have a maximum of 255 characters for each item in the print_layouts array.',
+            'order_type_enum.required' => 'Order Type Enum is required.',
             'is_active.required' => 'Is Active is required.',
             'is_hidden.required' => 'Is Hidden is required.',
         ];
@@ -103,19 +103,21 @@ class OrderTypes extends Component
             ->first();
 
         if ($orderType) {
-            $this->selectedOrderType = [
+            $this->orderType = [
                 'id' => $orderType->id,
                 'name' => $orderType->name,
                 'description' => $orderType->description,
+                'print_layouts' => $orderType->print_layouts,
                 'order_type_enum' => $orderType->order_type_enum,
                 'is_active' => $orderType->is_active,
                 'is_hidden' => $orderType->is_hidden,
             ];
         } else {
-            $this->selectedOrderType = [
+            $this->orderType = [
                 'id' => null,
                 'name' => null,
                 'description' => null,
+                'print_layouts' => [],
                 'order_type_enum' => null,
                 'is_active' => false,
                 'is_hidden' => false,
@@ -130,7 +132,7 @@ class OrderTypes extends Component
         if (! user_can('api.order-types.{id}.delete')) {
             return;
         }
-        (new OrderTypeService())->delete($this->selectedOrderType['id']);
+        (new OrderTypeService())->delete($this->orderType['id']);
 
         $this->skipRender();
     }

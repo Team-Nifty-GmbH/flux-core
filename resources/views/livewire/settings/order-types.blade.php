@@ -27,7 +27,7 @@
                                       option-value="id"
                             />
 
-                            @if($orderType['id'])
+                            @if(! $orderType['id'])
                                 <x-select label="{{ __('Order Type') }}"
                                           placeholder="{{ __('Select Order Type') }}"
                                           wire:model.defer="orderType.order_type_enum"
