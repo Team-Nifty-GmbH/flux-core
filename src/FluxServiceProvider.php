@@ -231,7 +231,7 @@ class FluxServiceProvider extends ServiceProvider
             Blade::component('flux::components.' . $relativePath, Str::remove('.index', $relativePath));
         }
 
-        foreach ($this->getViewClassAliasFromNmaespace('FluxErp\\View\\Components') as $alias => $class) {
+        foreach ($this->getViewClassAliasFromNamespace('FluxErp\\View\\Components') as $alias => $class) {
             Blade::component($class, $alias);
         }
     }
@@ -239,12 +239,12 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerLivewireComponents(): void
     {
         $livewireNamespace = 'FluxErp\\Http\\Livewire\\';
-        foreach ($this->getViewClassAliasFromNmaespace($livewireNamespace) as $alias => $class) {
+        foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
             Livewire::component($alias, $class);
         }
     }
 
-    private function getViewClassAliasFromNmaespace(string $namespace, string|null $directoryPath = null): array
+    private function getViewClassAliasFromNamespace(string $namespace, string|null $directoryPath = null): array
     {
         $directoryPath = $directoryPath ?: Str::replace(['\\', 'FluxErp'], ['/', __DIR__], $namespace);
         $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath));

@@ -20,6 +20,7 @@ use FluxErp\Http\Livewire\Settings\CustomerPortal;
 use FluxErp\Http\Livewire\Settings\Emails;
 use FluxErp\Http\Livewire\Settings\Languages;
 use FluxErp\Http\Livewire\Settings\Notifications;
+use FluxErp\Http\Livewire\Settings\OrderTypes;
 use FluxErp\Http\Livewire\Settings\Permissions;
 use FluxErp\Http\Livewire\Settings\Profile;
 use FluxErp\Http\Livewire\Settings\TicketTypes;
@@ -84,6 +85,7 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/emails', Emails::class)->name('settings.emails');
             Route::get('/languages', Languages::class)->name('settings.languages');
             Route::get('/notifications', Notifications::class)->name('settings.notifications');
+            Route::get('/order-types', OrderTypes::class)->name('settings.order-types');
             Route::get('/permissions', Permissions::class)->name('settings.permissions');
             Route::get('/ticket-types', TicketTypes::class)->name('settings.ticket-types');
             Route::get('/translations', Translations::class)->name('settings.translations');

@@ -3,6 +3,7 @@
 namespace FluxErp\Http\Requests;
 
 use FluxErp\Rules\ExistsWithIgnore;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateOrderTypeRequest extends BaseFormRequest
 {
@@ -22,6 +23,7 @@ class UpdateOrderTypeRequest extends BaseFormRequest
             'name' => 'string',
             'description' => 'string|nullable',
             'print_layouts' => 'array|nullable',
+            'print_layouts.*' => 'required|string',
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',
         ];
