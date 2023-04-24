@@ -40,7 +40,7 @@ class OrderTypeTableSeeder extends Seeder
         $orderType = OrderTypeEnum::from($orderType);
 
         $filteredLayouts = match ($orderType) {
-            OrderTypeEnum::Order, OrderTypeEnum::SplitOrder, OrderTypeEnum::Subscription => ['Invoice', 'Offer'],
+            OrderTypeEnum::Order, OrderTypeEnum::SplitOrder, OrderTypeEnum::Subscription => ['Offer'],
             OrderTypeEnum::Retoure => ['Retoure'],
             OrderTypeEnum::Purchase, OrderTypeEnum::PurchaseRefund => ['Invoice'],
             default => [],
