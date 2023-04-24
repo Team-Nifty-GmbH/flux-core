@@ -5,12 +5,13 @@ namespace FluxErp\Models;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasEnums;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
-use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderType extends Model
@@ -23,6 +24,7 @@ class OrderType extends Model
 
     protected $casts = [
         'uuid' => 'string',
+        'print_layouts' => 'array',
         'order_type_enum' => OrderTypeEnum::class,
         'is_active' => 'boolean',
         'is_hidden' => 'boolean',
@@ -37,6 +39,11 @@ class OrderType extends Model
         'name',
         'description',
     ];
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
 
     public function documentGenerationSettings(): HasMany
     {

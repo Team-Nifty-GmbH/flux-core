@@ -266,9 +266,9 @@ class Address extends Component
     {
         if ($addressId) {
             $address = AddressModel::query()
-             ->whereKey($addressId)
-             ->with('contactOptions', fn (HasMany $builder) => $builder->orderBy('type'))
-             ->first();
+                ->whereKey($addressId)
+                ->with('contactOptions', fn (HasMany $builder) => $builder->orderBy('type'))
+                ->first();
         } else {
             $address = new AddressModel(
                 [

@@ -4,6 +4,7 @@
         tab: $wire.entangle('tab'),
         formatter: @js(\FluxErp\Models\Order::typeScriptAttributes()),
         orderPositions: [],
+        createDocuments: false,
     }"
     x-on:updated-order-positions.window="orderPositions = $event.detail"
     x-on:order-positions-updated="$wire.set('hasUpdatedOrderPositions', true)"
@@ -14,6 +15,27 @@
         document.getElementsByTagName('head')[0].appendChild(meta);
      }"
 >
+    <x-modal.card id="preview" :fullscreen="true"  :title="__('Preview')">
+        <iframe id="preview-iframe" src="#" loading="lazy" class="w-full min-h-screen"></iframe>
+        <x-slot name="footer">
+            <div class="flex justify-end gap-x-4">
+                <div class="flex">
+                    <x-button flat label="Cancel" x-on:click="close" />
+                    <x-button primary label="Save" wire:click="save" />
+                </div>
+            </div>
+        </x-slot>
+    </x-modal.card>
+    <x-sidebar x-show="createDocuments">
+        @foreach($printLayouts as $key => $printLayout)
+            <x-checkbox wire:model.defer="selectedPrintLayouts.{{ $key }}" :label="$key" />
+        @endforeach
+        <x-slot name="footer">
+            <x-button spinner primary x-on:click="$wire.downloadDocuments()">
+                {{ __('Download') }}
+            </x-button>
+        </x-slot>
+    </x-sidebar>
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
         <div class="flex items-center space-x-5">
@@ -51,6 +73,13 @@
                     }, '{{ $this->id }}')
                     "/>
             @endif
+            <x-button
+                primary
+                spinner
+                class="w-full"
+                x-on:click="$wire.save(orderPositions)"
+                :label="__('Save')"
+            />
         </div>
     </div>
     <x-tabs
@@ -226,22 +255,39 @@
                 <div class="sticky top-6 space-y-6">
                     <x-card>
                         <div class="space-y-4">
-                            <x-button
-                                primary
-                                spinner
-                                class="w-full"
-                                x-on:click="$wire.save(orderPositions)"
-                                :label="__('Save')"
-                            />
-                            <x-button
-                                primary
-                                class="w-full"
-                                wire:click="createDocuments"
-                                :label="__('Create documents')"
-                            />
-                            <x-button class="w-full">
-                                {{ __('Preview') }}
-                            </x-button>
+                            @if($printLayouts)
+                                <x-button
+                                    primary
+                                    class="w-full"
+                                    x-on:click="createDocuments = true"
+                                    :label="__('Send documents')"
+                                />
+                                <x-button
+                                    class="w-full"
+                                    x-on:click="createDocuments = true"
+                                    :label="__('Download documents')"
+                                />
+                                <x-button
+                                    class="w-full"
+                                    x-on:click="createDocuments = true"
+                                    :label="__('Print documents')"
+                                />
+                                <div class="dropdown-full-w">
+                                    <x-dropdown width="w-full">
+                                        <x-slot name="trigger">
+                                            <x-button class="w-full">
+                                                {{ __('Preview') }}
+                                            </x-button>
+                                        </x-slot>
+                                        @foreach($printLayouts as $key => $printLayout)
+                                            <x-dropdown.item
+                                                x-on:click="const preview = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['id' => $order['id'], 'view' => $key, 'model' => \FluxErp\Models\Order::class, '']) }}'; $openModal(preview)">
+                                                {{ $key }}
+                                            </x-dropdown.item>
+                                        @endforeach
+                                    </x-dropdown>
+                                </div>
+                            @endif
                             <livewire:features.custom-events :model="\FluxErp\Models\Order::class" :id="$order['id']" />
                         </div>
                     </x-card>

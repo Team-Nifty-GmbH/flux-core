@@ -17,6 +17,11 @@ use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
+use FluxErp\Logging\DatabaseCustomLogger;
+use FluxErp\Logging\DatabaseLoggingHandler;
+use FluxErp\Models\Address;
+use FluxErp\Models\Token;
+use FluxErp\Models\User;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -42,15 +47,19 @@ class FluxServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
-        $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
+        if ($this->app->runningInConsole()) {
+            $this->offerPublishing();
+            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        } else {
+            $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
+            $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
+        }
+
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
-        $this->registerCommands();
-        $this->registerMiddleware();
 
         $this->registerBladeComponents();
         $this->registerLivewireComponents();
+        $this->registerMiddleware();
         $this->registerconfig();
         $this->registerMarcos();
 
@@ -88,6 +97,8 @@ class FluxServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerCommands();
+
         if (! Response::hasMacro('attachment')) {
             Response::macro('attachment', function ($content, $filename = 'download.pdf') {
                 $headers = [
@@ -107,7 +118,7 @@ class FluxServiceProvider extends ServiceProvider
                 return $this->getHost() === preg_replace(
                         '(^https?://)',
                         '',
-                        config('app.portal_domain')
+                        config('flux.portal_domain')
                     );
             });
         }
@@ -129,25 +140,24 @@ class FluxServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../database/migrations' => database_path('migrations'),
         ], 'flux-migrations');
-
         $this->publishes([
             __DIR__ . '/../database/seeders' => database_path('seeders'),
         ], 'flux-seeders');
-
         $this->publishes([
             __DIR__ . '/../config/flux.php' => config_path('flux.php'),
         ], 'flux-config');
-
         $this->publishes([
-            __DIR__ . '/../resources/views' => resource_path('views/vendor/team-nifty-gmbh/flux'),
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/flux'),
         ], 'flux-views');
-
         $this->publishes([
             __DIR__ . '/../lang' => base_path('lang/vendor/team-nifty-gmbh/flux'),
         ], 'flux-translations');
         $this->publishes([
-            __DIR__ . '/../public' => public_path('vendor/team-nifty-gmbh/flux'),
-        ], 'public');
+            __DIR__ . '/../public/build' => public_path('vendor/team-nifty-gmbh/flux'),
+        ], 'flux-assets');
+        $this->publishes([
+            __DIR__ . '/../docker' => base_path('docker'),
+        ], 'flux-docker');
     }
 
     protected function registerConfig(): void
@@ -162,46 +172,46 @@ class FluxServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/logging.php', 'logging');
         $this->mergeConfigFrom(__DIR__ . '/../config/print.php', 'print');
         $loggingConfig = config('logging.channels');
+        config(['filesystems.links.' . public_path('flux') => __DIR__ . '/../public']);
         $loggingConfig['database'] = [
             'driver' => 'custom',
-            'handler' => \FluxErp\Logging\DatabaseLoggingHandler::class,
-            'via' => \FluxErp\Logging\DatabaseCustomLogger::class,
+            'handler' => DatabaseLoggingHandler::class,
+            'via' => DatabaseCustomLogger::class,
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAYS', 30),
         ];
         config(['logging.channels' => $loggingConfig]);
         config([
-            'auth.guards' =>
-                [
-                    'sanctum' => [
-                        'driver' => 'sanctum',
-                        'provider' => 'users',
-                    ],
-                    'web' => [
-                        'driver' => 'session',
-                        'provider' => 'users',
-                    ],
-                    'token' => [
-                        'driver' => 'sanctum',
-                        'provider' => 'tokens',
-                    ],
-                    'address' => [
-                        'driver' => 'session',
-                        'provider' => 'addresses',
-                    ],
+            'auth.guards' => [
+                'sanctum' => [
+                    'driver' => 'sanctum',
+                    'provider' => 'users',
                 ],
+                'web' => [
+                    'driver' => 'session',
+                    'provider' => 'users',
+                ],
+                'token' => [
+                    'driver' => 'sanctum',
+                    'provider' => 'tokens',
+                ],
+                'address' => [
+                    'driver' => 'session',
+                    'provider' => 'addresses',
+                ],
+            ],
             'auth.providers' => [
                 'users' => [
                     'driver' => 'eloquent',
-                    'model' => \FluxErp\Models\User::class,
+                    'model' => User::class,
                 ],
                 'addresses' => [
                     'driver' => 'eloquent',
-                    'model' => \FluxErp\Models\Address::class,
+                    'model' => Address::class,
                 ],
                 'tokens' => [
                     'driver' => 'eloquent',
-                    'model' => \FluxErp\Models\Token::class,
+                    'model' => Token::class,
                 ],
             ],
         ]);
@@ -216,13 +226,12 @@ class FluxServiceProvider extends ServiceProvider
 
         foreach ($phpFiles as $phpFile) {
             $relativePath = Str::replace(__DIR__ . '/../resources/views/components/', '', $phpFile->getRealPath());
-            $relativePath = Str::replace(DIRECTORY_SEPARATOR, '.', Str::remove( '.blade.php', $relativePath));
+            $relativePath = Str::replace(DIRECTORY_SEPARATOR, '.', Str::remove('.blade.php', $relativePath));
             $relativePath = Str::afterLast($relativePath, 'views.components.');
             Blade::component('flux::components.' . $relativePath, Str::remove('.index', $relativePath));
         }
 
-        foreach($this->getViewClassAliasFromNmaespace('FluxErp\\View\\Components') as $alias => $class)
-        {
+        foreach ($this->getViewClassAliasFromNamespace('FluxErp\\View\\Components') as $alias => $class) {
             Blade::component($class, $alias);
         }
     }
@@ -230,13 +239,12 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerLivewireComponents(): void
     {
         $livewireNamespace = 'FluxErp\\Http\\Livewire\\';
-        foreach ($this->getViewClassAliasFromNmaespace($livewireNamespace) as $alias => $class)
-        {
+        foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
             Livewire::component($alias, $class);
         }
     }
 
-    private function getViewClassAliasFromNmaespace(string $namespace, string|null $directoryPath = null): array
+    private function getViewClassAliasFromNamespace(string $namespace, string|null $directoryPath = null): array
     {
         $directoryPath = $directoryPath ?: Str::replace(['\\', 'FluxErp'], ['/', __DIR__], $namespace);
         $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath));
@@ -264,21 +272,23 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function registerCommands(): void
     {
-        if ($this->app->runningInConsole()) {
-            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__.'/Console/Commands'));
-            $commandClasses = [];
-
-            foreach ($iterator as $file) {
-                if ($file->isFile() && $file->getExtension() === 'php') {
-                    $classPath = str_replace([__DIR__.'/','/'],['','\\'],$file->getPathname());
-                    $classNamespace = '\\FluxErp\\';
-                    $class = $classNamespace . str_replace('.php', '', $classPath);
-                    $commandClasses[] = $class;
-                }
-            }
-
-            $this->commands($commandClasses);
+        if (! $this->app->runningInConsole()) {
+            return;
         }
+
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands'));
+        $commandClasses = [];
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
+                $classNamespace = '\\FluxErp\\';
+                $class = $classNamespace . str_replace('.php', '', $classPath);
+                $commandClasses[] = $class;
+            }
+        }
+
+        $this->commands($commandClasses);
     }
 
     private function registerMiddleware()
@@ -290,10 +300,10 @@ class FluxServiceProvider extends ServiceProvider
         $kernel->appendMiddlewareToGroup('web', Permissions::class);
         $kernel->appendMiddlewareToGroup('web', Localization::class);
 
+        $this->app['router']->aliasMiddleware('abilities', CheckAbilities::class);
         $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
         $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
         $this->app['router']->aliasMiddleware('permission', Permissions::class);
         $this->app['router']->aliasMiddleware('localization', Localization::class);
-        $this->app['router']->aliasMiddleware('abilities', CheckAbilities::class);
     }
 }

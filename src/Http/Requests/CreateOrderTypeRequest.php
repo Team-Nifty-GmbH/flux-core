@@ -18,6 +18,8 @@ class CreateOrderTypeRequest extends BaseFormRequest
             'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
             'name' => 'required|string',
             'description' => 'string|nullable',
+            'print_layouts' => 'array|nullable',
+            'print_layouts.*' => 'required|string',
             'order_type_enum' => [
                 'required',
                 new Enum(OrderTypeEnum::class),

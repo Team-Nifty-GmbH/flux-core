@@ -27,7 +27,7 @@ class ContactFactory extends Factory
             'discount_days' => $this->faker->boolean ? $this->faker->numberBetween(int1: 1, int2: 50) : null,
             'discount_percent' => $this->faker->boolean ? $this->faker->randomFloat(nbMaxDecimals: 2, max: 5) : null,
             'credit_line' => $this->faker->boolean ?
-                $this->faker->randomFloat(nbMaxDecimals: 2, min: 100, max:10000) : null,
+                $this->faker->randomFloat(nbMaxDecimals: 2, min: 100, max: 10000) : null,
             'has_delivery_lock' => $this->faker->boolean,
             'has_sensitive_reminder' => $this->faker->boolean,
         ];

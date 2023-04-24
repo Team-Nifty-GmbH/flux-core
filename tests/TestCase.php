@@ -2,7 +2,6 @@
 
 namespace FluxErp\Tests;
 
-use App\Providers\AppServiceProvider;
 use Dotenv\Dotenv;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\FortifyServiceProvider;
@@ -17,6 +16,7 @@ use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
+use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
 
@@ -26,8 +26,10 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUp(): void
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
-        $dotenv->load();
+        if (file_exists(__DIR__ . '/../../../.env')) {
+            $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
+            $dotenv->load();
+        }
 
         parent::setUp();
 
@@ -36,13 +38,14 @@ abstract class TestCase extends BaseTestCase
         ]);
     }
 
-    public function getPackageProviders($app)
+    public function getPackageProviders($app): array
     {
         return [
             PermissionServiceProvider::class,
             ScoutServiceProvider::class,
             HeroiconsServiceProvider::class,
             MediaLibraryServiceProvider::class,
+            CalendarServiceProvider::class,
             LivewireServiceProvider::class,
             FastPaginateProvider::class,
             QueryBuilderServiceProvider::class,
@@ -56,9 +59,11 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    public function getEnvironmentSetUp($app)
+    public function getEnvironmentSetUp($app): void
     {
-        $dotenv = Dotenv::createImmutable(base_path('../../../../../../'));
-        $dotenv->load();
+        if (file_exists(base_path('../../../../../../.env'))) {
+            $dotenv = Dotenv::createImmutable(base_path('../../../../../../'));
+            $dotenv->load();
+        }
     }
 }

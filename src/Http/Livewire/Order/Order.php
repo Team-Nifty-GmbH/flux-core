@@ -10,6 +10,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Services\OrderPositionService;
 use FluxErp\Services\OrderService;
+use FluxErp\Services\PrintService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -17,6 +18,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 use WireUi\Traits\Actions;
+use ZipArchive;
 
 class Order extends Component
 {
@@ -29,6 +31,10 @@ class Order extends Component
     public array $clients = [];
 
     public array $availableStates = [];
+
+    public array $printLayouts = [];
+
+    public array $selectedPrintLayouts = [];
 
     public array $priceLists = [];
 
@@ -54,9 +60,12 @@ class Order extends Component
                 'client:id,name',
                 'contact.media',
                 'currency:id,iso,name',
-                'orderType:id,name',
+                'orderType:id,name,print_layouts',
             ])
             ->firstOrFail();
+
+        $this->printLayouts = $order->orderType?->print_layouts ?: [];
+        $this->selectedPrintLayouts = array_fill_keys(array_keys($this->printLayouts), false);
 
         $this->order = $order->toArray();
         $this->order['contact']['avatar_url'] = $order->contact?->getAvatarUrl();
@@ -122,7 +131,6 @@ class Order extends Component
     {
         $validatedOrder = Validator::make($this->order, (new UpdateOrderRequest())->getRules($this->order))
             ->validate();
-
         $responseOrder = (new OrderService())->update($validatedOrder);
         if ($responseOrder['status'] === 200) {
             $this->notification()->success(__('Order saved successfully!'));
@@ -154,9 +162,46 @@ class Order extends Component
         // TODO: Implement delete() method.
     }
 
-    public function createDocuments(): void
+    public function downloadDocuments()
     {
-        // TODO: Implement createDocuments() method.
+        $selected = array_keys(array_filter($this->selectedPrintLayouts, fn ($value) => $value === true));
+        if ($selected) {
+            $printService = new PrintService();
+
+            $pdfs = [];
+            foreach ($selected as $view) {
+                $pdfs[] = [
+                    'file' => $printService->viewToPdf(
+                            $view,
+                            \FluxErp\Models\Order::class,
+                            $this->order['id']
+                        )
+                        ->body(),
+                    'filename' => $view . '_' . $this->order['id'] . '.pdf',
+                ];
+            }
+
+            if (count($pdfs) === 1) {
+                return response()->streamDownload(function () use ($pdfs) {
+                    echo $pdfs[0]['file'];
+                }, $pdfs[0]['filename']);
+            } else {
+                $zip = new ZipArchive();
+                $zip->open('documents.zip', ZipArchive::CREATE);
+
+                foreach ($pdfs as $pdf) {
+                    $zip->addFromString($pdf['filename'], $pdf['file']);
+                }
+
+                $zip->close();
+
+                return response()->download('documents.zip', $zip->filename)->deleteFileAfterSend();
+            }
+        }
+
+        $this->skipRender();
+
+        return null;
     }
 
     public function updatedOrderState(): void

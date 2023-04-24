@@ -55,6 +55,6 @@ class AdditionalColumns extends Component
             return $key === 'label' ? __($value) : $value;
         });
 
-        return view('components.additional-columns');
+        return view('flux::components.additional-columns');
     }
 }

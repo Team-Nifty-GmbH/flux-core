@@ -1,15 +1,14 @@
 <?php
 
-use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Livewire\Calendars\Calendar;
 use FluxErp\Http\Livewire\Contacts\Contact;
 use FluxErp\Http\Livewire\Dashboard\Dashboard;
 use FluxErp\Http\Livewire\DataTables\ContactList;
-use FluxErp\Http\Livewire\DataTables\OrderList;
 use FluxErp\Http\Livewire\DataTables\ProductList;
 use FluxErp\Http\Livewire\DataTables\SerialNumberList;
 use FluxErp\Http\Livewire\DataTables\TicketList;
 use FluxErp\Http\Livewire\Order\Order;
+use FluxErp\Http\Livewire\Order\OrderList;
 use FluxErp\Http\Livewire\Product\Product;
 use FluxErp\Http\Livewire\Product\SerialNumber\SerialNumber;
 use FluxErp\Http\Livewire\Settings\AdditionalColumns;
@@ -21,6 +20,7 @@ use FluxErp\Http\Livewire\Settings\CustomerPortal;
 use FluxErp\Http\Livewire\Settings\Emails;
 use FluxErp\Http\Livewire\Settings\Languages;
 use FluxErp\Http\Livewire\Settings\Notifications;
+use FluxErp\Http\Livewire\Settings\OrderTypes;
 use FluxErp\Http\Livewire\Settings\Permissions;
 use FluxErp\Http\Livewire\Settings\Profile;
 use FluxErp\Http\Livewire\Settings\TicketTypes;
@@ -30,6 +30,7 @@ use FluxErp\Http\Livewire\Ticket\Ticket;
 use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
+use TeamNiftyGmbH\DataTable\Controllers\SearchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,6 +85,7 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/emails', Emails::class)->name('settings.emails');
             Route::get('/languages', Languages::class)->name('settings.languages');
             Route::get('/notifications', Notifications::class)->name('settings.notifications');
+            Route::get('/order-types', OrderTypes::class)->name('settings.order-types');
             Route::get('/permissions', Permissions::class)->name('settings.permissions');
             Route::get('/ticket-types', TicketTypes::class)->name('settings.ticket-types');
             Route::get('/translations', Translations::class)->name('settings.translations');

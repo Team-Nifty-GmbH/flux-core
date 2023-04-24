@@ -2,11 +2,11 @@
 
 namespace FluxErp\Tests\Feature;
 
+use FluxErp\Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use FluxErp\Tests\TestCase;
 
 class LoggingTest extends TestCase
 {

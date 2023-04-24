@@ -3,18 +3,16 @@
     "require": {
         "php": "^8.1",
         "ext-bcmath": "*",
-        "ext-pdo": "*",
         "ext-intl": "*",
         "ext-json": "*",
+        "ext-pdo": "*",
         "beyondcode/laravel-websockets": "^1.13.2",
-        "hammerstone/fast-paginate": "^0.1.11",
         "laravel/fortify": "^1.13",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.0",
-        "laravel/scout": "^9.6",
+        "laravel/scout": "^10.0",
         "livewire/livewire": "^2.10",
-        "maatwebsite/excel": "^3.1",
-        "meilisearch/meilisearch-php": "^1.0",
+        "php-http/discovery": "^1.15",
         "pusher/pusher-php-server": "^7.0.2",
         "spatie/laravel-activitylog": "^4.6",
         "spatie/laravel-medialibrary": "^10.0",
@@ -25,17 +23,19 @@
         "spatie/laravel-tags": "^4.3",
         "spatie/laravel-translatable": "^6.0",
         "spatie/laravel-translation-loader": "^2.7",
+        "team-nifty-gmbh/tall-calendar": "^0.0.1",
         "team-nifty-gmbh/tall-datatables": "^0.4.0",
         "wireui/heroicons": "^2.3",
         "wireui/wireui": "^1.12"
     },
     "require-dev": {
-        "orchestra/testbench": "^8.0",
-        "phpunit/phpunit": "^10.0",
         "brianium/paratest": "^7.0",
         "friendsofphp/php-cs-fixer": "^v3.6",
         "laravel/pint": "^1.1",
+        "nunomaduro/collision": "^7.4",
+        "orchestra/testbench": "^8.0",
         "phpstan/phpstan": "^1.9",
+        "phpunit/phpunit": "^10.0",
         "squizlabs/php_codesniffer": "^3.6",
         "vlucas/phpdotenv": "^5.5"
     },
@@ -45,7 +45,7 @@
     "license": "MIT",
     "autoload": {
         "files": [
-            "src/helpers.php",
+            "helpers.php",
             "src/frontend-helpers.php"
         ],
         "psr-4": {

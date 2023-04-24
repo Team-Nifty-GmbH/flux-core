@@ -33,9 +33,9 @@ class CreateProjectsTable extends Migration
             $table->unsignedBigInteger('updated_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that changed this record last.');
             $table->timestamp('deleted_at')->nullable()
-                    ->comment('A timestamp reflecting the time of record-deletion.');
+                ->comment('A timestamp reflecting the time of record-deletion.');
             $table->unsignedBigInteger('deleted_by')->nullable()
-                    ->comment('A unique identifier number for the table users of the user that deleted this record.');
+                ->comment('A unique identifier number for the table users of the user that deleted this record.');
 
             $table->foreign('project_id')->references('id')->on('projects');
             $table->foreign('project_category_template_id')

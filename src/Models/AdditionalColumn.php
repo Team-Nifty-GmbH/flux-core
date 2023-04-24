@@ -3,8 +3,8 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Filterable;
-use Illuminate\Database\Eloquent\Builder;
 use FluxErp\Traits\HasPackageFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class AdditionalColumn extends Model

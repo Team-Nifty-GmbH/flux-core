@@ -3,6 +3,8 @@
 @import "/node_modules/@fontsource/inter/latin-600.css";
 @import "/node_modules/@fontsource/inter/latin-900.css";
 
+@import "../../vendor/team-nifty-gmbh/tall-calendar/resources/css/calendar.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -34,5 +36,9 @@
 
     .text-secondary-400, .text-gray-400 {
         @apply text-gray-200;
+    }
+
+    .dropdown-full-w > div:first-child {
+        @apply w-full;
     }
 }

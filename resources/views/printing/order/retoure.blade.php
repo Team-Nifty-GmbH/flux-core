@@ -2,6 +2,7 @@
     @php
         $isNet = $model->is_net;
         $currency = $model->currency->iso;
+        $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
     @endphp
     <x-slot name="title">
         {{ __('Retoure') . ' ' . $model->invoice_number }}
@@ -237,9 +238,9 @@
                             </td>
                             <td class="py-4 text-right align-top">
                                 <div class="line-through">
-                                    {{ $position->total_base_net_price > $position->total_net_price ? money($position->total_base_net_price, $currency)->format(app()->getLocale()) : '' }}
+                                    {{ $position->total_base_net_price > $position->total_net_price ? $formatter->formatCurrency($position->total_base_net_price, $currency) : '' }}
                                 </div>
-                                {{ $position->total_net_price ? money($isNet ? $position->total_net_price : $position->total_gross_price, $currency)->format(app()->getLocale()) : null }}
+                                {{ $position->total_net_price ? $formatter->formatCurrency($isNet ? $position->total_net_price : $position->total_gross_price, $currency) : null }}
                             </td>
                         </tr>
                         </tbody>
@@ -268,7 +269,7 @@
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    {{ money($summaryItem->total_net_price, $currency)->format() }}
+                                                    {{ $formatter->formatCurrency($summaryItem->total_net_price, $currency) }}
                                                 </div>
                                             </div>
                                         @endforeach
@@ -295,16 +296,16 @@
                                             {{ __('Sum net') }}
                                         </div>
                                         <div>
-                                            {{ money($model->total_net_price, $currency)->format() }}
+                                            {{ $formatter->formatCurrency($model->total_net_price, $currency) }}
                                         </div>
                                     </div>
                                     @foreach($model->total_vats as $vat)
                                         <div class="flex justify-between py-2.5">
                                             <div>
-                                                {{ __('Plus ') }} {{ format_number($vat->vat_rate_percentage, NumberFormatter::PERCENT) }}
+                                                {{ __('Plus ') }} {{ format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT) }}
                                             </div>
                                             <div>
-                                                {{ money($vat->total_vat_price, $currency)->format() }}
+                                                {{ $formatter->formatCurrency($vat['total_vat_price'], $currency) }}
                                             </div>
                                         </div>
                                     @endforeach
@@ -313,7 +314,7 @@
                                             {{ __('Total gross') }}
                                         </div>
                                         <div>
-                                            {{ money($model->total_gross_price, $currency)->format() }}
+                                            {{ $formatter->formatCurrency($model->total_gross_price, $currency) }}
                                         </div>
                                     </div>
                                 </div>

@@ -23,9 +23,13 @@ class ImportCommand extends BaseImportCommand
      */
     public function handle(Dispatcher $events): int
     {
+        ModelFinder::all(flux_path('src/Models'), flux_path('src'), 'FluxErp')->merge(
+            ModelFinder::all()
+        );
         $models = (array) $this->argument('model') ?:
             array_values(
-                ModelFinder::all()
+                ModelFinder::all(flux_path('src/Models'), flux_path('src'), 'FluxErp')
+                    ->merge(ModelFinder::all())
                     ->filter(fn ($model) => in_array(Searchable::class, class_uses_recursive($model)))
                     ->unique()
                     ->toArray()

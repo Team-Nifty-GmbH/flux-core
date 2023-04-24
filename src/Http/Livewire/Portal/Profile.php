@@ -80,7 +80,7 @@ class Profile extends Component
 
     public function render(): View|Factory|Application
     {
-        return view($this->view, $this->addresses)->layout('components.layouts.portal');
+        return view($this->view, $this->addresses)->layout('flux::components.layouts.portal');
     }
 
     public function showUsers(): void

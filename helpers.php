@@ -193,16 +193,16 @@ if (! function_exists('event_subscribers')) {
                     $query->where('event', $event)
                         ->whereNull('model_id');
                 })
-                ->orWhere(function ($query) use ($event, $modelId, $modelType) {
-                    $query->where('event', $event)
-                        ->when($modelType, function ($query) use ($modelType) {
-                            $query->where('model_type', $modelType);
-                        })
-                        ->when($modelId && $modelType, function ($query) use ($modelId) {
-                            $query->where('model_id', $modelId);
-                        });
-                })
-                ->orWhere('event', '*');
+                    ->orWhere(function ($query) use ($event, $modelId, $modelType) {
+                        $query->where('event', $event)
+                            ->when($modelType, function ($query) use ($modelType) {
+                                $query->where('model_type', $modelType);
+                            })
+                            ->when($modelId && $modelType, function ($query) use ($modelId) {
+                                $query->where('model_id', $modelId);
+                            });
+                    })
+                    ->orWhere('event', '*');
             })
             ->get()
             ->pluck('user_id')
@@ -383,5 +383,12 @@ if (! function_exists('bcround')) {
         }
 
         return $number;
+    }
+}
+
+if (! function_exists('flux_path')) {
+    function flux_path(string $path = ''): string
+    {
+        return __DIR__ . ($path ? DIRECTORY_SEPARATOR . $path : $path);
     }
 }

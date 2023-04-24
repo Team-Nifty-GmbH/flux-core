@@ -1,0 +1,24 @@
+{
+    "short_name": "TN-Connect",
+    "name": "A Laravel based open source ERP system",
+    "icons": [
+        {
+            "src": "/images/pwa/icons-vector.svg",
+            "type": "image/svg+xml",
+            "sizes": "512x512"
+        },
+        {
+            "src": "/images/pwa/icons-192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "/images/pwa/icons-512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": "/",
+    "display": "standalone",
+    "scope": "/"
+}

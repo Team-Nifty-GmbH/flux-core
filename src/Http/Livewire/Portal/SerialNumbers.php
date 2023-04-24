@@ -52,7 +52,7 @@ class SerialNumbers extends Component
     public function render(): mixed
     {
         return view('flux::livewire.portal.serial-numbers')
-            ->layout('components.layouts.portal');
+            ->layout('flux::components.layouts.portal');
     }
 
     public function updatedSearch(): void

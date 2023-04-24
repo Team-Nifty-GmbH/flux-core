@@ -2,8 +2,8 @@
 
 namespace FluxErp\Jobs;
 
-use FluxErp\Models\User;
 use Carbon\Carbon;
+use FluxErp\Models\User;
 use GuzzleHttp\Client;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

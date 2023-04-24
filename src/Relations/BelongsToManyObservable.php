@@ -2,8 +2,8 @@
 
 namespace FluxErp\Relations;
 
-use FluxErp\Traits\HasAdditionalColumns;
 use Carbon\Carbon;
+use FluxErp\Traits\HasAdditionalColumns;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class BelongsToManyObservable extends BelongsToMany

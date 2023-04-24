@@ -2,9 +2,9 @@
 
 namespace FluxErp\Console\Commands\Init;
 
+use Closure;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;
-use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;

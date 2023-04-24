@@ -2,9 +2,9 @@
 
 namespace FluxErp\Tests\Feature;
 
+use Carbon\Carbon;
 use FluxErp\Models\Client;
 use FluxErp\Models\Permission;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
