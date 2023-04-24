@@ -20,7 +20,7 @@ class OrderTypeTableSeeder extends Seeder
 
         foreach ($clients as $client) {
             foreach (OrderTypeEnum::values() as $orderType) {
-                OrderType::factory()->count(2)->create([
+                OrderType::factory()->create([
                     'client_id' => $client->id,
                     'order_type_enum' => $orderType,
                 ]);
