@@ -7,7 +7,7 @@
                     option-label="name"
                     option-value="id"
                     :label="__('Order type')"
-                    wire:model="order.order_type_id"
+                    wire:model.defer="order.order_type_id"
                 />
                 <x-select
                     :label="__('Contact')"
@@ -41,7 +41,7 @@
                     <x-select
                         class="pb-4"
                         :label="__('Invoice Address')"
-                        wire:model="order.address_invoice_id"
+                        wire:model.defer="order.address_invoice_id"
                         option-value="id"
                         option-label="label"
                         option-description="description"
@@ -69,7 +69,7 @@
                     <x-select
                         :label="__('Delivery Address')"
                         class="pb-4"
-                        wire:model="order.address_delivery_id"
+                        wire:model.defer="order.address_delivery_id"
                         option-value="id"
                         option-label="label"
                         option-description="description"
@@ -112,7 +112,7 @@
                             option-label="name"
                             :clearable="false"
                             autocomplete="off"
-                            wire:model="order.price_list_id"
+                            wire:model.defer="order.price_list_id"
                             x-bind:disabled="order.is_locked"
                         />
                         <x-select
@@ -122,7 +122,7 @@
                             option-label="name"
                             :clearable="false"
                             autocomplete="off"
-                            wire:model="order.payment_type_id"
+                            wire:model.defer="order.payment_type_id"
                             x-bind:disabled="order.is_locked"
                         />
                         <x-select

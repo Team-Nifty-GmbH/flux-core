@@ -197,10 +197,11 @@ class Order extends Component
 
                 return response()->download('documents.zip', $zip->filename)->deleteFileAfterSend();
             }
-
         }
 
         $this->skipRender();
+
+        return null;
     }
 
     public function updatedOrderState(): void

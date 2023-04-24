@@ -32,7 +32,7 @@
         @endforeach
         <x-slot name="footer">
             <x-button spinner primary x-on:click="$wire.downloadDocuments()">
-                Download
+                {{ __('Download') }}
             </x-button>
         </x-slot>
     </x-sidebar>

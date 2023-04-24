@@ -23,11 +23,11 @@ vite build
 Please keep in mind to do so after setting the pusher credentials in the .env file.
 
 ### 2. Development
-if you want to develop for flux-erp you should publish the docker files (this runs nginx instead of artisan serve)
+If you want to develop for flux-erp you should publish the docker files (this runs nginx instead of artisan serve)
 ```bash
 php artisan vendor:publish --provider="FluxErp\FluxErpServiceProvider" --tag="flux-docker"
 ```
-after that change the path in your docker-compose.yml file to
+After that change the path in your docker-compose.yml file to
 ```yaml
     laravel.test:
         build:
@@ -35,7 +35,7 @@ after that change the path in your docker-compose.yml file to
    ...
 ```
 
-you should also add gotenberg to your docker-compose.yml file
+You should also add gotenberg to your docker-compose.yml file
 ```yaml
     gotenberg:
         image: 'gotenberg/gotenberg:7'
@@ -52,15 +52,15 @@ you should also add gotenberg to your docker-compose.yml file
 >**_Note:_** A word on Gotenberg:
 > 
 > 
-> i personally dont really like it but it is the only way to generate pdfs in the browser without using a headless browser.
+> I personally dont really like it but it is the only way to generate pdfs in the browser without using a headless browser.
 > 
 > Its important to have an APP_URL set in your .env file that is reachable from the docker container.
 > e.g. localhost will not work as from the sight of gotenberg localhost is gotenberg iteself.
 > 
-> also its neccessary to run your sail with nginx as the artisan serve command is not able to handle yours and the 
+> Also its neccessary to run your sail with nginx as the artisan serve command is not able to handle yours and the 
 > gotenberg request at the same time.
 
-if you already have built the docker images you should rebuild them
+If you already have built the docker images you should rebuild them
 ```bash
 sail build --no-cache
 ```
@@ -74,7 +74,7 @@ composer i
 
 # 2. Websockets
 
-i expect you to run your flux application in nginx with certbot ssl.
+I expect you to run your flux application in nginx with certbot ssl.
 Its important to understand that nginx serves as a proxy for the websockets running with supervisor.
 
 This means that your supervisor config file should use a different port than the one you use for your nginx config.
@@ -99,7 +99,7 @@ window.Echo = new Echo({
 });
 ```
 
-your nginx config should look like this
+Your nginx config should look like this
 ```nginx
 # Virtual Host configuration for tnconnect
 #
@@ -208,7 +208,7 @@ server {
 }
 ```
 
-your .env file should look something like this:
+Your .env file should look something like this:
 ```dotenv
 # .env
 PUSHER_APP_ID=local
@@ -220,9 +220,9 @@ PUSHER_SCHEME=https
 PUSHER_PORT=443
 ```
 
-this ensures that nginx handles your request, if you have mutliple instances of websockets running on the same server nginx will handle the request to the correct instance.
+This ensures that nginx handles your request, if you have mutliple instances of websockets running on the same server nginx will handle the request to the correct instance.
 
-if you have only one instance of websockets running you can use the default port 6001 and remove the `PUSHER_PORT` from your .env file.
+If you have only one instance of websockets running you can use the default port 6001 and remove the `PUSHER_PORT` from your .env file.
 ```dotenv
 # .env
 PUSHER_APP_ID=local
@@ -234,4 +234,4 @@ PUSHER_PORT=6001
 PUSHER_SCHEME=http
 ```
 
-this will not be piped through nginx and will be handled by the websocket server directly.
+This will not be piped through nginx and will be handled by the websocket server directly.

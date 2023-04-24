@@ -10,7 +10,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class Invoice extends \FluxErp\View\Printing\Order\OrderView
+class Invoice extends OrderView
 {
     public static array $pipelines = [
         PdfCreatingEvent::class => [
