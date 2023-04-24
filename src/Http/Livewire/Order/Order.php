@@ -14,11 +14,9 @@ use FluxErp\Services\PrintService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
-use Spatie\MediaLibrary\Support\MediaStream;
 use WireUi\Traits\Actions;
 use ZipArchive;
 
@@ -166,7 +164,7 @@ class Order extends Component
 
     public function downloadDocuments()
     {
-        $selected = array_keys(array_filter($this->selectedPrintLayouts, fn($value) => $value === true));
+        $selected = array_keys(array_filter($this->selectedPrintLayouts, fn ($value) => $value === true));
         if ($selected) {
             $printService = new PrintService();
 
@@ -183,7 +181,7 @@ class Order extends Component
                 ];
             }
 
-            if(count($pdfs) === 1) {
+            if (count($pdfs) === 1) {
                 return response()->streamDownload(function () use ($pdfs) {
                     echo $pdfs[0]['file'];
                 }, $pdfs[0]['filename']);

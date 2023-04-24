@@ -17,7 +17,15 @@ class OrderTypeList extends DataTable
         'description',
         'client.name',
         'order_type_enum',
-        'print_layouts'
+        'print_layouts',
+    ];
+
+    public array $columnLabels = [
+        'name' => 'Name',
+        'description' => 'Description',
+        'client.name' => 'Client',
+        'order_type_enum' => 'Enum',
+        'print_layouts' => 'Print Layouts',
     ];
 
     public array $sortable = ['*'];
@@ -47,5 +55,13 @@ class OrderTypeList extends DataTable
     public function getBuilder(Builder $builder): Builder
     {
         return $builder->with('client:id,name');
+    }
+
+    public function itemToArray($item): array
+    {
+        $item = parent::itemToArray($item);
+        $item['print_layouts'] = implode(', ', $item['print_layouts'] ?? []);
+
+        return $item;
     }
 }

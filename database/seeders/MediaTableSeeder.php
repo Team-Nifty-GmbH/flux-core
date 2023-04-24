@@ -2,8 +2,8 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Traits\InteractsWithMedia;
 use Faker\Factory;
+use FluxErp\Traits\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;

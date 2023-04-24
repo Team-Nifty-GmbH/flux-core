@@ -119,11 +119,11 @@ class StockPostingTest extends BaseSetup
         ];
 
         $stock = StockPosting::query()
-                ->where('warehouse_id', $stockPosting['warehouse_id'])
-                ->where('product_id', $stockPosting['product_id'])
-                ->latest()
-                ->get()
-                ->last()
+            ->where('warehouse_id', $stockPosting['warehouse_id'])
+            ->where('product_id', $stockPosting['product_id'])
+            ->latest()
+            ->get()
+            ->last()
                 ->stock + $stockPosting['posting'];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -148,10 +148,10 @@ class StockPostingTest extends BaseSetup
     public function test_create_stock_posting_empty_stock()
     {
         $latestPosting = StockPosting::query()
-                ->where('warehouse_id', '=', $this->warehouses[0]->id)
-                ->where('product_id', '=', $this->products[0]->id)
-                ->latest('id')
-                ->first();
+            ->where('warehouse_id', '=', $this->warehouses[0]->id)
+            ->where('product_id', '=', $this->products[0]->id)
+            ->latest('id')
+            ->first();
 
         $latestPosting->stock = null;
         $latestPosting->save();

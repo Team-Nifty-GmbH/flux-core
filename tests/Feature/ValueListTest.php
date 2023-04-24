@@ -2,12 +2,12 @@
 
 namespace FluxErp\Tests\Feature;
 
+use Carbon\Carbon;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Category;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;

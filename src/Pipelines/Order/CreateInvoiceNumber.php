@@ -2,8 +2,8 @@
 
 namespace FluxErp\Pipelines\Order;
 
-use FluxErp\Models\Order;
 use Closure;
+use FluxErp\Models\Order;
 
 class CreateInvoiceNumber
 {

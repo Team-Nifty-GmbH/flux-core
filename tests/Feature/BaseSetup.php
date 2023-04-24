@@ -5,8 +5,8 @@ namespace FluxErp\Tests\Feature;
 use FluxErp\Models\Client;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
-use Illuminate\Database\Eloquent\Model;
 use FluxErp\Tests\TestCase;
+use Illuminate\Database\Eloquent\Model;
 
 class BaseSetup extends TestCase
 {

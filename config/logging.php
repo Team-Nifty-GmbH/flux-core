@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'channels' =>[
+    'channels' => [
         'database' => [
             'driver' => 'custom',
             'handler' => \FluxErp\Logging\DatabaseLoggingHandler::class,
@@ -9,5 +9,5 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAYS', 30),
         ],
-    ]
+    ],
 ];

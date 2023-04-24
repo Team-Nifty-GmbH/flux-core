@@ -81,5 +81,5 @@ return [
         'user' => \FluxErp\Models\User::class,
         'vat_rate' => \FluxErp\Models\VatRate::class,
         'warehouse' => \FluxErp\Models\Warehouse::class,
-    ]
+    ],
 ];

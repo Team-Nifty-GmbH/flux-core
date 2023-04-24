@@ -4,23 +4,18 @@ namespace FluxErp\Http\Livewire\Order;
 
 use Carbon\Carbon;
 use FluxErp\Http\Requests\CreateOrderRequest;
-use FluxErp\Http\Requests\UpdateOrderRequest;
-use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Services\OrderPositionService;
 use FluxErp\Services\OrderService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class OrderList extends Component
 {

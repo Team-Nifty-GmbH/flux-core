@@ -2,8 +2,6 @@
 
 namespace FluxErp\Services;
 
-use Barryvdh\DomPDF\Facade\Pdf;
-use Dompdf\Dompdf;
 use FluxErp\Events\Print\PdfCreatedEvent;
 use FluxErp\Events\Print\PdfCreatingEvent;
 use FluxErp\Helpers\ResponseHelper;
@@ -13,7 +11,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
-use Spatie\Browsershot\Browsershot;
 
 class PrintService
 {

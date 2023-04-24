@@ -16,17 +16,17 @@ trait HasRelatedModel
         self::relatedModelsChanged(function (Model $model) {
             Cache::putMany([
                 $model->getMorphClass() . '.' . $model->getKey() . '.related.models' => DB::table('model_related')
-                        ->where('model_type', $model->getMorphClass())
-                        ->where('model_id', $model->getKey())
-                        ->groupBy('related_type')
-                        ->pluck('related_type')
-                        ->toArray(),
+                    ->where('model_type', $model->getMorphClass())
+                    ->where('model_id', $model->getKey())
+                    ->groupBy('related_type')
+                    ->pluck('related_type')
+                    ->toArray(),
                 $model->getMorphClass() . '.' . $model->getKey() . '.related.by' => DB::table('model_related')
-                        ->where('related_type', $model->getMorphClass())
-                        ->where('related_id', $model->getKey())
-                        ->groupBy('model_type')
-                        ->pluck('model_type')
-                        ->toArray(),
+                    ->where('related_type', $model->getMorphClass())
+                    ->where('related_id', $model->getKey())
+                    ->groupBy('model_type')
+                    ->pluck('model_type')
+                    ->toArray(),
             ]);
         });
     }

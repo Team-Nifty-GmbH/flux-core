@@ -59,10 +59,8 @@ class OrderTypes extends Component
             'selectedOrderType.name.required' => 'Order Type Name is required.',
             'selectedOrderType.description.max' => 'Description can have a maximum of 500 characters.',
             'selectedOrderType.order_type_enum.required' => 'Order Type Enum is required.',
-            'selectedOrderType.print_layouts.*.required' =>
-                'Print layout is required for each item in the print_layouts array.',
-            'selectedOrderType.print_layouts.*.max' =>
-                'Print layout can have a maximum of 255 characters for each item in the print_layouts array.',
+            'selectedOrderType.print_layouts.*.required' => 'Print layout is required for each item in the print_layouts array.',
+            'selectedOrderType.print_layouts.*.max' => 'Print layout can have a maximum of 255 characters for each item in the print_layouts array.',
             'selectedOrderType.is_active.required' => 'Is Active is required.',
             'selectedOrderType.is_hidden.required' => 'Is Hidden is required.',
         ];
@@ -108,25 +106,6 @@ class OrderTypes extends Component
         $this->render();
     }
 
-    public function show($orderTypeSlug): void
-    {
-        $this->orderTypeSlug = $orderTypeSlug;
-        $this->detailModal = true;
-        $this->orderType = data_get($this->orderTypeSettings, $orderTypeSlug);
-
-        $orderType = OrderType::query()
-            ->where('slug', $orderTypeSlug)
-            ->first();
-
-        if ($orderType) {
-            $this->orderType['is_enabled'] = $orderType->is_enabled;
-        } else {
-            $this->orderType['is_enabled'] = false;
-        }
-
-        $this->skipRender();
-    }
-
     public function showEditModal($orderTypeId = null)
     {
         if ($orderTypeId) {
@@ -154,5 +133,16 @@ class OrderTypes extends Component
         }
 
         $this->editModal = true;
+    }
+
+    public function delete(): void
+    {
+        if (! user_can('api.order-types.{id}.delete')) {
+            return;
+        }
+        (new OrderTypeService())->delete($this->selectedOrderType['id']);
+
+        $this->skipRender();
+        $this->emitUp('closeModal', $this->orderType, true);
     }
 }

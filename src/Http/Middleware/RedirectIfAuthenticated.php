@@ -2,8 +2,8 @@
 
 namespace FluxErp\Http\Middleware;
 
-use FluxErp\Providers\RouteServiceProvider;
 use Closure;
+use FluxErp\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

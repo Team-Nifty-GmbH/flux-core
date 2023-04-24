@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Livewire\Features\Calendar;
 
+use Exception;
 use FluxErp\Http\Requests\CreateCalendarEventRequest;
 use FluxErp\Http\Requests\UpdateCalendarEventRequest;
 use FluxErp\Models\Address;
@@ -9,7 +10,6 @@ use FluxErp\Models\Calendar as CalendarModel;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\User;
 use FluxErp\Services\CalendarEventService;
-use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;

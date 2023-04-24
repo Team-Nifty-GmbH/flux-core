@@ -2,16 +2,15 @@
 
 namespace FluxErp\Tests\Feature;
 
-use Dotenv\Dotenv;
 use FluxErp\Models\InterfaceUser;
 use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;
+use FluxErp\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use FluxErp\Tests\TestCase;
 
 class AuthTest extends TestCase
 {

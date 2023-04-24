@@ -20,11 +20,34 @@ class OrderTypeTableSeeder extends Seeder
 
         foreach ($clients as $client) {
             foreach (OrderTypeEnum::values() as $orderType) {
+                $printLayouts = $this->findPrintLayouts($orderType);
                 OrderType::factory()->create([
+                    'name' => $orderType,
                     'client_id' => $client->id,
+                    'print_layouts' => $printLayouts,
                     'order_type_enum' => $orderType,
                 ]);
             }
         }
+    }
+
+    protected function findPrintLayouts($orderType)
+    {
+        $printLayouts = get_subclasses_of(
+            extendingClass: 'FluxErp\View\Printing\Order\OrderView',
+            namespace: 'FluxErp\View\Printing\Order'
+        );
+        $orderType = OrderTypeEnum::from($orderType);
+
+        $filteredLayouts = match ($orderType) {
+            OrderTypeEnum::Order, OrderTypeEnum::SplitOrder, OrderTypeEnum::Subscription => ['Invoice', 'Offer'],
+            OrderTypeEnum::Retoure => ['Retoure'],
+            OrderTypeEnum::Purchase, OrderTypeEnum::PurchaseRefund => ['Invoice'],
+            default => [],
+        };
+
+        return array_filter($printLayouts, function ($layout) use ($filteredLayouts) {
+            return in_array(class_basename($layout), $filteredLayouts);
+        });
     }
 }

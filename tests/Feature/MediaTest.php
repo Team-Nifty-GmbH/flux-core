@@ -423,7 +423,7 @@ class MediaTest extends BaseSetup
             'model_type' => $modelType,
             'model_id' => $this->projectTask->id,
             'media' => $this->file,
-            'disk' => 'local'
+            'disk' => 'local',
         ];
 
         $this->user->givePermissionTo($this->permissions['upload']);

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Tests\Feature;
 
+use Carbon\Carbon;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
@@ -11,7 +12,6 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
 use FluxErp\Models\ProjectCategoryTemplate;
 use FluxErp\Models\ProjectTask;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;

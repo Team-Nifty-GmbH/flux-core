@@ -24,8 +24,8 @@ class SettingFactory extends Factory
     {
         $i = 0;
         while (Setting::query()
-                ->where('key', $key = $this->faker->jobTitle())
-                ->exists() && $i < 100) {
+            ->where('key', $key = $this->faker->jobTitle())
+            ->exists() && $i < 100) {
             $i++;
         }
 
