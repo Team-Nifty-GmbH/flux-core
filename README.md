@@ -25,9 +25,9 @@ Please keep in mind to do so after setting the pusher credentials in the .env fi
 ### 2. Development
 If you want to develop for flux-erp you should publish the docker files (this runs nginx instead of artisan serve)
 ```bash
-php artisan vendor:publish --provider="FluxErp\FluxErpServiceProvider" --tag="flux-docker"
+php artisan vendor:publish --tag="flux-docker"
 ```
-After that change the path in your docker-compose.yml file to
+Alternative you can change your docker-compose.yml file to use the flux-erp docker files from the vendor folder.
 ```yaml
     laravel.test:
         build:

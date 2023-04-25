@@ -20,8 +20,15 @@ use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Logging\DatabaseCustomLogger;
 use FluxErp\Logging\DatabaseLoggingHandler;
 use FluxErp\Models\Address;
+use FluxErp\Models\Order;
+use FluxErp\Models\Permission;
+use FluxErp\Models\Product;
+use FluxErp\Models\ProjectTask;
+use FluxErp\Models\SerialNumber;
+use FluxErp\Models\Ticket;
 use FluxErp\Models\Token;
 use FluxErp\Models\User;
+use FluxErp\Models\Warehouse;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -217,6 +224,61 @@ class FluxServiceProvider extends ServiceProvider
         ]);
         config(['wireui.heroicons.alias' => 'heroicons']);
         config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
+        config([
+            'scout.meilisearch.index-settings' =>
+                [
+                SerialNumber::class => [
+                    'filterableAttributes' => [
+                        'address_id',
+                    ],
+                ],
+                Permission::class => [
+                    'filterableAttributes' => [
+                        'guard_name',
+                    ],
+                    'sortableAttributes' => [
+                        'name',
+                    ],
+                ],
+                Ticket::class => [
+                    'filterableAttributes' => [
+                        'authenticatable_type',
+                        'authenticatable_id',
+                        'state',
+                    ],
+                    'sortableAttributes' => ['*'],
+                ],
+                Address::class => [
+                    'filterableAttributes' => [
+                        'is_main_address',
+                        'contact_id',
+                    ],
+                    'sortableAttributes' => ['*'],
+                ],
+                Order::class => [
+                    'filterableAttributes' => [
+                        'parent_id',
+                        'contact_id',
+                        'is_locked',
+                    ],
+                    'sortableAttributes' => ['*'],
+                ],
+                Product::class => [],
+                ProjectTask::class => [
+                    'filterableAttributes' => [
+                        'project_id',
+                        'state',
+                    ],
+                    'sortableAttributes' => ['*'],
+                ],
+                User::class => [
+                    'filterableAttributes' => [
+                        'is_active',
+                    ],
+                ],
+                Warehouse::class => [],
+            ],
+        ]);
     }
 
     protected function registerBladeComponents(): void

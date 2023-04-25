@@ -12,6 +12,7 @@
         document.getElementsByTagName('head')[0].appendChild(meta);
      }"
      class="dark:text-white"
+     x-on:data-table-row-clicked="$wire.selectPosition($event.detail.id)"
 >
     <x-modal.card wire:model.defer="detailModal">
         <div class="grid grid-cols-3 gap-5">
@@ -135,28 +136,13 @@
             </x-card>
         @endif
         <div class="space-y-8">
-            <x-alpinejs-table
-                :indented-cols="['name']"
-                :stretch-col="['name']"
-                :model="\FluxErp\Models\OrderPosition::class"
-                wire:selectable="selected"
-                x-disabled="record.is_bundle_position"
-                x-bind:class.tr="{'opacity-50 sortable-filter': record.is_bundle_position}"
-                :enabled-cols="$enabledCols"
-                :available-cols="$availableCols"
-                wire:model="order.order_positions"
-                x-bind:class.td="{
-                        'bg-gray-200 font-bold': (record.is_free_text && record.depth === 0 && record.has_children),
-                        'opacity-90': record.is_alternative,
-                        'opacity-50 sortable-filter': record.is_bundle_position,
-                        'font-semibold': record.is_free_text
-                    }"
-                x-on:click="$wire.selectPosition(record.id)"
-            >
-                <div x-show="selected.length > 0" class="pt-4">
-                    <livewire:features.custom-events :model="\FluxErp\Models\Order::class" :id="$order['id']" :additional-data="['selected', 'order']"/>
-                </div>
-            </x-alpinejs-table>
+            <livewire:data-tables.portal.order-position-list
+                :order-id="$order['id']"
+                :filters="[['column' => 'order_id', 'operator' => '=', 'value' => $order['id']]]"
+            />
+            <div x-show="selected.length > 0" class="pt-4">
+                <livewire:features.custom-events :model="\FluxErp\Models\Order::class" :id="$order['id']" :additional-data="['selected', 'order']"/>
+            </div>
             <div x-show="positionsSummary.length > 0" x-cloak>
                 <x-table>
                     <x-slot name="title">
@@ -220,12 +206,6 @@
                 {{ __('Related orders') }}
             </h2>
             <div class="mt-3">
-                <x-alpinejs-table
-                    :enabled-cols="$childEnabledCols"
-                    :available-cols="$childAvailableCols"
-                    wire:model="childOrders"
-                    x-bind:href="detailRoute.replace(':id', record.id)">
-                </x-alpinejs-table>
             </div>
         </div>
     @endif
