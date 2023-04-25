@@ -9,7 +9,7 @@
         "@alpinejs/persist": "^3.10.3",
         "@defstudio/vite-livewire-plugin": "^1.1.0",
         "@fontsource/inter": "^4.5.12",
-        "@fullcalendar/core": "^6.0.0",
+        "@fullcalendar/core": "^6.1.6",
         "@fullcalendar/daygrid": "^6.0.0",
         "@fullcalendar/interaction": "^6.0.3",
         "@fullcalendar/list": "^6.0.2",
