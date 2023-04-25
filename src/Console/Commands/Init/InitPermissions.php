@@ -111,7 +111,8 @@ class InitPermissions extends Command
             return false;
         }
 
-        return str_starts_with($path, base_path('vendor'));
+        return str_starts_with($path, base_path('vendor'))
+            && ! str_starts_with($path, base_path('vendor/team-nifty-gmbh/flux-erp'));
     }
 
     /**
