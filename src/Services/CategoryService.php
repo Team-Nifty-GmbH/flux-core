@@ -10,30 +10,12 @@ use FluxErp\Models\Category;
 
 class CategoryService
 {
-    public function create(array $data): array
+    public function create(array $data): Category
     {
-        if ($data['parent_id'] ?? false) {
-            $parentCategory = Category::query()
-                ->whereKey($data['parent_id'])
-                ->where('model_type', $data['model_type'])
-                ->first();
-
-            if ($parentCategory->parent()->exists()) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 409,
-                    data: ['parent_id' => 'only first level children allowed']
-                );
-            }
-        }
-
         $category = new Category($data);
         $category->save();
 
-        return ResponseHelper::createArrayResponse(
-            statusCode: 201,
-            data: $category->refresh(),
-            statusMessage: 'category created'
-        );
+        return $category->refresh();
     }
 
     public function update(array $data): array
@@ -125,14 +107,6 @@ class CategoryService
                 return ResponseHelper::createArrayResponse(
                     statusCode: 422,
                     data: ['parent_id' => 'parent with model_type \'' . $category->model_type . '\' not found'],
-                    additions: $response
-                );
-            }
-
-            if ($parentCategory->parent()->exists()) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 409,
-                    data: ['parent_id' => 'only first level children allowed'],
                     additions: $response
                 );
             }

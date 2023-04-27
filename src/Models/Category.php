@@ -13,11 +13,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 
-class Category extends Model
+class Category extends Model implements Sortable
 {
     use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification,
-        HasUuid;
+        HasUuid, SortableTrait;
 
     protected $appends = [
         'assigned',
@@ -35,6 +37,11 @@ class Category extends Model
 
     public $translatable = [
         'name',
+    ];
+
+    public array $sortable = [
+        'order_column_name' => 'sort_number',
+        'sort_when_creating' => true,
     ];
 
     public function assigned(): Attribute

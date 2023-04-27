@@ -2,6 +2,9 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Category;
+use FluxErp\Models\Product;
+
 class CreateProductRequest extends BaseFormRequest
 {
     /**
@@ -63,6 +66,9 @@ class CreateProductRequest extends BaseFormRequest
             'bundle_products' => 'required_if:is_bundle,true|array|exclude_unless:is_bundle,true',
             'bundle_products.*.id' => 'required|integer|exists:products,id,deleted_at,NULL',
             'bundle_products.*.count' => 'required|numeric|min:0',
+
+            'categories' => 'array',
+            'categories.*' => 'integer|exists:' . Category::class . ',id,model_type,' . Product::class,
         ];
     }
 }
