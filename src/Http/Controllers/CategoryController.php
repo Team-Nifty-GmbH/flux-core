@@ -61,9 +61,13 @@ class CategoryController extends BaseController
             );
         }
 
-        $response = $categoryService->create($validator->validated());
+        $category = $categoryService->create($validator->validated());
 
-        return ResponseHelper::createResponseFromArrayResponse($response);
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 201,
+            data: $category,
+            statusMessage: 'category created'
+        );
     }
 
     public function update(Request $request, CategoryService $categoryService): JsonResponse

@@ -298,27 +298,6 @@ class CategoryTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_create_category_second_level_category()
-    {
-        $category = [
-            'parent_id' => $this->categories[1]->id,
-            'name' => 'Second level Category',
-            'model_type' => ProjectTask::class,
-        ];
-
-        foreach ($this->additionalColumns as $additionalColumn) {
-            $category += [
-                $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-            ];
-        }
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/categories', $category);
-        $response->assertStatus(409);
-    }
-
     public function test_create_category_model_not_found()
     {
         $category = [
@@ -506,32 +485,6 @@ class CategoryTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/categories', $category);
         $response->assertStatus(422);
-    }
-
-    public function test_update_category_second_level_category()
-    {
-        $newCategory = Category::factory()->create(['model_type' => ProjectTask::class]);
-        $category = [
-            'id' => $newCategory->id,
-            'parent_id' => $this->categories[1]->id,
-            'name' => $this->categories[1]->name,
-            'model_type' => ProjectTask::class,
-        ];
-
-        foreach ($this->additionalColumns as $additionalColumn) {
-            $category += [
-                $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-            ];
-        }
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/categories', $category);
-        $response->assertStatus(409);
-        $this->assertTrue(
-            property_exists(json_decode($response->getContent())->errors, 'parent_id')
-        );
     }
 
     public function test_update_category_cycle_detected()
