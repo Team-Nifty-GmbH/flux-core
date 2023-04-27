@@ -52,7 +52,8 @@ trait Categorizable
 
     public function categories(): MorphToMany
     {
-        return $this->morphToMany(Category::class, 'categorizable');
+        return $this->morphToMany(Category::class, 'categorizable')
+            ->using(\FluxErp\Models\Pivots\Categorizable::class);
     }
 
     public function category(): MorphToMany
@@ -79,7 +80,7 @@ trait Categorizable
         }
 
         $validator = Validator::make($value,
-            ['*' => 'integer|exists:' . Category::class . ',id,model_type,' . $this->categoryClass ?? get_class($this)],
+            ['*' => 'integer|exists:' . Category::class . ',id'],
             [
                 'integer' => __('The category :input is no id.'),
                 'exists' => __('The category :input is invalid.'),

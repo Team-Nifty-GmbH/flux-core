@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasFrontendAttributes;
@@ -21,8 +22,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends Model implements HasMedia, InteractsWithDataTables
 {
-    use Filterable, HasAdditionalColumns, HasPackageFactory, HasFrontendAttributes, HasSerialNumberRange, HasUserModification,
-        HasUuid, InteractsWithMedia, Searchable, SoftDeletes;
+    use Categorizable, Filterable, HasAdditionalColumns, HasPackageFactory, HasFrontendAttributes, HasSerialNumberRange,
+        HasUserModification, HasUuid, InteractsWithMedia, Searchable, SoftDeletes;
 
     protected $hidden = [
         'uuid',
@@ -84,6 +85,16 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
     public function productProperties(): BelongsToMany
     {
         return $this->belongsToMany(ProductProperty::class, 'product_product_property', 'product_id', 'product_prop_id');
+    }
+
+    public function stockPostings()
+    {
+        return $this->hasMany(StockPosting::class);
+    }
+
+    public function vatRate(): BelongsTo
+    {
+        return $this->belongsTo(VatRate::class);
     }
 
     public function registerMediaCollections(): void
