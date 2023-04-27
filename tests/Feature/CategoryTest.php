@@ -131,7 +131,7 @@ class CategoryTest extends BaseSetup
         $this->assertNotEmpty($dbCategory);
         $this->assertNull($dbCategory->parent_id);
         $this->assertEquals($category['name'], $dbCategory->name);
-        $this->assertEquals(0, $dbCategory->sort_number);
+        $this->assertEquals(count($this->categories) + 1, $dbCategory->sort_number);
     }
 
     public function test_create_category_with_parent()
@@ -161,7 +161,7 @@ class CategoryTest extends BaseSetup
         $this->assertNotEmpty($dbCategory);
         $this->assertEquals($category['parent_id'], $dbCategory->parent_id);
         $this->assertEquals($category['name'], $dbCategory->name);
-        $this->assertEquals(0, $dbCategory->sort_number);
+        $this->assertEquals(count($this->categories) + 1, $dbCategory->sort_number);
     }
 
     public function test_create_category_with_additional_column()
@@ -196,7 +196,7 @@ class CategoryTest extends BaseSetup
         $this->assertNotEmpty($dbCategory);
         $this->assertNull($dbCategory->parent_id);
         $this->assertEquals($category['name'], $dbCategory->name);
-        $this->assertEquals(0, $dbCategory->sort_number);
+        $this->assertEquals(count($this->categories) + 1, $dbCategory->sort_number);
 
         $this->assertEquals($category[$additionalColumn->name], $projectCategory->{$additionalColumn->name});
         $this->assertEquals($category[$additionalColumn->name], $dbCategory->{$additionalColumn->name});
@@ -234,7 +234,7 @@ class CategoryTest extends BaseSetup
         $this->assertNotEmpty($dbCategory);
         $this->assertNull($dbCategory->parent_id);
         $this->assertEquals($category['name'], $dbCategory->name);
-        $this->assertEquals(0, $dbCategory->sort_number);
+        $this->assertEquals(count($this->categories) + 1, $dbCategory->sort_number);
 
         $this->assertEquals($category[$additionalColumn->name], $projectCategory->{$additionalColumn->name});
         $this->assertEquals($category[$additionalColumn->name], $dbCategory->{$additionalColumn->name});
