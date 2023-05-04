@@ -22,6 +22,9 @@ class ExistsWithForeign implements InvokableRule, DataAwareRule
         return $this;
     }
 
+    /**
+     * @param string $foreignAttribute Example: client_id, the value is retrieved from the validation data array
+     */
     public function __construct(
         public string $foreignAttribute,
         public string $table,

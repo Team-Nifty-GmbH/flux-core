@@ -156,9 +156,9 @@ class Init extends Command
 
             return false;
             // Settings tables.
-            //            $this->call('init:payment-types');
-            //            $this->call('init:document-types');
-            //            $this->call('init:order-types');
+//            $this->call('init:payment-types');
+//            $this->call('init:document-types');
+//            $this->call('init:order-types');
         }
     }
 
