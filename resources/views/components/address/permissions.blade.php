@@ -43,6 +43,12 @@
                 {{ __('Permissions') }}
             </label>
             <div class="col-span-2 space-y-3" x-data="{permissions: @entangle('permissions').defer}">
+                <x-button
+                    primary
+                    :label="__('Select all')"
+                    x-bind:disabled="!edit"
+                    x-on:click="address.permissions = permissions.map(permission => permission.id)"
+                />
                 <template x-for="permission in permissions">
                     <div class="flex">
                         <div>

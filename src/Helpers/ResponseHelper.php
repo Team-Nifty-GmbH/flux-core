@@ -97,9 +97,6 @@ class ResponseHelper
         );
     }
 
-    /**
-     * @param mixed $data
-     */
     public static function createArrayResponse(int $statusCode,
         mixed $data = null,
         array $additions = [],
@@ -250,7 +247,7 @@ class ResponseHelper
     }
 
     /**
-     * @param array|null $data
+     * @param  array|null  $data
      */
     private static function handle(mixed $data = null,
         array $errors = null,

@@ -74,6 +74,10 @@ class Address extends Component
     public function mount(): void
     {
         $this->getAddress($this->addressId ?: $this->address['id'], false);
+
+        if ($this->tab === 'permissions') {
+            $this->updatedTab();
+        }
     }
 
     protected function rules(): array

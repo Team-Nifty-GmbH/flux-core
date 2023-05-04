@@ -172,10 +172,10 @@ class Order extends Component
             foreach ($selected as $view) {
                 $pdfs[] = [
                     'file' => $printService->viewToPdf(
-                            $view,
-                            \FluxErp\Models\Order::class,
-                            $this->order['id']
-                        )
+                        $view,
+                        \FluxErp\Models\Order::class,
+                        $this->order['id']
+                    )
                         ->body(),
                     'filename' => $view . '_' . $this->order['id'] . '.pdf',
                 ];

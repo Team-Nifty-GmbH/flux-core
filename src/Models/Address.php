@@ -56,7 +56,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     protected function loginPassword(): Attribute
     {
         return Attribute::set(
-            fn ($value) => Hash::make($value)
+            fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
         );
     }
 

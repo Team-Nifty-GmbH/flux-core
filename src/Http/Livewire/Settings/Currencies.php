@@ -41,9 +41,6 @@ class Currencies extends Component
         return view('flux::livewire.settings.currencies');
     }
 
-    /**
-     * @param int|null $countryId
-     */
     public function showEditModal(int|null $currencyId = null): void
     {
         if (! $currencyId) {

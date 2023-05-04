@@ -184,9 +184,6 @@ class OrderPositions extends Component
         // TODO: Implement addtoGroup() method.
     }
 
-    /**
-     * @param array|string|null $selected
-     */
     public function remove(array|string|null $selected = null): void
     {
         $ids = $selected ? (array) $selected : $this->selected;

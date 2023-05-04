@@ -1,25 +1,25 @@
-<x-input x-ref="autofocus" :label="__('Title') . '*'" wire:model.defer="calendarEvent.title" x-bind:readonly="calendarEvent.disabled"/>
-<x-textarea :label="__('Description')" wire:model.defer="calendarEvent.description" x-bind:readonly="calendarEvent.disabled"/>
-<x-checkbox :label="__('all-day')" wire:model.defer="calendarEvent.is_all_day" x-bind:disabled="calendarEvent.disabled"/>
+<x-input x-ref="autofocus" :label="__('Title') . '*'" x-model="calendarEvent.title" x-bind:readonly="calendarEvent.disabled ?? false"/>
+<x-textarea :label="__('Description')" x-model="calendarEvent.description" x-bind:readonly="calendarEvent.disabled ?? false"/>
+<x-checkbox :label="__('all-day')" x-defer="calendarEvent.allDay" x-bind:disabled="calendarEvent.disabled ?? false"/>
 <x-label for="starts_at" :label="__('starts:')" />
 <input type="datetime-local"
        id="starts_at"
-       x-bind:disabled="calendarEvent.disabled"
-       x-bind:max="calendarEvent.ends_at"
+       x-bind:disabled="calendarEvent.disabled ?? false"
+       x-bind:max="calendarEvent.end"
        display-format="DD.MM.YYYY HH:mm"
        parse-format="YYYY-MM-DD HH:mm:ss"
-       wire:model="calendarEvent.starts_at"
+       x-model="calendarEvent.start"
        class="placeholder-secondary-400 dark:bg-secondary-800 dark:placeholder-secondary-500 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block w-full rounded-md border shadow-sm transition duration-100 ease-in-out focus:outline-none dark:text-gray-50 sm:text-sm"
        min="2018-06-07T00:00">
 <x-label for="ends_at" :label="__('ends:')" />
 <input type="datetime-local"
        id="ends_at"
-       x-bind:disabled="calendarEvent.disabled"
+       x-bind:disabled="calendarEvent.disabled ?? false"
        display-format="DD.MM.YYYY HH:mm"
        parse-format="YYYY-MM-DD HH:mm:ss"
-       wire:model="calendarEvent.ends_at"
+       x-model="calendarEvent.end"
        class="placeholder-secondary-400 dark:bg-secondary-800 dark:placeholder-secondary-500 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block w-full rounded-md border shadow-sm transition duration-100 ease-in-out focus:outline-none dark:text-gray-50 sm:text-sm"
-       x-bind:min="calendarEvent.starts_at"
+       x-bind:min="calendarEvent.start"
 >
 <div x-show="calendarEvent.status">
     <x-select wire:model="calendarEvent.status" :label="__('My status')" :clearable="false">
@@ -77,7 +77,7 @@
                 </nav>
             </div>
         </div>
-        <div x-show="! calendarEvent.disabled" x-on:click.outside="search = false">
+        <div x-show="! calendarEvent.disabled ?? false" x-on:click.outside="search = false">
             <x-input x-on:focus="search = true" icon="search" x-model.debounce.500ms="searchPhrase" />
             <div x-cloak x-show="search" class="absolute z-20 w-full pt-1">
                 <x-card>
@@ -131,7 +131,7 @@
                             />
                             <div class="pl-1.5" x-text="user.name"></div>
                         </div>
-                        <x-button.circle x-show="! calendarEvent.disabled" xs negative icon="x" x-on:click="calendarEvent.invited_users.splice(calendarEvent.invited_users.indexOf(user), 1);" />
+                        <x-button.circle x-show="! calendarEvent.disabled ?? false" xs negative icon="x" x-on:click="calendarEvent.invited_users.splice(calendarEvent.invited_users.indexOf(user), 1);" />
                     </div>
                 </template>
             </div>
@@ -171,7 +171,7 @@
                             />
                             <div class="pl-1.5" x-text="address.name"></div>
                         </div>
-                        <x-button.circle x-show="! calendarEvent.disabled" xs negative icon="x" x-on:click="calendarEvent.invited_addresses.splice(calendarEvent.invited_addresses.indexOf(address), 1);" />
+                        <x-button.circle x-show="! calendarEvent.disabled ?? false" xs negative icon="x" x-on:click="calendarEvent.invited_addresses.splice(calendarEvent.invited_addresses.indexOf(address), 1);" />
                     </div>
                 </template>
             </div>

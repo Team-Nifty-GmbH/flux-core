@@ -19,8 +19,6 @@ class ContactController extends BaseController
     }
 
     /**
-     * @param CreateContactRequest $request
-     *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function create(Request $request, ContactService $contactService): JsonResponse

@@ -68,7 +68,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference, Int
     protected function password(): Attribute
     {
         return Attribute::set(
-            fn ($value) => Hash::make($value)
+            fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
         );
     }
 

@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Validator;
 
 class ValidationHelper
 {
-    /**
-     * @param null            $service
-     */
     public static function validateBulkData(array &$data,
         BaseFormRequest $formRequest,
         $service = null,

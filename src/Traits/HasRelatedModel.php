@@ -122,12 +122,6 @@ trait HasRelatedModel
         );
     }
 
-    /**
-     * Fire the given event for the model.
-     *
-     * @param string $event
-     * @param bool $halt
-     */
     public function fireModelEvent($event, $halt = true): mixed
     {
         if (! isset(static::$dispatcher)) {

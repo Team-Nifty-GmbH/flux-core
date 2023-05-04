@@ -165,9 +165,9 @@ class Init extends Command
     /**
      * Set or update env-variable.
      *
-     * @param string $envFileContent Content of the .env file.
-     * @param string $key            Name of the variable.
-     * @param string $value          Value of the variable.
+     * @param  string  $envFileContent Content of the .env file.
+     * @param  string  $key            Name of the variable.
+     * @param  string  $value          Value of the variable.
      * @return array [string newEnvFileContent, bool isNewVariableSet].
      */
     private function setEnvVariable(string $envFileContent, string $key, string $value): array

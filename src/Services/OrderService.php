@@ -17,6 +17,7 @@ class OrderService
 
         $order = new Order($data);
         $this->fillPriceCalculation($order);
+        unset($order->addresses);
         $order->save();
 
         if ($data['addresses'] ?? false) {
@@ -45,6 +46,7 @@ class OrderService
 
             $order->fill($item);
             $this->fillPriceCalculation($order);
+            unset($order->addresses);
             $order->save();
 
             if ($item['addresses'] ?? false) {

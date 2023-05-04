@@ -33,15 +33,6 @@ class PrintController extends BaseController
         return (new PrintService())->render($view, $model, $id);
     }
 
-    /**
-     * Returns the given route as a pdf.
-     * The Route has to be reachable from the gotenberg docker container.
-     * Thats why localhost is not allowed here. Change your APP_URL env key to the ip of your docker host.
-     *
-     * @param string $route
-     *
-     * @throws ClientExceptionInterface
-     */
     public function renderPdf(string $view, string $model, string $id): mixed
     {
         $pdfResponse = (new PrintService())->viewToPdf($view, $model, $id);
