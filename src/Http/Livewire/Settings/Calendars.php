@@ -43,9 +43,6 @@ class Calendars extends Component
         return view('flux::livewire.settings.calendars');
     }
 
-    /**
-     * @param int|null $calendarId
-     */
     public function showEditModal(int|null $calendarId = null): void
     {
         $this->editModal = true;

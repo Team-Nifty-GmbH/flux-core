@@ -156,18 +156,18 @@ class Init extends Command
 
             return false;
             // Settings tables.
-//            $this->call('init:payment-types');
-//            $this->call('init:document-types');
-//            $this->call('init:order-types');
+            //            $this->call('init:payment-types');
+            //            $this->call('init:document-types');
+            //            $this->call('init:order-types');
         }
     }
 
     /**
      * Set or update env-variable.
      *
-     * @param string $envFileContent Content of the .env file.
-     * @param string $key            Name of the variable.
-     * @param string $value          Value of the variable.
+     * @param  string  $envFileContent Content of the .env file.
+     * @param  string  $key            Name of the variable.
+     * @param  string  $value          Value of the variable.
      * @return array [string newEnvFileContent, bool isNewVariableSet].
      */
     private function setEnvVariable(string $envFileContent, string $key, string $value): array

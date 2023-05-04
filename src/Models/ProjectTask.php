@@ -61,8 +61,6 @@ class ProjectTask extends Model implements HasMedia
     }
 
     /**
-     * @param Media|null $media
-     *
      * @throws \Spatie\Image\Exceptions\InvalidManipulation
      */
     public function registerMediaConversions(MediaLibraryMedia $media = null): void

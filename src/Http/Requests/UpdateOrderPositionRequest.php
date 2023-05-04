@@ -110,7 +110,6 @@ class UpdateOrderPositionRequest extends BaseFormRequest
             'is_alternative' => 'boolean',
             'is_net' => 'boolean',
             'is_free_text' => 'boolean',
-            'is_positive_operator' => 'boolean',
 
             'discounts' => [
                 'array',

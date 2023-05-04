@@ -5,6 +5,7 @@ namespace FluxErp\Services;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Helpers\ValidationHelper;
 use FluxErp\Http\Requests\UpdateProductRequest;
+use FluxErp\Models\Price;
 use FluxErp\Models\Product;
 
 class ProductService
@@ -78,8 +79,18 @@ class ProductService
             $product->productProperties()->sync($productProperties);
 
             if ($prices) {
-                $product->prices()->delete();
-                $product->prices()->createMany($prices);
+                $priceCollection = collect($prices)->keyBy('price_list_id');
+                $product->prices
+                    ?->each(function (Price $price) use ($priceCollection) {
+                        if ($priceCollection->has($price->price_list_id)) {
+                            $price->update($priceCollection->get($price->price_list_id));
+                            $priceCollection->forget($price->price_list_id);
+                        } else {
+                            $price->delete();
+                        }
+                    });
+
+                $priceCollection->each(fn ($item) => $product->prices()->create($item));
             }
 
             if ($product->is_bundle && $bundleProducts) {

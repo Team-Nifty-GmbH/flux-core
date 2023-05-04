@@ -108,7 +108,6 @@ class CreateOrderPositionRequest extends BaseFormRequest
             'is_net' => 'required_if:is_free_text,false|boolean',
             'is_free_text' => 'required|boolean',
             'is_bundle_position' => 'exclude_without:parent_id|boolean',
-            'is_positive_operator' => 'boolean',
 
             'discounts' => 'array',
             'discounts.*.sort_number' => 'required|integer|min:0',

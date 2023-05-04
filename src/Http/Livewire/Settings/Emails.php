@@ -47,9 +47,6 @@ class Emails extends Component
         return view('flux::livewire.settings.emails');
     }
 
-    /**
-     * @param int|null $emailTemplateId
-     */
     public function showEditModal(int|null $emailTemplateId = null): void
     {
         if (! $emailTemplateId) {

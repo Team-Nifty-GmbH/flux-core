@@ -123,10 +123,10 @@ class FluxServiceProvider extends ServiceProvider
         if (! Request::hasMacro('isPortal')) {
             Request::macro('isPortal', function () {
                 return $this->getHost() === preg_replace(
-                        '(^https?://)',
-                        '',
-                        config('flux.portal_domain')
-                    );
+                    '(^https?://)',
+                    '',
+                    config('flux.portal_domain')
+                );
             });
         }
 
@@ -225,8 +225,7 @@ class FluxServiceProvider extends ServiceProvider
         config(['wireui.heroicons.alias' => 'heroicons']);
         config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
         config([
-            'scout.meilisearch.index-settings' =>
-                [
+            'scout.meilisearch.index-settings' => [
                 SerialNumber::class => [
                     'filterableAttributes' => [
                         'address_id',

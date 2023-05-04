@@ -55,9 +55,6 @@ class Calendars extends Calendar
         $this->events = array_merge($this->events, $invited);
     }
 
-    /**
-     * @param string|array|null $status
-     */
     public function getInvites(string|array|null $status = null): void
     {
         $query = auth()->user()

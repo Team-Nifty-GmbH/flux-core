@@ -568,10 +568,6 @@ trait HasAdditionalColumns
     }
 
     /**
-     * Add or update the value of the `Meta` at a given key.
-     *
-     * @param mixed $value
-     *
      * @throws MetaException if invalid key is used.
      */
     public function setMeta(string|array $key, mixed $value = null): Meta|Collection
@@ -673,7 +669,7 @@ trait HasAdditionalColumns
      * Reset the meta changes collection for the given key.
      * Resets the entire collection if nothing is passed.
      *
-     * @param  ?string $key
+     * @param  ?string  $key
      */
     public function resetMetaChanges(?string $key = null): Collection
     {
@@ -802,7 +798,7 @@ trait HasAdditionalColumns
      * Store the meta data from the Meta Collection.
      * Returns `true` if all meta was saved successfully.
      *
-     * @param string|array|null $key
+     * @param  string|array|null  $key
      *
      * @throws MetaException
      */

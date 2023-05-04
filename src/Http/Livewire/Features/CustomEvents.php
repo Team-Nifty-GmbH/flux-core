@@ -66,9 +66,6 @@ class CustomEvents extends Component
         return view('flux::livewire.features.custom-events');
     }
 
-    /**
-     * @param mixed ...$additionalData
-     */
     public function dispatchCustomEvent(string $event, ...$additionalData): void
     {
         Event::dispatch($event, empty($additionalData) ? $this->record : $additionalData);

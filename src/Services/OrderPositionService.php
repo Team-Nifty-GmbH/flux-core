@@ -31,6 +31,9 @@ class OrderPositionService
             $data
         );
 
+        unset($orderPosition->tags);
+        unset($orderPosition->discounts);
+
         $orderPosition->save();
         $orderPosition->attachTags($data['tags'] ?? []);
 
@@ -64,6 +67,9 @@ class OrderPositionService
                 $orderPosition,
                 $item
             );
+
+            unset($orderPosition->tags);
+            unset($orderPosition->discounts);
 
             $orderPosition->save();
             $orderPosition->syncTags($data['tags'] ?? []);

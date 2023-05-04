@@ -15,9 +15,6 @@ class SanctumServiceProvider extends \Laravel\Sanctum\SanctumServiceProvider
 
     /**
      * Register the guard.
-     *
-     * @param \Illuminate\Contracts\Auth\Factory  $auth
-     * @param array $config
      */
     protected function createGuard($auth, $config): RequestGuard
     {

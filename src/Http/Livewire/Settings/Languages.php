@@ -45,9 +45,6 @@ class Languages extends Component
         return view('flux::livewire.settings.languages');
     }
 
-    /**
-     * @param int|null $languageId
-     */
     public function showEditModal(int|null $languageId = null): void
     {
         if (! $languageId) {
