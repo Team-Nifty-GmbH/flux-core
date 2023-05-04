@@ -23,7 +23,17 @@ class ExistsWithForeign implements InvokableRule, DataAwareRule
     }
 
     /**
-     * @param string $foreignAttribute Example: client_id, the value is retrieved from the validation data array
+     * @param  string  $foreignAttribute Example: client_id, the value is retrieved from the validation data array
+     *                                 and has to match $attributeColumn on $table (or $throughTable if set).
+     * @param  string  $table Example: addresses, table used for the regular exists.
+     * @param  string  $column Used for the exists statement, the attribute value has to match the column value
+     * @param  string|null  $baseTable If $this->data doesnt have the $foreignAttribute key
+     *                               retrieve the value from the record.
+     * @param  string|null  $attributeColumn The column name that has to match the
+     *                                      value from $foreignAttribute in $table (or $throughTable if set).
+     * @param  string|null  $throughTable Table name to join.
+     * @param  string  $throughLocal The local key from $table that has to match on throughForeign.
+     * @param  string|null  $throughForeign The foreign key on $throughTable that has to match on $throughLocal.
      */
     public function __construct(
         public string $foreignAttribute,
