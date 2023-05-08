@@ -21,10 +21,14 @@
                                 containerClass: "absolute z-50 mt-1 -ml-6 w-60 bg-white shadow-xl rounded-lg py-3 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:ml-auto sm:w-64 sm:text-sm",
                                 itemClass: "bg-white cursor-default select-none relative py-2 px-3 hover:bg-gray-100",
                                 trigger: "@",
+                                selectClass: "bg-gray-100",
+                                selectTemplate: function (item) {
+                                  return "<div contenteditable=\"false\" class=\"outline-none inline-flex justify-center items-center group rounded gap-x-1 text-xs font-semibold px-2.5 py-0.5 text-primary-600 bg-primary-100 dark:bg-slate-700\">@" + item.original.value + "</div>";
+                                },
                                 values: @json($this->users)
-                                        });
-                                tribute.attach($refs.textarea);
-                            }))
+                            });
+                            tribute.attach($refs.textarea);
+                        }))
                 '
             >
                 <div>
