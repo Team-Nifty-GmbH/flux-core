@@ -13,6 +13,7 @@ use FluxErp\DataType\ObjectHandler;
 use FluxErp\DataType\Registry;
 use FluxErp\DataType\SerializableHandler;
 use FluxErp\DataType\StringHandler;
+use FluxErp\Facades\Widget;
 use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\Localization;
@@ -29,6 +30,7 @@ use FluxErp\Models\Ticket;
 use FluxErp\Models\Token;
 use FluxErp\Models\User;
 use FluxErp\Models\Warehouse;
+use FluxErp\Widgets\WidgetManager;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -97,6 +99,10 @@ class FluxServiceProvider extends ServiceProvider
         });
 
         $this->app->alias(Registry::class, 'datatype.registry');
+
+        $this->app->singleton('flux.widget_manager', function ($app) {
+            return new WidgetManager();
+        });
     }
 
     /**
@@ -116,6 +122,9 @@ class FluxServiceProvider extends ServiceProvider
                 return Response::make($content, 200, $headers);
             });
         }
+
+        Widget::autoDiscoverWidgets(flux_path('src/Http/Livewire/Widgets'), 'FluxErp\Http\Livewire\Widgets');
+        Widget::autoDiscoverWidgets();
     }
 
     protected function registerMarcos(): void

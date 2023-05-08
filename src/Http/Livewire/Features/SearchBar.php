@@ -40,6 +40,7 @@ class SearchBar extends Component
     {
         if ($this->searchModel === '') {
             $this->searchModel = ModelInfo::forAllModels()
+                ->merge(ModelInfo::forAllModels(flux_path('src/Models'), flux_path('src'), 'FluxErp'))
                 ->filter(fn ($model) => in_array(Searchable::class, $model->traits->toArray()))
                 ->map(fn ($model) => $model->class)
                 ->toArray();

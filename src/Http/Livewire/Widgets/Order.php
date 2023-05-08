@@ -25,9 +25,11 @@ class Order extends Component
             ])
             ->first();
 
+        $invoiceAddress = new \FluxErp\Models\Address($order->address_invoice);
+
         $this->order = $order->toArray();
         $this->order['avatar'] = $order->contact?->getAvatarUrl();
-        $this->order['address_invoice']['label'] = $order->address_invoice?->getLabel();
+        $this->order['address_invoice']['label'] = $invoiceAddress?->getLabel();
     }
 
     public function render(): Factory|View|Application
