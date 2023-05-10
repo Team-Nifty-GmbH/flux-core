@@ -95,8 +95,7 @@ class OrderPositionList extends DataTable
             ->with('currency:id,iso')
             ->whereKey($this->orderId)
             ->first();
-        $this->isLocked = $order
-            ->is_locked;
+        $this->isLocked = $order->is_locked;
 
         $this->availableCols = ModelInfo::forModel(OrderPosition::class)
             ->attributes
@@ -220,7 +219,6 @@ class OrderPositionList extends DataTable
                 'has_children',
                 'unit_price',
                 'alternative_tag',
-                'currency',
             ]
         );
     }

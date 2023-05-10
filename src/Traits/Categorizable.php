@@ -74,7 +74,7 @@ trait Categorizable
      */
     public function setCategoriesAttribute(array $value): void
     {
-        if (!empty($value) && array_is_list($value) && is_array($value[0])) {
+        if (! empty($value) && array_is_list($value) && is_array($value[0])) {
             $value = Arr::pluck($value, 'id');
         }
 
