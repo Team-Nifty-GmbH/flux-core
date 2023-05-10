@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('component_name');
             $table->string('name')->nullable();
             $table->json('config')->nullable();
-            $table->integer('height')->default(1);
-            $table->integer('width')->default(1);
-            $table->integer('order_column')->default(0);
+            $table->unsignedInteger('height')->default(1);
+            $table->unsignedInteger('width')->default(1);
+            $table->unsignedInteger('order_column')->default(0);
             $table->timestamps();
         });
     }

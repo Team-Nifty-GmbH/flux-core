@@ -15,7 +15,7 @@ class Dashboard extends Component
 
     public array $widgets = [];
 
-    public function mount()
+    public function mount(): void
     {
         $this->widgets();
     }
@@ -27,16 +27,16 @@ class Dashboard extends Component
         ]);
     }
 
-    public function widgets()
+    public function widgets(): void
     {
         $this->widgets = auth()->user()->widgets->toArray();
     }
 
     public function saveWidgets(array $itemIds): void
     {
-        $eixistingItemIds = array_filter($itemIds, 'is_numeric');
-        auth()->user()->widgets()->whereNotIn('id', $eixistingItemIds)->delete();
-        \FluxErp\Models\Widget::setNewOrder($eixistingItemIds);
+        $existingItemIds = array_filter($itemIds, 'is_numeric');
+        auth()->user()->widgets()->whereNotIn('id', $existingItemIds)->delete();
+        \FluxErp\Models\Widget::setNewOrder($existingItemIds);
 
         $newItemIds = array_filter(array_map(function ($id) {
             return str_starts_with($id, 'new-')
@@ -56,7 +56,9 @@ class Dashboard extends Component
 
     public function updateWidget(array $widget): void
     {
-        $widgetModel = \FluxErp\Models\Widget::query()->whereKey($widget['id'])->firstOrFail();
+        $widgetModel = \FluxErp\Models\Widget::query()
+            ->whereKey($widget['id'])
+            ->firstOrFail();
         $widgetModel->fill($widget);
         $widgetModel->save();
 

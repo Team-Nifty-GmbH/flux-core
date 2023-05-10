@@ -16,7 +16,7 @@ class WidgetManager
     /**
      * @throws \Exception
      */
-    public function register($name, $widget): void
+    public function register(string $name, string $widget): void
     {
         $componentClass = Livewire::getClass($widget);
 
@@ -44,7 +44,7 @@ class WidgetManager
         return $this->widgets;
     }
 
-    public function get($name): ?string
+    public function get(string $name): ?string
     {
         return $this->widgets[$name] ?? null;
     }
@@ -73,7 +73,7 @@ class WidgetManager
 
                 try {
                     $this->register($componentName, $componentName);
-                } catch (\Exception $e) {
+                } catch (\Exception) {
                     // dont throw exceptions on auto discovery
                 }
             }

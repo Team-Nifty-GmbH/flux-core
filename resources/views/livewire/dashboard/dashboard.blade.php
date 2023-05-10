@@ -8,7 +8,7 @@
                 swapThreshold: 1,
                 animation: 150,
                 group: 'widgets',
-                delay: 100,
+                delay: 100
             });
             this.availableWidgetsSortable = new Sortable(document.getElementById('available-widgets'), {
                 swapThreshold: 1,
@@ -17,7 +17,7 @@
                     name: 'widgets',
                     pull: 'clone',
                     put: false
-                },
+                }
             });
             this.editMode = true;
         },

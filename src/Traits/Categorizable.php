@@ -72,9 +72,9 @@ trait Categorizable
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function setCategoriesAttribute($value): void
+    public function setCategoriesAttribute(array $value): void
     {
-        if (Arr::isList($value) && is_array($value[0])) {
+        if (!empty($value) && array_is_list($value) && is_array($value[0])) {
             $value = Arr::pluck($value, 'id');
         }
 

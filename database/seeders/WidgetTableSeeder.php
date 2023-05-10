@@ -8,9 +8,9 @@ use Illuminate\Database\Seeder;
 
 class WidgetTableSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        foreach (User::all() as $user) {
+        foreach (User::all(['id']) as $user) {
             $widgets = rand(1, 10);
             for ($i = 0; $i < $widgets; $i++) {
                 Widget::factory()->create([

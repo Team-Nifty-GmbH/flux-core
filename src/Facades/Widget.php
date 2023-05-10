@@ -14,7 +14,7 @@ class Widget extends Facade
         return 'flux.widget_manager';
     }
 
-    public static function register($name, $widget): void
+    public static function register(string $name, string $widget): void
     {
         static::$app->make('flux.widget_manager')->register($name, $widget);
     }

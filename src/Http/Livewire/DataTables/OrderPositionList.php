@@ -183,8 +183,7 @@ class OrderPositionList extends DataTable
     public function getBuilder(Builder $builder): Builder
     {
         return $builder->whereNull('parent_id')
-            ->with('currency')
-            ->reorder('sort_number', 'asc');
+            ->reorder('sort_number');
     }
 
     public function getReturnKeys(): array
