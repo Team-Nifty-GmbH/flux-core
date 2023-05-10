@@ -68,9 +68,9 @@
         </div>
     </div>
     <div class="flex gap-4 divide-x">
-        <div class="flex-initial">
+        <div class="flex-initial w-full">
             <div id="widgets" class="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-12 auto-cols-fr grid-flow-dense gap-4">
-                @foreach($widgets as $widget)
+                @forelse($widgets as $widget)
                     <div data-id="{{ $widget['id'] }}" x-bind:class="editMode && 'outline-offset-3 bg-primary-100 outline-2 outline-dashed outline-indigo-500'" class="rounded flex grid place-content-center relative {{ 'col-span-' . $widget['width'] . ' row-span-' . $widget['height'] }}">
                         <div class="absolute top-2 right-2" x-cloak x-show="editMode">
                             <x-button.circle class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" x-on:click="edit($el.parentNode.parentNode.dataset.id)" primary icon="pencil"/>
@@ -78,10 +78,12 @@
                         </div>
                         <livewire:is :component="$widget['component_name']" wire:key="{{ uniqid() }}" />
                     </div>
-                @endforeach
+                @empty
+                    <div class="col-span-12 h-96"></div>
+                @endforelse
             </div>
         </div>
-        <div class="pl-3 flex-none w-96" x-cloak x-transition x-show="editMode" wire:ignore>
+        <div class="pl-3 flex-none min-h-[85px]" x-cloak x-transition x-show="editMode" wire:ignore>
             <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-50">
                 {{ __('Available Widgets') }}
             </h3>
