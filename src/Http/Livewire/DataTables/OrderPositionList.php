@@ -36,6 +36,8 @@ class OrderPositionList extends DataTable
 
     public bool $isFilterable = false;
 
+    public bool $showRowButtons = true;
+
     protected $listeners = [
         'replaceByIndex',
         'removeByKey',
@@ -89,10 +91,11 @@ class OrderPositionList extends DataTable
 
     public function mount(): void
     {
-        $this->isLocked = Order::query()
-            ->select('is_locked')
+        $order = Order::query()
+            ->with('currency:id,iso')
             ->whereKey($this->orderId)
-            ->value('is_locked');
+            ->first();
+        $this->isLocked = $order->is_locked;
 
         $this->availableCols = ModelInfo::forModel(OrderPosition::class)
             ->attributes
@@ -106,6 +109,22 @@ class OrderPositionList extends DataTable
             [
                 'slug_position' => 'string',
                 'alternative_tag' => ['state', [__('Alternative') => 'negative']],
+                'unit_net_price' => [
+                    'money',
+                    [
+                        'currency' => [
+                            'iso' => $order->currency->iso,
+                        ],
+                    ],
+                ],
+                'total_net_price' => [
+                    'money',
+                    [
+                        'currency' => [
+                            'iso' => $order->currency->iso,
+                        ],
+                    ],
+                ],
             ]
         );
     }
@@ -132,16 +151,18 @@ class OrderPositionList extends DataTable
 
     public function getRowActions(): array
     {
-        return [
-            DataTableButton::make()
-                ->icon('pencil')
-                ->rounded()
-                ->color('primary')
-                ->attributes([
-                    'x-on:click' => "\$dispatch('open-modal', {record: record, index: index})",
-                    'x-show' => '! record.is_bundle_position && ! record.is_locked',
-                ]),
-        ];
+        return $this->showRowButtons
+            ? [
+                DataTableButton::make()
+                    ->icon('pencil')
+                    ->rounded()
+                    ->color('primary')
+                    ->attributes([
+                        'x-on:click' => "\$dispatch('open-modal', {record: record, index: index})",
+                        'x-show' => '! record.is_bundle_position && ! record.is_locked',
+                    ]),
+            ]
+            : [];
     }
 
     public function getRowAttributes(): DataTableRowAttributes
@@ -161,7 +182,7 @@ class OrderPositionList extends DataTable
     public function getBuilder(Builder $builder): Builder
     {
         return $builder->whereNull('parent_id')
-            ->reorder('sort_number', 'asc');
+            ->reorder('sort_number');
     }
 
     public function getReturnKeys(): array

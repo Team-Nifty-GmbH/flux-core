@@ -26,4 +26,12 @@ module.exports = {
         },
     },
     plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
+    safelist: [
+        {
+            pattern: /(col|row)-span-\d+/
+        },
+        {
+            pattern: /grid-cols-\d+/
+        }
+    ]
 }

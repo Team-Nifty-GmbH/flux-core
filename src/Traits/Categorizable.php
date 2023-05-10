@@ -70,12 +70,11 @@ trait Categorizable
      * intercept the set method on the categories model.
      * this saves the validated categories for later in a static variable
      *
-     *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function setCategoriesAttribute($value): void
+    public function setCategoriesAttribute(array $value): void
     {
-        if (is_array($value[0])) {
+        if (! empty($value) && array_is_list($value) && is_array($value[0])) {
             $value = Arr::pluck($value, 'id');
         }
 

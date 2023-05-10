@@ -65,21 +65,11 @@
     </div>
     <div class="pt-8 pb-2 font-semibold uppercase">{{ __('Order positions') }}</div>
     <div x-show="orderPositions.length > 0" x-cloak x-transition>
-        <x-alpinejs-table
-            :indented-cols="['name']"
-            :stretch-col="['name']"
-            :model="\FluxErp\Models\OrderPosition::class"
-            x-disabled="record.is_bundle_position"
-            x-bind:class.tr="{'opacity-50 sortable-filter': record.is_bundle_position}"
-            :enabled-cols="['name', 'amount', 'total_net_price']"
-            :available-cols="['name', 'product_number', 'amount', 'total_net_price']"
-            wire:model="orderPositions"
-            x-bind:class.td="{
-                        'bg-gray-200 dark:bg-secondary-700 font-bold': (record.is_free_text && record.depth === 0 && record.has_children),
-                        'opacity-90': record.is_alternative,
-                        'opacity-50 sortable-filter': record.is_bundle_position,
-                        'font-semibold': record.is_free_text
-                    }"
+        <livewire:data-tables.order-position-list
+            :order-id="$order['id']"
+            :show-row-buttons="false"
+            :is-filterable="false"
+            :filters="[['column' => 'order_id', 'operator' => '=', 'value' => $order['id']]]"
         />
     </div>
     <x-button x-show="orderPositions.length < 1" spinner primary x-on:click="$wire.loadOrderPositions()">

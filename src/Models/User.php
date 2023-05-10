@@ -8,6 +8,7 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\HasWidgets;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Lockable;
 use FluxErp\Traits\Notifiable;
@@ -32,8 +33,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 class User extends Authenticatable implements HasMedia, HasLocalePreference, InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasApiTokens, HasCalendars, HasDatatableUserSettings,
-        HasPackageFactory, HasFrontendAttributes, HasRoles, HasUuid, InteractsWithMedia, Lockable, Notifiable, Searchable,
-        SoftDeletes;
+        HasPackageFactory, HasFrontendAttributes, HasRoles, HasUuid, HasWidgets, InteractsWithMedia, Lockable,
+        Notifiable, Searchable, SoftDeletes;
 
     protected $appends = [
         'name',

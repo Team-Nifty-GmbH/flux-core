@@ -9,8 +9,8 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/apex-charts.js',
                 'resources/js/alpine.js',
-                'resources/js/tribute.js',
             ],
             refresh: false
         }),

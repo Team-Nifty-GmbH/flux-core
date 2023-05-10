@@ -32,23 +32,23 @@
     "src": "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-d730936d.css",
+    "file": "assets/app-5b5b7a24.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
   "resources/js/alpine.js": {
-    "file": "assets/alpine-46b7105f.js",
+    "file": "assets/alpine-07891ee2.js",
     "isEntry": true,
     "src": "resources/js/alpine.js"
   },
+  "resources/js/apex-charts.js": {
+    "file": "assets/apex-charts-9f0545d3.js",
+    "isEntry": true,
+    "src": "resources/js/apex-charts.js"
+  },
   "resources/js/app.js": {
-    "file": "assets/app-3c0e1d95.js",
+    "file": "assets/app-0e35d06f.js",
     "isEntry": true,
     "src": "resources/js/app.js"
-  },
-  "resources/js/tribute.js": {
-    "file": "assets/tribute-bdc1dd93.js",
-    "isEntry": true,
-    "src": "resources/js/tribute.js"
   }
 }
