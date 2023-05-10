@@ -37,9 +37,14 @@
     "src": "resources/css/app.css"
   },
   "resources/js/alpine.js": {
-    "file": "assets/alpine-f52aaaff.js",
+    "file": "assets/alpine-07891ee2.js",
     "isEntry": true,
     "src": "resources/js/alpine.js"
+  },
+  "resources/js/apex-charts.js": {
+    "file": "assets/apex-charts-9f0545d3.js",
+    "isEntry": true,
+    "src": "resources/js/apex-charts.js"
   },
   "resources/js/app.js": {
     "file": "assets/app-0e35d06f.js",
