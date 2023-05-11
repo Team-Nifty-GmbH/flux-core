@@ -42,6 +42,8 @@ class OrderList extends Component
 
     public array $orderTypes = [];
 
+    public array $filters = [];
+
     public function getRules(): array
     {
         return Arr::prependKeysWith((new CreateOrderRequest())->rules(), 'order.');
@@ -51,12 +53,12 @@ class OrderList extends Component
     {
         $contact = Contact::query()->whereKey($this->order['contact_id'])->first();
 
-        $this->order['client_id'] = $contact->client_id;
+        $this->order['client_id'] = $contact->client_id ?: $this->order['client_id'];
         $this->order['address_invoice_id'] = $contact->address_invoice_id;
         $this->order['address_delivery_id'] = $contact->address_delivery_id;
-        $this->order['language_id'] = $contact->language_id;
-        $this->order['price_list_id'] = $contact->price_list_id;
-        $this->order['payment_type_id'] = $contact->payment_type_id;
+        $this->order['language_id'] = $contact->language_id ?: $this->order['language_id'];
+        $this->order['price_list_id'] = $contact->price_list_id ?: $this->order['price_list_id'];
+        $this->order['payment_type_id'] = $contact->payment_type_id ?: $this->order['payment_type_id'];
         $this->order['payment_reminder_days_1'] = $contact->payment_reminder_days_1;
         $this->order['payment_reminder_days_2'] = $contact->payment_reminder_days_2;
         $this->order['payment_reminder_days_3'] = $contact->payment_reminder_days_3;

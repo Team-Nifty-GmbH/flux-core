@@ -1,5 +1,5 @@
 <div>
-    <livewire:data-tables.order-list
+    <livewire:order.order-list
         wire:key="{{ uniqid() }}"
         :filters="[['column' => 'contact_id', 'value' => $this->contact['id']]]"
     />
