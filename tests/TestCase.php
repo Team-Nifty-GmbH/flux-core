@@ -41,12 +41,12 @@ abstract class TestCase extends BaseTestCase
     public function getPackageProviders($app): array
     {
         return [
+            LivewireServiceProvider::class,
             PermissionServiceProvider::class,
             ScoutServiceProvider::class,
             HeroiconsServiceProvider::class,
             MediaLibraryServiceProvider::class,
             CalendarServiceProvider::class,
-            LivewireServiceProvider::class,
             FastPaginateProvider::class,
             QueryBuilderServiceProvider::class,
             FortifyServiceProvider::class,
