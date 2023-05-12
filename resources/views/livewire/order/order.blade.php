@@ -6,7 +6,7 @@
         orderPositions: [],
         createDocuments: false,
     }"
-    x-on:updated-order-positions.window="orderPositions = $event.detail"
+    x-on:updated-order-positions="orderPositions = $event.detail; $wire.recalculateOrder($event.detail)"
     x-on:order-positions-updated="$wire.set('hasUpdatedOrderPositions', true)"
     x-init="() => {
         var meta = document.createElement('meta');
@@ -293,12 +293,12 @@
                     </x-card>
                     <x-card>
                         <div class="text-sm">
-                            <div class="flex justify-between py-2.5">
+                            <div class="flex justify-between py-2.5" x-model="order">
                                 <div>
                                     {{ __('Sum net') }}
                                 </div>
                                 <div>
-                                    <span x-currency="{value: order.total_net_price, currency: order.currency.iso}">
+                                    <span x-html="formatters.coloredMoney(order.total_net_price)">
                                     </span>
                                 </div>
                             </div>
@@ -306,11 +306,11 @@
                                 <div class="flex justify-between py-2.5">
                                     <div>
                                         <span>{{ __('Plus ') }}</span>
-                                        <span x-percentage="vat.vat_rate_percentage">
+                                        <span x-html="formatters.percentage(vat.vat_rate_percentage)">
                                         </span>
                                     </div>
                                     <div>
-                                        <span x-currency="{value: vat.total_vat_price, currency: order.currency.iso}">
+                                        <span x-html="formatters.coloredMoney(vat.total_vat_price)">
                                         </span>
                                     </div>
                                 </div>
@@ -320,7 +320,7 @@
                                     {{ __('Total gross') }}
                                 </div>
                                 <div>
-                                    <span x-currency="{value: order.total_gross_price, currency: order.currency.iso}">
+                                    <span x-html="formatters.coloredMoney(order.total_gross_price)">
                                     </span>
                                 </div>
                             </div>

@@ -127,6 +127,30 @@ class Order extends Component
         $this->skipRender();
     }
 
+    public function recalculateOrder(array $orderPositions): void
+    {
+        $this->order['total_net_price'] = 0;
+        $this->order['total_gross_price'] = 0;
+        $this->order['total_vats'] = [];
+
+        foreach ($orderPositions as $orderPosition) {
+            if (data_get($orderPosition, 'is_alternative') || data_get($orderPosition, 'is_bundle_position')) {
+                continue;
+            }
+
+            $this->order['total_net_price'] = bcadd($this->order['total_net_price'], $orderPosition['total_net_price']);
+            $this->order['total_gross_price'] = bcadd($this->order['total_gross_price'], $orderPosition['total_gross_price']);
+            $this->order['total_vats'][$orderPosition['vat_rate_id']]['total_vat_price'] =
+                bcadd(
+                    $this->order['total_vats'][$orderPosition['vat_rate_id']]['total_vat_price'] ?? 0,
+                    bcsub($orderPosition['total_gross_price'], $orderPosition['total_net_price'])
+                );
+            $this->order['total_vats'][$orderPosition['vat_rate_id']]['vat_rate_percentage'] = $orderPosition['vat_rate_percentage'];
+        }
+
+        $this->skipRender();
+    }
+
     public function save(array $orderPositions): void
     {
         $validatedOrder = Validator::make($this->order, (new UpdateOrderRequest())->getRules($this->order))
