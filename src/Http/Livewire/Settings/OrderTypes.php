@@ -94,6 +94,7 @@ class OrderTypes extends Component
 
         $this->editModal = false;
         $this->skipRender();
+        $this->emitTo('data-tables.order-type-list', 'loadData');
     }
 
     public function showEditModal(?int $orderTypeId = null): void
@@ -107,7 +108,7 @@ class OrderTypes extends Component
                 'id' => $orderType->id,
                 'name' => $orderType->name,
                 'description' => $orderType->description,
-                'print_layouts' => $orderType->print_layouts,
+                'print_layouts' => $orderType->print_layouts ?? [],
                 'order_type_enum' => $orderType->order_type_enum,
                 'is_active' => $orderType->is_active,
                 'is_hidden' => $orderType->is_hidden,
