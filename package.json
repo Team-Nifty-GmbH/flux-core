@@ -10,7 +10,7 @@
         "@defstudio/vite-livewire-plugin": "^1.1.0",
         "@fontsource/inter": "^4.5.12",
         "@fullcalendar/core": "^6.1.7",
-        "@fullcalendar/daygrid": "^6.1.6",
+        "@fullcalendar/daygrid": "^6.1.8",
         "@fullcalendar/interaction": "^6.1.7",
         "@fullcalendar/list": "^6.1.7",
         "@fullcalendar/timegrid": "^6.1.7",
