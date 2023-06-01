@@ -51,11 +51,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         'uuid',
     ];
 
-    public function __construct()
-    {
-        dd(debug_backtrace());
-    }
-
     protected string $detailRouteName = 'contacts.id?';
 
     public static string $iconName = 'user';
