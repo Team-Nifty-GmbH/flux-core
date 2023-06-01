@@ -17,26 +17,34 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel(Address::getBroadcastChannelRoute(), function ($user) {
+Broadcast::channel(Address::class, function ($user) {
     return $user->can(channel_to_permission(Address::getBroadcastChannelRoute()));
 });
 
-Broadcast::channel(Calendar::getBroadcastChannelRoute(), function ($user) {
+Broadcast::channel(Calendar::class, function ($user) {
     return $user->can(channel_to_permission(Calendar::getBroadcastChannelRoute()));
 });
 
-Broadcast::channel(CalendarEvent::getBroadcastChannelRoute(), function ($user) {
+Broadcast::channel(CalendarEvent::class, function ($user) {
     return $user->can(channel_to_permission(CalendarEvent::getBroadcastChannelRoute()));
 });
 
-Broadcast::channel(Contact::getBroadcastChannel(), function ($user) {
+Broadcast::channel(Contact::class, function ($user) {
     return $user->can(channel_to_permission(Contact::getBroadcastChannel()));
 });
 
-Broadcast::channel(Contact::getBroadcastChannelRoute(), function ($user) {
+Broadcast::channel(Contact::class, function ($user) {
     return $user->can(channel_to_permission(Contact::getBroadcastChannelRoute()));
 });
 
-Broadcast::channel(\FluxErp\Models\User::getBroadcastChannelRoute(), function ($user, $id) {
+Broadcast::channel(\FluxErp\Models\User::class, function ($user, $id) {
     return (int) $user->id === (int) $id;
+});
+
+Broadcast::channel(\FluxErp\Models\Log::class, function ($user) {
+    return $user->can(channel_to_permission((new \FluxErp\Models\Log())->broadcastChannelRoute()));
+});
+
+Broadcast::channel(\FluxErp\Models\Log::getBroadcastChannel(), function ($user) {
+    return $user->can(channel_to_permission((new \FluxErp\Models\Log())->broadcastChannelRoute()));
 });

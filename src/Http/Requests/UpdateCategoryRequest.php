@@ -16,6 +16,7 @@ class UpdateCategoryRequest extends BaseFormRequest
             'parent_id' => 'integer|nullable|exists:categories,id',
             'name' => 'required|string',
             'sort_number' => 'integer|min:0',
+            'is_active' => 'boolean',
         ];
     }
 }

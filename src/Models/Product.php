@@ -32,6 +32,7 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
     protected $casts = [
         'uuid' => 'string',
         'is_active' => 'boolean',
+        'is_highlight' => 'boolean',
         'is_shipping_free' => 'boolean',
         'is_bundle' => 'boolean',
         'is_required_product_serial_number' => 'boolean',

@@ -287,6 +287,7 @@ class FluxServiceProvider extends ServiceProvider
                 Warehouse::class => [],
             ],
         ]);
+        config(['tinker.alias' => ['FluxErp\\Models\\', 'FluxErp\\Services\\']]);
     }
 
     protected function registerBladeComponents(): void

@@ -15,6 +15,7 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -27,7 +28,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Ticket extends Model implements HasMedia, InteractsWithDataTables
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasPackageFactory, HasFrontendAttributes,
+    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasPackageFactory, HasFrontendAttributes,
         HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
         SoftDeletes;
 

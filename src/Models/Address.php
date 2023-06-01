@@ -26,12 +26,14 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 use Spatie\Permission\Traits\HasRoles;
+use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendarEvents, HasPackageFactory,
-        HasFrontendAttributes, HasRoles, HasUserModification, HasUuid, Lockable, Notifiable, Searchable, SoftDeletes;
+    use BroadcastsEvents, HasCalendars, Commentable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendarEvents,
+        HasPackageFactory, HasFrontendAttributes, HasRoles, HasUserModification, HasUuid, Lockable, Notifiable,
+        Searchable, SoftDeletes;
 
     protected $hidden = [
         'login_password',
