@@ -2,7 +2,6 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
@@ -28,6 +27,7 @@ use Laravel\Scout\Searchable;
 use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
@@ -50,6 +50,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         'id',
         'uuid',
     ];
+
+    public function __construct()
+    {
+        dd(debug_backtrace());
+    }
 
     protected string $detailRouteName = 'contacts.id?';
 

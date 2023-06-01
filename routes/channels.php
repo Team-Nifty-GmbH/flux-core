@@ -17,23 +17,19 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel(Address::class, function ($user) {
+Broadcast::channel(Address::getBroadcastChannelRoute(), function ($user) {
     return $user->can(channel_to_permission(Address::getBroadcastChannelRoute()));
 });
 
-Broadcast::channel(Calendar::class, function ($user) {
+Broadcast::channel(Calendar::getBroadcastChannelRoute(), function ($user) {
     return $user->can(channel_to_permission(Calendar::getBroadcastChannelRoute()));
 });
 
-Broadcast::channel(CalendarEvent::class, function ($user) {
+Broadcast::channel(CalendarEvent::getBroadcastChannelRoute(), function ($user) {
     return $user->can(channel_to_permission(CalendarEvent::getBroadcastChannelRoute()));
 });
 
-Broadcast::channel(Contact::class, function ($user) {
-    return $user->can(channel_to_permission(Contact::getBroadcastChannel()));
-});
-
-Broadcast::channel(Contact::class, function ($user) {
+Broadcast::channel(Contact::getBroadcastChannelRoute(), function ($user) {
     return $user->can(channel_to_permission(Contact::getBroadcastChannelRoute()));
 });
 

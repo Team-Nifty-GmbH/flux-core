@@ -2,7 +2,6 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasFrontendAttributes;
@@ -20,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Contact extends Model implements HasMedia, InteractsWithDataTables
 {
