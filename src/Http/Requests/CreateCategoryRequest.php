@@ -15,6 +15,7 @@ class CreateCategoryRequest extends BaseFormRequest
             'model_type' => 'required|string',
             'name' => 'required|string',
             'parent_id' => 'integer|nullable|exists:categories,id',
+            'is_active' => 'boolean',
         ];
     }
 }

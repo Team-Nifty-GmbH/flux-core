@@ -66,6 +66,14 @@
                         <livewire:features.custom-events :model="\FluxErp\Models\Ticket::class" :id="$ticket['id']" />
                         <x-select
                             :disabled="! user_can('api.tickets.update')"
+                            :label="__('Ticket Type')"
+                            wire:model="ticket.ticket_type_id"
+                            option-value="id"
+                            option-label="name"
+                            :options="$ticketTypes"
+                        />
+                        <x-select
+                            :disabled="! user_can('api.tickets.update')"
                             multiselect
                             :label="__('Assigned')"
                             wire:model="ticket.users"

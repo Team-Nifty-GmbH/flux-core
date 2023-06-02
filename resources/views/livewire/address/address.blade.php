@@ -49,84 +49,82 @@
             <div
                 class="border-gray-200">
                 <div class="space-y-6 sm:space-y-5">
-                    <form wire:keydown.cmd.d="duplicate">
-                        <div class="flex justify-between">
-                            <div>
-                                <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-50" x-text="address.id ? '{{ __('Address') }}' + ' ' + address.id : '{{ __('New Address') }}'">
-                                </h3>
-                            </div>
-                            <div wire:ignore>
-                                @if($address['id'] ?? false)
-                                    @can('api.addresses.put')
+                    <div class="flex justify-between">
+                        <div>
+                            <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-50" x-text="address.id ? '{{ __('Address') }}' + ' ' + address.id : '{{ __('New Address') }}'">
+                            </h3>
+                        </div>
+                        <div wire:ignore>
+                            @if($address['id'] ?? false)
+                                @can('api.addresses.put')
+                                    <x-button
+                                        icon="pencil"
+                                        x-cloak
+                                        x-show="address.id"
+                                        @click="edit = true"
+                                        wire:click="edit"
+                                        primary
+                                    >
+                                        <div class="hidden sm:block">
+                                            {{ __('Edit') }}
+                                        </div>
+                                    </x-button>
+                                @endcan
+                                @can('api.addresses.post')
                                         <x-button
-                                            icon="pencil"
                                             x-cloak
+                                            icon="document-duplicate"
                                             x-show="address.id"
                                             @click="edit = true"
-                                            wire:click="edit"
-                                            primary
+                                            wire:click="duplicate"
                                         >
                                             <div class="hidden sm:block">
-                                                {{ __('Edit') }}
+                                                {{ __('Duplicate') }}
                                             </div>
                                         </x-button>
-                                    @endcan
-                                    @can('api.addresses.post')
-                                            <x-button
-                                                x-cloak
-                                                icon="document-duplicate"
-                                                x-show="address.id"
-                                                @click="edit = true"
-                                                wire:click="duplicate"
-                                            >
-                                                <div class="hidden sm:block">
-                                                    {{ __('Duplicate') }}
-                                                </div>
-                                            </x-button>
-                                    @endcan
-                                    @can('api.addresses.{id}.delete')
-                                        <x-button
-                                            x-cloak
-                                            icon="trash"
-                                            x-show="! address.is_main_address && address.id"
-                                            @click="
-                                            window.$wireui.confirmDialog({
-                                                title: '{{ __('Delete address') }}',
-                                                description: '{{ __('Do you really want to delete this address?') }}',
-                                                icon: 'error',
-                                                accept: {
-                                                    label: '{{ __('Delete') }}',
-                                                    method: 'delete',
-                                                },
-                                                reject: {
-                                                    label: '{{ __('Cancel') }}',
-                                                }
-                                            }, '{{ $this->id }}')
-                                            "
-                                            negative>
-                                            <div class="hidden sm:block">
-                                                {{ __('Delete') }}
-                                            </div>
-                                        </x-button>
-                                    @endcan
-                                @endif
-                            </div>
+                                @endcan
+                                @can('api.addresses.{id}.delete')
+                                    <x-button
+                                        x-cloak
+                                        icon="trash"
+                                        x-show="! address.is_main_address && address.id"
+                                        @click="
+                                        window.$wireui.confirmDialog({
+                                            title: '{{ __('Delete address') }}',
+                                            description: '{{ __('Do you really want to delete this address?') }}',
+                                            icon: 'error',
+                                            accept: {
+                                                label: '{{ __('Delete') }}',
+                                                method: 'delete',
+                                            },
+                                            reject: {
+                                                label: '{{ __('Cancel') }}',
+                                            }
+                                        }, '{{ $this->id }}')
+                                        "
+                                        negative>
+                                        <div class="hidden sm:block">
+                                            {{ __('Delete') }}
+                                        </div>
+                                    </x-button>
+                                @endcan
+                            @endif
                         </div>
-                        <!-- Tabs -->
-                        <x-tabs
-                            wire:model="tab"
-                            :tabs="[
-                                'address' => __('General'),
-                                'permissions' => __('Permissions'),
-                                'comments' => __('Comments'),
-                                'serial-numbers' => __('Serial numbers'),
-                                'additional-columns' => __('Additional columns'),
-                            ]"
-                            wire:loading
-                        >
-                            <x-dynamic-component :component="'address.' . $tab" />
-                        </x-tabs>
-                    </form>
+                    </div>
+                    <!-- Tabs -->
+                    <x-tabs
+                        wire:model="tab"
+                        :tabs="[
+                            'address' => __('General'),
+                            'permissions' => __('Permissions'),
+                            'comments' => __('Comments'),
+                            'serial-numbers' => __('Serial numbers'),
+                            'additional-columns' => __('Additional columns'),
+                        ]"
+                        wire:loading
+                    >
+                        <x-dynamic-component :component="'address.' . $tab" />
+                    </x-tabs>
                 </div>
                 <div class="pb-6">
                     <div x-cloak x-show="edit" x-transition.duration.400ms

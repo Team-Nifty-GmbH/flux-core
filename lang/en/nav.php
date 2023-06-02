@@ -22,6 +22,7 @@ return [
         'ticket-types' => 'Ticket Types',
         'translations' => 'Translations',
         'users' => 'Users',
+        'logs' => 'Logs',
     ],
     'calendars' => [
         'label' => 'Calendar',

@@ -24,10 +24,11 @@ use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Ticket extends Model implements HasMedia, InteractsWithDataTables
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasPackageFactory, HasFrontendAttributes,
+    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasPackageFactory, HasFrontendAttributes,
         HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
         SoftDeletes;
 

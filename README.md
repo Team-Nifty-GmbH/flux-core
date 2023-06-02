@@ -203,7 +203,7 @@ server {
 
     listen 80 default_server;
     listen [::]:80 default_server;
-    server_name energy.rmpv.de;
+    server_name your.domain.com;
     return 404; # managed by Certbot
 }
 ```

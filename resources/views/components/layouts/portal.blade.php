@@ -29,7 +29,7 @@
         <livewire:navigation :setting="$setting"/>
     </div>
     <div class="flex flex-1 flex-col md:pl-20">
-        <div class="h-full w-full p-16">
+        <div class="h-full w-full p-4 lg:p-16">
             {{ $slot }}
         </div>
     </div>

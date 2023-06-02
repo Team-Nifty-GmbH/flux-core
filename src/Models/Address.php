@@ -2,7 +2,6 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
@@ -26,12 +25,15 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 use Spatie\Permission\Traits\HasRoles;
+use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendarEvents, HasPackageFactory,
-        HasFrontendAttributes, HasRoles, HasUserModification, HasUuid, Lockable, Notifiable, Searchable, SoftDeletes;
+    use BroadcastsEvents, HasCalendars, Commentable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendarEvents,
+        HasPackageFactory, HasFrontendAttributes, HasRoles, HasUserModification, HasUuid, Lockable, Notifiable,
+        Searchable, SoftDeletes;
 
     protected $hidden = [
         'login_password',

@@ -25,6 +25,10 @@ class Category extends Model implements Sortable
         'assigned',
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
     protected $guarded = [
         'id',
         'uuid',

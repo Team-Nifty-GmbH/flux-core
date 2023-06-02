@@ -1,8 +1,6 @@
 <?php
 
 use FluxErp\Models\Address;
-use FluxErp\Models\Calendar;
-use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\Contact;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -17,26 +15,22 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel(Address::getBroadcastChannelRoute(), function ($user) {
+Broadcast::channel('FluxErp.Models.Address.{address}', function ($user) {
     return $user->can(channel_to_permission(Address::getBroadcastChannelRoute()));
 });
 
-Broadcast::channel(Calendar::getBroadcastChannelRoute(), function ($user) {
-    return $user->can(channel_to_permission(Calendar::getBroadcastChannelRoute()));
-});
-
-Broadcast::channel(CalendarEvent::getBroadcastChannelRoute(), function ($user) {
-    return $user->can(channel_to_permission(CalendarEvent::getBroadcastChannelRoute()));
-});
-
-Broadcast::channel(Contact::getBroadcastChannel(), function ($user) {
-    return $user->can(channel_to_permission(Contact::getBroadcastChannel()));
-});
-
-Broadcast::channel(Contact::getBroadcastChannelRoute(), function ($user) {
+Broadcast::channel('FluxErp.Models.Contact.{contact}', function ($user) {
     return $user->can(channel_to_permission(Contact::getBroadcastChannelRoute()));
 });
 
-Broadcast::channel(\FluxErp\Models\User::getBroadcastChannelRoute(), function ($user, $id) {
+Broadcast::channel('FluxErp.Models.User.{user}', function ($user, $id) {
     return (int) $user->id === (int) $id;
+});
+
+Broadcast::channel('FluxErp.Models.Log.{log}', function ($user) {
+    return $user->can(channel_to_permission((new \FluxErp\Models\Log())->broadcastChannelRoute()));
+});
+
+Broadcast::channel('FluxErp.Models.Log', function ($user) {
+    return $user->can(channel_to_permission((new \FluxErp\Models\Log())->broadcastChannelRoute()));
 });

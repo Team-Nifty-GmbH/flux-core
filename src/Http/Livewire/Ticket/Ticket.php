@@ -25,6 +25,8 @@ class Ticket extends Component
 
     public string $ticketState;
 
+    public array $ticketTypes;
+
     public array $states;
 
     public function getRules(): array
@@ -48,6 +50,11 @@ class Ticket extends Component
                 'name' => $item,
             ];
         }, $states->toArray());
+
+        $this->ticketTypes = TicketType::query()
+            ->select(['id', 'name'])
+            ->get()
+            ->toArray();
 
         $ticketModel = \FluxErp\Models\Ticket::query()
             ->with([
@@ -127,18 +134,12 @@ class Ticket extends Component
 
     public function updatedTicketUsers(): void
     {
-        if (! user_can('api.tickets.put')) {
-            $this->notification()->error(__('You dont have the permission to do that.'));
+        $this->save();
+    }
 
-            return;
-        }
-
-        $ticketService = new TicketService();
-        $validated = $this->validate()['ticket'];
-
-        $ticketService->update($validated);
-
-        $this->skipRender();
+    public function updatedTicketTicketTypeID(): void
+    {
+        $this->save();
     }
 
     public function changeAuthor(int $id): void
@@ -158,6 +159,22 @@ class Ticket extends Component
         $this->ticket = array_merge($this->ticket, $updatedTicket->toArray());
         $this->ticket['authenticatable']['avatar_url'] = $updatedTicket->authenticatable->getAvatarUrl();
         $this->ticket['authenticatable']['name'] = $updatedTicket->authenticatable->getLabel();
+
+        $this->skipRender();
+    }
+
+    public function save(): void
+    {
+        if (! user_can('api.tickets.put')) {
+            $this->notification()->error(__('You dont have the permission to do that.'));
+
+            return;
+        }
+
+        $ticketService = new TicketService();
+        $validated = $this->validate()['ticket'];
+
+        $ticketService->update($validated);
 
         $this->skipRender();
     }

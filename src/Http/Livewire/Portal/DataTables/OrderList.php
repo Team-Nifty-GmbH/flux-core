@@ -19,6 +19,8 @@ class OrderList extends DataTable
 
     public array $sortable = ['*'];
 
+    public bool $showFilterInputs = true;
+
     public function mount(): void
     {
         $this->enabledCols[] = auth()->user()->contact?->priceList?->is_net ? 'total_net_price' : 'total_gross_price';
@@ -58,6 +60,11 @@ class OrderList extends DataTable
         });
 
         return $formatters;
+    }
+
+    public function getScoutSearch(): \Laravel\Scout\Builder
+    {
+        return $this->model::search($this->search)->where('contact_id', auth()->user()->contact_id);
     }
 
     public function getReturnKeys(): array
