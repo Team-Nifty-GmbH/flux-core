@@ -14,8 +14,6 @@ class OutstandingInvoices extends Component implements UserWidget
 {
     public float $sum = 0;
 
-    public bool $showModal = false;
-
     public function mount()
     {
         $sum = Order::query()->sum('total_gross_price') - Transaction::query()->sum('amount');
@@ -25,7 +23,11 @@ class OutstandingInvoices extends Component implements UserWidget
 
     public function render()
     {
-        return view('flux::livewire.widgets.outstanding-invoices', ['currency' => Currency::query()->where('is_default', true)->first()->toArray()]);
+        return view('flux::livewire.widgets.outstanding-invoices',
+            [
+                'currency' => Currency::query()->where('is_default', true)->first()->toArray()
+            ]
+        );
     }
 
     public function viewOrders()

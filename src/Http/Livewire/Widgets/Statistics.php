@@ -3,12 +3,10 @@
 namespace FluxErp\Http\Livewire\Widgets;
 
 use FluxErp\Contracts\UserWidget;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\Product;
-use FluxErp\Models\Transaction;
 use Livewire\Component;
 
 class Statistics extends Component implements UserWidget
@@ -28,7 +26,11 @@ class Statistics extends Component implements UserWidget
 
     public function render()
     {
-        return view('flux::livewire.widgets.statistics', ['currency' => Currency::query()->where('is_default', true)->first()->toArray()]);
+        return view('flux::livewire.widgets.statistics',
+            [
+                'currency' => Currency::query()->where('is_default', true)->first()->toArray()
+            ]
+        );
     }
 
     public static function getLabel(): string
