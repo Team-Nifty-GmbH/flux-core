@@ -27,7 +27,7 @@ Broadcast::channel('FluxErp.Models.User.{user}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
-Broadcast::channel('FluxErp.Models.Log.{Log}', function ($user) {
+Broadcast::channel('FluxErp.Models.Log.{log}', function ($user) {
     return $user->can(channel_to_permission((new \FluxErp\Models\Log())->broadcastChannelRoute()));
 });
 
