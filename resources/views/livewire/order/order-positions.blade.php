@@ -9,7 +9,7 @@
         groups: $wire.entangle('groups').defer,
         selectedGroupId: 0,
         selectPositions(data) {
-            const children = this.orderPositions.filter(record => record.slug_position.startsWith(data.record.slug_position)).map(o => o.id);
+            const children = this.orderPositions.filter(record => record.slug_position?.startsWith(data.record.slug_position)).map(o => o.id);
             if (data.value) {
                 this.selected = [...this.selected, ...children];
             } else {

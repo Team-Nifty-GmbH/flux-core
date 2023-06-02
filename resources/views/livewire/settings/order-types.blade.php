@@ -1,5 +1,5 @@
 <div class="py-6" x-data="{orderType: @entangle('orderType').defer}">
-    <div class="px-4 sm:px-6 lg:px-8">
+    <div class="px-4 sm:px-6 lg:px-8" wire:ignore>
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
                 <h1 class="text-xl font-semibold">{{ __('Order Types') }}</h1>
@@ -26,15 +26,12 @@
                                       option-label="name"
                                       option-value="id"
                             />
-
-                            @if(! $orderType['id'])
-                                <x-select label="{{ __('Order Type') }}"
-                                          placeholder="{{ __('Select Order Type') }}"
-                                          wire:model.defer="orderType.order_type_enum"
-                                          :options="$enum"
-                                />
-                            @endif
-
+                            <x-select label="{{ __('Order Type') }}"
+                                      :disabled="(bool) $orderType['id']"
+                                      placeholder="{{ __('Select Order Type') }}"
+                                      wire:model.defer="orderType.order_type_enum"
+                                      :options="$enum"
+                            />
                             <x-select label="{{ __('Print Layouts') }}"
                                       placeholder="{{ __('Select a Print Layout') }}"
                                       wire:model.defer="orderType.print_layouts"

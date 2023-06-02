@@ -2,6 +2,7 @@
 
 namespace FluxErp\Widgets;
 
+use FluxErp\Contracts\UserWidget;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
 use Livewire\Livewire;
@@ -35,6 +36,7 @@ class WidgetManager
 
         $this->widgets[$name] = [
             'name' => $widget,
+            'label' => $componentClass::getLabel(),
             'class' => $componentClass,
         ];
     }
@@ -57,7 +59,7 @@ class WidgetManager
         foreach (glob("{$path}/*.php") as $file) {
             $class = $namespace . '\\' . pathinfo($file, PATHINFO_FILENAME);
 
-            if (! class_exists($class)) {
+            if (! class_exists($class) || ! in_array(UserWidget::class, class_implements($class))) {
                 continue;
             }
 
@@ -65,7 +67,9 @@ class WidgetManager
 
             // Check if the class is a valid Livewire component
             if ($reflection->isSubclassOf(Component::class) && ! $reflection->isAbstract()) {
-                if (class_exists($class)) {
+                if (class_exists($class)
+                    && str_starts_with($reflection->getNamespaceName(), config('livewire.class_namespace'))
+                ) {
                     $componentName = $class::getName();
                 } else {
                     $componentName = Livewire::getAlias($class, $class);
@@ -73,7 +77,7 @@ class WidgetManager
 
                 try {
                     $this->register($componentName, $componentName);
-                } catch (\Exception) {
+                } catch (\Exception $e) {
                     // dont throw exceptions on auto discovery
                 }
             }

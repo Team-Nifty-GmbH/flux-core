@@ -30,6 +30,9 @@ class OrderList extends Component
         'language_id' => null,
         'order_type_id' => null,
         'payment_texts' => [],
+        'payment_reminder_days_1' => 0,
+        'payment_reminder_days_2' => 0,
+        'payment_reminder_days_3' => 0,
     ];
 
     public array $priceLists = [];
@@ -59,10 +62,24 @@ class OrderList extends Component
         $this->order['language_id'] = $contact->language_id ?: $this->order['language_id'];
         $this->order['price_list_id'] = $contact->price_list_id ?: $this->order['price_list_id'];
         $this->order['payment_type_id'] = $contact->payment_type_id ?: $this->order['payment_type_id'];
-        $this->order['payment_reminder_days_1'] = $contact->payment_reminder_days_1;
-        $this->order['payment_reminder_days_2'] = $contact->payment_reminder_days_2;
-        $this->order['payment_reminder_days_3'] = $contact->payment_reminder_days_3;
-        $this->order['payment_target'] = $contact->payment_target + 0;
+
+        $paymentType = PaymentType::query()->whereKey($this->order['payment_type_id'])->first();
+
+        $this->order['payment_reminder_days_1'] = $contact->payment_reminder_days_1
+            ?: $paymentType->payment_reminder_days_1
+            ?: 1;
+        $this->order['payment_reminder_days_2'] = $contact->payment_reminder_days_2
+            ?: $paymentType->payment_reminder_days_2
+            ?: 1;
+        $this->order['payment_reminder_days_3'] = $contact->payment_reminder_days_3
+            ?: $paymentType->payment_reminder_days_3
+            ?: 1;
+        $this->order['payment_target'] = $contact->payment_target_days + 0
+            ?: $paymentType->payment_target + 0;
+        $this->order['payment_discount_target'] = $contact->discount_days
+            ?: $paymentType->payment_discount_target;
+        $this->order['payment_discount_percent'] = $contact->discount_percent
+            ?: $paymentType->payment_discount_percentage;
     }
 
     public function mount(): void
@@ -70,22 +87,37 @@ class OrderList extends Component
         $this->priceLists = PriceList::query()
             ->get(['id', 'name'])
             ->toArray();
+        if (count($this->priceLists) === 1) {
+            $this->order['price_list_id'] = $this->priceLists[0]['id'];
+        }
 
         $this->paymentTypes = PaymentType::query()
             ->get(['id', 'name'])
             ->toArray();
+        if (count($this->paymentTypes) === 1) {
+            $this->order['payment_type_id'] = $this->paymentTypes[0]['id'];
+        }
 
         $this->languages = Language::query()
             ->get(['id', 'name'])
             ->toArray();
+        if (count($this->languages) === 1) {
+            $this->order['language_id'] = $this->languages[0]['id'];
+        }
 
         $this->clients = Client::query()
             ->get(['id', 'name'])
             ->toArray();
+        if (count($this->clients) === 1) {
+            $this->order['client_id'] = $this->clients[0]['id'];
+        }
 
         $this->orderTypes = OrderType::query()
             ->get(['id', 'name'])
             ->toArray();
+        if (count($this->orderTypes) === 1) {
+            $this->order['order_type_id'] = $this->orderTypes[0]['id'];
+        }
     }
 
     public function render(): View|Factory|Application

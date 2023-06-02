@@ -212,7 +212,7 @@ class OrderPositions extends Component
                 [
                     'id' => Str::uuid()->toString(),
                     'sort_number' => $sortNumber,
-                    'slug_position' => $slugPosition,
+                    'slug_position' => (string) $slugPosition,
                     'client_id' => $this->order['client_id'],
                     'order_id' => $this->orderId,
                     'is_free_text' => false,

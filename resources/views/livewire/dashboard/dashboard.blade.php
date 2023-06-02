@@ -92,7 +92,7 @@
                     <div class="widget flex-1" data-id="new-{{ $availableWidget['name'] }}">
                         <x-card>
                             <span>
-                                {{ $availableWidget['name'] }}
+                                {{ $availableWidget['label'] }}
                             </span>
                         </x-card>
                     </div>
