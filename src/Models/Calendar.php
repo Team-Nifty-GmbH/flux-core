@@ -2,11 +2,11 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\HasUserModification;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use TeamNiftyGmbH\Calendar\Models\Calendar as BaseCalendar;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Calendar extends BaseCalendar
 {
