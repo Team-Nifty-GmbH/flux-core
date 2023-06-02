@@ -4,6 +4,7 @@ namespace FluxErp\Http\Livewire\DataTables;
 
 use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Session;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
