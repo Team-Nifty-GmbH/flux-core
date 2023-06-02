@@ -14,6 +14,7 @@ use FluxErp\Traits\Lockable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Spatie\MediaLibrary\HasMedia;
@@ -43,7 +44,7 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
 
     public static string $iconName = 'users';
 
-    public static function boot()
+    public static function boot(): void
     {
         parent::boot();
 
@@ -76,6 +77,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function discountGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(DiscountGroup::class, 'contact_discount_group');
     }
 
     public function bankConnections(): HasMany

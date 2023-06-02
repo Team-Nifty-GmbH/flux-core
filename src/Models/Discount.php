@@ -26,9 +26,4 @@ class Discount extends Model
         'id',
         'uuid',
     ];
-
-    public function orderPosition(): BelongsTo
-    {
-        return $this->belongsTo(OrderPosition::class);
-    }
 }
