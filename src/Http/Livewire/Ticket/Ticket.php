@@ -64,7 +64,7 @@ class Ticket extends Component
                 'authenticatable',
             ])
             ->whereKey($id)
-            ->first();
+            ->firstOrFail();
 
         $ticketModel->state = $ticketModel->state ?: \FluxErp\Models\Ticket::getDefaultStateFor('state');
 

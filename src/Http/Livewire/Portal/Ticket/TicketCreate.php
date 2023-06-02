@@ -39,15 +39,18 @@ class TicketCreate extends Component
         'save',
     ];
 
-    public function mount(): void
+    public function mount(?string $modelType = null, ?int $modelId = null): void
     {
         $this->ticket = [
             'title' => null,
             'description' => null,
+            'model_type' => $modelType,
+            'model_id' => $modelId,
         ];
 
         $this->ticketTypes = TicketType::query()
             ->with('additionalModelColumns:id,name,model_type,model_id,field_type,values')
+            ->where('model_type', $modelType)
             ->get()
             ->toArray();
 
@@ -85,7 +88,7 @@ class TicketCreate extends Component
         $this->skipRender();
     }
 
-    public function save(): void
+    public function save(): bool
     {
         $this->ticket = array_merge($this->ticket, [
             'authenticatable_type' => Auth::user()->getMorphClass(),
@@ -105,6 +108,8 @@ class TicketCreate extends Component
 
         $this->skipRender();
         $this->emitUp('closeModal', $ticket->toArray());
+
+        return true;
     }
 
     public function updatedTicketTypeId(): void

@@ -9,6 +9,11 @@
                 <div class="space-y-5 dark:text-gray-50">
                     <x-input wire:model="ticket.title" :disabled="true"/>
                     <x-textarea wire:model="ticket.description" :disabled="true"/>
+                    @if($ticket['model_type'] && $ticket['model_type']::getLivewireComponentWidget())
+                        <x-card>
+                            <livewire:is :component="$ticket['model_type']::getLivewireComponentWidget()" :modelId="$ticket['model_id']" />
+                        </x-card>
+                    @endif
                     <template x-for="additionalColumn in additionalColumns">
                         <div>
                             <x-label
