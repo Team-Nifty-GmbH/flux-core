@@ -9,6 +9,7 @@ use FluxErp\Models\TicketType;
 use FluxErp\Services\TicketService;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -50,7 +51,15 @@ class TicketCreate extends Component
 
         $this->ticketTypes = TicketType::query()
             ->with('additionalModelColumns:id,name,model_type,model_id,field_type,values')
-            ->where('model_type', $modelType)
+            ->when(
+                $modelType,
+                fn (Builder $query) => $query->where(
+                    function (Builder $query) use ($modelType) {
+                        $query->where('model_type', $modelType)
+                            ->orWhereNull('model_type');
+                }),
+                fn (Builder $query) => $query->whereNull('model_type')
+            )
             ->get()
             ->toArray();
 
