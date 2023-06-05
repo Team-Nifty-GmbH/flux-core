@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -14,6 +15,10 @@ return new class extends Migration
         Schema::table('price_lists', function (Blueprint $table) {
             $table->boolean('is_default')->default(false)->after('is_net');
         });
+
+        DB::table('price_lists')
+            ->limit(1)
+            ->update(['is_default' => true]);
     }
 
     /**

@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Casts\BcFloat;
 use TeamNiftyGmbH\DataTable\Casts\Money;
@@ -22,8 +23,8 @@ use TeamNiftyGmbH\DataTable\Casts\Percentage;
 
 class OrderPosition extends Model
 {
-    use HasAdditionalColumns, HasPackageFactory, HasFrontendAttributes, HasSerialNumberRange, HasTags, HasUserModification,
-        HasUuid, SoftDeletes;
+    use HasAdditionalColumns, HasPackageFactory, HasFrontendAttributes, HasSerialNumberRange, HasTags,
+        HasUserModification, HasUuid, SoftDeletes;
 
     protected $hidden = [
         'uuid',
@@ -148,9 +149,9 @@ class OrderPosition extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function discounts(): HasMany
+    public function discounts(): MorphMany
     {
-        return $this->hasMany(Discount::class, 'order_position_id');
+        return $this->morphMany(Discount::class, 'model');
     }
 
     public function parent(): BelongsTo

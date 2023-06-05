@@ -16,6 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('contact_id');
             $table->unsignedBigInteger('discount_group_id');
 
+            $table->unique(['contact_id', 'discount_group_id']);
+
             $table->foreign('contact_id')
                 ->references('id')
                 ->on('contacts')

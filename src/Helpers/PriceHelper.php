@@ -2,6 +2,7 @@
 
 namespace FluxErp\Helpers;
 
+use Carbon\Carbon;
 use FluxErp\Models\Category;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Discount;
@@ -18,6 +19,8 @@ class PriceHelper
 
     private Product $product;
 
+    private string $timestamp;
+
     public function __construct(Product $product)
     {
         $this->product = $product;
@@ -31,6 +34,13 @@ class PriceHelper
     public function setContact(Contact $contact): self
     {
         $this->contact = $contact;
+
+        return $this;
+    }
+
+    public function setTimestamp(string $timestamp): self
+    {
+        $this->timestamp = Carbon::parse($timestamp)->toDateTimeString();
 
         return $this;
     }
@@ -66,10 +76,31 @@ class PriceHelper
         }
 
         if ($this->contact) {
+            $this->timestamp = $this->timestamp ?? Carbon::now()->toDateTimeString();
+
             $discounts = Discount::query()
                 ->join('discount_discount_group AS ddg', 'discounts.id', 'ddg.discount_id')
                 ->join('contact_discount_group AS cdg', 'ddg.discount_group_id', '=', 'cdg.discount_group_id')
                 ->where('cdg.contact_id', $this->contact->id)
+                ->where(function (Builder $query) {
+                    return $query
+                        ->where(fn (Builder $query) => $query
+                            ->where('from', '<=', $this->timestamp)
+                            ->where('till', '>=', $this->timestamp)
+                        )
+                        ->orWhere(fn (Builder $query) => $query
+                            ->where('from', '<=', $this->timestamp)
+                            ->whereNull('till')
+                        )
+                        ->orWhere(fn (Builder $query) => $query
+                            ->where('till', '>=', $this->timestamp)
+                            ->whereNull('from')
+                        )
+                        ->orWhere(fn (Builder $query) => $query
+                            ->whereNull('from')
+                            ->whereNull('till')
+                        );
+                })
                 ->where(function (Builder $query) {
                     return $query
                         ->where(
@@ -87,15 +118,38 @@ class PriceHelper
 
             $discounts = $discounts->merge(
                 $this->contact->discounts()
-                    ->where(fn (Builder $query) => $query->where('model_type', Product::class)
-                            ->where('model_id', $this->product->id)
-                    )
-                    ->orWhere(fn (Builder $query) => $query->where('model_type', Category::class)
-                        ->whereIntegerInRaw(
-                            'model_id',
-                            $this->product->categories()->pluck('id')->toArray()
-                        )
-                    )
+                    ->where(function (Builder $query) {
+                        return $query
+                            ->where(fn (Builder $query) => $query
+                                ->where('from', '<=', $this->timestamp)
+                                ->where('till', '>=', $this->timestamp)
+                            )
+                            ->orWhere(fn (Builder $query) => $query
+                                ->where('from', '<=', $this->timestamp)
+                                ->whereNull('till')
+                            )
+                            ->orWhere(fn (Builder $query) => $query
+                                ->where('till', '>=', $this->timestamp)
+                                ->whereNull('from')
+                            )
+                            ->orWhere(fn (Builder $query) => $query
+                                ->whereNull('from')
+                                ->whereNull('till')
+                            );
+                    })
+                    ->where(function (Builder $query) {
+                        return $query
+                            ->where(
+                                fn (Builder $query) => $query->where('model_type', Product::class)
+                                    ->where('model_id', $this->product->id))
+                            ->orWhere(
+                                fn (Builder $query) => $query->where('model_type', Category::class)
+                                    ->whereIntegerInRaw(
+                                        'model_id',
+                                        $this->product->categories()->pluck('id')->toArray()
+                                    )
+                            );
+                    })
                     ->get()
             );
 
@@ -105,7 +159,7 @@ class PriceHelper
             $discountedPercentage = bcmul($price->price,  (1 - $maxPercentageDiscount));
             $discountedFlat = bcsub($price->price, $maxFlatDiscount);
 
-            $price->price = bccomp($discountedPercentage, $discountedFlat) !== -1 ?
+            $price->price = bccomp($discountedPercentage, $discountedFlat) === -1 ?
                 $discountedPercentage : $discountedFlat;
         }
 
