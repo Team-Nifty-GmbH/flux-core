@@ -15,6 +15,7 @@ class CreatePriceListRequest extends BaseFormRequest
             'name' => 'required|string',
             'price_list_code' => 'required|string|unique:price_lists,price_list_code',
             'is_net' => 'required|boolean',
+            'is_default' => 'boolean',
         ];
     }
 }

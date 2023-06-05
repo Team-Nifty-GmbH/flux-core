@@ -16,6 +16,7 @@ class UpdatePriceListRequest extends BaseFormRequest
             'name' => 'sometimes|required|string',
             'price_list_code' => 'sometimes|required|string|unique:price_lists,price_list_code',
             'is_net' => 'sometimes|boolean',
+            'is_default' => 'boolean',
         ];
     }
 }
