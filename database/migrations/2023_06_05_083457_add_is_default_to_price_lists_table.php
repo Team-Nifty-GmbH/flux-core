@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('discount_groups', function (Blueprint $table) {
-            $table->id();
-            $table->uuid();
-            $table->string('name');
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
+        Schema::table('price_lists', function (Blueprint $table) {
+            $table->boolean('is_default')->default(false)->after('is_net');
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('discount_groups');
+        Schema::table('price_lists', function (Blueprint $table) {
+            $table->dropColumn('is_default');
+        });
     }
 };

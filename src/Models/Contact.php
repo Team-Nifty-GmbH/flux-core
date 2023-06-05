@@ -79,6 +79,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
         return $this->belongsTo(Client::class);
     }
 
+    public function discounts(): BelongsToMany
+    {
+        return $this->belongsToMany(Discount::class, 'contact_discount');
+    }
+
     public function discountGroups(): BelongsToMany
     {
         return $this->belongsToMany(DiscountGroup::class, 'contact_discount_group');
