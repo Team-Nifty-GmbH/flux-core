@@ -105,7 +105,8 @@ class PriceHelper
             $discountedPercentage = bcmul($price->price,  (1 - $maxPercentageDiscount));
             $discountedFlat = bcsub($price->price, $maxFlatDiscount);
 
-            $price->price = min($discountedPercentage, $discountedFlat);
+            $price->price = bccomp($discountedPercentage, $discountedFlat) !== -1 ?
+                $discountedPercentage : $discountedFlat;
         }
 
         return $price;
