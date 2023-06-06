@@ -18,10 +18,18 @@ class ProductService
         $productProperties = $this->parseProductProperties($data['product_properties'] ?? []);
         $bundleProducts = $data['bundle_products'] ?? false;
         $prices = $data['prices'] ?? false;
-        unset($data['product_options'], $data['product_properties'], $data['bundle_products'], $data['prices']);
+        $tags = $data['tags'] ?? [];
+        unset($data['product_options'],
+            $data['product_properties'],
+            $data['bundle_products'],
+            $data['prices'],
+            $data['tags']
+        );
 
         $product->fill($data);
         $product->save();
+
+        $product->attachTags($tags);
 
         $product->productOptions()->attach($productOptions);
         $product->productProperties()->attach($productProperties);
@@ -65,7 +73,13 @@ class ProductService
             $productProperties = $this->parseProductProperties($item['product_properties'] ?? []);
             $bundleProducts = $item['bundle_products'] ?? false;
             $prices = $item['prices'] ?? false;
-            unset($item['product_options'], $item['product_properties'], $item['bundle_products'], $item['prices']);
+            $tags = $item['tags'] ?? [];
+            unset($item['product_options'],
+                $item['product_properties'],
+                $item['bundle_products'],
+                $item['prices'],
+                $item['tags']
+            );
 
             $product->fill($item);
 
@@ -74,6 +88,8 @@ class ProductService
             }
 
             $product->save();
+
+            $product->syncTags($tags);
 
             $product->productOptions()->sync($productOptions);
             $product->productProperties()->sync($productProperties);

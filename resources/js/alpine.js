@@ -1,9 +1,11 @@
 import Alpine from 'alpinejs'
 import focus from '@alpinejs/focus'
 import persist from '@alpinejs/persist'
+import mask from '@alpinejs/mask'
 
 Alpine.plugin(focus)
 Alpine.plugin(persist)
+Alpine.plugin(mask)
 
 if (typeof window.Livewire === 'undefined') {
     throw 'Livewire Sortable.js Plugin: window.Livewire is undefined. Make sure @livewireScripts is placed above this script include';
