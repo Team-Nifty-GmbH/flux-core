@@ -2,6 +2,8 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Rules\ExistsWithIgnore;
+
 class UpdatePriceListRequest extends BaseFormRequest
 {
     /**
@@ -13,7 +15,11 @@ class UpdatePriceListRequest extends BaseFormRequest
     {
         return [
             'id' => 'required|integer|exists:price_lists,id,deleted_at,NULL',
-            'parent_id' => 'nullable|integer|exists:price_lists,id,deleted_at,NULL',
+            'parent_id' => [
+                'integer',
+                'nullable',
+                (new ExistsWithIgnore('price_lists', 'id'))->whereNull('deleted_at'),
+            ],
             'name' => 'sometimes|required|string',
             'price_list_code' => 'sometimes|required|string|unique:price_lists,price_list_code',
             'is_net' => 'sometimes|boolean',
