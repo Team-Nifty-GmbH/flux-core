@@ -110,6 +110,8 @@ class FluxServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        bcscale(9);
+
         $this->registerCommands();
 
         if (! Response::hasMacro('attachment')) {

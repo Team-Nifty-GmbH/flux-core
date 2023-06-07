@@ -2,6 +2,7 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Helpers\Helper;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Helpers\ValidationHelper;
 use FluxErp\Http\Requests\UpdatePriceListRequest;
@@ -25,7 +26,8 @@ class PriceListService
 
         $responses = ValidationHelper::validateBulkData(
             data: $data,
-            formRequest: new UpdatePriceListRequest()
+            formRequest: new UpdatePriceListRequest(),
+            service: $this
         );
 
         foreach ($data as $item) {
@@ -79,5 +81,27 @@ class PriceListService
             statusCode: 204,
             statusMessage: 'price-list deleted'
         );
+    }
+
+    public function validateItem(array $item, array $response): ?array
+    {
+        if ($item['id'] ?? false) {
+            $priceList = PriceList::query()
+                ->whereKey($item['id'])
+                ->first();
+
+            // Check if new parent causes a cycle
+            if ($item['parent_id'] ?? false) {
+                if (Helper::checkCycle(PriceList::class, $priceList, $item['parent_id'])) {
+                    return ResponseHelper::createArrayResponse(
+                        statusCode: 409,
+                        data: ['parent_id' => 'cycle detected'],
+                        additions: $response
+                    );
+                }
+            }
+        }
+
+        return null;
     }
 }

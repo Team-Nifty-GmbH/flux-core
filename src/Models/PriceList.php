@@ -7,7 +7,9 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class PriceList extends Model
 {
@@ -25,6 +27,16 @@ class PriceList extends Model
         'id',
         'uuid',
     ];
+
+    public function discount(): MorphOne
+    {
+        return $this->morphOne(Discount::class, 'model');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(PriceList::class, 'parent_id');
+    }
 
     public function prices(): HasMany
     {
