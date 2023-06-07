@@ -101,7 +101,7 @@
                                     />
                                 @endif
 
-                                @if (!$withoutItemsCount)
+                                @if (! $withoutItemsCount)
                                     <span
                                         class="inline-flex text-secondary-700 dark:text-secondary-400 text-sm"
                                         x-show="selectedOptions.length"
@@ -141,7 +141,7 @@
 
             <x-slot name="append">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-2 gap-x-2">
-                    @if ($clearable && !$readonly && !$disabled)
+                    @if ($clearable && ! $readonly && ! $disabled)
                         <button
                             x-show="!isEmpty()"
                             x-on:click="clear"

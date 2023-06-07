@@ -76,7 +76,7 @@ class Product extends Component
     {
         if ($this->priceLists !== null) {
             $this->product['prices'] = collect($this->priceLists)
-                ->filter(fn($priceList) => $priceList['price_net'] !== null || $priceList['price_gross'] !== null)
+                ->filter(fn ($priceList) => $priceList['price_net'] !== null || $priceList['price_gross'] !== null)
                 ->map(function(array $priceList) {
                     return [
                         'price_list_id' => $priceList['id'],
