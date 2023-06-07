@@ -12,9 +12,7 @@ use FluxErp\Services\ProductService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -91,11 +89,9 @@ class Product extends Component
                 ? (new UpdateProductRequest())->rules()
                 : (new CreateProductRequest())->rules()
         );
-        $validator->validate();
-        $validated = $validator->validated();
+        $validated = $validator->validate();
 
         $service = new ProductService();
-
         if ($this->product['id']) {
             $service->update($validated);;
         } else {
