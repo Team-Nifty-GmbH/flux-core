@@ -1,4 +1,7 @@
-<div class="space-y-5">
+<div class="space-y-5"
+    x-data
+    wire:key="{{ uniqid() }}"
+>
     <x-card class="space-y-2.5" :title="__('General')">
         @section('general')
         <x-input x-bind:readonly="!edit" label="{{ __('Product number') }}" x-model="product.product_number" />

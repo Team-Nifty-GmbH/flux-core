@@ -1,6 +1,9 @@
 <div x-data="{
         product: $wire.entangle('product').defer,
         edit: false,
+        priceLists: $wire.entangle('priceLists').defer,
+        currency: $wire.entangle('currency').defer,
+        vatRates: $wire.entangle('vatRates').defer
     }"
 >
     <div
@@ -13,7 +16,7 @@
                         <x-heroicons x-show="product.is_locked" variant="solid" name="lock-closed" />
                         <x-heroicons x-show="! product.is_locked" variant="solid" name="lock-open" />
                         <div class="pl-2">
-                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="product.name">
+                            <span x-text="product.name">
                             </span>
                             <span class="opacity-40 transition-opacity hover:opacity-100" x-text="product.product_number">
                             </span>
@@ -77,13 +80,14 @@
                     'variants' => __('Variants'),
                     'media' => __('Media'),
                 ]"
+        wire:ignore
     >
         <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
             <section class="basis-10/12 pt-6 lg:pt-0">
                 <x-errors />
-                <x-dynamic-component :component="'product.' . $tab" :product="$product" :key="$tab" />
+                <x-dynamic-component :component="'product.' . $tab" :product="$product" :key="uniqid()" />
             </section>
-            <section class="relative basis-2/12" wire:ignore>
+            <section class="relative basis-2/12">
                 <div class="sticky top-6 space-y-6">
                     <x-card>
                         <div class="space-y-4">

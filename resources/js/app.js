@@ -30,3 +30,27 @@ window.Echo = new Echo({
     enabledTransports: ['ws', 'wss'],
 });
 
+window.parseNumber = function (number) {
+    let parsedNumber = parseFloat(number);
+    if (isNaN(parsedNumber)) {
+        parsedNumber = 0;
+    }
+    const trimmedNumber = parsedNumber.toString();
+    const decimalIndex = trimmedNumber.indexOf('.');
+
+    if (decimalIndex !== -1) {
+        let parsedNumber = trimmedNumber;
+        while (parsedNumber.endsWith('0')) {
+            parsedNumber = parsedNumber.slice(0, -1);
+        }
+        if (parsedNumber.endsWith('.')) {
+            parsedNumber = parsedNumber.slice(0, -1);
+        }
+        if (parsedNumber.includes('.') && parsedNumber.split('.')[1].length < 2) {
+            parsedNumber = parsedNumber + '0';
+        }
+        return parsedNumber;
+    }
+
+    return trimmedNumber + '.00';
+}

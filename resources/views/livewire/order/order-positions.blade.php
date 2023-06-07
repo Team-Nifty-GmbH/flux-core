@@ -1,7 +1,7 @@
 <div
     x-data="{
         selectedOrderPosition: {},
-        livewireSelectedOrderPosition: @entangle('position').defer,
+        livewireSelectedOrderPosition: $wire.entangle('position').defer,
         orderPositions: [],
         selectedIndex: null,
         order: $wire.entangle('order').defer,
@@ -63,6 +63,7 @@
                                 :async-data="[
                                     'api' => route('search', \FluxErp\Models\Product::class),
                                     'params' => [
+                                        'fields' => ['id', 'name', 'product_number'],
                                         'with' => 'media',
                                     ]
                                 ]"
@@ -81,7 +82,13 @@
                     </div>
                     <div class="flex-auto space-y-2" x-cloak x-show="livewireSelectedOrderPosition.is_free_text !== true">
                         <x-input type="number" min="0" :label="__('Amount')" x-model="livewireSelectedOrderPosition.amount" x-ref="amount"></x-input>
-                        <x-input type="number" :label="__('Unit price :type', ['type' => ($position['is_net'] ?? true) ? __('net') : __('gross') ])" x-model="livewireSelectedOrderPosition.unit_price">
+                        <x-input
+                            :prefix="$order['currency']['symbol']"
+                            type="number"
+                            :label="__('Unit price :type', ['type' => ($position['is_net'] ?? true) ? __('net') : __('gross') ])"
+                            x-model="livewireSelectedOrderPosition.unit_price"
+                            x-on:change="$el.value = parseNumber($el.value)"
+                        >
                         </x-input>
                         <x-input type="number" :label="__('Discount')" x-model="livewireSelectedOrderPosition.discount_percentage"></x-input>
                         <x-select :options="$vatRates" option-label="name" option-value="id" :label="__('Vat rate')" wire:model="position.vat_rate_id" />
