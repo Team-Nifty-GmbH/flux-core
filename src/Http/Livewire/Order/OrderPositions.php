@@ -150,7 +150,7 @@ class OrderPositions extends Component
         /** @var Price $price */
         $price = PriceHelper::make($product)
             ->setPriceList(PriceList::query()->whereKey($priceListId)->first())
-        ->price();
+            ->price();
 
         $this->position['product_id'] = $id;
         $this->position['product_number'] = $product?->product_number;

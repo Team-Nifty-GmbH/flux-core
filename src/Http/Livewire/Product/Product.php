@@ -36,17 +36,6 @@ class Product extends Component
         'tab' => ['except' => 'general'],
     ];
 
-    public function getRules()
-    {
-        return Arr::prependKeysWith(
-            $this->product['id']
-                ? (new UpdateProductRequest())->rules()
-                : (new CreateProductRequest())->rules(),
-            ''
-        );
-    }
-
-
     public function mount(int $id): void
     {
         $product = \FluxErp\Models\Product::query()
@@ -96,11 +85,13 @@ class Product extends Component
                 })
                 ->toArray();
         }
-        $validator = Validator::make($this->product, $this->getRules());
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
+        $validator = Validator::make(
+            $this->product,
+            $this->product['id']
+                ? (new UpdateProductRequest())->rules()
+                : (new CreateProductRequest())->rules()
+        );
+        $validator->validate();
         $validated = $validator->validated();
 
         $service = new ProductService();
@@ -117,7 +108,7 @@ class Product extends Component
         return true;
     }
 
-    public function getPriceLists()
+    public function getPriceLists(): void
     {
         $priceLists =  PriceList::all(['id', 'name', 'price_list_code', 'is_net', 'is_default']);
         $productPrices = Price::query()->where('product_id', $this->product['id'])->get();

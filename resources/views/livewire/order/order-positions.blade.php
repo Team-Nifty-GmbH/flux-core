@@ -85,7 +85,7 @@
                         <x-input
                             :prefix="$order['currency']['symbol']"
                             type="number"
-                            :label="__('Unit price :type', ['type' => ($position['is_net'] ?? true) ? __('net') : __('gross') ])"
+                            :label="__('Unit price :type', ['type' => ($position['is_net'] ?? true) ? __('net') : __('gross')])"
                             x-model="livewireSelectedOrderPosition.unit_price"
                             x-on:change="$el.value = parseNumber($el.value)"
                         >
