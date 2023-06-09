@@ -70,6 +70,9 @@ class CreateProductRequest extends BaseFormRequest
 
             'categories' => 'array',
             'categories.*' => 'integer|exists:' . Category::class . ',id,model_type,' . Product::class,
+
+            'tags' => 'array',
+            'tags.*' => 'string',
         ];
     }
 }
