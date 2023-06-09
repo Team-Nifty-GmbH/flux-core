@@ -4,6 +4,7 @@ namespace FluxErp\Logging;
 
 use Carbon\Carbon;
 use FluxErp\Models\Log;
+use Illuminate\Support\Facades\DB;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\LogRecord;
 
@@ -29,6 +30,13 @@ class DatabaseLoggingHandler extends AbstractProcessingHandler
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
-        Log::create($data);
+        $id = DB::table('logs')->insertGetId($data);
+
+        if (config('broadcasting.default') !== 'log') {
+            Log::query()
+                ->whereKey($id)
+                ->first()
+                ->newBroadcastableModelEvent('created');
+        }
     }
 }
