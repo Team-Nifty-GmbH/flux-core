@@ -295,5 +295,6 @@
     "Not attend": "Nicht teilnehmen",
     "Edit Event": "Termin bearbeiten",
     "Start": "Start",
-    "End": "Ende"
+    "End": "Ende",
+    "Inherited from :parent_name": "Basierend auf :parent_name"
 }

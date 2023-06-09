@@ -11,8 +11,15 @@ class DiscountGroupService
 {
     public function create(array $data): DiscountGroup
     {
+        $discounts = $data['discounts'] ?? null;
+        unset($data['discounts']);
+
         $discountGroup = new DiscountGroup($data);
         $discountGroup->save();
+
+        if (! is_null($discounts)) {
+            $discountGroup->discounts()->attach($discounts);
+        }
 
         return $discountGroup;
     }
@@ -32,9 +39,15 @@ class DiscountGroupService
             $discountGroup = DiscountGroup::query()
                 ->whereKey($item['id'])
                 ->first();
+            $discounts = $item['discounts'] ?? null;
+            unset($item['discounts']);
 
             $discountGroup->fill($item);
             $discountGroup->save();
+
+            if (! is_null($discounts)) {
+                $discountGroup->discounts()->sync($discounts);
+            }
 
             $responses[] = ResponseHelper::createArrayResponse(
                 statusCode: 200,

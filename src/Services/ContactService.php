@@ -13,9 +13,15 @@ class ContactService
     public function create(array $data): Contact
     {
         $data['customer_number'] = $data['customer_number'] ?? uniqid();
+        $discountGroups = $data['discount_groups'] ?? null;
+        unset($data['discount_groups']);
 
         $contact = new Contact($data);
         $contact->save();
+
+        if (! is_null($discountGroups)) {
+            $contact->discountGroups()->attach($discountGroups);
+        }
 
         return $contact;
     }
@@ -38,8 +44,15 @@ class ContactService
                 ->whereKey($item['id'])
                 ->first();
 
+            $discountGroups = $item['discount_groups'] ?? null;
+            unset($item['discount_groups']);
+
             $contact->fill($item);
             $contact->save();
+
+            if (! is_null($discountGroups)) {
+                $contact->discountGroups()->sync($discountGroups);
+            }
 
             $responses[] = ResponseHelper::createArrayResponse(
                 statusCode: 200,

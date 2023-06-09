@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Livewire\Product;
 
+use FluxErp\Helpers\PriceHelper;
 use FluxErp\Http\Requests\CreateProductRequest;
 use FluxErp\Http\Requests\UpdateProductRequest;
 use FluxErp\Models\Currency;
@@ -106,15 +107,21 @@ class Product extends Component
 
     public function getPriceLists(): void
     {
-        $priceLists =  PriceList::all(['id', 'name', 'price_list_code', 'is_net', 'is_default']);
-        $productPrices = Price::query()->where('product_id', $this->product['id'])->get();
-        $priceLists->map(function($priceList) use ($productPrices) {
-            $priceList->price_net = $productPrices->where('price_list_id', $priceList->id)
-                ->first()
-                ?->getNet($this->product['vat_rate']['rate_percentage']) ?? null;
-            $priceList->price_gross = $productPrices->where('price_list_id', $priceList->id)
-                ->first()
+        $priceLists =  PriceList::query()
+            ->with('parent')
+            ->get(['id', 'parent_id', 'name', 'price_list_code', 'is_net', 'is_default']);
+        $product = \FluxErp\Models\Product::query()->whereKey($this->product['id'])->first();
+        $priceListHelper = PriceHelper::make($product)->useDefault(false);
+
+        $priceLists->map(function($priceList) use ($priceListHelper) {
+            $price = $priceListHelper
+                ->setPriceList($priceList)
+                ->price();
+            $priceList->price_net = $price
+                    ?->getNet($this->product['vat_rate']['rate_percentage']) ?? null;
+            $priceList->price_gross = $price
                 ?->getGross($this->product['vat_rate']['rate_percentage']) ?? null;
+            $priceList->is_editable = is_null($price) || $price?->price_list_id === $priceList->id;
         });
 
         $this->priceLists = $priceLists->toArray();

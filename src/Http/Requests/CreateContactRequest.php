@@ -26,6 +26,9 @@ class CreateContactRequest extends BaseFormRequest
             'credit_line' => 'sometimes|numeric|min:0|nullable',
             'has_sensitive_reminder' => 'sometimes|boolean',
             'has_delivery_lock' => 'sometimes|boolean',
+
+            'discount_groups' => 'array',
+            'discount_groups.*' => 'integer|exists:discount_groups,id',
         ];
     }
 }
