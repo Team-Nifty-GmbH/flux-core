@@ -21,6 +21,7 @@ class PriceList extends Model
 
     protected $casts = [
         'is_net' => 'boolean',
+        'is_default' => 'boolean'
     ];
 
     protected $guarded = [
