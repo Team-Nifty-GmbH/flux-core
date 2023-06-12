@@ -6,7 +6,7 @@
             </h3>
         </div>
     </div>
-    <form class="space-y-6 sm:space-y-5">
+    <div class="space-y-6 sm:space-y-5">
         <div class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5">
             <label for="{{ md5('address.can_login') }}"
                    class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
@@ -65,5 +65,5 @@
                 </template>
             </div>
         </div>
-    </form>
+    </div>
 </div>

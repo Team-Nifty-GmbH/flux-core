@@ -3,21 +3,13 @@
 namespace FluxErp\Logging;
 
 use Carbon\Carbon;
+use FluxErp\Models\Log;
 use Illuminate\Support\Facades\DB;
 use Monolog\Handler\AbstractProcessingHandler;
-use Monolog\Logger;
 use Monolog\LogRecord;
 
 class DatabaseLoggingHandler extends AbstractProcessingHandler
 {
-    private string $table;
-
-    public function __construct($level = Logger::DEBUG, bool $bubble = true)
-    {
-        $this->table = 'logs';
-        parent::__construct($level, $bubble);
-    }
-
     protected function write(LogRecord $record): void
     {
         $context = (object) $record['context'];
@@ -38,6 +30,13 @@ class DatabaseLoggingHandler extends AbstractProcessingHandler
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
-        DB::table($this->table)->insert($data);
+        $id = DB::table('logs')->insertGetId($data);
+
+        if (config('broadcasting.default') !== 'log') {
+            Log::query()
+                ->whereKey($id)
+                ->first()
+                ->newBroadcastableModelEvent('created');
+        }
     }
 }

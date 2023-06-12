@@ -2,10 +2,12 @@
 
 namespace FluxErp\Http\Livewire\Order;
 
+use FluxErp\Helpers\PriceHelper;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Http\Requests\UpdateOrderPositionRequest;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
 use FluxErp\Services\OrderPositionService;
@@ -77,7 +79,7 @@ class OrderPositions extends Component
         $this->orderId = $id;
 
         $this->order = \FluxErp\Models\Order::query()
-            ->with(['priceList:id,name,is_net', 'currency:iso'])
+            ->with(['priceList:id,name,is_net', 'currency:id,symbol'])
             ->whereKey($id)
             ->first()
             ->toArray();
@@ -146,7 +148,9 @@ class OrderPositions extends Component
         $priceListId = ($this->position['price_list_id'] ?? false) ?: $this->order['price_list_id'];
 
         /** @var Price $price */
-        $price = $product?->prices?->where('price_list_id', '=', $priceListId)->first();
+        $price = PriceHelper::make($product)
+            ->setPriceList(PriceList::query()->whereKey($priceListId)->first())
+            ->price();
 
         $this->position['product_id'] = $id;
         $this->position['product_number'] = $product?->product_number;

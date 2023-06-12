@@ -4,6 +4,7 @@
         detail: $wire.entangle('positionDetails').defer,
         positionsSummary: $wire.entangle('positionsSummary').defer,
         detailRoute: '{{ route('portal.orders.id', ['id' => ':id']) }}',
+        selected: null,
     }"
      x-init="() => {
         var meta = document.createElement('meta');
@@ -12,7 +13,7 @@
         document.getElementsByTagName('head')[0].appendChild(meta);
      }"
      class="dark:text-white"
-     x-on:data-table-row-clicked="$wire.selectPosition($event.detail.id)"
+     x-on:data-table-record-selected="selected = Alpine.$data(document.getElementById('order-position-table').querySelector('[tall-datatable]')).selected"
 >
     <x-modal.card wire:model.defer="detailModal">
         <div class="grid grid-cols-3 gap-5">
@@ -33,15 +34,34 @@
             <div class="col-span-2">
                 <div class="text-lg" x-text="detail.product?.product_number"></div>
                 <div class="text-lg" x-text="detail.name"></div>
-                <div class="pt-5 text-sm" x-show="detail.serial_number">
-                    <span>{{ __('Serial number:') }}</span>
-                    <span x-text="detail.serial_number?.serial_number"></span>
+                <div class="pt-5 text-sm" x-show="detail.serial_number?.length">
+                    <span>{{ __('Serial numbers:') }}</span>
+                    <ul>
+                        <template x-for="serialNumber in detail.serial_number">
+                            <li x-text="serialNumber.serial_number"></li>
+                        </template>
+                    </ul>
                 </div>
                 <div class="pt-5" x-html="detail.product?.description"></div>
             </div>
         </div>
         <livewire:folder-tree/>
     </x-modal.card>
+    <div id="new-ticket-modal">
+        <x-modal.card :title="__('New Ticket')">
+            <livewire:portal.ticket.ticket-create :model-type="\FluxErp\Models\Order::class" :model-id="$order['id']"/>
+            <x-slot name="footer">
+                <div class="w-full">
+                    <div class="flex justify-between gap-x-4">
+                        <div class="flex">
+                            <x-button flat :label="__('Cancel')" x-on:click="close"/>
+                            <x-button primary :label="__('Save')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal').querySelector('[x-data]').querySelector('[x-data]')).save();"/>
+                        </div>
+                    </div>
+                </div>
+            </x-slot>
+        </x-modal.card>
+    </div>
     <h2 class="text-base font-bold uppercase">
         {{ __('Order details') }}
     </h2>
@@ -49,16 +69,18 @@
         {{ trans(':order_type :order_number dated :order_date', [
             'order_type' => $order['order_type']['name'],
             'order_number' => $order['order_number'],
-            'order_date' => $order['order_date']
+            'order_date' => \Illuminate\Support\Carbon::parse($order['order_date'])->isoFormat('L')
         ]) }}
     </h1>
-    <div class="flex justify-end pb-5">
+    <div class="flex justify-end pb-5 gap-1.5">
         @if($order['invoice_number'])
             <x-button primary :label="__('Download invoice')" wire:click="downloadInvoice" spinner="downloadInvoice"/>
         @endif
+
         @if($order['parent_id'])
             <x-button primary :href="route('portal.orders.id', $order['parent_id'])">{{ __('Show parent') }}</x-button>
         @endif
+        <x-button primary :label="__('New Ticket')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal').querySelector('[wireui-modal]')).open();" spinner="downloadInvoice"/>
     </div>
     <div class="space-y-5">
         <div class="flex gap-8">
@@ -87,7 +109,7 @@
             </template>
         </div>
         <x-card>
-            <div class="grid grid-cols-2">
+            <div class="grid grid-cols-1 lg:grid-cols-2">
                 <div class="grid grid-cols-2 gap-5">
                     <div class="text-right">
                         {{ __('Commission') }}:
@@ -136,11 +158,13 @@
             </x-card>
         @endif
         <div class="space-y-8">
-            <livewire:data-tables.portal.order-position-list
-                :order-id="$order['id']"
-                :filters="[['column' => 'order_id', 'operator' => '=', 'value' => $order['id']]]"
-            />
-            <div x-show="selected.length > 0" class="pt-4">
+            <div id="order-position-table" x-on:data-table-row-clicked="$wire.selectPosition($event.detail.id)">
+                <livewire:data-tables.portal.order-position-list
+                    :order-id="$order['id']"
+                    :filters="[['column' => 'order_id', 'operator' => '=', 'value' => $order['id']]]"
+                />
+            </div>
+            <div x-show="selected?.length > 0" class="pt-4">
                 <livewire:features.custom-events :model="\FluxErp\Models\Order::class" :id="$order['id']" :additional-data="['selected', 'order']"/>
             </div>
             <div x-show="positionsSummary.length > 0" x-cloak>
@@ -206,6 +230,24 @@
                 {{ __('Related orders') }}
             </h2>
             <div class="mt-3">
+                <livewire:portal.data-tables.order-list
+                    :is-searchable="false"
+                    :is-filterable="false"
+                    :is-sortable="false"
+                    :show-filter-inputs="false"
+                    :filters="[
+                        [
+                            'contact_id',
+                            '=',
+                            auth()->user()->contact_id
+                        ],
+                        [
+                            'parent_id',
+                            '=',
+                            $order['id']
+                        ]
+                    ]"
+                />
             </div>
         </div>
     @endif

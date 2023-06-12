@@ -4,10 +4,17 @@ namespace FluxErp\Models;
 
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Log extends Model
 {
-    use MassPrunable;
+    use BroadcastsEvents, MassPrunable;
+
+    protected $guarded = [
+        'id',
+        'created_at',
+        'updated_at',
+    ];
 
     public function prunable(): void
     {

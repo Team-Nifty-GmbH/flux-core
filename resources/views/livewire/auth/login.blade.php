@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <HTML class="h-full bg-white" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <x-layouts.head.head/>

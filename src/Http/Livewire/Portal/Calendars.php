@@ -2,78 +2,81 @@
 
 namespace FluxErp\Http\Livewire\Portal;
 
-use FluxErp\Http\Livewire\Features\Calendar\Calendar;
-use FluxErp\Models\Calendar as CalendarModel;
 use Illuminate\Contracts\View\Factory;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Carbon;
+use TeamNiftyGmbH\Calendar\CalendarComponent;
+use TeamNiftyGmbH\Calendar\Models\Calendar;
+use TeamNiftyGmbH\Calendar\Models\CalendarEvent;
 
-class Calendars extends Calendar
+class Calendars extends CalendarComponent
 {
-    public function mount(bool $showPersonalCalendar = true): void
+    public function render(): Factory|View|Application
     {
-        parent::mount();
-
-        $this->calendarEvent['calendar_id'] = null;
-    }
-
-    public function getCalendars(): void
-    {
-        $client = auth()->user()?->contact?->client;
-        $setting = $client?->settings()
-            ->where('key', 'customerPortal')
-            ->first()
-            ?->toArray();
-
-        $this->calendars = [];
-
-        $calendars = CalendarModel::query()
-            ->whereIntegerInRaw('id', ($setting['settings']['calendars'] ?? []))
-            ->get()
-            ->toArray();
-
-        $this->toFlatTree($calendars, 'calendars');
-    }
-
-    public function invitedEvents(): void
-    {
-        $invited = $this->mapEvents(auth()->user()
-            ->calendarEventInvites()
-            ->whereNot('status', 'declined')
-            ->whereIntegerNotInRaw('calendar_id', $this->activeCalendars)
-            ->where(function (Builder $query) {
-                return $query
-                    ->whereBetween('calendar_events.starts_at', [$this->gridStartsAt, $this->gridEndsAt])
-                    ->orWhereBetween('calendar_events.ends_at', [$this->gridStartsAt, $this->gridEndsAt]);
-            })
-            ->get())
-            ->toArray();
-
-        $invited = Arr::keyBy($invited, 'id');
-
-        $this->events = array_merge($this->events, $invited);
-    }
-
-    public function getInvites(string|array|null $status = null): void
-    {
-        $query = auth()->user()
-            ->calendarEventInvites()
-            ->whereIntegerNotInRaw('calendar_id', $this->activeCalendars);
-
-        if (is_null($status)) {
-            $query->whereNull('status');
-        } else {
-            $status = (array) $status;
-            $query->whereIn('status', $status);
-        }
-
-        $this->invites = $query->orderBy('starts_at')->get()->toArray();
-    }
-
-    public function render(): Factory|View
-    {
-        return view('flux::livewire.features.calendar.calendar')
+        return view('flux::livewire.portal.calendar-view')
             ->layout('flux::components.layouts.portal');
+    }
+
+    public function getCalendars(): array
+    {
+        return Calendar::where('is_public', true)
+            ->get()
+            ->map(function (Calendar $calendar) {
+                return $calendar->toCalendarObject([
+                    'permission' => 'reader',
+                    'group' => 'public',
+                    'resourceEditable' => false,
+                ]);
+            })
+            ->toArray();
+    }
+
+    public function getEvents(array $info, array $calendarAttributes): array
+    {
+        $calendar = Calendar::query()->find($calendarAttributes['id']);
+
+        return $calendar->calendarEvents()
+            ->where(function ($query) use ($info) {
+                $query->whereBetween('start', [
+                    Carbon::parse($info['start']),
+                    Carbon::parse($info['end']),
+                ])
+                    ->orWhereBetween('end', [
+                        Carbon::parse($info['start']),
+                        Carbon::parse($info['end']),
+                    ]);
+            })
+            ->get()
+            ->map(function (CalendarEvent $event) use ($calendarAttributes) {
+                $invited = $event->invites()
+                    ->where('inviteable_type', auth()->user()->getMorphClass())
+                    ->where('inviteable_id', auth()->user()->getKey())
+                    ->exists();
+
+                return $event->toCalendarEventObject(['is_editable' => false, 'is_attending' => $invited]);
+            })
+            ?->toArray();
+    }
+
+    public function attendEvent($eventId)
+    {
+        $event = CalendarEvent::query()->find($eventId);
+
+        $event->invites()->create([
+            'inviteable_type' => auth()->user()->getMorphClass(),
+            'inviteable_id' => auth()->user()->getKey(),
+            'status' => 'accepted',
+        ]);
+    }
+
+    public function notAttendEvent($eventId)
+    {
+        $event = CalendarEvent::query()->find($eventId);
+
+        $event->invites()
+            ->where('inviteable_type', auth()->user()->getMorphClass())
+            ->where('inviteable_id', auth()->user()->getKey())
+            ->delete();
     }
 }

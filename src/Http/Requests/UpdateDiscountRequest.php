@@ -15,13 +15,10 @@ class UpdateDiscountRequest extends BaseFormRequest
     {
         return [
             'id' => 'required|integer|exists:discounts,id,deleted_at,NULL',
-            'order_position_id' => [
-                'integer',
-                'nullable',
-                (new ExistsWithIgnore('order_positions', 'id'))->whereNull('deleted_at'),
-            ],
-            'sort_number' => 'sometimes|integer|min:0',
             'discount' => 'required_with:is_percentage|numeric',
+            'from' => 'nullable|date_format:Y-m-d H:i:s',
+            'till' => 'nullable|date_format:Y-m-d H:i:s',
+            'sort_number' => 'sometimes|integer|min:0',
             'is_percentage' => 'sometimes|boolean',
         ];
     }

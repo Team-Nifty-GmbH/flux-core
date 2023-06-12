@@ -13,16 +13,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Laravel\Scout\Searchable;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Category extends Model implements Sortable
+class Category extends Model implements Sortable, InteractsWithDataTables
 {
     use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification,
-        HasUuid, SortableTrait;
+        HasUuid, Searchable, SortableTrait;
 
-    protected $appends = [
-        'assigned',
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     protected $guarded = [
@@ -80,5 +82,33 @@ class Category extends Model implements Sortable
                 '',
                 ''
             );
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getLabel(): ?string
+    {
+        $path = [$this->name];
+
+        $parent = $this->parent;
+        while ($parent) {
+            $path[] = $parent->name;
+            $parent = $parent->parent;
+        }
+
+        return implode(' / ', array_reverse($path));
+    }
+
+    public function getUrl(): ?string
+    {
+        return null;
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return null;
     }
 }

@@ -176,11 +176,11 @@ class OrderDetail extends Component
         $image = $position->product?->getFirstMedia('images')
             ?? $position->product?->parent?->getFirstMedia('images');
 
-        $serialNumber = $position->serialNumber()->select(['id', 'serial_number'])->first()
-            ?: $position->origin?->serialNumber()->select(['id', 'serial_number'])->first();
+        $serialNumber = $position->serialNumbers()->select(['id', 'serial_number'])->get()
+            ?: $position->origin?->serialNumbers()->select(['id', 'serial_number'])->get();
 
         $this->positionDetails = $position->toArray();
-        $this->positionDetails['serial_number'] = $serialNumber;
+        $this->positionDetails['serial_number'] = $serialNumber->toArray();
         $this->positionDetails['product'] = $position
             ->product()
             ->select(['id', 'description', 'product_number'])
@@ -203,7 +203,7 @@ class OrderDetail extends Component
             abort(404);
         }
 
-        return response()->download($mediaItem->getPath(), $mediaItem->name);
+        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
 
     private function renderTree(array|Collection $tree, int $level = 0, string $loopPrefix = '', $parent = null): void

@@ -3,11 +3,11 @@
 namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\CalendarEvent;
-use FluxErp\Traits\BroadcastsEvents;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class CalendarEventInvite extends MorphPivot
 {

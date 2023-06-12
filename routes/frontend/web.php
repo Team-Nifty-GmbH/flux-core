@@ -19,6 +19,7 @@ use FluxErp\Http\Livewire\Settings\Currencies;
 use FluxErp\Http\Livewire\Settings\CustomerPortal;
 use FluxErp\Http\Livewire\Settings\Emails;
 use FluxErp\Http\Livewire\Settings\Languages;
+use FluxErp\Http\Livewire\Settings\Logs;
 use FluxErp\Http\Livewire\Settings\Notifications;
 use FluxErp\Http\Livewire\Settings\OrderTypes;
 use FluxErp\Http\Livewire\Settings\Permissions;
@@ -84,6 +85,7 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/currencies', Currencies::class)->name('settings.currencies');
             Route::get('/emails', Emails::class)->name('settings.emails');
             Route::get('/languages', Languages::class)->name('settings.languages');
+            Route::get('/logs', Logs::class)->name('settings.logs');
             Route::get('/notifications', Notifications::class)->name('settings.notifications');
             Route::get('/order-types', OrderTypes::class)->name('settings.order-types');
             Route::get('/permissions', Permissions::class)->name('settings.permissions');

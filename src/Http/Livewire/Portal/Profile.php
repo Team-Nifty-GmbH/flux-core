@@ -22,7 +22,7 @@ class Profile extends Component
 
     public array $addresses = [];
 
-    public string $view = 'livewire.portal.profile';
+    public string $view = 'flux::livewire.portal.profile';
 
     public ?string $loginPassword = null;
 

@@ -64,6 +64,7 @@ class UpdateProductRequest extends BaseFormRequest
             'warning_stock_amount' => 'numeric|nullable',
 
             'is_active' => 'boolean',
+            'is_highlight' => 'boolean',
             'is_bundle' => 'boolean',
             'is_shipping_free' => 'boolean',
             'is_required_product_serial_number' => 'boolean',
@@ -93,6 +94,9 @@ class UpdateProductRequest extends BaseFormRequest
 
             'categories' => 'array',
             'categories.*' => 'integer|exists:' . Category::class . ',id,model_type,' . Product::class,
+
+            'tags' => 'array',
+            'tags.*' => 'string',
         ];
     }
 }

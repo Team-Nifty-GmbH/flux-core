@@ -11,6 +11,7 @@ use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\Lockable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,12 +19,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends Model implements HasMedia, InteractsWithDataTables
 {
     use Categorizable, Filterable, HasAdditionalColumns, HasPackageFactory, HasFrontendAttributes, HasSerialNumberRange,
-        HasUserModification, HasUuid, InteractsWithMedia, Searchable, SoftDeletes;
+        HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'uuid',
@@ -32,6 +34,7 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
     protected $casts = [
         'uuid' => 'string',
         'is_active' => 'boolean',
+        'is_highlight' => 'boolean',
         'is_shipping_free' => 'boolean',
         'is_bundle' => 'boolean',
         'is_required_product_serial_number' => 'boolean',
