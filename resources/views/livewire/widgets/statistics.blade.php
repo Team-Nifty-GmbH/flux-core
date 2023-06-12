@@ -4,7 +4,7 @@
     </x-slot:title>
     <div class="grid grid-cols-4 gap-10">
         <div class="flex gap-5 items-start">
-            <x-button.circle xl class="cursor-default" icon="shopping-cart" purple></x-button.circle>
+            <x-button.circle xl class="ml-5 cursor-default" icon="shopping-cart" purple></x-button.circle>
             <div>
                 <p class="text-2xl font-semibold text-gray-900">{{$salesCount}}</p>
                 <p class="truncate text-lgfont-medium text-gray-500">{{__('Sales')}}</p>
