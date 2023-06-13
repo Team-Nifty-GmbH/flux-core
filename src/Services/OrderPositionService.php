@@ -283,7 +283,7 @@ class OrderPositionService
                 ->orderByDesc('id')
                 ->first();
 
-            if (!$stockPosting || bcmul(1, $stockPosting->posting) == 0) {
+            if (! $stockPosting || bcmul(1, $stockPosting->posting) == 0) {
                 $orderPosition->purchase_price = 0;
             } else {
                 $orderPosition->purchase_price = bcdiv($stockPosting->purchase_price, $stockPosting->posting);

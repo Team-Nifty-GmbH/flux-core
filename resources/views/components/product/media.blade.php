@@ -10,18 +10,18 @@
                 [
                     'model_id',
                     '=',
-                    $this->product['id']
+                    $this->product['id'],
                 ],
                 [
                     'model_type',
                     '=',
-                    \FluxErp\Models\Product::class
+                    \FluxErp\Models\Product::class,
                 ],
                 [
                     'collection_name',
                     '=',
-                    'images'
-                ]
+                    'images',
+                ],
             ]" />
     </x-card>
     <livewire:data-tables.media-list
@@ -31,18 +31,18 @@
             [
                 'model_id',
                 '=',
-                $this->product['id']
+                $this->product['id'],
             ],
             [
                 'model_type',
                 '=',
-                \FluxErp\Models\Product::class
+                \FluxErp\Models\Product::class,
             ],
             [
                 'collection_name',
                 '!=',
-                'images'
-            ]
+                'images',
+            ],
         ]"
     />
 </div>
