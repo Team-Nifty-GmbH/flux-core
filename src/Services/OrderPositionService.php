@@ -283,7 +283,7 @@ class OrderPositionService
                 ->orderByDesc('id')
                 ->first();
 
-            $orderPosition->purchase_price = ! $stockPosting ? 0 :
+            $orderPosition->purchase_price = ! $stockPosting || bcmul(1, $stockPosting->posting) == 0 ? 0 :
                 bcdiv($stockPosting->purchase_price, $stockPosting->posting);
         }
 
