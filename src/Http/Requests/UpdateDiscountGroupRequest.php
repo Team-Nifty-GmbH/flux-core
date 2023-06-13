@@ -15,6 +15,8 @@ class UpdateDiscountGroupRequest extends BaseFormRequest
             'id' => 'required|integer|exists:discount_groups,id',
             'name' => 'sometimes|required|string',
             'is_active' => 'boolean',
+            'discounts' => 'array',
+            'discounts.*' => 'integer|exists:discounts,id,deleted_at,NULL',
         ];
     }
 }

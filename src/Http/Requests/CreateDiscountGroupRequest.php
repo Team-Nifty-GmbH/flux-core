@@ -14,6 +14,8 @@ class CreateDiscountGroupRequest extends BaseFormRequest
         return [
             'name' => 'required|string',
             'is_active' => 'boolean',
+            'discounts' => 'array',
+            'discounts.*' => 'integer|exists:discounts,id,deleted_at,NULL',
         ];
     }
 }

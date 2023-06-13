@@ -23,6 +23,11 @@
                         </div>
                     </div>
                 </h1>
+                <a class="flex gap-1.5 font-semibold opacity-40" x-bind:href="product.parent?.url" x-show="product.parent?.url">
+                    <x-heroicons name="link" class="w-4 h-4" />
+                    <span x-text="product.parent?.label">
+                    </span>
+                </a>
             </div>
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
@@ -73,13 +78,7 @@
     </div>
     <x-tabs
         wire:model="tab"
-        :tabs="[
-                    'general' => __('General'),
-                    'prices' => __('Prices'),
-                    'stock' => __('Stock'),
-                    'variants' => __('Variants'),
-                    'media' => __('Media'),
-                ]"
+        :tabs="$tabs"
         wire:ignore
     >
         <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">

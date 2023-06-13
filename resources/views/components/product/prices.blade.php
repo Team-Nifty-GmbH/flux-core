@@ -29,10 +29,11 @@
                 <div class="flex gap-1.5">
                     <span x-text="priceList.name"></span>
                     <x-badge x-show="priceList.is_default" primary label="{{ __('Default') }}" />
+                    <x-badge x-show="priceList.parent" warning x-text="'{{ __('Inherited from :parent_name') }}'.replace(':parent_name', priceList.parent?.name)" />
                 </div>
             </x-slot:title>
-            <x-input :prefix="$this->currency['symbol']" class="net-price" type="number" x-on:input="recalculate(priceList, true);" x-bind:readonly="!edit" label="{{ __('Price net') }}" x-model="priceList.price_net" />
-            <x-input :prefix="$this->currency['symbol']" class="gross-price" type="number" x-on:input="recalculate(priceList, false);" x-bind:readonly="!edit" label="{{ __('Price gross') }}" x-model="priceList.price_gross" />
+            <x-input :prefix="$this->currency['symbol']" class="net-price" type="number" x-on:input="recalculate(priceList, true);" x-bind:readonly="!edit || !priceList.is_editable" label="{{ __('Price net') }}" x-model="priceList.price_net" />
+            <x-input :prefix="$this->currency['symbol']" class="gross-price" type="number" x-on:input="recalculate(priceList, false);" x-bind:readonly="!edit || !priceList.is_editable" label="{{ __('Price gross') }}" x-model="priceList.price_gross" />
         </x-card>
     </template>
 </div>

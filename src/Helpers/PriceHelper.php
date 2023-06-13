@@ -21,6 +21,8 @@ class PriceHelper
 
     private string $timestamp;
 
+    private bool $useDefault = true;
+
     public function __construct(Product $product)
     {
         $this->product = $product;
@@ -52,6 +54,13 @@ class PriceHelper
         return $this;
     }
 
+    public function useDefault(bool $useDefault): self
+    {
+        $this->useDefault = $useDefault;
+
+        return $this;
+    }
+
     public function price(): Price|null
     {
         $this->timestamp = $this->timestamp ?? Carbon::now()->toDateTimeString();
@@ -65,12 +74,12 @@ class PriceHelper
         }
 
         if (! $price) {
-            $price = $this->contact->priceList?->prices()
+            $price = $this->contact?->priceList?->prices()
                 ->where('product_id', $this->product->id)
                 ->first();
         }
 
-        if (! $price) {
+        if (! $price && $this->useDefault) {
             $price = Price::query()
                 ->where('product_id', $this->product->id)
                 ->whereRelation('priceList', 'is_default', true)
@@ -80,6 +89,8 @@ class PriceHelper
         if (! $price) {
             return null;
         }
+
+        $price->setRelation('priceList', $this->priceList);
 
         if ($this->contact) {
             $discounts = Discount::query()

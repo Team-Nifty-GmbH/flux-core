@@ -129,6 +129,6 @@
         </x-slot>
     </x-modal.card>
     <div wire:ignore>
-        <livewire:data-tables.order-list :filters="$filters" />
+        <livewire:data-tables.order-list :filters="$filters" cache-key="order.order-list"/>
     </div>
 </div>

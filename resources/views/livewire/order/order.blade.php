@@ -255,40 +255,41 @@
                 <div class="sticky top-6 space-y-6">
                     <x-card>
                         <div class="space-y-4">
-                            @if($printLayouts)
-                                <x-button
-                                    primary
-                                    class="w-full"
-                                    x-on:click="createDocuments = true"
-                                    :label="__('Send documents')"
-                                />
-                                <x-button
-                                    class="w-full"
-                                    x-on:click="createDocuments = true"
-                                    :label="__('Download documents')"
-                                />
-                                <x-button
-                                    class="w-full"
-                                    x-on:click="createDocuments = true"
-                                    :label="__('Print documents')"
-                                />
-                                <div class="dropdown-full-w">
-                                    <x-dropdown width="w-full">
-                                        <x-slot name="trigger">
-                                            <x-button class="w-full">
-                                                {{ __('Preview') }}
-                                            </x-button>
-                                        </x-slot>
-                                        @foreach($printLayouts as $key => $printLayout)
-                                            <x-dropdown.item
-                                                x-on:click="const preview = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['id' => $order['id'], 'view' => $key, 'model' => \FluxErp\Models\Order::class, '']) }}'; $openModal(preview)">
-                                                {{ $key }}
-                                            </x-dropdown.item>
-                                        @endforeach
-                                    </x-dropdown>
-                                </div>
-                            @endif
-                            <livewire:features.custom-events :model="\FluxErp\Models\Order::class" :id="$order['id']" />
+                            @section('actions')
+                                @if($printLayouts)
+                                    <x-button
+                                        primary
+                                        class="w-full"
+                                        x-on:click="createDocuments = true"
+                                        :label="__('Send documents')"
+                                    />
+                                    <x-button
+                                        class="w-full"
+                                        x-on:click="createDocuments = true"
+                                        :label="__('Download documents')"
+                                    />
+                                    <x-button
+                                        class="w-full"
+                                        x-on:click="createDocuments = true"
+                                        :label="__('Print documents')"
+                                    />
+                                    <div class="dropdown-full-w">
+                                        <x-dropdown width="w-full">
+                                            <x-slot name="trigger">
+                                                <x-button class="w-full">
+                                                    {{ __('Preview') }}
+                                                </x-button>
+                                            </x-slot>
+                                            @foreach($printLayouts as $key => $printLayout)
+                                                <x-dropdown.item
+                                                    x-on:click="const preview = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['id' => $order['id'], 'view' => $key, 'model' => \FluxErp\Models\Order::class, '']) }}'; $openModal(preview)">
+                                                    {{ $key }}
+                                                </x-dropdown.item>
+                                            @endforeach
+                                        </x-dropdown>
+                                    </div>
+                                @endif
+                            @show
                         </div>
                     </x-card>
                     <x-card>
