@@ -6,5 +6,5 @@
             @endcan
         </div>
     </div>
-    <livewire:data-tables.serial-number-list wire:key="{{ uniqid() }}" :filters="[['address_id', '=', $this->address['id']]]" />
+    <livewire:data-tables.serial-number-list cache-key="address.serial-number-list" wire:key="{{ uniqid() }}" :filters="[['address_id', '=', $this->address['id']]]" />
 </div>

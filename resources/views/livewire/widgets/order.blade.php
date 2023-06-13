@@ -66,6 +66,7 @@
     <div class="pt-8 pb-2 font-semibold uppercase">{{ __('Order positions') }}</div>
     <div x-show="orderPositions.length > 0" x-cloak x-transition>
         <livewire:data-tables.order-position-list
+            cache-key="widgets.order.order-position-list"
             :order-id="$order['id']"
             :show-row-buttons="false"
             :is-filterable="false"

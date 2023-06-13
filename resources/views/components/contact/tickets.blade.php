@@ -1,5 +1,6 @@
 <div>
     <livewire:data-tables.ticket-list
+        cache-key="contact.ticket-list"
         :filters="[
             [
                 'authenticatable_type',
