@@ -2,12 +2,11 @@
 
 namespace FluxErp\Http\Livewire\Settings;
 
-use FluxErp\Http\Requests\CreateCountryRequest;
-use FluxErp\Http\Requests\UpdateCountryRequest;
+use FluxErp\Http\Requests\CreatePriceListRequest;
+use FluxErp\Http\Requests\UpdatePriceListRequest;
 use FluxErp\Models\Country;
-use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
-use FluxErp\Services\CountryService;
+use FluxErp\Services\PriceListService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -18,7 +17,13 @@ class PriceLists extends Component
 {
     use Actions;
 
-    public ?array $selectedPriceList = [];
+    public array $selectedPriceList = [
+        'name' => '',
+        'parent_id' => null,
+        'price_list_code' => null,
+        'is_net' => false,
+        'is_default' => false
+    ];
 
     public array $priceLists = [];
 
@@ -27,13 +32,13 @@ class PriceLists extends Component
     public function getRules(): mixed
     {
         $priceListRequest = ($this->selectedPriceList['id'] ?? false)
-            ? new UpdateCountryRequest()
-            : new CreateCountryRequest();
+            ? new UpdatePriceListRequest()
+            : new CreatePriceListRequest();
 
         return Arr::prependKeysWith($priceListRequest->getRules($this->selectedPriceList), 'selectedPriceList.');
     }
 
-    public function boot(): void
+    public function mount(): void
     {
         $this->priceLists = PriceList::query()->get()->toArray();
     }
@@ -53,17 +58,19 @@ class PriceLists extends Component
 
     public function save(): void
     {
-        if (! user_can('api.priceLists.post')) {
+        if (! user_can('api.price-lists.post')) {
             return;
         }
 
         $validated = $this->validate();
 
+        dd($validated);
+
         $priceList = PriceList::query()->whereKey($this->selectedPriceList['id'] ?? false)->firstOrNew();
 
         $function = $priceList->exists ? 'update' : 'create';
 
-        $response = (new CountryService())->{$function}($validated['selectedCountry']);
+        $response = (new PriceListService())->{$function}($validated['selectedPriceList']);
 
         if (($response['status'] ?? false) === 200 || $response instanceof Model) {
             $this->notification()->success('Successfully saved');
@@ -74,7 +81,7 @@ class PriceLists extends Component
 
     public function delete(): void
     {
-        if (! user_can('api.countries.{id}.delete')) {
+        if (! user_can('api.price-lists.{id}.delete')) {
             return;
         }
 

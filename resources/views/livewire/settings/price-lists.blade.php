@@ -2,7 +2,7 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('Price Lists') }}</h1>
+                <h1 class="text-xl font-semibold dark:text-white">{{ __('Price Lists') }}</h1>
                 <div class="mt-2 text-sm text-gray-300">{{ __('A list of all the price lists') }}</div>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -24,14 +24,18 @@
         </div>
     </div>
 
-    <x-modal.card :title="__('Edit PriceList')" wire:model.defer="editModal">
+    <x-modal.card wire:model.defer="editModal">
+        <x-slot name="title" class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+            {{ ($selectedPriceList['id'] ?? false) ? __('Edit Price List') : __('New Price List') }}
+        </x-slot>
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
                     <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                         <div class="space-y-3 sm:col-span-6">
                             <x-input wire:model="selectedPriceList.name" :label="__('Name')"/>
-                            <x-input wire:model="selectedPriceList.parent_id" :label="__('Parent')"/>
+                            <x-select wire:model="selectedPriceList.parent_id" :label="__('Parent')"
+                                :options="$priceLists" option-value="id" option-label="name" />
                             <x-input wire:model="selectedPriceList.price_list_code" :label="__('Code')"/>
                             <x-toggle wire:model="selectedPriceList.is_net" lg :label="__('Is Net')"/>
                             <x-toggle wire:model="selectedPriceList.is_default" lg :label="__('Is Default')"/>
@@ -48,6 +52,7 @@
                 <div class="flex">
                     <x-button flat :label="__('Cancel')" x-on:click="close"/>
                     <x-button primary :label="__('Save')" wire:click="save"/>
+                    <x-errors />
                 </div>
             </div>
         </x-slot>
