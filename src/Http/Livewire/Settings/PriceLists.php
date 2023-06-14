@@ -2,10 +2,13 @@
 
 namespace FluxErp\Http\Livewire\Settings;
 
+use FluxErp\Http\Requests\CreateDiscountRequest;
 use FluxErp\Http\Requests\CreatePriceListRequest;
 use FluxErp\Http\Requests\UpdatePriceListRequest;
 use FluxErp\Models\Country;
+use FluxErp\Models\Discount;
 use FluxErp\Models\PriceList;
+use FluxErp\Services\DiscountService;
 use FluxErp\Services\PriceListService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
@@ -25,17 +28,30 @@ class PriceLists extends Component
         'is_default' => false
     ];
 
+    public array $discount = [
+        'discount' => null,
+        'is_percentage' => false
+    ];
+
     public array $priceLists = [];
 
     public bool $editModal = false;
 
-    public function getRules(): mixed
+    public function getRules(): array
     {
         $priceListRequest = ($this->selectedPriceList['id'] ?? false)
             ? new UpdatePriceListRequest()
             : new CreatePriceListRequest();
 
-        return Arr::prependKeysWith($priceListRequest->getRules($this->selectedPriceList), 'selectedPriceList.');
+        $rules = Arr::prependKeysWith($priceListRequest->getRules($this->selectedPriceList), 'selectedPriceList.');
+
+        if (!empty($this->discount['discount'])) {
+            $discountRequest = new CreateDiscountRequest();
+            $discountRules = Arr::prependKeysWith($discountRequest->getRules($this->discount), 'discount.');
+            $rules = array_merge($rules, $discountRules);
+        }
+
+        return $rules;
     }
 
     public function mount(): void
@@ -50,7 +66,18 @@ class PriceLists extends Component
 
     public function showEditModal(int|null $priceListId = null): void
     {
-        $this->selectedPriceList = PriceList::query()->whereKey($priceListId)->first()?->toArray() ?: [];
+        $this->selectedPriceList = PriceList::query()->whereKey($priceListId)->first()?->toArray() ?: [
+            'name' => '',
+            'parent_id' => null,
+            'price_list_code' => null,
+            'is_net' => false,
+            'is_default' => false
+        ];
+
+        $this->discount = [
+            'discount' => null,
+            'is_percentage' => false
+        ];
 
         $this->editModal = true;
         $this->resetErrorBag();
@@ -64,8 +91,6 @@ class PriceLists extends Component
 
         $validated = $this->validate();
 
-        dd($validated);
-
         $priceList = PriceList::query()->whereKey($this->selectedPriceList['id'] ?? false)->firstOrNew();
 
         $function = $priceList->exists ? 'update' : 'create';
@@ -73,10 +98,24 @@ class PriceLists extends Component
         $response = (new PriceListService())->{$function}($validated['selectedPriceList']);
 
         if (($response['status'] ?? false) === 200 || $response instanceof Model) {
+            if (!empty($validated['discount']['discount'])) {
+
+                $discount = new Discount($validated['discount']);
+
+                $discount->model_type = PriceList::class;
+
+                $discount->model_id = $response->id;
+
+                $discountService = new DiscountService();
+
+                $discountService->create($discount->toArray());
+            }
+
             $this->notification()->success('Successfully saved');
             $this->editModal = false;
         }
-        $this->boot();
+
+        $this->mount();
     }
 
     public function delete(): void
