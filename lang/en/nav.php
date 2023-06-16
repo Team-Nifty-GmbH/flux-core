@@ -19,6 +19,7 @@ return [
         'languages' => 'Languages',
         'order-types' => 'Order Types',
         'permissions' => 'Roles & Permissions',
+        'price-lists' => 'Price Lists',
         'ticket-types' => 'Ticket Types',
         'translations' => 'Translations',
         'users' => 'Users',

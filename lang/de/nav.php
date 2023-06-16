@@ -19,6 +19,7 @@ return [
         'notifications' => 'Benachrichtigungen',
         'order-types' => 'Auftragstypen',
         'permissions' => 'Rollen & Rechte',
+        'price-lists' => 'Preislisten',
         'ticket-types' => 'Tickettypen',
         'translations' => 'Übersetzungen',
         'users' => 'Benutzer',
