@@ -13,6 +13,7 @@
             placeholder="Select a time frame"
             :options="$timeFrames"
             wire:model="timeFrame"
+            :clearable="false"
         />
     </x-slot:footer>
 </x-card>
