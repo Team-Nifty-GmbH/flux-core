@@ -2,7 +2,10 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Project;
 use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\States\Project\ProjectState;
+use Spatie\ModelStates\Validation\ValidStateRule;
 
 class UpdateProjectRequest extends BaseFormRequest
 {
@@ -13,19 +16,26 @@ class UpdateProjectRequest extends BaseFormRequest
      */
     public function rules(): array
     {
-        return [
-            'id' => 'required|integer|exists:projects,id,deleted_at,NULL',
-            'project_category_template_id' => [
-                'integer',
-                new ExistsWithIgnore('project_category_templates', 'id'),
+        return array_merge(
+            (new Project())->hasAdditionalColumnsValidationRules(),
+            [
+                'id' => 'required|integer|exists:projects,id,deleted_at,NULL',
+                'category_id' => [
+                    'integer',
+                    new ExistsWithIgnore('categories', 'id'),
+                ],
+                'project_name' => 'sometimes|string',
+                'display_name' => 'sometimes|string|nullable',
+                'release_date' => 'sometimes|date_format:Y-m-d',
+                'deadline' => 'sometimes|date_format:Y-m-d|nullable',
+                'description' => 'sometimes|string|nullable',
+                'state' => [
+                    'string',
+                    ValidStateRule::make(ProjectState::class),
+                ],
+                'is_done' => 'sometimes|boolean',
+                'categories' => 'sometimes|required|array',
             ],
-            'project_name' => 'sometimes|string',
-            'display_name' => 'sometimes|string|nullable',
-            'release_date' => 'sometimes|date_format:Y-m-d',
-            'deadline' => 'sometimes|date_format:Y-m-d|nullable',
-            'description' => 'sometimes|string|nullable',
-            'is_done' => 'sometimes|boolean',
-            'categories' => 'sometimes|required|array',
-        ];
+        );
     }
 }

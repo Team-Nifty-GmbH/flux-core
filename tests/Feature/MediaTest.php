@@ -8,7 +8,6 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Media;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
-use FluxErp\Models\ProjectCategoryTemplate;
 use FluxErp\Models\ProjectTask;
 use FluxErp\Models\Setting;
 use Illuminate\Database\Eloquent\Model;
@@ -36,10 +35,8 @@ class MediaTest extends BaseSetup
         parent::setUp();
 
         $projectCategory = Category::factory()->create(['model_type' => ProjectTask::class]);
-        $projectCategoryTemplate = ProjectCategoryTemplate::factory()->create();
 
-        $projectCategoryTemplate->categories()->attach($projectCategory->id);
-        $project = Project::factory()->create(['project_category_template_id' => $projectCategoryTemplate->id]);
+        $project = Project::factory()->create(['category_id' => $projectCategory->id]);
         $contact = Contact::factory()->create(['client_id' => $this->dbClient->id]);
         $address = Address::factory()->create(['contact_id' => $contact->id, 'client_id' => $contact->client_id]);
 
@@ -51,10 +48,6 @@ class MediaTest extends BaseSetup
             'user_id' => $this->user->id,
         ]);
         $this->file = UploadedFile::fake()->image('TestFile.png');
-
-        $setting = Setting::query()
-            ->where('key', 'project_tasks.folders')
-            ->first();
 
         $this->permissions = [
             'download' => Permission::findOrCreate('api.media.private.{id}.get'),

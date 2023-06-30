@@ -6,37 +6,52 @@
                 isDropping: false,
                 isUploading: false,
                 progress: 0,
-                collection: @entangle('collection'),
-                subFolder: @entangle('subFolder'),
-                filesArray: @entangle('filesArray').defer,
+                filesArray: $wire.entangle('filesArray'),
                 handleFileSelect(event) {
                     if (event.target.files.length) {
-                        this.uploadFiles(event.target.files)
+                        this.uploadFiles(event.target.files, event)
                     }
                 },
                 handleFileDrop(event) {
                     if (event.dataTransfer.files.length > 0) {
-                        this.uploadFiles(event.dataTransfer.files)
+                        this.uploadFiles(event.dataTransfer.files, event)
                     }
                 },
-                uploadFiles(files) {
-                    const $this = this;
+                uploadError() {
+                    this.isUploading = false;
+                    this.progress = 0;
+                    window.$wireui.notify({
+                        title: 'File upload failed',
+                        description: 'Your file upload failed. Please try again.',
+                        icon: 'error'
+                    });
+                },
+                uploadSuccess(success, files) {
+                    this.isUploading = false
+                    this.progress = 0
+                    $dispatch('file-uploaded', files);
+                },
+                uploadProgress(progress) {
+                    this.progress = progress
+                },
+                uploadFiles(files, event) {
                     this.isUploading = true
-                    @this.uploadMultiple('{{ $target }}', files,
+                    let $this = this;
+                    $wire.uploadMultiple('{{ $target }}', files,
                         function (success) {
-                            $this.isUploading = false
-                            $this.progress = 0
+                            let uploadedFiles = event.target.files?.length ? event.target.files : event.dataTransfer.files;
+                            $this.uploadSuccess(success, uploadedFiles);
                         },
                         function(error) {
-                            console.log('error', error)
+                           $this.uploadError();
                         },
                         function (event) {
-                            $this.progress = event.detail.progress
+                            $this.uploadProgress(event);
                         }
                     )
                 },
                 removeUpload(index) {
-                    @this.removeUpload('{{ $target }}', index)
+                    $wire.removeUpload('{{ $target }}', index)
                 },
     }">
         <div class="relative flex flex-col items-center justify-center"
@@ -58,17 +73,16 @@
                 </div>
                 <p>{{ __('Click here to select files to upload') }}</p>
                 <em class="italic text-slate-400">{{ __('(Or drag files to the page)') }}</em>
-                <div class="mt-3 h-[2px] w-1/2 bg-gray-200">
+                <div class="mt-3 h-[2px] w-1/2 bg-gray-200" x-show="isUploading">
                     <div
                         class="h-[2px] bg-blue-500"
                         style="transition: width 1s"
-                        :style="`width: ${progress}%;`"
-                        x-show="isUploading"
+                        x-bind:style="`width: ${progress}%;`"
                     >
                     </div>
                 </div>
             </label>
-            <input type="file" id="file-upload"  class="hidden" multiple @change="handleFileSelect"/>
+            <input type="file" id="file-upload"  class="hidden" multiple x-on:change="handleFileSelect($event)"/>
         </div>
         <div class="space-y-3">
             <template x-for="(file, index) in filesArray">
@@ -82,10 +96,6 @@
                     </div>
                 </div>
             </template>
-            <div x-show="filesArray.length">
-                <x-label x-html="'{{__('Subfolder of ')}}' + ' ' + collection" />
-                <x-input pattern="[a-zA-Z0-9!@#$%^*_|]{6,25}" x-model.debounce.600ms="subFolder" />
-            </div>
         </div>
     </div>
 </div>

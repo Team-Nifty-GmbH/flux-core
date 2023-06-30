@@ -39,7 +39,6 @@ class FluxSeeder extends Seeder
         $this->call(AddressTableSeeder::class);
         $this->call(ContactOptionTableSeeder::class);
         $this->call(CategoryTableSeeder::class);
-        $this->call(ProjectCategoryTemplateTableSeeder::class);
         $this->call(ProjectTableSeeder::class);
         $this->call(ProjectTaskTableSeeder::class);
 

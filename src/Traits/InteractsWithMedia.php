@@ -3,6 +3,7 @@
 namespace FluxErp\Traits;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 trait InteractsWithMedia
 {
@@ -45,6 +46,7 @@ trait InteractsWithMedia
 
             $node[] = [
                 'name' => $key,
+                'id' => Str::uuid()->toString(),
                 'is_static' => $isStatic,
                 'collection_name' => $prefix . $key,
                 'children' => is_array($item) ?
@@ -53,14 +55,14 @@ trait InteractsWithMedia
                         $this->media()
                             ->where('collection_name', $prefix . $key)
                             ->orderBy('name', 'ASC')
-                            ->get(['id', 'name', 'collection_name', 'disk'])
-                            ->makeVisible(['id', 'name', 'collection_name', 'disk'])
+                            ->get()
+                            ->makeVisible(['id', 'name', 'file_name', 'collection_name', 'disk', 'size', 'mime_type', 'created_at'])
                             ->toArray(),
                     ) :
                     $this->media()
                         ->where('collection_name', $prefix . $key)
                         ->orderBy('name', 'ASC')
-                        ->get(['id', 'name', 'collection_name', 'disk'])
+                        ->get(['id', 'name', 'file_name', 'collection_name', 'disk', 'mime_type', 'size', 'created_at'])
                         ->makeVisible(['name', 'collection_name'])
                         ->toArray(),
             ];

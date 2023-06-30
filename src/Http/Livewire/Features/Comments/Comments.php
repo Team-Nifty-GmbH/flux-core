@@ -18,6 +18,7 @@ class Comments extends Component
 {
     use Actions;
 
+    /** @var Model $this->modelType */
     public string $modelType = '';
 
     public int $modelId = 0;
@@ -50,7 +51,7 @@ class Comments extends Component
      */
     public function getListeners(): array
     {
-        $channel = (new $this->modelType)->broadcastChannel() . '.' . $this->modelId;
+        $channel = (new $this->modelType)->broadcastChannel() . $this->modelId;
 
         return [
             'echo-private:' . $channel . ',.CommentCreated' => 'commentCreatedEvent',

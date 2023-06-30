@@ -30,6 +30,7 @@ class ReplaceMediaRequest extends BaseFormRequest
             'media_type' => ['sometimes', new MediaUploadType()],
             'parent_id' => 'integer|nullable|exists:media,id,deleted_at,NULL',
             'name' => 'sometimes|required|string',
+            'file_name' => 'sometimes|required|string',
             'disk' => [
                 'sometimes',
                 'required',
