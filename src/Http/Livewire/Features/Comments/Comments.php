@@ -3,8 +3,10 @@
 namespace FluxErp\Http\Livewire\Features\Comments;
 
 use FluxErp\Models\Comment;
+use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use FluxErp\Services\CommentService;
+use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -16,7 +18,7 @@ use WireUi\Traits\Actions;
 
 class Comments extends Component
 {
-    use Actions;
+    use Actions, WithFileUploads;
 
     public string $modelType = '';
 
@@ -36,6 +38,10 @@ class Comments extends Component
     public array $comments = [];
 
     public array $users = [];
+
+    public array $roles = [];
+
+    public $files;
 
     public int $commentId = 0;
 
@@ -77,17 +83,31 @@ class Comments extends Component
 
         $this->loadComments($record);
 
-        $tags = User::query()
+        $this->users = User::query()
+            ->select('id', 'firstname', 'lastname')
             ->where('is_active', 1)
             ->get()
+            ->map(function (User $user) {
+                return [
+                    'key' => $user->name,
+                    'value' => $user->id,
+                    'type' => User::class,
+                ];
+            })
             ->toArray();
 
-        $this->users = array_map(function ($tag) {
-            return (object) [
-                'key' => $tag['name'],
-                'value' => $tag['user_code'],
-            ];
-        }, $tags);
+        $this->roles = Role::query()
+            ->select(['id', 'name'])
+            ->whereRelation('users', 'is_active', 1)
+            ->get()
+            ->map(function (Role $role) {
+                return [
+                    'key' => $role->name,
+                    'value' => $role->id,
+                    'type' => Role::class,
+                ];
+            })
+            ->toArray();
     }
 
     public function render(): View|Factory|Application
@@ -219,5 +239,10 @@ class Comments extends Component
             $comment['slug_position'] = (string) $comment['id'];
             array_unshift($this->comments['data'], $comment);
         }
+    }
+
+    public function updatedFiles(): void
+    {
+        $this->skipRender();
     }
 }

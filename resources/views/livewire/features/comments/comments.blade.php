@@ -5,6 +5,9 @@
                 comments: $wire.entangle('comments').defer,
                 stickyComments: $wire.entangle('stickyComments').defer,
                 commentId: $wire.entangle('commentId').defer,
+                uploadFile() {
+                    $el.parentNode.querySelector('input[type=\'file\']').click();
+                },
             }"
         >
             <div class="dark:divide-secondary-700 divide-y divide-gray-200">
