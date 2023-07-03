@@ -94,39 +94,4 @@ class UserService
             statusMessage: 'user deleted'
         );
     }
-
-    public function initializeUsers(): void
-    {
-        $path = resource_path() . '/init-files/users.json';
-        $json = json_decode(file_get_contents($path));
-
-        if ($json->model === 'User') {
-            $jsonUsers = $json->data;
-
-            if ($jsonUsers) {
-                foreach ($jsonUsers as $jsonUser) {
-                    // Gather necessary foreign keys.
-                    $languageId = Language::query()
-                        ->where('language_code', $jsonUser->language_code)
-                        ->first()
-                        ?->id;
-
-                    // Save to database, if all foreign keys are found.
-                    if ($languageId && $jsonUser->user_code !== 'admin') {
-                        User::query()
-                            ->updateOrCreate([
-                                'user_code' => $jsonUser->user_code,
-                            ], [
-                                'language_id' => $languageId,
-                                'email' => $jsonUser->email,
-                                'firstname' => $jsonUser->firstname,
-                                'lastname' => $jsonUser->lastname,
-                                'password' => $jsonUser->password,
-                                'is_active' => $jsonUser->is_active,
-                            ]);
-                    }
-                }
-            }
-        }
-    }
 }

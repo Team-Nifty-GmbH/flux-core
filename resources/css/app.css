@@ -49,4 +49,10 @@
     textarea:read-only {
         @apply bg-gray-50 text-gray-600;
     }
+
+    .content-editable-placeholder:empty:before {
+        content: attr(placeholder);
+        @apply pointer-events-none text-secondary-400;
+    }
 }
+

@@ -82,32 +82,7 @@ class Comments extends Component
             ->toArray();
 
         $this->loadComments($record);
-
-        $this->users = User::query()
-            ->select('id', 'firstname', 'lastname')
-            ->where('is_active', 1)
-            ->get()
-            ->map(function (User $user) {
-                return [
-                    'key' => $user->name,
-                    'value' => $user->id,
-                    'type' => User::class,
-                ];
-            })
-            ->toArray();
-
-        $this->roles = Role::query()
-            ->select(['id', 'name'])
-            ->whereRelation('users', 'is_active', 1)
-            ->get()
-            ->map(function (Role $role) {
-                return [
-                    'key' => $role->name,
-                    'value' => $role->id,
-                    'type' => Role::class,
-                ];
-            })
-            ->toArray();
+        $this->loadUsersAndRoles();
     }
 
     public function render(): View|Factory|Application
@@ -244,5 +219,38 @@ class Comments extends Component
     public function updatedFiles(): void
     {
         $this->skipRender();
+    }
+
+    private function loadUsersAndRoles(): void
+    {
+        if(! auth()->user()?->getMorphClass() === User::class) {
+            return;
+        }
+
+        $this->users = User::query()
+            ->select('id', 'firstname', 'lastname')
+            ->where('is_active', 1)
+            ->get()
+            ->map(function (User $user) {
+                return [
+                    'key' => $user->name,
+                    'value' => $user->id,
+                    'type' => User::class,
+                ];
+            })
+            ->toArray();
+
+        $this->roles = Role::query()
+            ->select(['id', 'name'])
+            ->whereRelation('users', 'is_active', 1)
+            ->get()
+            ->map(function (Role $role) {
+                return [
+                    'key' => $role->name,
+                    'value' => $role->id,
+                    'type' => Role::class,
+                ];
+            })
+            ->toArray();
     }
 }
