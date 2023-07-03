@@ -62,7 +62,7 @@ trait InteractsWithMedia
                     $this->media()
                         ->where('collection_name', $prefix . $key)
                         ->orderBy('name', 'ASC')
-                        ->get(['id', 'name', 'file_name', 'collection_name', 'disk', 'mime_type', 'size', 'created_at'])
+                        ->get(['id', 'name', 'file_name', 'collection_name', 'disk', 'size', 'mime_type', 'created_at'])
                         ->makeVisible(['name', 'collection_name'])
                         ->toArray(),
             ];

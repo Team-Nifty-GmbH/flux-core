@@ -478,7 +478,7 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'id' => $this->projects[1]->id,
-            'category_id' => ++$this->category->id + 3,
+            'category_id' => ++$this->categories[1]->id,
             'project_name' => 'Project Name',
             'release_date' => date('Y-m-d'),
             'categories' => $this->categories->pluck('id')->toArray(),

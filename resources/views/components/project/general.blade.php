@@ -4,7 +4,7 @@
      }"
      wire:key="{{ uniqid() }}"
 >
-    <div  id="project-task-modal">
+    <div id="project-task-modal">
         <x-modal max-width="4xl">
             <x-card>
                 <livewire:project-task.project-task :project-id="$this->project['id'] ?? null" />

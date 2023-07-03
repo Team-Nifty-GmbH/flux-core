@@ -1,4 +1,3 @@
-
 <div x-data="{
                 ...folderTree(),
                 levels: [],
@@ -83,8 +82,8 @@
                     this.isUploading = false;
                     this.progress = 0;
                     window.$wireui.notify({
-                        title: 'File upload failed',
-                        description: message ? message : 'Your file upload failed. Please try again.',
+                        title: '{{  __('File upload failed') }}',
+                        description: message ? message : '{{ __('Your file upload failed. Please try again.') }}',
                         icon: 'error'
                     });
                 },
@@ -201,7 +200,7 @@
     <div class="min-w-0 overflow-auto">
         <ul class="flex flex-col gap-1" wire:ignore>
             <template x-for="(level,i) in levels" :key="level.id">
-                <li x-html="renderLevel(level,i)"></li>
+                <li x-html="renderLevel(level, i)"></li>
             </template>
             <li>
                 <x-button class="w-full" outline :label="__('Add folder')" x-on:click="addFolder(levels, null)" />
@@ -259,7 +258,13 @@
                 <x-input :label="__('Size')" disabled x-bind:value="convertSize(selection?.size)" />
                 <x-input :label="__('File')" disabled x-bind:value="selection.file_name" />
                 <x-input :label="__('Disk')" disabled x-bind:value="selection.disk" />
-                <x-input  x-show="selection?.disk === 'public'"  :label="__('Link')" readonly x-ref="originalLink" type="text" x-bind:value="selection.original_url">
+                <x-input x-show="selection?.disk === 'public'"
+                    :label="__('Link')"
+                    readonly
+                    x-ref="originalLink"
+                    type="text"
+                    x-bind:value="selection.original_url"
+                >
                     <x-slot:append>
                         <div class="absolute inset-y-0 right-0 flex items-center p-0.5">
                             <x-button
@@ -272,7 +277,12 @@
                         </div>
                     </x-slot:append>
                 </x-input>
-                <embed class="object-contain" x-bind:type="selection.mime_type" x-bind:src="selection.original_url" width="100%" height="200px" />
+                <embed class="object-contain"
+                    x-bind:type="selection.mime_type"
+                    x-bind:src="selection.original_url"
+                    width="100%"
+                    height="200px"
+                />
             </div>
         </div>
         <div x-show="selected" class="w-full flex justify-end">

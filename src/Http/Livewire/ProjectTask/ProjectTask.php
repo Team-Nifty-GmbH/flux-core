@@ -26,7 +26,7 @@ class ProjectTask extends Component
 
     public array $availableStates = [];
 
-    public ?array $categories = [];
+    public array $categories = [];
 
     public array $openCategories = [];
 
@@ -68,7 +68,7 @@ class ProjectTask extends Component
             ->whereKey($projectTask)
             ->with(['categories:id,parent_id', 'project'])
             ->firstOrNew();
-        $project = $projectTask->project ?? Project::query()->whereKey($this->projectId)->firstOrFail();
+        $project = $projectTask->project ?: Project::query()->whereKey($this->projectId)->firstOrFail();
         $projectCategories = $project
             ?->categories()
             ->get()
@@ -79,11 +79,17 @@ class ProjectTask extends Component
             ?->children()
             ->with('children:id,parent_id,name')
             ->get()
-            ->toArray() ?: []);
+            ->toArray() ?: []
+        );
         $primaryCategory = $project
             ->category
             ?->toArray();
-        $this->categories = array_values(array_filter($categories, fn ($category) => in_array($category['id'], array_column($projectCategories, 'id'))));
+        $this->categories = array_values(
+            array_filter(
+                $categories,
+                fn ($category) => in_array($category['id'], array_column($projectCategories, 'id'))
+            )
+        );
         $this->categories[] = $primaryCategory;
         $this->categories = to_tree($this->categories);
         $this->categories = $this->categories[0]['children'];
@@ -147,11 +153,7 @@ class ProjectTask extends Component
 
         $response = $service->delete($this->projectTask['id']);
 
-        if ($response['status'] < 300) {
-            return true;
-        } else {
-            return false;
-        }
+        return ($response['status'] ?? false) === 204;
     }
 
     public function getAdditionalColumns(): array

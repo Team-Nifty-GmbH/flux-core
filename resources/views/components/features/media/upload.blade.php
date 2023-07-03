@@ -21,8 +21,8 @@
                     this.isUploading = false;
                     this.progress = 0;
                     window.$wireui.notify({
-                        title: 'File upload failed',
-                        description: 'Your file upload failed. Please try again.',
+                        title: '{{ __('File upload failed') }}',
+                        description: '{{ __('Your file upload failed. Please try again.') }}',
                         icon: 'error'
                     });
                 },
@@ -82,7 +82,7 @@
                     </div>
                 </div>
             </label>
-            <input type="file" id="file-upload"  class="hidden" multiple x-on:change="handleFileSelect($event)"/>
+            <input type="file" id="file-upload" class="hidden" multiple x-on:change="handleFileSelect($event)"/>
         </div>
         <div class="space-y-3">
             <template x-for="(file, index) in filesArray">

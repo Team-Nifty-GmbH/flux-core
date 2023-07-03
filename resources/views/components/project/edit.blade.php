@@ -56,8 +56,8 @@
     ></x-model-select>
     <div class="pt-1.5">
         <ul wire:ignore class="flex flex-col gap-1">
-            <template x-for="(level,i) in levels">
-                <li x-html="renderLevel(level,i)"></li>
+            <template x-for="(level, i) in levels">
+                <li x-html="renderLevel(level, i)"></li>
             </template>
         </ul>
     </div>

@@ -36,6 +36,5 @@ return new class extends Migration
         Schema::table('projects', function (Blueprint $table) {
             $table->dropColumn('state');
         });
-
     }
 };

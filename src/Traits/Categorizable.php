@@ -103,11 +103,13 @@ trait Categorizable
      */
     public function categoryId(): Attribute
     {
-        $categories = $this->categories();
-
         return Attribute::make(
-            get: fn ($value) => $this->hasCategoryIdAttribute() ? $value : ($categories->count() === 1 ? $categories->first()?->id : null),
-            set: fn ($value) => $this->hasCategoryIdAttribute() ? $value : self::$categoryIds = $value
+            get: fn ($value) => $this->hasCategoryIdAttribute()
+                ? $value
+                : ($this->categories()->count() === 1 ? $this->categories()->first()?->id : null),
+            set: fn ($value) => $this->hasCategoryIdAttribute()
+                ? $value
+                : self::$categoryIds = $value
         );
     }
 

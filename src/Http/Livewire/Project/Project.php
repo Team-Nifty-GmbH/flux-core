@@ -57,10 +57,8 @@ class Project extends Component
             'comments' => __('Comments'),
             'statistics' => __('Statistics'),
         ];
-        $categories = Category::query()
-            ->whereNull('parent_id');
 
-        return view('flux::livewire.project.project', ['tabs' => $tabs, 'categories' => $categories]);
+        return view('flux::livewire.project.project', ['tabs' => $tabs]);
     }
 
     public function save(): bool|array

@@ -40,7 +40,7 @@ export default function () {
             let html = '<div class="flex gap-1">';
 
             if (this.isFolder(obj)) {
-                html +=  this.chevron();
+                html += this.chevron();
             }
 
             if (this.isSelectable(obj)) {
@@ -61,7 +61,7 @@ export default function () {
                 }
             }
 
-            let ref = 'l'+Math.random().toString(36).substring(7);
+            let ref = 'l' + Math.random().toString(36).substring(7);
 
             html += this.itemTemplate(obj, ref);
             html += '</div>';
@@ -87,7 +87,7 @@ export default function () {
         selectAttributes() {
             return '';
         },
-        chevron(){
+        chevron() {
             return `<svg x-bind:class="{'rotate-90' : openFolders.includes(level.id)}" x-on:click="toggleLevel('', level)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 icon-cursor transition-transform">
                     <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
                 </svg>`;

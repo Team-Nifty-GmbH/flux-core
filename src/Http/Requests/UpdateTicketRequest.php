@@ -49,7 +49,7 @@ class UpdateTicketRequest extends BaseFormRequest
                     'integer',
                     'exists:users,id,deleted_at,NULL',
                 ],
-            ]
+            ],
         );
     }
 }

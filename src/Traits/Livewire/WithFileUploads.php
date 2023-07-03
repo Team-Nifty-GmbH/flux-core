@@ -35,7 +35,9 @@ trait WithFileUploads
 
     public function downloadCollection(string $collection): BinaryFileResponse
     {
-        $media = Media::where('collection_name', 'like', $collection . '%')->get();
+        $media = Media::query()
+            ->where('collection_name', 'like', $collection . '%')
+            ->get();
 
         // add files to a zip file
         $zip = new \ZipArchive();

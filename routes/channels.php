@@ -43,7 +43,7 @@ Broadcast::channel('FluxErp.Models.ProjectTask', function ($user) {
     return $user->can(channel_to_permission((new \FluxErp\Models\ProjectTask())->broadcastChannelRoute()));
 });
 
-Broadcast::channel('FluxErp.Models.Project.{projectTask}', function ($user) {
+Broadcast::channel('FluxErp.Models.Project.{project}', function ($user) {
     return $user->can(channel_to_permission((new \FluxErp\Models\Project())->broadcastChannelRoute()));
 });
 

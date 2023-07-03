@@ -41,8 +41,8 @@
              x-model="projectTask.categories"
         >
             <ul class="flex flex-col gap-1" wire:ignore>
-                <template x-for="(level,i) in levels">
-                    <li x-html="renderLevel(level,i)"></li>
+                <template x-for="(level, i) in levels">
+                    <li x-html="renderLevel(level, i)"></li>
                 </template>
             </ul>
         </div>

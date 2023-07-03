@@ -36,7 +36,7 @@ class ProjectService
             ->whereKey($data['category_id'])
             ->with('children:id,parent_id')
             ->first();
-        $categories = Arr::pluck(to_flat_tree($categories->children->toArray()), 'id');
+        $categories = array_column(to_flat_tree($categories->children->toArray()), 'id');
 
         $diff = array_diff($intArray, $categories);
         if (count($diff) > 0 || count($categories) === 0) {
@@ -158,7 +158,7 @@ class ProjectService
                 ->with('children:id,parent_id')
                 ->get()
                 ->toArray();
-            $categories = $projectCategories ? Arr::pluck(to_flat_tree($projectCategories), 'id') : [];
+            $categories = $projectCategories ? array_column(to_flat_tree($projectCategories), 'id') : [];
 
             $diff = array_diff($intArray, $categories);
             if (count($diff) > 0) {
@@ -172,7 +172,10 @@ class ProjectService
 
             $projectTaskCategories = [];
             $project->tasks->each(function ($task) use (&$projectTaskCategories) {
-                $projectTaskCategories = array_merge($projectTaskCategories, $task->categories->pluck('id')->toArray());
+                $projectTaskCategories = array_merge(
+                    $projectTaskCategories,
+                    $task->categories->pluck('id')->toArray()
+                );
             });
 
             if (! empty(array_diff($projectTaskCategories, $intArray))) {

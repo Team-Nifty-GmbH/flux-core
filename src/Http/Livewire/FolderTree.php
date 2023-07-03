@@ -77,19 +77,6 @@ class FolderTree extends Component
         return ($item['file_name'] ?? false) ? $this->saveFile($item) : $this->saveFolder($item);
     }
 
-    private function saveFile(array $media): bool
-    {
-        $validator = Validator::make($media, (new UpdateMediaRequest())->rules());
-        $validated = $validator->validate();
-
-        $service = new MediaService();
-        $response = $service->update($validated);
-
-        $this->notification()->success(__('File saved!'));
-
-        return $response instanceof Media;
-    }
-
     public function saveFolder(array $collection): true
     {
         $newCollectionName = explode('.', $collection['collection_name']);
@@ -138,8 +125,16 @@ class FolderTree extends Component
             ->delete();
     }
 
-    public function getCollectionName(array $collection)
+    private function saveFile(array $media): bool
     {
+        $validator = Validator::make($media, (new UpdateMediaRequest())->rules());
+        $validated = $validator->validate();
 
+        $service = new MediaService();
+        $response = $service->update($validated);
+
+        $this->notification()->success(__('File saved!'));
+
+        return $response instanceof Media;
     }
 }

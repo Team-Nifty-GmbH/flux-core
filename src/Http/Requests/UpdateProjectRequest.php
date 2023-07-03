@@ -33,7 +33,6 @@ class UpdateProjectRequest extends BaseFormRequest
                     'string',
                     ValidStateRule::make(ProjectState::class),
                 ],
-                'is_done' => 'sometimes|boolean',
                 'categories' => 'sometimes|required|array',
             ],
         );

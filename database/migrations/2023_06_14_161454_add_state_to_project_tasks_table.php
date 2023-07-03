@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::table('project_tasks', function (Blueprint $table) {
             $table->string('state')->after('name')->default('open');
         });
+
+        \Illuminate\Support\Facades\DB::update('UPDATE project_tasks SET state = "done" WHERE is_done = 1');
     }
 
     /**
