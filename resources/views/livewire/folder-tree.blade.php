@@ -199,7 +199,7 @@
 >
     <div class="min-w-0 overflow-auto">
         <ul class="flex flex-col gap-1" wire:ignore>
-            <template x-for="(level,i) in levels" :key="level.id">
+            <template x-for="(level, i) in levels" :key="level.id">
                 <li x-html="renderLevel(level, i)"></li>
             </template>
             <li>
