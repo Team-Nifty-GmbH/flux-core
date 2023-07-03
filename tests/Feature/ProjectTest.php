@@ -10,7 +10,6 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
-use FluxErp\Models\ProjectCategoryTemplate;
 use FluxErp\Models\ProjectTask;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -25,7 +24,7 @@ class ProjectTest extends BaseSetup
 
     private Collection $projects;
 
-    private Model $projectCategoryTemplate;
+    private Model $category;
 
     private Collection $categories;
 
@@ -34,13 +33,22 @@ class ProjectTest extends BaseSetup
     protected function setUp(): void
     {
         parent::setUp();
-        $this->projectCategoryTemplate = ProjectCategoryTemplate::factory()->create();
+        $this->category = Category::factory()->create(['model_type' => Project::class]);
+        $this->categories = Category::factory()
+            ->count(2)
+            ->create([
+                'model_type' => ProjectTask::class,
+                'parent_id' => $this->category->id,
+            ]);
+
         $this->projects = Project::factory()->count(2)->create([
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
         ]);
 
-        $this->categories = Category::factory()->count(2)->create(['model_type' => ProjectTask::class]);
-        $this->projectCategoryTemplate->categories()->attach($this->categories->pluck('id')->toArray());
+        $this->projects
+            ->each(
+                fn ($project) => $project->categories()->attach($this->categories->pluck('id')->toArray())
+            );
 
         $this->permissions = [
             'show' => Permission::findOrCreate('api.projects.{id}.get'),
@@ -68,13 +76,13 @@ class ProjectTest extends BaseSetup
         $this->assertNotEmpty($project);
         $this->assertEquals($this->projects[0]->id, $project->id);
         $this->assertEquals($this->projects[0]->parent_id, $project->parent_id);
-        $this->assertEquals($this->projects[0]->project_category_template_id, $project->project_category_template_id);
+        $this->assertEquals($this->projects[0]->category_id, $project->category_id);
         $this->assertEquals($this->projects[0]->project_name, $project->project_name);
         $this->assertEquals($this->projects[0]->display_name, $project->display_name);
         $this->assertEquals(Carbon::parse($this->projects[0]->release_date)->toDateString(), $project->release_date);
         $this->assertNull($project->deadline);
         $this->assertEquals($this->projects[0]->description, $project->description);
-        $this->assertEquals($this->projects[0]->is_done, $project->is_done);
+        $this->assertEquals($this->projects[0]->state, $project->state);
         $this->assertEquals(Carbon::parse($this->projects[0]->created_at),
             Carbon::parse($project->created_at));
         $this->assertEquals(Carbon::parse($this->projects[0]->updated_at),
@@ -105,14 +113,14 @@ class ProjectTest extends BaseSetup
         $this->assertNotEmpty($projects);
         $this->assertEquals($referenceProject->id, $projects[0]->id);
         $this->assertEquals($referenceProject->parent_id, $projects[0]->parent_id);
-        $this->assertEquals($referenceProject->project_category_template_id, $projects[0]->project_category_template_id);
+        $this->assertEquals($referenceProject->category_id, $projects[0]->category_id);
         $this->assertEquals($referenceProject->project_name, $projects[0]->project_name);
         $this->assertEquals($referenceProject->display_name, $projects[0]->display_name);
         $this->assertEquals(Carbon::parse($referenceProject->release_date)->toDateString(), $projects[0]->release_date);
         $this->assertEquals($referenceProject->deadline ?
             Carbon::parse($referenceProject->deadline)->toDateString() : null, $projects[0]->deadline);
         $this->assertEquals($referenceProject->description, $projects[0]->description);
-        $this->assertEquals($referenceProject->is_done, $projects[0]->is_done);
+        $this->assertEquals($referenceProject->state, $projects[0]->state);
         $this->assertEquals(Carbon::parse($referenceProject->created_at), Carbon::parse($projects[0]->created_at));
         $this->assertEquals(Carbon::parse($referenceProject->updated_at), Carbon::parse($projects[0]->updated_at));
     }
@@ -121,7 +129,7 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'parent_id' => $this->projects[0]->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'display_name' => 'Display Name',
             'release_date' => date('Y-m-d'),
@@ -142,7 +150,7 @@ class ProjectTest extends BaseSetup
             ->first();
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['parent_id'], $dbProject->parent_id);
-        $this->assertEquals($project['project_category_template_id'], $dbProject->project_category_template_id);
+        $this->assertEquals($project['category_id'], $dbProject->category_id);
         $this->assertEquals($project['project_name'], $dbProject->project_name);
         $this->assertEquals($project['display_name'], $dbProject->display_name);
         $this->assertEquals($project['release_date'], Carbon::parse($dbProject->release_date)->toDateString());
@@ -158,7 +166,7 @@ class ProjectTest extends BaseSetup
 
         $project = [
             'parent_id' => $this->projects[0]->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'display_name' => 'Display Name',
             'release_date' => date('Y-m-d'),
@@ -185,7 +193,7 @@ class ProjectTest extends BaseSetup
             ->first();
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['parent_id'], $dbProject->parent_id);
-        $this->assertEquals($project['project_category_template_id'], $dbProject->project_category_template_id);
+        $this->assertEquals($project['category_id'], $dbProject->category_id);
         $this->assertEquals($project['project_name'], $dbProject->project_name);
         $this->assertEquals($project['project_name'],
             $dbProject->getTranslation('project_name', $this->defaultLanguageCode));
@@ -207,7 +215,7 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'parent_id' => $this->projects[0]->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'display_name' => 'Display Name',
             'release_date' => date('Y-m-D'),
@@ -227,7 +235,7 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'parent_id' => ++$this->projects[1]->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'release_date' => date('Y-m-d'),
             'categories' => $this->categories->pluck('id')->toArray(),
@@ -243,13 +251,13 @@ class ProjectTest extends BaseSetup
     public function test_create_project_second_level_project()
     {
         $parent = Project::factory()->create([
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'parent_id' => $this->projects[0]->id,
         ]);
 
         $project = [
             'parent_id' => $parent->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'release_date' => date('Y-m-d'),
             'categories' => $this->categories->pluck('id')->toArray(),
@@ -259,14 +267,14 @@ class ProjectTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/projects', $project);
-        $response->assertStatus(409);
+        $response->assertStatus(201);
     }
 
-    public function test_create_project_category_template_not_found()
+    public function test_create_project_category_not_found()
     {
         $project = [
             'parent_id' => $this->projects[1]->id,
-            'project_category_template_id' => ++$this->projectCategoryTemplate->id,
+            'category_id' => ++$this->category->id,
             'project_name' => 'Project Name',
             'release_date' => date('Y-m-d'),
             'categories' => $this->categories->pluck('id')->toArray(),
@@ -276,7 +284,7 @@ class ProjectTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/projects', $project);
-        $response->assertStatus(422);
+        $response->assertStatus(404);
     }
 
     public function test_create_project_categories_not_found()
@@ -284,7 +292,7 @@ class ProjectTest extends BaseSetup
         $category = Category::factory()->create(['model_type' => ProjectTask::class]);
         $project = [
             'parent_id' => $this->projects[1]->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'release_date' => date('Y-m-d'),
             'categories' => array_merge($this->categories->pluck('id')->toArray(), [$category->id]),
@@ -301,7 +309,7 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'id' => $this->projects[0]->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'display_name' => null,
             'release_date' => date('Y-m-d'),
@@ -325,7 +333,7 @@ class ProjectTest extends BaseSetup
 
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['id'], $dbProject->id);
-        $this->assertEquals($project['project_category_template_id'], $dbProject->project_category_template_id);
+        $this->assertEquals($project['category_id'], $dbProject->category_id);
         $this->assertEquals($project['project_name'], $dbProject->project_name);
         $this->assertNull($dbProject->display_name);
         $this->assertEquals($project['release_date'], Carbon::parse($dbProject->release_date)->toDateString());
@@ -344,7 +352,7 @@ class ProjectTest extends BaseSetup
         $this->projects[0]->saveMeta($additionalColumns[0]->name, 'Original Value');
         $this->projects[0]->saveMeta($additionalColumns[1]->name, $value);
 
-        $categoryTemplateId = $this->projects[0]->project_category_template_id;
+        $categoryId = $this->projects[0]->category_id;
 
         $project = [
             'id' => $this->projects[0]->id,
@@ -373,7 +381,7 @@ class ProjectTest extends BaseSetup
 
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['id'], $dbProject->id);
-        $this->assertEquals($categoryTemplateId, $dbProject->project_category_template_id);
+        $this->assertEquals($categoryId, $dbProject->category_id);
         $this->assertEquals($project['project_name'], $dbProject->project_name);
         $this->assertNull($dbProject->display_name);
         $this->assertEquals($project['release_date'], Carbon::parse($dbProject->release_date)->toDateString());
@@ -392,7 +400,7 @@ class ProjectTest extends BaseSetup
 
         $project = [
             'id' => $this->projects[0]->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'release_date' => date('Y-m-d'),
             'description' => 'New description text for further information',
@@ -416,7 +424,7 @@ class ProjectTest extends BaseSetup
             ->first();
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['id'], $dbProject->id);
-        $this->assertEquals($project['project_category_template_id'], $dbProject->project_category_template_id);
+        $this->assertEquals($project['category_id'], $dbProject->category_id);
         $this->assertEquals($project['project_name'], $dbProject->project_name);
         $this->assertEquals($project['project_name'],
             $dbProject->getTranslation('project_name', $this->defaultLanguageCode));
@@ -435,7 +443,7 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'id' => $this->projects[0]->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'release_date' => date('Y-m-d'),
             'deadline' => date('Y-m-D'),
@@ -453,7 +461,7 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'id' => ++$this->projects[1]->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'release_date' => date('Y-m-d'),
             'categories' => $this->categories->pluck('id')->toArray(),
@@ -466,11 +474,11 @@ class ProjectTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_update_project_category_template_not_found()
+    public function test_update_project_category_not_found()
     {
         $project = [
             'id' => $this->projects[1]->id,
-            'project_category_template_id' => ++$this->projectCategoryTemplate->id,
+            'category_id' => ++$this->categories[1]->id,
             'project_name' => 'Project Name',
             'release_date' => date('Y-m-d'),
             'categories' => $this->categories->pluck('id')->toArray(),
@@ -488,7 +496,7 @@ class ProjectTest extends BaseSetup
         $category = Category::factory()->create(['model_type' => ProjectTask::class]);
         $project = [
             'id' => $this->projects[1]->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'release_date' => date('Y-m-d'),
             'categories' => array_merge($this->categories->pluck('id')->toArray(), [$category->id]),
@@ -518,7 +526,7 @@ class ProjectTest extends BaseSetup
 
         $project = [
             'id' => $this->projects[1]->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'release_date' => date('Y-m-d'),
             'categories' => $categories,
@@ -538,7 +546,7 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'id' => $this->projects[0]->id,
-            'project_category_template_id' => $this->projectCategoryTemplate->id,
+            'category_id' => $this->category->id,
             'project_name' => 'Project Name',
             'display_name' => null,
             'release_date' => date('Y-m-d'),
@@ -615,7 +623,7 @@ class ProjectTest extends BaseSetup
             ->first();
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['id'], $dbProject->id);
-        $this->assertTrue($dbProject->is_done);
+        $this->assertEquals(\FluxErp\States\Project\Done::class, get_class($dbProject->state));
     }
 
     public function test_reopen_project()
@@ -637,7 +645,7 @@ class ProjectTest extends BaseSetup
             ->first();
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['id'], $dbProject->id);
-        $this->assertFalse($dbProject->is_done);
+        $this->assertEquals(Project::getDefaultStateFor('state'), $dbProject->state);
     }
 
     public function test_finish_project_validation_fails()

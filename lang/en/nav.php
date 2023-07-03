@@ -51,6 +51,10 @@ return [
         'list' => 'Product list',
         'serial-numbers' => 'Serial numbers',
     ],
+    'projects' => [
+        'label' => 'Projects',
+        'icon' => 'briefcase',
+    ],
     'orders' => [
         'label' => 'Orders',
         'icon' => 'shopping-bag',

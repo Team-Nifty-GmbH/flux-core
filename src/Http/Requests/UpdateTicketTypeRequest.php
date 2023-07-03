@@ -2,6 +2,8 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\TicketType;
+
 class UpdateTicketTypeRequest extends BaseFormRequest
 {
     /**
@@ -11,9 +13,12 @@ class UpdateTicketTypeRequest extends BaseFormRequest
      */
     public function rules(): array
     {
-        return [
-            'id' => 'required|integer|exists:ticket_types,id,deleted_at,NULL',
-            'name' => 'required|string',
-        ];
+        return array_merge(
+            (new TicketType())->hasAdditionalColumnsValidationRules(),
+            [
+                'id' => 'required|integer|exists:ticket_types,id,deleted_at,NULL',
+                'name' => 'required|string',
+            ],
+        );
     }
 }

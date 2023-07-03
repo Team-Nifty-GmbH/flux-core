@@ -2,6 +2,8 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Category;
+
 class CreateCategoryRequest extends BaseFormRequest
 {
     /**
@@ -11,11 +13,14 @@ class CreateCategoryRequest extends BaseFormRequest
      */
     public function rules(): array
     {
-        return [
-            'model_type' => 'required|string',
-            'name' => 'required|string',
-            'parent_id' => 'integer|nullable|exists:categories,id',
-            'is_active' => 'boolean',
-        ];
+        return array_merge(
+            (new Category())->hasAdditionalColumnsValidationRules(),
+            [
+                'model_type' => 'required|string',
+                'name' => 'required|string',
+                'parent_id' => 'integer|nullable|exists:categories,id',
+                'is_active' => 'boolean',
+            ],
+        );
     }
 }

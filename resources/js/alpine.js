@@ -2,7 +2,10 @@ import Alpine from 'alpinejs'
 import focus from '@alpinejs/focus'
 import persist from '@alpinejs/persist'
 import mask from '@alpinejs/mask'
+import folderTree from './components/folder-tree';
 import '../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
+
+window.folderTree = folderTree;
 
 Alpine.plugin(focus)
 Alpine.plugin(persist)
@@ -160,4 +163,3 @@ Alpine.directive('tribute', (el, { modifiers, expression }, { evaluate }) => {
 
 window.Alpine = Alpine;
 Alpine.start();
-
