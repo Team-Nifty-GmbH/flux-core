@@ -77,7 +77,7 @@ class FolderTree extends Component
         return ($item['file_name'] ?? false) ? $this->saveFile($item) : $this->saveFolder($item);
     }
 
-    public function saveFolder(array $collection): true
+    public function saveFolder(array $collection): bool
     {
         $newCollectionName = explode('.', $collection['collection_name']);
         array_pop($newCollectionName);
