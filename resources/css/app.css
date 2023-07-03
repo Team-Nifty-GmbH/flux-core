@@ -43,10 +43,14 @@
     }
 
     input:read-only {
-        @apply bg-gray-50 text-gray-600;
+        @apply bg-gray-50;
+    }
+
+    input[type="checkbox"]:disabled {
+        @apply text-gray-400;
     }
 
     textarea:read-only {
-        @apply bg-gray-50 text-gray-600;
+        @apply bg-gray-50;
     }
 }

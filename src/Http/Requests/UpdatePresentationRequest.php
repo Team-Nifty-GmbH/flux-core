@@ -2,6 +2,8 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Presentation;
+
 class UpdatePresentationRequest extends BaseFormRequest
 {
     /**
@@ -11,13 +13,16 @@ class UpdatePresentationRequest extends BaseFormRequest
      */
     public function rules(): array
     {
-        return [
-            'id' => 'required|integer|exists:presentations,id',
-            'name' => 'sometimes|string',
-            'notice' => 'sometimes|string|nullable',
-            'model_id' => 'integer|required_with:model_type',
-            'model_type' => 'string|required_with:model_id',
-            'is_public' => 'boolean',
-        ];
+        return array_merge(
+            (new Presentation())->hasAdditionalColumnsValidationRules(),
+            [
+                'id' => 'required|integer|exists:presentations,id',
+                'name' => 'sometimes|string',
+                'notice' => 'sometimes|string|nullable',
+                'model_id' => 'integer|required_with:model_type',
+                'model_type' => 'string|required_with:model_id',
+                'is_public' => 'boolean',
+            ],
+        );
     }
 }

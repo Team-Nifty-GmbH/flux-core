@@ -53,14 +53,17 @@ class UniqueInFieldDependence implements Rule, DataAwareRule
             $dependingFieldData = $this->data;
 
             foreach ($explodedDependingField as $field) {
-                $dependingFieldData = $dependingFieldData[$field] ?? $model::query()
-                    ->select($field, $this->key)
-                    ->where($this->key, $dependingFieldData[$this->key])
-                    ->first()
-                    ?->{$field};
+                if (array_key_exists($field, $dependingFieldData)) {
+                    $dependingFieldData = $dependingFieldData[$field];
+                } else {
+                    $dependingFieldData = $model::query()
+                        ->select($field, $this->key)
+                        ->where($this->key, $dependingFieldData[$this->key] ?? null)
+                        ->first();
 
-                if (! $dependingFieldData) {
-                    return false;
+                    if (! $dependingFieldData || ! property_exists($dependingFieldData, $field)) {
+                        return false;
+                    }
                 }
             }
 

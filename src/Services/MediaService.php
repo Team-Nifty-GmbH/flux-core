@@ -98,8 +98,13 @@ class MediaService
         $customProperties = $this->customProperties($data, $data['model_type']);
 
         $file = $data['media'];
-        $filename = $file instanceof UploadedFile ?
-            $file->getClientOriginalName() : hash('sha512', microtime(false) . Str::uuid());
+        if ($data['file_name'] ?? false) {
+            $filename = $data['file_name'];
+        } else {
+            $filename = $file instanceof UploadedFile ?
+                $file->getClientOriginalName() : hash('sha512', microtime(false) . Str::uuid());
+        }
+
         $collectionName = $data['collection_name'] ?? 'default';
         $diskName = $data['disk'] ?? (
             $modelInstance->getRegisteredMediaCollections()
@@ -120,20 +125,16 @@ class MediaService
         }
 
         if ($data['media_type'] ?? false) {
-            $media = $modelInstance
-                ->{'addMediaFrom' . $data['media_type']}($file)
-                ->setName($data['name'])
-                ->withCustomProperties($customProperties)
-                ->storingConversionsOnDisk(config('flux.media.conversion'))
-                ->toMediaCollection(collectionName: $collectionName, diskName: $diskName);
+            $fileAdder = $modelInstance->{'addMediaFrom' . $data['media_type']}($file);
         } else {
-            $media = $modelInstance
-                ->addMedia($file instanceof UploadedFile ? $file->path() : $file)
-                ->setName($data['name'])
-                ->withCustomProperties($customProperties)
-                ->storingConversionsOnDisk(config('flux.media.conversion'))
-                ->toMediaCollection(collectionName: $collectionName, diskName: $diskName);
+            $fileAdder = $modelInstance->addMedia($file instanceof UploadedFile ? $file->path() : $file);
         }
+
+        $media = $fileAdder->setName($data['name'])
+            ->usingFileName($filename)
+            ->withCustomProperties($customProperties)
+            ->storingConversionsOnDisk(config('flux.media.conversion'))
+            ->toMediaCollection(collectionName: $collectionName, diskName: $diskName);
 
         return ResponseHelper::createArrayResponse(
             statusCode: 201,
@@ -162,8 +163,12 @@ class MediaService
         );
 
         $file = $data['media'];
-        $filename = $file instanceof UploadedFile ?
-            $file->getClientOriginalName() : hash('sha512', microtime(false) . Str::uuid());
+        if ($data['file_name'] ?? false) {
+            $filename = $data['file_name'];
+        } else {
+            $filename = $file instanceof UploadedFile ?
+                $file->getClientOriginalName() : hash('sha512', microtime(false) . Str::uuid());
+        }
 
         $mediaItem->name = $data['name'] ?? $filename;
 
@@ -182,20 +187,17 @@ class MediaService
         $this->delete($id);
 
         if ($data['media_type'] ?? false) {
-            $media = $mediaItem->model
-                ->{'addMediaFrom' . $data['media_type']}($file)
-                ->setName($data['name'] ?? $filename)
-                ->withCustomProperties($customProperties)
-                ->storingConversionsOnDisk(config('flux.media.conversion'))
-                ->toMediaCollection(collectionName: $mediaItem->collection_name, diskName: $diskName);
+            $fileAdder = $mediaItem->model->{'addMediaFrom' . $data['media_type']}($file);
         } else {
-            $media = $mediaItem->model
-                ->addMedia($file instanceof UploadedFile ? $file->path() : $file)
-                ->setName($data['name'] ?? $filename)
-                ->withCustomProperties($customProperties)
-                ->storingConversionsOnDisk(config('flux.media.conversion'))
-                ->toMediaCollection(collectionName: $mediaItem->collection_name, diskName: $diskName);
+            $fileAdder = $mediaItem->model->addMedia($file instanceof UploadedFile ? $file->path() : $file);
         }
+
+        $media = $fileAdder
+            ->setName($data['name'] ?? $filename)
+            ->usingFileName($filename)
+            ->withCustomProperties($customProperties)
+            ->storingConversionsOnDisk(config('flux.media.conversion'))
+            ->toMediaCollection(collectionName: $mediaItem->collection_name, diskName: $diskName);
 
         $media->forceFill([
             'id' => $id,

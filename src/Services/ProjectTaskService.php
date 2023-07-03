@@ -22,7 +22,7 @@ class ProjectTaskService
         if (($data['category_id'] ?? false) && ! $project->categories()->whereKey($data['category_id'])->exists()) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['category_id' => 'category not found in project category template']
+                data: ['category_id' => 'category not found in project categories']
             );
         }
 

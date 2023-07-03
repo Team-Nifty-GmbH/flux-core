@@ -1,7 +1,6 @@
 <div class="relative">
     <section>
-        <div class=""
-             x-data="{
+        <div x-data="{
                 comments: $wire.entangle('comments').defer,
                 stickyComments: $wire.entangle('stickyComments').defer,
                 commentId: $wire.entangle('commentId').defer,

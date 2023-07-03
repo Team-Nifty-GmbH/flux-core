@@ -11,6 +11,8 @@ use FluxErp\Http\Livewire\Order\Order;
 use FluxErp\Http\Livewire\Order\OrderList;
 use FluxErp\Http\Livewire\Product\Product;
 use FluxErp\Http\Livewire\Product\SerialNumber\SerialNumber;
+use FluxErp\Http\Livewire\Project\Project;
+use FluxErp\Http\Livewire\Project\ProjectList;
 use FluxErp\Http\Livewire\Settings\AdditionalColumns;
 use FluxErp\Http\Livewire\Settings\Calendars;
 use FluxErp\Http\Livewire\Settings\Clients;
@@ -52,6 +54,8 @@ Route::middleware(['auth:web'])->group(function () {
     Route::get('/calendars', Calendar::class)->name('calendars');
     Route::get('/contacts', ContactList::class)->name('contacts');
     Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
+    Route::get('/projects', ProjectList::class)->name('projects');
+    Route::get('/projects/{id}', Project::class)->name('projects.id?');
     Route::get('/orders', OrderList::class)->name('orders');
     Route::get('/orders/{id}', Order::class)->name('orders.id?');
     Route::get('/tickets', TicketList::class)->name('tickets');

@@ -5,6 +5,7 @@ namespace FluxErp\Traits\Livewire;
 use FluxErp\Models\Media;
 use FluxErp\Services\MediaService;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -13,42 +14,59 @@ trait WithFileUploads
 {
     use WithFileUploadsBase {
         WithFileUploadsBase::removeUpload as parentRemoveUpload;
-        WithFileUploadsBase::finishUpload as parentFinishUpload;
     }
 
     public array $filesArray = [];
 
     public string $collection = '';
 
-    public ?string $subFolder = null;
-
-    public function finishUpload($name, $tmpPath, $isMultiple): void
+    public function download(Media $mediaItem): false|BinaryFileResponse
     {
-        if (! $isMultiple) {
-            $this->parentFinishUpload($name, $tmpPath, $isMultiple);
+        if (! file_exists($mediaItem->getPath())) {
+            if (method_exists($this, 'notification')) {
+                $this->notification()->error(__('File not found!'));
+            }
 
-            return;
+            return false;
         }
 
-        $this->cleanupOldUploads();
-
-        $files = collect($tmpPath)->map(function ($i) {
-            return TemporaryUploadedFile::createFromLivewire($i);
-        })->toArray();
-        $this->emitSelf('upload:finished', $name, collect($files)->map->getFilename()->toArray());
-
-        $files = array_merge($this->getPropertyValue($name), $files);
-
-        $this->syncInput($name, $files);
-
-        $this->prepareForMediaLibrary($name);
-
-        $this->skipRender();
+        return response()->download(Storage::disk('local')->path($mediaItem->getPath()), $mediaItem->name);
     }
 
-    public function download(Media $mediaItem): BinaryFileResponse
+    public function downloadCollection(string $collection): BinaryFileResponse
     {
-        return response()->download(Storage::disk('local')->path($mediaItem->getPath()), $mediaItem->name);
+        $media = Media::query()
+            ->where('collection_name', 'like', $collection . '%')
+            ->get();
+
+        // add files to a zip file
+        $zip = new \ZipArchive();
+        $zipFileName = explode('.', $collection);
+        $zipFileName = array_pop($zipFileName);
+        $zipFileName = $zipFileName . '.zip';
+
+        $zip->open($zipFileName, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        foreach ($media as $file) {
+            /** @var Media $file */
+            if (! file_exists($file->getPath())) {
+                continue;
+            }
+
+            if ($collection === $file->collection_name) {
+                $relativePath = $file->name;
+            } else {
+                $collectionName = Str::remove($collection . '.', $file->collection_name);
+                $relativePath = explode('.', $collectionName);
+                $relativePath[] = $file->name;
+                $relativePath = implode(DIRECTORY_SEPARATOR, $relativePath);
+            }
+
+            $zip->addFile($file->getPath(), $relativePath);
+        }
+        $zip->close();
+
+        // download zip file
+        return response()->download($zipFileName)->deleteFileAfterSend(true);
     }
 
     public function removeUpload(string $name, int $index): void
@@ -68,14 +86,17 @@ trait WithFileUploads
         $modelId = $modelId ?: $this->modelId ?? null;
         $modelType = $modelType ?: $this->modelType;
 
-        $collection = trim(
-            str_replace('/', '.', $this->collection . $this->subFolder), '.'
-        ) ?: 'default';
+        $collection = $this->collection ?: 'default';
 
         foreach ($property as $file) {
+            /** @var TemporaryUploadedFile $file */
+            // fix suffix as livewire sometimes changes this
+            $suffix = pathinfo($file->getClientOriginalName(), \PATHINFO_EXTENSION);
+
             $this->filesArray[] = [
                 'key' => $file->getFilename(),
                 'name' => $file->getClientOriginalName(),
+                'file_name' => $file->getClientOriginalName(),
                 'model_id' => $modelId,
                 'model_type' => $modelType,
                 'collection_name' => $collection,
@@ -96,19 +117,9 @@ trait WithFileUploads
         }
 
         $this->filesArray = [];
-        $this->reset($name, 'subFolder');
 
         $this->cleanupOldUploads();
 
         return $response;
-    }
-
-    public function updatedSubFolder($value): void
-    {
-        $value = str_replace([' ', '.', '\\'], ['_', '/', '/'], trim($value));
-
-        $this->subFolder = '/' . ltrim(preg_replace('/[^A-Za-z0-9_\/]/', '', $value), '/');
-
-        $this->skipRender();
     }
 }

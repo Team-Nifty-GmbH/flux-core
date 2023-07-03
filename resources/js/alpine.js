@@ -2,6 +2,9 @@ import Alpine from 'alpinejs'
 import focus from '@alpinejs/focus'
 import persist from '@alpinejs/persist'
 import mask from '@alpinejs/mask'
+import folderTree from './components/folder-tree';
+
+window.folderTree = folderTree;
 
 Alpine.plugin(focus)
 Alpine.plugin(persist)

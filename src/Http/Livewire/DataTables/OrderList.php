@@ -12,6 +12,8 @@ class OrderList extends DataTable
 {
     protected string $model = Order::class;
 
+    public bool $showFilterInputs = true;
+
     public array $enabledCols = [
         'order_type.name',
         'order_date',
@@ -82,5 +84,10 @@ class OrderList extends DataTable
     public function getReturnKeys(): array
     {
         return array_merge(parent::getReturnKeys(), ['currency.iso']);
+    }
+
+    public function getFilterableColumns(?string $name = null): array
+    {
+        return $this->availableCols;
     }
 }

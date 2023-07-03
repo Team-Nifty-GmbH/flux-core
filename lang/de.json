@@ -314,5 +314,14 @@
     "VAT rate": "MwSt.-Satz",
     "Price net": "Preis netto",
     "Price gross": "Preis brutto",
-    "Images": "Bilder"
+    "Images": "Bilder",
+    "Do you really want to delete this project?": "Möchten Sie dieses Projekt wirklich löschen?",
+    "Delete project": "Projekt löschen",
+    "Project state": "Projektstatus",
+    "Release date": "Veröffentlichungsdatum",
+    "Add folder": "Ordner hinzufügen",
+    "Download folder": "Ordner herunterladen",
+    "Move": "Verschieben",
+    "ProjectTasks": "Projektaufgaben",
+    "Tasks": "Aufgaben"
 }

@@ -5,8 +5,9 @@ namespace FluxErp\Services;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Helpers\ValidationHelper;
 use FluxErp\Http\Requests\UpdateProjectRequest;
+use FluxErp\Models\Category;
 use FluxErp\Models\Project;
-use FluxErp\Models\ProjectCategoryTemplate;
+use FluxErp\States\Project\Done;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
@@ -25,23 +26,17 @@ class ProjectService
                     data: ['parent_id' => 'parent project not found']
                 );
             }
-
-            if ($parentProject->parent()->exists()) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 409,
-                    data: ['children' => 'only first level children allowed']
-                );
-            }
         }
 
         $intArray = array_filter($data['categories'], function ($value) {
             return is_int($value) && $value > 0;
         });
 
-        $categoryTemplate = ProjectCategoryTemplate::query()
-            ->whereKey($data['project_category_template_id'])
+        $categories = Category::query()
+            ->whereKey($data['category_id'])
+            ->with('children:id,parent_id')
             ->first();
-        $categories = $categoryTemplate->categories->pluck('id')->toArray();
+        $categories = array_column(to_flat_tree($categories->children->toArray()), 'id');
 
         $diff = array_diff($intArray, $categories);
         if (count($diff) > 0 || count($categories) === 0) {
@@ -51,8 +46,6 @@ class ProjectService
                 statusMessage: 'categories not found'
             );
         }
-
-        unset($data['categories']);
 
         $project = new Project($data);
         $project->save();
@@ -136,7 +129,7 @@ class ProjectService
             ->whereKey($data['id'])
             ->first();
 
-        $project->is_done = $data['finish'];
+        $project->state = $data['finish'] ? Done::class : Project::getDefaultStateFor('state');
         $project->save();
 
         return $project;
@@ -149,15 +142,23 @@ class ProjectService
                 $intArray = Arr::pluck($item['categories'], 'id');
             } else {
                 $intArray = array_filter($item['categories'], function ($value) {
-                    return is_int($value) && $value > 0;
+                    return is_numeric($value) && $value > 0;
                 });
+                $intArray = array_map('intval', $intArray);
             }
 
             $project = Project::query()
                 ->whereKey($item['id'])
+                ->with(['tasks' => ['categories:id'], 'categories:id'])
                 ->first();
 
-            $categories = $project->categoryTemplate->categories->pluck('id')->toArray();
+            $projectCategories = $project
+                ->category
+                ?->children()
+                ->with('children:id,parent_id')
+                ->get()
+                ->toArray();
+            $categories = $projectCategories ? array_column(to_flat_tree($projectCategories), 'id') : [];
 
             $diff = array_diff($intArray, $categories);
             if (count($diff) > 0) {
@@ -169,11 +170,13 @@ class ProjectService
                     additions: $response);
             }
 
-            $projectTaskCategories = Arr::flatten(
-                Arr::pluck(
-                    $project->tasks()->get()->toArray(),
-                    'category_id')
-            );
+            $projectTaskCategories = [];
+            $project->tasks->each(function ($task) use (&$projectTaskCategories) {
+                $projectTaskCategories = array_merge(
+                    $projectTaskCategories,
+                    $task->categories->pluck('id')->toArray()
+                );
+            });
 
             if (! empty(array_diff($projectTaskCategories, $intArray))) {
                 return ResponseHelper::createArrayResponse(
