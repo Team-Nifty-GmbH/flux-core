@@ -264,12 +264,12 @@
         <div x-show="selection.file_name && selected" x-cloak class="flex flex-col gap-3">
             <div class="pb-1.5">
                 <x-button primary :label="__('Download')" x-on:click="$wire.download(selection.id)" />
-                @can('api.media.delete')
+                @can('api.media.{id}.delete')
                     <x-button negative :label="__('Delete')" x-on:click="deleteFile(selection)" />
                 @endcan
             </div>
             <div class="flex flex-col gap-1.5">
-                @can('api.media.put')
+                @can('api.media.{id}.put')
                     <x-input :label="__('Name')" x-model="selection.name" />
                     <x-input :label="__('File type')" disabled x-bind:value="selection.file_name?.split('.').pop()" />
                     <x-input :label="__('MIME-Type')" disabled x-bind:value="selection.mime_type" />
@@ -304,7 +304,7 @@
                 />
             </div>
         </div>
-        @can('api.media.put')
+        @can('api.media.{id}.put')
             <div x-show="selected" class="w-full flex justify-end">
                 <x-button primary :label="__('Save')" x-on:click="save()" />
             </div>
