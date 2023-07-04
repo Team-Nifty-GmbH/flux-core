@@ -18,7 +18,7 @@ class ProjectTaskTableSeeder extends Seeder
 
         foreach ($projects as $project) {
             for ($i = 0; $i < 10; $i++) {
-                $categories = $project->categoryTemplate->categories;
+                $categories = $project->category->categories;
                 $projectTask = ProjectTask::factory()->create([
                     'project_id' => $project->id,
                     'address_id' => $addresses->random()->id,

@@ -18,6 +18,8 @@ class Navigation extends Component
 
     public ?array $setting;
 
+    public bool $showSearchBar = true;
+
     public function boot(): void
     {
         $guard = explode('_', Auth::guard()->getName());
@@ -62,8 +64,10 @@ class Navigation extends Component
         $this->navigations = $navigation;
     }
 
-    public function mount(?array $setting = null): void
+    public function mount(?array $setting = null, bool $showSearchBar = true): void
     {
+        $this->showSearchBar = $showSearchBar;
+
         if ($setting) {
             $setting = $setting['settings'];
             $this->setting = $setting;

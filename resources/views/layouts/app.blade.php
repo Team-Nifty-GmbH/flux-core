@@ -11,10 +11,7 @@
             <livewire:navigation/>
         </div>
         <div class="md:pl-20">
-            <div class="p-6">
-                <livewire:features.search-bar />
-            </div>
-            <main class="px-6">
+            <main class="px-1.5 md:px-8">
                 {{ $slot }}
             </main>
         </div>

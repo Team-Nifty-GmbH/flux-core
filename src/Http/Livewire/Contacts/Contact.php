@@ -5,6 +5,7 @@ namespace FluxErp\Http\Livewire\Contacts;
 use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Http\Requests\CreateContactRequest;
 use FluxErp\Http\Requests\UpdateContactRequest;
+use FluxErp\Models\Address;
 use FluxErp\Models\Contact as ContactModel;
 use FluxErp\Models\Order;
 use FluxErp\Services\AddressService;
@@ -88,6 +89,9 @@ class Contact extends Component
             $contactQuery->whereKey($this->contactId);
         }
         $contact = $contactQuery->firstOrFail();
+        $contact->addresses->map(function (Address $address) {
+            return $address->append('name');
+        });
 
         $contact->main_address = $contact->addresses
             ->where('is_main_address', true)

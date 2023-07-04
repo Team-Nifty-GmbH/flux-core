@@ -25,6 +25,12 @@
     }"
 >
     <x-card class="flex w-full gap-2">
+        <x-button
+            class="block md:hidden"
+            icon="menu"
+            primary
+            x-on:click="showMenu(true)"
+        />
         <div x-on:click.outside="show = false" x-on:keydown.escape.window="show = false" class="relative flex-1">
                 <x-input shadowless
                          icon="search"

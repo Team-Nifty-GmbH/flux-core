@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<HTML class="h-full bg-white" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<HTML class="h-full bg-gray-50" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <x-layouts.head.head/>
 </head>
 <body class="h-full">
-<div class="bg-gray-50">
+<div>
     <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <x-logo fill="#000000" class="h-24"/>
