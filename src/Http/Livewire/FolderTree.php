@@ -65,6 +65,10 @@ class FolderTree extends Component
 
     public function getTree(): array
     {
+        if (! $this->modelType || ! $this->modelId) {
+            return [];
+        }
+
         return $this->modelType::query()->whereKey($this->modelId)->first()?->getMediaAsTree() ?: [];
     }
 

@@ -27,8 +27,8 @@ Broadcast::channel('FluxErp.Models.Contact.{contact}', function ($user) {
     return $user->can(channel_to_permission(Contact::getBroadcastChannelRoute()));
 });
 
-Broadcast::channel('FluxErp.Models.User.{user}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
+Broadcast::channel('FluxErp.Models.Contact.{contact}', function ($user) {
+    return $user->can(channel_to_permission((new Contact())->broadcastChannelRoute()));
 });
 
 Broadcast::channel('FluxErp.Models.Log.{log}', function ($user) {
@@ -39,12 +39,12 @@ Broadcast::channel('FluxErp.Models.Log', function ($user) {
     return $user->can(channel_to_permission((new \FluxErp\Models\Log())->broadcastChannelRoute()));
 });
 
-Broadcast::channel('FluxErp.Models.ProjectTask.{projectTask}', function ($user) {
-    return $user->can(channel_to_permission((new ProjectTask())->broadcastChannelRoute()));
+Broadcast::channel('FluxErp.Models.Order.{order}', function ($user) {
+    return $user->can(channel_to_permission((new Order())->broadcastChannelRoute()));
 });
 
-Broadcast::channel('FluxErp.Models.ProjectTask', function ($user) {
-    return $user->can(channel_to_permission((new ProjectTask())->broadcastChannelRoute()));
+Broadcast::channel('FluxErp.Models.Order', function ($user) {
+    return $user->can(channel_to_permission((new Order())->broadcastChannelRoute()));
 });
 
 Broadcast::channel('FluxErp.Models.Project.{project}', function ($user) {
@@ -55,6 +55,14 @@ Broadcast::channel('FluxErp.Models.Project', function ($user) {
     return $user->can(channel_to_permission((new Project())->broadcastChannelRoute()));
 });
 
+Broadcast::channel('FluxErp.Models.ProjectTask.{projectTask}', function ($user) {
+    return $user->can(channel_to_permission((new ProjectTask())->broadcastChannelRoute()));
+});
+
+Broadcast::channel('FluxErp.Models.ProjectTask', function ($user) {
+    return $user->can(channel_to_permission((new ProjectTask())->broadcastChannelRoute()));
+});
+
 Broadcast::channel('FluxErp.Models.Ticket.{ticket}', function ($user) {
     return $user->can(channel_to_permission((new Ticket())->broadcastChannelRoute()));
 });
@@ -63,18 +71,6 @@ Broadcast::channel('FluxErp.Models.Ticket', function ($user) {
     return $user->can(channel_to_permission((new Ticket())->broadcastChannelRoute()));
 });
 
-Broadcast::channel('FluxErp.Models.Order.{order}', function ($user) {
-    return $user->can(channel_to_permission((new Order())->broadcastChannelRoute()));
-});
-
-Broadcast::channel('FluxErp.Models.Order', function ($user) {
-    return $user->can(channel_to_permission((new Order())->broadcastChannelRoute()));
-});
-
-Broadcast::channel('FluxErp.Models.Contact.{contact}', function ($user) {
-    return $user->can(channel_to_permission((new Contact())->broadcastChannelRoute()));
-});
-
-Broadcast::channel('FluxErp.Models.Contact', function ($user) {
-    return $user->can(channel_to_permission((new Contact())->broadcastChannelRoute()));
+Broadcast::channel('FluxErp.Models.User.{user}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
 });

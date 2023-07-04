@@ -255,8 +255,9 @@ class Comments extends Component
         }
 
         $this->users = User::query()
+            ->orderBy('firstname')
             ->select('id', 'firstname', 'lastname')
-            ->where('is_active', 1)
+            ->where('is_active', true)
             ->get()
             ->map(function (User $user) {
                 return [
@@ -268,8 +269,9 @@ class Comments extends Component
             ->toArray();
 
         $this->roles = Role::query()
+            ->orderBy('name')
             ->select(['id', 'name'])
-            ->whereRelation('users', 'is_active', 1)
+            ->whereRelation('users', 'is_active', true)
             ->get()
             ->map(function (Role $role) {
                 return [

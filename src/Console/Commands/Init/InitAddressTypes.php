@@ -4,7 +4,6 @@ namespace FluxErp\Console\Commands\Init;
 
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Client;
-use FluxErp\Services\AddressTypeService;
 use Illuminate\Console\Command;
 
 class InitAddressTypes extends Command
@@ -26,11 +25,11 @@ class InitAddressTypes extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle(): void
     {
         $path = resource_path() . '/init-files/address-types.json';
         if (! file_exists($path)) {
-            return 0;
+            return;
         }
 
         $json = json_decode(file_get_contents($path), true);
@@ -62,7 +61,5 @@ class InitAddressTypes extends Command
         }
 
         $this->info('Address Types initiated!');
-
-        return 0;
     }
 }
