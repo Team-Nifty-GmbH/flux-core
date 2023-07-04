@@ -4,7 +4,6 @@ namespace FluxErp\Traits\Livewire;
 
 use FluxErp\Models\Media;
 use FluxErp\Services\MediaService;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
@@ -30,7 +29,7 @@ trait WithFileUploads
             return false;
         }
 
-        return response()->download(Storage::disk('local')->path($mediaItem->getPath()), $mediaItem->name);
+        return response()->download($mediaItem->getPath(), $mediaItem->name);
     }
 
     public function downloadCollection(string $collection): BinaryFileResponse

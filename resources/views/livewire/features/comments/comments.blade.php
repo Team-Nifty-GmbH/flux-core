@@ -4,8 +4,51 @@
                 comments: $wire.entangle('comments').defer,
                 stickyComments: $wire.entangle('stickyComments').defer,
                 commentId: $wire.entangle('commentId').defer,
-                uploadFile() {
-                    $el.parentNode.querySelector('input[type=\'file\']').click();
+                uploadProgress: function(progress) {
+                },
+                uploadSuccess: function(files) {
+                },
+                uploadFinished: function() {
+                    this.uploadCache.files.value = '';
+                    this.saveComment(this.uploadCache.content, null, this.uploadCache.sticky, this.uploadCache.internal);
+                },
+                uploadCache: null,
+                saveComment: function(content, files, sticky, internal) {
+                    if (files?.files.length > 0) {
+                        this.uploadCache = {
+                            content: content,
+                            files: files,
+                            sticky: sticky,
+                            internal: internal
+                        };
+
+                        $wire.uploadMultiple(
+                            'files',
+                            files.files,
+                            this.uploadSuccess,
+                            this.uploadError,
+                            this.uploadProgress
+                        );
+
+                        $wire.on('upload:finished', () => {
+                            this.uploadFinished();
+                        });
+
+                        return;
+                    }
+
+                    $wire.saveComment(content.innerHTML, sticky.checked, internal);
+                    this.uploadCache = null;
+                    content.innerHTML = '';
+                    sticky.checked = false;
+                },
+
+                uploadError: function() {
+                    window.$wireui.notify({
+                        title: '{{ __('File upload failed') }}',
+                        description: '{{ __('Your file upload failed. Please try again.') }}',
+                        icon: 'error'
+                    });
                 },
             }"
         >

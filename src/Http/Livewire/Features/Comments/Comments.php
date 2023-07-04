@@ -10,6 +10,7 @@ use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -73,16 +74,20 @@ class Comments extends Component
         }
 
         $record = $this->modelType::query()->whereKey($this->modelId)->firstOrFail();
+        $this->loadComments($record);
+
+        Comment::addGlobalScope('sticky', function (Builder $builder) {
+            $builder->where('is_sticky', true);
+        });
+
         $this->stickyComments = $record
             ->comments()
-            ->where('is_sticky', true)
             ->get()
             ->each(function (Comment $comment) {
                 $comment->is_current_user = $comment->createdBy?->is(Auth::user());
             })
             ->toArray();
 
-        $this->loadComments($record);
         $this->loadUsersAndRoles();
     }
 
@@ -117,7 +122,14 @@ class Comments extends Component
             return;
         }
 
-        $comment = $response['data']->toArray();
+        /** @var Comment $comment */
+        $comment = $response['data'];
+        if ($this->filesArray) {
+            $this->saveFileUploadsToMediaLibrary('files', $response['data']->id, Comment::class);
+            $comment->load('media:id,name,model_type,model_id,disk');
+        }
+
+        $comment = $comment->toArray();
         $comment['user'] = Auth::user()->toArray();
         $comment['user']['avatar_url'] = Auth::user()->getAvatarUrl();
 
@@ -161,10 +173,17 @@ class Comments extends Component
 
     public function loadComments(Model $record = null): void
     {
-        $record = $record ?: $this->modelType::query()->whereKey($this->modelId)->firstOrFail();
+        $record = $record ?: $this->modelType::query()
+            ->whereKey($this->modelId)
+            ->firstOrFail();
+
+        Comment::addGlobalScope('media', function (Builder $query) {
+            $query->with('media:id,name,model_type,model_id,disk');
+        });
 
         $comments = $record
             ->comments()
+            ->with(['media:id,name,model_type,model_id,disk'])
             ->when(
                 ! Auth::user() instanceof User,
                 function ($query) {
@@ -219,12 +238,19 @@ class Comments extends Component
 
     public function updatedFiles(): void
     {
+        $this->prepareForMediaLibrary('files', $this->modelId, $this->modelType);
+
+        $this->skipRender();
+    }
+
+    public function updatedCommentId()
+    {
         $this->skipRender();
     }
 
     private function loadUsersAndRoles(): void
     {
-        if(! auth()->user()?->getMorphClass() === User::class) {
+        if (! auth()->user()?->getMorphClass() === User::class) {
             return;
         }
 
