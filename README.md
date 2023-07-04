@@ -3,6 +3,14 @@
 ### 1. Installation
 Remove the welcome route from `routes/web.php` and add the following route.
 
+Add the following to your `config/filesystem.php` config file
+```php
+    'links' => [
+        ...
+        public_path('flux') => app_path('vendor/team-nifty-gmbh/flux-erp/public'),
+    ],
+```
+
 link the flux-erp assets
 ```bash
 php artisan storage:link

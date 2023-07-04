@@ -11,11 +11,14 @@
         meta.name = 'currency-code';
         meta.content = order.currency.iso;
         document.getElementsByTagName('head')[0].appendChild(meta);
+        $watch('detail', (value) => {
+            Alpine.$data(document.getElementById('folder-tree').querySelector('[x-data]')).loadModel(@js(\FluxErp\Models\Product::class), value.product_id);
+        });
      }"
      class="dark:text-white"
      x-on:data-table-record-selected="selected = Alpine.$data(document.getElementById('order-position-table').querySelector('[tall-datatable]')).selected"
 >
-    <x-modal.card wire:model.defer="detailModal">
+    <x-modal.card id="detail-modal" wire:model.defer="detailModal">
         <div class="grid grid-cols-3 gap-5">
             <div class="col-span-1">
                 <div class="bg-portal-light w-full rounded-md">
@@ -45,7 +48,9 @@
                 <div class="pt-5" x-html="detail.product?.description"></div>
             </div>
         </div>
-        <livewire:folder-tree/>
+        <div id="folder-tree" class="pt-3">
+            <livewire:folder-tree :model-type="\FluxErp\Models\Product::class" />
+        </div>
     </x-modal.card>
     <div id="new-ticket-modal">
         <x-modal.card :title="__('New Ticket')">

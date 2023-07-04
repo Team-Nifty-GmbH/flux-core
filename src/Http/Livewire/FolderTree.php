@@ -41,6 +41,10 @@ class FolderTree extends Component
 
     public function updatedFiles(): void
     {
+        if (! Auth::user()->can('api.media.post')) {
+            return;
+        }
+
         $this->validate($this->getRules());
 
         $media = $this->saveFileUploadsToMediaLibrary(
@@ -65,6 +69,10 @@ class FolderTree extends Component
 
     public function getTree(): array
     {
+        if (! $this->modelType || ! $this->modelId) {
+            return [];
+        }
+
         return $this->modelType::query()->whereKey($this->modelId)->first()?->getMediaAsTree() ?: [];
     }
 

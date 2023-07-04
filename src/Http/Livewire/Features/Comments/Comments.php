@@ -3,11 +3,14 @@
 namespace FluxErp\Http\Livewire\Features\Comments;
 
 use FluxErp\Models\Comment;
+use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use FluxErp\Services\CommentService;
+use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +19,7 @@ use WireUi\Traits\Actions;
 
 class Comments extends Component
 {
-    use Actions;
+    use Actions, WithFileUploads;
 
     /** @var Model $this->modelType */
     public string $modelType = '';
@@ -37,6 +40,10 @@ class Comments extends Component
     public array $comments = [];
 
     public array $users = [];
+
+    public array $roles = [];
+
+    public $files;
 
     public int $commentId = 0;
 
@@ -67,28 +74,21 @@ class Comments extends Component
         }
 
         $record = $this->modelType::query()->whereKey($this->modelId)->firstOrFail();
+        $this->loadComments($record);
+
+        Comment::addGlobalScope('sticky', function (Builder $builder) {
+            $builder->where('is_sticky', true);
+        });
+
         $this->stickyComments = $record
             ->comments()
-            ->where('is_sticky', true)
             ->get()
             ->each(function (Comment $comment) {
                 $comment->is_current_user = $comment->createdBy?->is(Auth::user());
             })
             ->toArray();
 
-        $this->loadComments($record);
-
-        $tags = User::query()
-            ->where('is_active', 1)
-            ->get()
-            ->toArray();
-
-        $this->users = array_map(function ($tag) {
-            return (object) [
-                'key' => $tag['name'],
-                'value' => $tag['user_code'],
-            ];
-        }, $tags);
+        $this->loadUsersAndRoles();
     }
 
     public function render(): View|Factory|Application
@@ -122,7 +122,14 @@ class Comments extends Component
             return;
         }
 
-        $comment = $response['data']->toArray();
+        /** @var Comment $comment */
+        $comment = $response['data'];
+        if ($this->filesArray) {
+            $this->saveFileUploadsToMediaLibrary('files', $response['data']->id, Comment::class);
+            $comment->load('media:id,name,model_type,model_id,disk');
+        }
+
+        $comment = $comment->toArray();
         $comment['user'] = Auth::user()->toArray();
         $comment['user']['avatar_url'] = Auth::user()->getAvatarUrl();
 
@@ -166,10 +173,17 @@ class Comments extends Component
 
     public function loadComments(Model $record = null): void
     {
-        $record = $record ?: $this->modelType::query()->whereKey($this->modelId)->firstOrFail();
+        $record = $record ?: $this->modelType::query()
+            ->whereKey($this->modelId)
+            ->firstOrFail();
+
+        Comment::addGlobalScope('media', function (Builder $query) {
+            $query->with('media:id,name,model_type,model_id,disk');
+        });
 
         $comments = $record
             ->comments()
+            ->with(['media:id,name,model_type,model_id,disk'])
             ->when(
                 ! Auth::user() instanceof User,
                 function ($query) {
@@ -220,5 +234,52 @@ class Comments extends Component
             $comment['slug_position'] = (string) $comment['id'];
             array_unshift($this->comments['data'], $comment);
         }
+    }
+
+    public function updatedFiles(): void
+    {
+        $this->prepareForMediaLibrary('files', $this->modelId, $this->modelType);
+
+        $this->skipRender();
+    }
+
+    public function updatedCommentId()
+    {
+        $this->skipRender();
+    }
+
+    private function loadUsersAndRoles(): void
+    {
+        if (! auth()->user()?->getMorphClass() === User::class) {
+            return;
+        }
+
+        $this->users = User::query()
+            ->select('id', 'firstname', 'lastname')
+            ->where('is_active', true)
+            ->orderBy('firstname')
+            ->get()
+            ->map(function (User $user) {
+                return [
+                    'key' => $user->name,
+                    'value' => $user->id,
+                    'type' => User::class,
+                ];
+            })
+            ->toArray();
+
+        $this->roles = Role::query()
+            ->select(['id', 'name'])
+            ->whereRelation('users', 'is_active', true)
+            ->orderBy('name')
+            ->get()
+            ->map(function (Role $role) {
+                return [
+                    'key' => $role->name,
+                    'value' => $role->id,
+                    'type' => Role::class,
+                ];
+            })
+            ->toArray();
     }
 }

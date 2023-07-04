@@ -190,7 +190,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/logging.php', 'logging');
         $this->mergeConfigFrom(__DIR__ . '/../config/print.php', 'print');
         $loggingConfig = config('logging.channels');
-        config(['filesystems.links.' . public_path('flux') => __DIR__ . '/../public']);
         $loggingConfig['database'] = [
             'driver' => 'custom',
             'handler' => DatabaseLoggingHandler::class,
