@@ -83,12 +83,11 @@ class Contact extends Component
     public function mount(?int $id = null): void
     {
         $this->contactId = $id;
+        $contact = ContactModel::query()
+            ->with('addresses')
+            ->when($this->contactId, fn($query) => $query->whereKey($this->contactId))
+            ->firstOrFail();
 
-        $contactQuery = ContactModel::query()->with('addresses');
-        if ($this->contactId) {
-            $contactQuery->whereKey($this->contactId);
-        }
-        $contact = $contactQuery->firstOrFail();
         $contact->addresses->map(function (Address $address) {
             return $address->append('name');
         });
