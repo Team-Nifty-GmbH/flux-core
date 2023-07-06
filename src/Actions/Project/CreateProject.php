@@ -23,7 +23,7 @@ class CreateProject implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -92,7 +92,7 @@ class CreateProject implements ActionInterface
                     __(
                         'categories \':values\' not found',
                         ['values' => implode(', ', array_values($diff))]
-                    )
+                    ),
                 ],
             ])->errorBag('createProject');
         }

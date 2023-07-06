@@ -62,8 +62,7 @@ class ActionManager
 
             try {
                 $this->register($class::name(), $class);
-            } catch (\Exception)
-            {
+            } catch (\Exception) {
             }
         }
     }

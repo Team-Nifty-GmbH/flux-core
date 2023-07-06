@@ -22,7 +22,7 @@ class DeleteOrderType implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -40,7 +40,7 @@ class DeleteOrderType implements ActionInterface
         return [OrderType::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return OrderType::query()
             ->whereKey($this->data['id'])

@@ -22,7 +22,7 @@ class DeleteBankConnection implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -40,7 +40,7 @@ class DeleteBankConnection implements ActionInterface
         return [BankConnection::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return BankConnection::query()
             ->whereKey($this->data['id'])

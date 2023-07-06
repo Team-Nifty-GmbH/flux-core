@@ -3,17 +3,12 @@
 namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Contracts\ActionInterface;
-use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Http\Requests\FillOrderPositionRequest;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
-use FluxErp\Models\Price;
 use FluxErp\Models\Product;
-use FluxErp\Models\StockPosting;
-use FluxErp\Models\VatRate;
 use FluxErp\Rules\Numeric;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
@@ -34,7 +29,7 @@ class FillOrderPositions implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string

@@ -26,7 +26,7 @@ class UpdateAddress implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -77,9 +77,8 @@ class UpdateAddress implements ActionInterface
             $addressTypes = AddressType::query()
                 ->whereIntegerInRaw('id', $this->data['address_types'])
                 ->where('is_unique', true)
-                ->whereHas('addresses', fn (Builder $query) =>
-                    $query->where('contact_id', $this->data['contact_id'])
-                        ->where('id', '!=', $this->data['id'])
+                ->whereHas('addresses', fn (Builder $query) => $query->where('contact_id', $this->data['contact_id'])
+                    ->where('id', '!=', $this->data['id'])
                 )
                 ->get();
 
@@ -116,10 +115,10 @@ class UpdateAddress implements ActionInterface
         if ($address->can_login && ($this->data['can_login'] ?? false)) {
             if ($address->login_name
                 && array_key_exists('login_name', $this->data)
-                && !$this->data['login_name']
+                && ! $this->data['login_name']
             ) {
                 $errors += [
-                    'login_name' => [__('Unable to clear login name while \'can_login\' = \'true\'')]
+                    'login_name' => [__('Unable to clear login name while \'can_login\' = \'true\'')],
                 ];
             }
 
@@ -128,7 +127,7 @@ class UpdateAddress implements ActionInterface
                 ! $this->data['login_password']
             ) {
                 $errors += [
-                    'login_password' => [__('Unable to clear login password while \'can_login\' = \'true\'')]
+                    'login_password' => [__('Unable to clear login password while \'can_login\' = \'true\'')],
                 ];
             }
         }

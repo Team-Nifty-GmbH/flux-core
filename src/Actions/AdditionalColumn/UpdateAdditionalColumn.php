@@ -23,7 +23,7 @@ class UpdateAdditionalColumn implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -85,7 +85,7 @@ class UpdateAdditionalColumn implements ActionInterface
             && $additionalColumn->modelValues()->whereNotIn('meta.value', $this->data['values'])->exists()
         ) {
             throw ValidationException::withMessages([
-                'values' => [__('Models with differing values exist')]
+                'values' => [__('Models with differing values exist')],
             ]);
         }
 

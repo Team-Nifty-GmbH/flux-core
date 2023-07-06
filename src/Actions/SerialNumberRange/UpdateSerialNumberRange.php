@@ -24,7 +24,7 @@ class UpdateSerialNumberRange implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -41,6 +41,7 @@ class UpdateSerialNumberRange implements ActionInterface
     {
         return [SerialNumberRange::class];
     }
+
     public function execute(): Model
     {
         $serialNumberRange = SerialNumberRange::query()

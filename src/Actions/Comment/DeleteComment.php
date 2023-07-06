@@ -24,7 +24,7 @@ class DeleteComment implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -42,7 +42,7 @@ class DeleteComment implements ActionInterface
         return [Comment::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return Comment::query()
             ->whereKey($this->data['id'])
@@ -66,14 +66,14 @@ class DeleteComment implements ActionInterface
             ->first();
 
         // only super admins can delete other users comments
-        if (! (
+        if (
+            ! (
                 $comment->created_by instanceof (Auth::user()->getMorphClass())
                 && $comment->created_by->id === Auth::id()
-            )
-            && ! Auth::user()->hasRole('Super Admin')
+            ) && ! Auth::user()->hasRole('Super Admin')
         ) {
             throw ValidationException::withMessages([
-                'comment' => [__('Cant delete other users comments.')]
+                'comment' => [__('Cant delete other users comments.')],
             ]);
         }
 

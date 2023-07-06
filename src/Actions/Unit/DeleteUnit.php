@@ -22,7 +22,7 @@ class DeleteUnit implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -40,7 +40,7 @@ class DeleteUnit implements ActionInterface
         return [Unit::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return Unit::query()
             ->whereKey($this->data['id'])

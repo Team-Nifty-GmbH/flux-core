@@ -23,7 +23,7 @@ class DeleteWarehouse implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -41,7 +41,7 @@ class DeleteWarehouse implements ActionInterface
         return [Warehouse::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return Warehouse::query()
             ->whereKey($this->data['id'])
@@ -61,10 +61,10 @@ class DeleteWarehouse implements ActionInterface
         $this->data = Validator::validate($this->data, $this->rules);
 
         if (Warehouse::query()
-                ->whereKey($this->data['id'])
-                ->first()
-                ->children()
-                ->count() > 0
+            ->whereKey($this->data['id'])
+            ->first()
+            ->children()
+            ->count() > 0
         ) {
             throw ValidationException::withMessages([
                 'children' => [__('The given warehouse has children')],

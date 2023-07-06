@@ -22,7 +22,7 @@ class DeleteTicket implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -40,7 +40,7 @@ class DeleteTicket implements ActionInterface
         return [Ticket::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return Ticket::query()
             ->whereKey($this->data['id'])

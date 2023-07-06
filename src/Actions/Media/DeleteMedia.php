@@ -25,7 +25,7 @@ class DeleteMedia implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -43,7 +43,7 @@ class DeleteMedia implements ActionInterface
         return [Media::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         $mediaItem = Media::query()
             ->whereKey($this->data['id'])

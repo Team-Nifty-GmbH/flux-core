@@ -23,7 +23,7 @@ class DeleteProductProperty implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -41,7 +41,7 @@ class DeleteProductProperty implements ActionInterface
         return [ProductProperty::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return ProductProperty::query()
             ->whereKey($this->data['id'])
@@ -61,10 +61,10 @@ class DeleteProductProperty implements ActionInterface
         $this->data = Validator::validate($this->data, $this->rules);
 
         if (ProductProperty::query()
-                ->whereKey($this->data['id'])
-                ->first()
-                ->products()
-                ->count() > 0
+            ->whereKey($this->data['id'])
+            ->first()
+            ->products()
+            ->count() > 0
         ) {
             throw ValidationException::withMessages([
                 'products' => [__('Product property has products')],

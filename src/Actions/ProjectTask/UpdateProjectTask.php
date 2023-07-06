@@ -24,7 +24,7 @@ class UpdateProjectTask implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -79,7 +79,7 @@ class UpdateProjectTask implements ActionInterface
             && ! $project->categories()->whereKey($this->data['category_id'])->exists()
         ) {
             throw ValidationException::withMessages([
-                'category_id' => [__('Project category not found')]
+                'category_id' => [__('Project category not found')],
             ])->errorBag('updateProjectTask');
         }
 

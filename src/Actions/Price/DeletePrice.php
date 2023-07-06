@@ -23,7 +23,7 @@ class DeletePrice implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -41,7 +41,7 @@ class DeletePrice implements ActionInterface
         return [Price::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return Price::query()
             ->whereKey($this->data['id'])
@@ -61,10 +61,10 @@ class DeletePrice implements ActionInterface
         $this->data = Validator::validate($this->data, $this->rules);
 
         if (Price::query()
-                ->whereKey($this->data['id'])
-                ->first()
-                ->orderPositions()
-                ->exists()
+            ->whereKey($this->data['id'])
+            ->first()
+            ->orderPositions()
+            ->exists()
         ) {
             throw ValidationException::withMessages([
                 'order_positions' => [__('Price has associated order positions')],

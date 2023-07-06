@@ -22,7 +22,7 @@ class DeleteVatRate implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -40,7 +40,7 @@ class DeleteVatRate implements ActionInterface
         return [VatRate::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return VatRate::query()
             ->whereKey($this->data['id'])

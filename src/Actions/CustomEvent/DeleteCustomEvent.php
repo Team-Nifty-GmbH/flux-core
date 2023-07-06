@@ -22,7 +22,7 @@ class DeleteCustomEvent implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -40,7 +40,7 @@ class DeleteCustomEvent implements ActionInterface
         return [CustomEvent::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return CustomEvent::query()
             ->whereKey($this->data['id'])

@@ -23,7 +23,7 @@ class DeleteOrder implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -41,7 +41,7 @@ class DeleteOrder implements ActionInterface
         return [Order::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return Order::query()
             ->whereKey($this->data['id'])
@@ -67,13 +67,13 @@ class DeleteOrder implements ActionInterface
 
         if ($order->is_locked) {
             $errors += [
-                'is_locked' => [__('Order is locked')]
+                'is_locked' => [__('Order is locked')],
             ];
         }
 
         if ($order->children()->count() > 0) {
             $errors += [
-                'children' => [__('Order has children')]
+                'children' => [__('Order has children')],
             ];
         }
 

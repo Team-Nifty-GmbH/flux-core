@@ -23,7 +23,7 @@ class DeleteProductOptionGroup implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -41,7 +41,7 @@ class DeleteProductOptionGroup implements ActionInterface
         return [ProductOptionGroup::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return ProductOptionGroup::query()
             ->whereKey($this->data['id'])
@@ -61,10 +61,10 @@ class DeleteProductOptionGroup implements ActionInterface
         $this->data = Validator::validate($this->data, $this->rules);
 
         if (ProductOptionGroup::query()
-                ->whereKey($this->data['id'])
-                ->first()
-                ->productOptions()
-                ->count() > 0
+            ->whereKey($this->data['id'])
+            ->first()
+            ->productOptions()
+            ->count() > 0
         ) {
             throw ValidationException::withMessages([
                 'product_options' => [__('Product option group has product options')],

@@ -23,7 +23,7 @@ class DeleteCategory implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -41,7 +41,7 @@ class DeleteCategory implements ActionInterface
         return [Category::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return Category::query()
             ->whereKey($this->data['id'])
@@ -67,13 +67,13 @@ class DeleteCategory implements ActionInterface
 
         if ($category->children->count() > 0) {
             $errors += [
-                'children' => [__('Category has children')]
+                'children' => [__('Category has children')],
             ];
         }
 
         if ($category->model()?->exists()) {
             $errors += [
-                'project_task' => [__('Project task with this category exists')]
+                'project_task' => [__('Project task with this category exists')],
             ];
         }
 

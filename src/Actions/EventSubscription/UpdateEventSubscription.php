@@ -26,7 +26,7 @@ class UpdateEventSubscription implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -79,7 +79,7 @@ class UpdateEventSubscription implements ActionInterface
 
         if (! $eventClass && ! $eloquentEvent) {
             throw ValidationException::withMessages([
-                'event' => [__('Event not found')]
+                'event' => [__('Event not found')],
             ]);
         }
 
@@ -98,7 +98,7 @@ class UpdateEventSubscription implements ActionInterface
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'subscription' => [__('Already subscribed')]
+                'subscription' => [__('Already subscribed')],
             ])->errorBag('createEventSubscription');
         }
 

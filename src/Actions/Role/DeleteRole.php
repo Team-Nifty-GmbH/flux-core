@@ -23,7 +23,7 @@ class DeleteRole implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -41,7 +41,7 @@ class DeleteRole implements ActionInterface
         return [Role::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return Role::query()
             ->whereKey($this->data['id'])
@@ -61,9 +61,9 @@ class DeleteRole implements ActionInterface
         $this->data = Validator::validate($this->data, $this->rules);
 
         if (Role::query()
-                ->whereKey($this->data['id'])
-                ->first()
-                ->name === 'Super Admin'
+            ->whereKey($this->data['id'])
+            ->first()
+            ->name === 'Super Admin'
         ) {
             throw ValidationException::withMessages([
                 'role' => [__('Cannot delete Super Admin role')],

@@ -24,7 +24,7 @@ class UpdateCategory implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -84,14 +84,14 @@ class UpdateCategory implements ActionInterface
                         __(
                             'Parent with model_type \':modelType\' not found',
                             ['modelType' => $category->model_type]
-                        )
-                    ]
+                        ),
+                    ],
                 ])->errorBag('updateProjectTask');
             }
 
             if (Helper::checkCycle(Category::class, $category, $this->data['parent_id'])) {
                 throw ValidationException::withMessages([
-                    'parent_id' => [__('Cycle detected')]
+                    'parent_id' => [__('Cycle detected')],
                 ])->errorBag('updateProjectTask');
             }
         }

@@ -22,7 +22,7 @@ class DeleteContactOption implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -40,7 +40,7 @@ class DeleteContactOption implements ActionInterface
         return [ContactOption::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return ContactOption::query()
             ->whereKey($this->data['id'])

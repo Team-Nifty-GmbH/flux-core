@@ -23,7 +23,7 @@ class UpdateValueList implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -72,11 +72,11 @@ class UpdateValueList implements ActionInterface
         if ($this->data['values'] ?? false) {
             if (! array_is_list($this->data['values'])) {
                 $errors += [
-                    'values' => [__('Values array is no list')]
+                    'values' => [__('Values array is no list')],
                 ];
             } elseif ($valueList->modelValues()->whereNotIn('meta.value', $this->data['values'])->exists()) {
                 $errors += [
-                    'values' => [__('Models with differing values exist')]
+                    'values' => [__('Models with differing values exist')],
                 ];
             }
         }
@@ -91,7 +91,7 @@ class UpdateValueList implements ActionInterface
             ->exists()
         ) {
             $errors += [
-                'name_model' => [__('Name model combination already exists')]
+                'name_model' => [__('Name model combination already exists')],
             ];
         }
 

@@ -2,8 +2,6 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
-
 class UpdateDiscountRequest extends BaseFormRequest
 {
     /**

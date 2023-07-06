@@ -7,7 +7,6 @@ use FluxErp\Actions\AddressType\DeleteAddressType;
 use FluxErp\Actions\AddressType\UpdateAddressType;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Models\AddressType;
-use FluxErp\Models\Client;
 use Illuminate\Validation\ValidationException;
 
 class AddressTypeService

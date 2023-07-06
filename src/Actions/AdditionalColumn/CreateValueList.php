@@ -22,7 +22,7 @@ class CreateValueList implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -64,7 +64,7 @@ class CreateValueList implements ActionInterface
 
         if (! array_is_list($this->data['values'])) {
             throw ValidationException::withMessages([
-                'values' => ['Values array is no list']
+                'values' => ['Values array is no list'],
             ])->errorBag('createValueList');
         }
 
@@ -74,7 +74,7 @@ class CreateValueList implements ActionInterface
             ->exists()
         ) {
             throw ValidationException::withMessages([
-                'name_model' => [__('Name model combination already exists')]
+                'name_model' => [__('Name model combination already exists')],
             ])->errorBag('createValueList');
         }
 

@@ -23,7 +23,7 @@ class DeleteTicketType implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -41,7 +41,7 @@ class DeleteTicketType implements ActionInterface
         return [TicketType::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return TicketType::query()
             ->whereKey($this->data['id'])
@@ -61,10 +61,10 @@ class DeleteTicketType implements ActionInterface
         $this->data = Validator::validate($this->data, $this->rules);
 
         if (TicketType::query()
-                ->whereKey($this->data['id'])
-                ->first()
-                ->tickets()
-                ->exists()
+            ->whereKey($this->data['id'])
+            ->first()
+            ->tickets()
+            ->exists()
         ) {
             throw ValidationException::withMessages([
                 'tickets' => [__('The given ticket type has tickets')],

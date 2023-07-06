@@ -23,7 +23,7 @@ class DeleteAddressType implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -41,7 +41,7 @@ class DeleteAddressType implements ActionInterface
         return [AddressType::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return AddressType::query()
             ->whereKey($this->data['id'])
@@ -67,13 +67,13 @@ class DeleteAddressType implements ActionInterface
 
         if ($addressType->is_lock) {
             $errors += [
-                'is_locked' => [__('Address type is locked')]
+                'is_locked' => [__('Address type is locked')],
             ];
         }
 
         if ($addressType->addresses()->exists()) {
             $errors += [
-                'address' => [__('Address type has attached addresses')]
+                'address' => [__('Address type has attached addresses')],
             ];
         }
         if ($errors) {

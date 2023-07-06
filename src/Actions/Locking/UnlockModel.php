@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use TeamNiftyGmbH\DataTable\Helpers\ModelFinder;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class UnlockModel implements ActionInterface
@@ -33,7 +32,7 @@ class UnlockModel implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string

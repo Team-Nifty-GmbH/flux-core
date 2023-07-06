@@ -25,7 +25,7 @@ class DeleteLanguage implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -43,7 +43,7 @@ class DeleteLanguage implements ActionInterface
         return [Language::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         $language = Language::query()
             ->whereKey($this->data['id'])
@@ -74,13 +74,13 @@ class DeleteLanguage implements ActionInterface
         // Don't delete if in use.
         if ($language->addresses()->exists()) {
             $errors += [
-                'address' => [__('Language referenced by an address')]
+                'address' => [__('Language referenced by an address')],
             ];
         }
 
         if ($language->users()->exists()) {
             $errors += [
-                'user' => [__('Language referenced by a user')]
+                'user' => [__('Language referenced by a user')],
             ];
         }
 

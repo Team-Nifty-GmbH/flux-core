@@ -26,17 +26,17 @@ class UpdateMainAddress implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
     {
-        return 'address.create';
+        return 'main-address.update';
     }
 
     public static function description(): string|null
     {
-        return 'create address';
+        return 'update main address';
     }
 
     public static function models(): array

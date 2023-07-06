@@ -4,7 +4,6 @@ namespace FluxErp\Console\Commands\Init;
 
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
-use FluxErp\Services\UserService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 

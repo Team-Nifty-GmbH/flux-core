@@ -23,7 +23,7 @@ class DeletePermission implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -41,7 +41,7 @@ class DeletePermission implements ActionInterface
         return [Permission::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return Permission::query()
             ->whereKey($this->data['id'])
@@ -61,9 +61,9 @@ class DeletePermission implements ActionInterface
         $this->data = Validator::validate($this->data, $this->rules);
 
         if (Permission::query()
-                ->whereKey($this->data['id'])
-                ->first()
-                ->is_locked
+            ->whereKey($this->data['id'])
+            ->first()
+            ->is_locked
         ) {
             throw ValidationException::withMessages([
                 'is_locked' => [__('Permission is locked')],

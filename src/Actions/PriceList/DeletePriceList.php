@@ -23,7 +23,7 @@ class DeletePriceList implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -41,7 +41,7 @@ class DeletePriceList implements ActionInterface
         return [PriceList::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return PriceList::query()
             ->whereKey($this->data['id'])
@@ -61,10 +61,10 @@ class DeletePriceList implements ActionInterface
         $this->data = Validator::validate($this->data, $this->rules);
 
         if (PriceList::query()
-                ->whereKey($this->data['id'])
-                ->first()
-                ->prices()
-                ->exists()
+            ->whereKey($this->data['id'])
+            ->first()
+            ->prices()
+            ->exists()
         ) {
             throw ValidationException::withMessages([
                 'prices' => [__('Price list has associated prices')],

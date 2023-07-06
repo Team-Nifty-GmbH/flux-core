@@ -27,7 +27,7 @@ class UpdateNotificationSetting implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -79,6 +79,7 @@ class UpdateNotificationSetting implements ActionInterface
 
         return $this;
     }
+
     public function handle(array $data, bool $isAnonymous = false): array
     {
         if (! array_is_list($data)) {

@@ -3,8 +3,6 @@
 namespace FluxErp\Actions\SepaMandate;
 
 use FluxErp\Contracts\ActionInterface;
-use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
 use FluxErp\Http\Requests\UpdateSepaMandateRequest;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
@@ -27,7 +25,7 @@ class UpdateSepaMandate implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -53,7 +51,6 @@ class UpdateSepaMandate implements ActionInterface
 
         $sepaMandate->fill($this->data);
         $sepaMandate->save();
-
 
         return $sepaMandate->withoutRelations()->fresh();
     }
@@ -92,7 +89,7 @@ class UpdateSepaMandate implements ActionInterface
         if (! $clientContactExists) {
             $errors += [
                 'contact_id' => ['contact with id: \'' . $this->data['contact_id'] .
-                    '\' doesnt match client id:\'' . $this->data['client_id'] . '\''
+                    '\' doesnt match client id:\'' . $this->data['client_id'] . '\'',
                 ],
             ];
         }
@@ -100,7 +97,7 @@ class UpdateSepaMandate implements ActionInterface
         if (! $contactBankConnectionExists) {
             $errors += [
                 'bank_connection_id' => ['bank connection with id: \'' .
-                    $this->data['bank_connection_id'] . '\' doesnt match contact id:' . $this->data['contact_id'] . '\''
+                    $this->data['bank_connection_id'] . '\' doesnt match contact id:' . $this->data['contact_id'] . '\'',
                 ],
             ];
         }

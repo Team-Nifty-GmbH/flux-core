@@ -21,17 +21,17 @@ class CreateSetting implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
     {
-        return 'setting.delete';
+        return 'setting.create';
     }
 
     public static function description(): string|null
     {
-        return 'delete setting';
+        return 'create setting';
     }
 
     public static function models(): array

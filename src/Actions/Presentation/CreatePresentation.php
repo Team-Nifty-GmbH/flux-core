@@ -3,12 +3,9 @@
 namespace FluxErp\Actions\Presentation;
 
 use FluxErp\Contracts\ActionInterface;
-use FluxErp\Helpers\Helper;
-use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\CreatePresentationRequest;
 use FluxErp\Models\Presentation;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class CreatePresentation implements ActionInterface
 {
@@ -24,7 +21,7 @@ class CreatePresentation implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string

@@ -25,7 +25,7 @@ class DeleteCountry implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -43,7 +43,7 @@ class DeleteCountry implements ActionInterface
         return [Country::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         $country = Country::query()
             ->whereKey($this->data['id'])
@@ -77,13 +77,13 @@ class DeleteCountry implements ActionInterface
 
         if ($country->addresses()->exists()) {
             $errors += [
-                'address' => [__('Country referenced by an address')]
+                'address' => [__('Country referenced by an address')],
             ];
         }
 
         if ($country->clients()->exists()) {
             $errors += [
-                'client' => [__('Country referenced by a client')]
+                'client' => [__('Country referenced by a client')],
             ];
         }
 

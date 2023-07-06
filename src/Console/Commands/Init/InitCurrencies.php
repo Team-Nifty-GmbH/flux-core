@@ -3,7 +3,6 @@
 namespace FluxErp\Console\Commands\Init;
 
 use FluxErp\Models\Currency;
-use FluxErp\Services\CurrencyService;
 use Illuminate\Console\Command;
 
 class InitCurrencies extends Command

@@ -25,7 +25,7 @@ class DeleteCurrency implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -43,9 +43,9 @@ class DeleteCurrency implements ActionInterface
         return [Currency::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
-        $currency =Currency::query()
+        $currency = Currency::query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -67,10 +67,10 @@ class DeleteCurrency implements ActionInterface
         $this->data = Validator::validate($this->data, $this->rules);
 
         if (Currency::query()
-                ->whereKey($this->data['id'])
-                ->first()
-                ->countries()
-                ->exists()
+            ->whereKey($this->data['id'])
+            ->first()
+            ->countries()
+            ->exists()
         ) {
             throw ValidationException::withMessages([
                 'country' => [__('Currency referenced by a country')],

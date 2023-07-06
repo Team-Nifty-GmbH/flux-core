@@ -24,7 +24,7 @@ class DeleteUser implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -42,13 +42,14 @@ class DeleteUser implements ActionInterface
         return [User::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         $user = User::query()
             ->whereKey($this->data['id'])
             ->first();
 
         $user->tokens()->delete();
+
         return $user->delete();
     }
 

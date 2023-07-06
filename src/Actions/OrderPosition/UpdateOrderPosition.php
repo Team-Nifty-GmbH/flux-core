@@ -26,7 +26,7 @@ class UpdateOrderPosition implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -101,7 +101,7 @@ class UpdateOrderPosition implements ActionInterface
                     ->exists()
                 ) {
                     $errors += [
-                        'price_id' => [__('Price not found in price list')]
+                        'price_id' => [__('Price not found in price list')],
                     ];
                 }
             }

@@ -6,7 +6,6 @@ use FluxErp\Actions\User\CreateUser;
 use FluxErp\Actions\User\DeleteUser;
 use FluxErp\Actions\User\UpdateUser;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use Illuminate\Validation\ValidationException;
 

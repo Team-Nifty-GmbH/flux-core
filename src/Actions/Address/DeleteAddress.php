@@ -22,7 +22,7 @@ class DeleteAddress implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -40,7 +40,7 @@ class DeleteAddress implements ActionInterface
         return [Address::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         $address = Address::query()
             ->whereKey($this->data['id'])

@@ -28,17 +28,17 @@ class DeleteValueList implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
     {
-        return 'warehouse.delete';
+        return 'value-list.delete';
     }
 
     public static function description(): string|null
     {
-        return 'delete warehouse';
+        return 'delete value list';
     }
 
     public static function models(): array
@@ -46,7 +46,7 @@ class DeleteValueList implements ActionInterface
         return [AdditionalColumn::class];
     }
 
-    public function execute()
+    public function execute(): bool|null
     {
         return AdditionalColumn::query()
             ->whereKey($this->data['id'])
@@ -66,10 +66,10 @@ class DeleteValueList implements ActionInterface
         $this->data = Validator::validate($this->data, $this->rules);
 
         if (AdditionalColumn::query()
-                ->whereKey($this->data['id'])
-                ->first()
-                ->modelValues()
-                ->exists()
+            ->whereKey($this->data['id'])
+            ->first()
+            ->modelValues()
+            ->exists()
         ) {
             throw ValidationException::withMessages([
                 'model_has_values' => [__('Value list referenced by at least one model instance')],

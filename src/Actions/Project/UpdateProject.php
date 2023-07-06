@@ -24,7 +24,7 @@ class UpdateProject implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -98,7 +98,7 @@ class UpdateProject implements ActionInterface
                         __(
                             'categories \':values\' not found',
                             ['values' => implode(', ', array_values($diff))]
-                        )
+                        ),
                     ],
                 ])->errorBag('updateProject');
             }
@@ -114,7 +114,7 @@ class UpdateProject implements ActionInterface
             if (! empty(array_diff($projectTaskCategories, $intArray))) {
                 throw ValidationException::withMessages([
                     'categories' => [
-                        __('Project task with different category exists')
+                        __('Project task with different category exists'),
                     ],
                 ])->errorBag('updateProject');
             }

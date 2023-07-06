@@ -25,7 +25,7 @@ class UpdateContact implements ActionInterface
 
     public static function make(array $data): static
     {
-        return (new static($data));
+        return new static($data);
     }
 
     public static function name(): string
@@ -92,7 +92,7 @@ class UpdateContact implements ActionInterface
 
             if ($customerNumberExists) {
                 $errors += [
-                    'customer_number' => [__('Customer number already exists')]
+                    'customer_number' => [__('Customer number already exists')],
                 ];
             }
         }
@@ -111,8 +111,8 @@ class UpdateContact implements ActionInterface
                             'paymentTypeId' => $this->data['payment_type_id'],
                             'clientId' => $this->data['client_id'],
                         ]
-                    )
-                ]
+                    ),
+                ],
             ];
         }
 
