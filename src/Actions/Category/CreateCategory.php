@@ -56,7 +56,19 @@ class CreateCategory implements ActionInterface
 
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        $this->data['sort_number'] = $this->data['sort_number'] ?? 0;
+        $this->rules = array_merge(
+            $this->rules,
+            [
+                'parent_id' => 'integer|nullable|exists:categories,id,model_type,' . $this->data['model_type'],
+                'sort_number' => 'required|integer',
+            ]
+        );
+
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(new Category());
+
+        $this->data = $validator->validate();
 
         return $this;
     }

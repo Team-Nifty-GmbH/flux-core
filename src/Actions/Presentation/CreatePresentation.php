@@ -59,7 +59,10 @@ class CreatePresentation implements ActionInterface
 
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(new Presentation());
+
+        $this->data = $validator->validate();
 
         return $this;
     }

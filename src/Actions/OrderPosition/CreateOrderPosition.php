@@ -7,6 +7,7 @@ use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Models\OrderPosition;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class CreateOrderPosition implements ActionInterface
 {
@@ -17,7 +18,57 @@ class CreateOrderPosition implements ActionInterface
     public function __construct(array $data)
     {
         $this->data = $data;
-        $this->rules = (new CreateOrderPositionRequest())->rules();
+        $this->rules = array_merge(
+            (new CreateOrderPositionRequest())->rules(),
+            [
+                'price_id' => [
+                    Rule::requiredIf(
+                        ($data['is_free_text'] ?? false) === false &&
+                        ($data['product_id'] ?? $data['price_list_id'] ?? false)
+                    ),
+                    'integer',
+                    'exists:prices,id,deleted_at,NULL',
+                    'exclude_if:is_free_text,true',
+                ],
+                'price_list_id' => [
+                    Rule::requiredIf(
+                        ($data['is_free_text'] ?? false) === false && ($data['price_id'] ?? false)
+                    ),
+                    'integer',
+                    'exists:price_lists,id,deleted_at,NULL',
+                    'exclude_if:is_free_text,true',
+                ],
+                'purchase_price' => [
+                    Rule::requiredIf(
+                        ($data['is_free_text'] ?? false) === false && ($data['product_id'] ?? false)
+                    ),
+                    'numeric',
+                    'exclude_if:is_free_text,true',
+                ],
+                'unit_price' => [
+                    Rule::requiredIf(
+                        ($data['is_free_text'] ?? false) === false && ($data['price_id'] ?? false)
+                    ),
+                    'numeric',
+                    'exclude_if:is_free_text,true',
+                ],
+                'vat_rate' => [
+                    Rule::requiredIf(
+                        ($data['is_free_text'] ?? false) === false && ($data['vat_rate_id'] ?? false)
+                    ),
+                    'numeric',
+                    'exclude_if:is_free_text,true',
+                ],
+                'product_number' => [
+                    Rule::requiredIf(
+                        ($data['is_free_text'] ?? false) === false && ($data['product_id'] ?? false)
+                    ),
+                    'string',
+                    'nullable',
+                    'exclude_if:is_free_text,true',
+                ],
+            ]
+        );
     }
 
     public static function make(array $data): static
@@ -63,7 +114,10 @@ class CreateOrderPosition implements ActionInterface
 
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(new OrderPosition());
+
+        $this->data = $validator->validate();
 
         return $this;
     }

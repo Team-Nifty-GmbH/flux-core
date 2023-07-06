@@ -76,7 +76,10 @@ class CreateOrder implements ActionInterface
 
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(new Order());
+
+        $this->data = $validator->validate();
 
         return $this;
     }
