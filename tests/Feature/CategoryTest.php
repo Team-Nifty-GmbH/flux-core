@@ -505,7 +505,7 @@ class CategoryTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/categories', $category);
-        $response->assertStatus(409);
+        $response->assertStatus(422);
         $this->assertTrue(
             property_exists(json_decode($response->getContent())->errors, 'parent_id')
         );

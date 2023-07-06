@@ -2,16 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Translation\CreateLanguageLine;
+use FluxErp\Actions\Translation\DeleteLanguageLine;
+use FluxErp\Actions\Translation\UpdateLanguageLine;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateTranslationRequest;
+use Illuminate\Validation\ValidationException;
 use Spatie\TranslationLoader\LanguageLine;
 
 class TranslationService
 {
     public function create(array $data): LanguageLine
     {
-        return LanguageLine::create($data);
+        return CreateLanguageLine::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -20,24 +22,25 @@ class TranslationService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateTranslationRequest()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $languageLine = UpdateLanguageLine::make($item)->validate()->execute(),
+                    additions: ['id' => $languageLine->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $languageLine = LanguageLine::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $languageLine->fill($item);
-            $languageLine->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $languageLine,
-                additions: ['id' => $languageLine->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -52,18 +55,14 @@ class TranslationService
 
     public function delete(string $id): array
     {
-        $languageLine = LanguageLine::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $languageLine) {
+        try {
+            DeleteLanguageLine::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['id' => 'language line not found']
+                data: $e->errors()
             );
         }
-
-        $languageLine->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

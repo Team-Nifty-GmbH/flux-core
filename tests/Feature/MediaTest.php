@@ -250,7 +250,7 @@ class MediaTest extends BaseSetup
         $response->assertStatus(201);
 
         $reUpload = $this->actingAs($this->user)->post('/api/media', $media);
-        $reUpload->assertStatus(409);
+        $reUpload->assertStatus(422);
     }
 
     public function test_upload_media_project_task_not_found()
@@ -643,7 +643,7 @@ class MediaTest extends BaseSetup
         $replace = $this->actingAs($this->user)->post('/api/media/' . $uploadedMedia->id, [
             'media' => $file,
         ]);
-        $replace->assertStatus(409);
+        $replace->assertStatus(422);
     }
 
     public function test_update_media()

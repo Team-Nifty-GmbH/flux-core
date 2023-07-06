@@ -259,7 +259,7 @@ class ProjectTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/projects', $project);
-        $response->assertStatus(409);
+        $response->assertStatus(422);
     }
 
     public function test_create_project_category_template_not_found()
@@ -294,7 +294,7 @@ class ProjectTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/projects', $project);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_update_project()
@@ -498,7 +498,7 @@ class ProjectTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/projects', $project);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
         $this->assertTrue(
             property_exists(json_decode($response->getContent())->errors, 'categories')
         );
@@ -528,7 +528,7 @@ class ProjectTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/projects', $project);
-        $response->assertStatus(409);
+        $response->assertStatus(422);
         $this->assertTrue(
             property_exists(json_decode($response->getContent())->errors, 'categories')
         );

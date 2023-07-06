@@ -2,6 +2,7 @@
 
 namespace FluxErp;
 
+use FluxErp\Actions\ActionManager;
 use FluxErp\DataType\ArrayHandler;
 use FluxErp\DataType\BooleanHandler;
 use FluxErp\DataType\DateTimeHandler;
@@ -13,6 +14,7 @@ use FluxErp\DataType\ObjectHandler;
 use FluxErp\DataType\Registry;
 use FluxErp\DataType\SerializableHandler;
 use FluxErp\DataType\StringHandler;
+use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\MediaLibraryDownloader;
@@ -103,6 +105,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->singleton('flux.widget_manager', function ($app) {
             return new WidgetManager();
         });
+
+        $this->app->singleton('flux.action_manager', fn ($app) => new ActionManager());
     }
 
     /**
@@ -127,6 +131,9 @@ class FluxServiceProvider extends ServiceProvider
 
         Widget::autoDiscoverWidgets(flux_path('src/Http/Livewire/Widgets'), 'FluxErp\Http\Livewire\Widgets');
         Widget::autoDiscoverWidgets();
+
+        Action::autoDiscover(flux_path('src/Actions'), 'FluxErp\Actions');
+        Action::autoDiscover();
     }
 
     protected function registerMarcos(): void

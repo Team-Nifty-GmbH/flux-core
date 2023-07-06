@@ -2,21 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Currency\CreateCurrency;
+use FluxErp\Actions\Currency\DeleteCurrency;
+use FluxErp\Actions\Currency\UpdateCurrency;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateCurrencyRequest;
 use FluxErp\Models\Currency;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class CurrencyService
 {
     public function create(array $data): Currency
     {
-        $currency = new Currency($data);
-        $currency->save();
-
-        return $currency;
+        return CreateCurrency::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -25,25 +22,25 @@ class CurrencyService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateCurrencyRequest(),
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $currency = UpdateCurrency::make($item)->validate()->execute(),
+                    additions: ['id' => $currency->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $currency = Currency::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            // Save new data to table.
-            $currency->fill($item);
-            $currency->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $currency->withoutRelations()->fresh(),
-                additions: ['id' => $currency->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -58,29 +55,14 @@ class CurrencyService
 
     public function delete(string $id): array
     {
-        $currency = Currency::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $currency) {
+        try {
+            DeleteCurrency::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'currency not found']
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        // Don't delete if in use.
-        if ($currency->countries()->exists()) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['country' => 'currency referenced by a country']
-            );
-        }
-
-        // Rename unique columns on soft-delete.
-        $currency->iso = $currency->iso . '___' . Hash::make(Str::uuid());
-        $currency->save();
-        $currency->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

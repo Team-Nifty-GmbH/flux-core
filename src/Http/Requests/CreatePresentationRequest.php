@@ -2,6 +2,10 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Rules\ClassExists;
+use FluxErp\Rules\MorphExists;
+use Illuminate\Database\Eloquent\Model;
+
 class CreatePresentationRequest extends BaseFormRequest
 {
     /**
@@ -14,8 +18,16 @@ class CreatePresentationRequest extends BaseFormRequest
         return [
             'name' => 'required|string',
             'notice' => 'sometimes|string|nullable',
-            'model_id' => 'integer|required_with:model_type',
-            'model_type' => 'string|required_with:model_id',
+            'model_type' => [
+                'required_with:model_id',
+                'string',
+                new ClassExists(instanceOf: Model::class),
+            ],
+            'model_id' => [
+                'required_with:model_type',
+                'integer',
+                new MorphExists(),
+            ],
             'is_public' => 'boolean',
         ];
     }

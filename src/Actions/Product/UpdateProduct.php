@@ -1,0 +1,114 @@
+<?php
+
+namespace FluxErp\Actions\Product;
+
+use FluxErp\Contracts\ActionInterface;
+use FluxErp\Http\Requests\UpdateProductRequest;
+use FluxErp\Models\Price;
+use FluxErp\Models\Product;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Validator;
+
+class UpdateProduct implements ActionInterface
+{
+    private array $data;
+
+    private array $rules;
+
+    public function __construct(array $data)
+    {
+        $this->data = $data;
+        $this->rules = (new UpdateProductRequest())->rules();
+    }
+
+    public static function make(array $data): static
+    {
+        return (new static($data));
+    }
+
+    public static function name(): string
+    {
+        return 'product.update';
+    }
+
+    public static function description(): string|null
+    {
+        return 'update product';
+    }
+
+    public static function models(): array
+    {
+        return [Product::class];
+    }
+
+    public function execute(): Model
+    {
+        $productOptions = Arr::pull($this->data, 'product_options', []);
+        $productProperties = Arr::mapWithKeys(
+            Arr::pull($this->data, 'product_properties', []),
+            fn ($item, $key) => [$item['id'] => $item['value']]
+        );
+        $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
+        $prices = Arr::pull($this->data, 'prices', false);
+
+        $product = Product::query()
+            ->whereKey($this->data['id'])
+            ->first();
+
+        $product->fill($this->data);
+
+        if ($product->isDirty('is_bundle') && ! $product->is_bundle) {
+            $product->bundleProducts()->detach();
+        }
+
+        $product->save();
+
+        $product->productOptions()->sync($productOptions);
+        $product->productProperties()->sync($productProperties);
+
+        if ($prices) {
+            $priceCollection = collect($prices)->keyBy('price_list_id');
+            $product->prices
+                ?->each(function (Price $price) use ($priceCollection) {
+                    if ($priceCollection->has($price->price_list_id)) {
+                        $price->update($priceCollection->get($price->price_list_id));
+                        $priceCollection->forget($price->price_list_id);
+                    } else {
+                        $price->delete();
+                    }
+                });
+
+            $priceCollection->each(fn ($item) => $product->prices()->create($item));
+        }
+
+        if ($product->is_bundle && $bundleProducts) {
+            $product->bundleProducts()
+                ->sync(
+                    collect($bundleProducts)
+                        ->unique('id')
+                        ->mapWithKeys(fn ($item) => [$item['id'] => ['count' => $item['count']]])
+                        ->toArray()
+                );
+        }
+
+        return $product->withoutRelations()->fresh();
+    }
+
+    public function setRules(array $rules): static
+    {
+        $this->rules = $rules;
+
+        return $this;
+    }
+
+    public function validate(): static
+    {
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(new Product());
+
+        $this->data = $validator->validate();
+
+        return $this;
+    }
+}

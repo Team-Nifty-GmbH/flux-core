@@ -2,20 +2,19 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\AddressType\CreateAddressType;
+use FluxErp\Actions\AddressType\DeleteAddressType;
+use FluxErp\Actions\AddressType\UpdateAddressType;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateAddressRequest;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Client;
+use Illuminate\Validation\ValidationException;
 
 class AddressTypeService
 {
     public function create(array $data): AddressType
     {
-        $addressType = new AddressType($data);
-        $addressType->save();
-
-        return $addressType;
+        return CreateAddressType::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -24,25 +23,25 @@ class AddressTypeService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateAddressRequest(),
-            service: $this
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $addressType = UpdateAddressType::make($item)->validate()->execute(),
+                    additions: ['id' => $addressType->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $addressType = AddressType::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $addressType->fill($item);
-            $addressType->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $addressType->withoutRelations()->fresh(),
-                additions: ['id' => $addressType->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -57,36 +56,18 @@ class AddressTypeService
 
     public function delete(string $id): array
     {
-        $addressType = AddressType::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $addressType) {
+        try {
+            DeleteAddressType::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'address type not found']
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        if ($addressType->is_lock) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['is_locked' => 'address type is locked']
-            );
-        }
-
-        if ($addressType->addresses()->exists()) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['address' => 'address type has attached addresses']
-            );
-        }
-
-        $addressType->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
-            statusMessage: 'address type deleted'
+            statusMessage: 'warehouse deleted'
         );
     }
 

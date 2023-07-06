@@ -2,38 +2,22 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Locking\LockModel;
+use FluxErp\Actions\Locking\UnlockModel;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Traits\Lockable;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class LockService
 {
     public function create(array $data, string $modelType): array
     {
-        if (! in_array(Lockable::class, class_uses($modelType) ?: [])) {
+        try {
+            LockModel::make(array_merge($data, ['model_type' => $modelType]))->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 405,
-                data: ['lock' => 'model not lockable']
+                statusCode: 422,
+                data: $e->errors()
             );
-        }
-
-        if ($modelType::query()
-            ->whereKey($data['id'])
-            ->whereRelation('lock', 'created_by', '!=', Auth::id())
-            ->exists()
-        ) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['model is locked by another user']
-            );
-        }
-
-        $model = $modelType::query()
-            ->whereKey($data['id'])
-            ->first();
-
-        if (! $model->lock()->exists()) {
-            $model->lock()->create();
         }
 
         return ResponseHelper::createArrayResponse(
@@ -44,32 +28,14 @@ class LockService
 
     public function delete(int $id, string $modelType): array
     {
-        if (! in_array(Lockable::class, class_uses($modelType) ?: [])) {
+        try {
+            UnlockModel::make(['id' => $id, 'model_type' => $modelType])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 405,
-                data: ['lock' => 'model not lockable']
+                statusCode: 422,
+                data: $e->errors()
             );
         }
-
-        $model = $modelType::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $model) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'model not found']
-            );
-        }
-
-        if ($model->lock && $model->lock->created_by !== Auth::id()) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['lock' => 'model is locked by another user']
-            );
-        }
-
-        $model->lock()->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 200,

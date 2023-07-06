@@ -2,47 +2,24 @@
 
 namespace FluxErp\Services;
 
-use FluxErp\Helpers\Helper;
+use FluxErp\Actions\AdditionalColumn\CreateValueList;
+use FluxErp\Actions\AdditionalColumn\DeleteValueList;
+use FluxErp\Actions\AdditionalColumn\UpdateValueList;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateValueListRequest;
-use FluxErp\Models\AdditionalColumn;
+use Illuminate\Validation\ValidationException;
 
 class ValueListService
 {
     public function create(array $data): array
     {
-        if (! array_is_list($data['values'])) {
+        try {
+            $valueList = CreateValueList::make($data)->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 422,
-                data: ['values' => 'values array is no list']
+                data: $e->errors()
             );
         }
-
-        $modelClass = Helper::classExists(classString: ucfirst($data['model_type']), isModel: true);
-        if (! $modelClass) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['model_type' => 'model type not found']
-            );
-        }
-
-        if (AdditionalColumn::query()
-            ->where('name', $data['name'])
-            ->where('model_type', $modelClass)
-            ->exists()) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 409,
-                data: ['name_model' => 'Name model combination already exists']
-            );
-        }
-
-        // Save data to table.
-        $valueList = new AdditionalColumn();
-        $valueList->name = $data['name'];
-        $valueList->model_type = $modelClass;
-        $valueList->values = $data['values'];
-        $valueList->save();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 201,
@@ -57,25 +34,25 @@ class ValueListService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateValueListRequest(),
-            service: $this
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $valueList = UpdateValueList::make($item)->validate()->execute(),
+                    additions: ['id' => $valueList->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $valueList = AdditionalColumn::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $valueList->fill($item);
-            $valueList->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $valueList->withoutRelations()->fresh(),
-                additions: ['id' => $valueList->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -83,77 +60,25 @@ class ValueListService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'value lists updated',
+            statusMessage: $statusCode === 422 ? null : 'value list(s) updated',
             bulk: true
         );
     }
 
     public function delete(string $id): array
     {
-        $valueList = AdditionalColumn::query()
-            ->whereKey($id)
-            ->whereNotNull('values')
-            ->first();
-
-        if (! $valueList) {
+        try {
+            DeleteValueList::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'value list not found']
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        if ($valueList->modelValues()->exists()) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['model_has_values' => 'value list referenced by at least one model instance']
-            );
-        }
-
-        $valueList->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
             statusMessage: 'value list deleted'
         );
-    }
-
-    public function validateItem(array $item, array $response): ?array
-    {
-        $valueList = AdditionalColumn::query()
-            ->whereKey($item['id'])
-            ->first();
-
-        if ($item['values'] ?? false) {
-            if (! array_is_list($item['values'])) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 422,
-                    data: ['values' => 'values array is no list']
-                );
-            } elseif ($valueList->modelValues()->whereNotIn('meta.value', $item['values'])->exists()) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 409,
-                    data: ['values' => 'Models with differing values exist'],
-                    additions: $response
-                );
-            }
-        }
-
-        $item['name'] = $item['name'] ?? $valueList->name;
-        $item['model_type'] = $item['model_type'] ?? $valueList->model_type;
-
-        if (AdditionalColumn::query()
-            ->where('id', '!=', $item['id'])
-            ->where('name', $item['name'])
-            ->where('model_type', $item['model_type'])
-            ->exists()
-        ) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 409,
-                data: ['name_model' => 'Name model combination already exists'],
-                additions: $response
-            );
-        }
-
-        return null;
     }
 }

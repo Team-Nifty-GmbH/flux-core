@@ -143,7 +143,7 @@ class EventSubscriptionTest extends BaseSetup
         ];
 
         $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_create_event_subscription_model_type_not_found()
@@ -161,7 +161,7 @@ class EventSubscriptionTest extends BaseSetup
         ];
 
         $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_create_event_subscription_model_id_not_found()
@@ -179,7 +179,7 @@ class EventSubscriptionTest extends BaseSetup
         ];
 
         $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_create_event_subscription_already_subscribed()
@@ -200,25 +200,7 @@ class EventSubscriptionTest extends BaseSetup
         $eventSubscription->save();
 
         $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-        $response->assertStatus(409);
-    }
-
-    public function test_create_event_subscription_model_id_null()
-    {
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $subscription = [
-            'user_id' => $this->user->id,
-            'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => Comment::class,
-            'model_id' => null,
-            'is_broadcast' => true,
-            'is_notifiable' => false,
-        ];
-
-        $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-        $response->assertStatus(409);
+        $response->assertStatus(422);
     }
 
     public function test_update_event_subscription()
@@ -290,7 +272,7 @@ class EventSubscriptionTest extends BaseSetup
         ];
 
         $response = $this->actingAs($this->user)->put('/api/event-subscriptions', $subscription);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_delete_event_subscription()
