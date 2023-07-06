@@ -203,7 +203,7 @@ class OrderDetail extends Component
             abort(404);
         }
 
-        return response()->download($mediaItem->getPath(), $mediaItem->name);
+        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
 
     private function renderTree(array|Collection $tree, int $level = 0, string $loopPrefix = '', $parent = null): void

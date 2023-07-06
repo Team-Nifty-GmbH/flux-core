@@ -2,10 +2,12 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\States\ProjectTask\ProjectTaskState;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -16,11 +18,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
+use Spatie\ModelStates\HasStates;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class ProjectTask extends Model implements HasMedia
 {
-    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification,
-        HasUuid, InteractsWithMedia, Searchable, SoftDeletes;
+    use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
+        HasPackageFactory, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -30,6 +34,7 @@ class ProjectTask extends Model implements HasMedia
     protected $casts = [
         'is_done' => 'boolean',
         'is_paid' => 'boolean',
+        'state' => ProjectTaskState::class,
     ];
 
     protected $hidden = [
@@ -75,8 +80,8 @@ class ProjectTask extends Model implements HasMedia
 
     public function toSearchableArray(): array
     {
-        return $this->with('address')
-            ->with('project')
+        return $this->with('address:id,company,firstname,lastname,city')
+            ->with('project:id,project_name,display_name')
             ->whereKey($this->id)
             ->first()?->toArray() ?? [];
     }

@@ -51,6 +51,7 @@ class UpdateProduct implements ActionInterface
         );
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
         $prices = Arr::pull($this->data, 'prices', false);
+        $tags = Arr::pull($this->data, 'tags');
 
         $product = Product::query()
             ->whereKey($this->data['id'])
@@ -63,6 +64,10 @@ class UpdateProduct implements ActionInterface
         }
 
         $product->save();
+
+        if (! is_null($tags)) {
+            $product->syncTags($tags);
+        }
 
         $product->productOptions()->sync($productOptions);
         $product->productProperties()->sync($productProperties);

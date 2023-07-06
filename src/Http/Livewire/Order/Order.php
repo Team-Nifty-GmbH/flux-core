@@ -65,6 +65,8 @@ class Order extends Component
             ->firstOrFail();
 
         $this->printLayouts = $order->orderType?->print_layouts ?: [];
+        $this->printLayouts = array_combine(array_map('class_basename', $this->printLayouts), $this->printLayouts);
+
         $this->selectedPrintLayouts = array_fill_keys(array_keys($this->printLayouts), false);
 
         $this->order = $order->toArray();

@@ -70,36 +70,4 @@ class AddressTypeService
             statusMessage: 'warehouse deleted'
         );
     }
-
-    public function initialize(): void
-    {
-        $path = resource_path() . '/init-files/address-types.json';
-        $json = json_decode(file_get_contents($path), true);
-
-        if ($json['model'] === 'AddressType') {
-            $jsonAddressTypes = $json['data'];
-
-            if ($jsonAddressTypes) {
-                foreach (Client::all() as $client) {
-                    foreach ($jsonAddressTypes as $jsonAddressType) {
-                        $data = array_map(function ($value) {
-                            return __($value);
-                        }, $jsonAddressType);
-                        $data['client_id'] = $client->id;
-
-                        // Gather necessary foreign keys.
-                        $addressType = AddressType::query()
-                            ->where('address_type_code', $data['address_type_code'])
-                            ->where('client_id', $client->id)
-                            ->firstOrNew();
-
-                        if (! $addressType->exists) {
-                            $addressType->fill($data);
-                            $addressType->save();
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

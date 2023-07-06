@@ -16,7 +16,13 @@
         </div>
         <div class="w-full">
             <div class="flex justify-between text-sm">
-                <div x-text="comment.user?.name ?? '{{ __('Unknown') }}'" class="font-medium text-gray-500"></div>
+                <div class="flex gap-1.5">
+                    <div x-text="comment.user?.name ?? '{{ __('Unknown') }}'" class="font-medium text-gray-500"></div>
+                    @if($this->isPublic === true)
+                        <x-badge flat x-bind:class="! comment.is_internal && 'hidden'" :label="__('Internal')">
+                        </x-badge>
+                    @endif
+                </div>
                 <x-dropdown>
                     @can('api.comments.put')
                         <x-dropdown.item x-on:click="$wire.toggleSticky(comment.id); comment.is_sticky = ! comment.is_sticky">
@@ -45,6 +51,15 @@
             </div>
             <div class="mt-1 text-sm dark:text-gray-50">
                 <p x-html="comment.comment"></p>
+                <div class="flex gap-1">
+                    <template x-for="file in comment.media">
+                        <x-button xs icon="paper-clip" x-on:click="$wire.download(file.id)" rounded>
+                            <x-slot:label>
+                                <span x-text="file.name"></span>
+                            </x-slot:label>
+                        </x-button>
+                    </template>
+                </div>
             </div>
             <div class="mt-2 space-x-2 text-sm font-medium text-gray-700 dark:text-gray-50">
                 <span x-text="window.formatters.relativeTime(new Date(comment.created_at).getTime())"></span>

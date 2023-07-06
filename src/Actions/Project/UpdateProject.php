@@ -73,15 +73,23 @@ class UpdateProject implements ActionInterface
                 $intArray = Arr::pluck($this->data['categories'], 'id');
             } else {
                 $intArray = array_filter($this->data['categories'], function ($value) {
-                    return is_int($value) && $value > 0;
+                    return is_numeric($value) && $value > 0;
                 });
+                $intArray = array_map('intval', $intArray);
             }
 
             $project = Project::query()
                 ->whereKey($this->data['id'])
+                ->with(['tasks' => ['categories:id'], 'categories:id'])
                 ->first();
 
-            $categories = $project->categoryTemplate->categories->pluck('id')->toArray();
+            $projectCategories = $project
+                ->category
+                ?->children()
+                ->with('children:id,parent_id')
+                ->get()
+                ->toArray();
+            $categories = $projectCategories ? array_column(to_flat_tree($projectCategories), 'id') : [];
 
             $diff = array_diff($intArray, $categories);
             if (count($diff) > 0) {
@@ -95,11 +103,13 @@ class UpdateProject implements ActionInterface
                 ])->errorBag('updateProject');
             }
 
-            $projectTaskCategories = Arr::flatten(
-                Arr::pluck(
-                    $project->tasks()->get()->toArray(),
-                    'category_id')
-            );
+            $projectTaskCategories = [];
+            $project->tasks->each(function ($task) use (&$projectTaskCategories) {
+                $projectTaskCategories = array_merge(
+                    $projectTaskCategories,
+                    $task->categories->pluck('id')->toArray()
+                );
+            });
 
             if (! empty(array_diff($projectTaskCategories, $intArray))) {
                 throw ValidationException::withMessages([

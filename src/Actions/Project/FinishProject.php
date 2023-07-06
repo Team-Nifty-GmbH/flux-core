@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Project;
 use FluxErp\Contracts\ActionInterface;
 use FluxErp\Http\Requests\FinishProjectRequest;
 use FluxErp\Models\Project;
+use FluxErp\States\Project\Done;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
@@ -46,7 +47,7 @@ class FinishProject implements ActionInterface
             ->whereKey($this->data['id'])
             ->first();
 
-        $project->is_done = $this->data['finish'];
+        $project->state = $this->data['finish'] ? Done::class : Project::getDefaultStateFor('state');
         $project->save();
 
         return $project;

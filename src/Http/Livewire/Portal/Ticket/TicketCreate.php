@@ -9,6 +9,7 @@ use FluxErp\Models\TicketType;
 use FluxErp\Services\TicketService;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -39,15 +40,26 @@ class TicketCreate extends Component
         'save',
     ];
 
-    public function mount(): void
+    public function mount(?string $modelType = null, ?int $modelId = null): void
     {
         $this->ticket = [
             'title' => null,
             'description' => null,
+            'model_type' => $modelType,
+            'model_id' => $modelId,
         ];
 
         $this->ticketTypes = TicketType::query()
             ->with('additionalModelColumns:id,name,model_type,model_id,field_type,values')
+            ->when(
+                $modelType,
+                fn (Builder $query) => $query->where(
+                    function (Builder $query) use ($modelType) {
+                        $query->where('model_type', $modelType)
+                            ->orWhereNull('model_type');
+                }),
+                fn (Builder $query) => $query->whereNull('model_type')
+            )
             ->get()
             ->toArray();
 
@@ -85,7 +97,7 @@ class TicketCreate extends Component
         $this->skipRender();
     }
 
-    public function save(): void
+    public function save(): bool
     {
         $this->ticket = array_merge($this->ticket, [
             'authenticatable_type' => Auth::user()->getMorphClass(),
@@ -105,6 +117,8 @@ class TicketCreate extends Component
 
         $this->skipRender();
         $this->emitUp('closeModal', $ticket->toArray());
+
+        return true;
     }
 
     public function updatedTicketTypeId(): void

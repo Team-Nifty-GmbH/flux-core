@@ -130,6 +130,11 @@ trait HasAdditionalColumns
             )
         );
 
+        $this->additionalColumns = Cache::store('array')->rememberForever(
+            'meta_additional_columns_' . get_class($this),
+            fn () => $this->getAdditionalColumns(false)
+        );
+
         $this->translatableMeta =
             Cache::store('array')->rememberForever(
                 'meta_translatable_' . get_class($this),
@@ -632,7 +637,6 @@ trait HasAdditionalColumns
         if ($this->isTranslatableMeta($key) && ! $isTranslated) {
             return $this->setMetaTranslation($key, app()->getLocale(), $value);
         }
-
         $attributes = [
             'value' => $value,
             'additional_column_id' => $this->getAdditionalColumnId($key),

@@ -24,6 +24,7 @@ class Files extends Component
         $this->serialNumbers = Auth::user()
             ->contact
             ->serialNumbers()
+            ->whereHas('media')
             ->with(['product', 'media'])
             ->get()
             ->toArray();

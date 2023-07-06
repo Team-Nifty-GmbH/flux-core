@@ -7,6 +7,7 @@ use FluxErp\Contracts\ActionInterface;
 use FluxErp\Http\Requests\CreateCommentRequest;
 use FluxErp\Models\Comment;
 use FluxErp\Models\EventSubscription;
+use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -45,11 +46,32 @@ class CreateComment implements ActionInterface
 
     public function execute(): Comment
     {
-        $mentions = [];
-        preg_match_all("(@(?P<names>[a-zA-Z0-9\-_]+))", $this->data['comment'], $mentions);
+        preg_match_all('/data-mention="(.*?)"/', $this->data['comment'], $matches);
+        $mentions = collect($matches[1])->map(function ($mention) {
+            $exploded = explode(':', $mention);
+
+            return [
+                'class' => $exploded[0],
+                'id' => $exploded[1],
+            ];
+        });
+
+        $mentions = $mentions
+            ->groupBy('class')
+            ->map(function ($mentions) {
+                return $mentions->pluck('id')->unique()->map(fn ($id) => (int) $id);
+            })
+            ->toArray();
+
         $mentionedUsers = User::query()
-            ->whereIn('user_code', $mentions['names'])
-            ->orWhere('id', Auth::id())
+            ->where(function ($query) use ($mentions) {
+                $query->whereIn('id', $mentions[User::class] ?? [])
+                    ->orWhereHas('roles', function ($query) use ($mentions) {
+                        $query->whereIn('id', $mentions[Role::class] ?? []);
+                    })
+                    ->orWhere('id', Auth::id());
+            })
+            ->where('is_active', true)
             ->get();
 
         foreach ($mentionedUsers as $mention) {

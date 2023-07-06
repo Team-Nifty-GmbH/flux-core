@@ -6,6 +6,7 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class AdditionalColumn extends Model
 {
@@ -28,6 +29,16 @@ class AdditionalColumn extends Model
     protected $hidden = [
         'pivot',
     ];
+
+    public static function boot(): void
+    {
+        parent::boot();
+
+        self::created(function (AdditionalColumn $additionalColumn) {
+            Cache::store('array')->forget('meta_casts_' . $additionalColumn->model_type);
+            Cache::store('array')->forget('meta_additional_columns_' . $additionalColumn->model_type);
+        });
+    }
 
     public function modelValues(): Builder
     {

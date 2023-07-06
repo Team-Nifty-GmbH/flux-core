@@ -5,6 +5,7 @@ namespace FluxErp\Actions\DiscountGroup;
 use FluxErp\Contracts\ActionInterface;
 use FluxErp\Http\Requests\CreateDiscountGroupRequest;
 use FluxErp\Models\DiscountGroup;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
 class CreateDiscountGroup implements ActionInterface
@@ -41,8 +42,14 @@ class CreateDiscountGroup implements ActionInterface
 
     public function execute(): DiscountGroup
     {
+        $discounts = Arr::pull($this->data, 'discounts', []);
+
         $discountGroup = new DiscountGroup($this->data);
         $discountGroup->save();
+
+        if ($discounts) {
+            $discountGroup->discounts()->attach($discounts);
+        }
 
         return $discountGroup;
     }

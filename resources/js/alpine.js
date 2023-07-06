@@ -1,9 +1,15 @@
 import Alpine from 'alpinejs'
 import focus from '@alpinejs/focus'
 import persist from '@alpinejs/persist'
+import mask from '@alpinejs/mask'
+import folderTree from './components/folder-tree';
+import '../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
+
+window.folderTree = folderTree;
 
 Alpine.plugin(focus)
 Alpine.plugin(persist)
+Alpine.plugin(mask)
 
 if (typeof window.Livewire === 'undefined') {
     throw 'Livewire Sortable.js Plugin: window.Livewire is undefined. Make sure @livewireScripts is placed above this script include';
@@ -118,8 +124,42 @@ Alpine.directive('percentage', (el, { expression }, { evaluate }) => {
     el.innerText = formatters.percentage(evaluate(expression));
 })
 
+Alpine.directive('tribute', (el, { modifiers, expression }, { evaluate }) => {
+    let values = evaluate(expression);
+
+    let triggerIndex = modifiers.indexOf('trigger');
+    let trigger;
+    if (triggerIndex >= 0) {
+        trigger = modifiers[triggerIndex + 1] ?? '@';
+    }
+
+    let defaultConfig = {
+        containerClass: 'absolute z-50 mt-1 -ml-6 w-60 bg-white shadow-xl rounded-lg py-3 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:ml-auto sm:w-64 sm:text-sm',
+        itemClass: 'bg-white cursor-default select-none relative py-2 px-3 hover:bg-gray-100',
+        selectClass: 'bg-gray-100',
+        selectTemplate: function (item) {
+            return '<div contenteditable="false" class="outline-none inline-flex justify-center items-center group rounded gap-x-1 text-xs font-semibold px-2.5 py-0.5 text-primary-600 bg-primary-100 dark:bg-slate-700" data-mention="' + item.original.type + ':' + item.original.value +'">' + this.current.trigger + ' ' + item.original.key + '</div>';
+        },
+    };
+
+    let config = [];
+    if (modifiers.includes('multiple')) {
+        values.forEach((value) => {
+            Object.assign(value, defaultConfig);
+            config.push(value);
+        });
+    } else {
+        defaultConfig.values = values;
+        defaultConfig.trigger = trigger;
+        config.push(defaultConfig);
+    }
+
+    const tribute = new Tribute({
+        collection: config
+    });
+
+    tribute.attach(el);
+})
+
 window.Alpine = Alpine;
 Alpine.start();
-
-import '../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
-

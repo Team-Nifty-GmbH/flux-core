@@ -197,7 +197,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/logging.php', 'logging');
         $this->mergeConfigFrom(__DIR__ . '/../config/print.php', 'print');
         $loggingConfig = config('logging.channels');
-        config(['filesystems.links.' . public_path('flux') => __DIR__ . '/../public']);
         $loggingConfig['database'] = [
             'driver' => 'custom',
             'handler' => DatabaseLoggingHandler::class,
@@ -241,6 +240,13 @@ class FluxServiceProvider extends ServiceProvider
             ],
         ]);
         config(['wireui.heroicons.alias' => 'heroicons']);
+        config(['wireui.modal' => [
+            'zIndex' => env('WIREUI_MODAL_Z_INDEX', 'z-20'),
+            'maxWidth' => env('WIREUI_MODAL_MAX_WIDTH', '2xl'),
+            'spacing' => env('WIREUI_MODAL_SPACING', 'p-4'),
+            'align' => env('WIREUI_MODAL_ALIGN', 'start'),
+            'blur' => env('WIREUI_MODAL_BLUR', false),
+        ]]);
         config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
         config([
             'scout.meilisearch.index-settings' => [
@@ -319,7 +325,14 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerLivewireComponents(): void
     {
         $livewireNamespace = 'FluxErp\\Http\\Livewire\\';
+        $manifest = app(\Livewire\LivewireComponentsFinder::class)->getManifest();
+
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
+            // if an alias is already registered, skip it
+            if ($manifest[$alias] ?? false) {
+                continue;
+            }
+
             Livewire::component($alias, $class);
         }
     }
@@ -334,7 +347,7 @@ class FluxServiceProvider extends ServiceProvider
         foreach ($phpFiles as $phpFile) {
             $relativePath = Str::replace($directoryPath, '', $phpFile->getRealPath());
             $relativePath = Str::replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
-            $class = $namespace . str_replace('/', '\\', rtrim($relativePath, '.php'));
+            $class = $namespace . str_replace('/', '\\', pathinfo($relativePath, PATHINFO_FILENAME));
 
             if (class_exists($class)) {
                 $exploded = explode('\\', $relativePath);

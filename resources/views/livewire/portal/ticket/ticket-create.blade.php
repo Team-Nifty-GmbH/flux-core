@@ -5,6 +5,13 @@
                 selectedAdditionalColumns: @entangle('selectedAdditionalColumns').defer,
                 additionalColumns: @entangle('additionalColumns').defer,
                 ticket: @entangle('ticket').defer,
+                save() {
+                    this.$wire.save().then((result) => {
+                        if (result === true) {
+                            close()
+                        }
+                    });
+                }
             }">
                 <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     <div class="sm:col-span-6">

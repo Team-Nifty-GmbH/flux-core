@@ -4,6 +4,8 @@ namespace FluxErp\Http\Requests;
 
 use FluxErp\Models\ProjectTask;
 use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\States\ProjectTask\ProjectTaskState;
+use Spatie\ModelStates\Validation\ValidStateRule;
 
 class UpdateProjectTaskRequest extends BaseFormRequest
 {
@@ -14,25 +16,32 @@ class UpdateProjectTaskRequest extends BaseFormRequest
      */
     public function rules(): array
     {
-        return [
-            'id' => 'required|integer|exists:project_tasks,id,deleted_at,NULL',
-            'project_id' => [
-                'integer',
-                (new ExistsWithIgnore('projects', 'id'))->whereNull('deleted_at'),
+        return array_merge(
+            (new ProjectTask())->hasAdditionalColumnsValidationRules(),
+            [
+                'id' => 'required|integer|exists:project_tasks,id,deleted_at,NULL',
+                'project_id' => [
+                    'integer',
+                    (new ExistsWithIgnore('projects', 'id'))->whereNull('deleted_at'),
+                ],
+                'address_id' => [
+                    'integer',
+                    (new ExistsWithIgnore('addresses', 'id'))->whereNull('deleted_at'),
+                ],
+                'user_id' => [
+                    'integer',
+                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+                ],
+                'name' => 'sometimes|string',
+                'state' => [
+                    'string',
+                    ValidStateRule::make(ProjectTaskState::class),
+                ],
+                'is_done' => 'sometimes|boolean',
+                'categories' => 'prohibits:category_id|required_without:category_id|array',
+                'category_id' => 'prohibits:categories|required_without:categories|integer|exists:categories,id,model_type,'
+                    . ProjectTask::class,
             ],
-            'address_id' => [
-                'integer',
-                (new ExistsWithIgnore('addresses', 'id'))->whereNull('deleted_at'),
-            ],
-            'user_id' => [
-                'integer',
-                (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
-            ],
-            'name' => 'sometimes|string',
-            'is_done' => 'sometimes|boolean',
-            'categories' => 'prohibits:category_id|required_without:category_id|array',
-            'category_id' => 'prohibits:categories|required_without:categories|integer|exists:categories,id,model_type,'
-                . ProjectTask::class,
-        ];
+        );
     }
 }

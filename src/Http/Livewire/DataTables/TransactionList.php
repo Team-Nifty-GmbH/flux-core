@@ -4,6 +4,7 @@ namespace FluxErp\Http\Livewire\DataTables;
 
 use FluxErp\Models\Transaction;
 use TeamNiftyGmbH\DataTable\DataTable;
+use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class TransactionList extends DataTable
 {
@@ -17,6 +18,12 @@ class TransactionList extends DataTable
 
     public function mount(): void
     {
+        $attributes = ModelInfo::forModel($this->model)->attributes;
+
+        $this->availableCols = $attributes
+            ->pluck('name')
+            ->toArray();
+
         parent::mount();
     }
 }

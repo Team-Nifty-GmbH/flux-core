@@ -4,8 +4,8 @@ namespace FluxErp\Actions\Project;
 
 use FluxErp\Contracts\ActionInterface;
 use FluxErp\Http\Requests\CreateProjectRequest;
+use FluxErp\Models\Category;
 use FluxErp\Models\Project;
-use FluxErp\Models\ProjectCategoryTemplate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -70,22 +70,17 @@ class CreateProject implements ActionInterface
                     'parent_id' => [__('Parent project not found')],
                 ])->errorBag('createProject');
             }
-
-            if ($parentProject->parent()->exists()) {
-                throw ValidationException::withMessages([
-                    'children' => [__('Only first level children allowed')],
-                ])->errorBag('createProject');
-            }
         }
 
         $intArray = array_filter($this->data['categories'], function ($value) {
             return is_int($value) && $value > 0;
         });
 
-        $categoryTemplate = ProjectCategoryTemplate::query()
-            ->whereKey($this->data['project_category_template_id'])
+        $categories = Category::query()
+            ->whereKey($this->data['category_id'])
+            ->with('children:id,parent_id')
             ->first();
-        $categories = $categoryTemplate->categories->pluck('id')->toArray();
+        $categories = array_column(to_flat_tree($categories->children->toArray()), 'id');
 
         $diff = array_diff($intArray, $categories);
         if (count($diff) > 0 || count($categories) === 0) {
@@ -98,8 +93,6 @@ class CreateProject implements ActionInterface
                 ],
             ])->errorBag('createProject');
         }
-
-        unset($this->data['categories']);
 
         return $this;
     }

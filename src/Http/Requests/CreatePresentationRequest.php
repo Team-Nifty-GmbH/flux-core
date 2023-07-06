@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Presentation;
 use FluxErp\Rules\ClassExists;
 use FluxErp\Rules\MorphExists;
 use Illuminate\Database\Eloquent\Model;
@@ -15,20 +16,23 @@ class CreatePresentationRequest extends BaseFormRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string',
-            'notice' => 'sometimes|string|nullable',
-            'model_type' => [
-                'required_with:model_id',
-                'string',
-                new ClassExists(instanceOf: Model::class),
+        return array_merge(
+            (new Presentation())->hasAdditionalColumnsValidationRules(),
+            [
+                'name' => 'required|string',
+                'notice' => 'sometimes|string|nullable',
+                'model_type' => [
+                    'required_with:model_id',
+                    'string',
+                    new ClassExists(instanceOf: Model::class),
+                ],
+                'model_id' => [
+                    'required_with:model_type',
+                    'integer',
+                    new MorphExists(),
+                ],
+                'is_public' => 'boolean',
             ],
-            'model_id' => [
-                'required_with:model_type',
-                'integer',
-                new MorphExists(),
-            ],
-            'is_public' => 'boolean',
-        ];
+        );
     }
 }

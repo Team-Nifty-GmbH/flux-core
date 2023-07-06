@@ -61,7 +61,7 @@ class CommentCreatedNotification extends Notification implements ShouldQueue
         $morph = $this->model->model;
 
         $accept = [];
-        if (method_exists($morph, 'detailRoute')) {
+        if ($morph && method_exists($morph, 'detailRoute')) {
             $accept = [
                 'accept' => [
                     'label' => __('View'),
@@ -78,7 +78,7 @@ class CommentCreatedNotification extends Notification implements ShouldQueue
                 ),
                 'description' => $this->model->comment,
                 'icon' => 'chat',
-                'img' => method_exists($user, 'getAvatarUrl') ? $user->getAvatarUrl() : null,
+                'img' => $user && method_exists($user, 'getAvatarUrl') ? $user->getAvatarUrl() : null,
             ],
             $accept
         );

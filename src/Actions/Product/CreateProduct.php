@@ -49,10 +49,12 @@ class CreateProduct implements ActionInterface
         );
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
         $prices = Arr::pull($this->data, 'prices', false);
+        $tags = Arr::pull($this->data, 'tags', []);
 
         $product = new Product($this->data);
         $product->save();
 
+        $product->attachTags($tags);
         $product->productOptions()->attach($productOptions);
         $product->productProperties()->attach($productProperties);
         $product->prices()->createMany($this->data['prices'] ?? []);

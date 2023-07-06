@@ -63,20 +63,17 @@ class ReplaceMedia implements ActionInterface
         DeleteMedia::make(['id' => $this->data['id']])->execute();
 
         if ($this->data['media_type'] ?? false) {
-            $media = $mediaItem->model
-                ->{'addMediaFrom' . $this->data['media_type']}($file)
-                ->setName($this->data['name'])
-                ->withCustomProperties($customProperties)
-                ->storingConversionsOnDisk(config('flux.media.conversion'))
-                ->toMediaCollection(collectionName: $mediaItem->collection_name, diskName: $diskName);
+            $fileAdder = $mediaItem->model->{'addMediaFrom' . $this->data['media_type']}($file);
         } else {
-            $media = $mediaItem->model
-                ->addMedia($file instanceof UploadedFile ? $file->path() : $file)
-                ->setName($this->data['name'])
-                ->withCustomProperties($customProperties)
-                ->storingConversionsOnDisk(config('flux.media.conversion'))
-                ->toMediaCollection(collectionName: $mediaItem->collection_name, diskName: $diskName);
+            $fileAdder = $mediaItem->model->addMedia($file instanceof UploadedFile ? $file->path() : $file);
         }
+
+        $media = $fileAdder
+            ->setName($this->data['name'])
+            ->usingFileName($this->data['file_name'])
+            ->withCustomProperties($customProperties)
+            ->storingConversionsOnDisk(config('flux.media.conversion'))
+            ->toMediaCollection(collectionName: $mediaItem->collection_name, diskName: $diskName);
 
         $media->forceFill([
             'id' => $this->data['id'],
@@ -106,11 +103,12 @@ class ReplaceMedia implements ActionInterface
             ->whereKey($this->data['id'])
             ->first();
 
-        $this->data['name'] = $this->data['name'] ?? (
+        $this->data['file_name'] = $this->data['file_name'] ?? (
             $this->data['media'] instanceof UploadedFile ?
                 $this->data['media']->getClientOriginalName() :
                 hash('sha512', microtime() . Str::uuid())
         );
+        $this->data['name'] = $this->data['name'] ?? $this->data['file_name'];
         $this->data['collection_name'] ??= 'default';
 
         if (Media::query()

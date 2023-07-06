@@ -37,7 +37,6 @@ use FluxErp\Http\Controllers\ProductController;
 use FluxErp\Http\Controllers\ProductOptionController;
 use FluxErp\Http\Controllers\ProductOptionGroupController;
 use FluxErp\Http\Controllers\ProductPropertyController;
-use FluxErp\Http\Controllers\ProjectCategoryTemplateController;
 use FluxErp\Http\Controllers\ProjectController;
 use FluxErp\Http\Controllers\ProjectTaskController;
 use FluxErp\Http\Controllers\RoleController;
@@ -339,13 +338,6 @@ Route::group(['middleware' => ['auth:sanctum', 'abilities:user', 'localization']
     Route::put('/projects', [ProjectController::class, 'update']);
     Route::delete('/projects/{id}', [ProjectController::class, 'delete']);
     Route::post('/projects/finish', [ProjectController::class, 'finish']);
-
-    //ProjectCategoriesTemplates
-    Route::get('/project-categories/templates', [ProjectCategoryTemplateController::class, 'index']);
-    Route::get('/project-categories/templates/{id}', [ProjectCategoryTemplateController::class, 'show']);
-    Route::post('/project-categories/templates', [ProjectCategoryTemplateController::class, 'create']);
-    Route::put('/project-categories/templates', [ProjectCategoryTemplateController::class, 'update']);
-    Route::delete('/project-categories/templates/{id}', [ProjectCategoryTemplateController::class, 'delete']);
 
     //Roles
     Route::get('/roles', [RoleController::class, 'index']);

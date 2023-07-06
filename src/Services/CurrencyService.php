@@ -69,27 +69,4 @@ class CurrencyService
             statusMessage: 'currency deleted'
         );
     }
-
-    public function initializeCurrencies(): void
-    {
-        $path = resource_path() . '/init-files/currencies.json';
-        $json = json_decode(file_get_contents($path));
-
-        if ($json->model === 'Currency') {
-            $jsonCurrencies = $json->data;
-
-            if ($jsonCurrencies) {
-                foreach ($jsonCurrencies as $jsonCurrency) {
-                    // Save to database.
-                    Currency::query()
-                        ->updateOrCreate([
-                            'iso' => $jsonCurrency->iso,
-                        ], [
-                            'name' => $jsonCurrency->name,
-                            'symbol' => $jsonCurrency->symbol,
-                        ]);
-                }
-            }
-        }
-    }
 }

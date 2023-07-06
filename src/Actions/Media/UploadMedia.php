@@ -59,21 +59,18 @@ class UploadMedia implements ActionInterface
         );
         $file = $this->data['media'];
 
-        if ($this->data['media_type'] ?? false) {
-            $media = $modelInstance
-                ->{'addMediaFrom' . $this->data['media_type']}($file)
-                ->setName($this->data['name'])
-                ->withCustomProperties($customProperties)
-                ->storingConversionsOnDisk(config('flux.media.conversion'))
-                ->toMediaCollection(collectionName: $this->data['collection_name'], diskName: $diskName);
+        if ($data['media_type'] ?? false) {
+            $fileAdder = $modelInstance->{'addMediaFrom' . $this->data['media_type']}($file);
         } else {
-            $media = $modelInstance
-                ->addMedia($file instanceof UploadedFile ? $file->path() : $file)
-                ->setName($this->data['name'])
-                ->withCustomProperties($customProperties)
-                ->storingConversionsOnDisk(config('flux.media.conversion'))
-                ->toMediaCollection(collectionName: $this->data['collection_name'], diskName: $diskName);
+            $fileAdder = $modelInstance->addMedia($file instanceof UploadedFile ? $file->path() : $file);
         }
+
+        $media = $fileAdder
+            ->setName($this->data['name'])
+            ->usingFileName($this->data['file_name'])
+            ->withCustomProperties($customProperties)
+            ->storingConversionsOnDisk(config('flux.media.conversion'))
+            ->toMediaCollection(collectionName: $this->data['collection_name'], diskName: $diskName);
 
         return $media->withoutRelations();
     }
@@ -89,11 +86,12 @@ class UploadMedia implements ActionInterface
     {
         $this->data = Validator::validate($this->data, $this->rules);
 
-        $this->data['name'] = $this->data['name'] ?? (
+        $this->data['file_name'] = $this->data['file_name'] ?? (
             $this->data['media'] instanceof UploadedFile ?
                 $this->data['media']->getClientOriginalName() :
                 hash('sha512', microtime() . Str::uuid())
         );
+        $this->data['name'] = $this->data['name'] ?? $this->data['file_name'];
         $this->data['collection_name'] ??= 'default';
 
         if (Media::query()

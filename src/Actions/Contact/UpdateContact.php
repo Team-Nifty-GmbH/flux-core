@@ -7,6 +7,7 @@ use FluxErp\Http\Requests\UpdateContactRequest;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -44,12 +45,18 @@ class UpdateContact implements ActionInterface
 
     public function execute(): Model
     {
+        $discountGroups = Arr::pull($this->data, 'discount_groups');
+
         $contact = Contact::query()
             ->whereKey($this->data['id'])
             ->first();
 
         $contact->fill($this->data);
         $contact->save();
+
+        if (! is_null($discountGroups)) {
+            $contact->discountGroups()->sync($discountGroups);
+        }
 
         return $contact->withoutRelations()->fresh();
     }

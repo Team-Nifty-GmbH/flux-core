@@ -3,6 +3,7 @@
 namespace FluxErp\Database\Factories;
 
 use FluxErp\Models\Project;
+use FluxErp\States\Project\ProjectState;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProjectFactory extends Factory
@@ -25,6 +26,7 @@ class ProjectFactory extends Factory
             'project_name' => $this->faker->jobTitle(),
             'display_name' => $this->faker->jobTitle(),
             'release_date' => $this->faker->dateTime(),
+            'state' => ProjectState::all()->random()::$name,
         ];
     }
 }

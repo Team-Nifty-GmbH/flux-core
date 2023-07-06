@@ -11,11 +11,14 @@
         meta.name = 'currency-code';
         meta.content = order.currency.iso;
         document.getElementsByTagName('head')[0].appendChild(meta);
+        $watch('detail', (value) => {
+            Alpine.$data(document.getElementById('folder-tree').querySelector('[x-data]')).loadModel(@js(\FluxErp\Models\Product::class), value.product_id);
+        });
      }"
      class="dark:text-white"
      x-on:data-table-record-selected="selected = Alpine.$data(document.getElementById('order-position-table').querySelector('[tall-datatable]')).selected"
 >
-    <x-modal.card wire:model.defer="detailModal">
+    <x-modal.card id="detail-modal" wire:model.defer="detailModal">
         <div class="grid grid-cols-3 gap-5">
             <div class="col-span-1">
                 <div class="bg-portal-light w-full rounded-md">
@@ -45,8 +48,25 @@
                 <div class="pt-5" x-html="detail.product?.description"></div>
             </div>
         </div>
-        <livewire:folder-tree/>
+        <div id="folder-tree" class="pt-3">
+            <livewire:folder-tree :model-type="\FluxErp\Models\Product::class" />
+        </div>
     </x-modal.card>
+    <div id="new-ticket-modal">
+        <x-modal.card :title="__('New Ticket')">
+            <livewire:portal.ticket.ticket-create :model-type="\FluxErp\Models\Order::class" :model-id="$order['id']"/>
+            <x-slot name="footer">
+                <div class="w-full">
+                    <div class="flex justify-between gap-x-4">
+                        <div class="flex">
+                            <x-button flat :label="__('Cancel')" x-on:click="close"/>
+                            <x-button primary :label="__('Save')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal').querySelector('[x-data]').querySelector('[x-data]')).save();"/>
+                        </div>
+                    </div>
+                </div>
+            </x-slot>
+        </x-modal.card>
+    </div>
     <h2 class="text-base font-bold uppercase">
         {{ __('Order details') }}
     </h2>
@@ -54,16 +74,18 @@
         {{ trans(':order_type :order_number dated :order_date', [
             'order_type' => $order['order_type']['name'],
             'order_number' => $order['order_number'],
-            'order_date' => $order['order_date']
+            'order_date' => \Illuminate\Support\Carbon::parse($order['order_date'])->isoFormat('L')
         ]) }}
     </h1>
     <div class="flex justify-end pb-5 gap-1.5">
         @if($order['invoice_number'])
             <x-button primary :label="__('Download invoice')" wire:click="downloadInvoice" spinner="downloadInvoice"/>
         @endif
+
         @if($order['parent_id'])
             <x-button primary :href="route('portal.orders.id', $order['parent_id'])">{{ __('Show parent') }}</x-button>
         @endif
+        <x-button primary :label="__('New Ticket')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal').querySelector('[wireui-modal]')).open();" spinner="downloadInvoice"/>
     </div>
     <div class="space-y-5">
         <div class="flex gap-8">
