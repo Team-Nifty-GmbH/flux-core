@@ -25,11 +25,11 @@
         </div>
     </a>
 </div>
-    <div id="nav" data-turbo-permanent>
-        <livewire:navigation :setting="$setting"/>
+    <div id="nav">
+        <livewire:navigation :show-search-bar="false" :setting="$setting"/>
     </div>
     <div class="flex flex-1 flex-col md:pl-20">
-        <div class="h-full w-full p-4 lg:p-16">
+        <div class="h-full w-full p-4 lg:p-8">
             {{ $slot }}
         </div>
     </div>

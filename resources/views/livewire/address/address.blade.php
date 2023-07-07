@@ -1,5 +1,10 @@
 <div
-    x-data="{address: @entangle('address').defer, edit: @entangle('edit').defer, tab: @entangle('tab')} "
+    x-data="{
+        address: @entangle('address').defer,
+        edit: @entangle('edit').defer,
+        tab: @entangle('tab'),
+        addresses: @entangle('addresses').defer,
+    }"
     class="w-full lg:col-span-2 lg:col-start-1 lg:flex lg:space-x-6">
 
     <!-- Address list-->
@@ -21,7 +26,7 @@
                         @endcan
                     </div>
                 </div>
-                <div x-data="{addresses: @entangle('addresses')}" class="space-y-2">
+                <div class="space-y-2">
                     <template x-for="addressItem in addresses">
                         <div
                             x-on:click="$wire.getAddress(addressItem.id, tab !== 'comments'); edit = false"
