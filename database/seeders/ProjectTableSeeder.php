@@ -11,11 +11,11 @@ class ProjectTableSeeder extends Seeder
 {
     public function run()
     {
-        $categories = Category::query()
+        $projectCategories = Category::query()
             ->where('model_type', ProjectTask::class)
             ->get();
         for ($i = 0; $i < 10; $i++) {
-            $category = $categories->random();
+            $category = $projectCategories->random();
             $project = Project::factory()->create([
                 'category_id' => $category->id,
             ]);
