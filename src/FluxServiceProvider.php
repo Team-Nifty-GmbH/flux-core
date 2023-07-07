@@ -29,7 +29,6 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\Token;
 use FluxErp\Models\User;
-use FluxErp\Models\Warehouse;
 use FluxErp\Widgets\WidgetManager;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -279,7 +278,13 @@ class FluxServiceProvider extends ServiceProvider
                     ],
                     'sortableAttributes' => ['*'],
                 ],
-                Product::class => [],
+                Product::class => [
+                    'filterableAttributes' => [
+                        'is_active',
+                        'parent_id',
+                    ],
+                    'sortableAttributes' => ['*'],
+                ],
                 ProjectTask::class => [
                     'filterableAttributes' => [
                         'project_id',
@@ -292,15 +297,19 @@ class FluxServiceProvider extends ServiceProvider
                         'is_active',
                     ],
                 ],
-                Warehouse::class => [],
             ],
         ]);
-        config(['tinker.alias' => ['FluxErp\\Models\\', 'FluxErp\\Services\\']]);
+
+        if (app()->runningInConsole()) {
+            config(['tinker.alias' => ['FluxErp\\Models\\', 'FluxErp\\Services\\']]);
+        }
     }
 
     protected function registerBladeComponents(): void
     {
-        $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/../resources/views/components'));
+        $directoryIterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(__DIR__ . '/../resources/views/components')
+        );
         $phpFiles = new RegexIterator($directoryIterator, '/\.blade\.php$/');
 
         foreach ($phpFiles as $phpFile) {
@@ -340,7 +349,11 @@ class FluxServiceProvider extends ServiceProvider
         foreach ($phpFiles as $phpFile) {
             $relativePath = Str::replace($directoryPath, '', $phpFile->getRealPath());
             $relativePath = Str::replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
-            $class = $namespace . str_replace('/', '\\', pathinfo($relativePath, PATHINFO_FILENAME));
+            $class = $namespace . str_replace(
+                '/',
+                '\\',
+                pathinfo($relativePath, PATHINFO_FILENAME)
+            );
 
             if (class_exists($class)) {
                 $exploded = explode('\\', $relativePath);
@@ -362,7 +375,9 @@ class FluxServiceProvider extends ServiceProvider
             return;
         }
 
-        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands'));
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands')
+        );
         $commandClasses = [];
 
         foreach ($iterator as $file) {
