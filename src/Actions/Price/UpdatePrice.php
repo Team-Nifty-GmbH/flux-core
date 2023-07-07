@@ -2,37 +2,17 @@
 
 namespace FluxErp\Actions\Price;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdatePriceRequest;
 use FluxErp\Models\Price;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 
-class UpdatePrice implements ActionInterface
+class UpdatePrice extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdatePriceRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'price.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update price';
     }
 
     public static function models(): array
@@ -50,19 +30,5 @@ class UpdatePrice implements ActionInterface
         $price->save();
 
         return $price->withoutRelations()->fresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

@@ -2,37 +2,18 @@
 
 namespace FluxErp\Actions\PaymentType;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdatePaymentTypeRequest;
 use FluxErp\Models\PaymentType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdatePaymentType implements ActionInterface
+class UpdatePaymentType extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdatePaymentTypeRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'payment-type.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update payment type';
     }
 
     public static function models(): array
@@ -50,13 +31,6 @@ class UpdatePaymentType implements ActionInterface
         $paymentType->save();
 
         return $paymentType->withoutRelations()->fresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
     }
 
     public function validate(): static

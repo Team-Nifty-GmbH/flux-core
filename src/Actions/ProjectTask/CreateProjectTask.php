@@ -2,38 +2,19 @@
 
 namespace FluxErp\Actions\ProjectTask;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateProjectTaskRequest;
 use FluxErp\Models\Project;
 use FluxErp\Models\ProjectTask;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class CreateProjectTask implements ActionInterface
+class CreateProjectTask extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateProjectTaskRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'project-task.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create project task';
     }
 
     public static function models(): array
@@ -47,13 +28,6 @@ class CreateProjectTask implements ActionInterface
         $projectTask->save();
 
         return $projectTask;
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
     }
 
     public function validate(): static

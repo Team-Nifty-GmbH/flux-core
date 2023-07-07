@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Address;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
@@ -10,31 +10,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class CreateAddress implements ActionInterface
+class CreateAddress extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateAddressRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'address.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create address';
     }
 
     public static function models(): array
@@ -85,16 +66,12 @@ class CreateAddress implements ActionInterface
         return $address;
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(new Address());
+
+        $this->data = $validator->validate();
 
         return $this;
     }

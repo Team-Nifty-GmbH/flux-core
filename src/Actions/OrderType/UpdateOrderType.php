@@ -2,37 +2,18 @@
 
 namespace FluxErp\Actions\OrderType;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateOrderTypeRequest;
 use FluxErp\Models\OrderType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateOrderType implements ActionInterface
+class UpdateOrderType extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateOrderTypeRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'order-type.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update order type';
     }
 
     public static function models(): array
@@ -50,13 +31,6 @@ class UpdateOrderType implements ActionInterface
         $orderType->save();
 
         return $orderType->withoutRelations()->fresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
     }
 
     public function validate(): static

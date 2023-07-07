@@ -2,40 +2,20 @@
 
 namespace FluxErp\Actions\EventSubscription;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\CreateEventSubscriptionRequest;
 use FluxErp\Models\EventSubscription;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class CreateEventSubscription implements ActionInterface
+class CreateEventSubscription extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateEventSubscriptionRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'event-subscription.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create event subscription';
     }
 
     public static function models(): array
@@ -51,16 +31,9 @@ class CreateEventSubscription implements ActionInterface
         return $eventSubscription;
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         $eventClass = Helper::classExists(classString: ucfirst($this->data['event']), isEvent: true);
 

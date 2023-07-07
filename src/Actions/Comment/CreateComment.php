@@ -2,41 +2,21 @@
 
 namespace FluxErp\Actions\Comment;
 
+use FluxErp\Actions\BaseAction;
 use FluxErp\Actions\EventSubscription\CreateEventSubscription;
-use FluxErp\Contracts\ActionInterface;
 use FluxErp\Http\Requests\CreateCommentRequest;
 use FluxErp\Models\Comment;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
-class CreateComment implements ActionInterface
+class CreateComment extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateCommentRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'comment.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create comment';
     }
 
     public static function models(): array
@@ -104,19 +84,5 @@ class CreateComment implements ActionInterface
         $comment->save();
 
         return $comment;
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

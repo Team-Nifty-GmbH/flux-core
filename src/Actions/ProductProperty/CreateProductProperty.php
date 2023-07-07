@@ -2,36 +2,17 @@
 
 namespace FluxErp\Actions\ProductProperty;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateProductPropertyRequest;
 use FluxErp\Models\ProductProperty;
 use Illuminate\Support\Facades\Validator;
 
-class CreateProductProperty implements ActionInterface
+class CreateProductProperty extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateProductPropertyRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'product-property.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create product property';
     }
 
     public static function models(): array
@@ -47,16 +28,12 @@ class CreateProductProperty implements ActionInterface
         return $productProperty;
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(new ProductProperty());
+
+        $this->data = $validator->validate();
 
         return $this;
     }

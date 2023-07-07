@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\OrderPosition;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Http\Requests\FillOrderPositionRequest;
 use FluxErp\Models\Order;
@@ -15,31 +15,17 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-class FillOrderPositions implements ActionInterface
+class FillOrderPositions extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new FillOrderPositionRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
     }
 
     public static function name(): string
     {
         return 'order-position.fill-multiple';
-    }
-
-    public static function description(): string|null
-    {
-        return 'Fill order positions';
     }
 
     public static function models(): array
@@ -79,16 +65,9 @@ class FillOrderPositions implements ActionInterface
         return $orderPositions;
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         // Validate Data
         $rules = (new CreateOrderPositionRequest())->rules();

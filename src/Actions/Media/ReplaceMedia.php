@@ -2,40 +2,20 @@
 
 namespace FluxErp\Actions\Media;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\ReplaceMediaRequest;
 use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class ReplaceMedia implements ActionInterface
+class ReplaceMedia extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new ReplaceMediaRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'media.replace';
-    }
-
-    public static function description(): string|null
-    {
-        return 'replace media';
     }
 
     public static function models(): array
@@ -83,13 +63,6 @@ class ReplaceMedia implements ActionInterface
         return $media->withoutRelations();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
         $this->data['model_type'] = Media::query()
@@ -97,7 +70,7 @@ class ReplaceMedia implements ActionInterface
             ->first()
             ?->model_type;
 
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         $mediaItem = Media::query()
             ->whereKey($this->data['id'])

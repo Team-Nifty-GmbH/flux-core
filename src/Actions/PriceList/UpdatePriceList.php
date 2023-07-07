@@ -2,39 +2,19 @@
 
 namespace FluxErp\Actions\PriceList;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdatePriceListRequest;
 use FluxErp\Models\PriceList;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdatePriceList implements ActionInterface
+class UpdatePriceList extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdatePriceListRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'price-list.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update price list';
     }
 
     public static function models(): array
@@ -54,16 +34,9 @@ class UpdatePriceList implements ActionInterface
         return $priceList->withoutRelations()->fresh();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         // Check if new parent causes a cycle
         if (

@@ -2,37 +2,17 @@
 
 namespace FluxErp\Actions\DiscountGroup;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateDiscountGroupRequest;
 use FluxErp\Models\DiscountGroup;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 
-class CreateDiscountGroup implements ActionInterface
+class CreateDiscountGroup extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateDiscountGroupRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'discount-group.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create discount group';
     }
 
     public static function models(): array
@@ -52,19 +32,5 @@ class CreateDiscountGroup implements ActionInterface
         }
 
         return $discountGroup;
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

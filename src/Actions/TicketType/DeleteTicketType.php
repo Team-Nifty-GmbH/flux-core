@@ -2,38 +2,18 @@
 
 namespace FluxErp\Actions\TicketType;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Models\TicketType;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class DeleteTicketType implements ActionInterface
+class DeleteTicketType extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = [
             'id' => 'required|integer|exists:ticket_types,id,deleted_at,NULL',
         ];
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'ticket-type.delete';
-    }
-
-    public static function description(): string|null
-    {
-        return 'delete ticket type';
     }
 
     public static function models(): array
@@ -49,16 +29,9 @@ class DeleteTicketType implements ActionInterface
             ->delete();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         if (TicketType::query()
             ->whereKey($this->data['id'])

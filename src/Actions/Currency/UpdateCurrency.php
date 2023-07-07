@@ -2,37 +2,17 @@
 
 namespace FluxErp\Actions\Currency;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateCurrencyRequest;
 use FluxErp\Models\Currency;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 
-class UpdateCurrency implements ActionInterface
+class UpdateCurrency extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateCurrencyRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'currency.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update currency';
     }
 
     public static function models(): array
@@ -50,19 +30,5 @@ class UpdateCurrency implements ActionInterface
         $currency->save();
 
         return $currency->withoutRelations()->fresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

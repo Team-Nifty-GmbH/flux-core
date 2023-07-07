@@ -2,36 +2,22 @@
 
 namespace FluxErp\Actions\Permission;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\EditUserPermissionRequest;
 use FluxErp\Models\User;
-use Illuminate\Support\Facades\Validator;
 
-class UpdateUserPermissions implements ActionInterface
+class UpdateUserPermissions extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = array_merge(['give' => true], $data);
+        parent::__construct($data);
+        $this->data = $this->data ? array_merge(['give' => true], $this->data) : [];
         $this->rules = (new EditUserPermissionRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
     }
 
     public static function name(): string
     {
         return 'user.update-permissions';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update user permissions';
     }
 
     public static function models(): array
@@ -54,19 +40,5 @@ class UpdateUserPermissions implements ActionInterface
         }
 
         return $user->permissions->toArray();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

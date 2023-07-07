@@ -2,39 +2,19 @@
 
 namespace FluxErp\Actions\Comment;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Models\Comment;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class DeleteComment implements ActionInterface
+class DeleteComment extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = [
             'id' => 'required|integer|exists:comments,id,deleted_at,NULL',
         ];
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'comment.delete';
-    }
-
-    public static function description(): string|null
-    {
-        return 'delete comment';
     }
 
     public static function models(): array
@@ -50,16 +30,9 @@ class DeleteComment implements ActionInterface
             ->delete();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         $comment = Comment::query()
             ->whereKey($this->data['id'])

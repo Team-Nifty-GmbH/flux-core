@@ -2,36 +2,16 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateAdditionalColumnRequest;
 use FluxErp\Models\AdditionalColumn;
-use Illuminate\Support\Facades\Validator;
 
-class CreateAdditionalColumn implements ActionInterface
+class CreateAdditionalColumn extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateAdditionalColumnRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'additional-column.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create additional column';
     }
 
     public static function models(): array
@@ -53,19 +33,5 @@ class CreateAdditionalColumn implements ActionInterface
         $additionalColumn->save();
 
         return $additionalColumn;
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

@@ -2,37 +2,18 @@
 
 namespace FluxErp\Actions\TicketType;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateTicketTypeRequest;
 use FluxErp\Models\TicketType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateTicketType implements ActionInterface
+class UpdateTicketType extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateTicketTypeRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'ticket-type.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update ticket type';
     }
 
     public static function models(): array
@@ -52,16 +33,12 @@ class UpdateTicketType implements ActionInterface
         return $ticketType->withoutRelations()->fresh();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(new TicketType());
+
+        $this->data = $validator->validate();
 
         return $this;
     }

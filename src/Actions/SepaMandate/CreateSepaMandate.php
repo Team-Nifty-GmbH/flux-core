@@ -2,39 +2,19 @@
 
 namespace FluxErp\Actions\SepaMandate;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateSepaMandateRequest;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
 use FluxErp\Models\SepaMandate;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class CreateSepaMandate implements ActionInterface
+class CreateSepaMandate extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateSepaMandateRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'sepa-mandate.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create sepa mandate';
     }
 
     public static function models(): array
@@ -50,16 +30,9 @@ class CreateSepaMandate implements ActionInterface
         return $sepaMandate;
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         $clientContactExists = Contact::query()
             ->whereKey($this->data['contact_id'])

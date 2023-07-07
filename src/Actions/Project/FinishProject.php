@@ -2,38 +2,18 @@
 
 namespace FluxErp\Actions\Project;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\FinishProjectRequest;
 use FluxErp\Models\Project;
 use FluxErp\States\Project\Done;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 
-class FinishProject implements ActionInterface
+class FinishProject extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new FinishProjectRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'project.finish';
-    }
-
-    public static function description(): string|null
-    {
-        return 'finish project';
     }
 
     public static function models(): array
@@ -51,19 +31,5 @@ class FinishProject implements ActionInterface
         $project->save();
 
         return $project;
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

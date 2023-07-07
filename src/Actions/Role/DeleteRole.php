@@ -2,38 +2,18 @@
 
 namespace FluxErp\Actions\Role;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Models\Role;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class DeleteRole implements ActionInterface
+class DeleteRole extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = [
             'id' => 'required|integer|exists:roles,id',
         ];
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'role.delete';
-    }
-
-    public static function description(): string|null
-    {
-        return 'delete role';
     }
 
     public static function models(): array
@@ -49,16 +29,9 @@ class DeleteRole implements ActionInterface
             ->delete();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         if (Role::query()
             ->whereKey($this->data['id'])

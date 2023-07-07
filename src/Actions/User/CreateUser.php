@@ -2,37 +2,17 @@
 
 namespace FluxErp\Actions\User;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateUserRequest;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
-use Illuminate\Support\Facades\Validator;
 
-class CreateUser implements ActionInterface
+class CreateUser extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateUserRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'user.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create user';
     }
 
     public static function models(): array
@@ -51,19 +31,5 @@ class CreateUser implements ActionInterface
         $user->save();
 
         return $user->refresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

@@ -4,7 +4,7 @@ namespace FluxErp\Contracts;
 
 interface ActionInterface
 {
-    public static function make(array $data): static;
+    public static function make(...$data): static;
 
     public static function name(): string;
 

@@ -2,37 +2,17 @@
 
 namespace FluxErp\Actions\VatRate;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateVatRateRequest;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 
-class UpdateVatRate implements ActionInterface
+class UpdateVatRate extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateVatRateRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'vat-rate.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update vat rate';
     }
 
     public static function models(): array
@@ -50,19 +30,5 @@ class UpdateVatRate implements ActionInterface
         $vatRate->save();
 
         return $vatRate->withoutRelations()->fresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

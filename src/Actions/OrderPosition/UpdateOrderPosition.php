@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\OrderPosition;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateOrderPositionRequest;
 use FluxErp\Models\OrderPosition;
@@ -12,31 +12,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateOrderPosition implements ActionInterface
+class UpdateOrderPosition extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateOrderPositionRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'order-position.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update order position';
     }
 
     public static function models(): array
@@ -62,16 +43,12 @@ class UpdateOrderPosition implements ActionInterface
         return $orderPosition->withoutRelations()->fresh();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(new OrderPosition());
+
+        $this->data = $validator->validate();
 
         if ($this->data['id'] ?? false) {
             $errors = [];

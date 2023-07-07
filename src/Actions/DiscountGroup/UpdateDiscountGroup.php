@@ -2,38 +2,18 @@
 
 namespace FluxErp\Actions\DiscountGroup;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateDiscountGroupRequest;
 use FluxErp\Models\DiscountGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 
-class UpdateDiscountGroup implements ActionInterface
+class UpdateDiscountGroup extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateDiscountGroupRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'discount group.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update discount-group';
     }
 
     public static function models(): array
@@ -57,19 +37,5 @@ class UpdateDiscountGroup implements ActionInterface
         }
 
         return $discountGroup->withoutRelations()->fresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

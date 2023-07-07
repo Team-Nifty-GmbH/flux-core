@@ -2,37 +2,17 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateValueListRequest;
 use FluxErp\Models\AdditionalColumn;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class CreateValueList implements ActionInterface
+class CreateValueList extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateValueListRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'value-list.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create value list';
     }
 
     public static function models(): array
@@ -51,16 +31,9 @@ class CreateValueList implements ActionInterface
         return $valueList;
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         if (! array_is_list($this->data['values'])) {
             throw ValidationException::withMessages([

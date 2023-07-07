@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Contact;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateContactRequest;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
@@ -11,31 +11,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateContact implements ActionInterface
+class UpdateContact extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateContactRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'contact.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update contact';
     }
 
     public static function models(): array
@@ -59,13 +40,6 @@ class UpdateContact implements ActionInterface
         }
 
         return $contact->withoutRelations()->fresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
     }
 
     public function validate(): static

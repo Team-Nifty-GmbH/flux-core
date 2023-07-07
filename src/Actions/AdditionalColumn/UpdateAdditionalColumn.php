@@ -2,38 +2,18 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateAdditionalColumnRequest;
 use FluxErp\Models\AdditionalColumn;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateAdditionalColumn implements ActionInterface
+class UpdateAdditionalColumn extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateAdditionalColumnRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'additional-column.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update additional column';
     }
 
     public static function models(): array
@@ -65,16 +45,9 @@ class UpdateAdditionalColumn implements ActionInterface
         return $additionalColumn;
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         $additionalColumn = AdditionalColumn::query()
             ->whereKey($this->data['id'])

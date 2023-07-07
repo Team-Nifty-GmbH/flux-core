@@ -2,36 +2,16 @@
 
 namespace FluxErp\Actions\ContactOption;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateContactOptionRequest;
 use FluxErp\Models\ContactOption;
-use Illuminate\Support\Facades\Validator;
 
-class CreateContactOption implements ActionInterface
+class CreateContactOption extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateContactOptionRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'contact-option.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create contact option';
     }
 
     public static function models(): array
@@ -45,19 +25,5 @@ class CreateContactOption implements ActionInterface
         $contactOption->save();
 
         return $contactOption;
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

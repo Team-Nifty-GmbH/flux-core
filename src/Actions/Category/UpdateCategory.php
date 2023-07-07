@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Category;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateCategoryRequest;
 use FluxErp\Models\Category;
@@ -10,31 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateCategory implements ActionInterface
+class UpdateCategory extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateCategoryRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'category.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update category';
     }
 
     public static function models(): array
@@ -52,13 +33,6 @@ class UpdateCategory implements ActionInterface
         $category->save();
 
         return $category->withoutRelations()->fresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
     }
 
     public function validate(): static

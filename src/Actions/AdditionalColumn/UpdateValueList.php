@@ -2,38 +2,18 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateValueListRequest;
 use FluxErp\Models\AdditionalColumn;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateValueList implements ActionInterface
+class UpdateValueList extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateValueListRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'value-list.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update value list';
     }
 
     public static function models(): array
@@ -53,16 +33,9 @@ class UpdateValueList implements ActionInterface
         return $valueList->withoutRelations()->fresh();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         $errors = [];
         $valueList = AdditionalColumn::query()

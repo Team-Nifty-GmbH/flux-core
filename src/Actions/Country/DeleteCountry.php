@@ -2,40 +2,20 @@
 
 namespace FluxErp\Actions\Country;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Models\Country;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class DeleteCountry implements ActionInterface
+class DeleteCountry extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = [
             'id' => 'required|integer|exists:countries,id,deleted_at,NULL',
         ];
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'country.delete';
-    }
-
-    public static function description(): string|null
-    {
-        return 'delete country';
     }
 
     public static function models(): array
@@ -59,16 +39,9 @@ class DeleteCountry implements ActionInterface
         return $country->delete();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         $errors = [];
         $country = Country::query()

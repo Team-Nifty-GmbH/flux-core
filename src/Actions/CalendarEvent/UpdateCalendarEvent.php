@@ -2,37 +2,17 @@
 
 namespace FluxErp\Actions\CalendarEvent;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateCalendarEventRequest;
 use FluxErp\Models\CalendarEvent;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 
-class UpdateCalendarEvent implements ActionInterface
+class UpdateCalendarEvent extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateCalendarEventRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'calendar-event.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update calendar event';
     }
 
     public static function models(): array
@@ -52,19 +32,5 @@ class UpdateCalendarEvent implements ActionInterface
         SyncCalendarEventInvites::make($this->data)->execute();
 
         return $calendarEvent->withoutRelations()->fresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

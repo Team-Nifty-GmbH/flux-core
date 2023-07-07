@@ -2,38 +2,19 @@
 
 namespace FluxErp\Actions\Order;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateOrderRequest;
 use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateOrder implements ActionInterface
+class UpdateOrder extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateOrderRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'order.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update order';
     }
 
     public static function models(): array
@@ -68,13 +49,6 @@ class UpdateOrder implements ActionInterface
         }
 
         return $order->withoutRelations()->fresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
     }
 
     public function validate(): static

@@ -2,41 +2,21 @@
 
 namespace FluxErp\Actions\Address;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Validator;
 
-class UpdateMainAddress implements ActionInterface
+class UpdateMainAddress extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = [
             'address_id' => 'integer|nullable|exists:addresses,id,deleted_at,NULL',
             'contact_id' => 'required|integer|exists:contacts,id,deleted_at,NULL',
             'is_main_address' => 'required|boolean',
         ];
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'main-address.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update main address';
     }
 
     public static function models(): array
@@ -64,19 +44,5 @@ class UpdateMainAddress implements ActionInterface
         }
 
         return $address;
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

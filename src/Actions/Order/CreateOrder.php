@@ -2,38 +2,19 @@
 
 namespace FluxErp\Actions\Order;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateOrderRequest;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class CreateOrder implements ActionInterface
+class CreateOrder extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateOrderRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'order.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create order';
     }
 
     public static function models(): array
@@ -65,13 +46,6 @@ class CreateOrder implements ActionInterface
         }
 
         return $order->refresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
     }
 
     public function validate(): static

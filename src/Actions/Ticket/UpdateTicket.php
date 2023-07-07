@@ -2,38 +2,19 @@
 
 namespace FluxErp\Actions\Ticket;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateTicketRequest;
 use FluxErp\Models\Ticket;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateTicket implements ActionInterface
+class UpdateTicket extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateTicketRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'ticket.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update ticket';
     }
 
     public static function models(): array
@@ -59,16 +40,12 @@ class UpdateTicket implements ActionInterface
         return $ticket->refresh();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(new Ticket());
+
+        $this->data = $validator->validate();
 
         return $this;
     }

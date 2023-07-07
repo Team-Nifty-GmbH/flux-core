@@ -2,37 +2,17 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Models\AdditionalColumn;
-use Illuminate\Support\Facades\Validator;
 
-class DeleteAdditionalColumn implements ActionInterface
+class DeleteAdditionalColumn extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = [
             'id' => 'required|integer|exists:additional_columns,id',
         ];
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'additional-column.delete';
-    }
-
-    public static function description(): string|null
-    {
-        return 'delete additional column';
     }
 
     public static function models(): array
@@ -49,19 +29,5 @@ class DeleteAdditionalColumn implements ActionInterface
         $additionalColumn->modelValues()->delete();
 
         return $additionalColumn->delete();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

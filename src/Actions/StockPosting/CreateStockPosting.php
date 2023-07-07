@@ -2,36 +2,16 @@
 
 namespace FluxErp\Actions\StockPosting;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateStockPostingRequest;
 use FluxErp\Models\StockPosting;
-use Illuminate\Support\Facades\Validator;
 
-class CreateStockPosting implements ActionInterface
+class CreateStockPosting extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateStockPostingRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'stock-posting.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create stock posting';
     }
 
     public static function models(): array
@@ -49,20 +29,6 @@ class CreateStockPosting implements ActionInterface
         $stockPosting->save();
 
         return $stockPosting;
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 
     private function getLatestStock(int $warehouseId, int $productId, float $posting): float

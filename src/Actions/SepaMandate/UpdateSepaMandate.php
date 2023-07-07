@@ -2,40 +2,20 @@
 
 namespace FluxErp\Actions\SepaMandate;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateSepaMandateRequest;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
 use FluxErp\Models\SepaMandate;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateSepaMandate implements ActionInterface
+class UpdateSepaMandate extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateSepaMandateRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'sepa-mandate.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update sepa mandate';
     }
 
     public static function models(): array
@@ -55,16 +35,9 @@ class UpdateSepaMandate implements ActionInterface
         return $sepaMandate->withoutRelations()->fresh();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         $sepaMandate = SepaMandate::query()
             ->whereKey($this->data['id'])

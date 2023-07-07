@@ -2,37 +2,18 @@
 
 namespace FluxErp\Actions\Product;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateProductRequest;
 use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class CreateProduct implements ActionInterface
+class CreateProduct extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateProductRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'product.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create product';
     }
 
     public static function models(): array
@@ -74,13 +55,6 @@ class CreateProduct implements ActionInterface
         }
 
         return $product->refresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
     }
 
     public function validate(): static

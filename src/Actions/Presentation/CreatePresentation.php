@@ -2,36 +2,17 @@
 
 namespace FluxErp\Actions\Presentation;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreatePresentationRequest;
 use FluxErp\Models\Presentation;
 use Illuminate\Support\Facades\Validator;
 
-class CreatePresentation implements ActionInterface
+class CreatePresentation extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreatePresentationRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'presentation.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create presentation';
     }
 
     public static function models(): array
@@ -45,13 +26,6 @@ class CreatePresentation implements ActionInterface
         $presentation->save();
 
         return $presentation;
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
     }
 
     public function validate(): static

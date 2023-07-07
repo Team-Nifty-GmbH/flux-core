@@ -2,24 +2,19 @@
 
 namespace FluxErp\Actions\Locking;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Rules\ClassExists;
 use FluxErp\Traits\Lockable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
-class LockModel implements ActionInterface
+class LockModel extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = [
             'id' => 'required|integer',
             'model_type' => [
@@ -28,21 +23,6 @@ class LockModel implements ActionInterface
                 new ClassExists(instanceOf: Model::class),
             ],
         ];
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'model.lock';
-    }
-
-    public static function description(): string|null
-    {
-        return 'lock model';
     }
 
     public static function models(): array
@@ -74,16 +54,9 @@ class LockModel implements ActionInterface
         return true;
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         if (! in_array(Lockable::class, class_uses($this->data['model_type']) ?: [])) {
             throw ValidationException::withMessages([

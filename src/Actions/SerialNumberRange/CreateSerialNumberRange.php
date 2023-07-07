@@ -2,36 +2,16 @@
 
 namespace FluxErp\Actions\SerialNumberRange;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateSerialNumberRangeRequest;
 use FluxErp\Models\SerialNumberRange;
-use Illuminate\Support\Facades\Validator;
 
-class CreateSerialNumberRange implements ActionInterface
+class CreateSerialNumberRange extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateSerialNumberRangeRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'serial-number-range.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create serial number range';
     }
 
     public static function models(): array
@@ -49,19 +29,5 @@ class CreateSerialNumberRange implements ActionInterface
         $serialNumberRange->save();
 
         return $serialNumberRange;
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function validate(): static
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-
-        return $this;
     }
 }

@@ -2,40 +2,20 @@
 
 namespace FluxErp\Actions\Currency;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Models\Currency;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class DeleteCurrency implements ActionInterface
+class DeleteCurrency extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = [
             'id' => 'required|integer|exists:currencies,id,deleted_at,NULL',
         ];
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'currency.delete';
-    }
-
-    public static function description(): string|null
-    {
-        return 'delete currency';
     }
 
     public static function models(): array
@@ -55,16 +35,9 @@ class DeleteCurrency implements ActionInterface
         return $currency->delete();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         if (Currency::query()
             ->whereKey($this->data['id'])

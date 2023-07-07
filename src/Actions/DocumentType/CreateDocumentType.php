@@ -2,36 +2,17 @@
 
 namespace FluxErp\Actions\DocumentType;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateDocumentTypeRequest;
 use FluxErp\Models\DocumentType;
 use Illuminate\Support\Facades\Validator;
 
-class CreateDocumentType implements ActionInterface
+class CreateDocumentType extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateDocumentTypeRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'document-type.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create document type';
     }
 
     public static function models(): array
@@ -47,16 +28,12 @@ class CreateDocumentType implements ActionInterface
         return $documentType;
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(new DocumentType());
+
+        $this->data = $validator->validate();
 
         return $this;
     }

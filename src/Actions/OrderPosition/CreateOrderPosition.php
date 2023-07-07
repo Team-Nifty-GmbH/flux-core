@@ -2,29 +2,25 @@
 
 namespace FluxErp\Actions\OrderPosition;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Models\OrderPosition;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class CreateOrderPosition implements ActionInterface
+class CreateOrderPosition extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = array_merge(
             (new CreateOrderPositionRequest())->rules(),
             [
                 'price_id' => [
                     Rule::requiredIf(
-                        ($data['is_free_text'] ?? false) === false &&
-                        ($data['product_id'] ?? $data['price_list_id'] ?? false)
+                        ($this->data['is_free_text'] ?? false) === false &&
+                        ($this->data['product_id'] ?? $this->data['price_list_id'] ?? false)
                     ),
                     'integer',
                     'exists:prices,id,deleted_at,NULL',
@@ -32,7 +28,7 @@ class CreateOrderPosition implements ActionInterface
                 ],
                 'price_list_id' => [
                     Rule::requiredIf(
-                        ($data['is_free_text'] ?? false) === false && ($data['price_id'] ?? false)
+                        ($this->data['is_free_text'] ?? false) === false && ($this->data['price_id'] ?? false)
                     ),
                     'integer',
                     'exists:price_lists,id,deleted_at,NULL',
@@ -40,28 +36,28 @@ class CreateOrderPosition implements ActionInterface
                 ],
                 'purchase_price' => [
                     Rule::requiredIf(
-                        ($data['is_free_text'] ?? false) === false && ($data['product_id'] ?? false)
+                        ($this->data['is_free_text'] ?? false) === false && ($this->data['product_id'] ?? false)
                     ),
                     'numeric',
                     'exclude_if:is_free_text,true',
                 ],
                 'unit_price' => [
                     Rule::requiredIf(
-                        ($data['is_free_text'] ?? false) === false && ($data['price_id'] ?? false)
+                        ($this->data['is_free_text'] ?? false) === false && ($this->data['price_id'] ?? false)
                     ),
                     'numeric',
                     'exclude_if:is_free_text,true',
                 ],
                 'vat_rate' => [
                     Rule::requiredIf(
-                        ($data['is_free_text'] ?? false) === false && ($data['vat_rate_id'] ?? false)
+                        ($this->data['is_free_text'] ?? false) === false && ($this->data['vat_rate_id'] ?? false)
                     ),
                     'numeric',
                     'exclude_if:is_free_text,true',
                 ],
                 'product_number' => [
                     Rule::requiredIf(
-                        ($data['is_free_text'] ?? false) === false && ($data['product_id'] ?? false)
+                        ($this->data['is_free_text'] ?? false) === false && ($this->data['product_id'] ?? false)
                     ),
                     'string',
                     'nullable',
@@ -69,21 +65,6 @@ class CreateOrderPosition implements ActionInterface
                 ],
             ]
         );
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'order-position.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create order position';
     }
 
     public static function models(): array
@@ -103,13 +84,6 @@ class CreateOrderPosition implements ActionInterface
         $orderPosition->attachTags($tags);
 
         return $orderPosition;
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
     }
 
     public function validate(): static

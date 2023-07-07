@@ -2,21 +2,16 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Models\AdditionalColumn;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-class DeleteValueList implements ActionInterface
+class DeleteValueList extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = [
             'id' => [
                 'required',
@@ -24,21 +19,6 @@ class DeleteValueList implements ActionInterface
                 Rule::exists('additional_columns', 'id')->whereNotNull('values'),
             ],
         ];
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'value-list.delete';
-    }
-
-    public static function description(): string|null
-    {
-        return 'delete value list';
     }
 
     public static function models(): array
@@ -54,16 +34,9 @@ class DeleteValueList implements ActionInterface
             ->delete();
     }
 
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
     public function validate(): static
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        parent::validate();
 
         if (AdditionalColumn::query()
             ->whereKey($this->data['id'])

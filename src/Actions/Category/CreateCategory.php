@@ -2,36 +2,17 @@
 
 namespace FluxErp\Actions\Category;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateCategoryRequest;
 use FluxErp\Models\Category;
 use Illuminate\Support\Facades\Validator;
 
-class CreateCategory implements ActionInterface
+class CreateCategory extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new CreateCategoryRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'category.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create category';
     }
 
     public static function models(): array
@@ -45,13 +26,6 @@ class CreateCategory implements ActionInterface
         $category->save();
 
         return $category->refresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
     }
 
     public function validate(): static

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\ProjectTask;
 
-use FluxErp\Contracts\ActionInterface;
+use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\UpdateProjectTaskRequest;
 use FluxErp\Models\Project;
 use FluxErp\Models\ProjectTask;
@@ -10,31 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateProjectTask implements ActionInterface
+class UpdateProjectTask extends BaseAction
 {
-    private array $data;
-
-    private array $rules;
-
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct($data);
         $this->rules = (new UpdateProjectTaskRequest())->rules();
-    }
-
-    public static function make(array $data): static
-    {
-        return new static($data);
-    }
-
-    public static function name(): string
-    {
-        return 'project-task.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update project task';
     }
 
     public static function models(): array
@@ -52,13 +33,6 @@ class UpdateProjectTask implements ActionInterface
         $task->save();
 
         return $task->withoutRelations()->fresh();
-    }
-
-    public function setRules(array $rules): static
-    {
-        $this->rules = $rules;
-
-        return $this;
     }
 
     public function validate(): static
