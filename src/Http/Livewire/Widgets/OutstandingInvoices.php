@@ -16,9 +16,7 @@ class OutstandingInvoices extends Component implements UserWidget
 
     public function mount()
     {
-        $sum = Order::query()->sum('total_gross_price') - Transaction::query()->sum('amount');
-
-        $this->sum = round($sum, 2);
+        $this->calculateSum();
     }
 
     public function render()
@@ -66,6 +64,12 @@ class OutstandingInvoices extends Component implements UserWidget
         Session::put(config('tall-datatables.cache_key') . '.filter:' . OrderList::class, $filters);
 
         return redirect()->route('orders');
+    }
+
+    public function calculateSum()
+    {
+        $sum = Order::query()->sum('total_gross_price') - Transaction::query()->sum('amount');
+        $this->sum = round($sum, 2);
     }
 
     public static function getLabel(): string

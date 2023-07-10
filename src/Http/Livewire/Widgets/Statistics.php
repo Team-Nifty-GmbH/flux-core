@@ -18,10 +18,7 @@ class Statistics extends Component implements UserWidget
 
     public function mount()
     {
-        $this->salesCount = Order::query()->whereNotNull('invoice_number')->count();
-        $this->activeCustomersCount = Contact::query()->whereHas('orders')->count();
-        $this->activeProductsCount = Product::query()->where('is_active', true)->count();
-        $this->revenue = round(Order::query()->sum('total_net_price'));
+        $this->loadStatistics();
     }
 
     public function render()
@@ -31,6 +28,14 @@ class Statistics extends Component implements UserWidget
                 'currency' => Currency::query()->where('is_default', true)->first()->toArray()
             ]
         );
+    }
+
+    public function loadStatistics()
+    {
+        $this->salesCount = Order::query()->whereNotNull('invoice_number')->count();
+        $this->activeCustomersCount = Contact::query()->whereHas('orders')->count();
+        $this->activeProductsCount = Product::query()->where('is_active', true)->count();
+        $this->revenue = round(Order::query()->sum('total_net_price'));
     }
 
     public static function getLabel(): string

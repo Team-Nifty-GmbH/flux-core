@@ -22,9 +22,6 @@ class AccountFactory extends Factory
     public function definition()
     {
         return [
-            'uuid' => $this->faker->uuid,
-            'bank_connection_id' => $this->faker->randomDigitNotNull,
-            'currency_id' => $this->faker->randomDigitNotNull,
             'name' => $this->faker->company,
             'account_number' => $this->faker->bankAccountNumber,
             'account_holder' => $this->faker->name,

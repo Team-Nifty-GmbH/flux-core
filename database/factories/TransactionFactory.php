@@ -22,10 +22,6 @@ class TransactionFactory extends Factory
     public function definition()
     {
         return [
-            'uuid' => $this->faker->uuid,
-            'account_id' => $this->faker->randomDigitNotNull,
-            'currency_id' => $this->faker->randomDigitNotNull,
-            'order_id' => $this->faker->randomDigitNotNull,
             'value_date' => $this->faker->date(),
             'booking_date' => $this->faker->date(),
             'amount' => $this->faker->randomFloat(2, 100, 10000),
