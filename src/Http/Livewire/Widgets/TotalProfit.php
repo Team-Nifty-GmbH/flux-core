@@ -15,19 +15,14 @@ class TotalProfit extends Component implements UserWidget
 {
     public float $sum = 0;
 
-    public string $timeFrame = 'Last Month';
-
-    public array $timeFrames = [];
-
-    protected $listeners = ['timeFrameUpdated' => 'updateTimeFrame'];
+    public string $timeFrame = TimeFrameEnum::LastMonth->value;
 
     public function mount(): void
     {
-        $this->timeFrames = TimeFrameEnum::values();
         $this->calculateSum();
     }
 
-    public function updatedTimeFrame(): void
+    public function timeFrameUpdated(): void
     {
         $this->calculateSum();
     }

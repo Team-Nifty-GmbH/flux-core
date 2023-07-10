@@ -9,9 +9,9 @@
     </div>
     <x-slot:footer>
         <x-select
-            label="Select Time Frame"
-            placeholder="Select a time frame"
-            :options="$timeFrames"
+            :label="__('Select Time Frame')"
+            :placeholder="__('Select a time frame')"
+            :options="FluxErp\Enums\TimeFrameEnum::values()"
             wire:model="timeFrame"
             :clearable="false"
         />

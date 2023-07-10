@@ -27,7 +27,7 @@ enum TimeFrameEnum: string
             self::ThisMonth => ['invoice_date', 'between', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]],
             self::ThisYear => ['invoice_date', 'between', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()]],
             self::AllTime => [],
-            default => throw new \Exception('Invalid time frame'),
+            default => throw new \InvalidArgumentException('Invalid time frame'),
         };
     }
 }
