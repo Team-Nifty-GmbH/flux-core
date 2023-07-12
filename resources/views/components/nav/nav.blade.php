@@ -10,7 +10,7 @@
     <div class="soft-scrollbar flex flex-grow flex-col overflow-x-hidden">
         <div class="flex relative flex h-16 shrink-0 justify-center p-2 px-4">
             <x-logo fill="#FFFFFF" />
-            <x-button.circle icon="X" x-on:click="closeMenu(true)" class="absolute top-6 right-6 block md:hidden"></x-button>
+            <x-button.circle icon="x" x-on:click="closeMenu(true)" class="absolute top-6 right-6 block md:hidden" />
         </div>
         <!-- User Menu -->
         <div>
