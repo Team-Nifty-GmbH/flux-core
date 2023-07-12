@@ -66,7 +66,7 @@ class InitCurrencies extends Command
             if (! Currency::query()->where('is_default')->exists()) {
                 Currency::query()
                     ->first()
-                    ->update(['is_default' => false]);
+                    ->update(['is_default' => true]);
             }
         }
 
