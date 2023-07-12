@@ -32,6 +32,7 @@ class UpdateUser extends BaseAction
         // Delete all tokens of the user if the user is set to is_active = false
         if (! ($this->data['is_active'] ?? true)) {
             $user->tokens()->delete();
+            $user->locks()->delete();
         }
 
         return $user->withoutRelations()->fresh();

@@ -2,9 +2,9 @@
 
 namespace FluxErp\Actions;
 
-use FluxErp\Contracts\ActionInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
+use InvalidArgumentException;
 
 class ActionManager
 {
@@ -22,8 +22,8 @@ class ActionManager
      */
     public function register(string $name, string $action): void
     {
-        if (! in_array(ActionInterface::class, class_implements($action))) {
-            throw new \Exception('The provided action class is not a valid action class');
+        if (! in_array(BaseAction::class, class_parents($action))) {
+            throw new InvalidArgumentException('The provided action class is not a valid action class');
         }
 
         $this->actions[$name] = [
@@ -56,7 +56,7 @@ class ActionManager
         foreach (glob("{$path}/*.php") as $file) {
             $class = $namespace . '\\' . pathinfo($file, PATHINFO_FILENAME);
 
-            if (! class_exists($class) || ! in_array(ActionInterface::class, class_implements($class))) {
+            if (! class_exists($class) || ! in_array(BaseAction::class, class_parents($class))) {
                 continue;
             }
 

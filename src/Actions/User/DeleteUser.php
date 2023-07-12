@@ -29,6 +29,7 @@ class DeleteUser extends BaseAction
             ->first();
 
         $user->tokens()->delete();
+        $user->locks()->delete();
 
         return $user->delete();
     }

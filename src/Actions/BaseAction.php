@@ -2,18 +2,21 @@
 
 namespace FluxErp\Actions;
 
-use FluxErp\Contracts\ActionInterface;
 use FluxErp\Traits\Makeable;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-class BaseAction implements ActionInterface
+abstract class BaseAction
 {
     use Makeable;
 
     protected array $data;
 
     protected array $rules = [];
+
+    abstract public function execute();
+
+    abstract public static function models(): array;
 
     public function __construct(array $data)
     {
@@ -34,15 +37,6 @@ class BaseAction implements ActionInterface
             ->headline()
             ->lower()
             ->toString();
-    }
-
-    public static function models(): array
-    {
-        return [];
-    }
-
-    public function execute()
-    {
     }
 
     public function setRules(array $rules): static

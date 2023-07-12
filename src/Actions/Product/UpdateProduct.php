@@ -3,12 +3,14 @@
 namespace FluxErp\Actions\Product;
 
 use FluxErp\Actions\BaseAction;
+use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateProductRequest;
 use FluxErp\Models\Price;
 use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class UpdateProduct extends BaseAction
 {
@@ -87,6 +89,16 @@ class UpdateProduct extends BaseAction
         $validator->addModel(new Product());
 
         $this->data = $validator->validate();
+
+        $product = Product::query()
+            ->whereKey($this->data['id'])
+            ->first();
+
+        if (Helper::checkCycle(Product::class, $product, $this->data['parent_id'])) {
+            throw ValidationException::withMessages([
+                'parent_id' => [__('Cycle detected')],
+            ])->errorBag('updateProduct');
+        }
 
         return $this;
     }

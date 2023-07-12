@@ -6,22 +6,12 @@ use FluxErp\Actions\BaseAction;
 use FluxErp\Http\Requests\CreateTranslationRequest;
 use Spatie\TranslationLoader\LanguageLine;
 
-class CreateLanguageLine extends BaseAction
+class CreateTranslation extends BaseAction
 {
     public function __construct(array $data)
     {
         parent::__construct($data);
         $this->rules = (new CreateTranslationRequest())->rules();
-    }
-
-    public static function name(): string
-    {
-        return 'translation.create';
-    }
-
-    public static function description(): string|null
-    {
-        return 'create translation';
     }
 
     public static function models(): array

@@ -2,9 +2,9 @@
 
 namespace FluxErp\Services;
 
-use FluxErp\Actions\Translation\CreateLanguageLine;
-use FluxErp\Actions\Translation\DeleteLanguageLine;
-use FluxErp\Actions\Translation\UpdateLanguageLine;
+use FluxErp\Actions\Translation\CreateTranslation;
+use FluxErp\Actions\Translation\DeleteTranslation;
+use FluxErp\Actions\Translation\UpdateTranslation;
 use FluxErp\Helpers\ResponseHelper;
 use Illuminate\Validation\ValidationException;
 use Spatie\TranslationLoader\LanguageLine;
@@ -13,7 +13,7 @@ class TranslationService
 {
     public function create(array $data): LanguageLine
     {
-        return CreateLanguageLine::make($data)->execute();
+        return CreateTranslation::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -27,7 +27,7 @@ class TranslationService
             try {
                 $responses[] = ResponseHelper::createArrayResponse(
                     statusCode: 200,
-                    data: $languageLine = UpdateLanguageLine::make($item)->validate()->execute(),
+                    data: $languageLine = UpdateTranslation::make($item)->validate()->execute(),
                     additions: ['id' => $languageLine->id]
                 );
             } catch (ValidationException $e) {
@@ -56,7 +56,7 @@ class TranslationService
     public function delete(string $id): array
     {
         try {
-            DeleteLanguageLine::make(['id' => $id])->validate()->execute();
+            DeleteTranslation::make(['id' => $id])->validate()->execute();
         } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,

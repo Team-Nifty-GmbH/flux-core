@@ -5,7 +5,7 @@ namespace FluxErp\Actions\Translation;
 use FluxErp\Actions\BaseAction;
 use Spatie\TranslationLoader\LanguageLine;
 
-class DeleteLanguageLine extends BaseAction
+class DeleteTranslation extends BaseAction
 {
     public function __construct(array $data)
     {
@@ -13,16 +13,6 @@ class DeleteLanguageLine extends BaseAction
         $this->rules = [
             'id' => 'required|integer|exists:language_lines,id',
         ];
-    }
-
-    public static function name(): string
-    {
-        return 'translation.delete';
-    }
-
-    public static function description(): string|null
-    {
-        return 'delete translation';
     }
 
     public static function models(): array

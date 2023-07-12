@@ -7,22 +7,12 @@ use FluxErp\Http\Requests\UpdateTranslationRequest;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\TranslationLoader\LanguageLine;
 
-class UpdateLanguageLine extends BaseAction
+class UpdateTranslation extends BaseAction
 {
     public function __construct(array $data)
     {
         parent::__construct($data);
         $this->rules = (new UpdateTranslationRequest())->rules();
-    }
-
-    public static function name(): string
-    {
-        return 'translation.update';
-    }
-
-    public static function description(): string|null
-    {
-        return 'update translation';
     }
 
     public static function models(): array

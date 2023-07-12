@@ -66,7 +66,7 @@ class UpdateCategory extends BaseAction
             if (Helper::checkCycle(Category::class, $category, $this->data['parent_id'])) {
                 throw ValidationException::withMessages([
                     'parent_id' => [__('Cycle detected')],
-                ])->errorBag('updateProjectTask');
+                ])->errorBag('updateCategory');
             }
         }
 

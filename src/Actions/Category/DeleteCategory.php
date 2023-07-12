@@ -46,7 +46,7 @@ class DeleteCategory extends BaseAction
 
         if ($category->model()?->exists()) {
             $errors += [
-                'project_task' => [__('Project task with this category exists')],
+                'model' => [__('Model with this category exists')],
             ];
         }
 
