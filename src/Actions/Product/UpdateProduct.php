@@ -90,14 +90,16 @@ class UpdateProduct extends BaseAction
 
         $this->data = $validator->validate();
 
-        $product = Product::query()
-            ->whereKey($this->data['id'])
-            ->first();
+        if ($this->data['parent_id'] ?? false) {
+            $product = Product::query()
+                ->whereKey($this->data['id'])
+                ->first();
 
-        if (Helper::checkCycle(Product::class, $product, $this->data['parent_id'])) {
-            throw ValidationException::withMessages([
-                'parent_id' => [__('Cycle detected')],
-            ])->errorBag('updateProduct');
+            if (Helper::checkCycle(Product::class, $product, $this->data['parent_id'])) {
+                throw ValidationException::withMessages([
+                    'parent_id' => [__('Cycle detected')],
+                ])->errorBag('updateProduct');
+            }
         }
 
         return $this;
