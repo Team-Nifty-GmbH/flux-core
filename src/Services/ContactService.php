@@ -2,28 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Contact\CreateContact;
+use FluxErp\Actions\Contact\DeleteContact;
+use FluxErp\Actions\Contact\UpdateContact;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateContactRequest;
 use FluxErp\Models\Contact;
-use FluxErp\Models\PaymentType;
+use Illuminate\Validation\ValidationException;
 
 class ContactService
 {
     public function create(array $data): Contact
     {
-        $data['customer_number'] = $data['customer_number'] ?? uniqid();
-        $discountGroups = $data['discount_groups'] ?? null;
-        unset($data['discount_groups']);
-
-        $contact = new Contact($data);
-        $contact->save();
-
-        if (! is_null($discountGroups)) {
-            $contact->discountGroups()->attach($discountGroups);
-        }
-
-        return $contact;
+        return CreateContact::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -32,33 +22,25 @@ class ContactService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateContactRequest(),
-            service: $this,
-            model: new Contact()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $contact = UpdateContact::make($item)->validate()->execute(),
+                    additions: ['id' => $contact->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $contact = Contact::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $discountGroups = $item['discount_groups'] ?? null;
-            unset($item['discount_groups']);
-
-            $contact->fill($item);
-            $contact->save();
-
-            if (! is_null($discountGroups)) {
-                $contact->discountGroups()->sync($discountGroups);
+                unset($data[$key]);
             }
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $contact->withoutRelations()->fresh(),
-                additions: ['id' => $contact->id]
-            );
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -66,73 +48,25 @@ class ContactService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'contacts updated',
+            statusMessage: $statusCode === 422 ? null : 'contact(s) updated',
             bulk: true
         );
     }
 
     public function delete(string $id): array
     {
-        $contact = Contact::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $contact) {
+        try {
+            DeleteContact::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['id' => 'contact not found']
+                data: $e->errors()
             );
         }
-
-        $contact->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
             statusMessage: 'contact deleted'
         );
-    }
-
-    public function validateItem(array $item, array $response): ?array
-    {
-        $contact = Contact::query()
-            ->whereKey($item['id'])
-            ->first();
-
-        $item['payment_type_id'] = $item['payment_type_id'] ?? $contact->payment_type_id;
-        $item['client_id'] = $item['client_id'] ?? $contact->client_id;
-
-        if (array_key_exists('customer_number', $item)) {
-            $customerNumberExists = Contact::query()
-                ->where('id', '!=', $item['id'])
-                ->where('client_id', '=', $item['client_id'])
-                ->where('customer_number', $item['customer_number'])
-                ->exists();
-
-            if ($customerNumberExists) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 409,
-                    data: ['customer_number' => 'customer number already exists'],
-                    additions: $response
-                );
-            }
-        }
-
-        $clientPaymentTypeExists = PaymentType::query()
-            ->whereKey($item['payment_type_id'])
-            ->where('client_id', $item['client_id'])
-            ->exists();
-
-        if (! $clientPaymentTypeExists) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 409,
-                data: [
-                    'payment_type_id' => 'payment type with id: \'' . $item['payment_type_id'] .
-                        '\' doesnt match client id:\'' . $item['client_id'] . '\'',
-                ],
-                additions: $response
-            );
-        }
-
-        return null;
     }
 }

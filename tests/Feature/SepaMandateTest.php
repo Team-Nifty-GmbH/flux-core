@@ -347,20 +347,20 @@ class SepaMandateTest extends BaseSetup
 
         $responses = json_decode($response->getContent())->responses;
         $this->assertEquals($sepaMandates[0]['id'], $responses[0]->id);
-        $this->assertEquals(409, $responses[0]->status);
+        $this->assertEquals(422, $responses[0]->status);
         $this->assertTrue(property_exists($responses[0]->errors, 'contact_id'));
         $this->assertEquals($sepaMandates[1]['id'], $responses[1]->id);
-        $this->assertEquals(409, $responses[1]->status);
+        $this->assertEquals(422, $responses[1]->status);
         $this->assertTrue(property_exists($responses[1]->errors, 'contact_id'));
         $this->assertTrue(property_exists($responses[1]->errors, 'bank_connection_id'));
         $this->assertEquals($sepaMandates[2]['id'], $responses[2]->id);
-        $this->assertEquals(409, $responses[2]->status);
+        $this->assertEquals(422, $responses[2]->status);
         $this->assertTrue(property_exists($responses[2]->errors, 'contact_id'));
         $this->assertEquals($sepaMandates[3]['id'], $responses[3]->id);
-        $this->assertEquals(409, $responses[3]->status);
+        $this->assertEquals(422, $responses[3]->status);
         $this->assertTrue(property_exists($responses[3]->errors, 'bank_connection_id'));
         $this->assertEquals($sepaMandates[4]['id'], $responses[4]->id);
-        $this->assertEquals(409, $responses[4]->status);
+        $this->assertEquals(422, $responses[4]->status);
         $this->assertTrue(property_exists($responses[4]->errors, 'bank_connection_id'));
     }
 

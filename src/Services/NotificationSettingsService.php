@@ -2,12 +2,9 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateNotificationSettingsRequest;
-use FluxErp\Http\Requests\UpdateUserNotificationSettingsRequest;
-use FluxErp\Models\NotificationSetting;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class NotificationSettingsService
 {
@@ -17,34 +14,27 @@ class NotificationSettingsService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: ! $isAnonymous ?
-                new UpdateUserNotificationSettingsRequest() : new UpdateNotificationSettingsRequest()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $notificationSetting = UpdateNotificationSetting::make(
+                        array_merge($item, ['is_anonymous' => $isAnonymous])
+                    )->validate()->execute(),
+                    additions: ['id' => $notificationSetting->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $notificationSetting = NotificationSetting::query()
-                ->firstOrNew([
-                    'notifiable_type' => ! $isAnonymous ? Auth::user()->getMorphClass() : null,
-                    'notifiable_id' => ! $isAnonymous ? Auth::id() : null,
-                    'notification_type' => $item['notification_type'],
-                    'channel' => config('notifications.channels.' . $item['channel'] . '.driver'),
-                ], [
-                    'is_active' => $item['is_active'],
-                ]);
-
-            if ($isAnonymous) {
-                $notificationSetting->channel_value = $item['channel_value'];
+                unset($data[$key]);
             }
-
-            $notificationSetting->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $notificationSetting,
-                additions: ['id' => $notificationSetting->id]
-            );
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -52,7 +42,7 @@ class NotificationSettingsService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'notification settings updated',
+            statusMessage: $statusCode === 422 ? null : 'notification setting(s) updated',
             bulk: count($data) !== 0
         );
     }

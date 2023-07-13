@@ -2,19 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\TicketType\CreateTicketType;
+use FluxErp\Actions\TicketType\DeleteTicketType;
+use FluxErp\Actions\TicketType\UpdateTicketType;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateTicketTypeRequest;
 use FluxErp\Models\TicketType;
+use Illuminate\Validation\ValidationException;
 
 class TicketTypeService
 {
     public function create(array $data): TicketType
     {
-        $ticketType = new TicketType($data);
-        $ticketType->save();
-
-        return $ticketType;
+        return CreateTicketType::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -23,24 +22,25 @@ class TicketTypeService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateTicketTypeRequest()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $ticketType = UpdateTicketType::make($item)->validate()->execute(),
+                    additions: ['id' => $ticketType->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $ticketType = TicketType::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $ticketType->fill($item);
-            $ticketType->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $ticketType->withoutRelations()->fresh(),
-                additions: ['id' => $ticketType->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -48,32 +48,21 @@ class TicketTypeService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'ticket type updated',
+            statusMessage: $statusCode === 422 ? null : 'ticket type(s) updated',
             bulk: true
         );
     }
 
     public function delete(string $id): array
     {
-        $ticketType = TicketType::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $ticketType) {
+        try {
+            DeleteTicketType::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'ticket type not found']
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        if ($ticketType->tickets()->exists()) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['address' => 'ticket type has tickets']
-            );
-        }
-
-        $ticketType->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

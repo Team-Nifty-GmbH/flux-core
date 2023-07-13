@@ -48,7 +48,7 @@ class Calendars extends CalendarComponent
                     ]);
             })
             ->get()
-            ->map(function (CalendarEvent $event) use ($calendarAttributes) {
+            ->map(function (CalendarEvent $event) {
                 $invited = $event->invites()
                     ->where('inviteable_type', auth()->user()->getMorphClass())
                     ->where('inviteable_id', auth()->user()->getKey())

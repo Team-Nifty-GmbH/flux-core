@@ -2,19 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\BankConnection\CreateBankConnection;
+use FluxErp\Actions\BankConnection\DeleteBankConnection;
+use FluxErp\Actions\BankConnection\UpdateBankConnection;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateBankConnectionRequest;
 use FluxErp\Models\BankConnection;
+use Illuminate\Validation\ValidationException;
 
 class BankConnectionService
 {
     public function create(array $data): BankConnection
     {
-        $bankConnection = new BankConnection($data);
-        $bankConnection->save();
-
-        return $bankConnection;
+        return CreateBankConnection::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -23,24 +22,25 @@ class BankConnectionService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateBankConnectionRequest()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $bankConnection = UpdateBankConnection::make($item)->validate()->execute(),
+                    additions: ['id' => $bankConnection->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $bankConnection = BankConnection::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $bankConnection->fill($item);
-            $bankConnection->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $bankConnection->withoutRelations()->fresh(),
-                additions: ['id' => $bankConnection->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -48,25 +48,21 @@ class BankConnectionService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'contact bank connections updated',
+            statusMessage: $statusCode === 422 ? null : 'contact bank connection(s) updated',
             bulk: true
         );
     }
 
     public function delete(string $id): array
     {
-        $bankConnection = BankConnection::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $bankConnection) {
+        try {
+            DeleteBankConnection::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['id' => 'contact bank connection not found']
+                data: $e->errors()
             );
         }
-
-        $bankConnection->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

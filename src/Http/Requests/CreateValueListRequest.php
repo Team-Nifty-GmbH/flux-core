@@ -2,6 +2,10 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Rules\ClassExists;
+use FluxErp\Traits\HasAdditionalColumns;
+use Illuminate\Database\Eloquent\Model;
+
 class CreateValueListRequest extends BaseFormRequest
 {
     /**
@@ -13,7 +17,11 @@ class CreateValueListRequest extends BaseFormRequest
     {
         return [
             'name' => 'required|string',
-            'model_type' => 'required|string',
+            'model_type' => [
+                'required',
+                'string',
+                new ClassExists(uses: HasAdditionalColumns::class, instanceOf: Model::class),
+            ],
             'values' => 'required|array',
         ];
     }

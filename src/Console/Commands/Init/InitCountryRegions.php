@@ -4,7 +4,6 @@ namespace FluxErp\Console\Commands\Init;
 
 use FluxErp\Models\Country;
 use FluxErp\Models\CountryRegion;
-use FluxErp\Services\CountryRegionService;
 use Illuminate\Console\Command;
 
 class InitCountryRegions extends Command

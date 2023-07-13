@@ -2,53 +2,26 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Project\CreateProject;
+use FluxErp\Actions\Project\DeleteProject;
+use FluxErp\Actions\Project\FinishProject;
+use FluxErp\Actions\Project\UpdateProject;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateProjectRequest;
-use FluxErp\Models\Category;
-use FluxErp\Models\Project;
-use FluxErp\States\Project\Done;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class ProjectService
 {
     public function create(array $data): array
     {
-        if ($data['parent_id'] ?? false) {
-            $parentProject = Project::query()
-                ->whereKey($data['parent_id'])
-                ->first();
-
-            if (empty($parentProject)) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 404,
-                    data: ['parent_id' => 'parent project not found']
-                );
-            }
-        }
-
-        $intArray = array_filter($data['categories'], function ($value) {
-            return is_int($value) && $value > 0;
-        });
-
-        $categories = Category::query()
-            ->whereKey($data['category_id'])
-            ->with('children:id,parent_id')
-            ->first();
-        $categories = array_column(to_flat_tree($categories->children->toArray()), 'id');
-
-        $diff = array_diff($intArray, $categories);
-        if (count($diff) > 0 || count($categories) === 0) {
+        try {
+            $project = CreateProject::make($data)->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['categories' => array_values($diff)],
-                statusMessage: 'categories not found'
+                statusCode: 422,
+                data: $e->errors()
             );
         }
-
-        $project = new Project($data);
-        $project->save();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 201,
@@ -63,26 +36,25 @@ class ProjectService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateProjectRequest(),
-            service: $this,
-            model: new Project()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $project = UpdateProject::make($item)->validate()->execute(),
+                    additions: ['id' => $project->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $project = Project::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $project->fill($item);
-            $project->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $project->withoutRelations()->fresh(),
-                additions: ['id' => $project->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -90,32 +62,21 @@ class ProjectService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'projects updated',
+            statusMessage: $statusCode === 422 ? null : 'project(s) updated',
             bulk: true
         );
     }
 
     public function delete(string $id): array
     {
-        $project = Project::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $project) {
+        try {
+            DeleteProject::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'project not found']
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        if ($project->children->count() > 0) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['children' => 'project has children']
-            );
-        }
-
-        $project->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
@@ -125,68 +86,6 @@ class ProjectService
 
     public function finishProject(array $data): Model
     {
-        $project = Project::query()
-            ->whereKey($data['id'])
-            ->first();
-
-        $project->state = $data['finish'] ? Done::class : Project::getDefaultStateFor('state');
-        $project->save();
-
-        return $project;
-    }
-
-    public function validateItem(array $item, array $response): ?array
-    {
-        if (array_key_exists('categories', $item)) {
-            if (is_array($item['categories'][0])) {
-                $intArray = Arr::pluck($item['categories'], 'id');
-            } else {
-                $intArray = array_filter($item['categories'], function ($value) {
-                    return is_numeric($value) && $value > 0;
-                });
-                $intArray = array_map('intval', $intArray);
-            }
-
-            $project = Project::query()
-                ->whereKey($item['id'])
-                ->with(['tasks' => ['categories:id'], 'categories:id'])
-                ->first();
-
-            $projectCategories = $project
-                ->category
-                ?->children()
-                ->with('children:id,parent_id')
-                ->get()
-                ->toArray();
-            $categories = $projectCategories ? array_column(to_flat_tree($projectCategories), 'id') : [];
-
-            $diff = array_diff($intArray, $categories);
-            if (count($diff) > 0) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 404,
-                    data: [
-                        'categories' => 'categories not found: \'' . implode(',', array_values($diff)) . '\'',
-                    ],
-                    additions: $response);
-            }
-
-            $projectTaskCategories = [];
-            $project->tasks->each(function ($task) use (&$projectTaskCategories) {
-                $projectTaskCategories = array_merge(
-                    $projectTaskCategories,
-                    $task->categories->pluck('id')->toArray()
-                );
-            });
-
-            if (! empty(array_diff($projectTaskCategories, $intArray))) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 409,
-                    data: ['categories' => 'project task with different category exists'],
-                    additions: $response
-                );
-            }
-        }
-
-        return null;
+        return FinishProject::make($data)->execute();
     }
 }

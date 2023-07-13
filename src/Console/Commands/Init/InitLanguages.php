@@ -3,7 +3,6 @@
 namespace FluxErp\Console\Commands\Init;
 
 use FluxErp\Models\Language;
-use FluxErp\Services\LanguageService;
 use Illuminate\Console\Command;
 
 class InitLanguages extends Command

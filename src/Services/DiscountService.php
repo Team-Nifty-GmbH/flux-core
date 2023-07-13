@@ -2,19 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Discount\CreateDiscount;
+use FluxErp\Actions\Discount\DeleteDiscount;
+use FluxErp\Actions\Discount\UpdateDiscount;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateDiscountRequest;
 use FluxErp\Models\Discount;
+use Illuminate\Validation\ValidationException;
 
 class DiscountService
 {
     public function create(array $data): Discount
     {
-        $discount = new Discount($data);
-        $discount->save();
-
-        return $discount;
+        return CreateDiscount::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -23,24 +22,25 @@ class DiscountService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateDiscountRequest()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $discount = UpdateDiscount::make($item)->validate()->execute(),
+                    additions: ['id' => $discount->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $discount = Discount::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $discount->fill($item);
-            $discount->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $discount->withoutRelations(),
-                additions: ['id' => $discount->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -55,18 +55,14 @@ class DiscountService
 
     public function delete(string $id): array
     {
-        $discount = Discount::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $discount) {
+        try {
+            DeleteDiscount::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['id' => 'discount not found']
+                data: $e->errors()
             );
         }
-
-        $discount->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

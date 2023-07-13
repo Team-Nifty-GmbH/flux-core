@@ -157,7 +157,7 @@ class ValueListTest extends BaseSetup
     {
         $valueList = [
             'name' => 'hopefullyNeverExistingName' . Str::random(),
-            'model_type' => 'user',
+            'model_type' => Category::class,
             'values' => ['test', 1, 3, 'c', 'g'],
         ];
 
@@ -220,7 +220,7 @@ class ValueListTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/value-lists', $valueList);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_create_value_list_name_model_combination_already_exists()
@@ -235,7 +235,7 @@ class ValueListTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/value-lists', $valueList);
-        $response->assertStatus(409);
+        $response->assertStatus(422);
     }
 
     public function test_update_value_list()
@@ -302,7 +302,7 @@ class ValueListTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/value-lists', $valueList);
-        $response->assertStatus(409);
+        $response->assertStatus(422);
     }
 
     public function test_update_value_list_model_has_values_exists()
@@ -321,7 +321,7 @@ class ValueListTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/value-lists', $valueList);
-        $response->assertStatus(409);
+        $response->assertStatus(422);
     }
 
     public function test_delete_value_list()

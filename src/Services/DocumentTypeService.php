@@ -2,19 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\DocumentType\CreateDocumentType;
+use FluxErp\Actions\DocumentType\DeleteDocumentType;
+use FluxErp\Actions\DocumentType\UpdateDocumentType;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateDocumentTypeRequest;
 use FluxErp\Models\DocumentType;
+use Illuminate\Validation\ValidationException;
 
 class DocumentTypeService
 {
     public function create(array $data): DocumentType
     {
-        $documentType = new DocumentType($data);
-        $documentType->save();
-
-        return $documentType;
+        return CreateDocumentType::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -23,26 +22,25 @@ class DocumentTypeService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateDocumentTypeRequest(),
-            model: new DocumentType()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $documentType = UpdateDocumentType::make($item)->validate()->execute(),
+                    additions: ['id' => $documentType->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $documentType = DocumentType::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            // Save new data to table.
-            $documentType->fill($item);
-            $documentType->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $documentType->withoutRelations()->fresh(),
-                additions: ['id' => $documentType->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -50,25 +48,21 @@ class DocumentTypeService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'document types updated',
+            statusMessage: $statusCode === 422 ? null : 'document type(s) updated',
             bulk: true
         );
     }
 
     public function delete(string $id): array
     {
-        $documentType = DocumentType::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $documentType) {
+        try {
+            DeleteDocumentType::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['id' => 'document type not found']
+                data: $e->errors()
             );
         }
-
-        $documentType->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

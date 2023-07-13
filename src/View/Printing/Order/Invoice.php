@@ -8,7 +8,6 @@ use FluxErp\Pipelines\Order\AttachInvoice;
 use FluxErp\Pipelines\Order\CreateInvoiceNumber;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\View\Component;
 
 class Invoice extends OrderView
 {

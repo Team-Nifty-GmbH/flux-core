@@ -2,19 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\PaymentType\CreatePaymentType;
+use FluxErp\Actions\PaymentType\DeletePaymentType;
+use FluxErp\Actions\PaymentType\UpdatePaymentType;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdatePaymentTypeRequest;
 use FluxErp\Models\PaymentType;
+use Illuminate\Validation\ValidationException;
 
 class PaymentTypeService
 {
     public function create(array $data): PaymentType
     {
-        $paymentType = new PaymentType($data);
-        $paymentType->save();
-
-        return $paymentType;
+        return CreatePaymentType::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -23,27 +22,25 @@ class PaymentTypeService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdatePaymentTypeRequest(),
-            model: new PaymentType()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $paymentType = UpdatePaymentType::make($item)->validate()->execute(),
+                    additions: ['id' => $paymentType->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            // Find existing data to update.
-            $paymentType = PaymentType::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            // Save new data to table.
-            $paymentType->fill($item);
-            $paymentType->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $paymentType->withoutRelations()->fresh(),
-                additions: ['id' => $paymentType->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -51,25 +48,21 @@ class PaymentTypeService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'payment types updated',
+            statusMessage: $statusCode === 422 ? null : 'payment type(s) updated',
             bulk: true
         );
     }
 
     public function delete(string $id): array
     {
-        $paymentType = PaymentType::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $paymentType) {
+        try {
+            DeletePaymentType::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['id' => 'payment type not found']
+                data: $e->errors()
             );
         }
-
-        $paymentType->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
