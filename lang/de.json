@@ -316,5 +316,12 @@
     "Price gross": "Preis brutto",
     "Images": "Bilder",
     "Select Time Frame": "Zeitraum auswählen",
-    "Select a time frame": "Wähle einen Zeitraum aus"
+    "Total profits": "Gesamtgewinn",
+    "Last Week": "Letzte Woche",
+    "Last Month": "Letzter Monat",
+    "Last Year": "Letztes Jahr",
+    "This Week": "Diese Woche",
+    "This Month": "Dieser Monat",
+    "This Year": "Dieses Jahr",
+    "All Time": "Gesamt"
 }

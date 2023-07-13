@@ -15,16 +15,38 @@ class TotalProfit extends Component implements UserWidget
 {
     public float $sum = 0;
 
-    public string $timeFrame = TimeFrameEnum::LastMonth->value;
+    public string $timeFrame = TimeFrameEnum::LastMonth->name;
+
+    public static function getLabel(): string
+    {
+        return __('Total Profit');
+    }
 
     public function mount(): void
     {
         $this->calculateSum();
     }
 
-    public function timeFrameUpdated(): void
+    public function render(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
+    {
+        return view('flux::livewire.widgets.total-profit',
+            [
+                'currency' => Currency::query()->where('is_default', true)->first()->toArray(),
+                'timeFrames' => array_map(function (TimeFrameEnum $timeFrame) {
+                    return [
+                        'value' => $timeFrame->name,
+                        'label' => __($timeFrame->value),
+                    ];
+                }, TimeFrameEnum::cases()),
+                'selectedTimeFrame' => $this->timeFrame,
+            ]
+        );
+    }
+
+    public function updatedTimeFrame(): void
     {
         $this->calculateSum();
+        $this->skipRender();
     }
 
     /**
@@ -33,7 +55,8 @@ class TotalProfit extends Component implements UserWidget
     public function calculateSum(): void
     {
         $query = Order::query();
-        $timeFrame = TimeFrameEnum::from($this->timeFrame);
+
+        $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
         $parameters = $timeFrame->dateQueryParameters();
 
         if ($parameters && count($parameters) > 0) {
@@ -46,21 +69,5 @@ class TotalProfit extends Component implements UserWidget
 
         $sum = $query->sum('margin');
         $this->sum = round($sum, 2);
-    }
-
-    public function render(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
-    {
-        return view('flux::livewire.widgets.total-profit',
-            [
-                'currency' => Currency::query()->where('is_default', true)->first()->toArray(),
-                'timeFrames' => TimeFrameEnum::cases(),
-                'selectedTimeFrame' => $this->timeFrame,
-            ]
-        );
-    }
-
-    public static function getLabel(): string
-    {
-        return __('Total Profit');
     }
 }
