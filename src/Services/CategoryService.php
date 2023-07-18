@@ -2,20 +2,18 @@
 
 namespace FluxErp\Services;
 
-use FluxErp\Helpers\Helper;
+use FluxErp\Actions\Category\CreateCategory;
+use FluxErp\Actions\Category\DeleteCategory;
+use FluxErp\Actions\Category\UpdateCategory;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateCategoryRequest;
 use FluxErp\Models\Category;
+use Illuminate\Validation\ValidationException;
 
 class CategoryService
 {
     public function create(array $data): Category
     {
-        $category = new Category($data);
-        $category->save();
-
-        return $category->refresh();
+        return CreateCategory::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -24,26 +22,25 @@ class CategoryService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateCategoryRequest(),
-            service: $this,
-            model: new Category()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $category = UpdateCategory::make($item)->validate()->execute(),
+                    additions: ['id' => $category->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $category = Category::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $category->fill($item);
-            $category->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $category->withoutRelations()->fresh(),
-                additions: ['id' => $category->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -58,68 +55,18 @@ class CategoryService
 
     public function delete(string $id): array
     {
-        $category = Category::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $category) {
+        try {
+            DeleteCategory::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'category not found']
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        if ($category->children->count() > 0) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['children' => 'category has children']
-            );
-        }
-
-        if ($category->model()?->exists()) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['project_task' => 'project task with this category exists']
-            );
-        }
-
-        $category->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
             statusMessage: 'category deleted'
         );
-    }
-
-    public function validateItem(array $item, array $response): ?array
-    {
-        $category = Category::query()
-            ->whereKey($item['id'])
-            ->first();
-
-        if ($item['parent_id'] ?? false) {
-            $parentCategory = Category::query()
-                ->whereKey($item['parent_id'])
-                ->where('model_type', $category->model_type ?? $item['model_type'])
-                ->first();
-
-            if (! $parentCategory) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 422,
-                    data: ['parent_id' => 'parent with model_type \'' . $category->model_type . '\' not found'],
-                    additions: $response
-                );
-            }
-
-            if (Helper::checkCycle(Category::class, $category, $item['parent_id'])) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 409,
-                    data: ['parent_id' => 'cycle detected'],
-                    additions: $response
-                );
-            }
-        }
-
-        return null;
     }
 }

@@ -2,54 +2,35 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Permission\CreatePermission;
+use FluxErp\Actions\Permission\DeletePermission;
+use FluxErp\Actions\Permission\UpdateUserPermissions;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Models\Permission;
-use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 class PermissionService
 {
     public function create(array $data): Model
     {
-        return Permission::create($data);
+        return CreatePermission::make($data)->execute();
     }
 
     public function editUserPermissions(array $data, bool $give): array
     {
-        $user = User::query()
-            ->whereKey($data['user_id'])
-            ->first();
-
-        if ($give) {
-            $user->givePermissionTo($data['permissions']);
-        } else {
-            foreach ($data['permissions'] as $permission) {
-                $user->revokePermissionTo($permission);
-            }
-        }
-
-        return $user->permissions->toArray();
+        return UpdateUserPermissions::make(array_merge($data, ['give' => $give]))->execute();
     }
 
     public function delete(string $id): array
     {
-        $permission = Permission::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $permission) {
+        try {
+            DeletePermission::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'permission not found']
-            );
-        } elseif ($permission->is_locked) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                statusMessage: __('permission is locked')
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        $permission->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

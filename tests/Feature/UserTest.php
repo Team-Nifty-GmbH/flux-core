@@ -296,6 +296,6 @@ class UserTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->delete('/api/users/' . $this->users[1]->id + 1);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 }

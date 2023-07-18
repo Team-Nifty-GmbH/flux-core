@@ -1,0 +1,48 @@
+<?php
+
+namespace FluxErp\Actions\Address;
+
+use FluxErp\Actions\BaseAction;
+use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
+use Illuminate\Database\Eloquent\Builder;
+
+class UpdateMainAddress extends BaseAction
+{
+    public function __construct(array $data)
+    {
+        parent::__construct($data);
+        $this->rules = [
+            'address_id' => 'integer|nullable|exists:addresses,id,deleted_at,NULL',
+            'contact_id' => 'required|integer|exists:contacts,id,deleted_at,NULL',
+            'is_main_address' => 'required|boolean',
+        ];
+    }
+
+    public static function models(): array
+    {
+        return [Address::class];
+    }
+
+    public function execute(): Address|null
+    {
+        $contact = Contact::query()
+            ->whereKey($this->data['contact_id'])
+            ->first();
+
+        $address = $contact->addresses()
+            ->when(
+                $this->data['address_id'],
+                fn (Builder $query) => $query->where('addresses.id', '!=', $this->data['address_id'])
+            )
+            ->where('is_main_address', true)
+            ->first();
+
+        if ($address) {
+            $address->is_main_address = $this->data['is_main_address'];
+            $address->save();
+        }
+
+        return $address;
+    }
+}

@@ -11,6 +11,7 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
 use FluxErp\Models\ProjectTask;
+use FluxErp\States\Project\Done;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
@@ -284,7 +285,7 @@ class ProjectTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/projects', $project);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_create_project_categories_not_found()
@@ -302,7 +303,7 @@ class ProjectTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/projects', $project);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_update_project()
@@ -506,7 +507,7 @@ class ProjectTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/projects', $project);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
         $this->assertTrue(
             property_exists(json_decode($response->getContent())->errors, 'categories')
         );
@@ -536,7 +537,7 @@ class ProjectTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/projects', $project);
-        $response->assertStatus(409);
+        $response->assertStatus(422);
         $this->assertTrue(
             property_exists(json_decode($response->getContent())->errors, 'categories')
         );
@@ -623,7 +624,7 @@ class ProjectTest extends BaseSetup
             ->first();
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['id'], $dbProject->id);
-        $this->assertEquals(\FluxErp\States\Project\Done::class, get_class($dbProject->state));
+        $this->assertEquals(Done::class, get_class($dbProject->state));
     }
 
     public function test_reopen_project()

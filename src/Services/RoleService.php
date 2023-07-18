@@ -2,23 +2,20 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Role\CreateRole;
+use FluxErp\Actions\Role\DeleteRole;
+use FluxErp\Actions\Role\UpdateRole;
+use FluxErp\Actions\Role\UpdateRolePermissions;
+use FluxErp\Actions\Role\UpdateRoleUsers;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateRoleRequest;
-use FluxErp\Models\Role;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 class RoleService
 {
     public function create(array $data): Model
     {
-        $role = Role::create($data);
-
-        if ($data['permissions'] ?? false) {
-            $role->givePermissionTo($data['permissions']);
-        }
-
-        return $role;
+        return CreateRole::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -27,28 +24,25 @@ class RoleService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateRoleRequest(),
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $role = UpdateRole::make($item)->validate()->execute(),
+                    additions: ['id' => $role->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $role = Role::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $role->fill($item);
-            $role->save();
-
-            if ($item['permissions'] ?? false) {
-                $role->syncPermissions($item['permissions']);
+                unset($data[$key]);
             }
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $role->withoutRelations()->fresh(),
-                additions: ['id' => $role->id]
-            );
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -56,66 +50,35 @@ class RoleService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'roles updated',
+            statusMessage: $statusCode === 422 ? null : 'role(s) updated',
             bulk: true
         );
     }
 
     public function editRolePermissions(array $data, bool $give): array
     {
-        $role = Role::query()
-            ->whereKey($data['id'])
-            ->first();
-
-        if ($give) {
-            $role->givePermissionTo($data['permissions']);
-        } else {
-            foreach ($data['permissions'] as $permission) {
-                $role->revokePermissionTo($permission);
-            }
-        }
-
-        return $role->permissions->toArray();
+        return UpdateRolePermissions::make(array_merge($data, ['give' => $give]))->execute();
     }
 
     public function editRoleUsers(array $data, bool $assign): array
     {
-        $role = Role::query()
-            ->whereKey($data['id'])
-            ->first();
-
-        if ($assign) {
-            $role->users()->syncWithoutDetaching($data['users']);
-        } else {
-            $role->users()->detach($data['users']);
-        }
-
-        return $role->users->toArray();
+        return UpdateRoleUsers::make(array_merge($data, ['assign' => $assign]))->execute();
     }
 
     public function delete(string $id): array
     {
-        $role = Role::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $role) {
+        try {
+            DeleteRole::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'role not found']
-            );
-        } elseif ($role->name === 'Super Admin') {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                statusMessage: __('cannot delete Super Admin role')
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
 
-        $role->delete();
-
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
-            statusMessage: __('role deleted')
+            statusMessage: 'role deleted'
         );
     }
 }

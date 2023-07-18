@@ -2,19 +2,17 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\ContactOption\CreateContactOption;
+use FluxErp\Actions\ContactOption\DeleteContactOption;
+use FluxErp\Actions\ContactOption\UpdateContactOption;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateContactOptionRequest;
-use FluxErp\Models\ContactOption;
+use Illuminate\Validation\ValidationException;
 
 class ContactOptionService
 {
-    public function create(array $data): ContactOption
+    public function create(array $data): array
     {
-        $contactOption = new ContactOption($data);
-        $contactOption->save();
-
-        return $contactOption;
+        return CreateContactOption::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -23,24 +21,25 @@ class ContactOptionService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateContactOptionRequest()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $contactOption = UpdateContactOption::make($item)->validate()->execute(),
+                    additions: ['id' => $contactOption->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $contactOption = ContactOption::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $contactOption->fill($item);
-            $contactOption->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $contactOption->withoutRelations()->fresh(),
-                additions: ['id' => $contactOption->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -55,18 +54,14 @@ class ContactOptionService
 
     public function delete(string $id): array
     {
-        $contactOption = ContactOption::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $contactOption) {
+        try {
+            DeleteContactOption::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['id' => 'contact option not found']
+                data: $e->errors()
             );
         }
-
-        $contactOption->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

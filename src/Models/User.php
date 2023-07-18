@@ -16,7 +16,6 @@ use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Hash;
@@ -83,9 +82,9 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference, Int
         return $this->belongsTo(Language::class);
     }
 
-    public function locks(): HasMany
+    public function locks(): MorphMany
     {
-        return $this->hasMany(Lock::class, 'created_by');
+        return $this->morphMany(Lock::class, 'authenticatable');
     }
 
     public function settings(): MorphMany

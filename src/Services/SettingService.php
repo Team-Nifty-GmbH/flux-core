@@ -2,6 +2,8 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Setting\CreateSetting;
+use FluxErp\Actions\Setting\UpdateSetting;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Models\Setting;
 
@@ -9,24 +11,14 @@ class SettingService
 {
     public function create(array $data): Setting
     {
-        $setting = new Setting($data);
-        $setting->save();
-
-        return $setting;
+        return CreateSetting::make($data)->execute();
     }
 
     public function update(array $data): array
     {
-        $setting = Setting::query()
-            ->whereKey($data['id'])
-            ->first();
-
-        $setting->settings = (object) $data['settings'];
-        $setting->save();
-
         return ResponseHelper::createArrayResponse(
             statusCode: 200,
-            data: $setting,
+            data: UpdateSetting::make($data)->execute(),
             statusMessage: 'setting updated'
         );
     }

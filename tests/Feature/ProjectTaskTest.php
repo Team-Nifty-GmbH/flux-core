@@ -292,7 +292,7 @@ class ProjectTaskTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/projects/tasks', $projectTask);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_create_project_task_address_not_found()
@@ -650,7 +650,7 @@ class ProjectTaskTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTasks);
         $response->assertStatus(207);
-        $this->assertEquals(422, json_decode($response->getContent())->responses[0]->status);
+        $this->assertEquals(422, json_decode($response->getContent())->responses[1]->status);
     }
 
     public function test_update_project_task_task_not_found()
@@ -698,7 +698,7 @@ class ProjectTaskTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTask);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_update_project_task_address_not_found()

@@ -5,7 +5,6 @@ namespace FluxErp\Console\Commands\Init;
 use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
-use FluxErp\Services\CountryService;
 use Illuminate\Console\Command;
 
 class InitCountries extends Command

@@ -2,19 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Calendar\CreateCalendar;
+use FluxErp\Actions\Calendar\DeleteCalendar;
+use FluxErp\Actions\Calendar\UpdateCalendar;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateCalendarRequest;
 use FluxErp\Models\Calendar;
+use Illuminate\Validation\ValidationException;
 
 class CalendarService
 {
     public function create(array $data): Calendar
     {
-        $calendar = new Calendar($data);
-        $calendar->save();
-
-        return $calendar;
+        return CreateCalendar::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -23,24 +22,25 @@ class CalendarService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateCalendarRequest()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $calendar = UpdateCalendar::make($item)->validate()->execute(),
+                    additions: ['id' => $calendar->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $calendar = Calendar::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $calendar->fill($item);
-            $calendar->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $calendar->withoutRelations(),
-                additions: ['id' => $calendar->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -55,18 +55,14 @@ class CalendarService
 
     public function delete(string $id): array
     {
-        $calendar = Calendar::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $calendar) {
+        try {
+            DeleteCalendar::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['id' => 'calendar not found']
+                data: $e->errors()
             );
         }
-
-        $calendar->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

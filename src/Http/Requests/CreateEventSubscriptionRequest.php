@@ -2,6 +2,10 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Rules\ClassExists;
+use FluxErp\Rules\MorphExists;
+use Illuminate\Database\Eloquent\Model;
+
 class CreateEventSubscriptionRequest extends BaseFormRequest
 {
     /**
@@ -14,8 +18,17 @@ class CreateEventSubscriptionRequest extends BaseFormRequest
         return [
             'event' => 'required|string',
             'user_id' => 'sometimes|integer|exists:users,id,deleted_at,NULL',
-            'model_type' => 'required|string',
-            'model_id' => 'present|integer|nullable',
+            'model_type' => [
+                'required',
+                'string',
+                new ClassExists(instanceOf: Model::class),
+            ],
+            'model_id' => [
+                'present',
+                'integer',
+                'nullable',
+                new MorphExists(),
+            ],
             'is_broadcast' => 'required|boolean|accepted_if:is_notifiable,false,0',
             'is_notifiable' => 'required|boolean|accepted_if:is_broadcast,false,0',
         ];

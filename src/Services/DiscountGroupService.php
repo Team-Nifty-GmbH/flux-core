@@ -2,26 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\DiscountGroup\CreateDiscountGroup;
+use FluxErp\Actions\DiscountGroup\DeleteDiscountGroup;
+use FluxErp\Actions\DiscountGroup\UpdateDiscountGroup;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateDiscountGroupRequest;
 use FluxErp\Models\DiscountGroup;
+use Illuminate\Validation\ValidationException;
 
 class DiscountGroupService
 {
     public function create(array $data): DiscountGroup
     {
-        $discounts = $data['discounts'] ?? null;
-        unset($data['discounts']);
-
-        $discountGroup = new DiscountGroup($data);
-        $discountGroup->save();
-
-        if (! is_null($discounts)) {
-            $discountGroup->discounts()->attach($discounts);
-        }
-
-        return $discountGroup;
+        return CreateDiscountGroup::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -30,30 +22,25 @@ class DiscountGroupService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateDiscountGroupRequest()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $discountGroup = UpdateDiscountGroup::make($item)->validate()->execute(),
+                    additions: ['id' => $discountGroup->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $discountGroup = DiscountGroup::query()
-                ->whereKey($item['id'])
-                ->first();
-            $discounts = $item['discounts'] ?? null;
-            unset($item['discounts']);
-
-            $discountGroup->fill($item);
-            $discountGroup->save();
-
-            if (! is_null($discounts)) {
-                $discountGroup->discounts()->sync($discounts);
+                unset($data[$key]);
             }
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $discountGroup->withoutRelations(),
-                additions: ['id' => $discountGroup->id]
-            );
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -68,18 +55,14 @@ class DiscountGroupService
 
     public function delete(string $id): array
     {
-        $discountGroup = DiscountGroup::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $discountGroup) {
+        try {
+            DeleteDiscountGroup::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['id' => 'discount group not found']
+                data: $e->errors()
             );
         }
-
-        $discountGroup->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
