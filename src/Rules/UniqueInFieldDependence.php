@@ -61,7 +61,7 @@ class UniqueInFieldDependence implements Rule, DataAwareRule
                         ->where($this->key, $dependingFieldData[$this->key] ?? null)
                         ->first();
 
-                    if (! $dependingFieldData || ! property_exists($dependingFieldData, $field)) {
+                    if (! $dependingFieldData || ! array_key_exists($field, $dependingFieldData->attributesToArray())) {
                         return false;
                     }
                 }

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Livewire\Order;
 
+use FluxErp\Actions\OrderPosition\PriceCalculation;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Http\Requests\UpdateOrderPositionRequest;
@@ -10,7 +11,6 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
-use FluxErp\Services\OrderPositionService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -114,7 +114,6 @@ class OrderPositions extends Component
 
     private function recalculatePosition(array $orderPosition): array
     {
-        $service = new OrderPositionService();
         $position = new OrderPosition();
         if ($orderPosition['id'] ?? false) {
             $position->setKeyType(gettype($orderPosition['id']));
@@ -123,7 +122,7 @@ class OrderPositions extends Component
         $position->is_net = $position->is_net ?: $this->order['price_list']['is_net'];
         $position->parent_id = $position->parent_id ?: null;
 
-        $service->fillPriceCalculation($position, $orderPosition);
+        PriceCalculation::fill($position, $orderPosition);
 
         $orderPosition = $position->toArray();
 
