@@ -39,7 +39,7 @@ class UploadMedia extends BaseAction
         );
         $file = $this->data['media'];
 
-        if ($data['media_type'] ?? false) {
+        if ($this->data['media_type'] ?? false) {
             $fileAdder = $modelInstance->{'addMediaFrom' . $this->data['media_type']}($file);
         } else {
             $fileAdder = $modelInstance->addMedia($file instanceof UploadedFile ? $file->path() : $file);
