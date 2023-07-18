@@ -6,9 +6,8 @@
         addresses: @entangle('addresses').defer,
     }"
     class="w-full lg:col-span-2 lg:col-start-1 lg:flex lg:space-x-6">
-
     <!-- Address list-->
-    <section class="basis-1/4" wire:ignore>
+    <section class="flex flex-col gap-4 basis-1/4" wire:ignore>
         <x-card>
             <div>
                 <div
@@ -47,6 +46,9 @@
                     </template>
                 </div>
             </div>
+        </x-card>
+        <x-card>
+            <x-select :label="__('Price group')" :options="$priceLists" option-label="name" option-value="id"/>
         </x-card>
     </section>
     <section class="basis-3/4 pt-6 lg:pt-0">

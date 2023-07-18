@@ -139,50 +139,40 @@
                     </h1>
                 </div>
             </div>
-            <div
-                class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
+            <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
                 @can('api.contacts.{id}.delete')
-                    <x-button negative label="{{ __('Delete') }}" @click="
-                              window.$wireui.confirmDialog({
-                              title: '{{ __('Delete contact') }}',
-                    description: '{{ __('Do you really want to delete this contact?') }}',
-                    icon: 'error',
-                    accept: {
-                        label: '{{ __('Delete') }}',
-                        method: 'delete',
-                    },
-                    reject: {
-                        label: '{{ __('Cancel') }}',
-                    }
-                    }, '{{ $this->id }}')
+                    <x-button negative label="{{ __('Delete') }}" x-on:click="
+                        window.$wireui.confirmDialog({
+                        title: '{{ __('Delete contact') }}',
+                        description: '{{ __('Do you really want to delete this contact?') }}',
+                        icon: 'error',
+                        accept: {
+                            label: '{{ __('Delete') }}',
+                            method: 'delete',
+                        },
+                        reject: {
+                            label: '{{ __('Cancel') }}',
+                        }
+                        }, '{{ $this->id }}')
                     "/>
                 @endcan
                 @can('api.contacts.post')
-                    <x-button primary label="{{ __('New') }}" @click="$openModal('newContactModal')"/>
+                    <x-button primary label="{{ __('New') }}" x-on:click="$openModal('newContactModal')"/>
                 @endcan
             </div>
         </div>
-        <!-- Tabs -->
-        <div x-data="{tab: $wire.entangle('tab')}" class="mt-8 px-6">
-            <div class="pb-2.5">
-                <div class="border-b border-gray-200">
-                    <nav class="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
-                        <button x-on:click.prevent="tab = 'addresses'" x-bind:class="{'!border-indigo-500 text-indigo-600' : tab === 'addresses'}" class="cursor-pointer whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-50">{{ __('Addresses') }}</button>
-                        <button x-on:click.prevent="tab = 'orders'" x-bind:class="{'!border-indigo-500 text-indigo-600' : tab === 'orders'}" class="cursor-pointer whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-50">{{ __('Orders') }}</button>
-                        <button x-on:click.prevent="tab = 'accounting'" x-bind:class="{'!border-indigo-500 text-indigo-600' : tab === 'accounting'}" class="cursor-pointer whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-50">{{ __('Accounting') }}</button>
-                        <button x-on:click.prevent="tab = 'tickets'" x-bind:class="{'!border-indigo-500 text-indigo-600' : tab === 'tickets'}" class="cursor-pointer whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-50">{{ __('Tickets') }}</button>
-                        <button x-on:click.prevent="tab = 'statistics'" x-bind:class="{'!border-indigo-500 text-indigo-600' : tab === 'statistics'}" class="cursor-pointer whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-50">{{ __('Statistics') }}</button>
-                    </nav>
-                </div>
-            </div>
-        </div>
-        <div class="relative mx-auto mt-8 sm:px-6">
-            <div wire:loading wire:ignore class="absolute right-0 top-0 left-0 bottom-0 bg-white/30 backdrop-blur-sm" style="z-index: 1">
-                <div class="absolute right-0 top-0 left-0 bottom-0 flex items-center justify-center">
+        <x-tabs
+            wire:model="tab"
+            :tabs="$tabs"
+            wire:ignore
+        >
+            <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
+                <section class="w-full lg:pt-0">
+                    <x-errors />
                     <x-spinner />
-                </div>
+                    <x-dynamic-component :component="'contact.' . $tab" />
+                </section>
             </div>
-            <x-dynamic-component :component="'contact.' . $tab"/>
-        </div>
+        </x-tabs>
     </main>
 </div>

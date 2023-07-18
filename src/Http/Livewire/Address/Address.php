@@ -7,6 +7,7 @@ use FluxErp\Http\Requests\UpdateAddressRequest;
 use FluxErp\Models\Address as AddressModel;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
+use FluxErp\Models\PriceList;
 use FluxErp\Services\AddressService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -93,7 +94,9 @@ class Address extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.address.address');
+        return view('flux::livewire.address.address', [
+            'priceLists' => PriceList::query()->select(['id', 'name'])->get()->toArray()
+        ]);
     }
 
     public function updated($propertyName): void

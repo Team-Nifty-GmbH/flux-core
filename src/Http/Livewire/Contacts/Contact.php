@@ -108,7 +108,15 @@ class Contact extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.contact.contact');
+        return view('flux::livewire.contact.contact', [
+            'tabs' => [
+                'addresses' => __('Addresses'),
+                'orders' => __('Orders'),
+                'accounting' => __('Accounting'),
+                'tickets' => __('Tickets'),
+                'statistics' => __('Statistics'),
+            ],
+        ]);
     }
 
     public function goToContactWithAddress(int $contactId, int $addressId): void
