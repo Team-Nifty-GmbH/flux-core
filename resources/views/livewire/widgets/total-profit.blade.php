@@ -1,4 +1,4 @@
-<x-card class="max-w-full" x-data="{total: $wire.entangle('sum'), selectedLabel: ''}">
+<x-card class="max-w-full" x-data="{total: $wire.entangle('sum')}">
     <div class="flex text-ellipsis overflow-hidden flex-col items-start overflow-auto">
         <x-button.circle xl class="cursor-default" icon="credit-card" orange></x-button.circle>
         <p class="truncate text-xl font-semibold pt-3">{{  __('Total profits') }}</p>

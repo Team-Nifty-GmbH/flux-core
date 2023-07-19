@@ -9,10 +9,12 @@ trait EnumTrait
         return array_column(self::cases(), 'value');
     }
 
-    public static function fromName(string $name): static
+    public static function fromName(string $name): static|null
     {
-        return array_values(
+        $values = array_values(
             array_filter(self::cases(), fn ($case) => $case->name === $name)
-        )[0];
+        );
+
+        return array_shift($values);
     }
 }

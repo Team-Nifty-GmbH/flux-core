@@ -67,7 +67,6 @@ class TotalProfit extends Component implements UserWidget
             }
         }
 
-        $sum = $query->sum('margin');
-        $this->sum = round($sum, 2);
+        $this->sum = round($query->sum('margin'), 2);
     }
 }
