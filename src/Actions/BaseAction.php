@@ -39,11 +39,28 @@ abstract class BaseAction
             ->toString();
     }
 
+    public function setData(array $data): static
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
     public function setRules(array $rules): static
     {
         $this->rules = $rules;
 
         return $this;
+    }
+
+    public function getRules(): array
+    {
+        return $this->rules;
     }
 
     public function validate(): static

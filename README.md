@@ -1,13 +1,13 @@
 <p align="center"><a href="https://team-nifty.com" target="_blank"><img src="https://user-images.githubusercontent.com/40495041/160839207-0e1593e0-ff3d-4407-b9d2-d3513c366ab9.svg" width="400"></a></p>
 
 ### 1. Installation
-Remove the welcome route from `routes/web.php` and add the following route.
+Remove the welcome route from `routes/web.php`.
 
 Add the following to your `config/filesystem.php` config file
 ```php
     'links' => [
         ...
-        public_path('flux') => app_path('vendor/team-nifty-gmbh/flux-erp/public'),
+        public_path('flux') => base_path('vendor/team-nifty-gmbh/flux-erp/public'),
     ],
 ```
 

@@ -2,18 +2,20 @@
 
 namespace FluxErp\Http\Livewire\Features\Comments;
 
+use FluxErp\Actions\Comment\CreateComment;
+use FluxErp\Actions\Comment\DeleteComment;
+use FluxErp\Actions\Comment\UpdateComment;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
-use FluxErp\Services\CommentService;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -103,7 +105,7 @@ class Comments extends Component
         }
 
         $comment = [
-            'model_type' => class_basename($this->modelType),
+            'model_type' => $this->modelType,
             'model_id' => $this->modelId,
             'comment' => $comment,
             'is_sticky' => $sticky,
@@ -111,21 +113,16 @@ class Comments extends Component
             'parent_id' => $this->commentId ?: null,
         ];
 
-        $commentService = new CommentService();
-        $response = $commentService->create($comment);
-        if ($response['status'] !== 201) {
-            $this->notification()->error(
-                title: __('Comment could not be saved'),
-                description: implode(', ', Arr::flatten($response['errors']))
-            );
+        try {
+            $comment = CreateComment::make($comment)->validate()->execute();
+        } catch (ValidationException $e) {
+            validation_errors_to_notifications($e, $this);
 
             return;
         }
 
-        /** @var Comment $comment */
-        $comment = $response['data'];
         if ($this->filesArray) {
-            $this->saveFileUploadsToMediaLibrary('files', $response['data']->id, Comment::class);
+            $this->saveFileUploadsToMediaLibrary('files', $comment->id, Comment::class);
             $comment->load('media:id,name,model_type,model_id,disk');
         }
 
@@ -154,18 +151,28 @@ class Comments extends Component
     public function toggleSticky(int $id): void
     {
         $comment = Comment::query()->whereKey($id)->first();
-        $commentService = new CommentService();
 
-        $commentService->update([
-            'id' => $comment->id,
-            'is_sticky' => ! $comment->is_sticky,
-        ]);
+        try {
+            UpdateComment::make([
+                'id' => $comment->id,
+                'is_sticky' => ! $comment->is_sticky,
+            ])
+                ->validate()
+                ->execute();
+        } catch (ValidationException $e) {
+            validation_errors_to_notifications($e, $this);
+        }
     }
 
     public function delete(int $id): void
     {
-        $commentService = new CommentService();
-        $commentService->delete($id);
+        try {
+            DeleteComment::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            validation_errors_to_notifications($e, $this);
+
+            return;
+        }
 
         $index = array_search($id, array_column($this->comments['data'], 'id'));
         unset($this->comments['data'][$index]);

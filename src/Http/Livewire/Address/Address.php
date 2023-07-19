@@ -2,12 +2,14 @@
 
 namespace FluxErp\Http\Livewire\Address;
 
+use FluxErp\Actions\Address\CreateAddress;
+use FluxErp\Actions\Address\DeleteAddress;
+use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Http\Requests\UpdateAddressRequest;
 use FluxErp\Models\Address as AddressModel;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
-use FluxErp\Models\PriceList;
 use FluxErp\Services\AddressService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -16,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -24,8 +27,6 @@ class Address extends Component
     use Actions;
 
     public array $address;
-
-    public array $addresses = [];
 
     public array $contactOptions = [];
 
@@ -94,9 +95,7 @@ class Address extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.address.address', [
-            'priceLists' => PriceList::query()->select(['id', 'name'])->get()->toArray()
-        ]);
+        return view('flux::livewire.address.address');
     }
 
     public function updated($propertyName): void
@@ -132,14 +131,16 @@ class Address extends Component
         $this->skipRender();
     }
 
-    public function save(int $contactId = null): void
+    public function save(int $contactId = null): array|null
     {
-        $function = ($this->address['id'] ?? false) ? 'update' : 'create';
+        $function = ($this->address['id'] ?? false)
+            ? new UpdateAddress([])
+            : new CreateAddress([]);
 
-        if (! Auth::user()->can('api.addresses.' . ($function === 'update' ? 'put' : 'post'))) {
+        if (! Auth::user()->can('api.addresses.' . (get_class($function) === UpdateAddress::class ? 'put' : 'post'))) {
             $this->notification()->error(__('You dont have the permission to do that.'));
 
-            return;
+            return null;
         }
 
         $this->address['contact_options'] = [];
@@ -147,44 +148,34 @@ class Address extends Component
             $this->address['contact_options'] = array_merge($this->address['contact_options'], $contactOption);
         }
 
-        $addressArray = $this->validate()['address'];
-
-        $addressService = new AddressService();
         $this->address['contact_id'] = $contactId ?? $this->address['contact_id'];
-
-        if ($function === 'update' && $this->loginPassword) {
-            $addressArray['login_password'] = $this->loginPassword;
+        if (($this->address['id'] ?? false) && $this->loginPassword) {
+            $this->address['login_password'] = $this->loginPassword;
         }
+
+        $function->setData($this->address);
 
         $this->loginPassword = '';
-        $response = $addressService->$function($addressArray);
+        try {
+            $model = $function->validate()->execute();
+        } catch (ValidationException $e) {
+            validation_errors_to_notifications($e, $this);
 
-        if ($response['status'] >= 400) {
-            $this->notification()->error(
-                title: __('Address could not be saved'),
-                description: implode(', ', Arr::flatten($response['errors']))
-            );
-        } else {
-            $model = $response instanceof Model ? $response : $response['data'];
-
-            $model->syncPermissions($this->address['permissions'] ?? []);
-
-            // TODO: remove all locks
-            $this->notification()->success(__('Address saved'));
-            $this->edit = false;
-            $this->getAddress($model->id);
-
-            if ($function === 'create') {
-                $this->addresses[] = $this->address;
-            } else {
-                $addresses = Arr::keyBy($this->addresses, 'id');
-                $addresses[$model->id] = $this->address;
-                $this->addresses = $addresses;
-            }
-
-            $this->addressOriginal = $model->toArray();
-            $this->skipRender();
+            return null;
         }
+
+        $model->syncPermissions($this->address['permissions'] ?? []);
+
+        // TODO: remove all locks
+        $this->notification()->success(__('Address saved'));
+        $this->edit = false;
+        $this->getAddress($model->id);
+
+        $this->addressOriginal = $model->toArray();
+        $this->skipRender();
+        $model->append('name');
+
+        return $model->toArray();
     }
 
     public function cancel(): void
@@ -199,32 +190,28 @@ class Address extends Component
         // TODO: remove all locks
     }
 
-    public function delete(): void
+    public function delete(): null|array
     {
         if (! Auth::user()->can('api.addresses.{id}.delete')) {
             $this->notification()->error(__('You dont have the permission to do that.'));
 
-            return;
+            return null;
         }
 
         if ($this->address['is_main_address']) {
             $this->notification()->error(__('You cant delete the main address.'));
 
-            return;
+            return null;
         }
 
-        $addressService = new AddressService();
-        $addressService->delete($this->address['id']);
-
-        $addresses = Arr::keyBy($this->addresses, 'id');
-        unset($addresses[$this->address['id']]);
-        $this->addresses = array_values($addresses);
-        $this->address = $this->addresses[0] ?? [];
+        DeleteAddress::make($this->address)->validate()->execute();
 
         $this->notification()->success(__('Address deleted'));
         $this->edit = false;
 
         $this->skipRender();
+
+        return $this->address;
     }
 
     public function duplicate(): void
