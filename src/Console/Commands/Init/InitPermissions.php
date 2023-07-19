@@ -3,8 +3,8 @@
 namespace FluxErp\Console\Commands\Init;
 
 use Closure;
+use FluxErp\Facades\Action;
 use FluxErp\Models\Permission;
-use FluxErp\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +15,8 @@ use Spatie\Permission\PermissionRegistrar;
 
 class InitPermissions extends Command
 {
+    private array $currentPermissions = [];
+
     /**
      * The name and signature of the console command.
      *
@@ -37,13 +39,26 @@ class InitPermissions extends Command
      */
     public function handle(): int
     {
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        $this->currentPermissions = array_flip(Permission::all('id')->pluck('id')->toArray());
+
+        $this->registerActionPermission();
+        $this->registerRoutePermissions();
+
+        foreach ($this->currentPermissions as $id => $currentPermission) {
+            Permission::query()->whereKey($id)->delete();
+        }
+
+        return 0;
+    }
+
+    private function registerRoutePermissions(): void
+    {
         $guards = array_keys(Arr::prependKeysWith(config('auth.guards'), 'auth:'));
         $guards[] = 'auth';
         $defaultGuard = config('auth.defaults.guard');
 
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
         $routes = Route::getRoutes()->getRoutes();
-        $currentPermissions = array_flip(Permission::all('id')->pluck('id')->toArray());
 
         $bar = $this->output->createProgressBar(count($routes));
         foreach ($routes as $route) {
@@ -54,11 +69,17 @@ class InitPermissions extends Command
                 continue;
             }
 
-            $guard = explode(':', Arr::first(array_intersect($route->middleware(), $guards)));
+            $guards = array_values(array_filter($route->middleware(), fn ($guard) => str_starts_with($guard, 'auth:')));
+            $guard = array_shift($guards);
+            if (! $guard) {
+                continue;
+            }
 
-            $permission = Permission::findOrCreate($permissionName, $guard[1] ?? $defaultGuard);
+            $guard = str_replace('auth:', '', $guard);
 
-            unset($currentPermissions[$permission->id]);
+            $permission = Permission::findOrCreate($permissionName, $guard);
+
+            unset($this->currentPermissions[$permission->id]);
 
             if ($guard[1] === $defaultGuard) {
                 foreach (array_keys(config('auth.guards')) as $additionalGuard) {
@@ -76,17 +97,19 @@ class InitPermissions extends Command
 
         $bar->finish();
 
-        foreach ($currentPermissions as $id => $currentPermission) {
-            Permission::query()->whereKey($id)->delete();
-        }
-
-        $superAdminRole = Role::findOrCreate('Super Admin');
-        User::query()->where('email', '=', 'admin')->first()?->assignRole($superAdminRole);
+        Role::findOrCreate('Super Admin');
 
         $this->newLine();
         $this->info('Permissions initiated!');
+    }
 
-        return 0;
+    private function registerActionPermission()
+    {
+        $this->info('Registering action permissions');
+        foreach (Action::all() as $action) {
+            $permission = Permission::findOrCreate('action.' . $action['name'], 'web');
+            unset($this->currentPermissions[$permission->id]);
+        }
     }
 
     /**

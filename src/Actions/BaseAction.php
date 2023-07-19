@@ -5,6 +5,7 @@ namespace FluxErp\Actions;
 use FluxErp\Traits\Makeable;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class BaseAction
 {
@@ -23,6 +24,15 @@ abstract class BaseAction
         $this->data = $data[0] ?? [];
     }
 
+    public function checkPermission(): static
+    {
+        if (! auth()->user()->can('action.' . static::name())) {
+            throw UnauthorizedException::forPermissions(['action.' . static::name()]);
+        }
+
+        return $this;
+    }
+
     public static function name(): string
     {
         $exploded = explode('-', Str::kebab(class_basename(static::class)));
@@ -31,7 +41,7 @@ abstract class BaseAction
         return implode('-', $exploded) . '.' . $function;
     }
 
-    public static function description(): string|null
+    public static function description(): ?string
     {
         return Str::of(class_basename(static::class))
             ->headline()

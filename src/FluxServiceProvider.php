@@ -101,9 +101,7 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->app->alias(Registry::class, 'datatype.registry');
 
-        $this->app->singleton('flux.widget_manager', function ($app) {
-            return new WidgetManager();
-        });
+        $this->app->singleton('flux.widget_manager', fn ($app) => new WidgetManager());
 
         $this->app->singleton('flux.action_manager', fn ($app) => new ActionManager());
     }
@@ -346,7 +344,7 @@ class FluxServiceProvider extends ServiceProvider
         }
     }
 
-    private function getViewClassAliasFromNamespace(string $namespace, string|null $directoryPath = null): array
+    private function getViewClassAliasFromNamespace(string $namespace, string $directoryPath = null): array
     {
         $directoryPath = $directoryPath ?: Str::replace(['\\', 'FluxErp'], ['/', __DIR__], $namespace);
         $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath));
@@ -399,7 +397,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->commands($commandClasses);
     }
 
-    private function registerMiddleware()
+    private function registerMiddleware(): void
     {
         $kernel = app()->make(Kernel::class);
         $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);

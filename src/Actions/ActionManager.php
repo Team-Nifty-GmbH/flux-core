@@ -38,7 +38,7 @@ class ActionManager
         return $this->actions;
     }
 
-    public function get(string $name): array|null
+    public function get(string $name): ?array
     {
         return $this->actions->get($name);
     }
@@ -48,13 +48,14 @@ class ActionManager
         return $this->actions->filter(fn ($item) => in_array($model, $item['models']));
     }
 
-    public function autoDiscover(string|null $directory = null, string|null $namespace = null): void
+    public function autoDiscover(string $directory = null, string $namespace = null): void
     {
         $namespace = $namespace ?: 'App\\Actions';
         $path = $directory ?: app_path('Actions');
 
-        foreach (glob("{$path}/*.php") as $file) {
-            $class = $namespace . '\\' . pathinfo($file, PATHINFO_FILENAME);
+        foreach (glob("{$path}/**/*.php") as $file) {
+            $subNameSpace = str_replace([$directory, '/'], ['', '\\'], pathinfo($file, PATHINFO_DIRNAME)) . '\\';
+            $class = $namespace . $subNameSpace . pathinfo($file, PATHINFO_FILENAME);
 
             if (! class_exists($class) || ! in_array(BaseAction::class, class_parents($class))) {
                 continue;

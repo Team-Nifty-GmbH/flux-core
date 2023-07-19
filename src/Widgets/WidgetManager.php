@@ -51,13 +51,14 @@ class WidgetManager
         return $this->widgets[$name] ?? null;
     }
 
-    public function autoDiscoverWidgets(?string $directory = null, ?string $namespace = null): void
+    public function autoDiscoverWidgets(string $directory = null, string $namespace = null): void
     {
         $namespace = $namespace ?: 'App\\Http\\Livewire\\Widgets';
         $path = $directory ?: app_path('Http/Livewire/Widgets');
 
-        foreach (glob("{$path}/*.php") as $file) {
-            $class = $namespace . '\\' . pathinfo($file, PATHINFO_FILENAME);
+        foreach (glob("{$path}/**/*.php") as $file) {
+            $subNameSpace = str_replace([$directory, '/'], ['', '\\'], pathinfo($file, PATHINFO_DIRNAME)) . '\\';
+            $class = $namespace . $subNameSpace . pathinfo($file, PATHINFO_FILENAME);
 
             if (! class_exists($class) || ! in_array(UserWidget::class, class_implements($class))) {
                 continue;
