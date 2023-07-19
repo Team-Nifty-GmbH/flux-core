@@ -271,6 +271,8 @@
                 <div class="sticky top-6 space-y-6">
                     <x-card>
                         <div class="space-y-4">
+                            @section('actions-prepend')
+                            @show
                             @section('actions')
                                 @if($printLayouts)
                                     <x-button
@@ -305,6 +307,8 @@
                                         </x-dropdown>
                                     </div>
                                 @endif
+                            @show
+                            @section('actions-append')
                             @show
                         </div>
                     </x-card>
