@@ -4,6 +4,7 @@ namespace FluxErp\Console\Commands\Init;
 
 use Closure;
 use FluxErp\Facades\Action;
+use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -44,6 +45,7 @@ class InitPermissions extends Command
 
         $this->registerActionPermission();
         $this->registerRoutePermissions();
+        $this->registerWidgetPermissions();
 
         foreach ($this->currentPermissions as $id => $currentPermission) {
             Permission::query()->whereKey($id)->delete();
@@ -103,11 +105,20 @@ class InitPermissions extends Command
         $this->info('Permissions initiated!');
     }
 
-    private function registerActionPermission()
+    private function registerActionPermission(): void
     {
         $this->info('Registering action permissions');
         foreach (Action::all() as $action) {
             $permission = Permission::findOrCreate('action.' . $action['name'], 'web');
+            unset($this->currentPermissions[$permission->id]);
+        }
+    }
+
+    private function registerWidgetPermissions(): void
+    {
+        $this->info('Registering widget permissions');
+        foreach (Widget::all() as $widget) {
+            $permission = Permission::findOrCreate('widget.' . $widget['name'], 'web');
             unset($this->currentPermissions[$permission->id]);
         }
     }

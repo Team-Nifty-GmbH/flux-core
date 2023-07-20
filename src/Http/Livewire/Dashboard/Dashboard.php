@@ -23,13 +23,13 @@ class Dashboard extends Component
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.dashboard.dashboard', [
-            'availableWidgets' => Widget::all(),
+            'availableWidgets' => $this->filterWidgets(Widget::all()),
         ]);
     }
 
     public function widgets(): void
     {
-        $this->widgets = auth()->user()->widgets->toArray();
+        $this->widgets = $this->filterWidgets(auth()->user()->widgets->toArray());
     }
 
     public function saveWidgets(array $itemIds): void
@@ -63,5 +63,13 @@ class Dashboard extends Component
         $widgetModel->save();
 
         $this->widgets();
+    }
+
+    private function filterWidgets(array $widgets): array
+    {
+        return array_filter(
+            $widgets,
+            fn($widget) => auth()->user()->can('widget.' . $widget['name'])
+        );
     }
 }
