@@ -2,9 +2,12 @@
 
 namespace FluxErp\Actions;
 
+use FilesystemIterator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class ActionManager
 {
@@ -53,17 +56,32 @@ class ActionManager
         $namespace = $namespace ?: 'App\\Actions';
         $path = $directory ?: app_path('Actions');
 
-        foreach (glob("{$path}/**/*.php") as $file) {
-            $subNameSpace = str_replace([$directory, '/'], ['', '\\'], pathinfo($file, PATHINFO_DIRNAME)) . '\\';
-            $class = $namespace . $subNameSpace . pathinfo($file, PATHINFO_FILENAME);
+        if (!is_dir($path)) {
+            return;
+        }
 
-            if (! class_exists($class) || ! in_array(BaseAction::class, class_parents($class))) {
-                continue;
-            }
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
 
-            try {
-                $this->register($class::name(), $class);
-            } catch (\Exception) {
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
+                $subNameSpace = !empty($relativePath)
+                    ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
+                    : '';
+                $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
+
+                if (!class_exists($class) || !in_array(BaseAction::class, class_parents($class))) {
+                    continue;
+                }
+
+                try {
+                    $this->register($class::name(), $class);
+                } catch (\Exception) {
+                    // Ignore exceptions during auto-discovery
+                }
             }
         }
     }
