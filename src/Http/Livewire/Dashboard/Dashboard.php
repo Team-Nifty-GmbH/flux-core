@@ -69,7 +69,7 @@ class Dashboard extends Component
     {
         return array_filter(
             $widgets,
-            fn($widget) => auth()->user()->can('widget.' . $widget['name'])
+            fn($widget) => auth()->user()->hasPermissionTo('widget.' . $widget['name'])
         );
     }
 }

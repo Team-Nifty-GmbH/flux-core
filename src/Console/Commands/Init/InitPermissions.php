@@ -38,7 +38,7 @@ class InitPermissions extends Command
      *
      * @throws \ReflectionException
      */
-    public function handle(): int
+    public function handle(): void
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
         $this->currentPermissions = array_flip(Permission::all('id')->pluck('id')->toArray());
@@ -50,8 +50,6 @@ class InitPermissions extends Command
         foreach ($this->currentPermissions as $id => $currentPermission) {
             Permission::query()->whereKey($id)->delete();
         }
-
-        return 0;
     }
 
     private function registerRoutePermissions(): void

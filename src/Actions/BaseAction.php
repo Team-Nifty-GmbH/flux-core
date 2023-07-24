@@ -24,7 +24,7 @@ abstract class BaseAction
         $this->data = $data[0] ?? [];
     }
 
-    public function checkPermission(): static
+    public function hasPermissionTo(): static
     {
         if (! auth()->user()->can('action.' . static::name())) {
             throw UnauthorizedException::forPermissions(['action.' . static::name()]);

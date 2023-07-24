@@ -11,7 +11,6 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
-use FluxErp\Models\Ticket;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
