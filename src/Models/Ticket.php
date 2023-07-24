@@ -28,9 +28,9 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Ticket extends Model implements HasMedia, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasCustomEvents, HasPackageFactory, HasFrontendAttributes,
-        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
-        SoftDeletes;
+    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasPackageFactory,
+        HasFrontendAttributes, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
+        InteractsWithMedia, Searchable, SoftDeletes;
 
     protected $hidden = [
         'uuid',
