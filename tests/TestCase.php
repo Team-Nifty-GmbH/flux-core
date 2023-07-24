@@ -9,6 +9,7 @@ use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use Hammerstone\FastPaginate\FastPaginateProvider;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Artisan;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;
@@ -27,6 +28,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUp(): void
     {
+        Artisan::call('migrate --force');
         if (file_exists(__DIR__ . '/../../../.env')) {
             $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
             $dotenv->load();
