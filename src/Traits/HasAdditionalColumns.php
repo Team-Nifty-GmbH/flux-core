@@ -8,7 +8,6 @@ use FluxErp\Casts\MetaAttribute;
 use FluxErp\Exceptions\MetaException;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Meta;
-use FluxErp\Models\Ticket;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -335,7 +334,7 @@ trait HasAdditionalColumns
     /**
      * Get or set the allowed meta keys for the model.
      */
-    public function metaKeys(?array $metaKeys = null): array
+    public function metaKeys(array $metaKeys = null): array
     {
         if (! $metaKeys) {
             return $this->getMetaKeysProperty();
@@ -560,7 +559,7 @@ trait HasAdditionalColumns
     /**
      * Determine if meta is dirty.
      */
-    public function isMetaDirty(?string $key = null): bool
+    public function isMetaDirty(string $key = null): bool
     {
         return (bool) with(
             $this->getMetaChanges(),
@@ -676,7 +675,7 @@ trait HasAdditionalColumns
      *
      * @param  ?string  $key
      */
-    public function resetMetaChanges(?string $key = null): Collection
+    public function resetMetaChanges(string $key = null): Collection
     {
         if ($key && $this->metaChanges) {
             $this->metaChanges->forget($key);
@@ -807,7 +806,7 @@ trait HasAdditionalColumns
      *
      * @throws MetaException
      */
-    public function saveMeta(string|array|null $key = null, mixed $value = null): bool
+    public function saveMeta(string|array $key = null, mixed $value = null): bool
     {
         /**
          * If we have exactly two arguments set and save the value for the given key.
