@@ -260,8 +260,6 @@
                         </div>
                     </x-card>
                     @show
-                    @section('content.left')
-                    @show
                 </div>
             </section>
             <section class="basis-8/12 pt-6 lg:pt-0">
@@ -271,8 +269,6 @@
                 <div class="sticky top-6 space-y-6">
                     <x-card>
                         <div class="space-y-4">
-                            @section('actions-prepend')
-                            @show
                             @section('actions')
                                 @if($printLayouts)
                                     <x-button
@@ -307,8 +303,6 @@
                                         </x-dropdown>
                                     </div>
                                 @endif
-                            @show
-                            @section('actions-append')
                             @show
                         </div>
                     </x-card>
