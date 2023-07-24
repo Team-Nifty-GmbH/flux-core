@@ -6,6 +6,7 @@ use FluxErp\Facades\Widget;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -29,7 +30,14 @@ class Dashboard extends Component
 
     public function widgets(): void
     {
-        $this->widgets = auth()->user()->widgets->toArray();
+        $this->widgets = auth()
+            ->user()
+            ->widgets()
+            ->get()
+            ->filter(function ($widget) {
+                return array_key_exists($widget->component_name, Widget::all());
+            })
+            ->toArray();
     }
 
     public function saveWidgets(array $itemIds): void
@@ -37,15 +45,17 @@ class Dashboard extends Component
         $existingItemIds = array_filter($itemIds, 'is_numeric');
         auth()->user()->widgets()->whereNotIn('id', $existingItemIds)->delete();
         \FluxErp\Models\Widget::setNewOrder($existingItemIds);
+        $newItemIds = array_filter(array_map(function ($id) use ($itemIds) {
+            $componentName = substr($id, 4);
 
-        $newItemIds = array_filter(array_map(function ($id) {
             return str_starts_with($id, 'new-')
                 ? [
-                    'name' => 'TestWidget',
-                    'component_name' => substr($id, 4),
+                    'name' => Str::headline($componentName),
+                    'component_name' => $componentName,
                 ]
                 : null;
         }, $itemIds));
+
 
         if ($newItemIds) {
             auth()->user()->widgets()->createMany(array_filter($newItemIds));
