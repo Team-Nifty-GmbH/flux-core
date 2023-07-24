@@ -19,6 +19,7 @@ use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
+use WireUi\Providers\WireUiServiceProvider;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -45,6 +46,7 @@ abstract class TestCase extends BaseTestCase
             PermissionServiceProvider::class,
             ScoutServiceProvider::class,
             HeroiconsServiceProvider::class,
+            WireUiServiceProvider::class,
             MediaLibraryServiceProvider::class,
             CalendarServiceProvider::class,
             FastPaginateProvider::class,
