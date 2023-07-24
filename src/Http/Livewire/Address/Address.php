@@ -204,7 +204,13 @@ class Address extends Component
             return null;
         }
 
-        DeleteAddress::make($this->address)->validate()->execute();
+        try {
+            DeleteAddress::make($this->address)->validate()->execute();
+        } catch (ValidationException $e) {
+            validation_errors_to_notifications($e, $this);
+
+            return null;
+        }
 
         $this->notification()->success(__('Address deleted'));
         $this->edit = false;

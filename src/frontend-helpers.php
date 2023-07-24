@@ -19,3 +19,23 @@ if (! function_exists('format_number')) {
         );
     }
 }
+
+if (! function_exists('validation_errors_to_notifications')) {
+    function validation_errors_to_notifications(
+        \Illuminate\Validation\ValidationException $errors,
+        \Livewire\Component $component
+    ): void
+    {
+        if (! method_exists($component, 'notification')) {
+            throw new InvalidArgumentException('Component does not have a notification method.');
+        }
+
+        foreach ($errors->errors() as $field => $messages) {
+            foreach ($messages as $message) {
+                $component->notification()->error($field, $message);
+            }
+        }
+
+        $component->skipRender();
+    }
+}

@@ -3,6 +3,7 @@
 namespace FluxErp\Http\Livewire\Dashboard;
 
 use FluxErp\Facades\Widget;
+use FluxErp\Models\Permission;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -71,9 +72,8 @@ class Dashboard extends Component
     {
         return array_filter(
             $widgets,
-            fn($widget) => auth()->user()->hasPermissionTo('widget.' . $widget['name']
-                && array_key_exists($widget['component_name'], Widget::all())
-            )
+            fn (array $widget) => auth()->user()->can('widget.' . strtolower($widget['name']))
+                && array_key_exists($widget['name'], Widget::all())
         );
     }
 }

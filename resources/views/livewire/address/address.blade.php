@@ -5,22 +5,22 @@
         tab: $wire.entangle('tab'),
         deleteAddressDialog() {
             window.$wireui.confirmDialog({
-                                        title: '{{ __('Delete address') }}',
-                                        description: '{{ __('Do you really want to delete this address?') }}',
-                                        icon: 'error',
-                                        accept: {
-                                            label: '{{ __('Delete') }}',
-                                            execute: () => {
-                                                $wire.delete().then((address) => {
-                                                    edit = false;
-                                                    $dispatch('address-deleted', address)
-                                                });
-                                            },
-                                        },
-                                        reject: {
-                                            label: '{{ __('Cancel') }}',
-                                        }
-                                    }, '{{ $this->id }}')
+                title: '{{ __('Delete address') }}',
+                description: '{{ __('Do you really want to delete this address?') }}',
+                icon: 'error',
+                accept: {
+                    label: '{{ __('Delete') }}',
+                    execute: () => {
+                        $wire.delete().then((address) => {
+                            edit = false;
+                            $dispatch('address-deleted', address)
+                        });
+                    },
+                },
+                reject: {
+                    label: '{{ __('Cancel') }}',
+                }
+            }, '{{ $this->id }}')
         }
     }"
     x-on:address-selected.window="edit = false; $wire.getAddress($event.detail.id, tab !== 'comments')"
