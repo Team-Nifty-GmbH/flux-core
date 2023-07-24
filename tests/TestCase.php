@@ -16,6 +16,7 @@ use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
+use Spatie\Tags\TagsServiceProvider;
 use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
@@ -44,6 +45,7 @@ abstract class TestCase extends BaseTestCase
         return [
             LivewireServiceProvider::class,
             PermissionServiceProvider::class,
+            TagsServiceProvider::class,
             ScoutServiceProvider::class,
             HeroiconsServiceProvider::class,
             WireUiServiceProvider::class,
