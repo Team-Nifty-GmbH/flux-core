@@ -8,7 +8,6 @@ use FluxErp\Traits\Lockable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class LockModel extends BaseAction
 {
@@ -27,18 +26,7 @@ class LockModel extends BaseAction
 
     public static function models(): array
     {
-        return array_values(
-            ModelInfo::forAllModels()
-                ->merge(
-                    ModelInfo::forAllModels(
-                        flux_path('src/Models'),
-                        flux_path('src'), 'FluxErp'
-                    )
-                )
-                ->filter(fn ($model) => in_array(Lockable::class, $model->traits->toArray()))
-                ->map(fn ($model) => $model->class)
-                ->toArray()
-        );
+        return [];
     }
 
     public function execute(): bool
