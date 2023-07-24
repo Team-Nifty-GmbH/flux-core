@@ -63,8 +63,8 @@ jobs:
           coverage: xdebug
 
       - name: Cache composer dependencies
-        id: composer-cache
-        run: echo "$(composer config cache-files-dir)" >> $GITHUB_ENV
+        run: |
+          echo "COMPOSER_CACHE_DIR=$(composer config cache-files-dir)" >> $GITHUB_ENV
 
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
