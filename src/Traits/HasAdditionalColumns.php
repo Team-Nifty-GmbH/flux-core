@@ -432,11 +432,8 @@ trait HasAdditionalColumns
     public function hasColumn($column): bool
     {
         $class = get_class($this);
-        if($this instanceof Ticket && $column === 'uuid') {
-            dd(static::$metaSchemaColumnsCache);
-        }
 
-        if (! isset(static::$metaSchemaColumnsCache[$class])) {
+        if (! (static::$metaSchemaColumnsCache[$class] ?? false)) {
             static::$metaSchemaColumnsCache[$class] = collect(
                 $this->getConnection()
                     ->getSchemaBuilder()
