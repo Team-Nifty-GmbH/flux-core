@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits;
 
+use FluxErp\Models\Ticket;
 use Ramsey\Uuid\Uuid;
 
 trait HasUuid
@@ -11,6 +12,9 @@ trait HasUuid
         static::creating(function ($model) {
             if (! $model->uuid) {
                 $model->uuid = Uuid::uuid4()->toString();
+                if ($model instanceof Ticket) {
+                    dd($model);
+                }
             }
         });
 
