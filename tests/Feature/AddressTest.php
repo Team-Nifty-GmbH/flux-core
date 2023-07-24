@@ -11,6 +11,7 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Ticket;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -78,6 +79,11 @@ class AddressTest extends BaseSetup
             'language_id' => $this->languages[1]->id,
             'country_id' => $this->countries[2]->id,
             'is_main_address' => true,
+        ]);
+
+        $this->tickets = Ticket::factory()->count(5)->create([
+            'authenticatable_type' => Address::class,
+            'authenticatable_id' => $this->addresses[0]->id,
         ]);
 
         $this->permissions = [
