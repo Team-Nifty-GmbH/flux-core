@@ -4,7 +4,6 @@ namespace FluxErp\Console\Commands\Init;
 
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
-use FluxErp\Services\UserService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
@@ -68,8 +67,43 @@ class InitUsers extends Command
             $admin->assignRole('Super Admin');
         }
 
-        $userController = new UserService();
-        $userController->initializeUsers();
+        $path = resource_path() . '/init-files/users.json';
+        if (! file_exists($path)) {
+            $this->info('Users initiated!');
+
+            return;
+        }
+
+        $json = json_decode(file_get_contents($path));
+
+        if ($json->model === 'User') {
+            $jsonUsers = $json->data;
+
+            if ($jsonUsers) {
+                foreach ($jsonUsers as $jsonUser) {
+                    // Gather necessary foreign keys.
+                    $languageId = Language::query()
+                        ->where('language_code', $jsonUser->language_code)
+                        ->first()
+                        ?->id;
+
+                    // Save to database, if all foreign keys are found.
+                    if ($languageId && $jsonUser->user_code !== 'admin') {
+                        User::query()
+                            ->updateOrCreate([
+                                'user_code' => $jsonUser->user_code,
+                            ], [
+                                'language_id' => $languageId,
+                                'email' => $jsonUser->email,
+                                'firstname' => $jsonUser->firstname,
+                                'lastname' => $jsonUser->lastname,
+                                'password' => $jsonUser->password,
+                                'is_active' => $jsonUser->is_active,
+                            ]);
+                    }
+                }
+            }
+        }
 
         $this->info('Users initiated!');
     }

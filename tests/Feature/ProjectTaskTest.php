@@ -10,7 +10,6 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
-use FluxErp\Models\ProjectCategoryTemplate;
 use FluxErp\Models\ProjectTask;
 use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -27,7 +26,7 @@ class ProjectTaskTest extends BaseSetup
 
     private Model $project;
 
-    private Collection $projectCategory;
+    private Collection $projectCategories;
 
     private Collection $projectTask;
 
@@ -38,10 +37,15 @@ class ProjectTaskTest extends BaseSetup
     protected function setUp(): void
     {
         parent::setUp();
-        $this->projectCategory = Category::factory()->count(3)->create(['model_type' => ProjectTask::class]);
-        $projectCategoryTemplate = ProjectCategoryTemplate::factory()->create();
-        $projectCategoryTemplate->categories()->attach([$this->projectCategory[0]->id, $this->projectCategory[2]->id]);
-        $this->project = Project::factory()->create(['project_category_template_id' => $projectCategoryTemplate->id]);
+        $category = Category::factory()->create(['model_type' => Project::class]);
+        $this->project = Project::factory()->create(['category_id' => $category->id]);
+        $this->projectCategories = Category::factory()
+            ->count(3)
+            ->create([
+                'model_type' => ProjectTask::class,
+                'parent_id' => $category->id,
+            ]);
+
         $contact = Contact::factory()->create(['client_id' => $this->dbClient->id]);
         $this->address = Address::factory()->create(['contact_id' => $contact->id, 'client_id' => $contact->client_id]);
         $this->projectTask = ProjectTask::factory()->count(3)->create([
@@ -50,7 +54,7 @@ class ProjectTaskTest extends BaseSetup
             'user_id' => $this->user->id,
         ]);
 
-        $this->project->categories()->attach($this->projectCategory->pluck('id')->toArray());
+        $this->project->categories()->attach($this->projectCategories->pluck('id')->toArray());
 
         $this->additionalColumns = AdditionalColumn::query()
             ->where('model_type', ProjectTask::class)
@@ -134,7 +138,7 @@ class ProjectTaskTest extends BaseSetup
     {
         $projectTask = [
             'project_id' => $this->project->id,
-            'category_id' => $this->projectCategory[0]->id,
+            'category_id' => $this->projectCategories[0]->id,
             'address_id' => $this->address->id,
             'user_id' => $this->user->id,
             'name' => 'test',
@@ -178,7 +182,7 @@ class ProjectTaskTest extends BaseSetup
 
         $projectTask = [
             'project_id' => $this->project->id,
-            'category_id' => $this->projectCategory[0]->id,
+            'category_id' => $this->projectCategories[0]->id,
             'address_id' => $this->address->id,
             'user_id' => $this->user->id,
             'name' => 'test',
@@ -230,7 +234,7 @@ class ProjectTaskTest extends BaseSetup
     {
         $projectTask = [
             'project_id' => $this->project->id,
-            'category_id' => $this->projectCategory[0]->id,
+            'category_id' => $this->projectCategories[0]->id,
             'address_id' => '1234S67',
             'user_id' => $this->user->id,
             'name' => 'test',
@@ -247,7 +251,7 @@ class ProjectTaskTest extends BaseSetup
     {
         $projectTask = [
             'project_id' => ++$this->project->id,
-            'category_id' => $this->projectCategory[0]->id,
+            'category_id' => $this->projectCategories[0]->id,
             'address_id' => $this->address->id,
             'user_id' => $this->user->id,
             'name' => 'test',
@@ -268,11 +272,11 @@ class ProjectTaskTest extends BaseSetup
 
     public function test_create_project_task_category_not_found()
     {
-        $this->project->categories()->detach($this->projectCategory[1]->id);
+        $this->project->categories()->detach($this->projectCategories[1]->id);
 
         $projectTask = [
             'project_id' => $this->project->id,
-            'category_id' => $this->projectCategory[1]->id,
+            'category_id' => $this->projectCategories[1]->id,
             'address_id' => $this->address->id,
             'user_id' => $this->user->id,
             'name' => 'test',
@@ -288,14 +292,14 @@ class ProjectTaskTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/projects/tasks', $projectTask);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_create_project_task_address_not_found()
     {
         $projectTask = [
             'project_id' => $this->project->id,
-            'category_id' => $this->projectCategory[0]->id,
+            'category_id' => $this->projectCategories[0]->id,
             'address_id' => --$this->address->id,
             'user_id' => $this->user->id,
             'name' => 'test',
@@ -318,7 +322,7 @@ class ProjectTaskTest extends BaseSetup
     {
         $projectTask = [
             'project_id' => $this->project->id,
-            'category_id' => $this->projectCategory[0]->id,
+            'category_id' => $this->projectCategories[0]->id,
             'address_id' => $this->address->id,
             'user_id' => ++$this->user->id,
             'name' => 'test',
@@ -342,7 +346,7 @@ class ProjectTaskTest extends BaseSetup
         $user = User::factory()->create(['language_id' => $this->user->language_id]);
         $projectTask = [
             'id' => $this->projectTask[0]->id,
-            'category_id' => $this->projectCategory[2]->id,
+            'category_id' => $this->projectCategories[2]->id,
             'address_id' => $this->address->id,
             'user_id' => $user->id,
             'name' => 'test',
@@ -385,7 +389,7 @@ class ProjectTaskTest extends BaseSetup
 
         $projectTask = [
             'id' => $this->projectTask[0]->id,
-            'category_id' => $this->projectCategory[2]->id,
+            'category_id' => $this->projectCategories[2]->id,
             'address_id' => $this->address->id,
             'user_id' => $user->id,
             'name' => 'test',
@@ -438,7 +442,7 @@ class ProjectTaskTest extends BaseSetup
         $projectTasks = [
             [
                 'id' => $this->projectTask[0]->id,
-                'category_id' => $this->projectCategory[2]->id,
+                'category_id' => $this->projectCategories[2]->id,
                 'address_id' => $this->address->id,
                 'user_id' => $user->id,
                 'name' => 'test',
@@ -450,7 +454,7 @@ class ProjectTaskTest extends BaseSetup
             ],
             [
                 'id' => $this->projectTask[1]->id,
-                'category_id' => $this->projectCategory[1]->id,
+                'category_id' => $this->projectCategories[1]->id,
                 'address_id' => $this->address->id,
                 'user_id' => $user->id,
                 'name' => 'test',
@@ -526,14 +530,14 @@ class ProjectTaskTest extends BaseSetup
         $projectTasks = [
             [
                 'id' => $this->projectTask[0]->id,
-                'category_id' => $this->projectCategory[2]->id,
+                'category_id' => $this->projectCategories[2]->id,
                 'address_id' => $this->address->id,
                 'user_id' => $user->id,
                 'name' => 'test',
             ],
             [
                 'id' => $this->projectTask[1]->id,
-                'category_id' => $this->projectCategory[1]->id,
+                'category_id' => $this->projectCategories[1]->id,
                 'address_id' => $this->address->id,
                 'user_id' => $user->id,
                 'name' => 'test',
@@ -589,7 +593,7 @@ class ProjectTaskTest extends BaseSetup
     {
         $projectTask = [
             'id' => $this->projectTask[0]->id,
-            'category_id' => $this->projectCategory[2]->id,
+            'category_id' => $this->projectCategories[2]->id,
             'address_id' => $this->address->id,
             'user_id' => '23A859',
             'name' => 'test',
@@ -609,7 +613,7 @@ class ProjectTaskTest extends BaseSetup
         $projectTasks = [
             [
                 'id' => $this->projectTask[0]->id,
-                'category_id' => $this->projectCategory[2]->id,
+                'category_id' => $this->projectCategories[2]->id,
                 'address_id' => $this->address->id,
                 'user_id' => $this->user->id,
                 'name' => 'test',
@@ -621,7 +625,7 @@ class ProjectTaskTest extends BaseSetup
             ],
             [
                 'id' => $this->projectTask[1]->id,
-                'category_id' => $this->projectCategory[1]->id,
+                'category_id' => $this->projectCategories[1]->id,
                 'address_id' => $this->address->id,
                 'user_id' => $this->user->id,
                 'name' => 'test',
@@ -646,14 +650,14 @@ class ProjectTaskTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTasks);
         $response->assertStatus(207);
-        $this->assertEquals(422, json_decode($response->getContent())->responses[0]->status);
+        $this->assertEquals(422, json_decode($response->getContent())->responses[1]->status);
     }
 
     public function test_update_project_task_task_not_found()
     {
         $projectTask = [
             'id' => ++$this->projectTask[2]->id,
-            'category_id' => $this->projectCategory[2]->id,
+            'category_id' => $this->projectCategories[2]->id,
             'address_id' => $this->address->id,
             'user_id' => $this->user->id,
             'name' => 'test',
@@ -674,11 +678,11 @@ class ProjectTaskTest extends BaseSetup
 
     public function test_update_project_task_category_not_found()
     {
-        $this->project->categories()->detach($this->projectCategory[1]->id);
+        $this->project->categories()->detach($this->projectCategories[1]->id);
 
         $projectTask = [
             'id' => $this->projectTask[0]->id,
-            'category_id' => $this->projectCategory[1]->id,
+            'category_id' => $this->projectCategories[1]->id,
             'address_id' => $this->address->id,
             'user_id' => $this->user->id,
             'name' => 'test',
@@ -694,14 +698,14 @@ class ProjectTaskTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTask);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_update_project_task_address_not_found()
     {
         $projectTask = [
             'id' => $this->projectTask[0]->id,
-            'category_id' => $this->projectCategory[2]->id,
+            'category_id' => $this->projectCategories[2]->id,
             'address_id' => --$this->address->id,
             'user_id' => $this->user->id,
             'name' => 'test',
@@ -724,7 +728,7 @@ class ProjectTaskTest extends BaseSetup
     {
         $projectTask = [
             'id' => $this->projectTask[0]->id,
-            'category_id' => $this->projectCategory[2]->id,
+            'category_id' => $this->projectCategories[2]->id,
             'address_id' => $this->address->id,
             'user_id' => ++$this->user->id,
             'name' => 'test',
@@ -750,7 +754,7 @@ class ProjectTaskTest extends BaseSetup
         $projectTask = [
             'id' => $this->projectTask[2]->id,
             'project_id' => $this->project->id,
-            'category_id' => $this->projectCategory[2]->id,
+            'category_id' => $this->projectCategories[2]->id,
             'address_id' => $this->address->id,
             'user_id' => $user->id,
             'name' => 'test',

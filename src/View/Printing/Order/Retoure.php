@@ -5,7 +5,6 @@ namespace FluxErp\View\Printing\Order;
 use FluxErp\Models\Order;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\View\Component;
 
 class Retoure extends OrderView
 {

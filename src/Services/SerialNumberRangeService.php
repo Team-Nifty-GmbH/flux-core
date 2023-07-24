@@ -2,24 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\SerialNumberRange\CreateSerialNumberRange;
+use FluxErp\Actions\SerialNumberRange\DeleteSerialNumberRange;
+use FluxErp\Actions\SerialNumberRange\UpdateSerialNumberRange;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateSerialNumberRangeRequest;
-use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
+use Illuminate\Validation\ValidationException;
 
 class SerialNumberRangeService
 {
     public function create(array $data): SerialNumberRange
     {
-        $data['current_number'] = array_key_exists('start_number', $data) ?
-            --$data['start_number'] : 0;
-        unset($data['start_number']);
-
-        $serialNumberRange = new SerialNumberRange($data);
-        $serialNumberRange->save();
-
-        return $serialNumberRange;
+        return CreateSerialNumberRange::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -28,25 +22,25 @@ class SerialNumberRangeService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateSerialNumberRangeRequest(),
-            service: $this
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $serialNumberRange = UpdateSerialNumberRange::make($item)->validate()->execute(),
+                    additions: ['id' => $serialNumberRange->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: array_key_exists('serial_numbers', $e->errors()) ? 423 : 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $serialNumberRange = SerialNumberRange::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $serialNumberRange->fill($item);
-            $serialNumberRange->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $serialNumberRange->withoutRelations()->fresh(),
-                additions: ['id' => $serialNumberRange->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -54,44 +48,25 @@ class SerialNumberRangeService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'serial number ranges updated',
+            statusMessage: $statusCode === 422 ? null : 'serial number range(s) updated',
             bulk: true
         );
     }
 
     public function delete(string $id): array
     {
-        $serialNumberRange = SerialNumberRange::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $serialNumberRange) {
+        try {
+            DeleteSerialNumberRange::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['id' => 'serial number range not found']
+                data: $e->errors()
             );
         }
-
-        $serialNumberRange->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
             statusMessage: 'serial number range deleted'
         );
-    }
-
-    public function validateItem(array $item, array $response): ?array
-    {
-        if (array_key_exists('prefix', $item) || array_key_exists('affix', $item)) {
-            if (SerialNumber::query()->where('serial_number_range_id', $item['id'])->exists()) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 423,
-                    data: ['serial_numbers' => 'serial number range has serial numbers'],
-                    additions: $response
-                );
-            }
-        }
-
-        return null;
     }
 }

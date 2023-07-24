@@ -9,7 +9,6 @@ use FluxErp\Models\Category;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
-use FluxErp\Models\ProjectCategoryTemplate;
 use FluxErp\Models\ProjectTask;
 use FluxErp\Services\CategoryService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -505,7 +504,7 @@ class CategoryTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/categories', $category);
-        $response->assertStatus(409);
+        $response->assertStatus(422);
         $this->assertTrue(
             property_exists(json_decode($response->getContent())->errors, 'parent_id')
         );
@@ -542,9 +541,8 @@ class CategoryTest extends BaseSetup
 
     public function test_delete_category_category_belongs_to_project()
     {
-        $projectCategoryTemplate = ProjectCategoryTemplate::factory()->create();
-        $projectCategoryTemplate->categories()->attach($this->categories[1]->id);
-        $project = Project::factory()->create(['project_category_template_id' => $projectCategoryTemplate->id]);
+        $category = Category::factory()->create(['model_type' => ProjectTask::class]);
+        $project = Project::factory()->create(['category_id' => $category->id]);
         $contact = Contact::factory()->create([
             'client_id' => $this->dbClient->id,
         ]);

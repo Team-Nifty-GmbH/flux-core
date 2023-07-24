@@ -55,6 +55,10 @@ return [
         'list' => 'Produktliste',
         'serial-numbers' => 'Seriennummern',
     ],
+    'projects' => [
+        'label' => 'Projekte',
+        'icon' => 'briefcase',
+    ],
     'calendar' => [
         'label' => 'Kalender',
         'icon' => 'calendar',

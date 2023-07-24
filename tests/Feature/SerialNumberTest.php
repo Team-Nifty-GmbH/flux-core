@@ -293,7 +293,7 @@ class SerialNumberTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/serial-numbers', $serialNumber);
-        $response->assertStatus(423);
+        $response->assertStatus(422);
     }
 
     public function test_update_serial_number_serial_number_has_order_position_id()
@@ -312,7 +312,7 @@ class SerialNumberTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/serial-numbers', $serialNumber);
-        $response->assertStatus(423);
+        $response->assertStatus(422);
     }
 
     public function test_delete_serial_number()

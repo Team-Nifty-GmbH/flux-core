@@ -13,6 +13,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Livewire\Component;
+use Livewire\Redirector;
 use WireUi\Traits\Actions;
 
 class Service extends Component
@@ -63,7 +64,7 @@ class Service extends Component
             ->layout('flux::components.layouts.portal');
     }
 
-    public function save(): RedirectResponse
+    public function save(): Redirector|RedirectResponse
     {
         $this->resetErrorBag();
         $this->validate();

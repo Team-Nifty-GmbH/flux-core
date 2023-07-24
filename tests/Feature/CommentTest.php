@@ -85,7 +85,7 @@ class CommentTest extends BaseSetup
     {
         $comment = [
             'model_id' => $this->user->id,
-            'model_type' => class_basename(User::class),
+            'model_type' => User::class,
             'comment' => 'test comment',
         ];
 
@@ -133,7 +133,7 @@ class CommentTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_create_comment_not_commentable()
@@ -148,7 +148,7 @@ class CommentTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-        $response->assertStatus(405);
+        $response->assertStatus(422);
     }
 
     public function test_create_comment_model_instance_not_found()
@@ -163,14 +163,14 @@ class CommentTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_create_comment_with_parent()
     {
         $comment = [
             'model_id' => $this->user->id,
-            'model_type' => class_basename(User::class),
+            'model_type' => User::class,
             'parent_id' => $this->comment->id,
             'comment' => 'child comment',
         ];

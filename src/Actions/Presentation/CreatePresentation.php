@@ -1,0 +1,40 @@
+<?php
+
+namespace FluxErp\Actions\Presentation;
+
+use FluxErp\Actions\BaseAction;
+use FluxErp\Http\Requests\CreatePresentationRequest;
+use FluxErp\Models\Presentation;
+use Illuminate\Support\Facades\Validator;
+
+class CreatePresentation extends BaseAction
+{
+    public function __construct(array $data)
+    {
+        parent::__construct($data);
+        $this->rules = (new CreatePresentationRequest())->rules();
+    }
+
+    public static function models(): array
+    {
+        return [Presentation::class];
+    }
+
+    public function execute(): Presentation
+    {
+        $presentation = new Presentation($this->data);
+        $presentation->save();
+
+        return $presentation;
+    }
+
+    public function validate(): static
+    {
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(new Presentation());
+
+        $this->data = $validator->validate();
+
+        return $this;
+    }
+}

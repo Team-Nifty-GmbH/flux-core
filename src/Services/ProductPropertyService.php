@@ -2,19 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\ProductProperty\CreateProductProperty;
+use FluxErp\Actions\ProductProperty\DeleteProductProperty;
+use FluxErp\Actions\ProductProperty\UpdateProductProperty;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateProductPropertyRequest;
 use FluxErp\Models\ProductProperty;
+use Illuminate\Validation\ValidationException;
 
 class ProductPropertyService
 {
     public function create(array $data): ProductProperty
     {
-        $productProperty = new ProductProperty($data);
-        $productProperty->save();
-
-        return $productProperty;
+        return CreateProductProperty::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -23,25 +22,25 @@ class ProductPropertyService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateProductPropertyRequest(),
-            model: new ProductProperty()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $productProperty = UpdateProductProperty::make($item)->validate()->execute(),
+                    additions: ['id' => $productProperty->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $productProperty = ProductProperty::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $productProperty->fill($item);
-            $productProperty->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $productProperty->withoutRelations()->fresh(),
-                additions: ['id' => $productProperty->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -56,25 +55,14 @@ class ProductPropertyService
 
     public function delete(string $id): array
     {
-        $productProperty = ProductProperty::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $productProperty) {
+        try {
+            DeleteProductProperty::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'product property not found']
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        if ($productProperty->products()->count() > 0) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['products' => 'product property has products']
-            );
-        }
-
-        $productProperty->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

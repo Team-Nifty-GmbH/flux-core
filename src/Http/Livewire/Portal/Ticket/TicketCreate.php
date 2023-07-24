@@ -57,7 +57,7 @@ class TicketCreate extends Component
                     function (Builder $query) use ($modelType) {
                         $query->where('model_type', $modelType)
                             ->orWhereNull('model_type');
-                }),
+                    }),
                 fn (Builder $query) => $query->whereNull('model_type')
             )
             ->get()

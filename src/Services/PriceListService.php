@@ -2,20 +2,18 @@
 
 namespace FluxErp\Services;
 
-use FluxErp\Helpers\Helper;
+use FluxErp\Actions\PriceList\CreatePriceList;
+use FluxErp\Actions\PriceList\DeletePriceList;
+use FluxErp\Actions\PriceList\UpdatePriceList;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdatePriceListRequest;
 use FluxErp\Models\PriceList;
+use Illuminate\Validation\ValidationException;
 
 class PriceListService
 {
     public function create(array $data): PriceList
     {
-        $priceList = new PriceList($data);
-        $priceList->save();
-
-        return $priceList;
+        return CreatePriceList::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -24,25 +22,25 @@ class PriceListService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdatePriceListRequest(),
-            service: $this
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $priceList = UpdatePriceList::make($item)->validate()->execute(),
+                    additions: ['id' => $priceList->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $priceList = PriceList::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $priceList->fill($item);
-            $priceList->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $priceList->withoutRelations(),
-                additions: ['id' => $priceList->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -57,51 +55,18 @@ class PriceListService
 
     public function delete(string $id): array
     {
-        $priceList = PriceList::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $priceList) {
+        try {
+            DeletePriceList::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'price-list not found']
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        if ($priceList->prices()->exists()) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['id' => 'price-list has associated prices']
-            );
-        }
-
-        $priceList->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
             statusMessage: 'price-list deleted'
         );
-    }
-
-    public function validateItem(array $item, array $response): ?array
-    {
-        if ($item['id'] ?? false) {
-            $priceList = PriceList::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            // Check if new parent causes a cycle
-            if ($item['parent_id'] ?? false) {
-                if (Helper::checkCycle(PriceList::class, $priceList, $item['parent_id'])) {
-                    return ResponseHelper::createArrayResponse(
-                        statusCode: 409,
-                        data: ['parent_id' => 'cycle detected'],
-                        additions: $response
-                    );
-                }
-            }
-        }
-
-        return null;
     }
 }

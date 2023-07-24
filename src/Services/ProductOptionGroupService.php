@@ -2,19 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\ProductOptionGroup\CreateProductOptionGroup;
+use FluxErp\Actions\ProductOptionGroup\DeleteProductOptionGroup;
+use FluxErp\Actions\ProductOptionGroup\UpdateProductOptionGroup;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateProductOptionGroupRequest;
 use FluxErp\Models\ProductOptionGroup;
+use Illuminate\Validation\ValidationException;
 
 class ProductOptionGroupService
 {
     public function create(array $data): ProductOptionGroup
     {
-        $productOptionGroup = new ProductOptionGroup($data);
-        $productOptionGroup->save();
-
-        return $productOptionGroup;
+        return CreateProductOptionGroup::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -23,25 +22,25 @@ class ProductOptionGroupService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateProductOptionGroupRequest(),
-            model: new ProductOptionGroup()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $productOptionGroup = UpdateProductOptionGroup::make($item)->validate()->execute(),
+                    additions: ['id' => $productOptionGroup->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $productOptionGroup = ProductOptionGroup::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $productOptionGroup->fill($item);
-            $productOptionGroup->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $productOptionGroup->withoutRelations()->fresh(),
-                additions: ['id' => $productOptionGroup->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -49,32 +48,21 @@ class ProductOptionGroupService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'product option groups updated',
+            statusMessage: $statusCode === 422 ? null : 'product option group(s) updated',
             bulk: true
         );
     }
 
     public function delete(string $id): array
     {
-        $productOptionGroup = ProductOptionGroup::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $productOptionGroup) {
+        try {
+            DeleteProductOptionGroup::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'product option group not found']
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        if ($productOptionGroup->productOptions()->count() > 0) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['product_options' => 'product option group has product options']
-            );
-        }
-
-        $productOptionGroup->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

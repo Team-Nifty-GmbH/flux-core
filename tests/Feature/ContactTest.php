@@ -345,7 +345,7 @@ class ContactTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/contacts', $contact);
-        $response->assertStatus(409);
+        $response->assertStatus(422);
 
         $responseContact = json_decode($response->getContent());
         $this->assertEquals($contact['id'], $responseContact->id);
@@ -378,13 +378,13 @@ class ContactTest extends BaseSetup
 
         $responses = json_decode($response->getContent())->responses;
         $this->assertEquals($contacts[0]['id'], $responses[0]->id);
-        $this->assertEquals(409, $responses[0]->status);
+        $this->assertEquals(422, $responses[0]->status);
         $this->assertTrue(property_exists($responses[0]->errors, 'payment_type_id'));
         $this->assertEquals($contacts[1]['id'], $responses[1]->id);
-        $this->assertEquals(409, $responses[1]->status);
+        $this->assertEquals(422, $responses[1]->status);
         $this->assertTrue(property_exists($responses[1]->errors, 'payment_type_id'));
         $this->assertEquals($contacts[2]['id'], $responses[2]->id);
-        $this->assertEquals(409, $responses[2]->status);
+        $this->assertEquals(422, $responses[2]->status);
         $this->assertTrue(property_exists($responses[2]->errors, 'payment_type_id'));
     }
 

@@ -154,11 +154,12 @@ class Init extends Command
             $this->setEnvVariable($content, 'APP_ENV', 'production');
             $this->writeFile($envFilePath, $content);
 
-            return false;
             // Settings tables.
-//            $this->call('init:payment-types');
-//            $this->call('init:document-types');
-//            $this->call('init:order-types');
+            //$this->call('init:payment-types');
+            //$this->call('init:document-types');
+            //$this->call('init:order-types');
+
+            return false;
         }
     }
 

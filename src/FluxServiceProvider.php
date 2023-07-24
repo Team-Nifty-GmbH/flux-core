@@ -2,6 +2,7 @@
 
 namespace FluxErp;
 
+use FluxErp\Actions\ActionManager;
 use FluxErp\DataType\ArrayHandler;
 use FluxErp\DataType\BooleanHandler;
 use FluxErp\DataType\DateTimeHandler;
@@ -13,6 +14,7 @@ use FluxErp\DataType\ObjectHandler;
 use FluxErp\DataType\Registry;
 use FluxErp\DataType\SerializableHandler;
 use FluxErp\DataType\StringHandler;
+use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\MediaLibraryDownloader;
@@ -29,7 +31,6 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\Token;
 use FluxErp\Models\User;
-use FluxErp\Models\Warehouse;
 use FluxErp\Widgets\WidgetManager;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -100,9 +101,9 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->app->alias(Registry::class, 'datatype.registry');
 
-        $this->app->singleton('flux.widget_manager', function ($app) {
-            return new WidgetManager();
-        });
+        $this->app->singleton('flux.widget_manager', fn ($app) => new WidgetManager());
+
+        $this->app->singleton('flux.action_manager', fn ($app) => new ActionManager());
     }
 
     /**
@@ -127,6 +128,9 @@ class FluxServiceProvider extends ServiceProvider
 
         Widget::autoDiscoverWidgets(flux_path('src/Http/Livewire/Widgets'), 'FluxErp\Http\Livewire\Widgets');
         Widget::autoDiscoverWidgets();
+
+        Action::autoDiscover(flux_path('src/Actions'), 'FluxErp\Actions');
+        Action::autoDiscover();
     }
 
     protected function registerMarcos(): void
@@ -190,7 +194,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/logging.php', 'logging');
         $this->mergeConfigFrom(__DIR__ . '/../config/print.php', 'print');
         $loggingConfig = config('logging.channels');
-        config(['filesystems.links.' . public_path('flux') => __DIR__ . '/../public']);
         $loggingConfig['database'] = [
             'driver' => 'custom',
             'handler' => DatabaseLoggingHandler::class,
@@ -234,6 +237,13 @@ class FluxServiceProvider extends ServiceProvider
             ],
         ]);
         config(['wireui.heroicons.alias' => 'heroicons']);
+        config(['wireui.modal' => [
+            'zIndex' => env('WIREUI_MODAL_Z_INDEX', 'z-20'),
+            'maxWidth' => env('WIREUI_MODAL_MAX_WIDTH', '2xl'),
+            'spacing' => env('WIREUI_MODAL_SPACING', 'p-4'),
+            'align' => env('WIREUI_MODAL_ALIGN', 'start'),
+            'blur' => env('WIREUI_MODAL_BLUR', false),
+        ]]);
         config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
         config([
             'scout.meilisearch.index-settings' => [
@@ -273,7 +283,13 @@ class FluxServiceProvider extends ServiceProvider
                     ],
                     'sortableAttributes' => ['*'],
                 ],
-                Product::class => [],
+                Product::class => [
+                    'filterableAttributes' => [
+                        'is_active',
+                        'parent_id',
+                    ],
+                    'sortableAttributes' => ['*'],
+                ],
                 ProjectTask::class => [
                     'filterableAttributes' => [
                         'project_id',
@@ -286,15 +302,19 @@ class FluxServiceProvider extends ServiceProvider
                         'is_active',
                     ],
                 ],
-                Warehouse::class => [],
             ],
         ]);
-        config(['tinker.alias' => ['FluxErp\\Models\\', 'FluxErp\\Services\\']]);
+
+        if (app()->runningInConsole()) {
+            config(['tinker.alias' => ['FluxErp\\Models\\', 'FluxErp\\Services\\']]);
+        }
     }
 
     protected function registerBladeComponents(): void
     {
-        $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/../resources/views/components'));
+        $directoryIterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(__DIR__ . '/../resources/views/components')
+        );
         $phpFiles = new RegexIterator($directoryIterator, '/\.blade\.php$/');
 
         foreach ($phpFiles as $phpFile) {
@@ -312,12 +332,19 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerLivewireComponents(): void
     {
         $livewireNamespace = 'FluxErp\\Http\\Livewire\\';
+        $manifest = app(\Livewire\LivewireComponentsFinder::class)->getManifest();
+
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
+            // if an alias is already registered, skip it
+            if ($manifest[$alias] ?? false) {
+                continue;
+            }
+
             Livewire::component($alias, $class);
         }
     }
 
-    private function getViewClassAliasFromNamespace(string $namespace, string|null $directoryPath = null): array
+    private function getViewClassAliasFromNamespace(string $namespace, string $directoryPath = null): array
     {
         $directoryPath = $directoryPath ?: Str::replace(['\\', 'FluxErp'], ['/', __DIR__], $namespace);
         $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath));
@@ -327,7 +354,11 @@ class FluxServiceProvider extends ServiceProvider
         foreach ($phpFiles as $phpFile) {
             $relativePath = Str::replace($directoryPath, '', $phpFile->getRealPath());
             $relativePath = Str::replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
-            $class = $namespace . str_replace('/', '\\', rtrim($relativePath, '.php'));
+            $class = $namespace . str_replace(
+                '/',
+                '\\',
+                pathinfo($relativePath, PATHINFO_FILENAME)
+            );
 
             if (class_exists($class)) {
                 $exploded = explode('\\', $relativePath);
@@ -349,7 +380,9 @@ class FluxServiceProvider extends ServiceProvider
             return;
         }
 
-        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands'));
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands')
+        );
         $commandClasses = [];
 
         foreach ($iterator as $file) {
@@ -364,7 +397,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->commands($commandClasses);
     }
 
-    private function registerMiddleware()
+    private function registerMiddleware(): void
     {
         $kernel = app()->make(Kernel::class);
         $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);

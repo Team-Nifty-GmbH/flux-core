@@ -5,6 +5,7 @@ namespace FluxErp\Traits;
 use FluxErp\Models\Category;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -46,7 +47,10 @@ trait Categorizable
             $unguarded = array_merge($unguarded, $this->getAdditionalColumns()->pluck('name')->toArray());
         }
 
-        $this->append('category_id');
+        if (! $this->hasCategoryIdAttribute()) {
+            $this->append('category_id');
+        }
+
         $this->mergeFillable(array_merge($unguarded, ['category_id', 'categories']));
     }
 
@@ -56,9 +60,9 @@ trait Categorizable
             ->using(\FluxErp\Models\Pivots\Categorizable::class);
     }
 
-    public function category(): MorphToMany
+    public function category(): MorphToMany|BelongsTo
     {
-        return $this->categories();
+        return $this->hasCategoryIdAttribute() ? $this->belongsTo(Category::class) : $this->categories();
     }
 
     public function getFirstCategory(): HasOne
@@ -99,11 +103,13 @@ trait Categorizable
      */
     public function categoryId(): Attribute
     {
-        $categories = $this->categories();
-
         return Attribute::make(
-            get: fn ($value) => $categories->count() === 1 ? $categories->first()?->id : null,
-            set: fn ($value) => self::$categoryIds = $value
+            get: fn ($value) => $this->hasCategoryIdAttribute()
+                ? $value
+                : ($this->categories()->count() === 1 ? $this->categories()->first()?->id : null),
+            set: fn ($value) => $this->hasCategoryIdAttribute()
+                ? $value
+                : self::$categoryIds = $value
         );
     }
 
@@ -114,8 +120,17 @@ trait Categorizable
      */
     protected function sanitize(): void
     {
+        if ($this->hasCategoryIdAttribute()) {
+            return;
+        }
+
         $attributes = $this->getAttributes();
         unset($attributes['category_id']);
         $this->setRawAttributes($attributes);
+    }
+
+    private function hasCategoryIdAttribute(): bool
+    {
+        return Schema::hasColumn($this->getTable(), 'category_id');
     }
 }
