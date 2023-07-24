@@ -32,10 +32,6 @@ class Ticket extends Model implements HasMedia, InteractsWithDataTables
         HasFrontendAttributes, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
         InteractsWithMedia, Searchable, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
         'state' => TicketState::class,
