@@ -2,9 +2,12 @@
 
 namespace FluxErp\Actions;
 
+use FilesystemIterator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class ActionManager
 {
@@ -38,7 +41,7 @@ class ActionManager
         return $this->actions;
     }
 
-    public function get(string $name): array|null
+    public function get(string $name): ?array
     {
         return $this->actions->get($name);
     }
@@ -48,21 +51,37 @@ class ActionManager
         return $this->actions->filter(fn ($item) => in_array($model, $item['models']));
     }
 
-    public function autoDiscover(string|null $directory = null, string|null $namespace = null): void
+    public function autoDiscover(string $directory = null, string $namespace = null): void
     {
         $namespace = $namespace ?: 'App\\Actions';
         $path = $directory ?: app_path('Actions');
 
-        foreach (glob("{$path}/*.php") as $file) {
-            $class = $namespace . '\\' . pathinfo($file, PATHINFO_FILENAME);
+        if (! is_dir($path)) {
+            return;
+        }
 
-            if (! class_exists($class) || ! in_array(BaseAction::class, class_parents($class))) {
-                continue;
-            }
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
 
-            try {
-                $this->register($class::name(), $class);
-            } catch (\Exception) {
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
+                $subNameSpace = ! empty($relativePath)
+                    ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
+                    : '';
+                $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
+
+                if (! class_exists($class) || ! in_array(BaseAction::class, class_parents($class))) {
+                    continue;
+                }
+
+                try {
+                    $this->register($class::name(), $class);
+                } catch (\Exception) {
+                    // Ignore exceptions during auto-discovery
+                }
             }
         }
     }

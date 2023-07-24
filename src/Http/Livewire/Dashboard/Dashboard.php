@@ -24,20 +24,13 @@ class Dashboard extends Component
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.dashboard.dashboard', [
-            'availableWidgets' => Widget::all(),
+            'availableWidgets' => $this->filterWidgets(Widget::all()),
         ]);
     }
 
     public function widgets(): void
     {
-        $this->widgets = auth()
-            ->user()
-            ->widgets()
-            ->get()
-            ->filter(function ($widget) {
-                return array_key_exists($widget->component_name, Widget::all());
-            })
-            ->toArray();
+        $this->widgets = $this->filterWidgets(auth()->user()->widgets()->get()->toArray());
     }
 
     public function saveWidgets(array $itemIds): void
@@ -45,7 +38,7 @@ class Dashboard extends Component
         $existingItemIds = array_filter($itemIds, 'is_numeric');
         auth()->user()->widgets()->whereNotIn('id', $existingItemIds)->delete();
         \FluxErp\Models\Widget::setNewOrder($existingItemIds);
-        $newItemIds = array_filter(array_map(function ($id) use ($itemIds) {
+        $newItemIds = array_filter(array_map(function ($id) {
             $componentName = substr($id, 4);
 
             return str_starts_with($id, 'new-')
@@ -55,7 +48,6 @@ class Dashboard extends Component
                 ]
                 : null;
         }, $itemIds));
-
 
         if ($newItemIds) {
             auth()->user()->widgets()->createMany(array_filter($newItemIds));
@@ -73,5 +65,15 @@ class Dashboard extends Component
         $widgetModel->save();
 
         $this->widgets();
+    }
+
+    private function filterWidgets(array $widgets): array
+    {
+        return array_filter(
+            $widgets,
+            fn($widget) => auth()->user()->hasPermissionTo('widget.' . $widget['name']
+                && array_key_exists($widget['component_name'], Widget::all())
+            )
+        );
     }
 }
