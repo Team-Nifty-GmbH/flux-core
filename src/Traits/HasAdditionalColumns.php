@@ -365,10 +365,6 @@ trait HasAdditionalColumns
      */
     public function isModelAttribute(string $key): bool
     {
-        if ($key === 'uuid' && $this instanceof Ticket) {
-            return true;
-        }
-
         return
             $this->hasSetMutator($key) ||
             $this->hasGetMutator($key) ||
@@ -436,6 +432,9 @@ trait HasAdditionalColumns
     public function hasColumn($column): bool
     {
         $class = get_class($this);
+        if($this instanceof Ticket && $column === 'uuid') {
+            dd(static::$metaSchemaColumnsCache);
+        }
 
         if (! isset(static::$metaSchemaColumnsCache[$class])) {
             static::$metaSchemaColumnsCache[$class] = collect(
