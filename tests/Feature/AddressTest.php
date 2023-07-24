@@ -81,11 +81,6 @@ class AddressTest extends BaseSetup
             'is_main_address' => true,
         ]);
 
-        $this->tickets = Ticket::factory()->count(5)->create([
-            'authenticatable_type' => Address::class,
-            'authenticatable_id' => $this->addresses[0]->id,
-        ]);
-
         $this->permissions = [
             'show' => Permission::findOrCreate('api.addresses.{id}.get'),
             'index' => Permission::findOrCreate('api.addresses.get'),

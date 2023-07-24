@@ -8,6 +8,7 @@ use FluxErp\Casts\MetaAttribute;
 use FluxErp\Exceptions\MetaException;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Meta;
+use FluxErp\Models\Ticket;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -364,6 +365,10 @@ trait HasAdditionalColumns
      */
     public function isModelAttribute(string $key): bool
     {
+        if ($key === 'uuid' && $this instanceof Ticket) {
+            return true;
+        }
+
         return
             $this->hasSetMutator($key) ||
             $this->hasGetMutator($key) ||
