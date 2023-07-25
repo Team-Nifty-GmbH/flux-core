@@ -21,7 +21,7 @@ abstract class BaseAction
 
     public function __construct(array $data)
     {
-        $this->setData($data[0] ?? [],  $data[1] ?? false);
+        $this->setData($data[0] ?? [], $data[1] ?? false);
     }
 
     public function checkPermission(): static
@@ -68,17 +68,6 @@ abstract class BaseAction
         return $this;
     }
 
-    public function convertEmptyStringToNull(array $data): array
-    {
-        return array_map(function ($value) {
-            if (is_array($value)) {
-                return $this->convertEmptyStringToNull($value); // Recurse into sub-arrays
-            }
-
-            return $value === '' ? null : $value;
-        }, $data);
-    }
-
     public function getRules(): array
     {
         return $this->rules;
@@ -89,5 +78,16 @@ abstract class BaseAction
         $this->data = Validator::validate($this->data, $this->rules);
 
         return $this;
+    }
+
+    protected function convertEmptyStringToNull(array $data): array
+    {
+        return array_map(function ($value) {
+            if (is_array($value)) {
+                return $this->convertEmptyStringToNull($value); // Recurse into sub-arrays
+            }
+
+            return $value === '' ? null : $value;
+        }, $data);
     }
 }

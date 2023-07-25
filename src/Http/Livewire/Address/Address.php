@@ -204,7 +204,7 @@ class Address extends Component
         try {
             DeleteAddress::make($this->address)->validate()->execute();
         } catch (ValidationException $e) {
-            validation_errors_to_notifications($e, $this);
+            exception_to_notifications($e, $this);
 
             return null;
         }
