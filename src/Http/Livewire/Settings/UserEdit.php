@@ -130,7 +130,7 @@ class UserEdit extends Component
         if (
             ! user_can(['api.users.{id}.put', 'api.users.post']) ||
             // Only a Super Admin can set a new Super Admin.
-            (in_array(Role::findByName('Super Admin', 'sanctum')->id, $this->user['roles']) &&
+            (in_array(Role::findByName('Super Admin')->id, $this->user['roles']) &&
                 ! auth()->user()->hasRole('Super Admin')
             )
         ) {
@@ -188,7 +188,7 @@ class UserEdit extends Component
     {
         $this->skipRender();
 
-        if (in_array(Role::findByName('Super Admin', 'sanctum')->id, $this->user['roles'])) {
+        if (in_array(Role::findByName('Super Admin')->id, $this->user['roles'])) {
             $this->lockedPermissions = Permission::all(['id'])->pluck('id')->toArray();
             $this->isSuperAdmin = true;
 

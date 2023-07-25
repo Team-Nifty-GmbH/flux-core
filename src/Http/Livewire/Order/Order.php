@@ -60,7 +60,7 @@ class Order extends Component
                 'client:id,name',
                 'contact.media',
                 'currency:id,iso,name',
-                'orderType:id,name,print_layouts',
+                'orderType:id,name,print_layouts,order_type_enum',
             ])
             ->firstOrFail();
 
@@ -94,7 +94,7 @@ class Order extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.order.order');
+        return view('flux::livewire.order.' . $this->order['order_type']['order_type_enum'] ?: 'order');
     }
 
     public function updatedOrderAddressInvoiceId(): void

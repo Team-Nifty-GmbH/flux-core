@@ -21,12 +21,12 @@ abstract class BaseAction
 
     public function __construct(array $data)
     {
-        $this->data = $data[0] ?? [];
+        $this->setData($data[0] ?? [], $data[1] ?? false);
     }
 
     public function checkPermission(): static
     {
-        if (! auth()->user()->hasPermissionTo('action.' . static::name())) {
+        if (! auth()->user()->can('action.' . static::name())) {
             throw UnauthorizedException::forPermissions(['action.' . static::name()]);
         }
 
@@ -49,6 +49,18 @@ abstract class BaseAction
             ->toString();
     }
 
+    public function setData(array $data, bool $keepEmptyStrings = false): static
+    {
+        $this->data = $keepEmptyStrings ? $data : $this->convertEmptyStringToNull($data);
+
+        return $this;
+    }
+
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
     public function setRules(array $rules): static
     {
         $this->rules = $rules;
@@ -56,10 +68,26 @@ abstract class BaseAction
         return $this;
     }
 
+    public function getRules(): array
+    {
+        return $this->rules;
+    }
+
     public function validate(): static
     {
         $this->data = Validator::validate($this->data, $this->rules);
 
         return $this;
+    }
+
+    protected function convertEmptyStringToNull(array $data): array
+    {
+        return array_map(function ($value) {
+            if (is_array($value)) {
+                return $this->convertEmptyStringToNull($value); // Recurse into sub-arrays
+            }
+
+            return $value === '' ? null : $value;
+        }, $data);
     }
 }

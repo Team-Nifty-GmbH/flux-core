@@ -39,7 +39,7 @@
                         <x-dropdown.item :label="__('My profile')" href="/my-profile" />
 
                         <x-dropdown.item :label="__('Logout')"
-                                         x-on:click="document.getElementById('logout-form').submit()"/>
+                                         x-on:click="document.getElementById('logout-form-desktop').submit()"/>
                         <x-dropdown.item>
                             <livewire:toggle-dark-mode />
                         </x-dropdown.item>

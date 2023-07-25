@@ -3,10 +3,13 @@
 namespace FluxErp\Http\Livewire\Dashboard;
 
 use FluxErp\Facades\Widget;
+use FluxErp\Models\Permission;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Livewire\Component;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use WireUi\Traits\Actions;
 
 class Dashboard extends Component
@@ -29,7 +32,7 @@ class Dashboard extends Component
 
     public function widgets(): void
     {
-        $this->widgets = $this->filterWidgets(auth()->user()->widgets->toArray());
+        $this->widgets = $this->filterWidgets(auth()->user()->widgets()->get()->toArray());
     }
 
     public function saveWidgets(array $itemIds): void
@@ -37,12 +40,13 @@ class Dashboard extends Component
         $existingItemIds = array_filter($itemIds, 'is_numeric');
         auth()->user()->widgets()->whereNotIn('id', $existingItemIds)->delete();
         \FluxErp\Models\Widget::setNewOrder($existingItemIds);
-
         $newItemIds = array_filter(array_map(function ($id) {
+            $componentName = substr($id, 4);
+
             return str_starts_with($id, 'new-')
                 ? [
-                    'name' => 'TestWidget',
-                    'component_name' => substr($id, 4),
+                    'name' => Str::headline($componentName),
+                    'component_name' => $componentName,
                 ]
                 : null;
         }, $itemIds));
@@ -69,7 +73,18 @@ class Dashboard extends Component
     {
         return array_filter(
             $widgets,
-            fn($widget) => auth()->user()->hasPermissionTo('widget.' . $widget['name'])
+            function(array $widget) {
+                $name = $widget['component_name'] ?? $widget['name'];
+
+                try {
+                    $permissionExists = Permission::findByName('widget.' . $name)->exists;
+                } catch (PermissionDoesNotExist $e) {
+                    $permissionExists = false;
+                }
+
+                return (! $permissionExists || auth()->user()->can('widget.' . $name))
+                    && array_key_exists($name, Widget::all());
+            }
         );
     }
 }

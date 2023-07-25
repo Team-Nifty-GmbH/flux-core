@@ -1,3 +1,5 @@
 <div class="w-full">
-    {{-- In work, do what you enjoy. --}}
+    <x-card>
+        <livewire:folder-tree :model-type="\FluxErp\Models\Order::class" :model-id="$this->orderId" />
+    </x-card>
 </div>

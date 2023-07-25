@@ -22,16 +22,9 @@
 >
     <div class="flex space-x-3">
         <div>
-            <template x-if="user?.user_code && ! avatarUrl">
-                <x-avatar :label="'-'" x-text="user.user_code">
-                </x-avatar>
-            </template>
-            <template x-if="avatarUrl">
-                <x-avatar src="#" x-bind:src="avatarUrl" />
-            </template>
-            <template x-if="! avatarUrl && ! user?.user_code">
-                <x-avatar></x-avatar>
-            </template>
+            <div class="shrink-0 inline-flex items-center justify-center overflow-hidden rounded-full border border-gray-200 dark:border-secondary-500">
+                <img class="shrink-0 object-cover object-center rounded-full w-10 h-10 text-base" x-bind:src="avatarUrl" />
+            </div>
         </div>
         <div class="min-w-0 flex-1">
             <div>
@@ -74,7 +67,7 @@
                             wire:loading.attr="disabled" :label="auth()->user()->getMorphClass() === \FluxErp\Models\User::class && $this->isPublic === true ? __('Save internal') : __('Save')"/>
                         @if(auth()->user()->getMorphClass() === \FluxErp\Models\User::class && $this->isPublic === true)
                             <x-button
-                                x-on:click="$wire.call('saveComment', content, sticky, false); content = ''; $refs.textarea.innerHTML = ''"
+                                x-on:click="saveComment($refs.textarea, $refs.fileUpload, $refs.sticky, false)"
                                 primary
                                 wire:loading.attr="disabled" :label="__('Answer to customer')"/>
                         @endif

@@ -44,6 +44,11 @@ class WidgetManager
         ];
     }
 
+    public function unregister(string $name): void
+    {
+        unset($this->widgets[$name]);
+    }
+
     public function all(): array
     {
         return $this->widgets;

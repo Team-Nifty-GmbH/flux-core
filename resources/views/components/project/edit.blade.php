@@ -1,4 +1,5 @@
 <div
+    class="space-y-5"
     x-data="{
         ...folderTree(),
         levels: [],

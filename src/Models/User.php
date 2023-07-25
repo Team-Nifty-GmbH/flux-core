@@ -103,6 +103,7 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference, Int
             ->acceptsFile(function (File $file) {
                 return str_starts_with($file->mimeType, 'image/');
             })
+            ->useFallbackUrl(self::icon()->getUrl())
             ->useDisk('public')
             ->singleFile();
     }
