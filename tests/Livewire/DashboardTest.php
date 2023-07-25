@@ -3,6 +3,7 @@
 namespace FluxErp\Tests\Livewire;
 
 use FluxErp\Contracts\UserWidget;
+use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use FluxErp\Models\Widget;
 use FluxErp\Tests\Feature\BaseSetup;
@@ -10,6 +11,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Component;
 use Livewire\Livewire;
 use FluxErp\Widgets\WidgetManager;
+use Spatie\Permission\PermissionRegistrar;
 
 class DashboardTest extends BaseSetup
 {
@@ -74,6 +76,35 @@ class DashboardTest extends BaseSetup
             ->assertDontSee('Hello from sample component 2')
             ->assertSeeLivewire('sample-component')
             ->assertDontSeeLivewire('sample-component-2');
+    }
+
+    public function test_dashboard_hide_widget_without_permission()
+    {
+        Livewire::test('dashboard.dashboard')
+            ->assertSeeLivewire('sample-component');
+
+        Permission::findOrCreate('widget.sample-component');
+        $this->app->make(PermissionRegistrar::class)->registerPermissions();
+
+        Livewire::test('dashboard.dashboard')
+            ->assertOk()
+            ->assertDontSeeLivewire('sample-component');
+    }
+
+    public function test_dashboard_show_widget_with_permission()
+    {
+        $permission = Permission::findOrCreate('widget.sample-component');
+        $this->app->make(PermissionRegistrar::class)->registerPermissions();
+
+        Livewire::test('dashboard.dashboard')
+            ->assertOk()
+            ->assertDontSeeLivewire('sample-component');
+
+        $this->user->givePermissionTo($permission);
+
+        Livewire::test('dashboard.dashboard')
+            ->assertOk()
+            ->assertSeeLivewire('sample-component');
     }
 
     public function test_dashboard_widget_adding()
