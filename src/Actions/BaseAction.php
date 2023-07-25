@@ -21,12 +21,12 @@ abstract class BaseAction
 
     public function __construct(array $data)
     {
-        $this->data = $data[0] ?? [];
+        $this->setData($data[0] ?? []);
     }
 
     public function checkPermission(): static
     {
-        if (! auth()->user()->hasPermissionTo('action.' . static::name())) {
+        if (! auth()->user()->can('action.' . static::name())) {
             throw UnauthorizedException::forPermissions(['action.' . static::name()]);
         }
 
@@ -51,7 +51,7 @@ abstract class BaseAction
 
     public function setData(array $data): static
     {
-        $this->data = $data;
+        $this->data = array_map_empty_string_to_null($data);
 
         return $this;
     }

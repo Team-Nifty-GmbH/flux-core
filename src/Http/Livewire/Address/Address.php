@@ -147,6 +147,9 @@ class Address extends Component
             $this->address['login_password'] = $this->loginPassword;
         }
 
+        $this->address['can_login'] = $this->address['login_name'] && $this->address['can_login']
+            ? $this->address['can_login']
+            : false;
         $function->setData($this->address);
 
         $this->loginPassword = '';

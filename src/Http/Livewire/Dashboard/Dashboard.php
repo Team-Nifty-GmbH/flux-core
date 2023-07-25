@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use WireUi\Traits\Actions;
 
 class Dashboard extends Component
@@ -72,8 +73,18 @@ class Dashboard extends Component
     {
         return array_filter(
             $widgets,
-            fn (array $widget) => auth()->user()->can('widget.' . strtolower($widget['name']))
-                && array_key_exists($widget['name'], Widget::all())
+            function(array $widget) {
+                $name = $widget['component_name'] ?? $widget['name'];
+
+                try {
+                    $permissionExists = Permission::findByName('widget.' . $name)->exists;
+                } catch (PermissionDoesNotExist $e) {
+                    $permissionExists = false;
+                }
+
+                return (! $permissionExists || auth()->user()->can('widget.' . $name))
+                    && array_key_exists($name, Widget::all());
+            }
         );
     }
 }

@@ -20,7 +20,7 @@ class WidgetManager
     /**
      * @throws \Exception
      */
-    public function register(string $name, string $widget): void
+    public function register(string $name, string|object $widget): void
     {
         $componentClass = Livewire::getClass($widget);
 
