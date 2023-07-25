@@ -120,11 +120,11 @@ class Address extends Component
 
     public function edit(): void
     {
-        if (! Auth::user()->can('api.addresses.put')) {
-            $this->notification()->error(__('You dont have the permission to do that.'));
-
-            return;
-        }
+//        if (! Auth::user()->can('api.addresses.put')) {
+//            $this->notification()->error(__('You dont have the permission to do that.'));
+//
+//            return;
+//        }
 
         // TODO: Lock Model on edit
         $this->edit = true;
@@ -136,12 +136,6 @@ class Address extends Component
         $function = ($this->address['id'] ?? false)
             ? new UpdateAddress([])
             : new CreateAddress([]);
-
-        if (! Auth::user()->can('api.addresses.' . (get_class($function) === UpdateAddress::class ? 'put' : 'post'))) {
-            $this->notification()->error(__('You dont have the permission to do that.'));
-
-            return null;
-        }
 
         $this->address['contact_options'] = [];
         foreach ($this->contactOptions as $contactOption) {
@@ -157,9 +151,9 @@ class Address extends Component
 
         $this->loginPassword = '';
         try {
-            $model = $function->validate()->execute();
-        } catch (ValidationException $e) {
-            validation_errors_to_notifications($e, $this);
+            $model = $function->validate()->checkPermission()->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
             return null;
         }

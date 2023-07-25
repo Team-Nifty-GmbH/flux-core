@@ -20,9 +20,9 @@ if (! function_exists('format_number')) {
     }
 }
 
-if (! function_exists('validation_errors_to_notifications')) {
-    function validation_errors_to_notifications(
-        \Illuminate\Validation\ValidationException $errors,
+if (! function_exists('exception_to_notifications')) {
+    function exception_to_notifications(
+        Exception $exception,
         \Livewire\Component $component
     ): void
     {
@@ -30,10 +30,14 @@ if (! function_exists('validation_errors_to_notifications')) {
             throw new InvalidArgumentException('Component does not have a notification method.');
         }
 
-        foreach ($errors->errors() as $field => $messages) {
-            foreach ($messages as $message) {
-                $component->notification()->error($field, $message);
+        if (method_exists($exception, 'errors')) {
+            foreach ($exception->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $component->notification()->error($field, $message);
+                }
             }
+        } else {
+            $component->notification()->error($exception->getMessage());
         }
 
         $component->skipRender();
