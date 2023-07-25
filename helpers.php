@@ -398,16 +398,3 @@ if (! function_exists('flux_path')) {
         return __DIR__ . ($path ? DIRECTORY_SEPARATOR . $path : $path);
     }
 }
-
-if (! function_exists('array_map_empty_string_to_null')) {
-    function array_map_empty_string_to_null(array $array): array
-    {
-        return array_map(function ($value) {
-            if (is_array($value)) {
-                return array_map_empty_string_to_null($value); // Recurse into sub-arrays
-            }
-
-            return $value === '' ? null : $value;
-        }, $array);
-    }
-}

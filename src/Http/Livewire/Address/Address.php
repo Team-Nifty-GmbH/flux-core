@@ -120,11 +120,11 @@ class Address extends Component
 
     public function edit(): void
     {
-//        if (! Auth::user()->can('api.addresses.put')) {
-//            $this->notification()->error(__('You dont have the permission to do that.'));
-//
-//            return;
-//        }
+        if (! Auth::user()->can('api.addresses.put')) {
+            $this->notification()->error(__('You dont have the permission to do that.'));
+
+            return;
+        }
 
         // TODO: Lock Model on edit
         $this->edit = true;
