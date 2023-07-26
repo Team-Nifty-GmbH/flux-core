@@ -252,6 +252,7 @@ class OrderTest extends BaseSetup
         $this->assertEquals($order['language_id'], $dbOrder->language_id);
         $this->assertEquals($order['order_type_id'], $dbOrder->order_type_id);
         $this->assertEquals($order['payment_type_id'], $dbOrder->payment_type_id);
+        $this->assertEquals($order['price_list_id'], $dbOrder->price_list_id);
         $this->assertEquals($order['payment_target'], $dbOrder->payment_target);
         $this->assertEquals($order['payment_discount_target'], $dbOrder->payment_discount_target);
         $this->assertEquals($order['payment_discount_percent'], $dbOrder->payment_discount_percent);
