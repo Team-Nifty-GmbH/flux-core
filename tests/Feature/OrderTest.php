@@ -247,6 +247,51 @@ class OrderTest extends BaseSetup
 
         $this->assertEquals($order['address_delivery']['company'], $dbOrder->address_delivery['company']);
         $this->assertNull($dbOrder->address_delivery_id);
+        $this->assertEquals($order['address_invoice_id'], $dbOrder->address_invoice_id);
+        $this->assertEquals($order['client_id'], $dbOrder->client_id);
+        $this->assertEquals($order['language_id'], $dbOrder->language_id);
+        $this->assertEquals($order['order_type_id'], $dbOrder->order_type_id);
+        $this->assertEquals($order['payment_type_id'], $dbOrder->payment_type_id);
+        $this->assertEquals($order['payment_target'], $dbOrder->payment_target);
+        $this->assertEquals($order['payment_discount_target'], $dbOrder->payment_discount_target);
+        $this->assertEquals($order['payment_discount_percent'], $dbOrder->payment_discount_percent);
+        $this->assertEquals($order['payment_reminder_days_1'], $dbOrder->payment_reminder_days_1);
+        $this->assertEquals($order['payment_reminder_days_2'], $dbOrder->payment_reminder_days_2);
+        $this->assertEquals($order['payment_reminder_days_3'], $dbOrder->payment_reminder_days_3);
+        $this->assertEquals($order['payment_texts'], $dbOrder->payment_texts);
+        $this->assertEquals($order['order_date'], $dbOrder->order_date->format('Y-m-d'));
+    }
+
+    public function test_create_order_with_address_delivery_validation_fails()
+    {
+        $order = [
+            'address_invoice_id' => $this->addresses[0]->id,
+            'address_delivery_id' => $this->addresses[1]->id,
+            'client_id' => $this->clients[0]->id,
+            'language_id' => $this->languages[0]->id,
+            'order_type_id' => $this->orderTypes[0]->id,
+            'payment_type_id' => $this->paymentTypes[0]->id,
+            'price_list_id' => $this->priceLists[0]->id,
+            'address_delivery' => [
+                'company' => 123,
+            ],
+            'payment_target' => rand(10, 20),
+            'payment_discount_target' => rand(3, 5),
+            'payment_discount_percent' => rand(1, 10) / 100,
+            'payment_reminder_days_1' => rand(1, 10),
+            'payment_reminder_days_2' => rand(1, 10),
+            'payment_reminder_days_3' => rand(1, 10),
+            'payment_texts' => [Str::random(), Str::random(), Str::random()],
+            'order_date' => date('Y-m-d', strtotime('+1 day')),
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/orders', $order);
+        $response->assertStatus(422);
+
+        $response->assertJsonValidationErrorFor('address_delivery.company');
     }
 
     public function test_update_order_address_delivery_validation_fails()
@@ -289,6 +334,19 @@ class OrderTest extends BaseSetup
 
         $this->assertEquals($order['address_delivery']['company'], $dbOrder->address_delivery['company']);
         $this->assertNull($dbOrder->address_delivery_id);
+        $this->assertEquals($this->orders[0]->address_invoice_id, $dbOrder->address_invoice_id);
+        $this->assertEquals($this->orders[0]->client_id, $dbOrder->client_id);
+        $this->assertEquals($this->orders[0]->language_id, $dbOrder->language_id);
+        $this->assertEquals($this->orders[0]->order_type_id, $dbOrder->order_type_id);
+        $this->assertEquals($this->orders[0]->payment_type_id, $dbOrder->payment_type_id);
+        $this->assertEquals($this->orders[0]->payment_target, $dbOrder->payment_target);
+        $this->assertEquals($this->orders[0]->payment_discount_target, $dbOrder->payment_discount_target);
+        $this->assertEquals($this->orders[0]->payment_discount_percent, $dbOrder->payment_discount_percent);
+        $this->assertEquals($this->orders[0]->payment_reminder_days_1, $dbOrder->payment_reminder_days_1);
+        $this->assertEquals($this->orders[0]->payment_reminder_days_2, $dbOrder->payment_reminder_days_2);
+        $this->assertEquals($this->orders[0]->payment_reminder_days_3, $dbOrder->payment_reminder_days_3);
+        $this->assertEquals($this->orders[0]->payment_texts, $dbOrder->payment_texts);
+        $this->assertEquals($this->orders[0]->order_date->format('Y-m-d'), $dbOrder->order_date->format('Y-m-d'));
     }
 
     public function test_update_order()

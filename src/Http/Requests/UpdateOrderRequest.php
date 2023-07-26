@@ -82,6 +82,14 @@ class UpdateOrderRequest extends BaseFormRequest
                 'address_delivery' => [
                     'array',
                 ],
+                'address_delivery.id' => [
+                    'integer',
+                    new ExistsWithForeign(
+                        foreignAttribute: 'client_id',
+                        table: 'addresses',
+                        baseTable: 'orders'
+                    ),
+                ],
 
                 'state' => [
                     'string',

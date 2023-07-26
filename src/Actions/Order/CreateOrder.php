@@ -29,7 +29,7 @@ class CreateOrder extends BaseAction
 
         if (! ($this->data['address_delivery']['id'] ?? false) && ($this->data['address_delivery_id'] ?? false)) {
             $this->data['address_delivery_id'] = null;
-        } else {
+        } elseif ($this->data['address_delivery']['id'] ?? false) {
             $this->data['address_delivery_id'] = $this->data['address_delivery']['id'];
         }
 

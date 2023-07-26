@@ -19,7 +19,6 @@ class CreateOrderRequest extends BaseFormRequest
     public function rules(): array
     {
         return array_merge(
-
             (new Order())->hasAdditionalColumnsValidationRules(),
             Arr::prependKeysWith((new CreateAddressRequest())->postalAddressRules(), 'address_delivery.'),
             [
@@ -52,6 +51,14 @@ class CreateOrderRequest extends BaseFormRequest
 
                 'address_delivery' => [
                     'array',
+                ],
+                'address_delivery.id' => [
+                    'integer',
+                    new ExistsWithForeign(
+                        foreignAttribute: 'client_id',
+                        table: 'addresses',
+                        baseTable: 'orders'
+                    ),
                 ],
 
                 'delivery_state' => [
