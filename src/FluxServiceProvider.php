@@ -185,57 +185,13 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerConfig(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
-        $this->mergeConfigFrom(__DIR__ . '/../config/activitylog.php', 'activitylog');
-        $this->mergeConfigFrom(__DIR__ . '/../config/fortify.php', 'fortify');
-        $this->mergeConfigFrom(__DIR__ . '/../config/auth.php', 'auth');
-        $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
-        $this->mergeConfigFrom(__DIR__ . '/../config/permission.php', 'permission');
-        $this->mergeConfigFrom(__DIR__ . '/../config/scout.php', 'scout');
-        $this->mergeConfigFrom(__DIR__ . '/../config/logging.php', 'logging');
         $this->mergeConfigFrom(__DIR__ . '/../config/print.php', 'print');
-        $loggingConfig = config('logging.channels');
-        $loggingConfig['database'] = [
-            'driver' => 'custom',
-            'handler' => DatabaseLoggingHandler::class,
-            'via' => DatabaseCustomLogger::class,
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => env('LOG_DAYS', 30),
-        ];
-        config(['logging.channels' => $loggingConfig]);
-        config([
-            'auth.guards' => [
-                'sanctum' => [
-                    'driver' => 'sanctum',
-                    'provider' => 'users',
-                ],
-                'web' => [
-                    'driver' => 'session',
-                    'provider' => 'users',
-                ],
-                'token' => [
-                    'driver' => 'sanctum',
-                    'provider' => 'tokens',
-                ],
-                'address' => [
-                    'driver' => 'session',
-                    'provider' => 'addresses',
-                ],
-            ],
-            'auth.providers' => [
-                'users' => [
-                    'driver' => 'eloquent',
-                    'model' => User::class,
-                ],
-                'addresses' => [
-                    'driver' => 'eloquent',
-                    'model' => Address::class,
-                ],
-                'tokens' => [
-                    'driver' => 'eloquent',
-                    'model' => Token::class,
-                ],
-            ],
-        ]);
+        $this->mergeConfigFrom(__DIR__ . '/../config/fortify.php', 'fortify');
+        $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
+        $this->mergeConfigFrom(__DIR__ . '/../config/scout.php', 'scout');
+        config(['auth' => require __DIR__ . '/../config/auth.php']);
+        config(['activitylog' => require __DIR__ . '/../config/activitylog.php']);
+        config(['logging' => require __DIR__ . '/../config/logging.php']);
         config(['wireui.heroicons.alias' => 'heroicons']);
         config(['wireui.modal' => [
             'zIndex' => env('WIREUI_MODAL_Z_INDEX', 'z-20'),
@@ -306,7 +262,13 @@ class FluxServiceProvider extends ServiceProvider
         ]);
 
         if (app()->runningInConsole()) {
-            config(['tinker.alias' => ['FluxErp\\Models\\', 'FluxErp\\Services\\']]);
+            config([
+                'tinker.alias' => [
+                    'FluxErp\\Models\\',
+                    'FluxErp\\Services\\',
+                    'FluxErp\\Actions\\',
+                ]
+            ]);
         }
     }
 

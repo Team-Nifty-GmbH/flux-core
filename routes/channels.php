@@ -23,8 +23,8 @@ Broadcast::channel('FluxErp.Models.Address.{address}', function ($user) {
     return $user->can(channel_to_permission(Address::getBroadcastChannelRoute()));
 });
 
-Broadcast::channel('FluxErp.Models.Contact.{contact}', function ($user) {
-    return $user->can(channel_to_permission(Contact::getBroadcastChannelRoute()));
+Broadcast::channel('FluxErp.Models.Contact', function ($user) {
+    return $user->can(channel_to_permission((new Contact())->broadcastChannelRoute()));
 });
 
 Broadcast::channel('FluxErp.Models.Contact.{contact}', function ($user) {

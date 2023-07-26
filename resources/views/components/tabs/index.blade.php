@@ -2,7 +2,7 @@
      x-data="{
          init() {
              $nextTick(() => {
-                    this.tabRepositionMarker(this.$refs.tabButtons.querySelector('[data-tab-name=' + this.tab + ']'));
+                    this.tabRepositionMarker(this.$refs.tabButtons.querySelector('[data-tab-name=' + CSS.escape(this.tab) + ']'));
                     this.$refs.tabMarker.classList.remove('hidden');
              })
          },

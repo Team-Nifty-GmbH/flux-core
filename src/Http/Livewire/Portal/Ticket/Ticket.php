@@ -17,6 +17,8 @@ class Ticket extends Component
 
     public array $attachments = [];
 
+    public string $tab = 'features.comments.comments';
+
     public function mount(int $id): void
     {
         $ticket = \FluxErp\Models\Ticket::query()

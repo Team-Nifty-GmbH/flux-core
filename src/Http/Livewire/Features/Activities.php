@@ -1,0 +1,83 @@
+<?php
+
+namespace FluxErp\Http\Livewire\Features;
+
+use FluxErp\Models\User;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
+use Livewire\Component;
+use TeamNiftyGmbH\DataTable\Helpers\Icon;
+
+class Activities extends Component
+{
+    /** @var Model $this->modelType */
+    public string $modelType = '';
+
+    public int $modelId = 0;
+
+    public array $activities = [];
+
+    public int $page = 1;
+
+    public int $perPage = 1;
+
+    public int $total = 1;
+
+    /**
+     * @return string[]
+     */
+    public function getListeners(): array
+    {
+        $channel = (new $this->modelType)->broadcastChannel() . $this->modelId;
+
+        return [
+            'echo-private:' . $channel . ',.CommentCreated' => 'commentCreatedEvent',
+            'echo-private:' . $channel . ',.CommentUpdated' => 'commentUpdatedEvent',
+            'echo-private:' . $channel . ',.CommentDeleted' => 'commentDeletedEvent',
+        ];
+    }
+
+    public function updatedPage(): void
+    {
+        $this->loadData();
+    }
+
+    public function loadData(): void
+    {
+        $activities = $this->modelType::query()
+            ->whereKey($this->modelId)
+            ->firstOrFail()
+            ->activities()
+            ->with('causer:id,firstname,lastname')
+            ->latest()
+            ->paginate(perPage: 10 * $this->page);
+
+        $this->perPage = $activities->perPage();
+        $this->total = $activities->total();
+
+        $this->activities = $activities->map(function ($item) {
+            $itemArray = $item->toArray();
+
+            $itemArray['causer']['name'] = $item->causer?->getLabel() ?: __('Unknown');
+            $itemArray['causer']['avatar_url'] = $item->causer?->getAvatarUrl() ?: Icon::make('user')->getUrl();
+            $itemArray['event'] = __($item->event);
+
+            if (! auth()->user() instanceof User) {
+                $itemArray['properties'] = [
+                    'old' => [],
+                    'attributes' => [],
+                ];
+            }
+
+            return $itemArray;
+        })
+        ->toArray();
+    }
+
+    public function render(): View|Factory|Application
+    {
+        return view('flux::livewire.features.activities');
+    }
+}

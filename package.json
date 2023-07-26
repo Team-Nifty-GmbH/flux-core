@@ -35,6 +35,8 @@
         "vite": "^4.4.7"
     },
     "dependencies": {
-        "apexcharts": "^3.41.0"
+        "@alpinejs/collapse": "^3.12.3",
+        "apexcharts": "^3.41.0",
+        "dayjs": "^1.11.9"
     }
 }

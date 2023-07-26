@@ -33,7 +33,7 @@
         availableWidgetsSortable: {},
         editMode: false
     }">
-    <div wire:ignore class="mx-auto px-4 py-6 sm:px-6 lg:px-8 flex justify-between">
+    <div wire:ignore class="mx-auto py-6 flex justify-between">
         <div class="pb-6 md:flex md:items-center md:justify-between md:space-x-5">
             <div class="flex items-start space-x-5">
                 <div class="flex-shrink-0">

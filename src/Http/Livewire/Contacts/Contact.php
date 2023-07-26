@@ -67,7 +67,7 @@ class Contact extends Component
 
     protected function getListeners(): array
     {
-        $channel = (new ContactModel())->broadcastChannel();
+        $channel = (new ContactModel())->broadcastChannel(true);
 
         return array_merge(['goToContactWithAddress' => 'goToContactWithAddress'], [
             'echo-private:' . $channel . '.' . $this->contactId . ',.ContactUpdated' => 'contactUpdatedEvent',
