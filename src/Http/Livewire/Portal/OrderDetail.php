@@ -16,6 +16,8 @@ class OrderDetail extends Component
 
     public array $childOrders = [];
 
+    public array $attachments = [];
+
     public array $positionDetails = [];
 
     public array $positionsSummary = [];
@@ -87,6 +89,17 @@ class OrderDetail extends Component
                 'total_gross_price',
                 'unit_gross_price', ]
         );
+
+        // get the latest attachment per collection_name where disk is public
+        $this->attachments = $order->media()
+            ->where('disk', 'public')
+            ->latest('id')
+            ->get()
+            ->groupBy('collection_name')
+            ->map(function ($item) {
+                return $item->first()->only('id', 'collection_name', 'file_name', 'mime_type');
+            })
+            ->toArray();
 
         $this->order = $order->toArray();
 
@@ -198,6 +211,21 @@ class OrderDetail extends Component
             ->whereKey($this->order['id'])
             ->first();
         $mediaItem = $order->invoice();
+
+        if (! $mediaItem) {
+            abort(404);
+        }
+
+        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
+    }
+
+    public function downloadMedia(int $id): BinaryFileResponse
+    {
+        $order = Order::query()
+            ->whereKey($this->order['id'])
+            ->first();
+
+        $mediaItem = $order->media()->whereKey($id)->first();
 
         if (! $mediaItem) {
             abort(404);
