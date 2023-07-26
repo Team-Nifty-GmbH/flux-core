@@ -216,6 +216,10 @@ class OrderDetail extends Component
             abort(404);
         }
 
+        activity()->performedOn($order)
+            ->event('downloaded')
+            ->log($mediaItem->collection_name . ' ' . $mediaItem->file_name);
+
         return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
 
@@ -230,6 +234,10 @@ class OrderDetail extends Component
         if (! $mediaItem) {
             abort(404);
         }
+
+        activity()->performedOn($order)
+            ->event('downloaded')
+            ->log($mediaItem->collection_name . ' ' . $mediaItem->file_name);
 
         return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
