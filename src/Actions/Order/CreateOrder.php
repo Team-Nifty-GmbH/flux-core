@@ -27,8 +27,10 @@ class CreateOrder extends BaseAction
         $this->data['currency_id'] = $this->data['currency_id'] ?? Currency::query()->first()?->id;
         $addresses = Arr::pull($this->data, 'addresses', []);
 
-        if (! ($this->data['address_delivery']['id'] ?? false) && $this->data['address_delivery_id'] ?? false) {
+        if (! ($this->data['address_delivery']['id'] ?? false) && ($this->data['address_delivery_id'] ?? false)) {
             $this->data['address_delivery_id'] = null;
+        } else {
+            $this->data['address_delivery_id'] = $this->data['address_delivery']['id'];
         }
 
         $order = new Order($this->data);
