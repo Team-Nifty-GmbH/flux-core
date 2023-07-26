@@ -16,6 +16,7 @@ class CreateAddressRequest extends BaseFormRequest
     {
         return array_merge(
             (new Address())->hasAdditionalColumnsValidationRules(),
+            $this->postalAddressRules(),
             [
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
                 'contact_id' => [
@@ -33,27 +34,6 @@ class CreateAddressRequest extends BaseFormRequest
                     'nullable',
                     'exists:languages,id,deleted_at,NULL',
                 ],
-                'company' => 'sometimes|string|nullable',
-                'title' => 'sometimes|string|nullable',
-                'salutation' => 'sometimes|string|nullable',
-                'firstname' => 'sometimes|string|nullable',
-                'lastname' => 'sometimes|string|nullable',
-                'addition' => 'sometimes|string|nullable',
-                'mailbox' => 'sometimes|string|nullable',
-                'latitude' => [
-                    'sometimes',
-                    'nullable',
-                    'regex:/^[-]?(([0-8]?[0-9](\.\d+)?)|(90(\.0+)?))$/',
-                ],
-                'longitude' => [
-                    'sometimes',
-                    'nullable',
-                    'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))(\.\d+)?)|(180(\.0+)?))$/',
-                ],
-                'zip' => 'sometimes|string|nullable',
-                'city' => 'sometimes|string|nullable',
-                'street' => 'sometimes|string|nullable',
-                'url' => 'sometimes|string|nullable',
                 'date_of_birth' => 'sometimes|date|nullable',
                 'department' => 'sometimes|string|nullable',
                 'login_name' => 'sometimes|string|unique:addresses,login_name|nullable',
@@ -76,5 +56,32 @@ class CreateAddressRequest extends BaseFormRequest
                 'contact_options.*.is_primary' => 'sometimes|required|boolean',
             ],
         );
+    }
+
+    public function postalAddressRules(): array
+    {
+        return [
+            'company' => 'sometimes|string|nullable',
+            'title' => 'sometimes|string|nullable',
+            'salutation' => 'sometimes|string|nullable',
+            'firstname' => 'sometimes|string|nullable',
+            'lastname' => 'sometimes|string|nullable',
+            'addition' => 'sometimes|string|nullable',
+            'mailbox' => 'sometimes|string|nullable',
+            'latitude' => [
+                'sometimes',
+                'nullable',
+                'regex:/^[-]?(([0-8]?[0-9](\.\d+)?)|(90(\.0+)?))$/',
+            ],
+            'longitude' => [
+                'sometimes',
+                'nullable',
+                'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))(\.\d+)?)|(180(\.0+)?))$/',
+            ],
+            'zip' => 'sometimes|string|nullable',
+            'city' => 'sometimes|string|nullable',
+            'street' => 'sometimes|string|nullable',
+            'url' => 'sometimes|string|nullable',
+        ];
     }
 }

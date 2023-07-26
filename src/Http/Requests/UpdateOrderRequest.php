@@ -9,6 +9,7 @@ use FluxErp\Rules\UniqueInFieldDependence;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
 use FluxErp\States\Order\PaymentState\PaymentState;
+use Illuminate\Support\Arr;
 use Spatie\ModelStates\Validation\ValidStateRule;
 
 class UpdateOrderRequest extends BaseFormRequest
@@ -22,6 +23,7 @@ class UpdateOrderRequest extends BaseFormRequest
     {
         return array_merge(
             (new Order())->hasAdditionalColumnsValidationRules(),
+            Arr::prependKeysWith((new CreateAddressRequest())->postalAddressRules(), 'address_delivery.'),
             [
                 'id' => 'required|integer|exists:orders,id,deleted_at,NULL',
                 'address_invoice_id' => [
@@ -35,9 +37,8 @@ class UpdateOrderRequest extends BaseFormRequest
                     ),
                 ],
                 'address_delivery_id' => [
-                    'sometimes',
-                    'required',
                     'integer',
+                    'nullable',
                     new ExistsWithForeign(
                         foreignAttribute: 'client_id',
                         table: 'addresses',
@@ -76,6 +77,10 @@ class UpdateOrderRequest extends BaseFormRequest
                         table: 'payment_types',
                         baseTable: 'orders'
                     ),
+                ],
+
+                'address_delivery' => [
+                    'array',
                 ],
 
                 'state' => [

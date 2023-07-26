@@ -2,6 +2,7 @@
 
 namespace FluxErp\Database\Seeders;
 
+use FluxErp\Actions\OrderPosition\PriceCalculation;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
@@ -82,7 +83,7 @@ class OrderPositionTableSeeder extends Seeder
 
                     $data['unit_price'] = bcmul(rand(1, 9999) / 100, $multiplier);
 
-                    $orderPositionService->fillPriceCalculation($orderPosition, $data);
+                    PriceCalculation::fill($orderPosition, $data);
                     $orderPosition->save();
 
                     // Create Bundle Positions

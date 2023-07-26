@@ -27,6 +27,10 @@ class CreateOrder extends BaseAction
         $this->data['currency_id'] = $this->data['currency_id'] ?? Currency::query()->first()?->id;
         $addresses = Arr::pull($this->data, 'addresses', []);
 
+        if (! ($this->data['address_delivery']['id'] ?? false) && $this->data['address_delivery_id'] ?? false) {
+            $this->data['address_delivery_id'] = null;
+        }
+
         $order = new Order($this->data);
         if ($order->shipping_costs_net_price) {
             $order->shipping_costs_vat_rate_percentage = 0.190000000;   // TODO: Make this percentage NOT hardcoded!
@@ -39,6 +43,7 @@ class CreateOrder extends BaseAction
                 $order->shipping_costs_net_price
             );
         }
+
         $order->save();
 
         if ($addresses) {
