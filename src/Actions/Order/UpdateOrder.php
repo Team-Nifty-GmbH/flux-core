@@ -41,6 +41,12 @@ class UpdateOrder extends BaseAction
             );
         }
 
+        if (! ($this->data['address_delivery']['id'] ?? false)) {
+            $this->data['address_delivery_id'] = null;
+        } else {
+            $this->data['address_delivery_id'] = $this->data['address_delivery']['id'];
+        }
+
         $order->fill($this->data);
         $order->save();
 

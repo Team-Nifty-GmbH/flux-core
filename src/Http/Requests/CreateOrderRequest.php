@@ -6,6 +6,7 @@ use FluxErp\Models\Order;
 use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\PaymentState\PaymentState;
+use Illuminate\Support\Arr;
 use Spatie\ModelStates\Validation\ValidStateRule;
 
 class CreateOrderRequest extends BaseFormRequest
@@ -19,6 +20,7 @@ class CreateOrderRequest extends BaseFormRequest
     {
         return array_merge(
             (new Order())->hasAdditionalColumnsValidationRules(),
+            Arr::prependKeysWith((new CreateAddressRequest())->postalAddressRules(), 'address_delivery.'),
             [
                 'parent_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
@@ -29,8 +31,8 @@ class CreateOrderRequest extends BaseFormRequest
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'addresses'),
                 ],
                 'address_delivery_id' => [
-                    'required',
                     'integer',
+                    'nullable',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'addresses'),
                 ],
                 'language_id' => 'required|integer|exists:languages,id,deleted_at,NULL',
@@ -45,6 +47,18 @@ class CreateOrderRequest extends BaseFormRequest
                     'required',
                     'integer',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'payment_types'),
+                ],
+
+                'address_delivery' => [
+                    'array',
+                ],
+                'address_delivery.id' => [
+                    'integer',
+                    new ExistsWithForeign(
+                        foreignAttribute: 'client_id',
+                        table: 'addresses',
+                        baseTable: 'orders'
+                    ),
                 ],
 
                 'delivery_state' => [
