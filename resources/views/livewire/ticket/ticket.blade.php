@@ -44,8 +44,16 @@
                             </x-slot:header>
                             <livewire:folder-tree :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
                         </x-card>
-                        <x-card class="!px-0 !py-0">
-                            <livewire:features.comments.comments :is-public="true" :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
+                        <x-card>
+                            <x-tabs
+                                wire:model="tab"
+                                :tabs="[
+                                    'features.comments.comments' => __('Comments'),
+                                    'features.activities' => __('Activities'),
+                                ]"
+                            >
+                                <livewire:is wire:key="{{ uniqid() }}" :component="$tab" :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
+                            </x-tabs>
                         </x-card>
                     </div>
                 </div>

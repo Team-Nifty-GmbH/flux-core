@@ -1,6 +1,7 @@
 import Alpine from 'alpinejs'
 import focus from '@alpinejs/focus'
 import persist from '@alpinejs/persist'
+import collapse from '@alpinejs/collapse'
 import mask from '@alpinejs/mask'
 import folderTree from './components/folder-tree';
 import '../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
@@ -8,6 +9,7 @@ import '../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
 window.folderTree = folderTree;
 
 Alpine.plugin(focus)
+Alpine.plugin(collapse)
 Alpine.plugin(persist)
 Alpine.plugin(mask)
 

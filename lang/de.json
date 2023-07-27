@@ -525,5 +525,11 @@
     "settings.translations.get": "Übersetzungseinstellungen anzeigen",
     "settings.users.get": "Benutzereinstellungen anzeigen",
     "tickets.{id}.get": "Ticketdetails anzeigen",
-    "tickets.get": "Tickets anzeigen"
+    "tickets.get": "Tickets anzeigen",
+    "created": "hat erstellt",
+    "updated": "hat aktualisiert",
+    "deleted": "hat gelöscht",
+    "restored": "hat wiederhergestellt",
+    "Show more": "Mehr anzeigen",
+    "Activities": "Aktivitäten"
 }
