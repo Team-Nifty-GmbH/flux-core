@@ -20,8 +20,6 @@ use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
-use FluxErp\Logging\DatabaseCustomLogger;
-use FluxErp\Logging\DatabaseLoggingHandler;
 use FluxErp\Models\Address;
 use FluxErp\Models\Order;
 use FluxErp\Models\Permission;
@@ -29,7 +27,6 @@ use FluxErp\Models\Product;
 use FluxErp\Models\ProjectTask;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
-use FluxErp\Models\Token;
 use FluxErp\Models\User;
 use FluxErp\Widgets\WidgetManager;
 use Illuminate\Contracts\Http\Kernel;
@@ -267,7 +264,7 @@ class FluxServiceProvider extends ServiceProvider
                     'FluxErp\\Models\\',
                     'FluxErp\\Services\\',
                     'FluxErp\\Actions\\',
-                ]
+                ],
             ]);
         }
     }

@@ -92,13 +92,15 @@ class OrderDetail extends Component
 
         // get the latest attachment per collection_name where disk is public
         $this->attachments = $order->media()
+            ->select(['id', 'collection_name', 'file_name', 'mime_type', 'disk'])
             ->where('disk', 'public')
-            ->latest('id')
-            ->get()
-            ->groupBy('collection_name')
-            ->map(function ($item) {
-                return $item->first()->only('id', 'collection_name', 'file_name', 'mime_type');
+            ->whereIn('id', function ($query) {
+                $query->selectRaw('MAX(id)')
+                    ->from('media')
+                    ->where('disk', 'public')
+                    ->groupBy('collection_name');
             })
+            ->get()
             ->toArray();
 
         $this->order = $order->toArray();

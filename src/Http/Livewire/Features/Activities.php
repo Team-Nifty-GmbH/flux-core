@@ -21,23 +21,9 @@ class Activities extends Component
 
     public int $page = 1;
 
-    public int $perPage = 1;
+    public int $perPage = 15;
 
-    public int $total = 1;
-
-    /**
-     * @return string[]
-     */
-    public function getListeners(): array
-    {
-        $channel = (new $this->modelType)->broadcastChannel() . $this->modelId;
-
-        return [
-            'echo-private:' . $channel . ',.CommentCreated' => 'commentCreatedEvent',
-            'echo-private:' . $channel . ',.CommentUpdated' => 'commentUpdatedEvent',
-            'echo-private:' . $channel . ',.CommentDeleted' => 'commentDeletedEvent',
-        ];
-    }
+    public int $total = 0;
 
     public function updatedPage(): void
     {
@@ -52,28 +38,29 @@ class Activities extends Component
             ->activities()
             ->with('causer:id,firstname,lastname')
             ->latest()
-            ->paginate(perPage: 10 * $this->page);
+            ->paginate(perPage: $this->perPage * $this->page);
 
         $this->perPage = $activities->perPage();
         $this->total = $activities->total();
 
-        $this->activities = $activities->map(function ($item) {
-            $itemArray = $item->toArray();
+        $this->activities = $activities
+            ->map(function ($item) {
+                $itemArray = $item->toArray();
 
-            $itemArray['causer']['name'] = $item->causer?->getLabel() ?: __('Unknown');
-            $itemArray['causer']['avatar_url'] = $item->causer?->getAvatarUrl() ?: Icon::make('user')->getUrl();
-            $itemArray['event'] = __($item->event);
+                $itemArray['causer']['name'] = $item->causer?->getLabel() ?: __('Unknown');
+                $itemArray['causer']['avatar_url'] = $item->causer?->getAvatarUrl() ?: Icon::make('user')->getUrl();
+                $itemArray['event'] = __($item->event);
 
-            if (! auth()->user() instanceof User) {
-                $itemArray['properties'] = [
-                    'old' => [],
-                    'attributes' => [],
-                ];
-            }
+                if (! auth()->user() instanceof User) {
+                    $itemArray['properties'] = [
+                        'old' => [],
+                        'attributes' => [],
+                    ];
+                }
 
-            return $itemArray;
-        })
-        ->toArray();
+                return $itemArray;
+            })
+            ->toArray();
     }
 
     public function render(): View|Factory|Application
