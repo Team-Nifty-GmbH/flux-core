@@ -21,7 +21,7 @@ class DeleteProductProperty extends BaseAction
         return [ProductProperty::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return ProductProperty::query()
             ->whereKey($this->data['id'])

@@ -22,7 +22,7 @@ class DeleteComment extends BaseAction
         return [Comment::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return Comment::query()
             ->whereKey($this->data['id'])

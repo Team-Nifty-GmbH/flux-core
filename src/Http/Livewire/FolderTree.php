@@ -56,7 +56,7 @@ class FolderTree extends Component
         $this->latestUploads = $media;
     }
 
-    public function mount(?string $modelType = null, ?int $modelId = null): void
+    public function mount(string $modelType = null, int $modelId = null): void
     {
         $this->modelType = $modelType;
         $this->modelId = $modelId;
@@ -85,7 +85,7 @@ class FolderTree extends Component
         return ($item['file_name'] ?? false) ? $this->saveFile($item) : $this->saveFolder($item);
     }
 
-    public function saveFolder(array $collection): bool
+    public function saveFolder(array $collection): true
     {
         $newCollectionName = explode('.', $collection['collection_name']);
         array_pop($newCollectionName);

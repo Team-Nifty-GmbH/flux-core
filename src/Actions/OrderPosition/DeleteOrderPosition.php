@@ -20,7 +20,7 @@ class DeleteOrderPosition extends BaseAction
         return [OrderPosition::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         $orderPosition = OrderPosition::query()
             ->whereKey($this->data['id'])

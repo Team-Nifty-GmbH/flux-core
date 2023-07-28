@@ -20,7 +20,7 @@ class DeleteCountryRegion extends BaseAction
         return [CountryRegion::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return CountryRegion::query()
             ->whereKey($this->data['id'])

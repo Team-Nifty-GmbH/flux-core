@@ -28,6 +28,6 @@ class CreateSerialNumberRange extends BaseAction
         $serialNumberRange = new SerialNumberRange($this->data);
         $serialNumberRange->save();
 
-        return $serialNumberRange;
+        return $serialNumberRange->fresh();
     }
 }

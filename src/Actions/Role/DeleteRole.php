@@ -21,7 +21,7 @@ class DeleteRole extends BaseAction
         return [Role::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return Role::query()
             ->whereKey($this->data['id'])

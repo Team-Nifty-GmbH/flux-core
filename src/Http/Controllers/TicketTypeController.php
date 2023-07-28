@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class TicketTypeController extends BaseController
 {
-    public function __construct(?string $permission = null)
+    public function __construct(string $permission = null)
     {
         parent::__construct($permission);
         $this->model = new TicketType();

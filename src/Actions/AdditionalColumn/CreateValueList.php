@@ -28,7 +28,7 @@ class CreateValueList extends BaseAction
         $valueList->values = $this->data['values'];
         $valueList->save();
 
-        return $valueList;
+        return $valueList->fresh();
     }
 
     public function validate(): static

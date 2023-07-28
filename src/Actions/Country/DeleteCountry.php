@@ -23,7 +23,7 @@ class DeleteCountry extends BaseAction
         return [Country::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         $country = Country::query()
             ->whereKey($this->data['id'])

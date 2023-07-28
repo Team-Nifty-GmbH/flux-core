@@ -23,7 +23,7 @@ class DeleteMedia extends BaseAction
         return [Media::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         $mediaItem = Media::query()
             ->whereKey($this->data['id'])

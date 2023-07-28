@@ -30,7 +30,7 @@ class ProjectTask extends Component
 
     public array $openCategories = [];
 
-    public function mount(?int $id = null, ?int $projectId = null): void
+    public function mount(int $id = null, int $projectId = null): void
     {
         $this->projectId = $projectId;
 
@@ -114,7 +114,7 @@ class ProjectTask extends Component
         }
     }
 
-    public function save(): bool|array
+    public function save(): false|array
     {
         $projectTask = $this->projectTask;
         $projectTask['categories'] = [$this->projectTask['categories']];

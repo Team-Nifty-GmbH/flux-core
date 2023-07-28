@@ -22,7 +22,7 @@ class DeleteWorkTimeType extends BaseAction
         return [WorkTimeType::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return WorkTime::query()
             ->whereKey($this->data['id'])

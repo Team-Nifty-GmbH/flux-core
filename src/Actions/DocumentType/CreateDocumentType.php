@@ -25,7 +25,7 @@ class CreateDocumentType extends BaseAction
         $documentType = new DocumentType($this->data);
         $documentType->save();
 
-        return $documentType;
+        return $documentType->fresh();
     }
 
     public function validate(): static

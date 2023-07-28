@@ -27,7 +27,7 @@ class CreateSepaMandate extends BaseAction
         $sepaMandate = new SepaMandate($this->data);
         $sepaMandate->save();
 
-        return $sepaMandate;
+        return $sepaMandate->fresh();
     }
 
     public function validate(): static

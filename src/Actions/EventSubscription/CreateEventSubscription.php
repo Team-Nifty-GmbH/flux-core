@@ -28,7 +28,7 @@ class CreateEventSubscription extends BaseAction
         $eventSubscription = new EventSubscription($this->data);
         $eventSubscription->save();
 
-        return $eventSubscription;
+        return $eventSubscription->fresh();
     }
 
     public function validate(): static

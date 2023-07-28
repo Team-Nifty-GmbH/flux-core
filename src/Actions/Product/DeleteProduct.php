@@ -21,7 +21,7 @@ class DeleteProduct extends BaseAction
         return [Product::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return Product::query()
             ->whereKey($this->data['id'])

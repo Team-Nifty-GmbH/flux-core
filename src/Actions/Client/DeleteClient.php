@@ -20,7 +20,7 @@ class DeleteClient extends BaseAction
         return [Client::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return Client::query()
             ->whereKey($this->data['id'])

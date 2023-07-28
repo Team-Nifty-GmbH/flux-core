@@ -20,7 +20,7 @@ class DeleteSerialNumberRange extends BaseAction
         return [SerialNumberRange::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return SerialNumberRange::query()
             ->whereKey($this->data['id'])

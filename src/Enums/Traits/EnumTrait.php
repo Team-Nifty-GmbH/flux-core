@@ -9,7 +9,7 @@ trait EnumTrait
         return array_column(self::cases(), 'value');
     }
 
-    public static function fromName(string $name): static|null
+    public static function fromName(string $name): ?static
     {
         $values = array_values(
             array_filter(self::cases(), fn ($case) => $case->name === $name)

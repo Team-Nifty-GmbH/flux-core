@@ -26,6 +26,6 @@ class CreateCalendarEvent extends BaseAction
 
         SyncCalendarEventInvites::make(array_merge($this->data, ['id' => $calendarEvent->id]))->execute();
 
-        return $calendarEvent;
+        return $calendarEvent->fresh();
     }
 }

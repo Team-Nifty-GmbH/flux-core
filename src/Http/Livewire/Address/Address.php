@@ -10,11 +10,9 @@ use FluxErp\Http\Requests\UpdateAddressRequest;
 use FluxErp\Models\Address as AddressModel;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
-use FluxErp\Services\AddressService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -131,7 +129,7 @@ class Address extends Component
         $this->skipRender();
     }
 
-    public function save(int $contactId = null): array|null
+    public function save(int $contactId = null): ?array
     {
         $function = ($this->address['id'] ?? false)
             ? new UpdateAddress([])
@@ -187,7 +185,7 @@ class Address extends Component
         // TODO: remove all locks
     }
 
-    public function delete(): null|array
+    public function delete(): ?array
     {
         if (! Auth::user()->can('api.addresses.{id}.delete')) {
             $this->notification()->error(__('You dont have the permission to do that.'));
@@ -259,7 +257,7 @@ class Address extends Component
         }
     }
 
-    public function getAddress(?int $addressId = null, bool $skipRender = true): void
+    public function getAddress(int $addressId = null, bool $skipRender = true): void
     {
         if ($addressId) {
             $address = AddressModel::query()

@@ -21,7 +21,7 @@ class DeleteWorkTime extends BaseAction
         return [WorkTime::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return WorkTime::query()
             ->whereKey($this->data['id'])

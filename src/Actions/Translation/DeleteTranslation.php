@@ -20,7 +20,7 @@ class DeleteTranslation extends BaseAction
         return [LanguageLine::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return LanguageLine::query()
             ->whereKey($this->data['id'])

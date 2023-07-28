@@ -20,7 +20,7 @@ class DeletePaymentType extends BaseAction
         return [PaymentType::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return PaymentType::query()
             ->whereKey($this->data['id'])

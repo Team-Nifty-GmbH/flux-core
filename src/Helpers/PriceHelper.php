@@ -13,9 +13,9 @@ use Illuminate\Database\Eloquent\Builder;
 
 class PriceHelper
 {
-    private Contact|null $contact = null;
+    private ?Contact $contact = null;
 
-    private PriceList|null $priceList = null;
+    private ?PriceList $priceList = null;
 
     private Product $product;
 
@@ -61,7 +61,7 @@ class PriceHelper
         return $this;
     }
 
-    public function price(): Price|null
+    public function price(): ?Price
     {
         $this->timestamp = $this->timestamp ?? Carbon::now()->toDateTimeString();
 
@@ -184,7 +184,7 @@ class PriceHelper
     /**
      * Calculate price from price list based on price list parent(s) and discount per price list
      */
-    private function calculatePriceFromPriceList(PriceList $priceList, array $discounts): Price|null
+    private function calculatePriceFromPriceList(PriceList $priceList, array $discounts): ?Price
     {
         $discounts[] = $priceList->discount()
             ->where(function (Builder $query) {

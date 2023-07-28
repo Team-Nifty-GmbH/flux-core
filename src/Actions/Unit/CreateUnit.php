@@ -24,6 +24,6 @@ class CreateUnit extends BaseAction
         $unit = new Unit($this->data);
         $unit->save();
 
-        return $unit;
+        return $unit->fresh();
     }
 }

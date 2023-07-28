@@ -40,7 +40,7 @@ class TicketCreate extends Component
         'save',
     ];
 
-    public function mount(?string $modelType = null, ?int $modelId = null): void
+    public function mount(string $modelType = null, int $modelId = null): void
     {
         $this->ticket = [
             'title' => null,
@@ -92,12 +92,11 @@ class TicketCreate extends Component
 
         $this->attachments = [];
         $this->filesArray = [];
-        $this->subFolder = null;
 
         $this->skipRender();
     }
 
-    public function save(): bool
+    public function save(): true
     {
         $this->ticket = array_merge($this->ticket, [
             'authenticatable_type' => Auth::user()->getMorphClass(),

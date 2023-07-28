@@ -21,7 +21,7 @@ class DeleteCategory extends BaseAction
         return [Category::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return Category::query()
             ->whereKey($this->data['id'])

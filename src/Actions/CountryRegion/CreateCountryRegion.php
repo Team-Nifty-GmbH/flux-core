@@ -25,7 +25,7 @@ class CreateCountryRegion extends BaseAction
         $countryRegion = new CountryRegion($this->data);
         $countryRegion->save();
 
-        return $countryRegion;
+        return $countryRegion->fresh();
     }
 
     public function validate(): static

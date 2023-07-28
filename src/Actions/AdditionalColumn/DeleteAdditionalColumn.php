@@ -20,7 +20,7 @@ class DeleteAdditionalColumn extends BaseAction
         return [AdditionalColumn::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         $additionalColumn = AdditionalColumn::query()
             ->whereKey($this->data['id'])

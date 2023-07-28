@@ -21,7 +21,7 @@ class DeleteProductOptionGroup extends BaseAction
         return [ProductOptionGroup::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return ProductOptionGroup::query()
             ->whereKey($this->data['id'])

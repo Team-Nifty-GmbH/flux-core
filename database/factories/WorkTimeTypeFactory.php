@@ -16,14 +16,12 @@ class WorkTimeTypeFactory extends Factory
 
     /**
      * Define the model's default state.
-     *
-     * @return array
      */
     public function definition(): array
     {
         return [
             'name' => $this->faker->word,
-            'is_billable' => $this->faker->boolean()
+            'is_billable' => $this->faker->boolean(),
         ];
     }
 }

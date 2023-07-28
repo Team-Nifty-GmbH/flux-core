@@ -17,8 +17,6 @@ class WorkTimeFactory extends Factory
 
     /**
      * Define the model's default state.
-     *
-     * @return array
      */
     public function definition(): array
     {
@@ -26,7 +24,7 @@ class WorkTimeFactory extends Factory
             'started_at' => $startedAt = $this->faker->dateTimeThisYear(),
             'ended_at' => $startedAt->add(DateInterval::createFromDateString('8 hours')),
             'description' => $this->faker->realText(),
-            'is_pause' => $this->faker->boolean(25)
+            'is_pause' => $this->faker->boolean(25),
         ];
     }
 }

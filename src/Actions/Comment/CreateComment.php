@@ -83,6 +83,6 @@ class CreateComment extends BaseAction
         $comment->is_internal = $this->data['is_internal'] ?? true;
         $comment->save();
 
-        return $comment;
+        return $comment->fresh();
     }
 }

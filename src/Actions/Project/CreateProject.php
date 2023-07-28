@@ -27,7 +27,7 @@ class CreateProject extends BaseAction
         $project = new Project($this->data);
         $project->save();
 
-        return $project;
+        return $project->fresh();
     }
 
     public function validate(): static

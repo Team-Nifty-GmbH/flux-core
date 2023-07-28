@@ -24,6 +24,6 @@ class CreateBankConnection extends BaseAction
         $bankConnection = new BankConnection($this->data);
         $bankConnection->save();
 
-        return $bankConnection;
+        return $bankConnection->fresh();
     }
 }

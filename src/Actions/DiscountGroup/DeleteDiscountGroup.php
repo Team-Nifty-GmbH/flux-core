@@ -20,7 +20,7 @@ class DeleteDiscountGroup extends BaseAction
         return [DiscountGroup::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return DiscountGroup::query()
             ->whereKey($this->data['id'])

@@ -25,7 +25,7 @@ class CreateOrderType extends BaseAction
         $orderType = new OrderType($this->data);
         $orderType->save();
 
-        return $orderType;
+        return $orderType->fresh();
     }
 
     public function validate(): static

@@ -14,7 +14,7 @@ class Navigation extends Component
 {
     public array $navigations = [];
 
-    public null|string $background;
+    public ?string $background;
 
     public ?array $setting;
 
@@ -64,7 +64,7 @@ class Navigation extends Component
         $this->navigations = $navigation;
     }
 
-    public function mount(?array $setting = null, bool $showSearchBar = true): void
+    public function mount(array $setting = null, bool $showSearchBar = true): void
     {
         $this->showSearchBar = $showSearchBar;
 

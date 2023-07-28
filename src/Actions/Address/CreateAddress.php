@@ -63,7 +63,7 @@ class CreateAddress extends BaseAction
             }
         }
 
-        return $address;
+        return $address->withoutRelations()->fresh();
     }
 
     public function validate(): static

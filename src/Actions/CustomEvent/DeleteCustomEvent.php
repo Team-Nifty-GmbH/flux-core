@@ -20,7 +20,7 @@ class DeleteCustomEvent extends BaseAction
         return [CustomEvent::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return CustomEvent::query()
             ->whereKey($this->data['id'])

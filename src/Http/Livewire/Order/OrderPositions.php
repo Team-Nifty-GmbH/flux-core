@@ -133,7 +133,7 @@ class OrderPositions extends Component
         return $orderPosition;
     }
 
-    public function updatedProductId(?string $id = null): void
+    public function updatedProductId(string $id = null): void
     {
         if (is_null($id)) {
             return;
@@ -187,7 +187,7 @@ class OrderPositions extends Component
         // TODO: Implement addtoGroup() method.
     }
 
-    public function remove(array|string|null $selected = null): void
+    public function remove(array|string $selected = null): void
     {
         $ids = $selected ? (array) $selected : $this->selected;
 

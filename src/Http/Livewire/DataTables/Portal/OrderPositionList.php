@@ -30,7 +30,7 @@ class OrderPositionList extends DataTable
         'total_net_price',
     ];
 
-    public bool|null $isSearchable = false;
+    public ?bool $isSearchable = false;
 
     public bool $isFilterable = false;
 

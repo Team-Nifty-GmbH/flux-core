@@ -24,7 +24,7 @@ class UpdateMainAddress extends BaseAction
         return [Address::class];
     }
 
-    public function execute(): Address|null
+    public function execute(): ?Address
     {
         $contact = Contact::query()
             ->whereKey($this->data['contact_id'])
@@ -43,6 +43,6 @@ class UpdateMainAddress extends BaseAction
             $address->save();
         }
 
-        return $address;
+        return $address?->fresh();
     }
 }

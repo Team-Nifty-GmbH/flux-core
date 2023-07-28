@@ -24,10 +24,10 @@ class CustomEvents extends Component
 
     public function mount(
         string|Model $model,
-        ?int $id = null,
-        ?array $record = null,
-        ?string $recordModel = null,
-        ?array $additionalData = null
+        int $id = null,
+        array $record = null,
+        string $recordModel = null,
+        array $additionalData = null
     ): void {
         $this->model = $model;
         $this->modelId = $id;
