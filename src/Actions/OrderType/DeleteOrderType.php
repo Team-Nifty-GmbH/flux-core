@@ -7,9 +7,9 @@ use FluxErp\Models\OrderType;
 
 class DeleteOrderType extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:order_types,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteOrderType extends BaseAction
         return [OrderType::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return OrderType::query()
             ->whereKey($this->data['id'])

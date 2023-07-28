@@ -8,9 +8,9 @@ use FluxErp\Models\StockPosting;
 
 class CreateStockPosting extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateStockPostingRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateStockPosting extends BaseAction
         return [StockPosting::class];
     }
 
-    public function execute(): StockPosting
+    public function performAction(): StockPosting
     {
         $this->data['stock'] = $this->getLatestStock(
             $this->data['warehouse_id'], $this->data['product_id'], $this->data['posting']

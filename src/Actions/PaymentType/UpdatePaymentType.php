@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdatePaymentType extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdatePaymentTypeRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdatePaymentType extends BaseAction
         return [PaymentType::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $paymentType = PaymentType::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdatePaymentType extends BaseAction
         return $paymentType->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new PaymentType());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

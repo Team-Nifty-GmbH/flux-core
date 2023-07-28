@@ -11,9 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdatePriceList extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdatePriceListRequest())->rules();
     }
 
@@ -22,7 +22,7 @@ class UpdatePriceList extends BaseAction
         return [PriceList::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $priceList = PriceList::query()
             ->whereKey($this->data['id'])
@@ -34,9 +34,9 @@ class UpdatePriceList extends BaseAction
         return $priceList->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         // Check if new parent causes a cycle
         if (
@@ -51,7 +51,5 @@ class UpdatePriceList extends BaseAction
                 'parent_id' => [__('Cycle detected')],
             ])->errorBag('updatePriceList');
         }
-
-        return $this;
     }
 }

@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateOrder extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateOrderRequest())->rules();
     }
 
@@ -22,7 +22,7 @@ class UpdateOrder extends BaseAction
         return [Order::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $addresses = Arr::pull($this->data, 'addresses', []);
 
@@ -57,13 +57,11 @@ class UpdateOrder extends BaseAction
         return $order->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Order());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

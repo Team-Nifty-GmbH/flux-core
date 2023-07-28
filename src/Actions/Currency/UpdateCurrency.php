@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateCurrency extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateCurrencyRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateCurrency extends BaseAction
         return [Currency::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $currency = Currency::query()
             ->whereKey($this->data['id'])

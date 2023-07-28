@@ -14,9 +14,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateProduct extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateProductRequest())->rules();
     }
 
@@ -25,7 +25,7 @@ class UpdateProduct extends BaseAction
         return [Product::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $productOptions = Arr::pull($this->data, 'product_options', []);
         $productProperties = Arr::mapWithKeys(
@@ -83,7 +83,7 @@ class UpdateProduct extends BaseAction
         return $product->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Product());
@@ -101,7 +101,5 @@ class UpdateProduct extends BaseAction
                 ])->errorBag('updateProduct');
             }
         }
-
-        return $this;
     }
 }

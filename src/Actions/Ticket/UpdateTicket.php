@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateTicket extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateTicketRequest())->rules();
     }
 
@@ -22,7 +22,7 @@ class UpdateTicket extends BaseAction
         return [Ticket::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $users = Arr::pull($this->data, 'users');
 
@@ -40,13 +40,11 @@ class UpdateTicket extends BaseAction
         return $ticket->refresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Ticket());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

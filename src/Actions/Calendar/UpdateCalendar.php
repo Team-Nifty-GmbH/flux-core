@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateCalendar extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateCalendarRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateCalendar extends BaseAction
         return [Calendar::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $calendar = Calendar::query()
             ->whereKey($this->data['id'])

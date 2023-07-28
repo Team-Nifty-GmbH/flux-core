@@ -11,9 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class LockModel extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer',
             'model_type' => [
@@ -29,7 +29,7 @@ class LockModel extends BaseAction
         return [];
     }
 
-    public function execute(): bool
+    public function performAction(): true
     {
         $model = $this->data['model_type']::query()
             ->whereKey($this->data['id'])
@@ -42,9 +42,9 @@ class LockModel extends BaseAction
         return true;
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (! in_array(Lockable::class, class_uses($this->data['model_type']) ?: [])) {
             throw ValidationException::withMessages([
@@ -70,7 +70,5 @@ class LockModel extends BaseAction
                 'model' => [__('Model is locked by another user')],
             ])->errorBag('lockModel');
         }
-
-        return $this;
     }
 }

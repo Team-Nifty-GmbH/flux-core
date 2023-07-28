@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateTransaction extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateTransactionRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateTransaction extends BaseAction
         return [Transaction::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $warehouse = Transaction::query()
             ->whereKey($this->data['id'])

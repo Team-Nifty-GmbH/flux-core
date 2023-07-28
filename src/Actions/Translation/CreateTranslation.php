@@ -8,9 +8,9 @@ use Spatie\TranslationLoader\LanguageLine;
 
 class CreateTranslation extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateTranslationRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateTranslation extends BaseAction
         return [LanguageLine::class];
     }
 
-    public function execute(): LanguageLine
+    public function performAction(): LanguageLine
     {
         return LanguageLine::create($this->data);
     }

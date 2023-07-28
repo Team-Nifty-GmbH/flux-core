@@ -8,9 +8,9 @@ use Illuminate\Validation\ValidationException;
 
 class DeletePrice extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:prices,id,deleted_at,NULL',
         ];
@@ -21,7 +21,7 @@ class DeletePrice extends BaseAction
         return [Price::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return Price::query()
             ->whereKey($this->data['id'])
@@ -29,9 +29,9 @@ class DeletePrice extends BaseAction
             ->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (Price::query()
             ->whereKey($this->data['id'])
@@ -43,7 +43,5 @@ class DeletePrice extends BaseAction
                 'order_positions' => [__('Price has associated order positions')],
             ])->errorBag('deletePrice');
         }
-
-        return $this;
     }
 }

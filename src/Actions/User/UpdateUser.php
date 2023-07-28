@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateUser extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateUserRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateUser extends BaseAction
         return [User::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $user = User::query()
             ->whereKey($this->data['id'])

@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateAddressType extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateAddressTypeRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateAddressType extends BaseAction
         return [AddressType::class];
     }
 
-    public function execute(): AddressType
+    public function performAction(): AddressType
     {
         $addressType = new AddressType($this->data);
         $addressType->save();
@@ -28,13 +28,11 @@ class CreateAddressType extends BaseAction
         return $addressType;
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new AddressType());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

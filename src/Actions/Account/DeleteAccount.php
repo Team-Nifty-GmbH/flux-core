@@ -7,9 +7,9 @@ use FluxErp\Models\Account;
 
 class DeleteAccount extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:accounts,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteAccount extends BaseAction
         return [Account::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return Account::query()
             ->whereKey($this->data['id'])

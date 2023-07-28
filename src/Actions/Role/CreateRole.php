@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class CreateRole extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateRoleRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateRole extends BaseAction
         return [Role::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $role = Role::create($this->data);
 

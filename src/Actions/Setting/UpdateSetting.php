@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateSetting extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateSettingRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateSetting extends BaseAction
         return [Setting::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $setting = Setting::query()
             ->whereKey($this->data['id'])

@@ -8,9 +8,9 @@ use FluxErp\Models\PriceList;
 
 class CreatePriceList extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreatePriceListRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreatePriceList extends BaseAction
         return [PriceList::class];
     }
 
-    public function execute(): PriceList
+    public function performAction(): PriceList
     {
         $priceList = new PriceList($this->data);
         $priceList->save();

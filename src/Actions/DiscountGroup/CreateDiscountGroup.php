@@ -9,9 +9,9 @@ use Illuminate\Support\Arr;
 
 class CreateDiscountGroup extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateDiscountGroupRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateDiscountGroup extends BaseAction
         return [DiscountGroup::class];
     }
 
-    public function execute(): DiscountGroup
+    public function performAction(): DiscountGroup
     {
         $discounts = Arr::pull($this->data, 'discounts', []);
 

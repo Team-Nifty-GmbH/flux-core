@@ -7,9 +7,9 @@ use FluxErp\Models\CountryRegion;
 
 class DeleteCountryRegion extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:country_regions,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteCountryRegion extends BaseAction
         return [CountryRegion::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return CountryRegion::query()
             ->whereKey($this->data['id'])

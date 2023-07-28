@@ -8,9 +8,9 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteAddressType extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:address_types,id,deleted_at,NULL',
         ];
@@ -21,7 +21,7 @@ class DeleteAddressType extends BaseAction
         return [AddressType::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return AddressType::query()
             ->whereKey($this->data['id'])
@@ -29,9 +29,9 @@ class DeleteAddressType extends BaseAction
             ->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         $errors = [];
         $addressType = AddressType::query()
@@ -52,7 +52,5 @@ class DeleteAddressType extends BaseAction
         if ($errors) {
             throw ValidationException::withMessages($errors)->errorBag('deleteAddressType');
         }
-
-        return $this;
     }
 }

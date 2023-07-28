@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateBankConnection extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateBankConnectionRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateBankConnection extends BaseAction
         return [BankConnection::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $bankConnection = BankConnection::query()
             ->whereKey($this->data['id'])

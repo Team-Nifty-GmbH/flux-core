@@ -9,10 +9,10 @@ use FluxErp\Models\User;
 
 class UpdateRoleUsers extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
-        $this->data = $this->data ? array_merge(['assign' => true], $this->data) : [];
+        parent::boot($data);
+        $this->setData($this->data ? array_merge(['assign' => true], $this->data) : []);
         $this->rules = (new EditRoleUserRequest())->rules();
     }
 
@@ -26,7 +26,7 @@ class UpdateRoleUsers extends BaseAction
         return [Role::class, User::class];
     }
 
-    public function execute(): array
+    public function performAction(): array
     {
         $role = Role::query()
             ->whereKey($this->data['id'])

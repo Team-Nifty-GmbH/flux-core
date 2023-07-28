@@ -7,9 +7,9 @@ use Spatie\TranslationLoader\LanguageLine;
 
 class DeleteTranslation extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:language_lines,id',
         ];
@@ -20,7 +20,7 @@ class DeleteTranslation extends BaseAction
         return [LanguageLine::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return LanguageLine::query()
             ->whereKey($this->data['id'])

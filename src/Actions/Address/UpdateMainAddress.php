@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Builder;
 
 class UpdateMainAddress extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'address_id' => 'integer|nullable|exists:addresses,id,deleted_at,NULL',
             'contact_id' => 'required|integer|exists:contacts,id,deleted_at,NULL',
@@ -24,7 +24,7 @@ class UpdateMainAddress extends BaseAction
         return [Address::class];
     }
 
-    public function execute(): Address|null
+    public function performAction(): ?Address
     {
         $contact = Contact::query()
             ->whereKey($this->data['contact_id'])

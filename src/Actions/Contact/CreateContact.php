@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateContact extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateContactRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class CreateContact extends BaseAction
         return [Contact::class];
     }
 
-    public function execute(): Contact
+    public function performAction(): Contact
     {
         $this->data['customer_number'] = $this->data['customer_number'] ?? uniqid();
         $discountGroups = Arr::pull($this->data, 'discount_groups', []);
@@ -36,13 +36,11 @@ class CreateContact extends BaseAction
         return $contact;
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Contact());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

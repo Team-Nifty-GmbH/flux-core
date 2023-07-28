@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateMedia extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateMediaRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateMedia extends BaseAction
         return [Media::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $media = Media::query()
             ->whereKey($this->data['id'])

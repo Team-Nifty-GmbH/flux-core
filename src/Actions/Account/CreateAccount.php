@@ -8,9 +8,9 @@ use FluxErp\Models\Account;
 
 class CreateAccount extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateAccountRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateAccount extends BaseAction
         return [Account::class];
     }
 
-    public function execute(): Account
+    public function performAction(): Account
     {
         $account = new Account($this->data);
         $account->save();

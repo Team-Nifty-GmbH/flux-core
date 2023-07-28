@@ -10,9 +10,9 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteLanguage extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:languages,id,deleted_at,NULL',
         ];
@@ -23,7 +23,7 @@ class DeleteLanguage extends BaseAction
         return [Language::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         $language = Language::query()
             ->whereKey($this->data['id'])
@@ -35,9 +35,9 @@ class DeleteLanguage extends BaseAction
         return $language->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         $errors = [];
         $language = Language::query()
@@ -60,7 +60,5 @@ class DeleteLanguage extends BaseAction
         if ($errors) {
             throw ValidationException::withMessages($errors)->errorBag('deleteLanguage');
         }
-
-        return $this;
     }
 }

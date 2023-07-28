@@ -11,9 +11,10 @@ use Illuminate\Support\Facades\Auth;
 
 class UpdateNotificationSetting extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct(array_merge(['is_anonymous' => false], $data[0] ?? []));
+        parent::boot($data);
+        $this->setData(array_merge(['is_anonymous' => false], $this->data));
         $this->rules = $this->data['is_anonymous'] ?
             (new UpdateNotificationSettingsRequest())->rules() : (new UpdateUserNotificationSettingsRequest())->rules();
     }
@@ -23,7 +24,7 @@ class UpdateNotificationSetting extends BaseAction
         return [NotificationSetting::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $notificationSetting = NotificationSetting::query()
             ->firstOrNew([

@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateProduct extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateProductRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class CreateProduct extends BaseAction
         return [Product::class];
     }
 
-    public function execute(): Product
+    public function performAction(): Product
     {
         $productOptions = Arr::pull($this->data, 'product_options', []);
         $productProperties = Arr::mapWithKeys(
@@ -57,13 +57,11 @@ class CreateProduct extends BaseAction
         return $product->refresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Product());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

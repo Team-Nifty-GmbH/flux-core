@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateOrderType extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateOrderTypeRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateOrderType extends BaseAction
         return [OrderType::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $orderType = OrderType::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdateOrderType extends BaseAction
         return $orderType->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new OrderType());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

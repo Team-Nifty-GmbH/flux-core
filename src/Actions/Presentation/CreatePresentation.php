@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreatePresentation extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreatePresentationRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreatePresentation extends BaseAction
         return [Presentation::class];
     }
 
-    public function execute(): Presentation
+    public function performAction(): Presentation
     {
         $presentation = new Presentation($this->data);
         $presentation->save();
@@ -28,13 +28,11 @@ class CreatePresentation extends BaseAction
         return $presentation;
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Presentation());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

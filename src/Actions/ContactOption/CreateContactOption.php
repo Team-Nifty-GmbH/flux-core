@@ -8,9 +8,9 @@ use FluxErp\Models\ContactOption;
 
 class CreateContactOption extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateContactOptionRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateContactOption extends BaseAction
         return [ContactOption::class];
     }
 
-    public function execute(): ContactOption
+    public function performAction(): ContactOption
     {
         $contactOption = new ContactOption($this->data);
         $contactOption->save();

@@ -8,9 +8,9 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteProduct extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:products,id,deleted_at,NULL',
         ];
@@ -21,7 +21,7 @@ class DeleteProduct extends BaseAction
         return [Product::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return Product::query()
             ->whereKey($this->data['id'])
@@ -29,9 +29,9 @@ class DeleteProduct extends BaseAction
             ->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (Product::query()
             ->whereKey($this->data['id'])
@@ -43,7 +43,5 @@ class DeleteProduct extends BaseAction
                 'children' => [__('The given product has children')],
             ])->errorBag('deleteProduct');
         }
-
-        return $this;
     }
 }

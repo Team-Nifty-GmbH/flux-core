@@ -7,9 +7,9 @@ use FluxErp\Models\OrderPosition;
 
 class DeleteOrderPosition extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:order_positions,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteOrderPosition extends BaseAction
         return [OrderPosition::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         $orderPosition = OrderPosition::query()
             ->whereKey($this->data['id'])

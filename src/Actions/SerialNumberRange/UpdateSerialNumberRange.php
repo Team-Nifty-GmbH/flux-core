@@ -11,9 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateSerialNumberRange extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateSerialNumberRangeRequest())->rules();
     }
 
@@ -22,7 +22,7 @@ class UpdateSerialNumberRange extends BaseAction
         return [SerialNumberRange::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $serialNumberRange = SerialNumberRange::query()
             ->whereKey($this->data['id'])
@@ -34,9 +34,9 @@ class UpdateSerialNumberRange extends BaseAction
         return $serialNumberRange->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if ((array_key_exists('prefix', $this->data) || array_key_exists('affix', $this->data))
             && SerialNumber::query()
@@ -47,7 +47,5 @@ class UpdateSerialNumberRange extends BaseAction
                 'serial_numbers' => [__('Serial number range has serial numbers')],
             ])->errorBag('updateSerialNumberRange');
         }
-
-        return $this;
     }
 }

@@ -9,9 +9,9 @@ use FluxErp\Models\User;
 
 class CreateUser extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateUserRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateUser extends BaseAction
         return [User::class];
     }
 
-    public function execute(): User
+    public function performAction(): User
     {
         $this->data['is_active'] = $this->data['is_active'] ?? true;
         $this->data['language_id'] = array_key_exists('language_id', $this->data) ?

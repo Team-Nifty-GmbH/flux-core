@@ -8,9 +8,9 @@ use FluxErp\Models\BankConnection;
 
 class CreateBankConnection extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateBankConnectionRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateBankConnection extends BaseAction
         return [BankConnection::class];
     }
 
-    public function execute(): BankConnection
+    public function performAction(): BankConnection
     {
         $bankConnection = new BankConnection($this->data);
         $bankConnection->save();

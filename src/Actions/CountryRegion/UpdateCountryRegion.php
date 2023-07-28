@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateCountryRegion extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateCountryRegionRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateCountryRegion extends BaseAction
         return [CountryRegion::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $countryRegion = CountryRegion::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdateCountryRegion extends BaseAction
         return $countryRegion->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new CountryRegion());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

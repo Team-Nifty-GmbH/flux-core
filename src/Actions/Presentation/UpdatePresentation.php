@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdatePresentation extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdatePresentationRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdatePresentation extends BaseAction
         return [Presentation::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $presentation = Presentation::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdatePresentation extends BaseAction
         return $presentation->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Presentation());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

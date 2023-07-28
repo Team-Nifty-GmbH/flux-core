@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateVatRate extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateVatRateRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateVatRate extends BaseAction
         return [VatRate::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $vatRate = VatRate::query()
             ->whereKey($this->data['id'])

@@ -9,9 +9,9 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteComment extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:comments,id,deleted_at,NULL',
         ];
@@ -22,7 +22,7 @@ class DeleteComment extends BaseAction
         return [Comment::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return Comment::query()
             ->whereKey($this->data['id'])
@@ -30,9 +30,9 @@ class DeleteComment extends BaseAction
             ->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         $comment = Comment::query()
             ->whereKey($this->data['id'])
@@ -49,7 +49,5 @@ class DeleteComment extends BaseAction
                 'comment' => [__('Cant delete other users comments.')],
             ]);
         }
-
-        return $this;
     }
 }

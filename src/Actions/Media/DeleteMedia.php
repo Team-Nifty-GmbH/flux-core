@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Log;
 
 class DeleteMedia extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:media,id',
         ];
@@ -23,7 +23,7 @@ class DeleteMedia extends BaseAction
         return [Media::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         $mediaItem = Media::query()
             ->whereKey($this->data['id'])

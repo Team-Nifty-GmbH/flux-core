@@ -8,9 +8,9 @@ use FluxErp\Models\Setting;
 
 class CreateSetting extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateSettingRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateSetting extends BaseAction
         return [Setting::class];
     }
 
-    public function execute(): Setting
+    public function performAction(): Setting
     {
         $setting = new Setting($this->data);
         $setting->save();

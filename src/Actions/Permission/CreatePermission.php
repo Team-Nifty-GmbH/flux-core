@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class CreatePermission extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreatePermissionRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreatePermission extends BaseAction
         return [Permission::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         return Permission::create($this->data);
     }

@@ -7,9 +7,9 @@ use FluxErp\Models\DiscountGroup;
 
 class DeleteDiscountGroup extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:discount_groups,id',
         ];
@@ -20,7 +20,7 @@ class DeleteDiscountGroup extends BaseAction
         return [DiscountGroup::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return DiscountGroup::query()
             ->whereKey($this->data['id'])

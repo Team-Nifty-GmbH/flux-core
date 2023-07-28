@@ -12,9 +12,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreateEventSubscription extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateEventSubscriptionRequest())->rules();
     }
 
@@ -23,7 +23,7 @@ class CreateEventSubscription extends BaseAction
         return [EventSubscription::class];
     }
 
-    public function execute(): EventSubscription
+    public function performAction(): EventSubscription
     {
         $eventSubscription = new EventSubscription($this->data);
         $eventSubscription->save();
@@ -31,9 +31,9 @@ class CreateEventSubscription extends BaseAction
         return $eventSubscription;
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         $eventClass = Helper::classExists(classString: ucfirst($this->data['event']), isEvent: true);
 
@@ -68,7 +68,5 @@ class CreateEventSubscription extends BaseAction
                 'subscription' => [__('Already subscribed')],
             ])->errorBag('createEventSubscription');
         }
-
-        return $this;
     }
 }

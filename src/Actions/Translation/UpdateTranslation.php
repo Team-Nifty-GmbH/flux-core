@@ -9,9 +9,9 @@ use Spatie\TranslationLoader\LanguageLine;
 
 class UpdateTranslation extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateTranslationRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateTranslation extends BaseAction
         return [LanguageLine::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $languageLine = LanguageLine::query()
             ->whereKey($this->data['id'])

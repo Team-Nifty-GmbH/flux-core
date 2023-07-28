@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateAddress extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateAddressRequest())->rules();
     }
 
@@ -23,7 +23,7 @@ class CreateAddress extends BaseAction
         return [Address::class];
     }
 
-    public function execute(): Address
+    public function performAction(): Address
     {
         $mainAddress = UpdateMainAddress::make([
             'address_id' => null,
@@ -66,13 +66,11 @@ class CreateAddress extends BaseAction
         return $address;
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Address());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

@@ -8,9 +8,9 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteRole extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:roles,id',
         ];
@@ -21,7 +21,7 @@ class DeleteRole extends BaseAction
         return [Role::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return Role::query()
             ->whereKey($this->data['id'])
@@ -29,9 +29,9 @@ class DeleteRole extends BaseAction
             ->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (Role::query()
             ->whereKey($this->data['id'])
@@ -42,7 +42,5 @@ class DeleteRole extends BaseAction
                 'role' => [__('Cannot delete Super Admin role')],
             ])->errorBag('deleteRole');
         }
-
-        return $this;
     }
 }

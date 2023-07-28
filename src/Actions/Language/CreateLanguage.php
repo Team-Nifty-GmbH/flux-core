@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateLanguage extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateLanguageRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateLanguage extends BaseAction
         return [Language::class];
     }
 
-    public function execute(): Language
+    public function performAction(): Language
     {
         $language = new Language($this->data);
         $language->save();
@@ -28,13 +28,11 @@ class CreateLanguage extends BaseAction
         return $language;
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Language());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

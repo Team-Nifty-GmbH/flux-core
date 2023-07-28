@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateDocumentType extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateDocumentTypeRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateDocumentType extends BaseAction
         return [DocumentType::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $documentType = DocumentType::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdateDocumentType extends BaseAction
         return $documentType->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new DocumentType());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

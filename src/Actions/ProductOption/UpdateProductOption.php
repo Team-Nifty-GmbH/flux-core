@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateProductOption extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateProductOptionRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateProductOption extends BaseAction
         return [ProductOption::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $productOption = ProductOption::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdateProductOption extends BaseAction
         return $productOption->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new ProductOption());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

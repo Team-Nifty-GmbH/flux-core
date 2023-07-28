@@ -7,9 +7,9 @@ use FluxErp\Models\ProductOption;
 
 class DeleteProductOption extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:product_options,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteProductOption extends BaseAction
         return [ProductOption::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return ProductOption::query()
             ->whereKey($this->data['id'])

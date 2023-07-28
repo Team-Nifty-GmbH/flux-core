@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateTicketType extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateTicketTypeRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateTicketType extends BaseAction
         return [TicketType::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $ticketType = TicketType::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdateTicketType extends BaseAction
         return $ticketType->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new TicketType());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

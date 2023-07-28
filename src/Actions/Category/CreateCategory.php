@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateCategory extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateCategoryRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateCategory extends BaseAction
         return [Category::class];
     }
 
-    public function execute(): Category
+    public function performAction(): Category
     {
         $category = new Category($this->data);
         $category->save();
@@ -28,7 +28,7 @@ class CreateCategory extends BaseAction
         return $category->refresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $this->data['sort_number'] = $this->data['sort_number'] ?? 0;
         $this->rules = array_merge(
@@ -43,7 +43,5 @@ class CreateCategory extends BaseAction
         $validator->addModel(new Category());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

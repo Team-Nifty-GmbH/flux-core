@@ -11,9 +11,9 @@ use Illuminate\Validation\Rule;
 
 class CreateOrderPosition extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = array_merge(
             (new CreateOrderPositionRequest())->rules(),
             [
@@ -72,7 +72,7 @@ class CreateOrderPosition extends BaseAction
         return [OrderPosition::class];
     }
 
-    public function execute(): OrderPosition
+    public function performAction(): OrderPosition
     {
         $tags = Arr::pull($this->data, 'tags', []);
 
@@ -86,13 +86,11 @@ class CreateOrderPosition extends BaseAction
         return $orderPosition;
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new OrderPosition());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

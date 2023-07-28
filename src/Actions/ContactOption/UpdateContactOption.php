@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateContactOption extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateContactOptionRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateContactOption extends BaseAction
         return [ContactOption::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $contactOption = ContactOption::query()
             ->whereKey($this->data['id'])

@@ -10,9 +10,9 @@ use Illuminate\Support\Arr;
 
 class SyncCalendarEventInvites extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = array_filter(
             (new UpdateCalendarEventRequest())->rules(),
             fn ($key) => str_starts_with($key, 'invited_') || $key === 'id',
@@ -30,7 +30,7 @@ class SyncCalendarEventInvites extends BaseAction
         return [CalendarEvent::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $calendarEvent = CalendarEvent::query()
             ->whereKey($this->data['id'])

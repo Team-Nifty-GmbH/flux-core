@@ -7,9 +7,9 @@ use FluxErp\Models\SepaMandate;
 
 class DeleteSepaMandate extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:sepa_mandates,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteSepaMandate extends BaseAction
         return [SepaMandate::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return SepaMandate::query()
             ->whereKey($this->data['id'])

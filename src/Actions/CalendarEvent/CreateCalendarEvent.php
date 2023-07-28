@@ -8,9 +8,9 @@ use FluxErp\Models\CalendarEvent;
 
 class CreateCalendarEvent extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateCalendarEventRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateCalendarEvent extends BaseAction
         return [CalendarEvent::class];
     }
 
-    public function execute(): CalendarEvent
+    public function performAction(): CalendarEvent
     {
         $calendarEvent = new CalendarEvent($this->data);
         $calendarEvent->save();

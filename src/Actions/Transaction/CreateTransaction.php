@@ -8,9 +8,9 @@ use FluxErp\Models\Transaction;
 
 class CreateTransaction extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateTransactionRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateTransaction extends BaseAction
         return [Transaction::class];
     }
 
-    public function execute(): Transaction
+    public function performAction(): Transaction
     {
         $transaction = new Transaction($this->data);
         $transaction->save();

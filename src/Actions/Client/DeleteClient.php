@@ -7,9 +7,9 @@ use FluxErp\Models\Client;
 
 class DeleteClient extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:clients,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteClient extends BaseAction
         return [Client::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return Client::query()
             ->whereKey($this->data['id'])

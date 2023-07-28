@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinishProjectTask extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new FinishProjectTaskRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class FinishProjectTask extends BaseAction
         return [ProjectTask::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $task = ProjectTask::query()
             ->whereKey($this->data['id'])

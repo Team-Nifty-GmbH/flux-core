@@ -12,9 +12,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateProject extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateProjectRequest())->rules();
     }
 
@@ -23,7 +23,7 @@ class UpdateProject extends BaseAction
         return [Project::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $project = Project::query()
             ->whereKey($this->data['id'])
@@ -35,7 +35,7 @@ class UpdateProject extends BaseAction
         return $project->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Project());
@@ -93,7 +93,5 @@ class UpdateProject extends BaseAction
                 ])->errorBag('updateProject');
             }
         }
-
-        return $this;
     }
 }

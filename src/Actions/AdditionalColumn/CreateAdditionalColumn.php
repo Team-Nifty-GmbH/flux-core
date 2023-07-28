@@ -8,9 +8,9 @@ use FluxErp\Models\AdditionalColumn;
 
 class CreateAdditionalColumn extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateAdditionalColumnRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateAdditionalColumn extends BaseAction
         return [AdditionalColumn::class];
     }
 
-    public function execute(): AdditionalColumn
+    public function performAction(): AdditionalColumn
     {
         if (! ($this->data['validations'] ?? false)) {
             $this->data['validations'] = null;

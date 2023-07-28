@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Auth;
 
 class CreateComment extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateCommentRequest())->rules();
     }
 
@@ -24,7 +24,7 @@ class CreateComment extends BaseAction
         return [Comment::class, EventSubscription::class];
     }
 
-    public function execute(): Comment
+    public function performAction(): Comment
     {
         preg_match_all('/data-mention="(.*?)"/', $this->data['comment'], $matches);
         $mentions = collect($matches[1])->map(function ($mention) {

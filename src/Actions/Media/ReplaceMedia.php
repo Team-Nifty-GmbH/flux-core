@@ -12,9 +12,9 @@ use Illuminate\Validation\ValidationException;
 
 class ReplaceMedia extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new ReplaceMediaRequest())->rules();
     }
 
@@ -23,7 +23,7 @@ class ReplaceMedia extends BaseAction
         return [Media::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $mediaItem = Media::query()
             ->whereKey($this->data['id'])
@@ -63,14 +63,14 @@ class ReplaceMedia extends BaseAction
         return $media->withoutRelations();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $this->data['model_type'] = Media::query()
             ->whereKey($this->data['id'] ?? null)
             ->first()
             ?->model_type;
 
-        parent::validate();
+        parent::validateData();
 
         $mediaItem = Media::query()
             ->whereKey($this->data['id'])
@@ -96,7 +96,5 @@ class ReplaceMedia extends BaseAction
                 'filename' => [__('File name already exists')],
             ])->errorBag('replaceMedia');
         }
-
-        return $this;
     }
 }

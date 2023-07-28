@@ -7,9 +7,9 @@ use FluxErp\Models\DocumentType;
 
 class DeleteDocumentType extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:document_types,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteDocumentType extends BaseAction
         return [DocumentType::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return DocumentType::query()
             ->whereKey($this->data['id'])

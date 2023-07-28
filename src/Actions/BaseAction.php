@@ -3,6 +3,9 @@
 namespace FluxErp\Actions;
 
 use FluxErp\Traits\Makeable;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Events\NullDispatcher;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -15,11 +18,24 @@ abstract class BaseAction
 
     protected array $rules = [];
 
-    abstract public function execute();
+    protected static Dispatcher $dispatcher;
 
     abstract public static function models(): array;
 
+    abstract public function performAction();
+
     public function __construct(array $data)
+    {
+        $this->setEventDispatcher();
+
+        $this->fireActionEvent(event: 'booting', halt: false);
+
+        $this->boot($data);
+
+        $this->fireActionEvent(event: 'booted', halt: false);
+    }
+
+    protected function boot(array $data): void
     {
         $this->setData($data[0] ?? [], $data[1] ?? false);
     }
@@ -73,9 +89,45 @@ abstract class BaseAction
         return $this->rules;
     }
 
-    public function validate(): static
+    final public function execute()
+    {
+        if ($this->fireActionEvent(event: 'executing') === false) {
+            return false;
+        }
+
+        $returnValue = $this->performAction();
+
+        $this->fireActionEvent(event: 'executed', object: is_object($returnValue) ? $returnValue : null, halt: false);
+
+        return $returnValue;
+    }
+
+    final public function validate(): static
+    {
+        if ($this->fireActionEvent(event: 'validating') !== false) {
+            $this->validateData();
+
+            $this->fireActionEvent(event: 'validated', halt: false);
+        }
+
+        return $this;
+    }
+
+    protected function validateData(): void
     {
         $this->data = Validator::validate($this->data, $this->rules);
+    }
+
+    final public function withEvents(): static
+    {
+        $this->setEventDispatcher();
+
+        return $this;
+    }
+
+    final public function withoutEvents(): static
+    {
+        $this->setEventDispatcher(true);
 
         return $this;
     }
@@ -89,5 +141,25 @@ abstract class BaseAction
 
             return $value === '' ? null : $value;
         }, $data);
+    }
+
+    protected function fireActionEvent(string $event, object $object = null, bool $halt = true)
+    {
+        $function = $halt ? 'until' : 'dispatch';
+
+        return static::$dispatcher->{$function}('action.' . $event . ': ' . static::class, $object ?: $this);
+    }
+
+    private function setEventDispatcher(bool $nullDispatcher = false): void
+    {
+        if (! $nullDispatcher) {
+            try {
+                static::$dispatcher = app()->make(Dispatcher::class);
+            } catch (BindingResolutionException) {
+                static::$dispatcher = new NullDispatcher(new \Illuminate\Events\Dispatcher());
+            }
+        } else {
+            static::$dispatcher = new NullDispatcher(static::$dispatcher);
+        }
     }
 }

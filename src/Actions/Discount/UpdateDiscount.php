@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateDiscount extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateDiscountRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateDiscount extends BaseAction
         return [Discount::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $discount = Discount::query()
             ->whereKey($this->data['id'])

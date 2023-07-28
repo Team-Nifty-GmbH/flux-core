@@ -9,9 +9,9 @@ use Illuminate\Validation\Rule;
 
 class DeleteEventSubscription extends BaseAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => [
                 'required',
@@ -26,7 +26,7 @@ class DeleteEventSubscription extends BaseAction
         return [EventSubscription::class];
     }
 
-    public function execute(): bool|null
+    public function performAction(): ?bool
     {
         return EventSubscription::query()
             ->whereKey($this->data['id'])
