@@ -47,6 +47,8 @@ use FluxErp\Http\Controllers\SettingController;
 use FluxErp\Http\Controllers\StockPostingController;
 use FluxErp\Http\Controllers\TicketController;
 use FluxErp\Http\Controllers\TicketTypeController;
+use FluxErp\Http\Controllers\TimeTrackingController;
+use FluxErp\Http\Controllers\TimeTrackingTypeController;
 use FluxErp\Http\Controllers\TranslationController;
 use FluxErp\Http\Controllers\UnitController;
 use FluxErp\Http\Controllers\UserController;
@@ -404,6 +406,19 @@ Route::group(['middleware' => ['auth:sanctum', 'abilities:user', 'localization']
     Route::post('/ticket-types', [TicketTypeController::class, 'create']);
     Route::put('/ticket-types', [TicketTypeController::class, 'update']);
     Route::delete('/ticket-types/{id}', [TicketTypeController::class, 'delete']);
+
+    //TimeTracking
+    Route::get('/user/time-tracking', [TimeTrackingController::class, 'userIndex']);
+    Route::get('/time-tracking', [TimeTrackingController::class, 'index']);
+    Route::post('/time-tracking', [TimeTrackingController::class, 'create']);
+    Route::put('/time-tracking', [TimeTrackingController::class, 'update']);
+    Route::delete('/time-tracking/{id}', [TimeTrackingController::class, 'delete']);
+
+    //TimeTrackingTypes
+    Route::get('/time-tracking-types', [TimeTrackingTypeController::class, 'index']);
+    Route::post('/time-tracking-types', [TimeTrackingTypeController::class, 'create']);
+    Route::put('/time-tracking-types', [TimeTrackingTypeController::class, 'update']);
+    Route::delete('/time-tracking-types/{id}', [TimeTrackingTypeController::class, 'delete']);
 
     //Translations
     Route::get('/translations', [TranslationController::class, 'index']);
