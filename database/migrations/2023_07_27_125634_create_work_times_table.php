@@ -26,7 +26,7 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('order_position_id')->references('id')->on('order_positions');
+            $table->foreign('order_position_id')->references('id')->on('order_positions')->nullOnDelete();
             $table->foreign('work_time_type_id')->references('id')->on('work_time_types');
         });
     }
