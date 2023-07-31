@@ -27,7 +27,7 @@ class CreateProject extends FluxAction
         $project = new Project($this->data);
         $project->save();
 
-        return $project;
+        return $project->fresh();
     }
 
     public function validateData(): void

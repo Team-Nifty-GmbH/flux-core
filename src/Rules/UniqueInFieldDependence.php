@@ -27,7 +27,7 @@ class UniqueInFieldDependence implements Rule, DataAwareRule
      *
      * @return void
      */
-    public function __construct(string $model, string|array $dependingField, bool $ignoreSelf = true, ?string $key = null)
+    public function __construct(string $model, string|array $dependingField, bool $ignoreSelf = true, string $key = null)
     {
         $this->dependingFields = is_array($dependingField) ? $dependingField : [$dependingField];
         $this->ignoreSelf = $ignoreSelf;

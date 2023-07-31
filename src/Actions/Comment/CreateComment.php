@@ -2,8 +2,8 @@
 
 namespace FluxErp\Actions\Comment;
 
-use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\EventSubscription\CreateEventSubscription;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCommentRequest;
 use FluxErp\Models\Comment;
 use FluxErp\Models\EventSubscription;
@@ -83,6 +83,6 @@ class CreateComment extends FluxAction
         $comment->is_internal = $this->data['is_internal'] ?? true;
         $comment->save();
 
-        return $comment;
+        return $comment->fresh();
     }
 }

@@ -24,6 +24,6 @@ class CreateTransaction extends FluxAction
         $transaction = new Transaction($this->data);
         $transaction->save();
 
-        return $transaction;
+        return $transaction->fresh();
     }
 }

@@ -44,7 +44,7 @@ class Countries extends Component
         return view('flux::livewire.settings.countries');
     }
 
-    public function showEditModal(int|null $countryId = null): void
+    public function showEditModal(int $countryId = null): void
     {
         $this->selectedCountry = Country::query()->whereKey($countryId)->first()?->toArray() ?: [
             'language_id' => null,

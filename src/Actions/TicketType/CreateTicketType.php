@@ -25,7 +25,7 @@ class CreateTicketType extends FluxAction
         $ticketType = new TicketType($this->data);
         $ticketType->save();
 
-        return $ticketType;
+        return $ticketType->fresh();
     }
 
     public function validateData(): void

@@ -86,7 +86,7 @@ class OrderList extends DataTable
         return array_merge(parent::getReturnKeys(), ['currency.iso']);
     }
 
-    public function getFilterableColumns(?string $name = null): array
+    public function getFilterableColumns(string $name = null): array
     {
         return $this->availableCols;
     }

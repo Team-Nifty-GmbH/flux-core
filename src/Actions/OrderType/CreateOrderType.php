@@ -25,7 +25,7 @@ class CreateOrderType extends FluxAction
         $orderType = new OrderType($this->data);
         $orderType->save();
 
-        return $orderType;
+        return $orderType->fresh();
     }
 
     public function validateData(): void

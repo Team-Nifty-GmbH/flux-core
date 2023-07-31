@@ -24,6 +24,6 @@ class CreateCurrency extends FluxAction
         $currency = new Currency($this->data);
         $currency->save();
 
-        return $currency;
+        return $currency->fresh();
     }
 }

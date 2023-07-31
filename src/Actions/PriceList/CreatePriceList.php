@@ -24,6 +24,6 @@ class CreatePriceList extends FluxAction
         $priceList = new PriceList($this->data);
         $priceList->save();
 
-        return $priceList;
+        return $priceList->fresh();
     }
 }

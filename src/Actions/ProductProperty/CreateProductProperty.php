@@ -25,7 +25,7 @@ class CreateProductProperty extends FluxAction
         $productProperty = new ProductProperty($this->data);
         $productProperty->save();
 
-        return $productProperty;
+        return $productProperty->fresh();
     }
 
     public function validateData(): void

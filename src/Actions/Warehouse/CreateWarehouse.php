@@ -24,6 +24,6 @@ class CreateWarehouse extends FluxAction
         $warehouse = new Warehouse($this->data);
         $warehouse->save();
 
-        return $warehouse;
+        return $warehouse->fresh();
     }
 }

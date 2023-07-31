@@ -25,7 +25,7 @@ class CreateProductOptionGroup extends FluxAction
         $productOptionGroup = new ProductOptionGroup($this->data);
         $productOptionGroup->save();
 
-        return $productOptionGroup;
+        return $productOptionGroup->fresh();
     }
 
     public function validateData(): void

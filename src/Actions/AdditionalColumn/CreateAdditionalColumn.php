@@ -32,6 +32,6 @@ class CreateAdditionalColumn extends FluxAction
         $additionalColumn = new AdditionalColumn($this->data);
         $additionalColumn->save();
 
-        return $additionalColumn;
+        return $additionalColumn->fresh();
     }
 }

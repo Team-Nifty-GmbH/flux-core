@@ -33,7 +33,7 @@ class CreateContact extends FluxAction
             $contact->discountGroups()->attach($discountGroups);
         }
 
-        return $contact;
+        return $contact->withoutRelations()->fresh();
     }
 
     public function validateData(): void

@@ -151,8 +151,8 @@ trait HasRelatedModel
      * @return MorphToMorph
      */
     protected function morphToMorph(
-        string $related, string $name, string $relatedMorph, string $table, string|null $foreignPivotKey = null,
-        string|null $relatedPivotKey = null, string|null $parentKey = null, string|null $relatedKey = null,
+        string $related, string $name, string $relatedMorph, string $table, string $foreignPivotKey = null,
+        string $relatedPivotKey = null, string $parentKey = null, string $relatedKey = null,
         bool $inverse = false)
     {
         $caller = $this->guessBelongsToManyRelation();
@@ -184,7 +184,7 @@ trait HasRelatedModel
      */
     protected function newMorphToMorph(
         Builder $query, Model $parent, string $name, string $related, string $table, string $foreignPivotKey,
-        string $relatedPivotKey, string $parentKey, string $relatedKey, string|null $relationName = null,
+        string $relatedPivotKey, string $parentKey, string $relatedKey, string $relationName = null,
         bool $inverse = false)
     {
         return new MorphToMorph(
@@ -200,8 +200,8 @@ trait HasRelatedModel
      */
     protected function morphedByMorph(
         string $related, string $name, string $relatedMorph, string $table = null,
-        string|null $foreignPivotKey = null, string|null $relatedPivotKey = null, string|null $parentKey = null,
-        string|null $relatedKey = null)
+        string $foreignPivotKey = null, string $relatedPivotKey = null, string $parentKey = null,
+        string $relatedKey = null)
     {
         $foreignPivotKey = $foreignPivotKey ?: $relatedMorph . '_id';
 

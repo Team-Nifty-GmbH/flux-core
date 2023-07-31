@@ -50,7 +50,7 @@ class Order extends Component
 
     public string $tab = 'order-positions';
 
-    public function mount(?string $id = null): void
+    public function mount(string $id = null): void
     {
         $order = \FluxErp\Models\Order::query()
             ->whereKey($id)

@@ -29,6 +29,6 @@ class FinishProjectTask extends FluxAction
         $task->is_done = $this->data['finish'];
         $task->save();
 
-        return $task;
+        return $task->fresh();
     }
 }

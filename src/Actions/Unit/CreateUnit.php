@@ -24,6 +24,6 @@ class CreateUnit extends FluxAction
         $unit = new Unit($this->data);
         $unit->save();
 
-        return $unit;
+        return $unit->fresh();
     }
 }

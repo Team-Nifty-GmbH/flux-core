@@ -25,7 +25,7 @@ class CreateLanguage extends FluxAction
         $language = new Language($this->data);
         $language->save();
 
-        return $language;
+        return $language->fresh();
     }
 
     public function validateData(): void

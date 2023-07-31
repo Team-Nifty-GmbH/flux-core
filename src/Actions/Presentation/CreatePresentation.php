@@ -25,7 +25,7 @@ class CreatePresentation extends FluxAction
         $presentation = new Presentation($this->data);
         $presentation->save();
 
-        return $presentation;
+        return $presentation->fresh();
     }
 
     public function validateData(): void

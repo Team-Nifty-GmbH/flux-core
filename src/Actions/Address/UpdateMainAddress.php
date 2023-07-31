@@ -43,6 +43,6 @@ class UpdateMainAddress extends FluxAction
             $address->save();
         }
 
-        return $address;
+        return $address?->fresh();
     }
 }

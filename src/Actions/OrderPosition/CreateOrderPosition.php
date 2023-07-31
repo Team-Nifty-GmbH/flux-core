@@ -83,7 +83,7 @@ class CreateOrderPosition extends FluxAction
 
         $orderPosition->attachTags($tags);
 
-        return $orderPosition;
+        return $orderPosition->withoutRelations()->fresh();
     }
 
     public function validateData(): void

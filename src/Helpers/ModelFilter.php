@@ -21,7 +21,7 @@ class ModelFilter
 
     private array $queryFilters = [];
 
-    private array|null $includes = null;
+    private ?array $includes = null;
 
     private array $sorts = [];
 
@@ -158,7 +158,7 @@ class ModelFilter
         return $this->queryFilters;
     }
 
-    public function getIncludes(): array|null
+    public function getIncludes(): ?array
     {
         return $this->includes;
     }

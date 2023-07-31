@@ -42,6 +42,6 @@ class UpdateNotificationSetting extends FluxAction
 
         $notificationSetting->save();
 
-        return $notificationSetting;
+        return $notificationSetting->fresh();
     }
 }

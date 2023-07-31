@@ -24,6 +24,6 @@ class CreateVatRate extends FluxAction
         $vatRate = new VatRate($this->data);
         $vatRate->save();
 
-        return $vatRate;
+        return $vatRate->fresh();
     }
 }

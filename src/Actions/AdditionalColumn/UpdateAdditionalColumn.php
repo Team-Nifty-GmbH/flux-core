@@ -42,7 +42,7 @@ class UpdateAdditionalColumn extends FluxAction
         $additionalColumn->fill($this->data);
         $additionalColumn->save();
 
-        return $additionalColumn;
+        return $additionalColumn->fresh();
     }
 
     public function validateData(): void

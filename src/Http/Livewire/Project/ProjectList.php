@@ -6,7 +6,7 @@ use FluxErp\States\Project\Open;
 
 class ProjectList extends Project
 {
-    public function mount(?int $id = null): void
+    public function mount(int $id = null): void
     {
         $this->availableStates = \FluxErp\Models\Project::getStatesFor('state')->map(function ($state) {
             return [

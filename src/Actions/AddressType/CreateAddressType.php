@@ -25,7 +25,7 @@ class CreateAddressType extends FluxAction
         $addressType = new AddressType($this->data);
         $addressType->save();
 
-        return $addressType;
+        return $addressType->fresh();
     }
 
     public function validateData(): void

@@ -25,7 +25,7 @@ class CreateSerialNumber extends FluxAction
         $serialNumber = new SerialNumber($this->data);
         $serialNumber->save();
 
-        return $serialNumber;
+        return $serialNumber->fresh();
     }
 
     public function validateData(): void

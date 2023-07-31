@@ -28,7 +28,7 @@ class CreateEventSubscription extends FluxAction
         $eventSubscription = new EventSubscription($this->data);
         $eventSubscription->save();
 
-        return $eventSubscription;
+        return $eventSubscription->fresh();
     }
 
     public function validateData(): void

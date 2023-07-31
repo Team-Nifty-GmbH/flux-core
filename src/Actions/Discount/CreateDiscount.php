@@ -24,6 +24,6 @@ class CreateDiscount extends FluxAction
         $discount = new Discount($this->data);
         $discount->save();
 
-        return $discount;
+        return $discount->fresh();
     }
 }

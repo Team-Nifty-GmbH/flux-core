@@ -20,7 +20,7 @@ use Spatie\QueryBuilder\QueryBuilder as LaravelQueryBuilder;
 
 class QueryBuilder
 {
-    public static function filterModel(object $model, ?Request $request = null): LaravelQueryBuilder
+    public static function filterModel(object $model, Request $request = null): LaravelQueryBuilder
     {
         $queryBuilder = LaravelQueryBuilder::for($model, $request);
 

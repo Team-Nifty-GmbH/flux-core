@@ -29,6 +29,6 @@ class UpdateSetting extends FluxAction
         $setting->settings = (object) $this->data['settings'];
         $setting->save();
 
-        return $setting;
+        return $setting->fresh();
     }
 }

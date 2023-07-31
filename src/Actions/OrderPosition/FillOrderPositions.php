@@ -90,7 +90,7 @@ class FillOrderPositions extends FluxAction
         $this->data['order_positions'] = $orderPositions;
     }
 
-    private function validateOrderPosition(array $orderPosition, array $rules, ?array $parent = null): array
+    private function validateOrderPosition(array $orderPosition, array $rules, array $parent = null): array
     {
         $errors = [];
         $validator = Validator::make($orderPosition, $rules);

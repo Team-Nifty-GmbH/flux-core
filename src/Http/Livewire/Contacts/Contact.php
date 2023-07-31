@@ -3,13 +3,11 @@
 namespace FluxErp\Http\Livewire\Contacts;
 
 use FluxErp\Actions\Contact\UpdateContact;
-use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Http\Requests\CreateContactRequest;
 use FluxErp\Http\Requests\UpdateContactRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact as ContactModel;
-use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
@@ -90,12 +88,12 @@ class Contact extends Component
         return $rules;
     }
 
-    public function mount(?int $id = null): void
+    public function mount(int $id = null): void
     {
         $this->contactId = $id;
         $contact = ContactModel::query()
             ->with('addresses')
-            ->when($this->contactId, fn($query) => $query->whereKey($this->contactId))
+            ->when($this->contactId, fn ($query) => $query->whereKey($this->contactId))
             ->firstOrFail();
 
         $contact->addresses->map(function (Address $address) {
@@ -114,7 +112,6 @@ class Contact extends Component
         $this->address = $this->addressId ?
             $contact->addresses->whereKey($this->addressId)->firstOrFail()->toArray() :
             $contact->addresses->where('is_main_address', true)->first()->toArray();
-
 
         $this->priceLists = PriceList::query()->select(['id', 'name'])->get()->toArray();
         $this->paymentTypes = PaymentType::query()->select(['id', 'name'])->get()->toArray();
@@ -138,7 +135,7 @@ class Contact extends Component
         try {
             UpdateContact::make($this->contact)->validate()->execute();
         } catch (ValidationException $e) {
-            validation_errors_to_notifications($e, $this);
+            exception_to_notifications($e, $this);
         }
     }
 

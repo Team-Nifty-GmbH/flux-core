@@ -31,6 +31,6 @@ class CreateDiscountGroup extends FluxAction
             $discountGroup->discounts()->attach($discounts);
         }
 
-        return $discountGroup;
+        return $discountGroup->withoutRelations()->fresh();
     }
 }

@@ -28,7 +28,7 @@ class CreateValueList extends FluxAction
         $valueList->values = $this->data['values'];
         $valueList->save();
 
-        return $valueList;
+        return $valueList->fresh();
     }
 
     public function validateData(): void

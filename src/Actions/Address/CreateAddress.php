@@ -63,7 +63,7 @@ class CreateAddress extends FluxAction
             }
         }
 
-        return $address;
+        return $address->withoutRelations()->fresh();
     }
 
     public function validateData(): void

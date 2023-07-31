@@ -24,6 +24,6 @@ class CreateContactOption extends FluxAction
         $contactOption = new ContactOption($this->data);
         $contactOption->save();
 
-        return $contactOption;
+        return $contactOption->fresh();
     }
 }

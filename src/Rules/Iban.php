@@ -155,7 +155,7 @@ class Iban implements Rule
     /**
      * Returns the designated length of IBAN for given IBAN
      */
-    private function getDesignatedIbanLength(string $iban): bool|int
+    private function getDesignatedIbanLength(string $iban): false|int
     {
         $countryCode = substr($iban, 0, 2);
 

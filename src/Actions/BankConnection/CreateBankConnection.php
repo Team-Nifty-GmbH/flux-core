@@ -24,6 +24,6 @@ class CreateBankConnection extends FluxAction
         $bankConnection = new BankConnection($this->data);
         $bankConnection->save();
 
-        return $bankConnection;
+        return $bankConnection->fresh();
     }
 }

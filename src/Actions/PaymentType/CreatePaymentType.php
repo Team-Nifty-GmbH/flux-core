@@ -25,7 +25,7 @@ class CreatePaymentType extends FluxAction
         $paymentType = new PaymentType($this->data);
         $paymentType->save();
 
-        return $paymentType;
+        return $paymentType->fresh();
     }
 
     public function validateData(): void
