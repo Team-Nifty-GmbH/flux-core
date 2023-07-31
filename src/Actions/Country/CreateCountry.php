@@ -25,7 +25,7 @@ class CreateCountry extends BaseAction
         $country = new Country($this->data);
         $country->save();
 
-        return $country;
+        return $country->fresh();
     }
 
     public function validate(): static

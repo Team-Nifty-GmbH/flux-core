@@ -20,7 +20,7 @@ class DeleteOrderType extends BaseAction
         return [OrderType::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return OrderType::query()
             ->whereKey($this->data['id'])

@@ -21,7 +21,7 @@ class DeleteTicketType extends BaseAction
         return [TicketType::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return TicketType::query()
             ->whereKey($this->data['id'])

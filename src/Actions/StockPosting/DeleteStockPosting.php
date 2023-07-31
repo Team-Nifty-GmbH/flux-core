@@ -20,7 +20,7 @@ class DeleteStockPosting extends BaseAction
         return [StockPosting::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return StockPosting::query()
             ->whereKey($this->data['id'])

@@ -20,7 +20,7 @@ class DeleteAccount extends BaseAction
         return [Account::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return Account::query()
             ->whereKey($this->data['id'])

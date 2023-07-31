@@ -15,6 +15,7 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -30,7 +31,7 @@ class Ticket extends Model implements HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasPackageFactory,
         HasFrontendAttributes, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
-        InteractsWithMedia, Searchable, SoftDeletes;
+        InteractsWithMedia, Searchable, SoftDeletes, Trackable;
 
     protected $casts = [
         'uuid' => 'string',

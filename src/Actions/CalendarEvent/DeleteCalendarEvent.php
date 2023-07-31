@@ -20,7 +20,7 @@ class DeleteCalendarEvent extends BaseAction
         return [CalendarEvent::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return CalendarEvent::query()
             ->whereKey($this->data['id'])

@@ -29,7 +29,7 @@ class UnlockModel extends BaseAction
         return [];
     }
 
-    public function execute()
+    public function execute(): ?bool
     {
         return $this->data['model_type']::query()
             ->whereKey($this->data['id'])

@@ -20,7 +20,7 @@ class DeleteTransaction extends BaseAction
         return [Transaction::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return Transaction::query()
             ->whereKey($this->data['id'])

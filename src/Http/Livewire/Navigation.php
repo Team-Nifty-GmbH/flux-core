@@ -30,7 +30,10 @@ class Navigation extends Component
                 $item = __(Str::headline($item));
             }
         });
+    }
 
+    public function mount(?array $setting = null, bool $showSearchBar = true): void
+    {
         $this->showSearchBar = $showSearchBar;
 
         if ($setting) {

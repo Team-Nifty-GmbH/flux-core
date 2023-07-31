@@ -23,7 +23,7 @@ class DeleteLanguage extends BaseAction
         return [Language::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         $language = Language::query()
             ->whereKey($this->data['id'])

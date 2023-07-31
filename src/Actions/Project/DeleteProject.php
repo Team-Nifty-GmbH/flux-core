@@ -21,7 +21,7 @@ class DeleteProject extends BaseAction
         return [Project::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return Project::query()
             ->whereKey($this->data['id'])

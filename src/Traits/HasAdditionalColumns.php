@@ -802,8 +802,6 @@ trait HasAdditionalColumns
      * Store the meta data from the Meta Collection.
      * Returns `true` if all meta was saved successfully.
      *
-     * @param  string|array|null  $key
-     *
      * @throws MetaException
      */
     public function saveMeta(string|array $key = null, mixed $value = null): bool

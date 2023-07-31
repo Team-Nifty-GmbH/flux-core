@@ -24,6 +24,6 @@ class CreateCustomEvent extends BaseAction
         $customEvent = new CustomEvent($this->data);
         $customEvent->save();
 
-        return $customEvent;
+        return $customEvent->fresh();
     }
 }

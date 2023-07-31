@@ -26,7 +26,7 @@ class DeleteValueList extends BaseAction
         return [AdditionalColumn::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return AdditionalColumn::query()
             ->whereKey($this->data['id'])

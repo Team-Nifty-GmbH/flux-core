@@ -23,7 +23,7 @@ class DeleteCurrency extends BaseAction
         return [Currency::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         $currency = Currency::query()
             ->whereKey($this->data['id'])

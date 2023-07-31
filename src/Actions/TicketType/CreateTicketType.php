@@ -25,7 +25,7 @@ class CreateTicketType extends BaseAction
         $ticketType = new TicketType($this->data);
         $ticketType->save();
 
-        return $ticketType;
+        return $ticketType->fresh();
     }
 
     public function validate(): static

@@ -22,7 +22,7 @@ class DeleteUser extends BaseAction
         return [User::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         $user = User::query()
             ->whereKey($this->data['id'])

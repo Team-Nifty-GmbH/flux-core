@@ -95,7 +95,7 @@ class UserEdit extends Component
         return Arr::prependKeysWith($rules, 'user.');
     }
 
-    public function show(?int $id = null): void
+    public function show(int $id = null): void
     {
         $user = User::query()->whereKey($id)->with(['roles'])->firstOrNew();
 

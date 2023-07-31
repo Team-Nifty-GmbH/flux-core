@@ -24,6 +24,6 @@ class CreateClient extends BaseAction
         $client = new Client($this->data);
         $client->save();
 
-        return $client;
+        return $client->fresh();
     }
 }

@@ -20,7 +20,7 @@ class DeleteSepaMandate extends BaseAction
         return [SepaMandate::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return SepaMandate::query()
             ->whereKey($this->data['id'])

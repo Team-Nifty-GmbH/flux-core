@@ -75,7 +75,7 @@ class CalendarEdit extends Component
         return view('flux::livewire.calendar-edit');
     }
 
-    public function show(int|null $id = null, array|null $parentOptions = []): void
+    public function show(int $id = null, ?array $parentOptions = []): void
     {
         if (! is_null($parentOptions)) {
             $this->parentOptions = $parentOptions;

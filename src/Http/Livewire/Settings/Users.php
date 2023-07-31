@@ -27,7 +27,7 @@ class Users extends Component
         return view('flux::livewire.settings.users');
     }
 
-    public function show(?int $id = null): void
+    public function show(int $id = null): void
     {
         $this->userId = $id ?? 0;
         $this->emitTo('settings.user-edit', 'show', $id);

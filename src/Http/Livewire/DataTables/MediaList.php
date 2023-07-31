@@ -3,6 +3,7 @@
 namespace FluxErp\Http\Livewire\DataTables;
 
 use FluxErp\Models\Media;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -41,7 +42,7 @@ class MediaList extends DataTable
         ];
     }
 
-    public function downloadMedia(Media $media): bool|\Symfony\Component\HttpFoundation\BinaryFileResponse
+    public function downloadMedia(Media $media): false|BinaryFileResponse
     {
         if (! file_exists($media->getPath())) {
             $this->notification()->error(__('The file does not exist anymore.'));

@@ -33,7 +33,7 @@ class CreateContact extends BaseAction
             $contact->discountGroups()->attach($discountGroups);
         }
 
-        return $contact;
+        return $contact->withoutRelations()->fresh();
     }
 
     public function validate(): static

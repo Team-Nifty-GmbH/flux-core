@@ -21,7 +21,7 @@ class DeleteAddressType extends BaseAction
         return [AddressType::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return AddressType::query()
             ->whereKey($this->data['id'])

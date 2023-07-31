@@ -25,7 +25,7 @@ class CreatePaymentType extends BaseAction
         $paymentType = new PaymentType($this->data);
         $paymentType->save();
 
-        return $paymentType;
+        return $paymentType->fresh();
     }
 
     public function validate(): static

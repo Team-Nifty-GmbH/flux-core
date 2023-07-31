@@ -29,7 +29,7 @@ class LockModel extends BaseAction
         return [];
     }
 
-    public function execute(): bool
+    public function execute(): true
     {
         $model = $this->data['model_type']::query()
             ->whereKey($this->data['id'])
