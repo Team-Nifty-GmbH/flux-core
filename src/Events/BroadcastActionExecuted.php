@@ -10,7 +10,7 @@ use Illuminate\Queue\SerializesModels;
 
 class BroadcastActionExecuted implements ShouldBroadcast
 {
-    use InteractsWithSockets, SerializesModels;
+    use InteractsWithSockets;
 
     protected array $channels = [];
 
@@ -18,8 +18,11 @@ class BroadcastActionExecuted implements ShouldBroadcast
 
     public ?string $queue;
 
-    public function __construct(public FluxAction $action)
+    private FluxAction $action;
+
+    public function __construct(string $action, array $data, private readonly mixed $result = null)
     {
+        $this->action = $action::make($data);
     }
 
     public function broadcastOn(): array
@@ -47,7 +50,11 @@ class BroadcastActionExecuted implements ShouldBroadcast
     {
         return method_exists($this->action, 'broadcastWith')
             ? $this->action->broadcastWith()
-            : null;
+            : [
+                'action' => get_class($this->action),
+                'data' => $this->action->getData(),
+                'result' => $this->result,
+            ];
     }
 
     public function onChannels(array $channels): static

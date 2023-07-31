@@ -40,7 +40,7 @@ trait BroadcastAction
 
     public function broadcastActionExecuted(): mixed
     {
-        return tap(new BroadcastActionExecuted($this), function ($event) {
+        return tap(new BroadcastActionExecuted(get_class($this), $this->getData(), $this->result), function ($event) {
             $event->connection = $this->broadcastConnection();
             $event->queue = $this->broadcastQueue();
         });
@@ -51,13 +51,13 @@ trait BroadcastAction
         return [$this];
     }
 
-    public function broadcastConnection(): ?string
+    public function broadcastConnection()
     {
-        return null;
+        //
     }
 
-    public function broadcastQueue(): ?string
+    public function broadcastQueue()
     {
-        return null;
+        //
     }
 }
