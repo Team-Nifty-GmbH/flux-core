@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\Country;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Country;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class DeleteCountry extends BaseAction
+class DeleteCountry extends FluxAction
 {
     protected function boot(array $data): void
     {

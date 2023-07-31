@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\Currency;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Currency;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class DeleteCurrency extends BaseAction
+class DeleteCurrency extends FluxAction
 {
     protected function boot(array $data): void
     {

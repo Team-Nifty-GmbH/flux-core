@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Media;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\ReplaceMediaRequest;
 use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class ReplaceMedia extends BaseAction
+class ReplaceMedia extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Address;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 
-class UpdateMainAddress extends BaseAction
+class UpdateMainAddress extends FluxAction
 {
     protected function boot(array $data): void
     {

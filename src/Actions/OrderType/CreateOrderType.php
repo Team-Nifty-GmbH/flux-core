@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\OrderType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderTypeRequest;
 use FluxErp\Models\OrderType;
 use Illuminate\Support\Facades\Validator;
 
-class CreateOrderType extends BaseAction
+class CreateOrderType extends FluxAction
 {
     protected function boot(array $data): void
     {

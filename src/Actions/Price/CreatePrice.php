@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Price;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreatePriceRequest;
 use FluxErp\Models\Price;
 
-class CreatePrice extends BaseAction
+class CreatePrice extends FluxAction
 {
     protected function boot(array $data): void
     {

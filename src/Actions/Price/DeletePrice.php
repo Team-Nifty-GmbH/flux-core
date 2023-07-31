@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Price;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Price;
 use Illuminate\Validation\ValidationException;
 
-class DeletePrice extends BaseAction
+class DeletePrice extends FluxAction
 {
     protected function boot(array $data): void
     {

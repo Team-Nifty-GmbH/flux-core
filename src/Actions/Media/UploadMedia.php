@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Media;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UploadMediaRequest;
 use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class UploadMedia extends BaseAction
+class UploadMedia extends FluxAction
 {
     protected function boot(array $data): void
     {

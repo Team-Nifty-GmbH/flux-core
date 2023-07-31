@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Contact;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateContactRequest;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
@@ -11,7 +11,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateContact extends BaseAction
+class UpdateContact extends FluxAction
 {
     protected function boot(array $data): void
     {

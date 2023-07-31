@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\ProductProperty;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateProductPropertyRequest;
 use FluxErp\Models\ProductProperty;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateProductProperty extends BaseAction
+class UpdateProductProperty extends FluxAction
 {
     protected function boot(array $data): void
     {

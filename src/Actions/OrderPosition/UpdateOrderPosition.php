@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\OrderPosition;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateOrderPositionRequest;
 use FluxErp\Models\OrderPosition;
@@ -12,7 +12,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateOrderPosition extends BaseAction
+class UpdateOrderPosition extends FluxAction
 {
     protected function boot(array $data): void
     {

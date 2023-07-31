@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\PaymentType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdatePaymentTypeRequest;
 use FluxErp\Models\PaymentType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdatePaymentType extends BaseAction
+class UpdatePaymentType extends FluxAction
 {
     protected function boot(array $data): void
     {

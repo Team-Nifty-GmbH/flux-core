@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\Unit;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Unit;
 
-class DeleteUnit extends BaseAction
+class DeleteUnit extends FluxAction
 {
     protected function boot(array $data): void
     {

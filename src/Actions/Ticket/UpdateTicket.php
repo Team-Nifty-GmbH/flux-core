@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Ticket;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateTicketRequest;
 use FluxErp\Models\Ticket;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateTicket extends BaseAction
+class UpdateTicket extends FluxAction
 {
     protected function boot(array $data): void
     {

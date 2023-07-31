@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\ProductOptionGroup;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Validation\ValidationException;
 
-class DeleteProductOptionGroup extends BaseAction
+class DeleteProductOptionGroup extends FluxAction
 {
     protected function boot(array $data): void
     {

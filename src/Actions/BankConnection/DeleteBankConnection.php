@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\BankConnection;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\BankConnection;
 
-class DeleteBankConnection extends BaseAction
+class DeleteBankConnection extends FluxAction
 {
     protected function boot(array $data): void
     {

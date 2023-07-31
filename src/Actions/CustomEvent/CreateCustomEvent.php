@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\CustomEvent;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCustomEventRequest;
 use FluxErp\Models\CustomEvent;
 
-class CreateCustomEvent extends BaseAction
+class CreateCustomEvent extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\ContactOption;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateContactOptionRequest;
 use FluxErp\Models\ContactOption;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateContactOption extends BaseAction
+class UpdateContactOption extends FluxAction
 {
     protected function boot(array $data): void
     {

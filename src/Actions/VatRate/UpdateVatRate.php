@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\VatRate;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateVatRateRequest;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateVatRate extends BaseAction
+class UpdateVatRate extends FluxAction
 {
     protected function boot(array $data): void
     {

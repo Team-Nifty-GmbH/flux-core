@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Discount;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateDiscountRequest;
 use FluxErp\Models\Discount;
 
-class CreateDiscount extends BaseAction
+class CreateDiscount extends FluxAction
 {
     protected function boot(array $data): void
     {

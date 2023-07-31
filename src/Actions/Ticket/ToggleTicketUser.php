@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Ticket;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\ToggleTicketUserAssignmentRequest;
 use FluxErp\Models\Ticket;
 
-class ToggleTicketUser extends BaseAction
+class ToggleTicketUser extends FluxAction
 {
     protected function boot(array $data): void
     {

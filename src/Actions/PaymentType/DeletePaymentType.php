@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\PaymentType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\PaymentType;
 
-class DeletePaymentType extends BaseAction
+class DeletePaymentType extends FluxAction
 {
     protected function boot(array $data): void
     {

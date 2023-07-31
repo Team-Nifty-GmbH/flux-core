@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Category;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Category;
 use Illuminate\Validation\ValidationException;
 
-class DeleteCategory extends BaseAction
+class DeleteCategory extends FluxAction
 {
     protected function boot(array $data): void
     {

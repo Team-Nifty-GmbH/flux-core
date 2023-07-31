@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\VatRate;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateVatRateRequest;
 use FluxErp\Models\VatRate;
 
-class CreateVatRate extends BaseAction
+class CreateVatRate extends FluxAction
 {
     protected function boot(array $data): void
     {

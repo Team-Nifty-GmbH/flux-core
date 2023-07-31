@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\ProjectTask;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateProjectTaskRequest;
 use FluxErp\Models\Project;
 use FluxErp\Models\ProjectTask;
@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateProjectTask extends BaseAction
+class UpdateProjectTask extends FluxAction
 {
     protected function boot(array $data): void
     {

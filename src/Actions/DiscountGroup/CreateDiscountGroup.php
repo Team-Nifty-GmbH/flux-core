@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\DiscountGroup;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateDiscountGroupRequest;
 use FluxErp\Models\DiscountGroup;
 use Illuminate\Support\Arr;
 
-class CreateDiscountGroup extends BaseAction
+class CreateDiscountGroup extends FluxAction
 {
     protected function boot(array $data): void
     {

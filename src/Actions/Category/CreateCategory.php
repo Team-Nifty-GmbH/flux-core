@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Category;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCategoryRequest;
 use FluxErp\Models\Category;
 use Illuminate\Support\Facades\Validator;
 
-class CreateCategory extends BaseAction
+class CreateCategory extends FluxAction
 {
     protected function boot(array $data): void
     {

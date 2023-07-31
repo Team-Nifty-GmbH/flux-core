@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\Presentation;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Presentation;
 
-class DeletePresentation extends BaseAction
+class DeletePresentation extends FluxAction
 {
     protected function boot(array $data): void
     {

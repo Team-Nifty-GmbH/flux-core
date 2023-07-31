@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\Language;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateLanguageRequest;
 use FluxErp\Models\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateLanguage extends BaseAction
+class UpdateLanguage extends FluxAction
 {
     protected function boot(array $data): void
     {

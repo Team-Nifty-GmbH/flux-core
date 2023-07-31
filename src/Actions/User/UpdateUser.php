@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\User;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateUserRequest;
 use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateUser extends BaseAction
+class UpdateUser extends FluxAction
 {
     protected function boot(array $data): void
     {

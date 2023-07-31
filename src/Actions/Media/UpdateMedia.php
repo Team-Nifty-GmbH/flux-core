@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Media;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateMediaRequest;
 use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateMedia extends BaseAction
+class UpdateMedia extends FluxAction
 {
     protected function boot(array $data): void
     {

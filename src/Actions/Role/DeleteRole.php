@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Role;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Role;
 use Illuminate\Validation\ValidationException;
 
-class DeleteRole extends BaseAction
+class DeleteRole extends FluxAction
 {
     protected function boot(array $data): void
     {

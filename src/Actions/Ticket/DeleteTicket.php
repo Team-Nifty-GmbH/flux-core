@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\Ticket;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Ticket;
 
-class DeleteTicket extends BaseAction
+class DeleteTicket extends FluxAction
 {
     protected function boot(array $data): void
     {

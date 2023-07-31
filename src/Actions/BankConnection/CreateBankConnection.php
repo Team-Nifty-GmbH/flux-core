@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\BankConnection;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateBankConnectionRequest;
 use FluxErp\Models\BankConnection;
 
-class CreateBankConnection extends BaseAction
+class CreateBankConnection extends FluxAction
 {
     protected function boot(array $data): void
     {

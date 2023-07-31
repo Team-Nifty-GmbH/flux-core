@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\SerialNumberRange;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\SerialNumberRange;
 
-class DeleteSerialNumberRange extends BaseAction
+class DeleteSerialNumberRange extends FluxAction
 {
     protected function boot(array $data): void
     {

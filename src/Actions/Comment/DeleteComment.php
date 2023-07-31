@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Comment;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Comment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class DeleteComment extends BaseAction
+class DeleteComment extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\User;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateUserRequest;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
 
-class CreateUser extends BaseAction
+class CreateUser extends FluxAction
 {
     protected function boot(array $data): void
     {

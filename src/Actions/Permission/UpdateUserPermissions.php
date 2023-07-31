@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Permission;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\EditUserPermissionRequest;
 use FluxErp\Models\User;
 
-class UpdateUserPermissions extends BaseAction
+class UpdateUserPermissions extends FluxAction
 {
     protected function boot(array $data): void
     {

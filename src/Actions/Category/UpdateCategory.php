@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Category;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateCategoryRequest;
 use FluxErp\Models\Category;
@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateCategory extends BaseAction
+class UpdateCategory extends FluxAction
 {
     protected function boot(array $data): void
     {

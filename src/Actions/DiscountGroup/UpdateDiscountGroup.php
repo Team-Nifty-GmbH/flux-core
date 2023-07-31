@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\DiscountGroup;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateDiscountGroupRequest;
 use FluxErp\Models\DiscountGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
-class UpdateDiscountGroup extends BaseAction
+class UpdateDiscountGroup extends FluxAction
 {
     protected function boot(array $data): void
     {

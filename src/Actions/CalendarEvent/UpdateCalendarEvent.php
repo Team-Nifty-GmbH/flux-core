@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\CalendarEvent;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateCalendarEventRequest;
 use FluxErp\Models\CalendarEvent;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateCalendarEvent extends BaseAction
+class UpdateCalendarEvent extends FluxAction
 {
     protected function boot(array $data): void
     {

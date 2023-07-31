@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Language;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateLanguageRequest;
 use FluxErp\Models\Language;
 use Illuminate\Support\Facades\Validator;
 
-class CreateLanguage extends BaseAction
+class CreateLanguage extends FluxAction
 {
     protected function boot(array $data): void
     {

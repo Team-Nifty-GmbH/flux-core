@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\Presentation;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdatePresentationRequest;
 use FluxErp\Models\Presentation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdatePresentation extends BaseAction
+class UpdatePresentation extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\Language;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Language;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class DeleteLanguage extends BaseAction
+class DeleteLanguage extends FluxAction
 {
     protected function boot(array $data): void
     {

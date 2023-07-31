@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Unit;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateUnitRequest;
 use FluxErp\Models\Unit;
 
-class CreateUnit extends BaseAction
+class CreateUnit extends FluxAction
 {
     protected function boot(array $data): void
     {

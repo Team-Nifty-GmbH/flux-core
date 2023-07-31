@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateValueListRequest;
 use FluxErp\Models\AdditionalColumn;
 use Illuminate\Validation\ValidationException;
 
-class CreateValueList extends BaseAction
+class CreateValueList extends FluxAction
 {
     protected function boot(array $data): void
     {

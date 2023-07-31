@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\Account;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Account;
 
-class DeleteAccount extends BaseAction
+class DeleteAccount extends FluxAction
 {
     protected function boot(array $data): void
     {

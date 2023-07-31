@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\AdditionalColumn;
 
-class DeleteAdditionalColumn extends BaseAction
+class DeleteAdditionalColumn extends FluxAction
 {
     protected function boot(array $data): void
     {

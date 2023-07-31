@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Discount;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateDiscountRequest;
 use FluxErp\Models\Discount;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateDiscount extends BaseAction
+class UpdateDiscount extends FluxAction
 {
     protected function boot(array $data): void
     {

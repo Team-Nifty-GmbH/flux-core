@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Currency;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateCurrencyRequest;
 use FluxErp\Models\Currency;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateCurrency extends BaseAction
+class UpdateCurrency extends FluxAction
 {
     protected function boot(array $data): void
     {

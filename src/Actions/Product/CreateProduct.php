@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\Product;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateProductRequest;
 use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class CreateProduct extends BaseAction
+class CreateProduct extends FluxAction
 {
     protected function boot(array $data): void
     {

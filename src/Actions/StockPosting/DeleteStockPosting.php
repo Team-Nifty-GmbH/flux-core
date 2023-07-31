@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\StockPosting;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\StockPosting;
 
-class DeleteStockPosting extends BaseAction
+class DeleteStockPosting extends FluxAction
 {
     protected function boot(array $data): void
     {

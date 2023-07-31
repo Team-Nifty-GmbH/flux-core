@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\TicketType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateTicketTypeRequest;
 use FluxErp\Models\TicketType;
 use Illuminate\Support\Facades\Validator;
 
-class CreateTicketType extends BaseAction
+class CreateTicketType extends FluxAction
 {
     protected function boot(array $data): void
     {

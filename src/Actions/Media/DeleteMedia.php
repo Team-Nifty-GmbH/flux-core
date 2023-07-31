@@ -3,12 +3,12 @@
 namespace FluxErp\Actions\Media;
 
 use Carbon\Carbon;
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Media;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-class DeleteMedia extends BaseAction
+class DeleteMedia extends FluxAction
 {
     protected function boot(array $data): void
     {

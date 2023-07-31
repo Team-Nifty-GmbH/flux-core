@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\SepaMandate;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateSepaMandateRequest;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
 use FluxErp\Models\SepaMandate;
 use Illuminate\Validation\ValidationException;
 
-class CreateSepaMandate extends BaseAction
+class CreateSepaMandate extends FluxAction
 {
     protected function boot(array $data): void
     {

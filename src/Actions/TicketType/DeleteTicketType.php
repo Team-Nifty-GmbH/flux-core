@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\TicketType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\TicketType;
 use Illuminate\Validation\ValidationException;
 
-class DeleteTicketType extends BaseAction
+class DeleteTicketType extends FluxAction
 {
     protected function boot(array $data): void
     {

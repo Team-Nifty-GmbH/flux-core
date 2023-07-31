@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\Address;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Address;
 
-class DeleteAddress extends BaseAction
+class DeleteAddress extends FluxAction
 {
     protected function boot(array $data): void
     {

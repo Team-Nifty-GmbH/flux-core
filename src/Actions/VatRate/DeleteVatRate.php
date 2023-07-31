@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\VatRate;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\VatRate;
 
-class DeleteVatRate extends BaseAction
+class DeleteVatRate extends FluxAction
 {
     protected function boot(array $data): void
     {

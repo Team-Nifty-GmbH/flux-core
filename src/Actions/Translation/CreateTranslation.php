@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Translation;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateTranslationRequest;
 use Spatie\TranslationLoader\LanguageLine;
 
-class CreateTranslation extends BaseAction
+class CreateTranslation extends FluxAction
 {
     protected function boot(array $data): void
     {

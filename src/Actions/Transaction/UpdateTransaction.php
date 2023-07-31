@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Transaction;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateTransactionRequest;
 use FluxErp\Models\Transaction;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateTransaction extends BaseAction
+class UpdateTransaction extends FluxAction
 {
     protected function boot(array $data): void
     {

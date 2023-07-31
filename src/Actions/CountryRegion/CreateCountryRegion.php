@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\CountryRegion;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCountryRegionRequest;
 use FluxErp\Models\CountryRegion;
 use Illuminate\Support\Facades\Validator;
 
-class CreateCountryRegion extends BaseAction
+class CreateCountryRegion extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Locking;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Rules\ClassExists;
 use FluxErp\Traits\Lockable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class LockModel extends BaseAction
+class LockModel extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\AdditionalColumn;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-class DeleteValueList extends BaseAction
+class DeleteValueList extends FluxAction
 {
     protected function boot(array $data): void
     {

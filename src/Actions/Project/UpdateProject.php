@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Project;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateProjectRequest;
 use FluxErp\Models\Project;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateProject extends BaseAction
+class UpdateProject extends FluxAction
 {
     protected function boot(array $data): void
     {

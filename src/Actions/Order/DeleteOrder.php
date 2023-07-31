@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Order;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Order;
 use Illuminate\Validation\ValidationException;
 
-class DeleteOrder extends BaseAction
+class DeleteOrder extends FluxAction
 {
     protected function boot(array $data): void
     {

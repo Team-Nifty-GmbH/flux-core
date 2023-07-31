@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\SepaMandate;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\SepaMandate;
 
-class DeleteSepaMandate extends BaseAction
+class DeleteSepaMandate extends FluxAction
 {
     protected function boot(array $data): void
     {

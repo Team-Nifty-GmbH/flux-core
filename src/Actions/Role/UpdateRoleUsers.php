@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Role;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\EditRoleUserRequest;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
 
-class UpdateRoleUsers extends BaseAction
+class UpdateRoleUsers extends FluxAction
 {
     protected function boot(array $data): void
     {

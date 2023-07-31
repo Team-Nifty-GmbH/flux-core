@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\BankConnection;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateBankConnectionRequest;
 use FluxErp\Models\BankConnection;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateBankConnection extends BaseAction
+class UpdateBankConnection extends FluxAction
 {
     protected function boot(array $data): void
     {

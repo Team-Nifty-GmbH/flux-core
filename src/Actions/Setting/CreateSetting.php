@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Setting;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateSettingRequest;
 use FluxErp\Models\Setting;
 
-class CreateSetting extends BaseAction
+class CreateSetting extends FluxAction
 {
     protected function boot(array $data): void
     {

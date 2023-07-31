@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Order;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderRequest;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class CreateOrder extends BaseAction
+class CreateOrder extends FluxAction
 {
     protected function boot(array $data): void
     {

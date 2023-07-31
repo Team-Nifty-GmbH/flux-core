@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Warehouse;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateWarehouseRequest;
 use FluxErp\Models\Warehouse;
 
-class CreateWarehouse extends BaseAction
+class CreateWarehouse extends FluxAction
 {
     protected function boot(array $data): void
     {

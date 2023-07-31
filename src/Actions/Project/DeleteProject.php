@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Project;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Project;
 use Illuminate\Validation\ValidationException;
 
-class DeleteProject extends BaseAction
+class DeleteProject extends FluxAction
 {
     protected function boot(array $data): void
     {

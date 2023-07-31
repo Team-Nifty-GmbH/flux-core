@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\DiscountGroup;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\DiscountGroup;
 
-class DeleteDiscountGroup extends BaseAction
+class DeleteDiscountGroup extends FluxAction
 {
     protected function boot(array $data): void
     {

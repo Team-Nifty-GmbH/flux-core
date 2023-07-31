@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\Contact;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateContactRequest;
 use FluxErp\Models\Contact;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class CreateContact extends BaseAction
+class CreateContact extends FluxAction
 {
     protected function boot(array $data): void
     {

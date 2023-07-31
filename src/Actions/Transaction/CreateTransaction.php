@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Transaction;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateTransactionRequest;
 use FluxErp\Models\Transaction;
 
-class CreateTransaction extends BaseAction
+class CreateTransaction extends FluxAction
 {
     protected function boot(array $data): void
     {

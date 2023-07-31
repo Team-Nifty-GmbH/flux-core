@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Account;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateAccountRequest;
 use FluxErp\Models\Account;
 
-class CreateAccount extends BaseAction
+class CreateAccount extends FluxAction
 {
     protected function boot(array $data): void
     {

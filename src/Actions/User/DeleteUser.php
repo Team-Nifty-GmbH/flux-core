@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\User;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class DeleteUser extends BaseAction
+class DeleteUser extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\ProductOptionGroup;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateProductOptionGroupRequest;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Support\Facades\Validator;
 
-class CreateProductOptionGroup extends BaseAction
+class CreateProductOptionGroup extends FluxAction
 {
     protected function boot(array $data): void
     {

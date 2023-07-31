@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\AddressType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateAddressTypeRequest;
 use FluxErp\Models\AddressType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateAddressType extends BaseAction
+class UpdateAddressType extends FluxAction
 {
     protected function boot(array $data): void
     {

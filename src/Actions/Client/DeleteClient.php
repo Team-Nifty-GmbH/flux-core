@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\Client;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Client;
 
-class DeleteClient extends BaseAction
+class DeleteClient extends FluxAction
 {
     protected function boot(array $data): void
     {

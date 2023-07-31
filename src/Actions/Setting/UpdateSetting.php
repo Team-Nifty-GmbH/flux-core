@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Setting;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateSettingRequest;
 use FluxErp\Models\Setting;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateSetting extends BaseAction
+class UpdateSetting extends FluxAction
 {
     protected function boot(array $data): void
     {

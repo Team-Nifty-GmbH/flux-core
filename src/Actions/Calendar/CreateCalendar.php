@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Calendar;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCalendarRequest;
 use FluxErp\Models\Calendar;
 
-class CreateCalendar extends BaseAction
+class CreateCalendar extends FluxAction
 {
     protected function boot(array $data): void
     {

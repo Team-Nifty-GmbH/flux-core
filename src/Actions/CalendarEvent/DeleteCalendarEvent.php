@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\CalendarEvent;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\CalendarEvent;
 
-class DeleteCalendarEvent extends BaseAction
+class DeleteCalendarEvent extends FluxAction
 {
     protected function boot(array $data): void
     {

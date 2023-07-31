@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateAdditionalColumnRequest;
 use FluxErp\Models\AdditionalColumn;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
-class UpdateAdditionalColumn extends BaseAction
+class UpdateAdditionalColumn extends FluxAction
 {
     protected function boot(array $data): void
     {

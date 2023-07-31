@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\EventSubscription;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\CreateEventSubscriptionRequest;
 use FluxErp\Models\EventSubscription;
@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class CreateEventSubscription extends BaseAction
+class CreateEventSubscription extends FluxAction
 {
     protected function boot(array $data): void
     {

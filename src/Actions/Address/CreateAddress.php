@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Address;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class CreateAddress extends BaseAction
+class CreateAddress extends FluxAction
 {
     protected function boot(array $data): void
     {

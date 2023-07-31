@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\Country;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateCountryRequest;
 use FluxErp\Models\Country;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateCountry extends BaseAction
+class UpdateCountry extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\AddressType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateAddressTypeRequest;
 use FluxErp\Models\AddressType;
 use Illuminate\Support\Facades\Validator;
 
-class CreateAddressType extends BaseAction
+class CreateAddressType extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\Client;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateClientRequest;
 use FluxErp\Models\Client;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateClient extends BaseAction
+class UpdateClient extends FluxAction
 {
     protected function boot(array $data): void
     {

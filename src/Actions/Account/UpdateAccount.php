@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Account;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateAccountRequest;
 use FluxErp\Models\Account;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateAccount extends BaseAction
+class UpdateAccount extends FluxAction
 {
     protected function boot(array $data): void
     {

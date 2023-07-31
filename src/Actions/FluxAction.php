@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions;
 
+use FluxErp\Traits\BroadcastAction;
 use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -10,19 +11,23 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
-abstract class BaseAction
+abstract class FluxAction
 {
-    use Makeable;
+    use Makeable, BroadcastAction;
 
     protected array $data;
 
     protected array $rules = [];
 
+    protected mixed $result = null;
+
     protected static Dispatcher $dispatcher;
+
+    protected static bool $isBroadcasting = true;
 
     abstract public static function models(): array;
 
-    abstract public function performAction();
+    abstract public function performAction(): mixed;
 
     public function __construct(array $data)
     {
@@ -30,6 +35,7 @@ abstract class BaseAction
 
         $this->fireActionEvent(event: 'booting', halt: false);
 
+        static::bootBroadcastAction();
         $this->boot($data);
 
         $this->fireActionEvent(event: 'booted', halt: false);
@@ -65,6 +71,11 @@ abstract class BaseAction
             ->toString();
     }
 
+    public static function executed($callback): void
+    {
+        static::$dispatcher->listen('action.executed: ' . static::class, $callback);
+    }
+
     public function setData(array $data, bool $keepEmptyStrings = false): static
     {
         $this->data = $keepEmptyStrings ? $data : $this->convertEmptyStringToNull($data);
@@ -89,17 +100,17 @@ abstract class BaseAction
         return $this->rules;
     }
 
-    final public function execute()
+    final public function execute(): mixed
     {
         if ($this->fireActionEvent(event: 'executing') === false) {
             return false;
         }
 
-        $returnValue = $this->performAction();
+        $this->result = $this->performAction();
 
-        $this->fireActionEvent(event: 'executed', object: is_object($returnValue) ? $returnValue : null, halt: false);
+        $this->fireActionEvent(event: 'executed', halt: false);
 
-        return $returnValue;
+        return $this->result;
     }
 
     final public function validate(): static
@@ -143,11 +154,11 @@ abstract class BaseAction
         }, $data);
     }
 
-    protected function fireActionEvent(string $event, object $object = null, bool $halt = true)
+    protected function fireActionEvent(string $event, bool $halt = true)
     {
         $function = $halt ? 'until' : 'dispatch';
 
-        return static::$dispatcher->{$function}('action.' . $event . ': ' . static::class, $object ?: $this);
+        return static::$dispatcher->{$function}('action.' . $event . ': ' . static::class, $this);
     }
 
     private function setEventDispatcher(bool $nullDispatcher = false): void

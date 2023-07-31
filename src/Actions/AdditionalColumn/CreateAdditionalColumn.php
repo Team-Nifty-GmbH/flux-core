@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateAdditionalColumnRequest;
 use FluxErp\Models\AdditionalColumn;
 
-class CreateAdditionalColumn extends BaseAction
+class CreateAdditionalColumn extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\ProductOption;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ProductOption;
 
-class DeleteProductOption extends BaseAction
+class DeleteProductOption extends FluxAction
 {
     protected function boot(array $data): void
     {

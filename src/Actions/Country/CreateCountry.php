@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Country;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCountryRequest;
 use FluxErp\Models\Country;
 use Illuminate\Support\Facades\Validator;
 
-class CreateCountry extends BaseAction
+class CreateCountry extends FluxAction
 {
     protected function boot(array $data): void
     {

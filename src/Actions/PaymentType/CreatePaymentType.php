@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\PaymentType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreatePaymentTypeRequest;
 use FluxErp\Models\PaymentType;
 use Illuminate\Support\Facades\Validator;
 
-class CreatePaymentType extends BaseAction
+class CreatePaymentType extends FluxAction
 {
     protected function boot(array $data): void
     {

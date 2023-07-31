@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\DocumentType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\DocumentType;
 
-class DeleteDocumentType extends BaseAction
+class DeleteDocumentType extends FluxAction
 {
     protected function boot(array $data): void
     {

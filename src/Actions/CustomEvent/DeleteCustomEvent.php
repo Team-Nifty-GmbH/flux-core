@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\CustomEvent;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\CustomEvent;
 
-class DeleteCustomEvent extends BaseAction
+class DeleteCustomEvent extends FluxAction
 {
     protected function boot(array $data): void
     {

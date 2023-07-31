@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\ContactOption;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateContactOptionRequest;
 use FluxErp\Models\ContactOption;
 
-class CreateContactOption extends BaseAction
+class CreateContactOption extends FluxAction
 {
     protected function boot(array $data): void
     {

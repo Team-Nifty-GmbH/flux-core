@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\Project;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\FinishProjectRequest;
 use FluxErp\Models\Project;
 use FluxErp\States\Project\Done;
 use Illuminate\Database\Eloquent\Model;
 
-class FinishProject extends BaseAction
+class FinishProject extends FluxAction
 {
     protected function boot(array $data): void
     {

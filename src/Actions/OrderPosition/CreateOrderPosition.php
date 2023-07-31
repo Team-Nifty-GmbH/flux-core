@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\OrderPosition;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Models\OrderPosition;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class CreateOrderPosition extends BaseAction
+class CreateOrderPosition extends FluxAction
 {
     protected function boot(array $data): void
     {

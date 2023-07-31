@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\ProductProperty;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ProductProperty;
 use Illuminate\Validation\ValidationException;
 
-class DeleteProductProperty extends BaseAction
+class DeleteProductProperty extends FluxAction
 {
     protected function boot(array $data): void
     {

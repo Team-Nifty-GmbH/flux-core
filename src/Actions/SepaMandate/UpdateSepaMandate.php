@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\SepaMandate;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateSepaMandateRequest;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
@@ -10,7 +10,7 @@ use FluxErp\Models\SepaMandate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
-class UpdateSepaMandate extends BaseAction
+class UpdateSepaMandate extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\SerialNumberRange;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateSerialNumberRangeRequest;
 use FluxErp\Models\SerialNumberRange;
 
-class CreateSerialNumberRange extends BaseAction
+class CreateSerialNumberRange extends FluxAction
 {
     protected function boot(array $data): void
     {

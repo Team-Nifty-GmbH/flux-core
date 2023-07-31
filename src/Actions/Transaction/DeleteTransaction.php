@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\Transaction;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Transaction;
 
-class DeleteTransaction extends BaseAction
+class DeleteTransaction extends FluxAction
 {
     protected function boot(array $data): void
     {

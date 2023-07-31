@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\SerialNumber;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateSerialNumberRequest;
 use FluxErp\Models\SerialNumber;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateSerialNumber extends BaseAction
+class UpdateSerialNumber extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\OrderType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateOrderTypeRequest;
 use FluxErp\Models\OrderType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateOrderType extends BaseAction
+class UpdateOrderType extends FluxAction
 {
     protected function boot(array $data): void
     {

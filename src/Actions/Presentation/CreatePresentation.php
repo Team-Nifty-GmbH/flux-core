@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Presentation;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreatePresentationRequest;
 use FluxErp\Models\Presentation;
 use Illuminate\Support\Facades\Validator;
 
-class CreatePresentation extends BaseAction
+class CreatePresentation extends FluxAction
 {
     protected function boot(array $data): void
     {

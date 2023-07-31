@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Permission;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreatePermissionRequest;
 use FluxErp\Models\Permission;
 use Illuminate\Database\Eloquent\Model;
 
-class CreatePermission extends BaseAction
+class CreatePermission extends FluxAction
 {
     protected function boot(array $data): void
     {

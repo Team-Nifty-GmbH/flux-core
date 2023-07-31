@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Price;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdatePriceRequest;
 use FluxErp\Models\Price;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdatePrice extends BaseAction
+class UpdatePrice extends FluxAction
 {
     protected function boot(array $data): void
     {

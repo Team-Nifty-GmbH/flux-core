@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\DocumentType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateDocumentTypeRequest;
 use FluxErp\Models\DocumentType;
 use Illuminate\Support\Facades\Validator;
 
-class CreateDocumentType extends BaseAction
+class CreateDocumentType extends FluxAction
 {
     protected function boot(array $data): void
     {

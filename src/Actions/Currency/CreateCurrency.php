@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Currency;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCurrencyRequest;
 use FluxErp\Models\Currency;
 
-class CreateCurrency extends BaseAction
+class CreateCurrency extends FluxAction
 {
     protected function boot(array $data): void
     {

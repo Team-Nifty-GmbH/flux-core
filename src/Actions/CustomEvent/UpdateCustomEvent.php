@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\CustomEvent;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateCustomEventRequest;
 use FluxErp\Models\CustomEvent;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateCustomEvent extends BaseAction
+class UpdateCustomEvent extends FluxAction
 {
     protected function boot(array $data): void
     {

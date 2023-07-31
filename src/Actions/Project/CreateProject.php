@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Project;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateProjectRequest;
 use FluxErp\Models\Category;
 use FluxErp\Models\Project;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class CreateProject extends BaseAction
+class CreateProject extends FluxAction
 {
     protected function boot(array $data): void
     {

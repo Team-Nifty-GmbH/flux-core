@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\Contact;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Contact;
 
-class DeleteContact extends BaseAction
+class DeleteContact extends FluxAction
 {
     protected function boot(array $data): void
     {

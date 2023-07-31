@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Warehouse;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Warehouse;
 use Illuminate\Validation\ValidationException;
 
-class DeleteWarehouse extends BaseAction
+class DeleteWarehouse extends FluxAction
 {
     protected function boot(array $data): void
     {

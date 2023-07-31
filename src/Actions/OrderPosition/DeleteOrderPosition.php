@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\OrderPosition;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\OrderPosition;
 
-class DeleteOrderPosition extends BaseAction
+class DeleteOrderPosition extends FluxAction
 {
     protected function boot(array $data): void
     {

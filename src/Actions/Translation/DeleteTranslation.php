@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\Translation;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use Spatie\TranslationLoader\LanguageLine;
 
-class DeleteTranslation extends BaseAction
+class DeleteTranslation extends FluxAction
 {
     protected function boot(array $data): void
     {

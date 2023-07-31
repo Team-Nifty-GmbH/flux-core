@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\DocumentType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateDocumentTypeRequest;
 use FluxErp\Models\DocumentType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateDocumentType extends BaseAction
+class UpdateDocumentType extends FluxAction
 {
     protected function boot(array $data): void
     {

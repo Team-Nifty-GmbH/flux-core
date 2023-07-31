@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\OrderType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\OrderType;
 
-class DeleteOrderType extends BaseAction
+class DeleteOrderType extends FluxAction
 {
     protected function boot(array $data): void
     {

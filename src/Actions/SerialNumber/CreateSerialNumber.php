@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\SerialNumber;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateSerialNumberRequest;
 use FluxErp\Models\SerialNumber;
 use Illuminate\Support\Facades\Validator;
 
-class CreateSerialNumber extends BaseAction
+class CreateSerialNumber extends FluxAction
 {
     protected function boot(array $data): void
     {

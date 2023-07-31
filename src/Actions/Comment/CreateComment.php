@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Comment;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\EventSubscription\CreateEventSubscription;
 use FluxErp\Http\Requests\CreateCommentRequest;
 use FluxErp\Models\Comment;
@@ -11,7 +11,7 @@ use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use Illuminate\Support\Facades\Auth;
 
-class CreateComment extends BaseAction
+class CreateComment extends FluxAction
 {
     protected function boot(array $data): void
     {

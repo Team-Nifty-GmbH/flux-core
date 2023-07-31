@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Address;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateAddressRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
@@ -12,7 +12,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateAddress extends BaseAction
+class UpdateAddress extends FluxAction
 {
     protected function boot(array $data): void
     {

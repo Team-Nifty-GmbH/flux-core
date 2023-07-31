@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Ticket;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateTicketRequest;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Ticket;
@@ -11,7 +11,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class CreateTicket extends BaseAction
+class CreateTicket extends FluxAction
 {
     protected function boot(array $data): void
     {

@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Translation;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateTranslationRequest;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\TranslationLoader\LanguageLine;
 
-class UpdateTranslation extends BaseAction
+class UpdateTranslation extends FluxAction
 {
     protected function boot(array $data): void
     {

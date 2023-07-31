@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\PriceList;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdatePriceListRequest;
 use FluxErp\Models\PriceList;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
-class UpdatePriceList extends BaseAction
+class UpdatePriceList extends FluxAction
 {
     protected function boot(array $data): void
     {

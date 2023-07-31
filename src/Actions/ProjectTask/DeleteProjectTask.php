@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\ProjectTask;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ProjectTask;
 
-class DeleteProjectTask extends BaseAction
+class DeleteProjectTask extends FluxAction
 {
     protected function boot(array $data): void
     {

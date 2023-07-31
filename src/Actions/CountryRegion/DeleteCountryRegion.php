@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\CountryRegion;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\CountryRegion;
 
-class DeleteCountryRegion extends BaseAction
+class DeleteCountryRegion extends FluxAction
 {
     protected function boot(array $data): void
     {

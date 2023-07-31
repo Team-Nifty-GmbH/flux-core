@@ -2,12 +2,12 @@
 
 namespace FluxErp\Actions\Role;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateRoleRequest;
 use FluxErp\Models\Role;
 use Illuminate\Database\Eloquent\Model;
 
-class CreateRole extends BaseAction
+class CreateRole extends FluxAction
 {
     protected function boot(array $data): void
     {

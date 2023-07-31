@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Permission;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Permission;
 use Illuminate\Validation\ValidationException;
 
-class DeletePermission extends BaseAction
+class DeletePermission extends FluxAction
 {
     protected function boot(array $data): void
     {

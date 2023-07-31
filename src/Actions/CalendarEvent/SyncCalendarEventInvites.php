@@ -2,13 +2,13 @@
 
 namespace FluxErp\Actions\CalendarEvent;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateCalendarEventRequest;
 use FluxErp\Models\CalendarEvent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
-class SyncCalendarEventInvites extends BaseAction
+class SyncCalendarEventInvites extends FluxAction
 {
     protected function boot(array $data): void
     {

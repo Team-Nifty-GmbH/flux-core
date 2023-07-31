@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\AddressType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\AddressType;
 use Illuminate\Validation\ValidationException;
 
-class DeleteAddressType extends BaseAction
+class DeleteAddressType extends FluxAction
 {
     protected function boot(array $data): void
     {

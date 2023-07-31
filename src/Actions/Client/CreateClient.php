@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\Client;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateClientRequest;
 use FluxErp\Models\Client;
 
-class CreateClient extends BaseAction
+class CreateClient extends FluxAction
 {
     protected function boot(array $data): void
     {

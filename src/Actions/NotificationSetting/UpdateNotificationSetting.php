@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\NotificationSetting;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateNotificationSettingsRequest;
 use FluxErp\Http\Requests\UpdateUserNotificationSettingsRequest;
 use FluxErp\Models\NotificationSetting;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
-class UpdateNotificationSetting extends BaseAction
+class UpdateNotificationSetting extends FluxAction
 {
     protected function boot(array $data): void
     {
