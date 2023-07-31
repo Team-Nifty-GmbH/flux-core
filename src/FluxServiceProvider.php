@@ -70,7 +70,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerBladeComponents();
         $this->registerLivewireComponents();
         $this->registerMiddleware();
-        $this->registerconfig();
+        $this->registerConfig();
         $this->registerMarcos();
 
         $this->app->extend('validator', function () {

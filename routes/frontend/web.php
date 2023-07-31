@@ -63,7 +63,7 @@ Route::middleware(['auth:web'])->group(function () {
 
     Route::name('products.')->prefix('products')
         ->group(function () {
-            Route::get('/')->registersMenuItem(icon: 'square-3-stack-3d');
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'square-3-stack-3d');
             Route::get('/list', ProductList::class)->name('products')->registersMenuItem();
             Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers')->registersMenuItem();
             Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
@@ -78,7 +78,7 @@ Route::middleware(['auth:web'])->group(function () {
 
     Route::name('settings.')->prefix('settings')
         ->group(function () {
-            Route::get('/')->registersMenuItem(icon: 'cog', order: 9999);
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'cog', order: 9999);
             Route::get('/additional-columns', AdditionalColumns::class)
                 ->name('additional-columns')
                 ->registersMenuItem();

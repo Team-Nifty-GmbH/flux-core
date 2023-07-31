@@ -36,8 +36,8 @@ class MenuManager
         Route $route,
         string $label = null,
         string $icon = null,
-        int $order = null,
-    ): void {
+        int $order = null): void
+    {
         $routeName = $route->getName();
 
         $guards = array_values(
@@ -66,8 +66,7 @@ class MenuManager
                 'order' => $order
                     ?? count(
                         data_get($this->menuItems, Str::beforeLast($path, '.'))
-                            ?? (str_contains($path, '.') ? [] : $this->menuItems
-                            )
+                            ?? (str_contains($path, '.') ? [] : $this->menuItems)
                     ),
             ])
         );

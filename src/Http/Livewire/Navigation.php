@@ -20,7 +20,7 @@ class Navigation extends Component
 
     public bool $showSearchBar = true;
 
-    public function mount(?array $setting = null, bool $showSearchBar = true): void
+    public function mount(array $setting = null, bool $showSearchBar = true): void
     {
         $guard = explode('_', Auth::guard()->getName());
 
