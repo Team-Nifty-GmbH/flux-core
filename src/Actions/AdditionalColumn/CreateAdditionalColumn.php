@@ -32,6 +32,6 @@ class CreateAdditionalColumn extends BaseAction
         $additionalColumn = new AdditionalColumn($this->data);
         $additionalColumn->save();
 
-        return $additionalColumn;
+        return $additionalColumn->fresh();
     }
 }

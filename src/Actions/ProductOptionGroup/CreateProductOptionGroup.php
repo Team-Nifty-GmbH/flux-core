@@ -25,7 +25,7 @@ class CreateProductOptionGroup extends BaseAction
         $productOptionGroup = new ProductOptionGroup($this->data);
         $productOptionGroup->save();
 
-        return $productOptionGroup;
+        return $productOptionGroup->fresh();
     }
 
     public function validate(): static

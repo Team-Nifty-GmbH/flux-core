@@ -24,6 +24,6 @@ class CreateCalendar extends BaseAction
         $calendar = new Calendar($this->data);
         $calendar->save();
 
-        return $calendar;
+        return $calendar->fresh();
     }
 }

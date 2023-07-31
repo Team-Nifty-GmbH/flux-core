@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Tags\HasTags;
@@ -63,7 +64,7 @@ class OrderPosition extends Model
         'uuid',
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::addGlobalScope('withChildren', function ($builder) {
             $builder->with('children');
@@ -112,6 +113,11 @@ class OrderPosition extends Model
         return $this->hasMany(OrderPosition::class, 'origin_position_id');
     }
 
+    public function children(): HasMany
+    {
+        return $this->hasMany(OrderPosition::class, 'parent_id');
+    }
+
     public function currency(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -124,6 +130,11 @@ class OrderPosition extends Model
         );
     }
 
+    public function discounts(): MorphMany
+    {
+        return $this->morphMany(Discount::class, 'model');
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
@@ -132,6 +143,11 @@ class OrderPosition extends Model
     public function origin(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class, 'origin_position_id');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(OrderPosition::class, 'parent_id');
     }
 
     public function price(): BelongsTo
@@ -149,21 +165,6 @@ class OrderPosition extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function discounts(): MorphMany
-    {
-        return $this->morphMany(Discount::class, 'model');
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(OrderPosition::class, 'parent_id');
-    }
-
-    public function children(): HasMany
-    {
-        return $this->hasMany(OrderPosition::class, 'parent_id');
-    }
-
     public function serialNumbers(): HasMany
     {
         return $this->hasMany(SerialNumber::class);
@@ -172,6 +173,11 @@ class OrderPosition extends Model
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
+    }
+
+    public function workTime(): HasOne
+    {
+        return $this->hasOne(WorkTime::class);
     }
 
     private function subTotalNet(): string

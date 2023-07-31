@@ -83,7 +83,7 @@ class CreateOrderPosition extends BaseAction
 
         $orderPosition->attachTags($tags);
 
-        return $orderPosition;
+        return $orderPosition->withoutRelations()->fresh();
     }
 
     public function validate(): static

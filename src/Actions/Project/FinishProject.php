@@ -30,6 +30,6 @@ class FinishProject extends BaseAction
         $project->state = $this->data['finish'] ? Done::class : Project::getDefaultStateFor('state');
         $project->save();
 
-        return $project;
+        return $project->fresh();
     }
 }

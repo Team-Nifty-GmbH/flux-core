@@ -2,7 +2,6 @@
 
 namespace FluxErp\Widgets;
 
-use FilesystemIterator;
 use FluxErp\Contracts\UserWidget;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
@@ -64,7 +63,7 @@ class WidgetManager
         $namespace = $namespace ?: 'App\\Http\\Livewire\\Widgets';
         $path = $directory ?: app_path('Http/Livewire/Widgets');
 
-        if (!is_dir($path)) {
+        if (! is_dir($path)) {
             return;
         }
 
@@ -76,19 +75,19 @@ class WidgetManager
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === 'php') {
                 $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
-                $subNameSpace = !empty($relativePath)
+                $subNameSpace = ! empty($relativePath)
                     ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
                     : '';
                 $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
 
-                if (!class_exists($class) || !in_array(UserWidget::class, class_implements($class))) {
+                if (! class_exists($class) || ! in_array(UserWidget::class, class_implements($class))) {
                     continue;
                 }
 
                 $reflection = new ReflectionClass($class);
 
                 // Check if the class is a valid Livewire component
-                if ($reflection->isSubclassOf(Component::class) && !$reflection->isAbstract()) {
+                if ($reflection->isSubclassOf(Component::class) && ! $reflection->isAbstract()) {
                     if (class_exists($class) && str_starts_with($reflection->getNamespaceName(), config('livewire.class_namespace'))) {
                         $componentName = $class::getName();
                     } else {

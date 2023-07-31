@@ -25,7 +25,7 @@ class CreateAddressType extends BaseAction
         $addressType = new AddressType($this->data);
         $addressType->save();
 
-        return $addressType;
+        return $addressType->fresh();
     }
 
     public function validate(): static

@@ -73,7 +73,7 @@ class Dashboard extends Component
     {
         return array_filter(
             $widgets,
-            function(array $widget) {
+            function (array $widget) {
                 $name = $widget['component_name'] ?? $widget['name'];
 
                 try {

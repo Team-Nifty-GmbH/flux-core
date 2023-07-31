@@ -21,7 +21,7 @@ class DeletePriceList extends BaseAction
         return [PriceList::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return PriceList::query()
             ->whereKey($this->data['id'])

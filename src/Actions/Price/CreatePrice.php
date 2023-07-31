@@ -24,6 +24,6 @@ class CreatePrice extends BaseAction
         $price = new Price($this->data);
         $price->save();
 
-        return $price;
+        return $price->fresh();
     }
 }

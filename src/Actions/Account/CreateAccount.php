@@ -24,6 +24,6 @@ class CreateAccount extends BaseAction
         $account = new Account($this->data);
         $account->save();
 
-        return $account;
+        return $account->fresh();
     }
 }

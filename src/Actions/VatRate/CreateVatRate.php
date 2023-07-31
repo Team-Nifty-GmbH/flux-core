@@ -24,6 +24,6 @@ class CreateVatRate extends BaseAction
         $vatRate = new VatRate($this->data);
         $vatRate->save();
 
-        return $vatRate;
+        return $vatRate->fresh();
     }
 }

@@ -20,7 +20,7 @@ class DeleteVatRate extends BaseAction
         return [VatRate::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return VatRate::query()
             ->whereKey($this->data['id'])

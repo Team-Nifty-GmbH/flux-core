@@ -10,7 +10,6 @@ use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Component;
 use Livewire\Livewire;
-use FluxErp\Widgets\WidgetManager;
 use Spatie\Permission\PermissionRegistrar;
 
 class DashboardTest extends BaseSetup
@@ -23,7 +22,8 @@ class DashboardTest extends BaseSetup
     {
         parent::setUp();
 
-        $this->components[] = new class extends Component implements UserWidget{
+        $this->components[] = new class extends Component implements UserWidget
+        {
             public function render(): string
             {
                 return <<<'blade'
@@ -37,7 +37,8 @@ class DashboardTest extends BaseSetup
             }
         };
 
-        $this->components[] =  new class extends Component implements UserWidget{
+        $this->components[] = new class extends Component implements UserWidget
+        {
             public function render(): string
             {
                 return <<<'blade'
@@ -57,7 +58,7 @@ class DashboardTest extends BaseSetup
             'component_name' => 'sample-component',
             'name' => 'Widget 1',
             'width' => 2,
-            'height' => 1
+            'height' => 1,
         ]);
 
         Livewire::component('sample-component', $this->components[0]);
@@ -138,7 +139,7 @@ class DashboardTest extends BaseSetup
                     'id' => $this->user->widgets->first()->id,
                     'name' => 'New Name',
                     'width' => 3,
-                    'height' => 3
+                    'height' => 3,
                 ]
             )
             ->assertOk()

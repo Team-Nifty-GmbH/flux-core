@@ -65,7 +65,7 @@ class ProjectTasksList extends DataTable
         return $builder->with('user:id,user_code');
     }
 
-    public function getFilterableColumns(?string $name = null): array
+    public function getFilterableColumns(string $name = null): array
     {
         $filterable = parent::getFilterableColumns($name);
         $filterable[] = 'user.user_code';

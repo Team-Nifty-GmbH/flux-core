@@ -42,10 +42,8 @@ class Init extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return void
      */
-    public function handle(): bool
+    public function handle(): void
     {
         $this->call(StorageLinkCommand::class);
 
@@ -122,7 +120,7 @@ class Init extends Command
             $this->call('config:clear');
         } else {
             if (! $this->confirmToProceed()) {
-                return false;
+                return;
             }
 
             $envFilePath = App::environmentFilePath();
@@ -158,8 +156,6 @@ class Init extends Command
             //$this->call('init:payment-types');
             //$this->call('init:document-types');
             //$this->call('init:order-types');
-
-            return false;
         }
     }
 

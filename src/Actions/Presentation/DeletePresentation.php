@@ -20,7 +20,7 @@ class DeletePresentation extends BaseAction
         return [Presentation::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return Presentation::query()
             ->whereKey($this->data['id'])

@@ -41,6 +41,6 @@ class UpdateNotificationSetting extends BaseAction
 
         $notificationSetting->save();
 
-        return $notificationSetting;
+        return $notificationSetting->fresh();
     }
 }

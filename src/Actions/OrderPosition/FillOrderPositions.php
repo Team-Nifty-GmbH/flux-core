@@ -92,7 +92,7 @@ class FillOrderPositions extends BaseAction
         return $this;
     }
 
-    private function validateOrderPosition(array $orderPosition, array $rules, ?array $parent = null): array
+    private function validateOrderPosition(array $orderPosition, array $rules, array $parent = null): array
     {
         $errors = [];
         $validator = Validator::make($orderPosition, $rules);

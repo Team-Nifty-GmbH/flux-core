@@ -94,7 +94,7 @@ class Product extends Component
         return view('flux::livewire.product.product', ['tabs' => $tabs]);
     }
 
-    public function save(): bool
+    public function save(): true
     {
         if ($this->priceLists !== null) {
             $this->product['prices'] = collect($this->priceLists)
@@ -136,7 +136,7 @@ class Product extends Component
         $product = \FluxErp\Models\Product::query()->whereKey($this->product['id'])->first();
         $priceListHelper = PriceHelper::make($product)->useDefault(false);
 
-        $priceLists->map(function ($priceList) use ($priceListHelper) {
+        $priceLists->map(function (PriceList $priceList) use ($priceListHelper) {
             $price = $priceListHelper
                 ->setPriceList($priceList)
                 ->price();

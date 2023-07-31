@@ -24,6 +24,6 @@ class CreateSetting extends BaseAction
         $setting = new Setting($this->data);
         $setting->save();
 
-        return $setting;
+        return $setting->fresh();
     }
 }

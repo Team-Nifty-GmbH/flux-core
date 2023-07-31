@@ -37,6 +37,8 @@ class Calendar extends Component
         'status' => null,
     ];
 
+    public array $events = [];
+
     public bool $eventModal = false;
 
     // Settings
@@ -101,7 +103,7 @@ class Calendar extends Component
         $this->editable = user_can('api.calendar-events.put');
     }
 
-    public function onDayClick(?string $dateString = null): void
+    public function onDayClick(string $dateString = null): void
     {
         // This method gets called when a day is clicked
         $this->resetErrorBag();

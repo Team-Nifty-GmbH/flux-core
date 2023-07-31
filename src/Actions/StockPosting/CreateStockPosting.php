@@ -28,7 +28,7 @@ class CreateStockPosting extends BaseAction
         $stockPosting = new StockPosting($this->data);
         $stockPosting->save();
 
-        return $stockPosting;
+        return $stockPosting->fresh();
     }
 
     private function getLatestStock(int $warehouseId, int $productId, float $posting): float

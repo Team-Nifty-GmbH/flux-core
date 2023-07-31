@@ -21,7 +21,7 @@ class DeletePermission extends BaseAction
         return [Permission::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return Permission::query()
             ->whereKey($this->data['id'])

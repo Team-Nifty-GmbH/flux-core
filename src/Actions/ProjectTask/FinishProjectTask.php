@@ -29,6 +29,6 @@ class FinishProjectTask extends BaseAction
         $task->is_done = $this->data['finish'];
         $task->save();
 
-        return $task;
+        return $task->fresh();
     }
 }

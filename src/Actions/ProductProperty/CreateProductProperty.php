@@ -25,7 +25,7 @@ class CreateProductProperty extends BaseAction
         $productProperty = new ProductProperty($this->data);
         $productProperty->save();
 
-        return $productProperty;
+        return $productProperty->fresh();
     }
 
     public function validate(): static

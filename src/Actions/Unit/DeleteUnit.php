@@ -20,7 +20,7 @@ class DeleteUnit extends BaseAction
         return [Unit::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return Unit::query()
             ->whereKey($this->data['id'])

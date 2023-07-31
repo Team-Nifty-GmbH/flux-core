@@ -20,7 +20,7 @@ class DeleteContactOption extends BaseAction
         return [ContactOption::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return ContactOption::query()
             ->whereKey($this->data['id'])

@@ -61,7 +61,7 @@ class TicketList extends DataTable
         return $returnArray;
     }
 
-    public function getFilterableColumns(?string $name = null): array
+    public function getFilterableColumns(string $name = null): array
     {
         return $this->availableCols;
     }

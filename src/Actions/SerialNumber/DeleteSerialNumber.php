@@ -20,7 +20,7 @@ class DeleteSerialNumber extends BaseAction
         return [SerialNumber::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return SerialNumber::query()
             ->whereKey($this->data['id'])

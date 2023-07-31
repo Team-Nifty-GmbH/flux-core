@@ -25,8 +25,8 @@ class AdditionalColumns extends Component
      */
     public function __construct(
         string|Model $model,
-        ?string $wire = null,
-        ?int $id = null,
+        string $wire = null,
+        int $id = null,
         bool $table = false,
     ) {
         $this->model = $model;

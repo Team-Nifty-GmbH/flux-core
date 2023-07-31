@@ -10,7 +10,7 @@ class Numeric implements InvokableRule
 
     private string|int|null $max;
 
-    public function __construct(string|int|null $min = null, string|int|null $max = null)
+    public function __construct(string|int $min = null, string|int $max = null)
     {
         $this->min = $min;
         $this->max = $max;

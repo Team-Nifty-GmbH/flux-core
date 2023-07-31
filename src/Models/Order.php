@@ -259,7 +259,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
         );
     }
 
-    public function invoice(): \Spatie\MediaLibrary\MediaCollections\Models\Media|null
+    public function invoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
     {
         return $this->getFirstMedia('invoice');
     }

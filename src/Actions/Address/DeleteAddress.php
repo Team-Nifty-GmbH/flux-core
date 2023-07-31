@@ -20,7 +20,7 @@ class DeleteAddress extends BaseAction
         return [Address::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         $address = Address::query()
             ->whereKey($this->data['id'])

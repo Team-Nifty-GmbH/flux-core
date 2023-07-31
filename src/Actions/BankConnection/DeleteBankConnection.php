@@ -20,7 +20,7 @@ class DeleteBankConnection extends BaseAction
         return [BankConnection::class];
     }
 
-    public function execute(): bool|null
+    public function execute(): ?bool
     {
         return BankConnection::query()
             ->whereKey($this->data['id'])
