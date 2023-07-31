@@ -48,7 +48,7 @@
     </x-modal>
     <div class="mb-6 sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-xl font-semibold">{{ __('flux::nav.settings.logs') }}</h1>
+            <h1 class="text-xl font-semibold">{{ __('Logs') }}</h1>
         </div>
     </div>
     <div wire:ignore>

@@ -71,7 +71,7 @@
                         <div>
                             <a
                                 x-bind:class="activeItem === '{{ $key }}' && 'bg-primary-500 dark:bg-primary-700 !text-white hover:bg-primary-600 nav-item-active'"
-                                @if(count($navigation['children']) > 1)
+                                @if($navigation['children'] ?? false)
                                     x-on:click.prevent="toggleMenu('{{ $key }}')"
                                 @else
                                     href="{{ $navigation['uri'] }}"
@@ -85,14 +85,14 @@
                                         <x-heroicons :name="$navigation['icon'] ?? 'no-symbol'" class="h-4 w-4" />
                                     </div>
                                 </div>
-                                <span class="truncate text-sm text-white"> {{ __($navigation['label']) }} </span>
-                                @if(count($navigation['children']) > 1)
+                                <span class="truncate text-sm text-white"> {{ __($navigation['label'] ?? $key) }} </span>
+                                @if($navigation['children'] ?? false)
                                     <span aria-hidden="true" class="ml-auto pl-2 pr-2">
                                     <x-icon name="chevron-left" class="h-4 w-4 text-white transform transition-transform" x-bind:class="{ '-rotate-90': isOpen('{{ $key }}') }" />
                                 </span>
                                 @endif
                             </a>
-                            @if(count($navigation['children']) > 1)
+                            @if($navigation['children'] ?? false)
                                 <div x-show="isOpen('{{ $key }}')" x-transition class="mt-2 space-y-2 overflow-x-hidden text-white" role="menu"
                                      aria-label="Authentication" x-cloak>
                                     @foreach($navigation['children'] as $child)
@@ -100,7 +100,7 @@
                                            href="{{ $child['uri'] }}" role="menuitem"
                                            :class="activeSubItem === '{{ $child['uri'] }}' && 'rounded-md bg-primary-600/50 dark:bg-primary-700/5 hover:bg-primary-600/10'"
                                            class="dark:hover:text-light block truncate rounded-md p-2 pl-20 text-sm transition-colors duration-200 hover:bg-gray-800/50">
-                                            {{ __($child['name']) }}
+                                            {{ __(\Illuminate\Support\Str::headline($child['label'])) }}
                                         </a>
                                     @endforeach
                                 </div>

@@ -42,7 +42,7 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="mb-6 sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('flux::nav.settings.users') }}</h1>
+                <h1 class="text-xl font-semibold">{{ __('Users') }}</h1>
                 <p class="mt-2 text-sm text-gray-300">{{ __('Here you can manage the application users...') }}</p>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">

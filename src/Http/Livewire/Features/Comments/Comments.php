@@ -116,7 +116,7 @@ class Comments extends Component
         try {
             $comment = CreateComment::make($comment)->validate()->execute();
         } catch (ValidationException $e) {
-            validation_errors_to_notifications($e, $this);
+            exception_to_notifications($e, $this);
 
             return;
         }
@@ -160,7 +160,7 @@ class Comments extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException $e) {
-            validation_errors_to_notifications($e, $this);
+            exception_to_notifications($e, $this);
         }
     }
 
@@ -169,7 +169,7 @@ class Comments extends Component
         try {
             DeleteComment::make(['id' => $id])->validate()->execute();
         } catch (ValidationException $e) {
-            validation_errors_to_notifications($e, $this);
+            exception_to_notifications($e, $this);
 
             return;
         }

@@ -2,7 +2,7 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('flux::nav.settings.ticket-types') }}</h1>
+                <h1 class="text-xl font-semibold">{{ __('Ticket Types') }}</h1>
                 <div class="mt-2 text-sm text-gray-300">{{__('Here you can manage all ticket types...')}}</div>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
