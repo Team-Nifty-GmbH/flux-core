@@ -24,6 +24,11 @@ class CreateOrderRequest extends BaseFormRequest
             [
                 'parent_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
+                'contact_id' => [
+                    'integer',
+                    'nullable',
+                    new ExistsWithForeign(foreignAttribute: 'client_id', table: 'contacts'),
+                ],
                 'currency_id' => 'integer|exists:currencies,id,deleted_at,NULL',
                 'address_invoice_id' => [
                     'required',
@@ -91,7 +96,7 @@ class CreateOrderRequest extends BaseFormRequest
 
                 'order_date' => 'date',
                 'invoice_date' => 'date|nullable',
-                'invoice_number' => 'string|unique:orders,invoice_number',
+                'invoice_number' => 'string',
                 'system_delivery_date' => 'date|nullable',
                 'customer_delivery_date' => 'date|nullable',
                 'date_of_approval' => 'date|nullable',
