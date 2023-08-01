@@ -25,6 +25,7 @@ class UpdateUserNotificationSettingsRequest extends BaseFormRequest
                 Rule::in(array_keys(config('notifications.channels'))),
             ],
             'is_active' => 'required|boolean',
+            'is_anonymous' => 'sometimes|required|boolean|declined',
         ];
     }
 }
