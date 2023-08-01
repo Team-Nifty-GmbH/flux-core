@@ -2,17 +2,17 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Scout\Searchable;
 
 class Account extends Model
 {
-    use HasUserModification, HasUuid, Searchable, SoftDeletes, HasFactory;
+    use HasPackageFactory, HasUserModification, HasUuid, Searchable, SoftDeletes;
 
     protected $hidden = [
         'uuid',

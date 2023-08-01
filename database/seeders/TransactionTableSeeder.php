@@ -8,14 +8,12 @@ use FluxErp\Models\Account;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 
-class TransactionsTableSeeder extends Seeder
+class TransactionTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         $accounts = Account::all();
         $currencies = Currency::all();

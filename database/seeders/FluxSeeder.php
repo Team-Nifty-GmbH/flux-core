@@ -44,6 +44,7 @@ class FluxSeeder extends Seeder
         $this->call(ProjectTaskTableSeeder::class);
 
         $this->call(BankConnectionTableSeeder::class);
+        $this->call(AccountTableSeeder::class);
         $this->call(SepaMandateTableSeeder::class);
         $this->call(ProductOptionGroupTableSeeder::class);
         $this->call(ProductOptionTableSeeder::class);
@@ -58,6 +59,7 @@ class FluxSeeder extends Seeder
         $this->call(OrderTableSeeder::class);
         $this->call(OrderPositionTableSeeder::class);
         $this->call(DiscountTableSeeder::class);
+        $this->call(TransactionTableSeeder::class);
         $this->call(SerialNumberTableSeeder::class);
         $this->call(RoleTableSeeder::class);
         $this->call(CalendarTableSeeder::class);

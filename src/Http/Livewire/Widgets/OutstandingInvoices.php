@@ -7,6 +7,7 @@ use FluxErp\Http\Livewire\DataTables\OrderList;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\Transaction;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Illuminate\Support\Facades\Session;
 
@@ -14,21 +15,24 @@ class OutstandingInvoices extends Component implements UserWidget
 {
     public float $sum = 0;
 
-    public function mount()
+    public function mount(): void
     {
         $this->calculateSum();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('flux::livewire.widgets.outstanding-invoices',
             [
-                'currency' => Currency::query()->where('is_default', true)->first()->toArray()
+                'currency' => Currency::query()
+                    ->where('is_default', true)
+                    ->first()
+                    ?->toArray() ?: []
             ]
         );
     }
 
-    public function viewOrders()
+    public function viewOrders(): void
     {
         $filters = [
             'userFilters' => [
@@ -36,26 +40,21 @@ class OutstandingInvoices extends Component implements UserWidget
                     [
                         'column' => 'is_locked',
                         'operator' => '=',
-                        'value' => '1',
-                        'relation' => '',
+                        'value' => true,
                     ],
                     [
                         'column' => 'invoice_number',
-                        'operator' => '!=',
-                        'value' => 'null',
-                        'relation' => '',
+                        'operator' => 'is not null',
                     ],
                     [
                         'column' => 'total_gross_price',
                         'operator' => '>',
-                        'value' => '0',
-                        'relation' => '',
+                        'value' => 0,
                     ],
                     [
                         'column' => 'payment_state',
                         'operator' => '!=',
                         'value' => 'paid',
-                        'relation' => '',
                     ],
                 ],
             ],
@@ -63,13 +62,13 @@ class OutstandingInvoices extends Component implements UserWidget
 
         Session::put(config('tall-datatables.cache_key') . '.filter:' . OrderList::class, $filters);
 
-        return redirect()->route('orders');
+        $this->redirect(route('orders'));
     }
 
-    public function calculateSum()
+    public function calculateSum(): void
     {
-        $sum = Order::query()->sum('total_gross_price') - Transaction::query()->sum('amount');
-        $this->sum = round($sum, 2);
+        $sum = bcsub(Order::query()->sum('total_gross_price'), Transaction::query()->sum('amount'));
+        $this->sum = bcround($sum, 2);
     }
 
     public static function getLabel(): string

@@ -7,14 +7,12 @@ use FluxErp\Models\BankConnection;
 use FluxErp\Models\Currency;
 use Illuminate\Database\Seeder;
 
-class AccountsTableSeeder extends Seeder
+class AccountTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         $bankConnections = BankConnection::all();
         $currencies = Currency::all();

@@ -1,6 +1,6 @@
 <x-card class="max-w-full" x-data="{total: $wire.entangle('sum')}">
     <div class="flex text-ellipsis overflow-hidden flex-col items-start overflow-auto">
-        <p class="truncate text-xl font-medium text-gray-500">{{__('Outstanding invoinces')}}</p>
+        <p class="truncate text-xl font-medium text-gray-500">{{ __('Outstanding Invoices') }}</p>
         <div class="flex flex-col items-start pt-3">
             <p class="text-lg font-semibold" x-text="formatters.money(total, @js($currency))"></p>
         </div>
