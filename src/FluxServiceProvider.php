@@ -15,11 +15,13 @@ use FluxErp\DataType\Registry;
 use FluxErp\DataType\SerializableHandler;
 use FluxErp\DataType\StringHandler;
 use FluxErp\Facades\Action;
+use FluxErp\Facades\Menu;
 use FluxErp\Facades\Widget;
 use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
+use FluxErp\Menu\MenuManager;
 use FluxErp\Models\Address;
 use FluxErp\Models\Order;
 use FluxErp\Models\Permission;
@@ -32,6 +34,7 @@ use FluxErp\Widgets\WidgetManager;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Request;
@@ -67,7 +70,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerBladeComponents();
         $this->registerLivewireComponents();
         $this->registerMiddleware();
-        $this->registerconfig();
+        $this->registerConfig();
         $this->registerMarcos();
 
         $this->app->extend('validator', function () {
@@ -99,8 +102,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->alias(Registry::class, 'datatype.registry');
 
         $this->app->singleton('flux.widget_manager', fn ($app) => new WidgetManager());
-
         $this->app->singleton('flux.action_manager', fn ($app) => new ActionManager());
+        $this->app->singleton('flux.menu_manager', fn ($app) => new MenuManager());
     }
 
     /**
@@ -152,6 +155,43 @@ class FluxServiceProvider extends ServiceProvider
                         ->withPath($urlParams ? dirname(url()->full()) . $urlParams : url()->full());
                 });
         }
+
+        \Illuminate\Routing\Route::macro('registersMenuItem',
+            function (string $label = null, string $icon = null, int $order = null) {
+                Menu::register(
+                    route: $this,
+                    label: $label,
+                    icon: $icon,
+                    order: $order,
+                );
+            }
+        );
+
+        \Illuminate\Routing\Route::macro('getPermissionName',
+            function () {
+                $methods = array_flip($this->methods());
+                Arr::forget($methods, 'HEAD');
+                $method = array_keys($methods)[0];
+
+                $uri = array_flip(array_filter(explode('/', $this->uri)));
+                if (! $uri) {
+                    return null;
+                }
+
+                $uri = array_keys($uri);
+                $uri[] = $method;
+
+                return strtolower(implode('.', $uri));
+            }
+        );
+
+        \Illuminate\Routing\Route::macro('hasPermission', function () {
+            $this->setAction(array_merge($this->getAction(), [
+                'permission' => route_to_permission($this, false),
+            ]));
+
+            return $this;
+        });
     }
 
     protected function offerPublishing(): void
@@ -188,7 +228,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/scout.php', 'scout');
         config(['auth' => require __DIR__ . '/../config/auth.php']);
         config(['activitylog' => require __DIR__ . '/../config/activitylog.php']);
-        config(['logging' => require __DIR__ . '/../config/logging.php']);
+        config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
         config(['wireui.heroicons.alias' => 'heroicons']);
         config(['wireui.modal' => [
             'zIndex' => env('WIREUI_MODAL_Z_INDEX', 'z-20'),
