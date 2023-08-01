@@ -97,11 +97,4 @@ class ReplaceMedia extends FluxAction
             ])->errorBag('replaceMedia');
         }
     }
-
-    public function getData(): array
-    {
-        unset($this->data['media']);
-
-        return $this->data;
-    }
 }

@@ -2,7 +2,6 @@
 
 namespace FluxErp\Actions;
 
-use FluxErp\Traits\BroadcastAction;
 use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -13,7 +12,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class FluxAction
 {
-    use Makeable, BroadcastAction;
+    use Makeable;
 
     protected array $data;
 
@@ -22,8 +21,6 @@ abstract class FluxAction
     protected mixed $result = null;
 
     protected static Dispatcher $dispatcher;
-
-    protected static bool $isBroadcasting = true;
 
     abstract public static function models(): array;
 
@@ -35,10 +32,26 @@ abstract class FluxAction
 
         $this->fireActionEvent(event: 'booting', halt: false);
 
-        static::bootBroadcastAction();
+        static::bootTraits();
         $this->boot($data);
 
         $this->fireActionEvent(event: 'booted', halt: false);
+    }
+
+    protected static function bootTraits(): void
+    {
+        $class = static::class;
+        $booted = [];
+
+        foreach (class_uses_recursive($class) as $trait) {
+            $method = 'boot' . class_basename($trait);
+
+            if (method_exists($class, $method) && ! in_array($method, $booted)) {
+                forward_static_call([$class, $method]);
+
+                $booted[] = $method;
+            }
+        }
     }
 
     protected function boot(array $data): void

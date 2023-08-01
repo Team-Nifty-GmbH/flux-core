@@ -79,11 +79,4 @@ class UploadMedia extends FluxAction
             ])->errorBag('uploadMedia');
         }
     }
-
-    public function getData(): array
-    {
-        unset($this->data['media']);
-
-        return $this->data;
-    }
 }

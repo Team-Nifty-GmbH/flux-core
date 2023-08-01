@@ -11,6 +11,8 @@ use Illuminate\Support\Arr;
 
 trait BroadcastAction
 {
+    protected static bool $isBroadcasting = true;
+
     public static function bootBroadcastAction(): void
     {
         static::executed(function (FluxAction $action) {
