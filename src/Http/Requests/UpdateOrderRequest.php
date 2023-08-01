@@ -131,9 +131,7 @@ class UpdateOrderRequest extends BaseFormRequest
                 'invoice_date' => 'sometimes|date|nullable',
                 'invoice_number' => [
                     'exclude_if:invoice_number,null',
-                    'nullable',
                     'string',
-                    new UniqueInFieldDependence(Order::class, 'client_id'),
                 ],
                 'system_delivery_date' => 'sometimes|date|nullable',
                 'customer_delivery_date' => 'sometimes|date|nullable',

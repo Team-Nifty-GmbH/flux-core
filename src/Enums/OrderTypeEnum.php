@@ -20,7 +20,7 @@ enum OrderTypeEnum: string
         return self::getMultiplier($this);
     }
 
-    public static function getMultiplier(self $value): string
+    public static function getMultiplier(self $value): int
     {
         return match ($value) {
             self::Order, self::Subscription, self::PurchaseRefund, self::SplitOrder => 1,

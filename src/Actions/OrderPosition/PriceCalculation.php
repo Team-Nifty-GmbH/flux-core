@@ -139,16 +139,22 @@ class PriceCalculation
         $totalDiscountPercentage = diff_percentage($preDiscountedPrice, $discountedPrice);
         $margin = bcsub($discountedNetPrice, bcmul($orderPosition->purchase_price, $orderPosition->amount));
 
-        $orderPosition->margin = $margin;
+        $multiplier = $orderPosition->order->orderType->order_type_enum->multiplier();
+        $orderPosition->margin = bcmul($margin, $multiplier);
         $orderPosition->discount_percentage = $totalDiscountPercentage == 0
             ? null
             : $totalDiscountPercentage;
 
-        $orderPosition->total_net_price = $discountedNetPrice;
-        $orderPosition->total_gross_price = $discountedGrossPrice;
+        $orderPosition->total_net_price = bcmul($discountedNetPrice, $multiplier);
+        $orderPosition->total_gross_price = bcmul($discountedGrossPrice, $multiplier);
 
         if ($orderPosition->vat_rate_percentage) {
             $orderPosition->vat_price = bcsub($orderPosition->total_gross_price, $orderPosition->total_net_price);
+        }
+
+        if ($multiplier !== 1) {
+            $orderPosition->total_base_gross_price = bcmul($orderPosition->total_base_gross_price, $multiplier);
+            $orderPosition->total_base_net_price = bcmul($orderPosition->total_base_net_price, $multiplier);
         }
     }
 }

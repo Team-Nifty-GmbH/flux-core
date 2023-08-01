@@ -3,11 +3,15 @@
 namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Http\Requests\CreateOrderRequest;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
+use FluxErp\Models\OrderType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class CreateOrder extends FluxAction
 {
@@ -61,5 +65,29 @@ class CreateOrder extends FluxAction
         $validator->addModel(new Order());
 
         $this->data = $validator->validate();
+
+        if ($this->data['invoice_number'] ?? false) {
+            $isPurchase = OrderType::query()
+                ->whereKey($this->data['order_type_id'])
+                ->whereIn('order_type_enum', [OrderTypeEnum::Purchase->value, OrderTypeEnum::PurchaseRefund->value])
+                ->exists();
+
+            if ($isPurchase && ! ($this->data['contact_id'] ?? false)) {
+                throw ValidationException::withMessages([
+                    'contact_id' => [__('validation.required', ['attribute' => 'contact_id'])],
+                ])->errorBag('createOrder');
+            }
+
+            if (Order::query()
+                ->where('client_id', $this->data['client_id'])
+                ->where('invoice_number', $this->data['invoice_number'])
+                ->when($isPurchase, fn (Builder $query) => $query->where('contact_id', $this->data['contact_id']))
+                ->exists()
+            ) {
+                throw ValidationException::withMessages([
+                    'invoice_number' => [__('validation.unique', ['attribute' => 'invoice_number'])],
+                ])->errorBag('createOrder');
+            }
+        }
     }
 }
