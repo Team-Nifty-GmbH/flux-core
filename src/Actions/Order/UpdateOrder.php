@@ -94,7 +94,7 @@ class UpdateOrder extends FluxAction
                 ->exists()
             ) {
                 throw ValidationException::withMessages([
-                    'invoice_number' => [__('validation.unique', ['attribute' => 'invoice_number'])]
+                    'invoice_number' => [__('validation.unique', ['attribute' => 'invoice_number'])],
                 ])->errorBag('createOrder');
             }
         }

@@ -74,7 +74,7 @@ class CreateOrder extends FluxAction
 
             if ($isPurchase && ! ($this->data['contact_id'] ?? false)) {
                 throw ValidationException::withMessages([
-                    'contact_id' => [__('validation.required', ['attribute' => 'contact_id'])]
+                    'contact_id' => [__('validation.required', ['attribute' => 'contact_id'])],
                 ])->errorBag('createOrder');
             }
 
@@ -85,7 +85,7 @@ class CreateOrder extends FluxAction
                 ->exists()
             ) {
                 throw ValidationException::withMessages([
-                    'invoice_number' => [__('validation.unique', ['attribute' => 'invoice_number'])]
+                    'invoice_number' => [__('validation.unique', ['attribute' => 'invoice_number'])],
                 ])->errorBag('createOrder');
             }
         }
