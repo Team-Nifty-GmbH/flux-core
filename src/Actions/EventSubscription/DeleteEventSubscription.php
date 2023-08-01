@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\EventSubscription;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\EventSubscription;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
-class DeleteEventSubscription extends BaseAction
+class DeleteEventSubscription extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => [
                 'required',
@@ -26,7 +26,7 @@ class DeleteEventSubscription extends BaseAction
         return [EventSubscription::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return EventSubscription::query()
             ->whereKey($this->data['id'])

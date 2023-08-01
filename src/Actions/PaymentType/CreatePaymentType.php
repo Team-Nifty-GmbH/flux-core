@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\PaymentType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreatePaymentTypeRequest;
 use FluxErp\Models\PaymentType;
 use Illuminate\Support\Facades\Validator;
 
-class CreatePaymentType extends BaseAction
+class CreatePaymentType extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreatePaymentTypeRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreatePaymentType extends BaseAction
         return [PaymentType::class];
     }
 
-    public function execute(): PaymentType
+    public function performAction(): PaymentType
     {
         $paymentType = new PaymentType($this->data);
         $paymentType->save();
@@ -28,13 +28,11 @@ class CreatePaymentType extends BaseAction
         return $paymentType->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new PaymentType());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

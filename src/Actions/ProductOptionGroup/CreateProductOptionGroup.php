@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\ProductOptionGroup;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateProductOptionGroupRequest;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Support\Facades\Validator;
 
-class CreateProductOptionGroup extends BaseAction
+class CreateProductOptionGroup extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateProductOptionGroupRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateProductOptionGroup extends BaseAction
         return [ProductOptionGroup::class];
     }
 
-    public function execute(): ProductOptionGroup
+    public function performAction(): ProductOptionGroup
     {
         $productOptionGroup = new ProductOptionGroup($this->data);
         $productOptionGroup->save();
@@ -28,13 +28,11 @@ class CreateProductOptionGroup extends BaseAction
         return $productOptionGroup->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new ProductOptionGroup());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Address;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateAddressRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
@@ -12,11 +12,11 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateAddress extends BaseAction
+class UpdateAddress extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateAddressRequest())->rules();
     }
 
@@ -25,7 +25,7 @@ class UpdateAddress extends BaseAction
         return [Address::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $address = Address::query()
             ->whereKey($this->data['id'])
@@ -77,7 +77,7 @@ class UpdateAddress extends BaseAction
         return $address->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Address());
@@ -112,7 +112,5 @@ class UpdateAddress extends BaseAction
         if ($errors) {
             throw ValidationException::withMessages($errors)->errorBag('updateAddress');
         }
-
-        return $this;
     }
 }

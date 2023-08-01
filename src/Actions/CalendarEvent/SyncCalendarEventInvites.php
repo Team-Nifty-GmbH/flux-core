@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\CalendarEvent;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateCalendarEventRequest;
 use FluxErp\Models\CalendarEvent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
-class SyncCalendarEventInvites extends BaseAction
+class SyncCalendarEventInvites extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = array_filter(
             (new UpdateCalendarEventRequest())->rules(),
             fn ($key) => str_starts_with($key, 'invited_') || $key === 'id',
@@ -30,7 +30,7 @@ class SyncCalendarEventInvites extends BaseAction
         return [CalendarEvent::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $calendarEvent = CalendarEvent::query()
             ->whereKey($this->data['id'])

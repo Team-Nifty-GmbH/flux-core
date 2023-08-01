@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\WorkTime;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateWorkTimeRequest;
 use FluxErp\Models\WorkTime;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateWorkTime extends BaseAction
+class UpdateWorkTime extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateWorkTimeRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateWorkTime extends BaseAction
         return [WorkTime::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $workTime = WorkTime::query()
             ->whereKey($this->data['id'])

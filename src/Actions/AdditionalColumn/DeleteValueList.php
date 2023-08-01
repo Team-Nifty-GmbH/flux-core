@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\AdditionalColumn;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-class DeleteValueList extends BaseAction
+class DeleteValueList extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => [
                 'required',
@@ -26,7 +26,7 @@ class DeleteValueList extends BaseAction
         return [AdditionalColumn::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return AdditionalColumn::query()
             ->whereKey($this->data['id'])
@@ -34,9 +34,9 @@ class DeleteValueList extends BaseAction
             ->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (AdditionalColumn::query()
             ->whereKey($this->data['id'])
@@ -48,7 +48,5 @@ class DeleteValueList extends BaseAction
                 'model_has_values' => [__('Value list referenced by at least one model instance')],
             ])->errorBag('deleteValueList');
         }
-
-        return $this;
     }
 }

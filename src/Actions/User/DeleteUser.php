@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\User;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class DeleteUser extends BaseAction
+class DeleteUser extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:users,id,deleted_at,NULL',
         ];
@@ -22,7 +22,7 @@ class DeleteUser extends BaseAction
         return [User::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         $user = User::query()
             ->whereKey($this->data['id'])
@@ -34,16 +34,14 @@ class DeleteUser extends BaseAction
         return $user->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if ($this->data['id'] == Auth::id()) {
             throw ValidationException::withMessages([
                 'id' => [__('Cannot delete yourself')],
             ])->errorBag('deleteUser');
         }
-
-        return $this;
     }
 }

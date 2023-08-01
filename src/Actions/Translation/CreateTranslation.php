@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\Translation;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateTranslationRequest;
 use Spatie\TranslationLoader\LanguageLine;
 
-class CreateTranslation extends BaseAction
+class CreateTranslation extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateTranslationRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateTranslation extends BaseAction
         return [LanguageLine::class];
     }
 
-    public function execute(): LanguageLine
+    public function performAction(): LanguageLine
     {
         return LanguageLine::create($this->data);
     }

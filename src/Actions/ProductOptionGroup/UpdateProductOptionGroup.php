@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\ProductOptionGroup;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateProductOptionGroupRequest;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateProductOptionGroup extends BaseAction
+class UpdateProductOptionGroup extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateProductOptionGroupRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateProductOptionGroup extends BaseAction
         return [ProductOptionGroup::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $productOptionGroup = ProductOptionGroup::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdateProductOptionGroup extends BaseAction
         return $productOptionGroup->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new ProductOptionGroup());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

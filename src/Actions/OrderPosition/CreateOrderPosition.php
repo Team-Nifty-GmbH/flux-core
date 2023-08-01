@@ -2,18 +2,18 @@
 
 namespace FluxErp\Actions\OrderPosition;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Models\OrderPosition;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class CreateOrderPosition extends BaseAction
+class CreateOrderPosition extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = array_merge(
             (new CreateOrderPositionRequest())->rules(),
             [
@@ -72,7 +72,7 @@ class CreateOrderPosition extends BaseAction
         return [OrderPosition::class];
     }
 
-    public function execute(): OrderPosition
+    public function performAction(): OrderPosition
     {
         $tags = Arr::pull($this->data, 'tags', []);
 
@@ -86,13 +86,11 @@ class CreateOrderPosition extends BaseAction
         return $orderPosition->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new OrderPosition());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

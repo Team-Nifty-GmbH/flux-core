@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\Client;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateClientRequest;
 use FluxErp\Models\Client;
 
-class CreateClient extends BaseAction
+class CreateClient extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateClientRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateClient extends BaseAction
         return [Client::class];
     }
 
-    public function execute(): Client
+    public function performAction(): Client
     {
         $client = new Client($this->data);
         $client->save();

@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\Permission;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\EditUserPermissionRequest;
 use FluxErp\Models\User;
 
-class UpdateUserPermissions extends BaseAction
+class UpdateUserPermissions extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->data = $this->data ? array_merge(['give' => true], $this->data) : [];
         $this->rules = (new EditUserPermissionRequest())->rules();
     }
@@ -25,7 +25,7 @@ class UpdateUserPermissions extends BaseAction
         return [User::class];
     }
 
-    public function execute(): array
+    public function performAction(): array
     {
         $user = User::query()
             ->whereKey($this->data['user_id'])

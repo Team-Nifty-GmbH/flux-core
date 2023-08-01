@@ -2,18 +2,18 @@
 
 namespace FluxErp\Actions\Order;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateOrderRequest;
 use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateOrder extends BaseAction
+class UpdateOrder extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateOrderRequest())->rules();
     }
 
@@ -22,7 +22,7 @@ class UpdateOrder extends BaseAction
         return [Order::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $addresses = Arr::pull($this->data, 'addresses', []);
 
@@ -57,13 +57,11 @@ class UpdateOrder extends BaseAction
         return $order->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Order());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

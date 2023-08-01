@@ -2,18 +2,18 @@
 
 namespace FluxErp\Actions\Project;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateProjectRequest;
 use FluxErp\Models\Category;
 use FluxErp\Models\Project;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class CreateProject extends BaseAction
+class CreateProject extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateProjectRequest())->rules();
     }
 
@@ -22,7 +22,7 @@ class CreateProject extends BaseAction
         return [Project::class];
     }
 
-    public function execute(): Project
+    public function performAction(): Project
     {
         $project = new Project($this->data);
         $project->save();
@@ -30,7 +30,7 @@ class CreateProject extends BaseAction
         return $project->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Project());
@@ -70,7 +70,5 @@ class CreateProject extends BaseAction
                 ],
             ])->errorBag('createProject');
         }
-
-        return $this;
     }
 }

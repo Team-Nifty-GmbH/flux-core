@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\CustomEvent;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCustomEventRequest;
 use FluxErp\Models\CustomEvent;
 
-class CreateCustomEvent extends BaseAction
+class CreateCustomEvent extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateCustomEventRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateCustomEvent extends BaseAction
         return [CustomEvent::class];
     }
 
-    public function execute(): CustomEvent
+    public function performAction(): CustomEvent
     {
         $customEvent = new CustomEvent($this->data);
         $customEvent->save();

@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Unit;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Unit;
 
-class DeleteUnit extends BaseAction
+class DeleteUnit extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:units,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteUnit extends BaseAction
         return [Unit::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return Unit::query()
             ->whereKey($this->data['id'])

@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Client;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Client;
 
-class DeleteClient extends BaseAction
+class DeleteClient extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:clients,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteClient extends BaseAction
         return [Client::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return Client::query()
             ->whereKey($this->data['id'])

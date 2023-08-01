@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Ticket;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateTicketRequest;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Ticket;
@@ -11,11 +11,11 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class CreateTicket extends BaseAction
+class CreateTicket extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateTicketRequest())->rules();
     }
 
@@ -24,7 +24,7 @@ class CreateTicket extends BaseAction
         return [Ticket::class];
     }
 
-    public function execute(): Ticket
+    public function performAction(): Ticket
     {
         $users = Arr::pull($this->data, 'users');
 
@@ -66,13 +66,11 @@ class CreateTicket extends BaseAction
         return $ticket->refresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Ticket());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\Address;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 
-class UpdateMainAddress extends BaseAction
+class UpdateMainAddress extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'address_id' => 'integer|nullable|exists:addresses,id,deleted_at,NULL',
             'contact_id' => 'required|integer|exists:contacts,id,deleted_at,NULL',
@@ -24,7 +24,7 @@ class UpdateMainAddress extends BaseAction
         return [Address::class];
     }
 
-    public function execute(): ?Address
+    public function performAction(): ?Address
     {
         $contact = Contact::query()
             ->whereKey($this->data['contact_id'])

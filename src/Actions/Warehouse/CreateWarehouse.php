@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\Warehouse;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateWarehouseRequest;
 use FluxErp\Models\Warehouse;
 
-class CreateWarehouse extends BaseAction
+class CreateWarehouse extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateWarehouseRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateWarehouse extends BaseAction
         return [Warehouse::class];
     }
 
-    public function execute(): Warehouse
+    public function performAction(): Warehouse
     {
         $warehouse = new Warehouse($this->data);
         $warehouse->save();

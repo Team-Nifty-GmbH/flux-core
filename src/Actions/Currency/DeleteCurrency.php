@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\Currency;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Currency;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class DeleteCurrency extends BaseAction
+class DeleteCurrency extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:currencies,id,deleted_at,NULL',
         ];
@@ -23,7 +23,7 @@ class DeleteCurrency extends BaseAction
         return [Currency::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         $currency = Currency::query()
             ->whereKey($this->data['id'])
@@ -35,9 +35,9 @@ class DeleteCurrency extends BaseAction
         return $currency->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (Currency::query()
             ->whereKey($this->data['id'])
@@ -49,7 +49,5 @@ class DeleteCurrency extends BaseAction
                 'country' => [__('Currency referenced by a country')],
             ])->errorBag('deleteCurrency');
         }
-
-        return $this;
     }
 }

@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\Country;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateCountryRequest;
 use FluxErp\Models\Country;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateCountry extends BaseAction
+class UpdateCountry extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateCountryRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateCountry extends BaseAction
         return [Country::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $country = Country::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdateCountry extends BaseAction
         return $country->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Country());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

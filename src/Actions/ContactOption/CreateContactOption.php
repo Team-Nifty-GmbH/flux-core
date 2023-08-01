@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\ContactOption;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateContactOptionRequest;
 use FluxErp\Models\ContactOption;
 
-class CreateContactOption extends BaseAction
+class CreateContactOption extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateContactOptionRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateContactOption extends BaseAction
         return [ContactOption::class];
     }
 
-    public function execute(): ContactOption
+    public function performAction(): ContactOption
     {
         $contactOption = new ContactOption($this->data);
         $contactOption->save();

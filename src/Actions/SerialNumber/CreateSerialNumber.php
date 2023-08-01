@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\SerialNumber;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateSerialNumberRequest;
 use FluxErp\Models\SerialNumber;
 use Illuminate\Support\Facades\Validator;
 
-class CreateSerialNumber extends BaseAction
+class CreateSerialNumber extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateSerialNumberRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateSerialNumber extends BaseAction
         return [SerialNumber::class];
     }
 
-    public function execute(): SerialNumber
+    public function performAction(): SerialNumber
     {
         $serialNumber = new SerialNumber($this->data);
         $serialNumber->save();
@@ -28,13 +28,11 @@ class CreateSerialNumber extends BaseAction
         return $serialNumber->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new SerialNumber());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\TicketType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\TicketType;
 use Illuminate\Validation\ValidationException;
 
-class DeleteTicketType extends BaseAction
+class DeleteTicketType extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:ticket_types,id,deleted_at,NULL',
         ];
@@ -21,7 +21,7 @@ class DeleteTicketType extends BaseAction
         return [TicketType::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return TicketType::query()
             ->whereKey($this->data['id'])
@@ -29,9 +29,9 @@ class DeleteTicketType extends BaseAction
             ->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (TicketType::query()
             ->whereKey($this->data['id'])
@@ -43,7 +43,5 @@ class DeleteTicketType extends BaseAction
                 'tickets' => [__('The given ticket type has tickets')],
             ])->errorBag('deleteTicketType');
         }
-
-        return $this;
     }
 }

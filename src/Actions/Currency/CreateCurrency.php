@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\Currency;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCurrencyRequest;
 use FluxErp\Models\Currency;
 
-class CreateCurrency extends BaseAction
+class CreateCurrency extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateCurrencyRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateCurrency extends BaseAction
         return [Currency::class];
     }
 
-    public function execute(): Currency
+    public function performAction(): Currency
     {
         $currency = new Currency($this->data);
         $currency->save();

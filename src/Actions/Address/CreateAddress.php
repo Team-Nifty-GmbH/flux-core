@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Address;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class CreateAddress extends BaseAction
+class CreateAddress extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateAddressRequest())->rules();
     }
 
@@ -23,7 +23,7 @@ class CreateAddress extends BaseAction
         return [Address::class];
     }
 
-    public function execute(): Address
+    public function performAction(): Address
     {
         $mainAddress = UpdateMainAddress::make([
             'address_id' => null,
@@ -66,13 +66,11 @@ class CreateAddress extends BaseAction
         return $address->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Address());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

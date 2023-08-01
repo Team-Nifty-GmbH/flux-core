@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\DocumentType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateDocumentTypeRequest;
 use FluxErp\Models\DocumentType;
 use Illuminate\Support\Facades\Validator;
 
-class CreateDocumentType extends BaseAction
+class CreateDocumentType extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateDocumentTypeRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateDocumentType extends BaseAction
         return [DocumentType::class];
     }
 
-    public function execute(): DocumentType
+    public function performAction(): DocumentType
     {
         $documentType = new DocumentType($this->data);
         $documentType->save();
@@ -28,13 +28,11 @@ class CreateDocumentType extends BaseAction
         return $documentType->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new DocumentType());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

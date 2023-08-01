@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\Warehouse;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateWarehouseRequest;
 use FluxErp\Models\Warehouse;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateWarehouse extends BaseAction
+class UpdateWarehouse extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateWarehouseRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateWarehouse extends BaseAction
         return [Warehouse::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $warehouse = Warehouse::query()
             ->whereKey($this->data['id'])

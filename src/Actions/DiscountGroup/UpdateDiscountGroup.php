@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\DiscountGroup;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateDiscountGroupRequest;
 use FluxErp\Models\DiscountGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
-class UpdateDiscountGroup extends BaseAction
+class UpdateDiscountGroup extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateDiscountGroupRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateDiscountGroup extends BaseAction
         return [DiscountGroup::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $discounts = Arr::pull($this->data, 'discounts');
 

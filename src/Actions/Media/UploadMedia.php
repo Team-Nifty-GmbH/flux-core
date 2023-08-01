@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Media;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UploadMediaRequest;
 use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Model;
@@ -10,11 +10,11 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class UploadMedia extends BaseAction
+class UploadMedia extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UploadMediaRequest())->rules();
     }
 
@@ -23,7 +23,7 @@ class UploadMedia extends BaseAction
         return [Media::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $modelInstance = $this->data['model_type']::query()
             ->whereKey($this->data['model_id'])
@@ -55,9 +55,9 @@ class UploadMedia extends BaseAction
         return $media->withoutRelations();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         $this->data['file_name'] = $this->data['file_name'] ?? (
             $this->data['media'] instanceof UploadedFile ?
@@ -78,7 +78,5 @@ class UploadMedia extends BaseAction
                 'filename' => [__('File name already exists')],
             ])->errorBag('uploadMedia');
         }
-
-        return $this;
     }
 }

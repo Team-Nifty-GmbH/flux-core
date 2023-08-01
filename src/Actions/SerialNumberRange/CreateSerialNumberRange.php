@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\SerialNumberRange;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateSerialNumberRangeRequest;
 use FluxErp\Models\SerialNumberRange;
 
-class CreateSerialNumberRange extends BaseAction
+class CreateSerialNumberRange extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateSerialNumberRangeRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateSerialNumberRange extends BaseAction
         return [SerialNumberRange::class];
     }
 
-    public function execute(): SerialNumberRange
+    public function performAction(): SerialNumberRange
     {
         $this->data['current_number'] = array_key_exists('start_number', $this->data) ?
             --$this->data['start_number'] : 0;

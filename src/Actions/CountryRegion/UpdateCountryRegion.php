@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\CountryRegion;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateCountryRegionRequest;
 use FluxErp\Models\CountryRegion;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateCountryRegion extends BaseAction
+class UpdateCountryRegion extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateCountryRegionRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateCountryRegion extends BaseAction
         return [CountryRegion::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $countryRegion = CountryRegion::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdateCountryRegion extends BaseAction
         return $countryRegion->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new CountryRegion());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

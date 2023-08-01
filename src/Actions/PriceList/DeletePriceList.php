@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\PriceList;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\PriceList;
 use Illuminate\Validation\ValidationException;
 
-class DeletePriceList extends BaseAction
+class DeletePriceList extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:price_lists,id,deleted_at,NULL',
         ];
@@ -21,7 +21,7 @@ class DeletePriceList extends BaseAction
         return [PriceList::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return PriceList::query()
             ->whereKey($this->data['id'])
@@ -29,9 +29,9 @@ class DeletePriceList extends BaseAction
             ->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (PriceList::query()
             ->whereKey($this->data['id'])
@@ -43,7 +43,5 @@ class DeletePriceList extends BaseAction
                 'prices' => [__('Price list has associated prices')],
             ])->errorBag('deletePriceList');
         }
-
-        return $this;
     }
 }

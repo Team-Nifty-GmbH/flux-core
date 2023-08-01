@@ -2,18 +2,18 @@
 
 namespace FluxErp\Actions\ProjectTask;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateProjectTaskRequest;
 use FluxErp\Models\Project;
 use FluxErp\Models\ProjectTask;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class CreateProjectTask extends BaseAction
+class CreateProjectTask extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateProjectTaskRequest())->rules();
     }
 
@@ -22,7 +22,7 @@ class CreateProjectTask extends BaseAction
         return [ProjectTask::class];
     }
 
-    public function execute(): ProjectTask
+    public function performAction(): ProjectTask
     {
         $projectTask = new ProjectTask($this->data);
         $projectTask->save();
@@ -30,7 +30,7 @@ class CreateProjectTask extends BaseAction
         return $projectTask->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new ProjectTask());
@@ -49,7 +49,5 @@ class CreateProjectTask extends BaseAction
                 'category_id' => [__('Category not found in project')],
             ])->errorBag('createProjectTask');
         }
-
-        return $this;
     }
 }

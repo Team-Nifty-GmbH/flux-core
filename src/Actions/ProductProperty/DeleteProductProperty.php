@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\ProductProperty;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ProductProperty;
 use Illuminate\Validation\ValidationException;
 
-class DeleteProductProperty extends BaseAction
+class DeleteProductProperty extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:product_properties,id,deleted_at,NULL',
         ];
@@ -21,7 +21,7 @@ class DeleteProductProperty extends BaseAction
         return [ProductProperty::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return ProductProperty::query()
             ->whereKey($this->data['id'])
@@ -29,9 +29,9 @@ class DeleteProductProperty extends BaseAction
             ->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (ProductProperty::query()
             ->whereKey($this->data['id'])
@@ -43,7 +43,5 @@ class DeleteProductProperty extends BaseAction
                 'products' => [__('Product property has products')],
             ])->errorBag('deleteProductProperty');
         }
-
-        return $this;
     }
 }

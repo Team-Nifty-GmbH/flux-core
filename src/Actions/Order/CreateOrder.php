@@ -2,18 +2,18 @@
 
 namespace FluxErp\Actions\Order;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderRequest;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class CreateOrder extends BaseAction
+class CreateOrder extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateOrderRequest())->rules();
     }
 
@@ -22,7 +22,7 @@ class CreateOrder extends BaseAction
         return [Order::class];
     }
 
-    public function execute(): Order
+    public function performAction(): Order
     {
         $this->data['currency_id'] = $this->data['currency_id'] ?? Currency::query()->first()?->id;
         $addresses = Arr::pull($this->data, 'addresses', []);
@@ -55,13 +55,11 @@ class CreateOrder extends BaseAction
         return $order->refresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Order());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

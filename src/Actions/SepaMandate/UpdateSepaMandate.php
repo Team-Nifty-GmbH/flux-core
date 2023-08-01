@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\SepaMandate;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateSepaMandateRequest;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
@@ -10,11 +10,11 @@ use FluxErp\Models\SepaMandate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
-class UpdateSepaMandate extends BaseAction
+class UpdateSepaMandate extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateSepaMandateRequest())->rules();
     }
 
@@ -23,7 +23,7 @@ class UpdateSepaMandate extends BaseAction
         return [SepaMandate::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $sepaMandate = SepaMandate::query()
             ->whereKey($this->data['id'])
@@ -35,9 +35,9 @@ class UpdateSepaMandate extends BaseAction
         return $sepaMandate->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         $sepaMandate = SepaMandate::query()
             ->whereKey($this->data['id'])
@@ -78,7 +78,5 @@ class UpdateSepaMandate extends BaseAction
         if ($errors) {
             throw ValidationException::withMessages($errors)->errorBag('updateSepaMandate');
         }
-
-        return $this;
     }
 }

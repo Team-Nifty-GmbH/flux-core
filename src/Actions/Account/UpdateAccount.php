@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\Account;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateAccountRequest;
 use FluxErp\Models\Account;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateAccount extends BaseAction
+class UpdateAccount extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateAccountRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateAccount extends BaseAction
         return [Account::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $account = Account::query()
             ->whereKey($this->data['id'])

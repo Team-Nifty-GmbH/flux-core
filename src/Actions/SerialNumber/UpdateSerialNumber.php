@@ -2,18 +2,18 @@
 
 namespace FluxErp\Actions\SerialNumber;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateSerialNumberRequest;
 use FluxErp\Models\SerialNumber;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateSerialNumber extends BaseAction
+class UpdateSerialNumber extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateSerialNumberRequest())->rules();
     }
 
@@ -22,7 +22,7 @@ class UpdateSerialNumber extends BaseAction
         return [SerialNumber::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $serialNumber = SerialNumber::query()
             ->whereKey($this->data['id'])
@@ -34,7 +34,7 @@ class UpdateSerialNumber extends BaseAction
         return $serialNumber->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new SerialNumber());
@@ -65,7 +65,5 @@ class UpdateSerialNumber extends BaseAction
         if ($errors) {
             throw ValidationException::withMessages($errors)->errorBag('updateSerialNumber');
         }
-
-        return $this;
     }
 }

@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateValueListRequest;
 use FluxErp\Models\AdditionalColumn;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
-class UpdateValueList extends BaseAction
+class UpdateValueList extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateValueListRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateValueList extends BaseAction
         return [AdditionalColumn::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $valueList = AdditionalColumn::query()
             ->whereKey($this->data['id'])
@@ -33,9 +33,9 @@ class UpdateValueList extends BaseAction
         return $valueList->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         $errors = [];
         $valueList = AdditionalColumn::query()
@@ -71,7 +71,5 @@ class UpdateValueList extends BaseAction
         if ($errors) {
             throw ValidationException::withMessages($errors)->errorBag('updateValueList');
         }
-
-        return $this;
     }
 }

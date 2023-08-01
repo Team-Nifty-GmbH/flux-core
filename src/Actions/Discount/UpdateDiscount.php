@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\Discount;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateDiscountRequest;
 use FluxErp\Models\Discount;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateDiscount extends BaseAction
+class UpdateDiscount extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateDiscountRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateDiscount extends BaseAction
         return [Discount::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $discount = Discount::query()
             ->whereKey($this->data['id'])

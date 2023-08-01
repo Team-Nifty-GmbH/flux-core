@@ -2,8 +2,8 @@
 
 namespace FluxErp\Actions\Comment;
 
-use FluxErp\Actions\BaseAction;
 use FluxErp\Actions\EventSubscription\CreateEventSubscription;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCommentRequest;
 use FluxErp\Models\Comment;
 use FluxErp\Models\EventSubscription;
@@ -11,11 +11,11 @@ use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use Illuminate\Support\Facades\Auth;
 
-class CreateComment extends BaseAction
+class CreateComment extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateCommentRequest())->rules();
     }
 
@@ -24,7 +24,7 @@ class CreateComment extends BaseAction
         return [Comment::class, EventSubscription::class];
     }
 
-    public function execute(): Comment
+    public function performAction(): Comment
     {
         preg_match_all('/data-mention="(.*?)"/', $this->data['comment'], $matches);
         $mentions = collect($matches[1])->map(function ($mention) {

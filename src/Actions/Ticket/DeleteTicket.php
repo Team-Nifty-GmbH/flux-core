@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Ticket;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Ticket;
 
-class DeleteTicket extends BaseAction
+class DeleteTicket extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:tickets,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteTicket extends BaseAction
         return [Ticket::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return Ticket::query()
             ->whereKey($this->data['id'])

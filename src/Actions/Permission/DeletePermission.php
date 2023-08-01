@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\Permission;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Permission;
 use Illuminate\Validation\ValidationException;
 
-class DeletePermission extends BaseAction
+class DeletePermission extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:permissions,id',
         ];
@@ -21,7 +21,7 @@ class DeletePermission extends BaseAction
         return [Permission::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return Permission::query()
             ->whereKey($this->data['id'])
@@ -29,9 +29,9 @@ class DeletePermission extends BaseAction
             ->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (Permission::query()
             ->whereKey($this->data['id'])
@@ -42,7 +42,5 @@ class DeletePermission extends BaseAction
                 'is_locked' => [__('Permission is locked')],
             ])->errorBag('deletePermission');
         }
-
-        return $this;
     }
 }

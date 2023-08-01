@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\Ticket;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\ToggleTicketUserAssignmentRequest;
 use FluxErp\Models\Ticket;
 
-class ToggleTicketUser extends BaseAction
+class ToggleTicketUser extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new ToggleTicketUserAssignmentRequest())->rules();
     }
 
@@ -24,7 +24,7 @@ class ToggleTicketUser extends BaseAction
         return [Ticket::class];
     }
 
-    public function execute(): array
+    public function performAction(): array
     {
         $ticket = Ticket::query()
             ->whereKey($this->data['ticket_id'])
