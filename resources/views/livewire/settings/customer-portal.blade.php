@@ -41,7 +41,7 @@
             <input class="w-full" type="color" wire:model.defer="setting.settings.nav.hover_item" />
             <x-inputs.number min="12" max="48" step="2" :label="__('Icon size')" wire:model.defer="setting.settings.nav.icon_size" />
         </x-card>
-        <x-card :title="__('FluxErpend links')">
+        <x-card :title="__('Append links')">
             <div class="space-y-5">
                     <template x-for="(link, index) in setting.settings.nav.append_links" :key="index">
                         <div class="flex w-full items-center space-x-3">

@@ -9,20 +9,6 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
-/**
- * MenuManager Facade
- *
- * The MenuManager facade provides an interface to manage and retrieve menu items in FluxErp.
- * It allows you to register menu items based on Laravel routes and perform various operations on them.
- *
- * @method static void register(Route $route, string $label = null, string $icon = null, int $order = null)
- * @method static void unregister(string $name)
- * @method static array all()
- * @method static array|null get(string $name)
- * @method static array forGuard(string $guard, string $group = null, bool $ignorePermissions = false)
- *
- * @see \FluxErp\Menu\MenuManager
- */
 class MenuManager
 {
     use Macroable;
@@ -66,7 +52,7 @@ class MenuManager
                 'order' => $order
                     ?? count(
                         data_get($this->menuItems, Str::beforeLast($path, '.'))
-                            ?? (str_contains($path, '.') ? [] : $this->menuItems)
+                            ?: (str_contains($path, '.') ? [] : $this->menuItems)
                     ),
             ])
         );
@@ -95,11 +81,12 @@ class MenuManager
                 if (($value['permission'] ?? false) && ! $ignorePermissions) {
                     // check if a permission for the current guard exists
                     if ($value['permission'] === null) {
-                        dd($value);
+                        return true;
                     }
+
                     try {
-                        $permission = Permission::findByName($value['permission'], $guard);
-                    } catch (PermissionDoesNotExist $e) {
+                        Permission::findByName($value['permission'], $guard);
+                    } catch (PermissionDoesNotExist) {
                         return true;
                     }
 
