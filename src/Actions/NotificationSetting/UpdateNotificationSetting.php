@@ -14,7 +14,7 @@ class UpdateNotificationSetting extends BaseAction
     public function __construct(array $data)
     {
         parent::__construct(array_merge(['is_anonymous' => false], $data[0] ?? []));
-        $this->rules = ($this->data['is_anonymous'] ?? false) ?
+        $this->rules = $this->data['is_anonymous'] ?
             (new UpdateNotificationSettingsRequest())->rules() : (new UpdateUserNotificationSettingsRequest())->rules();
     }
 
