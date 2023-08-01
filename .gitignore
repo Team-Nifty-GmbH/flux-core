@@ -2,7 +2,6 @@
 .phpunit.result.cache
 composer.lock
 coverage
-docs
 phpunit.xml
 phpstan.neon
 testbench.yaml
