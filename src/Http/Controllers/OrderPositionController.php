@@ -62,7 +62,7 @@ class OrderPositionController extends BaseController
                         'numeric',
                         'exclude_if:is_free_text,true',
                     ],
-                    'vat_rate' => [
+                    'vat_rate_percentage' => [
                         Rule::requiredIf(
                             ($data['is_free_text'] ?? false) === false && ($data['vat_rate_id'] ?? false)
                         ),
