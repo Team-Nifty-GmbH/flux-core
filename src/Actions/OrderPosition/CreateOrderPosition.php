@@ -20,9 +20,10 @@ class CreateOrderPosition extends FluxAction
                 'price_id' => [
                     Rule::requiredIf(
                         ($this->data['is_free_text'] ?? false) === false &&
-                        ($this->data['product_id'] ?? $this->data['price_list_id'] ?? false)
+                        (($this->data['product_id'] ?? false) && ($this->data['price_list_id'] ?? false))
                     ),
                     'integer',
+                    'nullable',
                     'exists:prices,id,deleted_at,NULL',
                     'exclude_if:is_free_text,true',
                 ],
@@ -48,7 +49,7 @@ class CreateOrderPosition extends FluxAction
                     'numeric',
                     'exclude_if:is_free_text,true',
                 ],
-                'vat_rate' => [
+                'vat_rate_percentage' => [
                     Rule::requiredIf(
                         ($this->data['is_free_text'] ?? false) === false && ($this->data['vat_rate_id'] ?? false)
                     ),
