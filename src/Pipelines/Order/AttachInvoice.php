@@ -11,7 +11,7 @@ class AttachInvoice
         $model = $event->model;
         $response = $event->response;
         $fileName = __('Invoice', locale: $model->addressInvoice?->language?->iso_code ?? app()->getLocale())
-        . '_' . $model->invoice_number . '.pdf';
+            . '_' . $model->invoice_number . '.pdf';
 
         $model->addMediaFromStream($response)
             ->usingName($fileName)

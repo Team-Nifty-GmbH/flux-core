@@ -74,7 +74,7 @@
             <div x-data="{index: @entangle('index').defer}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
-                    @if(user_can('action.serial-number.delete'))
+                    @if(user_can('action.additional-column.delete'))
                         <x-button x-bind:class="index > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
                                   x-on:click="window.$wireui.confirmDialog({
                                                             title: '{{ __('Delete additional column') }}',
