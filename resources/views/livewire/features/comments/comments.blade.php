@@ -56,7 +56,7 @@
                 <template x-ref="textarea">
                         <x-features.comments.input />
                 </template>
-                @if(user_can('api.comments.post') || $this->isPublic === false)
+                @if(user_can('action.comment.create') || $this->isPublic === false)
                     <x-features.comments.input />
                 @endcan
                 <div class="relative">

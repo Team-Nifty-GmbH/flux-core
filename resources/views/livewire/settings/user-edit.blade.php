@@ -30,7 +30,7 @@
                 {{ __('Permissions') }}
             </div>
         </nav>
-        @if(user_can('api.roles.{id}.get') && user_can('api.roles.user.assign.put'))
+        @if(user_can('api.roles.{id}.get') && user_can('action.role.update-users'))
             <div x-show="active === 'roles'">
                 <div class="max-h-96 space-y-3 overflow-y-auto">
                     @php
@@ -51,7 +51,7 @@
                 </div>
             </div>
         @endif
-        @if(user_can('api.permissions.get') && user_can('api.permissions.give.put'))
+        @if(user_can('api.permissions.get') && user_can('action.user.update-permissions'))
             <div x-show="active === 'permissions'">
                 <div class="pb-3">
                     <x-input wire:model.debounce.500ms="searchPermission" icon="search"/>

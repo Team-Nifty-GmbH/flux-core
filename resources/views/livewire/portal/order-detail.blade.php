@@ -183,6 +183,8 @@
                     :filters="[['column' => 'order_id', 'operator' => '=', 'value' => $order['id']]]"
                 />
             </div>
+            @section('actions')
+            @show
             <div x-show="selected?.length > 0" class="pt-4">
                 <livewire:features.custom-events :model="\FluxErp\Models\Order::class" :id="$order['id']" :additional-data="['selected', 'order']"/>
             </div>

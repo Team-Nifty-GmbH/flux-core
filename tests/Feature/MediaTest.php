@@ -718,7 +718,13 @@ class MediaTest extends BaseSetup
         $delete->assertStatus(204);
 
         $this->assertFalse(DB::table('media')->where('id', $uploadedMedia->id)->exists());
-        $this->assertTrue(DB::table('logs')->where('foreign_uuid', $uploadedMedia->uuid)->exists());
+        $this->assertTrue(
+            DB::table('activity_log')
+                ->where('subject_type', Media::class)
+                ->where('subject_id', $uploadedMedia->id)
+                ->where('event', 'deleted')
+                ->exists()
+        );
     }
 
     public function test_delete_media_media_not_found()

@@ -17,7 +17,7 @@
                     class="dark:border-secondary-700 flex items-center justify-between border-b border-gray-200 pb-5">
                     <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-50">{{ __('Addresses') }}</h3>
                     <div class="mt-3 sm:mt-0 sm:ml-4">
-                        @can('api.addresses.post')
+                        @can('action.address.create')
                             <x-button
                                 x-on:click="$focus.within($refs.address).first(); edit = true;"
                                 x-on:click="$dispatch('add-address')"

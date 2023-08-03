@@ -2,12 +2,15 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasUserModification;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
 
 class Media extends BaseMedia
 {
+    use HasUserModification;
+
     protected $hidden = [
         'model_type',
         'model_id',

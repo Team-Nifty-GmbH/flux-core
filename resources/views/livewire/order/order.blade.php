@@ -63,7 +63,7 @@
             </div>
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-            @if(user_can('api.orders.{id}.delete') && $order['id'] && ! $order['is_locked'])
+            @if(user_can('action.order.delete') && $order['id'] && ! $order['is_locked'])
                 <x-button negative label="{{ __('Delete') }}" x-on:click="
                               window.$wireui.confirmDialog({
                               title: '{{ __('Delete order') }}',

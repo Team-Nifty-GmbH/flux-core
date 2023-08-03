@@ -32,7 +32,7 @@
         </div>
         <x-slot name="footer">
             <div class="flex justify-between gap-x-4">
-                @can('api.serial-numbers.{id}.delete')
+                @can('action.serial-number.delete')
                     <x-button flat negative label="{{ __('Delete') }}" @click="
                                                         window.$wireui.confirmDialog({
                                                             title: '{{ __('Delete serial number') }}',
@@ -57,7 +57,7 @@
     </x-modal.card>
     <div class="flex items-center justify-end pb-5">
         <div class="mt-3 sm:mt-0 sm:ml-4">
-            @can('api.serial-numbers.post')
+            @can('action.serial-number.create')
                 <x-button wire:click="create" primary>{{ __('Assign serial number') }}</x-button>
             @endcan
         </div>
