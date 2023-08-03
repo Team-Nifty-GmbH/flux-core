@@ -2,19 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Price\CreatePrice;
+use FluxErp\Actions\Price\DeletePrice;
+use FluxErp\Actions\Price\UpdatePrice;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdatePriceRequest;
 use FluxErp\Models\Price;
+use Illuminate\Validation\ValidationException;
 
 class PriceService
 {
     public function create(array $data): Price
     {
-        $price = new Price($data);
-        $price->save();
-
-        return $price;
+        return CreatePrice::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -23,24 +22,25 @@ class PriceService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdatePriceRequest()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $price = UpdatePrice::make($item)->validate()->execute(),
+                    additions: ['id' => $price->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $price = Price::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $price->fill($item);
-            $price->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $price->withoutRelations(),
-                additions: ['id' => $price->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -55,25 +55,14 @@ class PriceService
 
     public function delete(string $id): array
     {
-        $price = Price::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $price) {
+        try {
+            DeletePrice::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'price not found']
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        if ($price->orderPositions()->exists()) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['id' => 'price has associated order-positions']
-            );
-        }
-
-        $price->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

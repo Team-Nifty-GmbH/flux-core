@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<HTML class="h-full bg-white" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<HTML class="h-full bg-gray-50" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <x-layouts.head.head/>
 </head>
 <body class="h-full">
-    <div class="bg-gray-50">
-        <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
-            <div class="sm:mx-auto sm:w-full sm:max-w-md">
-                <x-logo fill="#000000" class="h-24"/>
-            </div>
-            <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-                <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                    <div class="mt-6">
+<div>
+    <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <x-logo fill="#000000" class="h-24"/>
+        </div>
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                <div class="mt-6">
+                    @section('login-form')
                         <form action="{{ route('login') }}" method="POST" class="space-y-6">
                             @csrf
                             <x-input id="email" value="{{ request()->get('email') }}" :label="__('Email')" name="email" type="email" required autofocus/>
@@ -24,10 +25,11 @@
                             </div>
                             <x-button primary class="w-full" :label="__('Login')" type="submit"></x-button>
                         </form>
-                    </div>
+                    @show
                 </div>
             </div>
         </div>
     </div>
+</div>
 </body>
 </HTML>

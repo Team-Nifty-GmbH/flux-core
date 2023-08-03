@@ -123,7 +123,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
                     : $contact->client_id;
             }
 
-            if ($order->isDirty('address_delivery_id')) {
+            if ($order->isDirty('address_delivery_id')
+                && $order->address_delivery_id
+                && ! $order->isDirty('address_delivery')
+            ) {
                 $order->address_delivery = $order->addressDelivery()->first()->append('name');
             }
 
@@ -256,7 +259,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
         );
     }
 
-    public function invoice(): \Spatie\MediaLibrary\MediaCollections\Models\Media|null
+    public function invoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
     {
         return $this->getFirstMedia('invoice');
     }

@@ -11,6 +11,8 @@ class ContactList extends DataTable
 {
     protected string $model = Address::class;
 
+    public bool $showFilterInputs = true;
+
     public array $enabledCols = [
         'avatar',
         'contact.customer_number',
@@ -60,5 +62,10 @@ class ContactList extends DataTable
         $returnArray['avatar'] = $item->getAvatarUrl();
 
         return $returnArray;
+    }
+
+    public function getFilterableColumns(string $name = null): array
+    {
+        return $this->availableCols;
     }
 }

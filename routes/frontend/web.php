@@ -11,6 +11,8 @@ use FluxErp\Http\Livewire\Order\Order;
 use FluxErp\Http\Livewire\Order\OrderList;
 use FluxErp\Http\Livewire\Product\Product;
 use FluxErp\Http\Livewire\Product\SerialNumber\SerialNumber;
+use FluxErp\Http\Livewire\Project\Project;
+use FluxErp\Http\Livewire\Project\ProjectList;
 use FluxErp\Http\Livewire\Settings\AdditionalColumns;
 use FluxErp\Http\Livewire\Settings\Calendars;
 use FluxErp\Http\Livewire\Settings\Clients;
@@ -49,19 +51,22 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
     ->name('icons');
 
 Route::middleware(['auth:web'])->group(function () {
-    Route::get('/', Dashboard::class)->name('dashboard');
-    Route::get('/calendars', Calendar::class)->name('calendars');
-    Route::get('/contacts', ContactList::class)->name('contacts');
+    Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);
+    Route::get('/calendars', Calendar::class)->name('calendars')->registersMenuItem(icon: 'calendar');
+    Route::get('/contacts', ContactList::class)->name('contacts')->registersMenuItem(icon: 'identification');
     Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
-    Route::get('/orders', OrderList::class)->name('orders');
+    Route::get('/projects', ProjectList::class)->name('projects')->registersMenuItem(icon: 'briefcase');
+    Route::get('/projects/{id}', Project::class)->name('projects.id?');
+    Route::get('/orders', OrderList::class)->name('orders')->registersMenuItem(icon: 'shopping-bag');
     Route::get('/orders/{id}', Order::class)->name('orders.id?');
-    Route::get('/tickets', TicketList::class)->name('tickets');
+    Route::get('/tickets', TicketList::class)->name('tickets')->registersMenuItem(icon: 'wrench-screwdriver');
     Route::get('/tickets/{id}', Ticket::class)->name('tickets.id');
 
     Route::name('products.')->prefix('products')
         ->group(function () {
-            Route::get('/list', ProductList::class)->name('products');
-            Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers');
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'square-3-stack-3d');
+            Route::get('/list', ProductList::class)->name('products')->registersMenuItem();
+            Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers')->registersMenuItem();
             Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
             Route::get('/{id?}', Product::class)->name('id?');
         });
@@ -74,26 +79,30 @@ Route::middleware(['auth:web'])->group(function () {
 
     Route::name('settings.')->prefix('settings')
         ->group(function () {
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'cog', order: 9999);
             Route::get('/additional-columns', AdditionalColumns::class)
-                ->name('settings.additional-columns');
+                ->name('additional-columns')
+                ->registersMenuItem();
             Route::get('/calendars', Calendars::class)
-                ->name('settings.calendars');
+                ->name('calendars')
+                ->registersMenuItem();
             Route::get('/clients', Clients::class)
-                ->name('settings.clients');
+                ->name('clients')
+                ->registersMenuItem();
             Route::get('/clients/{client}/customer-portal', CustomerPortal::class)
-                ->name('settings.customer-portal');
-            Route::get('/countries', Countries::class)->name('settings.countries');
-            Route::get('/currencies', Currencies::class)->name('settings.currencies');
-            Route::get('/emails', Emails::class)->name('settings.emails');
-            Route::get('/languages', Languages::class)->name('settings.languages');
-            Route::get('/logs', Logs::class)->name('settings.logs');
-            Route::get('/notifications', Notifications::class)->name('settings.notifications');
-            Route::get('/order-types', OrderTypes::class)->name('settings.order-types');
-            Route::get('/permissions', Permissions::class)->name('settings.permissions');
-            Route::get('/price-lists', PriceLists::class)->name('settings.price-lists');
-            Route::get('/ticket-types', TicketTypes::class)->name('settings.ticket-types');
-            Route::get('/translations', Translations::class)->name('settings.translations');
-            Route::get('/users', Users::class)->name('settings.users');
+                ->name('customer-portal');
+            Route::get('/countries', Countries::class)->name('countries')->registersMenuItem();
+            Route::get('/currencies', Currencies::class)->name('currencies')->registersMenuItem();
+            Route::get('/emails', Emails::class)->name('emails')->registersMenuItem();
+            Route::get('/languages', Languages::class)->name('languages')->registersMenuItem();
+            Route::get('/logs', Logs::class)->name('logs')->registersMenuItem();
+            Route::get('/notifications', Notifications::class)->name('notifications')->registersMenuItem();
+            Route::get('/order-types', OrderTypes::class)->name('order-types')->registersMenuItem();
+            Route::get('/permissions', Permissions::class)->name('permissions')->registersMenuItem();
+            Route::get('/price-lists', PriceLists::class)->name('price-lists')->registerMenuItem();
+            Route::get('/ticket-types', TicketTypes::class)->name('ticket-types')->registersMenuItem();
+            Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
+            Route::get('/users', Users::class)->name('users')->registersMenuItem();
         });
 
     Route::name('search')->prefix('search')->group(function () {

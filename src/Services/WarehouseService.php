@@ -2,19 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Warehouse\CreateWarehouse;
+use FluxErp\Actions\Warehouse\DeleteWarehouse;
+use FluxErp\Actions\Warehouse\UpdateWarehouse;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateWarehouseRequest;
 use FluxErp\Models\Warehouse;
+use Illuminate\Validation\ValidationException;
 
 class WarehouseService
 {
     public function create(array $data): Warehouse
     {
-        $warehouse = new Warehouse($data);
-        $warehouse->save();
-
-        return $warehouse;
+        return CreateWarehouse::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -23,24 +22,25 @@ class WarehouseService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateWarehouseRequest()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $warehouse = UpdateWarehouse::make($item)->validate()->execute(),
+                    additions: ['id' => $warehouse->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $warehouse = Warehouse::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $warehouse->fill($item);
-            $warehouse->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $warehouse->withoutRelations()->fresh(),
-                additions: ['id' => $warehouse->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -48,32 +48,21 @@ class WarehouseService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'warehouses updated',
+            statusMessage: $statusCode === 422 ? null : 'warehouse(s) updated',
             bulk: true
         );
     }
 
     public function delete(string $id): array
     {
-        $warehouse = Warehouse::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $warehouse) {
+        try {
+            DeleteWarehouse::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'warehouse not found']
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        if ($warehouse->children()->count() > 0) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['children' => 'warehouse has children']
-            );
-        }
-
-        $warehouse->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

@@ -26,16 +26,22 @@
             </div>
         </x-slot>
     </x-modal.card>
-    <x-sidebar x-show="createDocuments">
-        @foreach($printLayouts as $key => $printLayout)
-            <x-checkbox wire:model.defer="selectedPrintLayouts.{{ $key }}" :label="$key" />
-        @endforeach
-        <x-slot name="footer">
-            <x-button spinner primary x-on:click="$wire.downloadDocuments()">
-                {{ __('Download') }}
-            </x-button>
-        </x-slot>
-    </x-sidebar>
+    @section('create-documents-sidebar')
+        <x-sidebar x-show="createDocuments">
+            @section('create-documents-sidebar.content')
+                @foreach($printLayouts as $key => $printLayout)
+                    <x-checkbox wire:model.defer="selectedPrintLayouts.{{ $key }}" :label="$key" />
+                @endforeach
+            @show
+            <x-slot name="footer">
+                @section('create-documents-sidebar.footer')
+                    <x-button spinner primary x-on:click="$wire.downloadDocuments()">
+                        {{ __('Download') }}
+                    </x-button>
+                @show
+            </x-slot>
+        </x-sidebar>
+    @show
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
         <div class="flex items-center space-x-5">
@@ -95,6 +101,7 @@
         <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">
+                    @section('invoice-address-card')
                     <x-card>
                         <x-slot:header>
                             <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
@@ -136,6 +143,8 @@
                             </div>
                         </div>
                     </x-card>
+                    @show
+                    @section('delivery-address-card')
                     <x-card>
                         <x-slot:header>
                             <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
@@ -176,6 +185,8 @@
                             </div>
                         </div>
                     </x-card>
+                    @show
+                    @section('general-card')
                     <x-card>
                         <div class="space-y-3">
                             <x-select
@@ -220,6 +231,8 @@
                             />
                         </div>
                     </x-card>
+                    @show
+                    @section('state-card')
                     <x-card>
                         <div class="space-y-3">
                             <x-state
@@ -246,6 +259,7 @@
                             />
                         </div>
                     </x-card>
+                    @show
                 </div>
             </section>
             <section class="basis-8/12 pt-6 lg:pt-0">
@@ -255,40 +269,41 @@
                 <div class="sticky top-6 space-y-6">
                     <x-card>
                         <div class="space-y-4">
-                            @if($printLayouts)
-                                <x-button
-                                    primary
-                                    class="w-full"
-                                    x-on:click="createDocuments = true"
-                                    :label="__('Send documents')"
-                                />
-                                <x-button
-                                    class="w-full"
-                                    x-on:click="createDocuments = true"
-                                    :label="__('Download documents')"
-                                />
-                                <x-button
-                                    class="w-full"
-                                    x-on:click="createDocuments = true"
-                                    :label="__('Print documents')"
-                                />
-                                <div class="dropdown-full-w">
-                                    <x-dropdown width="w-full">
-                                        <x-slot name="trigger">
-                                            <x-button class="w-full">
-                                                {{ __('Preview') }}
-                                            </x-button>
-                                        </x-slot>
-                                        @foreach($printLayouts as $key => $printLayout)
-                                            <x-dropdown.item
-                                                x-on:click="const preview = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['id' => $order['id'], 'view' => $key, 'model' => \FluxErp\Models\Order::class, '']) }}'; $openModal(preview)">
-                                                {{ $key }}
-                                            </x-dropdown.item>
-                                        @endforeach
-                                    </x-dropdown>
-                                </div>
-                            @endif
-                            <livewire:features.custom-events :model="\FluxErp\Models\Order::class" :id="$order['id']" />
+                            @section('actions')
+                                @if($printLayouts)
+                                    <x-button
+                                        primary
+                                        class="w-full"
+                                        x-on:click="createDocuments = true"
+                                        :label="__('Send documents')"
+                                    />
+                                    <x-button
+                                        class="w-full"
+                                        x-on:click="createDocuments = true"
+                                        :label="__('Download documents')"
+                                    />
+                                    <x-button
+                                        class="w-full"
+                                        x-on:click="createDocuments = true"
+                                        :label="__('Print documents')"
+                                    />
+                                    <div class="dropdown-full-w">
+                                        <x-dropdown width="w-full">
+                                            <x-slot name="trigger">
+                                                <x-button class="w-full">
+                                                    {{ __('Preview') }}
+                                                </x-button>
+                                            </x-slot>
+                                            @foreach($printLayouts as $key => $printLayout)
+                                                <x-dropdown.item
+                                                    x-on:click="const preview = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['id' => $order['id'], 'view' => $key, 'model' => \FluxErp\Models\Order::class, '']) }}'; $openModal(preview)">
+                                                    {{ $key }}
+                                                </x-dropdown.item>
+                                            @endforeach
+                                        </x-dropdown>
+                                    </div>
+                                @endif
+                            @show
                         </div>
                     </x-card>
                     <x-card>
@@ -331,6 +346,8 @@
                             <x-input wire:model.defer="order.commission" :label="__('Commission')" />
                         </div>
                     </x-card>
+                    @section('content.right')
+                    @endsection
                 </div>
             </section>
         </div>

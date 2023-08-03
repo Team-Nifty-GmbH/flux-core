@@ -40,6 +40,9 @@ class UpdateContactRequest extends BaseFormRequest
             'credit_line' => 'sometimes|numeric|nullable',
             'has_sensitive_reminder' => 'sometimes|boolean',
             'has_delivery_lock' => 'sometimes|boolean',
+
+            'discount_groups' => 'array',
+            'discount_groups.*' => 'integer|exists:discount_groups,id',
         ];
     }
 }

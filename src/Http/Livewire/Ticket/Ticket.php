@@ -29,6 +29,8 @@ class Ticket extends Component
 
     public array $states;
 
+    public string $tab = 'features.comments.comments';
+
     public function getRules(): array
     {
         return Arr::prependKeysWith(

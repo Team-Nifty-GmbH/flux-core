@@ -3,75 +3,63 @@
 namespace FluxErp\Http\Livewire;
 
 use FluxErp\Http\Requests\UpdateMediaRequest;
-use FluxErp\Http\Requests\UploadMediaRequest;
 use FluxErp\Services\MediaService;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Arr;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use WireUi\Traits\Actions;
 
 class FolderTree extends Component
 {
     use Actions, WithFileUploads;
 
-    public array $tree = [];
-
+    /** @var Model $this->modelType */
     public ?string $modelType = null;
 
     public ?int $modelId = null;
 
-    public bool $showDetails = false;
+    public $files = [];
 
-    public bool $showFolderDetails = false;
-
-    public array $selected = [];
-
-    public array $selectedCollection = [];
-
-    public string $selectedCollectionName;
-
-    protected $listeners = ['renderFromTree'];
-
-    public string|array $upload = [];
+    public array $latestUploads = [];
 
     /**
      * @return array|mixed
      */
     public function getRules(): mixed
     {
-        $rules = ($this->selected['id'] ?? false)
-            ? (new UpdateMediaRequest())->rules()
-            : (new UploadMediaRequest())->rules();
-
-        return Arr::prependKeysWith($rules,
-            'selected.');
+        return [
+            'files.*' => 'required|file|max:10240',
+        ];
     }
 
-    public function mount(?string $modelType = null, ?int $modelId = null): void
+    public function updatedFiles(): void
+    {
+        if (! Auth::user()->can('api.media.post')) {
+            return;
+        }
+
+        $this->validate($this->getRules());
+
+        $media = $this->saveFileUploadsToMediaLibrary(
+            name: 'files',
+            modelId: $this->modelId,
+            modelType: $this->modelType
+        );
+
+        $this->latestUploads = $media;
+    }
+
+    public function mount(string $modelType = null, int $modelId = null): void
     {
         $this->modelType = $modelType;
         $this->modelId = $modelId;
-
-        $this->selected['disk'] = config('filesystems.default');
-
-        if ($modelId && $modelType) {
-            $this->tree = $modelType::query()->whereKey($modelId)->first()?->getMediaAsTree() ?: [];
-        }
-
-        if (! $this->tree) {
-            $this->tree = [[
-                'name' => 'files',
-                'is_static' => true,
-                'collection_name' => 'files',
-                'children' => [],
-            ]];
-        }
     }
 
     public function render(): View|Factory|Application
@@ -79,139 +67,82 @@ class FolderTree extends Component
         return view('flux::livewire.folder-tree');
     }
 
-    public function renderFromTree(?array $tree = []): void
+    public function getTree(): array
     {
-        $this->tree = $tree ?: [];
-    }
-
-    /**
-     * @return BinaryFileResponse|void
-     */
-    public function select($id)
-    {
-        $media = Media::query()->whereKey($id)->first();
-        $this->selected = $media->toArray();
-
-        if (! auth()->user()->can('api.media.put')) {
-            return $this->download();
+        if (! $this->modelType || ! $this->modelId) {
+            return [];
         }
 
-        $this->selected['preview'] = $media->toHtml();
-        $this->selected['human_readable_size'] = $media->human_readable_size;
-        $this->showDetails = true;
-
-        $this->skipRender();
+        return $this->modelType::query()->whereKey($this->modelId)->first()?->getMediaAsTree() ?: [];
     }
 
-    public function showFolder(string $collectionName, bool $isStatic): void
-    {
-        $this->selectedCollectionName = $collectionName;
-        $exploded = explode('.', $collectionName);
-        $this->selectedCollection['name'] = array_pop($exploded);
-        $this->selectedCollection['path'] = implode('/', $exploded) ?: null;
-        $this->selectedCollection['is_static'] = $isStatic;
-
-        $this->collection = $collectionName;
-
-        $this->showFolderDetails = true;
-        $this->skipRender();
-    }
-
-    public function save(): void
+    public function save(array $item): bool
     {
         if (! Auth::user()->can('api.media.put')) {
-            return;
+            return false;
         }
 
-        $this->validate();
-
-        $service = new MediaService();
-
-        $service->update($this->selected);
-        $this->showDetails = false;
-        $this->tree = $this->modelType::query()->whereKey($this->modelId)->first()?->getMediaAsTree() ?: [];
-
-        $this->notification()->success(__('File saved!'));
+        return ($item['file_name'] ?? false) ? $this->saveFile($item) : $this->saveFolder($item);
     }
 
-    public function saveFolder(): void
+    public function saveFolder(array $collection): true
     {
-        if (! Auth::user()->can('api.media.put') && ! Auth::user()->can('api.media.post')) {
-            return;
-        }
+        $newCollectionName = explode('.', $collection['collection_name']);
+        array_pop($newCollectionName);
+        $newCollectionName[] = Str::of($collection['name'])
+            ->ascii(config('app.locale'))
+            ->snake();
+        $newCollectionName = implode('.', $newCollectionName);
 
-        $exploded = $this->selectedCollection['path']
-            ? explode('/', $this->selectedCollection['path'])
-            : [];
-        $exploded[] = $this->selectedCollection['name'];
-        $collectionName = implode('.', $exploded);
+        $model = $this->modelType::query()->whereKey($this->modelId)->first();
 
-        if (
-            $this->selectedCollectionName !== $this->selectedCollection['name']
-            && ! $this->selectedCollection['is_static']
-            && Auth::user()->can('api.media.put')
-        ) {
-            $media = Media::query()
-                ->where('collection_name', 'LIKE', $this->selectedCollectionName . '%')
-                ->get();
+        \FluxErp\Models\Media::query()
+            ->where('model_type', $this->modelType)
+            ->where('model_id', $this->modelId)
+            ->where('collection_name', 'LIKE', $collection['collection_name'] . '%')
+            ->get()
+            ->each(function (\FluxErp\Models\Media $media) use ($newCollectionName, $model, $collection) {
+                $collectionName = $media->collection_name;
+                $collectionName = str_replace($collection['collection_name'], $newCollectionName, $collectionName);
 
-            foreach ($media as $mediaItem) {
-                $mediaItem->collection_name = substr_replace(
-                    $mediaItem->collection_name,
-                    $collectionName,
-                    0,
-                    strlen($this->selectedCollectionName)
-                );
+                $media->move($model, $collectionName);
+            });
 
-                $mediaItem->save();
-            }
-        }
-
-        if ($this->upload && Auth::user()->can('api.media.post')) {
-            $this->collection = $collectionName;
-            $this->saveFileUploadsToMediaLibrary('upload');
-        }
-        $this->tree = $this->modelType::query()->whereKey($this->modelId)->first()?->getMediaAsTree() ?: [];
-
-        $this->notification()->success(__('Folder saved!'));
-
-        $this->showFolderDetails = false;
+        return true;
     }
 
-    public function delete(): void
+    public function delete(\FluxErp\Models\Media $media): bool
     {
         if (! Auth::user()->can('api.media.{id}.delete')) {
-            return;
+            return false;
         }
 
-        Media::query()->whereKey($this->selected['id'])->delete();
-        $this->tree = $this->modelType::query()->whereKey($this->modelId)->first()?->getMediaAsTree() ?: [];
-
-        $this->showDetails = false;
+        return $media->delete();
     }
 
-    public function deleteFolder(): void
+    public function deleteCollection(string $collection): void
     {
         if (! Auth::user()->can('api.media.{id}.delete')) {
             return;
         }
 
         Media::query()
-            ->where('collection_name', 'LIKE', $this->selectedCollectionName . '%')
+            ->where('model_type', $this->modelType)
+            ->where('model_id', $this->modelId)
+            ->where('collection_name', 'LIKE', $collection . '%')
             ->delete();
-        $this->tree = $this->modelType::query()->whereKey($this->modelId)->first()?->getMediaAsTree() ?: [];
-
-        $this->showFolderDetails = false;
     }
 
-    public function download(): BinaryFileResponse
+    private function saveFile(array $media): bool
     {
-        $mediaItem = Media::query()->whereKey($this->selected['id'])->first();
+        $validator = Validator::make($media, (new UpdateMediaRequest())->rules());
+        $validated = $validator->validate();
 
-        if (! file_exists($mediaItem->getPath())) {
-            abort(404);
-        }
+        $service = new MediaService();
+        $response = $service->update($validated);
 
-        return response()->download($mediaItem->getPath(), $mediaItem->name);
+        $this->notification()->success(__('File saved!'));
+
+        return $response instanceof Media;
     }
 }

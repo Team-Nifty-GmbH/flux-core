@@ -2,12 +2,13 @@
 
 namespace FluxErp\Services;
 
-use FluxErp\Helpers\Helper;
+use FluxErp\Actions\Presentation\CreatePresentation;
+use FluxErp\Actions\Presentation\DeletePresentation;
+use FluxErp\Actions\Presentation\UpdatePresentation;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdatePresentationRequest;
 use FluxErp\Models\Presentation;
 use Illuminate\Contracts\View\View;
+use Illuminate\Validation\ValidationException;
 
 class PresentationService
 {
@@ -41,33 +42,14 @@ class PresentationService
 
     public function create(array $data): array
     {
-        $presentation = new Presentation();
-
-        if (($data['model_type'] ?? false) && ($data['model_id'] ?? false)) {
-            $model = $data['model_type'];
-
-            if (! class_exists($model)) {
-                $model = Helper::classExists(classString: ucfirst($data['model_type']), isModel: true);
-                if (! $model) {
-                    return ResponseHelper::createArrayResponse(
-                        statusCode: 404,
-                        data: ['model_type' => 'model type not found']
-                    );
-                }
-            }
-
-            $modelInstance = $model::query()->whereKey($data['model_id'])->first();
-
-            if (empty($modelInstance)) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 404,
-                    data: ['model_id' => 'model instance not found']
-                );
-            }
+        try {
+            $presentation = CreatePresentation::make($data)->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: 422,
+                data: $e->errors()
+            );
         }
-
-        $presentation->fill($data);
-        $presentation->save();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 201,
@@ -82,26 +64,25 @@ class PresentationService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdatePresentationRequest(),
-            service: $this,
-            model: new Presentation()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $presentation = UpdatePresentation::make($item)->validate()->execute(),
+                    additions: ['id' => $presentation->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $presentation = Presentation::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $presentation->fill($item);
-            $presentation->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $presentation->withoutRelations()->fresh(),
-                additions: ['id' => $presentation->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -109,54 +90,25 @@ class PresentationService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'presentations updated',
+            statusMessage: $statusCode === 422 ? null : 'presentation(s) updated',
             bulk: true
         );
     }
 
     public function delete(string $id): array
     {
-        $presentation = Presentation::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $presentation) {
-            return ResponseHelper::createArrayResponse(statusCode: 404, data: ['id' => 'presentation not found']);
+        try {
+            DeletePresentation::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: $e->errors()
+            );
         }
 
-        $presentation->delete();
-
-        return ResponseHelper::createArrayResponse(statusCode: 204, statusMessage: 'presentation deleted');
-    }
-
-    public function validateItem(array $item, array $response): ?array
-    {
-        if (($item['model_type'] ?? false) && ($item['model_id'] ?? false)) {
-            $model = $item['model_type'];
-
-            if (! class_exists($model)) {
-                $model = Helper::classExists(classString: $item['model_type'], isModel: true);
-
-                if (! $model) {
-                    return ResponseHelper::createArrayResponse(
-                        statusCode: 404,
-                        data: ['model_type', 'model type not found'],
-                        additions: $response
-                    );
-                }
-            }
-
-            $modelInstance = $model::query()->whereKey($item['model_id'])->first();
-
-            if (empty($modelInstance)) {
-                return ResponseHelper::createArrayResponse(
-                    statusCode: 404,
-                    data: ['model_id' => 'model instance not found'],
-                    additions: $response
-                );
-            }
-        }
-
-        return null;
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: 'presentation deleted'
+        );
     }
 }

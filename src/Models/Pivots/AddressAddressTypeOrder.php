@@ -26,7 +26,7 @@ class AddressAddressTypeOrder extends Pivot
         });
     }
 
-    public function getAddressAttribute(): Model|null
+    public function getAddressAttribute(): ?Model
     {
         $address = $this->fromJson($this->attributes['address'] ?? null);
 

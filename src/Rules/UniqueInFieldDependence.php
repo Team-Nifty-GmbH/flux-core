@@ -27,7 +27,7 @@ class UniqueInFieldDependence implements Rule, DataAwareRule
      *
      * @return void
      */
-    public function __construct(string $model, string|array $dependingField, bool $ignoreSelf = true, ?string $key = null)
+    public function __construct(string $model, string|array $dependingField, bool $ignoreSelf = true, string $key = null)
     {
         $this->dependingFields = is_array($dependingField) ? $dependingField : [$dependingField];
         $this->ignoreSelf = $ignoreSelf;
@@ -53,14 +53,17 @@ class UniqueInFieldDependence implements Rule, DataAwareRule
             $dependingFieldData = $this->data;
 
             foreach ($explodedDependingField as $field) {
-                $dependingFieldData = $dependingFieldData[$field] ?? $model::query()
-                    ->select($field, $this->key)
-                    ->where($this->key, $dependingFieldData[$this->key])
-                    ->first()
-                    ?->{$field};
+                if (array_key_exists($field, $dependingFieldData)) {
+                    $dependingFieldData = $dependingFieldData[$field];
+                } else {
+                    $dependingFieldData = $model::query()
+                        ->select($field, $this->key)
+                        ->where($this->key, $dependingFieldData[$this->key] ?? null)
+                        ->first();
 
-                if (! $dependingFieldData) {
-                    return false;
+                    if (! $dependingFieldData || ! array_key_exists($field, $dependingFieldData->attributesToArray())) {
+                        return false;
+                    }
                 }
             }
 

@@ -97,7 +97,7 @@ class OrderTypes extends Component
         $this->emitTo('data-tables.order-type-list', 'loadData');
     }
 
-    public function showEditModal(?int $orderTypeId = null): void
+    public function showEditModal(int $orderTypeId = null): void
     {
         $orderType = OrderType::query()
             ->whereKey($orderTypeId)

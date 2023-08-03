@@ -138,7 +138,7 @@ class Meta extends Model
      *
      * @param  ?string  $type
      */
-    public function scopeWhereValue(Builder $query, mixed $value, mixed $operator = '=', ?string $type = null): void
+    public function scopeWhereValue(Builder $query, mixed $value, mixed $operator = '=', string $type = null): void
     {
         $registry = $this->getDataTypeRegistry();
 
@@ -158,7 +158,7 @@ class Meta extends Model
      * @param  Builder<Meta>  $query
      * @param  ?string  $type
      */
-    public function scopeWhereValueIn(Builder $query, array $values, ?string $type = null): void
+    public function scopeWhereValueIn(Builder $query, array $values, string $type = null): void
     {
         $registry = $this->getDataTypeRegistry();
 

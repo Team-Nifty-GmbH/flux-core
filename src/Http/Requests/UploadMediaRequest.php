@@ -44,6 +44,7 @@ class UploadMediaRequest extends BaseFormRequest
                 new ExistsWithIgnore('media', 'id'),
             ],
             'name' => 'sometimes|required|string',
+            'file_name' => 'sometimes|required|string',
             'disk' => [
                 'sometimes',
                 'required',

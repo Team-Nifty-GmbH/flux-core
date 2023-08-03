@@ -20,6 +20,8 @@ class ProductList extends DataTable
 
     public array $availableRelations = ['*'];
 
+    public bool $showFilterInputs = true;
+
     public array $sortable = ['*'];
 
     public array $formatters = [
@@ -48,5 +50,10 @@ class ProductList extends DataTable
         $returnArray['product_image'] = $item->getAvatarUrl();
 
         return $returnArray;
+    }
+
+    public function getFilterableColumns(string $name = null): array
+    {
+        return $this->availableCols;
     }
 }

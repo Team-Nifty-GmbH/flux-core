@@ -44,8 +44,16 @@
                             </x-slot:header>
                             <livewire:folder-tree :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
                         </x-card>
-                        <x-card class="!px-0 !py-0">
-                            <livewire:features.comments.comments :is-public="true" :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
+                        <x-card>
+                            <x-tabs
+                                wire:model="tab"
+                                :tabs="[
+                                    'features.comments.comments' => __('Comments'),
+                                    'features.activities' => __('Activities'),
+                                ]"
+                            >
+                                <livewire:is wire:key="{{ uniqid() }}" :component="$tab" :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
+                            </x-tabs>
                         </x-card>
                     </div>
                 </div>
@@ -123,24 +131,28 @@
                         </div>
                     </div>
                 </x-card>
-                <x-card>
-                    <x-slot:header>
-                        <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
-                            <x-label>
-                                {{ __('Additional columns') }}
-                            </x-label>
+                <div x-cloak x-show="additionalColumns?.length > 0">
+                    <x-card>
+                        <x-slot:header>
+                            <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
+                                <x-label>
+                                    {{ __('Additional columns') }}
+                                </x-label>
+                            </div>
+                        </x-slot:header>
+                        <div class="flex flex-col gap-4">
+                            <template x-for="additionalColumn in additionalColumns">
+                                <div>
+                                    <x-label
+                                        x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
+                                        x-bind:for="additionalColumn.name"
+                                    />
+                                    <x-input x-bind:type="additionalColumn.field_type" x-model="ticket[additionalColumn.name]" :disabled="true"/>
+                                </div>
+                            </template>
                         </div>
-                    </x-slot:header>
-                    <template x-for="additionalColumn in additionalColumns">
-                        <div>
-                            <x-label
-                                x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
-                                x-bind:for="additionalColumn.name"
-                            />
-                            <x-input x-bind:type="additionalColumn.field_type" x-model="ticket[additionalColumn.name]" :disabled="true"/>
-                        </div>
-                    </template>
-                </x-card>
+                    </x-card>
+                </div>
             </div>
         </section>
     </div>

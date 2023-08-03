@@ -94,7 +94,7 @@ trait HasTranslations
         return $this;
     }
 
-    public function hasTranslationsValidationRules(array $rules, ?array $data = null): array
+    public function hasTranslationsValidationRules(array $rules, array $data = null): array
     {
         $availableLocales = Language::all()
             ->pluck('language_code')

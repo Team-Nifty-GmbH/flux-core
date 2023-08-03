@@ -41,7 +41,7 @@ class Currencies extends Component
         return view('flux::livewire.settings.currencies');
     }
 
-    public function showEditModal(int|null $currencyId = null): void
+    public function showEditModal(int $currencyId = null): void
     {
         if (! $currencyId) {
             $this->selectedCurrency = [];

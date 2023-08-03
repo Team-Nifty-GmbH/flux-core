@@ -2,6 +2,11 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Rules\ClassExists;
+use FluxErp\Rules\MorphExists;
+use FluxErp\Traits\Commentable;
+use Illuminate\Database\Eloquent\Model;
+
 class CreateCommentRequest extends BaseFormRequest
 {
     /**
@@ -12,8 +17,16 @@ class CreateCommentRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'model_id' => 'required|integer',
-            'model_type' => 'required|string',
+            'model_type' => [
+                'required',
+                'string',
+                new ClassExists(uses: Commentable::class, instanceOf: Model::class),
+            ],
+            'model_id' => [
+                'required',
+                'integer',
+                new MorphExists(),
+            ],
             'parent_id' => 'integer|exists:comments,id|nullable',
             'comment' => 'required|string',
             'is_internal' => 'sometimes|required|boolean',

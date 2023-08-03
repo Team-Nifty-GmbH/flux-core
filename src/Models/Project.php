@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\States\Project\ProjectState;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -10,14 +11,19 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\ModelStates\HasStates;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
+use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Project extends Model
+class Project extends Model implements InteractsWithDataTables
 {
-    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification,
-        HasUuid, SoftDeletes;
+    use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
+        HasPackageFactory, HasStates, HasUserModification, HasUuid, SoftDeletes, Trackable;
 
     protected $guarded = [
         'id',
@@ -31,6 +37,7 @@ class Project extends Model
     protected $casts = [
         'uuid' => 'string',
         'is_done' => 'boolean',
+        'state' => ProjectState::class,
     ];
 
     public array $translatable = [
@@ -43,11 +50,13 @@ class Project extends Model
         'project_category_template_id',
     ];
 
+    public string $detailRouteName = 'projects.id?';
+
     public string $categoryClass = ProjectTask::class;
 
-    public function categoryTemplate(): BelongsTo
+    public function category(): BelongsTo
     {
-        return $this->belongsTo(ProjectCategoryTemplate::class, 'project_category_template_id');
+        return $this->belongsTo(Category::class);
     }
 
     public function children(): HasMany
@@ -63,5 +72,25 @@ class Project extends Model
     public function tasks(): HasMany
     {
         return $this->hasMany(ProjectTask::class);
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->project_name . ' (' . $this->display_name . ')';
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->detailRoute();
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return null;
     }
 }

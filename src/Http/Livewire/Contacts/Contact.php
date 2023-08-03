@@ -2,11 +2,15 @@
 
 namespace FluxErp\Http\Livewire\Contacts;
 
+use FluxErp\Actions\Contact\UpdateContact;
 use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Http\Requests\CreateContactRequest;
 use FluxErp\Http\Requests\UpdateContactRequest;
+use FluxErp\Models\Address;
 use FluxErp\Models\Contact as ContactModel;
 use FluxErp\Models\Order;
+use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
 use FluxErp\Services\AddressService;
 use FluxErp\Services\ContactService;
 use FluxErp\Traits\Livewire\WithFileUploads;
@@ -16,6 +20,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -54,9 +59,13 @@ class Contact extends Component
 
     public bool $orderAsc = true;
 
+    public array $priceLists = [];
+
+    public array $paymentTypes = [];
+
     protected function getListeners(): array
     {
-        $channel = (new ContactModel())->broadcastChannel();
+        $channel = (new ContactModel())->broadcastChannel(true);
 
         return array_merge(['goToContactWithAddress' => 'goToContactWithAddress'], [
             'echo-private:' . $channel . '.' . $this->contactId . ',.ContactUpdated' => 'contactUpdatedEvent',
@@ -79,15 +88,17 @@ class Contact extends Component
         return $rules;
     }
 
-    public function mount(?int $id = null): void
+    public function mount(int $id = null): void
     {
         $this->contactId = $id;
+        $contact = ContactModel::query()
+            ->with('addresses')
+            ->when($this->contactId, fn ($query) => $query->whereKey($this->contactId))
+            ->firstOrFail();
 
-        $contactQuery = ContactModel::query()->with('addresses');
-        if ($this->contactId) {
-            $contactQuery->whereKey($this->contactId);
-        }
-        $contact = $contactQuery->firstOrFail();
+        $contact->addresses->map(function (Address $address) {
+            return $address->append('name');
+        });
 
         $contact->main_address = $contact->addresses
             ->where('is_main_address', true)
@@ -101,11 +112,31 @@ class Contact extends Component
         $this->address = $this->addressId ?
             $contact->addresses->whereKey($this->addressId)->firstOrFail()->toArray() :
             $contact->addresses->where('is_main_address', true)->first()->toArray();
+
+        $this->priceLists = PriceList::query()->select(['id', 'name'])->get()->toArray();
+        $this->paymentTypes = PaymentType::query()->select(['id', 'name'])->get()->toArray();
     }
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.contact.contact');
+        return view('flux::livewire.contact.contact', [
+            'tabs' => [
+                'addresses' => __('Addresses'),
+                'orders' => __('Orders'),
+                'accounting' => __('Accounting'),
+                'tickets' => __('Tickets'),
+                'statistics' => __('Statistics'),
+            ],
+        ]);
+    }
+
+    public function updatedContact(): void
+    {
+        try {
+            UpdateContact::make($this->contact)->validate()->execute();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     public function goToContactWithAddress(int $contactId, int $addressId): void

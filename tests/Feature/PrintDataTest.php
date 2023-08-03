@@ -42,6 +42,7 @@ class PrintDataTest extends BaseSetup
 
         $this->presentation = Presentation::factory()->create();
 
+        File::makeDirectory(resource_path('views/print'), recursive: true, force: true);
         File::put(resource_path('views/print/test-print.blade.php'), '<div>{{$test_variable}}</div>');
 
         $this->permissions = [

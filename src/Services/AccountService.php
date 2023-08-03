@@ -2,19 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Account\CreateAccount;
+use FluxErp\Actions\Account\DeleteAccount;
+use FluxErp\Actions\Account\UpdateAccount;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateAccountRequest;
 use FluxErp\Models\Account;
+use Illuminate\Validation\ValidationException;
 
 class AccountService
 {
     public function create(array $data): Account
     {
-        $account = new Account($data);
-        $account->save();
-
-        return $account;
+        return CreateAccount::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -23,25 +22,25 @@ class AccountService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateAccountRequest(),
-            service: $this
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $account = UpdateAccount::make($item)->validate()->execute(),
+                    additions: ['id' => $account->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            $account = Account::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            $account->fill($item);
-            $account->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $account->withoutRelations()->fresh(),
-                additions: ['id' => $account->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -56,18 +55,14 @@ class AccountService
 
     public function delete(string $id): array
     {
-        $account = Account::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $account) {
+        try {
+            DeleteAccount::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['id' => 'account not found']
+                data: $e->errors()
             );
         }
-
-        $account->delete();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,

@@ -13,13 +13,15 @@ use Illuminate\Database\Eloquent\Builder;
 
 class PriceHelper
 {
-    private Contact|null $contact = null;
+    private ?Contact $contact = null;
 
-    private PriceList|null $priceList = null;
+    private ?PriceList $priceList = null;
 
     private Product $product;
 
     private string $timestamp;
+
+    private bool $useDefault = true;
 
     public function __construct(Product $product)
     {
@@ -28,7 +30,7 @@ class PriceHelper
 
     public static function make(Product $product): static
     {
-        return (new static($product));
+        return new static($product);
     }
 
     public function setContact(Contact $contact): self
@@ -52,7 +54,14 @@ class PriceHelper
         return $this;
     }
 
-    public function price(): Price|null
+    public function useDefault(bool $useDefault): self
+    {
+        $this->useDefault = $useDefault;
+
+        return $this;
+    }
+
+    public function price(): ?Price
     {
         $this->timestamp = $this->timestamp ?? Carbon::now()->toDateTimeString();
 
@@ -65,12 +74,12 @@ class PriceHelper
         }
 
         if (! $price) {
-            $price = $this->contact->priceList?->prices()
+            $price = $this->contact?->priceList?->prices()
                 ->where('product_id', $this->product->id)
                 ->first();
         }
 
-        if (! $price) {
+        if (! $price && $this->useDefault) {
             $price = Price::query()
                 ->where('product_id', $this->product->id)
                 ->whereRelation('priceList', 'is_default', true)
@@ -80,6 +89,8 @@ class PriceHelper
         if (! $price) {
             return null;
         }
+
+        $price->setRelation('priceList', $this->priceList);
 
         if ($this->contact) {
             $discounts = Discount::query()
@@ -160,7 +171,7 @@ class PriceHelper
             $maxPercentageDiscount = $discounts->max(fn ($item) => $item->is_percentage ? $item->discount : 0);
             $maxFlatDiscount = $discounts->max(fn ($item) => $item->is_percentage ? 0 : $item->discount);
 
-            $discountedPercentage = bcmul($price->price,  (1 - $maxPercentageDiscount));
+            $discountedPercentage = bcmul($price->price, (1 - $maxPercentageDiscount));
             $discountedFlat = bcsub($price->price, $maxFlatDiscount);
 
             $price->price = bccomp($discountedPercentage, $discountedFlat) === -1 ?
@@ -170,11 +181,10 @@ class PriceHelper
         return $price;
     }
 
-
     /**
      * Calculate price from price list based on price list parent(s) and discount per price list
      */
-    private function calculatePriceFromPriceList(PriceList $priceList, array $discounts): Price|null
+    private function calculatePriceFromPriceList(PriceList $priceList, array $discounts): ?Price
     {
         $discounts[] = $priceList->discount()
             ->where(function (Builder $query) {

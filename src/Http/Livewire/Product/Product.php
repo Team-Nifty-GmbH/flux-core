@@ -2,10 +2,10 @@
 
 namespace FluxErp\Http\Livewire\Product;
 
+use FluxErp\Helpers\PriceHelper;
 use FluxErp\Http\Requests\CreateProductRequest;
 use FluxErp\Http\Requests\UpdateProductRequest;
 use FluxErp\Models\Currency;
-use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\VatRate;
 use FluxErp\Services\ProductService;
@@ -42,11 +42,19 @@ class Product extends Component
                 'categories:id',
                 'tags:id',
                 'bundleProducts:id',
-                'vatRate:id,rate_percentage'
+                'vatRate:id,rate_percentage',
+                'parent',
             ])
+            ->withCount('children')
             ->first();
 
+        $parent = $product->parent;
         $this->product = $product->toArray();
+
+        $this->product['parent'] = $parent ? [
+            'label' => $parent->getLabel(),
+            'url' => $parent->getUrl(),
+        ] : null;
 
         $this->product['categories'] = $product->categories->pluck('id')->toArray();
         $this->product['tags'] = $product->tags->pluck('id')->toArray();
@@ -67,15 +75,31 @@ class Product extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.product.product');
+        $tabs = [
+            'general' => __('General'),
+            'prices' => __('Prices'),
+            'stock' => __('Stock'),
+            'media' => __('Media'),
+        ];
+
+        if ($this->product['children_count']) {
+            // add children tab on third position
+            $tabs = array_merge(
+                array_slice($tabs, 0, 2),
+                ['variants' => __('Variants')],
+                array_slice($tabs, 2)
+            );
+        }
+
+        return view('flux::livewire.product.product', ['tabs' => $tabs]);
     }
 
-    public function save(): bool
+    public function save(): true
     {
         if ($this->priceLists !== null) {
             $this->product['prices'] = collect($this->priceLists)
                 ->filter(fn ($priceList) => $priceList['price_net'] !== null || $priceList['price_gross'] !== null)
-                ->map(function(array $priceList) {
+                ->map(function (array $priceList) {
                     return [
                         'price_list_id' => $priceList['id'],
                         'price' => $priceList['is_net'] ? $priceList['price_net'] : $priceList['price_gross'],
@@ -93,7 +117,7 @@ class Product extends Component
 
         $service = new ProductService();
         if ($this->product['id']) {
-            $service->update($validated);;
+            $service->update($validated);
         } else {
             $service->create($validated);
         }
@@ -106,15 +130,21 @@ class Product extends Component
 
     public function getPriceLists(): void
     {
-        $priceLists =  PriceList::all(['id', 'name', 'price_list_code', 'is_net', 'is_default']);
-        $productPrices = Price::query()->where('product_id', $this->product['id'])->get();
-        $priceLists->map(function($priceList) use ($productPrices) {
-            $priceList->price_net = $productPrices->where('price_list_id', $priceList->id)
-                ->first()
+        $priceLists = PriceList::query()
+            ->with('parent')
+            ->get(['id', 'parent_id', 'name', 'price_list_code', 'is_net', 'is_default']);
+        $product = \FluxErp\Models\Product::query()->whereKey($this->product['id'])->first();
+        $priceListHelper = PriceHelper::make($product)->useDefault(false);
+
+        $priceLists->map(function (PriceList $priceList) use ($priceListHelper) {
+            $price = $priceListHelper
+                ->setPriceList($priceList)
+                ->price();
+            $priceList->price_net = $price
                 ?->getNet($this->product['vat_rate']['rate_percentage']) ?? null;
-            $priceList->price_gross = $productPrices->where('price_list_id', $priceList->id)
-                ->first()
+            $priceList->price_gross = $price
                 ?->getGross($this->product['vat_rate']['rate_percentage']) ?? null;
+            $priceList->is_editable = is_null($price) || $price?->price_list_id === $priceList->id;
         });
 
         $this->priceLists = $priceLists->toArray();

@@ -50,7 +50,7 @@ class Order extends Component
 
     public string $tab = 'order-positions';
 
-    public function mount(?string $id = null): void
+    public function mount(string $id = null): void
     {
         $order = \FluxErp\Models\Order::query()
             ->whereKey($id)
@@ -60,11 +60,13 @@ class Order extends Component
                 'client:id,name',
                 'contact.media',
                 'currency:id,iso,name',
-                'orderType:id,name,print_layouts',
+                'orderType:id,name,print_layouts,order_type_enum',
             ])
             ->firstOrFail();
 
         $this->printLayouts = $order->orderType?->print_layouts ?: [];
+        $this->printLayouts = array_combine(array_map('class_basename', $this->printLayouts), $this->printLayouts);
+
         $this->selectedPrintLayouts = array_fill_keys(array_keys($this->printLayouts), false);
 
         $this->order = $order->toArray();
@@ -92,7 +94,7 @@ class Order extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.order.order');
+        return view('flux::livewire.order.' . $this->order['order_type']['order_type_enum'] ?: 'order');
     }
 
     public function updatedOrderAddressInvoiceId(): void

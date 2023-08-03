@@ -28,7 +28,14 @@
                 </div>
             </div>
         </div>
-        <h2 class="pt-10 pb-8 text-base font-bold uppercase dark:text-gray-50">{{ __('Comments') }}</h2>
+        <x-tabs
+            wire:model="tab"
+            :tabs="[
+                'features.comments.comments' => __('Comments'),
+                'features.activities' => __('Activities'),
+            ]"
+        >
+            <livewire:is wire:key="{{ uniqid() }}" :component="$tab" :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
+        </x-tabs>
     </div>
-    <livewire:features.comments.comments :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
 </div>

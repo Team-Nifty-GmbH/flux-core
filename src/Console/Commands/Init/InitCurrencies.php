@@ -2,7 +2,7 @@
 
 namespace FluxErp\Console\Commands\Init;
 
-use FluxErp\Services\CurrencyService;
+use FluxErp\Models\Currency;
 use Illuminate\Console\Command;
 
 class InitCurrencies extends Command
@@ -36,8 +36,38 @@ class InitCurrencies extends Command
      */
     public function handle(): void
     {
-        $currencyController = new CurrencyService();
-        $currencyController->initializeCurrencies();
+        $path = resource_path() . '/init-files/currencies.json';
+        if (! file_exists($path)) {
+            return;
+        }
+
+        $json = json_decode(file_get_contents($path));
+
+        if ($json->model === 'Currency') {
+            $jsonCurrencies = $json->data;
+
+            if ($jsonCurrencies) {
+                $isDefault = false;
+                foreach ($jsonCurrencies as $jsonCurrency) {
+                    // Save to database.
+                    $isDefault = $isDefault ? false : $jsonCurrency->is_default;
+                    Currency::query()
+                        ->updateOrCreate([
+                            'iso' => $jsonCurrency->iso,
+                        ], [
+                            'name' => $jsonCurrency->name,
+                            'symbol' => $jsonCurrency->symbol,
+                            'is_default' => $isDefault,
+                        ]);
+                }
+            }
+
+            if (! Currency::query()->where('is_default')->exists()) {
+                Currency::query()
+                    ->first()
+                    ->update(['is_default' => true]);
+            }
+        }
 
         $this->info('Currencies initiated!');
     }

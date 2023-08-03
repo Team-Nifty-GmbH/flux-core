@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Http\Livewire\Widgets;
+
+use FluxErp\Contracts\UserWidget;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
+use Livewire\Component;
+
+class {{class}} extends Component implements UserWidget
+{
+    public function render(): View|Factory
+    {
+        return view('livewire.widgets.{{snake_case class}}');
+    }
+
+    public static function getLabel(): string
+    {
+        return Str::headline(class_basename(self::class));
+    }
+}

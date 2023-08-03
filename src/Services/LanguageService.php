@@ -2,21 +2,18 @@
 
 namespace FluxErp\Services;
 
+use FluxErp\Actions\Language\CreateLanguage;
+use FluxErp\Actions\Language\DeleteLanguage;
+use FluxErp\Actions\Language\UpdateLanguage;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Helpers\ValidationHelper;
-use FluxErp\Http\Requests\UpdateLanguageRequest;
 use FluxErp\Models\Language;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class LanguageService
 {
     public function create(array $data): Language
     {
-        $language = new Language($data);
-        $language->save();
-
-        return $language;
+        return CreateLanguage::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -25,27 +22,25 @@ class LanguageService
             $data = [$data];
         }
 
-        $responses = ValidationHelper::validateBulkData(
-            data: $data,
-            formRequest: new UpdateLanguageRequest(),
-            model: new Language()
-        );
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $language = UpdateLanguage::make($item)->validate()->execute(),
+                    additions: ['id' => $language->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
 
-        foreach ($data as $item) {
-            // Find existing data to update.
-            $language = Language::query()
-                ->whereKey($item['id'])
-                ->first();
-
-            // Save new data to table.
-            $language->fill($item);
-            $language->save();
-
-            $responses[] = ResponseHelper::createArrayResponse(
-                statusCode: 200,
-                data: $language->withoutRelations()->fresh(),
-                additions: ['id' => $language->id]
-            );
+                unset($data[$key]);
+            }
         }
 
         $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
@@ -53,99 +48,25 @@ class LanguageService
         return ResponseHelper::createArrayResponse(
             statusCode: $statusCode,
             data: $responses,
-            statusMessage: $statusCode === 422 ? null : 'languages updated',
+            statusMessage: $statusCode === 422 ? null : 'language(s) updated',
             bulk: true
         );
     }
 
     public function delete(string $id): array
     {
-        $language = Language::query()
-            ->whereKey($id)
-            ->first();
-
-        if (! $language) {
+        try {
+            DeleteLanguage::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['id' => 'language not found']
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
             );
         }
-
-        // Don't delete if in use.
-        if ($language->addresses()->exists()) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['address' => 'language referenced by an address']
-            );
-        }
-
-        if ($language->users()->exists()) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 423,
-                data: ['user' => 'language referenced by a user']
-            );
-        }
-
-        $language->delete();
-
-        // Rename unique columns on soft-delete.
-        $language->language_code = $language->language_code . '___' . Hash::make(Str::uuid());
-        $language->save();
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
             statusMessage: 'language deleted'
         );
-    }
-
-    public function initializeLanguages(): void
-    {
-        // create the default locale language
-        $locale = Language::query()
-            ->where('language_code', config('app.locale'))
-            ->firstOrNew();
-        if (! $locale->exists) {
-            $locale->fill([
-                'name' => config('app.locale'),
-                'iso_name' => config('app.locale'),
-                'language_code' => config('app.locale'),
-            ]);
-            $locale->save();
-        }
-
-        $fallback = Language::query()
-            ->where('language_code', config('app.fallback_locale'))
-            ->firstOrNew();
-        if (! $fallback->exists) {
-            $fallback->fill([
-                'name' => config('app.fallback_locale'),
-                'iso_name' => config('app.fallback_locale'),
-                'language_code' => config('app.fallback_locale'),
-            ]);
-            $fallback->save();
-        }
-
-        $path = resource_path() . '/init-files/languages.json';
-        $json = json_decode(file_get_contents($path), true);
-
-        if ($json['model'] === 'Language') {
-            $jsonLanguages = $json['data'];
-
-            if ($jsonLanguages) {
-                foreach ($jsonLanguages as $jsonLanguage) {
-                    $jsonLanguage['name'] = __($jsonLanguage['name']);
-
-                    // Save to database.
-                    $language = Language::query()
-                        ->where('language_code', $jsonLanguage['language_code'])
-                        ->firstOrNew();
-
-                    if (! $language->exists) {
-                        $language->fill($jsonLanguage);
-                        $language->save();
-                    }
-                }
-            }
-        }
     }
 }

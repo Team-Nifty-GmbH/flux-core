@@ -16,31 +16,17 @@ if (! function_exists('route_to_permission')) {
         $guard = explode(':', \Illuminate\Support\Arr::first(array_intersect($route->middleware(), $guards)));
 
         // Allow if route is not guarded in any way.
-        if (! array_intersect($route->middleware(), $guards)) {
+        if (! array_intersect($route->middleware(), $guards) || ! $route->getPermissionName()) {
             return null;
         }
-
-        $methods = array_flip($route->methods());
-        \Illuminate\Support\Arr::forget($methods, 'HEAD');
-        $method = array_keys($methods)[0];
-
-        $uri = array_flip(array_filter(explode('/', $route->uri)));
-        if (! $uri) {
-            return null;
-        }
-
-        $uri = array_keys($uri);
-        $uri[] = $method;
-
-        $permissionName = strtolower(implode('.', $uri));
 
         try {
-            $permission = \Spatie\Permission\Models\Permission::findByName($permissionName, $guard[1] ?? $defaultGuard);
+            $permission = \Spatie\Permission\Models\Permission::findByName($route->getPermissionName(), $guard[1] ?? $defaultGuard);
         } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
             $permission = null;
         }
 
-        return $checkPermission ? $permission?->name : $permissionName;
+        return $checkPermission ? $permission?->name : $route->getPermissionName();
     }
 }
 
@@ -109,7 +95,7 @@ if (! function_exists('channel_to_permission')) {
 }
 
 if (! function_exists('qualify_model')) {
-    function qualify_model(?string $model = null): string|null
+    function qualify_model(string $model = null): ?string
     {
         if (
             str_contains($model, '\\')
@@ -174,8 +160,8 @@ if (! function_exists('diff_percentage')) {
 if (! function_exists('event_subscribers')) {
     function event_subscribers(
         string $event,
-        ?int $modelId = null,
-        ?string $modelType = null
+        int $modelId = null,
+        string $modelType = null
     ): Illuminate\Database\Eloquent\Collection {
         if (
             \FluxErp\Models\EventSubscription::query()
@@ -215,7 +201,7 @@ if (! function_exists('event_subscribers')) {
 if (! function_exists('eloquent_model_event')) {
     function eloquent_model_event(string $event, string $model): string
     {
-        $event = strtolower(ltrim($event, 'eloquent.'));
+        $event = strtolower(str_starts_with($event, 'eloquent.') ? substr($event, 9) : $event);
 
         $modelClass = \TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all()->merge(config('flux.models'))->filter(
             function ($item) use ($model) {

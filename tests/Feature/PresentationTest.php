@@ -265,7 +265,7 @@ class PresentationTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/presentations', $presentation);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_create_presentation_model_instance_not_found()
@@ -281,7 +281,7 @@ class PresentationTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/presentations', $presentation);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_update_presentation()
@@ -394,7 +394,7 @@ class PresentationTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/presentations', $presentation);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_update_presentation_model_instance_not_found()
@@ -411,7 +411,7 @@ class PresentationTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->put('/api/presentations', $presentation);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_delete_presentation()

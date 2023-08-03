@@ -6,6 +6,7 @@ use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\View\FileViewFinder;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,14 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        /** use @extendFlux() at the end of the component, not the beginning */
+        Blade::directive('extendFlux', function (string $expression) {
+            $finder = new FileViewFinder(app('files'), [flux_path('resources/views')]);
+            $filePath = $finder->find($expression);
+
+            return Blade::compileString(file_get_contents($filePath));
+        });
+
         Blade::component(App::class, 'layouts.app');
         Blade::component(Printing::class, 'layouts.print.index');
         Blade::component(Printing::class, 'layouts.print');

@@ -2,7 +2,7 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('flux::nav.settings.translations') }}</h1>
+                <h1 class="text-xl font-semibold">{{ __('Translations') }}</h1>
                 <div class="mt-2 text-sm text-gray-300">{{__('Here you can manage your translations...')}}</div>
             </div>
             <div class="mt-6 sm:ml-16">

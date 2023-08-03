@@ -83,9 +83,9 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference, Int
         return $this->belongsTo(Language::class);
     }
 
-    public function locks(): HasMany
+    public function locks(): MorphMany
     {
-        return $this->hasMany(Lock::class, 'created_by');
+        return $this->morphMany(Lock::class, 'authenticatable');
     }
 
     public function settings(): MorphMany
@@ -98,12 +98,18 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference, Int
         return $this->belongsToMany(Ticket::class, 'ticket_user');
     }
 
+    public function workTimes(): HasMany
+    {
+        return $this->hasMany(WorkTime::class);
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('avatar')
             ->acceptsFile(function (File $file) {
                 return str_starts_with($file->mimeType, 'image/');
             })
+            ->useFallbackUrl(self::icon()->getUrl())
             ->useDisk('public')
             ->singleFile();
     }

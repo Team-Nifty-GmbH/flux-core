@@ -22,27 +22,33 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
 
 Route::middleware(['auth:address'])->group(function () {
     Route::get('/', FluxErp\Http\Livewire\Portal\Dashboard::class)
-        ->name('portal.dashboard');
+        ->name('portal.dashboard')
+        ->registersMenuItem(icon: 'home', order: -9999);
     Route::get('/calendar', FluxErp\Http\Livewire\Portal\Calendar::class)
-        ->name('portal.calendar');
+        ->name('portal.calendar')
+        ->registersMenuItem(icon: 'calendar');
     Route::get('/files', FluxErp\Http\Livewire\Portal\Files::class)
-        ->name('portal.files');
+        ->name('portal.files')
+        ->registersMenuItem(icon: 'folder-open');
     Route::get('/my-profile/{id?}', FluxErp\Http\Livewire\Portal\Profile::class)
         ->name('portal.my-profile');
     Route::get('/orders/{id}', FluxErp\Http\Livewire\Portal\OrderDetail::class)
         ->name('portal.orders.id');
     Route::get('/orders', FluxErp\Http\Livewire\Portal\Orders::class)
-        ->name('portal.orders');
+        ->name('portal.orders')
+        ->registersMenuItem(icon: 'shopping-bag');
     Route::get('/product/{id}', FluxErp\Http\Livewire\Portal\Product::class)
         ->name('portal.product');
     Route::get('/profile/{id?}', FluxErp\Http\Livewire\Portal\Profile::class)
         ->name('portal.profile.id?');
     Route::get('/serial-numbers', FluxErp\Http\Livewire\Portal\SerialNumbers::class)
-        ->name('portal.serial-numbers');
+        ->name('portal.serial-numbers')
+        ->registersMenuItem(icon: 'tag');
     Route::get('/service/{serialNumberId?}', FluxErp\Http\Livewire\Portal\Service::class)
         ->name('portal.service');
     Route::get('/tickets', FluxErp\Http\Livewire\Portal\Ticket\Tickets::class)
-        ->name('portal.tickets');
+        ->name('portal.tickets')
+        ->registersMenuItem(icon: 'wrench-screwdriver');
     Route::get('/tickets/{id}', FluxErp\Http\Livewire\Portal\Ticket\Ticket::class)
         ->name('portal.tickets.id');
 

@@ -16,6 +16,8 @@ class OrderDetail extends Component
 
     public array $childOrders = [];
 
+    public array $attachments = [];
+
     public array $positionDetails = [];
 
     public array $positionsSummary = [];
@@ -87,6 +89,19 @@ class OrderDetail extends Component
                 'total_gross_price',
                 'unit_gross_price', ]
         );
+
+        // get the latest attachment per collection_name where disk is public
+        $this->attachments = $order->media()
+            ->select(['id', 'collection_name', 'file_name', 'mime_type', 'disk'])
+            ->where('disk', 'public')
+            ->whereIn('id', function ($query) {
+                $query->selectRaw('MAX(id)')
+                    ->from('media')
+                    ->where('disk', 'public')
+                    ->groupBy('collection_name');
+            })
+            ->get()
+            ->toArray();
 
         $this->order = $order->toArray();
 
@@ -202,6 +217,29 @@ class OrderDetail extends Component
         if (! $mediaItem) {
             abort(404);
         }
+
+        activity()->performedOn($order)
+            ->event('downloaded')
+            ->log($mediaItem->collection_name . ' ' . $mediaItem->file_name);
+
+        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
+    }
+
+    public function downloadMedia(int $id): BinaryFileResponse
+    {
+        $order = Order::query()
+            ->whereKey($this->order['id'])
+            ->first();
+
+        $mediaItem = $order->media()->whereKey($id)->first();
+
+        if (! $mediaItem) {
+            abort(404);
+        }
+
+        activity()->performedOn($order)
+            ->event('downloaded')
+            ->log($mediaItem->collection_name . ' ' . $mediaItem->file_name);
 
         return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
