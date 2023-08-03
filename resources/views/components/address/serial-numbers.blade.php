@@ -1,7 +1,7 @@
 <div>
     <div class="flex items-center justify-end pb-5">
         <div class="mt-3 sm:mt-0 sm:ml-4">
-            @can('api.serial-numbers.post')
+            @can('action.serial-number.create')
                 <x-button :href="route('products.serial-numbers.id?', ['id' => 0, 'addressId' => $this->address['id']])" primary>{{ __('Assign serial number') }}</x-button>
             @endcan
         </div>

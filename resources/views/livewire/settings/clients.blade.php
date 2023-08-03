@@ -75,7 +75,7 @@
             <div x-data="{index: @entangle('index').defer}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
-                    @if(user_can('api.clients.{id}.delete'))
+                    @if(user_can('action.client.delete'))
                         <x-button x-bind:class="index > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
                                   @click="window.$wireui.confirmDialog({
                                                             title: '{{ __('Delete client') }}',

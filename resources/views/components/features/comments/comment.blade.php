@@ -15,7 +15,7 @@
                     @endif
                 </div>
                 <x-dropdown>
-                    @can('api.comments.put')
+                    @can('action.comment.update')
                         <x-dropdown.item x-on:click="$wire.toggleSticky(comment.id); comment.is_sticky = ! comment.is_sticky">
                             <span x-text="comment.is_sticky ? '{{ __('Unsticky') }}' : '{{ __('Sticky') }}'"></span>
                         </x-dropdown.item>
@@ -54,7 +54,7 @@
             </div>
             <div class="mt-2 space-x-2 text-sm font-medium text-gray-700 dark:text-gray-50">
                 <span x-text="window.formatters.relativeTime(new Date(comment.created_at).getTime())"></span>
-                @can('api.comments.post')
+                @can('action.comment.create')
                     <span class="">&middot;</span>
                     <button
                         type="button"

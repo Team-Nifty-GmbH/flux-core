@@ -73,7 +73,7 @@
                         <x-state wire:model="ticketState" formatters="formatter.state" avialable="availableStates"/>
                         <livewire:features.custom-events :model="\FluxErp\Models\Ticket::class" :id="$ticket['id']" />
                         <x-select
-                            :disabled="! user_can('api.tickets.update')"
+                            :disabled="! user_can('action.ticket.update')"
                             :label="__('Ticket Type')"
                             wire:model="ticket.ticket_type_id"
                             option-value="id"
@@ -81,7 +81,7 @@
                             :options="$ticketTypes"
                         />
                         <x-select
-                            :disabled="! user_can('api.tickets.update')"
+                            :disabled="! user_can('action.ticket.update')"
                             multiselect
                             :label="__('Assigned')"
                             wire:model="ticket.users"
@@ -109,7 +109,7 @@
                                 </div>
                             </div>
                             <x-select
-                                :disabled="! user_can('api.tickets.update')"
+                                :disabled="! user_can('action.ticket.update')"
                                 x-on:selected="$wire.changeAuthor($event.detail.value)"
                                 class="pb-4"
                                 wire:model.defer="ticket.authenticatable_id"

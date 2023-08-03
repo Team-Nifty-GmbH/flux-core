@@ -8,7 +8,7 @@
             <div x-data="{userId: $wire.entangle('userId').defer}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
-                    @if(user_can('api.users.{id}.delete'))
+                    @if(user_can('action.user.delete'))
                         <x-button
                             x-bind:class="userId > 0 || 'invisible'"
                             flat

@@ -24,7 +24,7 @@
         </div>
         <div
             class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-            @if(user_can('api.serial-numbers.{id}.delete') && ($serialNumber['id'] ?? false))
+            @if(user_can('action.serial-number.delete') && ($serialNumber['id'] ?? false))
                 <x-button negative label="{{ __('Delete') }}" @click="
                               window.$wireui.confirmDialog({
                               title: '{{ __('Delete serial-number') }}',
@@ -40,10 +40,10 @@
                     }, '{{ $this->id }}')
                     "/>
             @endcan
-            @if(user_can('api.serial-numbers.post') && ($serialNumber['id'] ?? false))
+            @if(user_can('action.serial-number.create') && ($serialNumber['id'] ?? false))
                 <x-button primary label="{{ __('New') }}" x-on:click="$wire.new()"/>
             @endcan
-            @can('api.serial-numbers.{id}.put')
+            @can('action.serial-number.update')
                 <template x-if="serialNumber.id && edit === false">
                     <x-button primary label="{{ __('Edit') }}" x-on:click="$wire.startEdit()"/>
                 </template>
