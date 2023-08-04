@@ -114,7 +114,11 @@ class Profile extends Component
     public function updatedAvatar(): void
     {
         $this->collection = 'avatar';
-        $response = $this->saveFileUploadsToMediaLibrary('avatar', auth()->id(), User::class);
+        try {
+            $response = $this->saveFileUploadsToMediaLibrary('avatar', auth()->id(), User::class);
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
 
         $this->avatar = $response[0]['data']->getUrl();
     }

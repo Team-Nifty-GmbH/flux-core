@@ -17,12 +17,12 @@ class DeleteMediaCollectionRequest extends BaseFormRequest
     {
         return [
             'model_type' => [
-                'required_with:model_id',
+                'required',
                 'string',
                 new ClassExists(instanceOf: Model::class),
             ],
             'model_id' => [
-                'required_with:model_type',
+                'required',
                 'integer',
                 new MorphExists(),
             ],

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Livewire\Portal;
 
+use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Http\Requests\CreateTicketRequest;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
@@ -42,11 +43,6 @@ class Service extends Component
         $this->contactData = Auth::user()->toArray();
     }
 
-    public function getRules(): array
-    {
-        return Arr::prependKeysWith((new CreateTicketRequest())->rules(), 'ticket.');
-    }
-
     public function mount($serialNumberId = null): void
     {
         if ($serialNumberId) {
@@ -64,15 +60,23 @@ class Service extends Component
             ->layout('flux::components.layouts.portal');
     }
 
-    public function save(): Redirector|RedirectResponse
+    public function save(): false|Redirector|RedirectResponse
     {
-        $this->resetErrorBag();
-        $this->validate();
+        try {
+            $ticket = CreateTicket::make($this->ticket)
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
-        $ticketService = new TicketService();
-        $ticket = $ticketService->create($this->ticket);
+            return false;
+        }
 
-        $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id);
+        try {
+            $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id);
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
 
         $this->notification()->success(__('Ticket created…'));
         Event::dispatch('customerTicket.created', $ticket);

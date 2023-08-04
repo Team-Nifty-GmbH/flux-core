@@ -66,9 +66,9 @@ class RoleService
         return UpdateRoleUsers::make(array_merge($data, ['assign' => $assign]))->execute();
     }
 
-    public function syncUserRoles(array $data)
+    public function syncUserRoles(array $data): array
     {
-        return UpdateUserRoles::make($data)->execute();
+        return UpdateUserRoles::make(array_merge($data, ['sync' => true]))->execute();
     }
 
     public function delete(string $id): array

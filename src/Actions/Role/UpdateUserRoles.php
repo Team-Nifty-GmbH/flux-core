@@ -12,7 +12,7 @@ class UpdateUserRoles extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->setData($this->data ? array_merge(['assign' => true], $this->data) : []);
+        $this->setData($data);
         $this->rules = (new EditUserRoleRequest())->rules();
     }
 
@@ -32,7 +32,7 @@ class UpdateUserRoles extends FluxAction
             ->whereKey($this->data['user_id'])
             ->first();
 
-        if ($this->data['sync']) {
+        if ($this->data['sync'] ?? false) {
             $user->syncRoles($this->data['roles']);
 
             return $user->roles->toArray();

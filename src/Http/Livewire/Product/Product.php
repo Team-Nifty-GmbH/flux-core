@@ -117,13 +117,13 @@ class Product extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-            $this->product['id'] = $product->id;
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;
         }
 
+        $this->product['id'] = $product->id;
         $this->notification()->success(__('Product saved successfully.'));
 
         return true;

@@ -107,6 +107,7 @@ trait WithFileUploads
     public function saveFileUploadsToMediaLibrary(string $name, int $modelId = null, string $modelType = null): array
     {
         $this->prepareForMediaLibrary($name, $modelId, $modelType);
+        $response = [];
 
         foreach ($this->filesArray as $file) {
             $response[] = UploadMedia::make($file)

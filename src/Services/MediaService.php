@@ -162,7 +162,7 @@ class MediaService
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
-            statusMessage: 'media deleted'
+            statusMessage: 'media collection deleted'
         );
     }
 }

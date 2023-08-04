@@ -122,8 +122,12 @@ class Comments extends Component
         }
 
         if ($this->filesArray) {
-            $this->saveFileUploadsToMediaLibrary('files', $comment->id, Comment::class);
-            $comment->load('media:id,name,model_type,model_id,disk');
+            try {
+                $this->saveFileUploadsToMediaLibrary('files', $comment->id, Comment::class);
+                $comment->load('media:id,name,model_type,model_id,disk');
+            } catch (\Exception $e) {
+                exception_to_notifications($e, $this);
+            }
         }
 
         $comment = $comment->toArray();

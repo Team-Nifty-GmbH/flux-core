@@ -13,9 +13,9 @@ class EditUserPermissionRequest extends BaseFormRequest
     {
         return [
             'user_id' => 'required|integer|exists:users,id',
-            'sync' => 'sometimes|required|boolean',
-            'give' => 'sometimes|required|boolean',
-            'permissions' => 'required_without:sync|array',
+            'sync' => 'require_without:give|accepted|boolean',
+            'give' => 'required_without:sync|boolean',
+            'permissions' => 'present|array',
             'permissions.*' => 'required|integer|exists:permissions,id',
         ];
     }

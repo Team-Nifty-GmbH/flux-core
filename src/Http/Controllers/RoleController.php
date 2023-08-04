@@ -80,14 +80,14 @@ class RoleController extends BaseController
         );
     }
 
-    public function syncUsers(EditUserRoleRequest $request, RoleService $roleService): JsonResponse
+    public function syncUserRoles(EditUserRoleRequest $request, RoleService $roleService): JsonResponse
     {
         $roles = $roleService->syncUserRoles($request->validated());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
             data: $roles,
-            statusMessage: 'role permissions updated'
+            statusMessage: 'user roles updated'
         );
     }
 

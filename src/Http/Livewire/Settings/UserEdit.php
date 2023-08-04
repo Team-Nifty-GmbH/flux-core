@@ -110,8 +110,8 @@ class UserEdit extends Component
     public function save(): void
     {
         if (
-            in_array(Role::findByName('Super Admin')->id, $this->user['roles']) &&
-            ! auth()->user()->hasRole('Super Admin')
+            in_array(Role::findByName('Super Admin')->id, $this->user['roles'])
+            && ! auth()->user()->hasRole('Super Admin')
         ) {
             return;
         }

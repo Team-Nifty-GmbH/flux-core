@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
 
 class FolderTree extends Component
@@ -41,8 +42,8 @@ class FolderTree extends Component
     public function updatedFiles(): void
     {
         try {
-            UpdateMedia::make()->checkPermission();
-        } catch (\Throwable $e) {
+            UpdateMedia::canPerformAction();
+        } catch (UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -50,13 +51,17 @@ class FolderTree extends Component
 
         $this->validate($this->getRules());
 
-        $media = $this->saveFileUploadsToMediaLibrary(
-            name: 'files',
-            modelId: $this->modelId,
-            modelType: $this->modelType
-        );
+        try {
+            $media = $this->saveFileUploadsToMediaLibrary(
+                name: 'files',
+                modelId: $this->modelId,
+                modelType: $this->modelType
+            );
 
-        $this->latestUploads = $media;
+            $this->latestUploads = $media;
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     public function mount(string $modelType = null, int $modelId = null): void
@@ -82,8 +87,8 @@ class FolderTree extends Component
     public function save(array $item): bool
     {
         try {
-            UpdateMedia::make()->checkPermission();
-        } catch (\Exception $e) {
+            UpdateMedia::canPerformAction();
+        } catch (UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return false;

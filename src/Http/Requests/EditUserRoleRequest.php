@@ -12,10 +12,10 @@ class EditUserRoleRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|integer|exists:users,id',
-            'sync' => 'sometimes|required|boolean',
-            'assign' => 'sometimes|required|boolean',
-            'roles' => 'required_without:sync|array',
+            'user_id' => 'required|integer|exists:users,id,deleted_at,NULL',
+            'sync' => 'require_without:assign|accepted|boolean',
+            'assign' => 'required_without:sync|boolean',
+            'roles' => 'present|array',
             'roles.*' => 'required|integer|exists:roles,id',
         ];
     }

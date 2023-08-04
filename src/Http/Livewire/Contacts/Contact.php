@@ -128,10 +128,7 @@ class Contact extends Component
         $this->mount();
     }
 
-    /**
-     * @return Application|\Illuminate\Http\RedirectResponse|Redirector|void
-     */
-    public function save()
+    public function save(): false|RedirectResponse|Redirector
     {
         $action = ($this->newContact['address']['id'] ?? false) ? UpdateContact::class : CreateContact::class;
 
@@ -143,7 +140,7 @@ class Contact extends Component
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
 
-            return;
+            return false;
         }
 
         $this->newContact['address']['contact_id'] = $contact->id;
@@ -158,7 +155,7 @@ class Contact extends Component
             exception_to_notifications($e, $this);
             $contact->forceDelete();
 
-            return;
+            return false;
         }
 
         $this->notification()->success(__('Contact saved'));
@@ -208,7 +205,14 @@ class Contact extends Component
     public function updatedAvatar(): void
     {
         $this->collection = 'avatar';
-        $response = $this->saveFileUploadsToMediaLibrary('avatar', $this->contactId, ContactModel::class);
+        try {
+            $response = $this->saveFileUploadsToMediaLibrary('avatar', $this->contactId, ContactModel::class);
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
         $this->avatar = $response[0]['data']->getUrl();
     }
 
