@@ -230,7 +230,7 @@ class PrintDataService
             $responses[] = ResponseHelper::createArrayResponse(
                 statusCode: 201,
                 data: $printData->makeHidden('data')->toArray(),
-                additions: ['url' => route('print.show-html', ['id' => $printData->id])]
+                additions: ['url' => route('api.print.show-html', ['id' => $printData->id])]
             );
         }
 
@@ -334,7 +334,7 @@ class PrintDataService
         return ResponseHelper::createArrayResponse(
             statusCode: 200,
             data: $printData->makeHidden('data')->toArray(),
-            additions: ['url' => route('print.show-html', ['id' => $printData->id])]
+            additions: ['url' => route('api.print.show-html', ['id' => $printData->id])]
         );
     }
 
@@ -493,7 +493,7 @@ class PrintDataService
         return ResponseHelper::createArrayResponse(
             statusCode: 201,
             data: $printData->makeHidden('data')->toArray(),
-            additions: ['url' => route('print.show-html', ['id' => $printData->id])]
+            additions: ['url' => route('api.print.show-html', ['id' => $printData->id])]
         );
     }
 
