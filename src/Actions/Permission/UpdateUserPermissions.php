@@ -11,7 +11,7 @@ class UpdateUserPermissions extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->data = $this->data ? array_merge(['give' => true], $this->data) : [];
+        $this->data = $this->data ? array_merge(['give' => true, 'sync' => false], $this->data) : [];
         $this->rules = (new EditUserPermissionRequest())->rules();
     }
 
