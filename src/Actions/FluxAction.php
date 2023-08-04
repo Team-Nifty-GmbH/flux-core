@@ -113,6 +113,18 @@ abstract class FluxAction
         return $this->rules;
     }
 
+    public function setResult(mixed $result): static
+    {
+        $this->result = $result;
+
+        return $this;
+    }
+
+    public function getResult(): mixed
+    {
+        return $this->result;
+    }
+
     final public function execute(): mixed
     {
         if ($this->fireActionEvent(event: 'executing') === false) {
