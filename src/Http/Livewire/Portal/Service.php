@@ -3,14 +3,11 @@
 namespace FluxErp\Http\Livewire\Portal;
 
 use FluxErp\Actions\Ticket\CreateTicket;
-use FluxErp\Http\Requests\CreateTicketRequest;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
-use FluxErp\Services\TicketService;
 use FluxErp\Traits\Livewire\WithAddressAuth;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Livewire\Component;

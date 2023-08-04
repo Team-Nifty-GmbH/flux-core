@@ -12,6 +12,7 @@ class UpdateUserRoles extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
+        $this->data = $this->data ? array_merge(['assign' => true], $this->data) : [];
 
         $this->rules = (new EditUserRoleRequest())->rules();
     }

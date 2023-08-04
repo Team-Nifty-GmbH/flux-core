@@ -12,7 +12,7 @@ class EditUserPermissionRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|integer|exists:users,id',
+            'user_id' => 'required|integer|exists:users,id,deleted_at,NULL',
             'sync' => 'sometimes|required|boolean',
             'give' => 'sometimes|required|boolean',
             'permissions' => 'present|array',
