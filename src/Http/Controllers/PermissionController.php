@@ -70,6 +70,17 @@ class PermissionController extends BaseController
         );
     }
 
+    public function sync(EditUserPermissionRequest $request, PermissionService $permissionService): JsonResponse
+    {
+        $permissions = $permissionService->syncUserPermissions($request->validated());
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $permissions,
+            statusMessage: 'user permissions updated'
+        );
+    }
+
     public function delete(string $id, PermissionService $permissionService): JsonResponse
     {
         $response = $permissionService->delete($id);

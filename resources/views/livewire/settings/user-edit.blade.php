@@ -51,7 +51,7 @@
                 </div>
             </div>
         @endif
-        @if(user_can('api.permissions.get') && user_can('action.user.update-permissions'))
+        @if(user_can('action.user.update-permissions'))
             <div x-show="active === 'permissions'">
                 <div class="pb-3">
                     <x-input wire:model.debounce.500ms="searchPermission" icon="search"/>
@@ -59,12 +59,12 @@
                 <div class="max-h-96 space-y-3 overflow-y-auto pt-3">
                     <div class="grid grid-cols-6 gap-3">
                         @foreach($permissions as $permission)
-                            <div class="col-span-3 font-medium">{{ __($permission->name) }}</div>
-                            <div class="font-medium">{{ __($permission->guard_name) }}</div>
+                            <div class="col-span-3 font-medium">{{ __($permission['name']) }}</div>
+                            <div class="font-medium">{{ __($permission['guard_name']) }}</div>
                             <x-checkbox readonly :label="__('Role')" disabled wire:model.defer="lockedPermissions"
-                                        :value="$permission->id" :id="uniqid()"/>
+                                        :value="$permission['id']" :id="uniqid()"/>
                             <x-checkbox :label="__('Direct')" wire:model.defer="user.permissions"
-                                        :value="$permission->id" :id="uniqid()"/>
+                                        :value="$permission['id']" :id="uniqid()"/>
                         @endforeach
                     </div>
                 </div>

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Livewire\Order;
 
+use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Http\Requests\UpdateOrderRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
@@ -14,9 +15,11 @@ use FluxErp\Services\PrintService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
+use Livewire\Redirector;
 use WireUi\Traits\Actions;
 use ZipArchive;
 
@@ -183,9 +186,22 @@ class Order extends Component
         $this->skipRender();
     }
 
-    public function delete(): void
+    public function delete(): false|RedirectResponse|Redirector
     {
-        // TODO: Implement delete() method.
+        $this->skipRender();
+
+        try {
+            DeleteOrder::make($this->order)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            return redirect()->route('orders');
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        return false;
     }
 
     public function downloadDocuments()

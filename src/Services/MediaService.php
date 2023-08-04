@@ -3,6 +3,7 @@
 namespace FluxErp\Services;
 
 use FluxErp\Actions\Media\DeleteMedia;
+use FluxErp\Actions\Media\DeleteMediaCollection;
 use FluxErp\Actions\Media\ReplaceMedia;
 use FluxErp\Actions\Media\UpdateMedia;
 use FluxErp\Actions\Media\UploadMedia;
@@ -145,6 +146,23 @@ class MediaService
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
             statusMessage: 'media deleted'
+        );
+    }
+
+    public function deleteCollection(array $data): array
+    {
+        try {
+            DeleteMediaCollection::make($data)->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: 422,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: 'media collection deleted'
         );
     }
 }

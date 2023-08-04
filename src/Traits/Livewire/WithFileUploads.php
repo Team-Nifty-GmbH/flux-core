@@ -2,8 +2,8 @@
 
 namespace FluxErp\Traits\Livewire;
 
+use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Media;
-use FluxErp\Services\MediaService;
 use Illuminate\Support\Str;
 use Livewire\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
@@ -106,13 +106,14 @@ trait WithFileUploads
 
     public function saveFileUploadsToMediaLibrary(string $name, int $modelId = null, string $modelType = null): array
     {
-        $mediaService = new MediaService();
+        $this->prepareForMediaLibrary($name, $modelId, $modelType);
         $response = [];
 
-        $this->prepareForMediaLibrary($name, $modelId, $modelType);
-
         foreach ($this->filesArray as $file) {
-            $response[] = $mediaService->upload($file);
+            $response[] = UploadMedia::make($file)
+                ->checkPermission()
+                ->validate()
+                ->execute();
         }
 
         $this->filesArray = [];

@@ -2,18 +2,21 @@
 
 namespace FluxErp\Http\Livewire\Settings;
 
+use FluxErp\Actions\Permission\UpdateUserPermissions;
+use FluxErp\Actions\Role\UpdateUserRoles;
+use FluxErp\Actions\User\CreateUser;
+use FluxErp\Actions\User\DeleteUser;
+use FluxErp\Actions\User\UpdateUser;
 use FluxErp\Http\Requests\CreateUserRequest;
-use FluxErp\Http\Requests\UpdateUserRequest;
 use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
-use FluxErp\Services\UserService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\Actions;
@@ -32,8 +35,6 @@ class UserEdit extends Component
 
     public array $roles = [];
 
-    public array $guardNames = [];
-
     public bool $isSuperAdmin = false;
 
     protected $listeners = [
@@ -42,7 +43,7 @@ class UserEdit extends Component
         'delete',
     ];
 
-    public function boot(): void
+    public function mount(): void
     {
         $this->user = array_fill_keys(
             array_keys((new CreateUserRequest())->rules()),
@@ -50,22 +51,7 @@ class UserEdit extends Component
         );
         $this->languages = Language::all(['id', 'name'])->toArray();
 
-        // get guards for users
-        $providers = config('auth.providers');
-        $providerNames = [];
-        foreach ($providers as $name => $provider) {
-            if ($provider['driver'] === 'eloquent' && $provider['model'] === User::class) {
-                $providerNames[] = $name;
-            }
-        }
-
-        $this->guardNames = array_keys(
-            collect(config('auth.guards'))
-                ->whereIn('provider', $providerNames)
-                ->toArray()
-        );
-
-        $this->roles = Role::query()->whereIn('guard_name', $this->guardNames)
+        $this->roles = Role::query()
             ->get(['id', 'name', 'guard_name'])
             ->toArray();
     }
@@ -74,8 +60,8 @@ class UserEdit extends Component
     {
         return view('flux::livewire.settings.user-edit',
             [
-                'permissions' => Permission::search($this->searchPermission)
-                    ->whereIn('guard_name', $this->guardNames)
+                'permissions' => Permission::query()
+                    ->when($this->searchPermission, fn ($query) => $query->search($this->searchPermission))
                     ->paginate(pageName: 'permissionsPage'),
             ]
         );
@@ -83,16 +69,12 @@ class UserEdit extends Component
 
     public function getRules(): array
     {
-        $request = ($this->user['id'] ?? false) ? new UpdateUserRequest() : new CreateUserRequest();
-        $rules = $request->getRules($this->user);
+        $request = ($this->user['id'] ?? false) ? UpdateUser::make($this->user) : CreateUser::make($this->user);
+        $rules = $request->getRules();
 
         $rules['password'][] = 'confirmed';
 
-        if ($request instanceof UpdateUserRequest && is_string($rules['email'])) {
-            $rules['email'] .= ',' . $this->user['id'];
-        }
-
-        return Arr::prependKeysWith($rules, 'user.');
+        return $rules;
     }
 
     public function show(int $id = null): void
@@ -128,60 +110,78 @@ class UserEdit extends Component
     public function save(): void
     {
         if (
-            ! user_can(['api.users.{id}.put', 'api.users.post']) ||
-            // Only a Super Admin can set a new Super Admin.
-            (in_array(Role::findByName('Super Admin')->id, $this->user['roles']) &&
-                ! auth()->user()->hasRole('Super Admin')
-            )
+            in_array(Role::findByName('Super Admin')->id, $this->user['roles'])
+            && ! auth()->user()->hasRole('Super Admin')
         ) {
             return;
         }
 
-        $this->validate();
+        $action = ($this->user['id'] ?? false) ? UpdateUser::class : CreateUser::class;
 
-        $service = new UserService();
-        $response = ($this->user['id'] ?? false) ? $service->update($this->user) : $service->create($this->user);
+        try {
+            Validator::make($this->user, $this->getRules())->validate();
 
-        if ($response instanceof Model || $response['status'] < 300) {
-            $this->notification()->success(__('User saved successful.'));
-
-            $user = $response instanceof Model ? $response : User::query()->whereKey($this->user['id'])->first();
-        } else {
-            $this->notification()->error(
-                implode(',', array_keys($response['errors'])),
-                implode(', ', Arr::dot($response['errors']))
-            );
+            $user = $action::make($this->user)
+                ->checkPermission()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
             return;
         }
 
-        if (user_can('api.permissions.give.put')) {
-            $permissions = Permission::query()->whereIntegerInRaw('id', array_map('intval', $this->user['permissions']))->get();
-            $user->syncPermissions($permissions);
-        }
-
-        if (user_can('api.roles.give.put')) {
-            // We have to pass Role instances because spatie checks for the guard which HAS to be the one
-            // the frontend user is using currently.
-            $roles = Role::query()->whereIntegerInRaw('id', array_map('intval', $this->user['roles']))->get();
-            $user->syncRoles($roles);
-        }
-
-        $this->skipRender();
+        $this->notification()->success(__('User saved successful.'));
         $this->emitUp('closeModal');
         $this->emitTo('data-tables.user-list', 'loadData');
-    }
 
-    public function delete(): void
-    {
-        if (! user_can('api.users.{id}.delete')) {
-            return;
+        try {
+            UpdateUserPermissions::make([
+                'user_id' => $this->user['id'],
+                'permissions' => array_map('intval', $this->user['permissions'] ?? []),
+                'sync' => true,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
         }
 
-        (new UserService())->delete($this->user['id']);
+        try {
+            UpdateUserRoles::make([
+                'user_id' => $this->user['id'],
+                'roles' => array_map('intval', $this->user['roles']),
+                'sync' => true,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
 
+        $this->user = $user->load(['roles', 'permissions'])->toArray();
+    }
+
+    public function delete(): bool
+    {
         $this->skipRender();
-        $this->emitUp('closeModal');
+
+        try {
+            DeleteUser::make($this->user)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            $this->skipRender();
+            $this->emitUp('closeModal');
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return true;
     }
 
     public function updatedUserRoles(): void

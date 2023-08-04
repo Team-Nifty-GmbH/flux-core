@@ -12,7 +12,16 @@ class UpdateUser extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateUserRequest())->rules();
+
+        $rules = (new UpdateUserRequest())->rules();
+
+        $this->rules = array_merge(
+            $rules,
+            [
+                'user_code' => $rules['user_code'] . ',' . $this->data['id'],
+                'email' => $rules['email'] . ',' . $this->data['id'],
+            ]
+        );
     }
 
     public static function models(): array
