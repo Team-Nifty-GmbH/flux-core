@@ -7,6 +7,7 @@ use FluxErp\Actions\Role\DeleteRole;
 use FluxErp\Actions\Role\UpdateRole;
 use FluxErp\Actions\Role\UpdateRolePermissions;
 use FluxErp\Actions\Role\UpdateRoleUsers;
+use FluxErp\Actions\Role\UpdateUserRoles;
 use FluxErp\Helpers\ResponseHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
@@ -63,6 +64,11 @@ class RoleService
     public function editRoleUsers(array $data, bool $assign): array
     {
         return UpdateRoleUsers::make(array_merge($data, ['assign' => $assign]))->execute();
+    }
+
+    public function syncUserRoles(array $data)
+    {
+        return UpdateUserRoles::make($data)->execute();
     }
 
     public function delete(string $id): array

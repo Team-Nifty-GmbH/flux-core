@@ -31,6 +31,12 @@ class UpdateUserPermissions extends FluxAction
             ->whereKey($this->data['user_id'])
             ->first();
 
+        if ($this->data['sync']) {
+            $user->syncPermissions($this->data['permissions']);
+
+            return $user->permissions->toArray();
+        }
+
         if ($this->data['give']) {
             $user->givePermissionTo($this->data['permissions']);
         } else {

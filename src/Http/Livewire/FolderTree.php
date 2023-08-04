@@ -2,15 +2,14 @@
 
 namespace FluxErp\Http\Livewire;
 
-use FluxErp\Http\Requests\UpdateMediaRequest;
-use FluxErp\Services\MediaService;
+use FluxErp\Actions\Media\DeleteMedia;
+use FluxErp\Actions\Media\DeleteMediaCollection;
+use FluxErp\Actions\Media\UpdateMedia;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -41,7 +40,11 @@ class FolderTree extends Component
 
     public function updatedFiles(): void
     {
-        if (! Auth::user()->can('api.media.post')) {
+        try {
+            UpdateMedia::make()->checkPermission();
+        } catch (\Throwable $e) {
+            exception_to_notifications($e, $this);
+
             return;
         }
 
@@ -78,7 +81,11 @@ class FolderTree extends Component
 
     public function save(array $item): bool
     {
-        if (! Auth::user()->can('api.media.put')) {
+        try {
+            UpdateMedia::make()->checkPermission();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
             return false;
         }
 
@@ -113,33 +120,45 @@ class FolderTree extends Component
 
     public function delete(\FluxErp\Models\Media $media): bool
     {
-        if (! Auth::user()->can('api.media.{id}.delete')) {
+        try {
+            DeleteMedia::make($media->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
             return false;
         }
 
-        return $media->delete();
+        return true;
     }
 
     public function deleteCollection(string $collection): void
     {
-        if (! Auth::user()->can('api.media.{id}.delete')) {
-            return;
+        try {
+            DeleteMediaCollection::make([
+                'model_type' => $this->modelType,
+                'model_id' => $this->modelId,
+                'collection_name' => $collection,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
         }
-
-        Media::query()
-            ->where('model_type', $this->modelType)
-            ->where('model_id', $this->modelId)
-            ->where('collection_name', 'LIKE', $collection . '%')
-            ->delete();
     }
 
     private function saveFile(array $media): bool
     {
-        $validator = Validator::make($media, (new UpdateMediaRequest())->rules());
-        $validated = $validator->validate();
+        try {
+            $response = UpdateMedia::make($media)->checkPermission()->validate()->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
-        $service = new MediaService();
-        $response = $service->update($validated);
+            return false;
+        }
 
         $this->notification()->success(__('File saved!'));
 

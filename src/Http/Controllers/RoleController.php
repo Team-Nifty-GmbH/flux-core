@@ -6,6 +6,7 @@ use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\CreateRoleRequest;
 use FluxErp\Http\Requests\EditRolePermissionRequest;
 use FluxErp\Http\Requests\EditRoleUserRequest;
+use FluxErp\Http\Requests\EditUserRoleRequest;
 use FluxErp\Http\Requests\UpdateRoleRequest;
 use FluxErp\Models\User;
 use FluxErp\Services\RoleService;
@@ -75,6 +76,17 @@ class RoleController extends BaseController
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
             data: $permissions,
+            statusMessage: 'role permissions updated'
+        );
+    }
+
+    public function syncUsers(EditUserRoleRequest $request, RoleService $roleService): JsonResponse
+    {
+        $roles = $roleService->syncUserRoles($request->validated());
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $roles,
             statusMessage: 'role permissions updated'
         );
     }

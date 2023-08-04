@@ -214,6 +214,7 @@ Route::group(['middleware' => ['auth:sanctum', 'abilities:user', 'localization']
     Route::post('/media', [MediaController::class, 'upload']);
     Route::put('/media', [MediaController::class, 'update']);
     Route::delete('/media/{id}', [MediaController::class, 'delete']);
+    Route::delete('/media-collection/', [MediaController::class, 'deleteCollection']);
 
     //NotificationSettings
     Route::put('/notifications', [NotificationSettingsController::class, 'update']);
@@ -254,6 +255,7 @@ Route::group(['middleware' => ['auth:sanctum', 'abilities:user', 'localization']
     Route::post('/permissions', [PermissionController::class, 'create']);
     Route::put('/permissions/give', [PermissionController::class, 'give']);
     Route::put('/permissions/revoke', [PermissionController::class, 'revoke']);
+    Route::put('/permissions/sync', [PermissionController::class, 'sync']);
     Route::delete('/permissions/{id}', [PermissionController::class, 'delete']);
 
     //Presentations
@@ -351,6 +353,7 @@ Route::group(['middleware' => ['auth:sanctum', 'abilities:user', 'localization']
     Route::put('/roles/revoke', [RoleController::class, 'revoke']);
     Route::put('/roles/users/assign', [RoleController::class, 'assignUsers']);
     Route::put('/roles/users/revoke', [RoleController::class, 'revokeUsers']);
+    Route::put('/roles/users/sync', [RoleController::class, 'syncUsers']);
     Route::delete('/roles/{id}', [RoleController::class, 'delete']);
 
     //SepaMandates

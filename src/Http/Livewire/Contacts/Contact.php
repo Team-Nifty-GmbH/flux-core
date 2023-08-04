@@ -2,24 +2,21 @@
 
 namespace FluxErp\Http\Livewire\Contacts;
 
+use FluxErp\Actions\Address\CreateAddress;
+use FluxErp\Actions\Contact\CreateContact;
+use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Actions\Contact\UpdateContact;
-use FluxErp\Http\Requests\CreateAddressRequest;
-use FluxErp\Http\Requests\CreateContactRequest;
-use FluxErp\Http\Requests\UpdateContactRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact as ContactModel;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Services\AddressService;
-use FluxErp\Services\ContactService;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use WireUi\Traits\Actions;
@@ -71,21 +68,6 @@ class Contact extends Component
             'echo-private:' . $channel . '.' . $this->contactId . ',.ContactUpdated' => 'contactUpdatedEvent',
             'echo-private:' . $channel . ',.ContactDeleted' => 'contactDeletedEvent',
         ]);
-    }
-
-    protected function rules(): array
-    {
-        $service = $this->address === [] ? new UpdateContactRequest() : new CreateContactRequest();
-
-        $rules = array_merge(
-            Arr::prependKeysWith($service->rules(), 'newContact.'),
-            Arr::prependKeysWith((new CreateAddressRequest())->rules(), 'newContact.address.')
-        );
-
-        unset($rules['newContact.address.client_id']);
-        unset($rules['newContact.address.contact_id']);
-
-        return $rules;
     }
 
     public function mount(int $id = null): void
@@ -151,53 +133,54 @@ class Contact extends Component
      */
     public function save()
     {
-        $validated = $this->validate()['newContact'];
+        $action = ($this->newContact['address']['id'] ?? false) ? UpdateContact::class : CreateContact::class;
 
-        $function = ($this->newContact['address']['id'] ?? false) ? 'update' : 'create';
-        if (! Auth::user()->can($function === 'update' ? 'api.contacts.put' : 'api.contacts.post')) {
-            $this->notification()->error(__('You dont have the permission to do that.'));
-        }
-
-        $address = $validated['address'];
-        unset($validated['address']);
-
-        $contact = $validated;
-
-        $contactService = new ContactService();
-
-        $response = $contactService->$function($contact);
-        if ($response['status'] >= 400) {
-            $this->notification()->error(
-                title: __('Contact could not be saved'),
-                description: implode(', ', Arr::flatten($response['errors']))
-            );
-        } else {
-            $address['contact_id'] = $response->id;
-            $address['client_id'] = $response->client_id;
-            (new AddressService())->create($address);
-
-            $this->newContactModal = false;
-            $this->notification()->success(__('Contact saved'));
-
-            return redirect(route('contacts.id?', ['id' => $response->id]));
-        }
-    }
-
-    /**
-     * @return Application|\Illuminate\Http\RedirectResponse|Redirector|void
-     */
-    public function delete()
-    {
-        if (! user_can('api.contacts.{id}.delete')) {
-            $this->notification()->error(__('You dont have the permission to do that.'));
+        try {
+            $contact = $action::make($this->newContact)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
             return;
         }
 
-        $contactService = new ContactService();
-        $contactService->delete($this->contact['id']);
+        $this->newContact['address']['contact_id'] = $contact->id;
+        $this->newContact['address']['client_id'] = $contact->client_id;
 
-        return redirect(route('contacts'));
+        try {
+            CreateAddress::make($this->newContact['address'])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+            $contact->forceDelete();
+
+            return;
+        }
+
+        $this->notification()->success(__('Contact saved'));
+
+        return redirect(route('contacts.id?', ['id' => $contact->id]));
+    }
+
+    public function delete(): false|RedirectResponse|Redirector
+    {
+        $this->skipRender();
+        try {
+            DeleteContact::make($this->contact)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            return redirect()->route('contacts');
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        return false;
     }
 
     public function contactUpdatedEvent(array $data): void

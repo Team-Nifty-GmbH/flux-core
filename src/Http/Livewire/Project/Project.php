@@ -2,17 +2,18 @@
 
 namespace FluxErp\Http\Livewire\Project;
 
-use FluxErp\Http\Requests\CreateProjectRequest;
-use FluxErp\Http\Requests\UpdateProjectRequest;
+use FluxErp\Actions\Project\CreateProject;
+use FluxErp\Actions\Project\DeleteProject;
+use FluxErp\Actions\Project\UpdateProject;
 use FluxErp\Models\Category;
 use FluxErp\Models\ProjectTask;
-use FluxErp\Services\ProjectService;
 use FluxErp\Traits\Livewire\HasAdditionalColumns;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\RedirectResponse;
 use Livewire\Component;
+use Livewire\Redirector;
 use WireUi\Traits\Actions;
 
 class Project extends Component
@@ -61,43 +62,46 @@ class Project extends Component
         return view('flux::livewire.project.project', ['tabs' => $tabs]);
     }
 
-    public function save(): array|true
+    public function save(): array|bool
     {
-        $validator = Validator::make(
-            $this->project,
-            ($this->project['id'] ?? false)
-                ? (new UpdateProjectRequest())->getRules($this->project)
-                : (new CreateProjectRequest())->getRules($this->project)
-        );
-        $validated = $validator->validate();
+        $action = ($this->project['id'] ?? false) ? UpdateProject::class : CreateProject::class;
 
-        $service = new ProjectService();
-        if ($this->project['id'] ?? false) {
-            $response = $service->update($validated);
-        } else {
-            $response = $service->create($validated);
+        try {
+            $response = $action::make($this->project)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
-            return $response['data']->toArray();
+            return false;
         }
 
-        if ($response instanceof \FluxErp\Models\Project || $response['status'] === 201) {
-            $this->notification()->success(__('Project task saved'));
-        } else {
-            $this->notification()->error(__('Project task could not be saved'));
-        }
-
+        $this->notification()->success(__('Project task saved'));
         $this->skipRender();
+
+        if ($action === CreateProject::class) {
+            return $response->toArray();
+        }
 
         return true;
     }
 
-    public function delete(): bool
+    public function delete(): false|RedirectResponse|Redirector
     {
-        $service = new ProjectService();
+        $this->skipRender();
+        try {
+            DeleteProject::make($this->project)
+                ->checkPermission()
+                ->validate()
+                ->execute();
 
-        $response = $service->delete($this->project['id']);
+            return redirect()->route('projects');
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
 
-        return ($response['status'] ?? false) === 204;
+        return false;
     }
 
     public function getAdditionalColumns(): array

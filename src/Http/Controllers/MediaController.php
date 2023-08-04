@@ -3,6 +3,7 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
+use FluxErp\Http\Requests\DeleteMediaCollectionRequest;
 use FluxErp\Http\Requests\DownloadPublicMediaRequest;
 use FluxErp\Http\Requests\ReplaceMediaRequest;
 use FluxErp\Http\Requests\UpdateMediaRequest;
@@ -65,6 +66,13 @@ class MediaController extends Controller
     public function delete(string $id, MediaService $mediaService): JsonResponse
     {
         $response = $mediaService->delete($id);
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
+    public function deleteCollection(DeleteMediaCollectionRequest $request, MediaService $mediaService): JsonResponse
+    {
+        $response = $mediaService->deleteCollection($request->validated());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
