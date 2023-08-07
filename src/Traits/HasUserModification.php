@@ -11,7 +11,7 @@ trait HasUserModification
 {
     use LogsActivity;
 
-    public function getActivitylogOptions(): LogOptions
+    public function getActivityLogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->useLogName('model_events')

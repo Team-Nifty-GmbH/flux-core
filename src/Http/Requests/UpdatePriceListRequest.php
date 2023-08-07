@@ -21,9 +21,13 @@ class UpdatePriceListRequest extends BaseFormRequest
                 (new ExistsWithIgnore('price_lists', 'id'))->whereNull('deleted_at'),
             ],
             'name' => 'sometimes|required|string',
-            'price_list_code' => 'sometimes|required|string|unique:price_lists,price_list_code',
+            'price_list_code' => 'sometimes|required|string',
             'is_net' => 'sometimes|boolean',
             'is_default' => 'boolean',
+
+            'discount' => 'exclude_without:parent_id|exclude_if:parent_id,NULL|array',
+            'discount.discount' => 'present|numeric|nullable',
+            'discount.is_percentage' => 'boolean',
         ];
     }
 }

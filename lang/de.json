@@ -550,5 +550,18 @@
     "Translations": "Übersetzungen",
     "Users": "Benutzer",
     "Customer Portal": "Kundenportal",
-    "Currencies": "Währungen"
+    "Currencies": "Währungen",
+    "Price Lists": "Preislisten",
+    "A list of all the price lists": "Liste aller Preislisten",
+    "New Price List": "Neue Preisliste",
+    "Edit Price List": "Preisliste bearbeiten",
+    "Name": "Name",
+    "Price List Code": "Preislisten-Code",
+    "Is Net": "Netto",
+    "Is Default": "Standard",
+    "Is Percentage": "Prozent",
+    "Parent": "Übergeordnet",
+    "Product category discounts": "Produktkategorie Rabatte",
+    "Category": "Kategorie",
+    "Discount": "Rabatt"
 }

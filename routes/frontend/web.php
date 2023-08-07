@@ -99,7 +99,7 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/notifications', Notifications::class)->name('notifications')->registersMenuItem();
             Route::get('/order-types', OrderTypes::class)->name('order-types')->registersMenuItem();
             Route::get('/permissions', Permissions::class)->name('permissions')->registersMenuItem();
-            Route::get('/price-lists', PriceLists::class)->name('price-lists')->registerMenuItem();
+            Route::get('/price-lists', PriceLists::class)->name('price-lists')->registersMenuItem();
             Route::get('/ticket-types', TicketTypes::class)->name('ticket-types')->registersMenuItem();
             Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
             Route::get('/users', Users::class)->name('users')->registersMenuItem();

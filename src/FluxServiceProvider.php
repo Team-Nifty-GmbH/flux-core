@@ -23,6 +23,7 @@ use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Menu\MenuManager;
 use FluxErp\Models\Address;
+use FluxErp\Models\Category;
 use FluxErp\Models\Order;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
@@ -293,6 +294,11 @@ class FluxServiceProvider extends ServiceProvider
                 User::class => [
                     'filterableAttributes' => [
                         'is_active',
+                    ],
+                ],
+                Category::class => [
+                    'filterableAttributes' => [
+                        'model_type',
                     ],
                 ],
             ],

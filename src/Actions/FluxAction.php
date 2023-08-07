@@ -59,11 +59,16 @@ abstract class FluxAction
         $this->setData($data[0] ?? [], $data[1] ?? false);
     }
 
-    public function checkPermission(): static
+    public static function canPerformAction(): void
     {
         if (! auth()->user()->can('action.' . static::name())) {
             throw UnauthorizedException::forPermissions(['action.' . static::name()]);
         }
+    }
+
+    public function checkPermission(): static
+    {
+        static::canPerformAction();
 
         return $this;
     }

@@ -17,6 +17,10 @@ class CreatePriceListRequest extends BaseFormRequest
             'price_list_code' => 'required|string|unique:price_lists,price_list_code',
             'is_net' => 'required|boolean',
             'is_default' => 'boolean',
+
+            'discount' => 'exclude_without:parent_id|exclude_if:parent_id,NULL|array',
+            'discount.discount' => 'present|numeric|nullable',
+            'discount.is_percentage' => 'required_with:discount.discount|boolean',
         ];
     }
 }

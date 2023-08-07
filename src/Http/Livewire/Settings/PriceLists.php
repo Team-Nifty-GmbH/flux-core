@@ -2,17 +2,16 @@
 
 namespace FluxErp\Http\Livewire\Settings;
 
-use FluxErp\Http\Requests\CreateDiscountRequest;
-use FluxErp\Http\Requests\CreatePriceListRequest;
-use FluxErp\Http\Requests\UpdatePriceListRequest;
-use FluxErp\Models\Country;
-use FluxErp\Models\Discount;
+use FluxErp\Actions\Discount\CreateDiscount;
+use FluxErp\Actions\Discount\UpdateDiscount;
+use FluxErp\Actions\PriceList\CreatePriceList;
+use FluxErp\Actions\PriceList\DeletePriceList;
+use FluxErp\Actions\PriceList\UpdatePriceList;
+use FluxErp\Models\Category;
 use FluxErp\Models\PriceList;
-use FluxErp\Services\DiscountService;
-use FluxErp\Services\PriceListService;
+use FluxErp\Models\Product;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -25,59 +24,70 @@ class PriceLists extends Component
         'parent_id' => null,
         'price_list_code' => null,
         'is_net' => false,
-        'is_default' => false
+        'is_default' => false,
+        'discount' => [
+            'discount' => null,
+            'is_percentage' => true,
+        ],
     ];
 
-    public array $discount = [
+    public array $priceLists;
+
+    public array $discountedCategories = [];
+
+    public array $newCategoryDiscount = [
+        'category_id' => null,
         'discount' => null,
-        'is_percentage' => false
+        'is_percentage' => true,
     ];
-
-    public array $priceLists = [];
 
     public bool $editModal = false;
 
-    public function getRules(): array
-    {
-        $priceListRequest = ($this->selectedPriceList['id'] ?? false)
-            ? new UpdatePriceListRequest()
-            : new CreatePriceListRequest();
-
-        $rules = Arr::prependKeysWith($priceListRequest->getRules($this->selectedPriceList), 'selectedPriceList.');
-
-        if (!empty($this->discount['discount'])) {
-            $discountRequest = new CreateDiscountRequest();
-            $discountRules = Arr::prependKeysWith($discountRequest->getRules($this->discount), 'discount.');
-            $rules = array_merge($rules, $discountRules);
-        }
-
-        return $rules;
-    }
-
     public function mount(): void
     {
-        $this->priceLists = PriceList::query()->get()->toArray();
+        $this->priceLists = PriceList::query()
+            ->get()
+            ->toArray();
     }
 
-    public function render(): View
+    public function showEditModal(int $priceListId = null): void
     {
-        return view('flux::livewire.settings.price-lists');
-    }
+        $priceList = PriceList::query()
+            ->whereKey($priceListId)
+            ->with('discount')
+            ->first();
 
-    public function showEditModal(int|null $priceListId = null): void
-    {
-        $this->selectedPriceList = PriceList::query()->whereKey($priceListId)->first()?->toArray() ?: [
+        $this->selectedPriceList = $priceList?->toArray() ?: [
             'name' => '',
             'parent_id' => null,
             'price_list_code' => null,
             'is_net' => false,
-            'is_default' => false
+            'is_default' => false,
+            'discount' => [
+                'discount' => null,
+                'is_percentage' => true,
+            ],
         ];
 
-        $this->discount = [
-            'discount' => null,
-            'is_percentage' => false
-        ];
+        if (is_null($this->selectedPriceList['discount'])) {
+            $this->selectedPriceList['discount'] = [
+                'discount' => null,
+                'is_percentage' => true,
+            ];
+        }
+
+        if ($priceList) {
+            $this->discountedCategories = $priceList->discountedCategories()
+                ->where('model_type', Product::class)
+                ->orderBy('sort_number', 'DESC')
+                ->with([
+                    'discounts' =>
+                        fn ($query) => $query->where('category_price_list.price_list_id', $priceList->id)
+                            ->select(['id', 'discount', 'is_percentage']),
+                ])
+                ->get()
+                ->toArray();
+        }
 
         $this->editModal = true;
         $this->resetErrorBag();
@@ -85,47 +95,130 @@ class PriceLists extends Component
 
     public function save(): void
     {
-        if (! user_can('api.price-lists.post')) {
+        $action = ($this->selectedPriceList['id'] ?? false) ? UpdatePriceList::class : CreatePriceList::class;
+
+        try {
+            $priceList = $action::make($this->selectedPriceList)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
             return;
         }
 
-        $validated = $this->validate();
+        // Create product category discounts
+        $categories = $priceList->discountedCategories()
+            ->where('model_type', Product::class)
+            ->orderBy('sort_number', 'DESC')
+            ->with([
+                'discounts' =>
+                    fn ($query) => $query->where('category_price_list.price_list_id', $priceList->id)
+                        ->select(['id', 'discount', 'is_percentage']),
+            ])
+            ->get()
+            ->toArray();
 
-        $priceList = PriceList::query()->whereKey($this->selectedPriceList['id'] ?? false)->firstOrNew();
+        $categoryIds = array_column($categories, 'id');
 
-        $function = $priceList->exists ? 'update' : 'create';
+        foreach ($this->discountedCategories as $discountedCategory) {
+            // Update category discount if category already discounted else create category discount
+            if (($index = array_search($discountedCategory['id'], $categoryIds)) !== false) {
+                try {
+                    UpdateDiscount::make($discountedCategory['discounts'][0])->validate()->execute();
+                } catch (ValidationException) {
+                    continue;
+                }
 
-        $response = (new PriceListService())->{$function}($validated['selectedPriceList']);
+                $categories[$index]['exists'] = true;
+            } else {
+                try {
+                    $discount = CreateDiscount::make(
+                        array_merge(
+                            $discountedCategory['discounts'][0],
+                            [
+                                'model_type' => Category::class,
+                                'model_id' => $discountedCategory['id'],
+                            ]
+                        )
+                    )
+                        ->validate()
+                        ->execute();
+                } catch (ValidationException) {
+                    continue;
+                }
 
-        if (($response['status'] ?? false) === 200 || $response instanceof Model) {
-            if (!empty($validated['discount']['discount'])) {
-
-                $discount = new Discount($validated['discount']);
-
-                $discount->model_type = PriceList::class;
-
-                $discount->model_id = $response->id;
-
-                $discountService = new DiscountService();
-
-                $discountService->create($discount->toArray());
+                $priceList->discountedCategories()->attach($discountedCategory['id'], ['discount_id' => $discount->id]);
+                $categories[] = array_merge($discountedCategory, ['exists' => true]);
             }
-
-            $this->notification()->success('Successfully saved');
-            $this->editModal = false;
         }
 
-        $this->mount();
+        // Delete removed discounted categories
+        if ($removed = array_filter($categories, fn ($item) => ! ($item['exists'] ?? false))) {
+            $priceList->discountedCategories()->detach(array_column($removed, 'id'));
+        }
+
+        array_unshift($this->priceLists, $priceList->toArray());
+
+        $this->notification()->success(__('Successfully saved'));
+        $this->editModal = false;
+
+        $this->skipRender();
     }
 
     public function delete(): void
     {
-        if (! user_can('api.price-lists.{id}.delete')) {
+        try {
+            DeletePriceList::make(['id' => $this->selectedPriceList['id']])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
             return;
         }
 
-        $collection = collect($this->priceLists);
-        Country::query()->whereKey($this->selectedPriceList['id'])->first()->delete();
-        $this->priceLists = $collection->whereNotIn('id', [$this->selectedPriceList['id']])->toArray();
+        $index = array_search($this->selectedPriceList['id'], array_column($this->priceLists, 'id'));
+        unset($this->priceLists[$index]);
+    }
+
+    public function addCategoryDiscount(): void
+    {
+        $this->skipRender();
+
+        if ($this->newCategoryDiscount['category_id'] === null || ! $this->newCategoryDiscount['discount']) {
+            return;
+        }
+
+        $this->discountedCategories[] = [
+            'id' => $this->newCategoryDiscount['category_id'],
+            'name' => Category::query()
+                ->whereKey($this->newCategoryDiscount['category_id'])
+                ->first(['name'])
+                ->name,
+            'discounts' => [
+                $this->newCategoryDiscount,
+            ],
+        ];
+
+        $this->newCategoryDiscount = [
+            'category_id' => null,
+            'discount' => null,
+            'is_percentage' => true,
+        ];
+    }
+
+    public function removeCategoryDiscount(int $index): void
+    {
+        unset($this->discountedCategories[$index]);
+
+        $this->skipRender();
+    }
+
+    public function render(): View
+    {
+        return view('flux::livewire.settings.price-lists');
     }
 }
