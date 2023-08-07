@@ -29,4 +29,4 @@ Route::middleware(['auth:web'])->group(function () {
 
 This will add a new route `/my-module` with the livewire component `\App\Http\Livewire\MyModule::class` and register a new menu item with the name `my-module` and the title `My module`.
 
-A new Permission will automatically be created with the name `my-module` and the title `My module` after running `php artisan init:permissions`.
+A new permission will automatically be created with the name `my-module` and the title `My module` after running `php artisan init:permissions`.

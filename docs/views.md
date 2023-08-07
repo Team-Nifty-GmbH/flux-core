@@ -28,7 +28,7 @@ If you want to extend the section rather than replace it you can use the `@paren
 
 ## Livewire components
 
-If you want to replace a whole livewire component you can create a news component with the same name in your Project.
+If you want to replace a whole livewire component you can create a news component with the same name in your project.
 To do so just use the default artisan command:
 
 ```bash

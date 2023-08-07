@@ -53,7 +53,6 @@ class UpdateOrderPositionRequest extends BaseFormRequest
                             && $data->get('is_bundle_position', false) === false,
                         'exclude'
                     ),
-                    'integer',
                     'nullable',
                     'integer',
                     (new ExistsWithIgnore('products', 'id'))->whereNull('deleted_at'),
