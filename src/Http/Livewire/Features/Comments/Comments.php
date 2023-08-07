@@ -114,8 +114,8 @@ class Comments extends Component
         ];
 
         try {
-            $comment = CreateComment::make($comment)->validate()->execute();
-        } catch (ValidationException $e) {
+            $comment = CreateComment::make($comment)->checkPermission()->validate()->execute();
+        } catch (\Exception $e) {
             exception_to_notifications($e, $this);
 
             return;
