@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Calendar;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Calendar;
 
-class DeleteCalendar extends BaseAction
+class DeleteCalendar extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:calendars,id',
         ];
@@ -20,7 +20,7 @@ class DeleteCalendar extends BaseAction
         return [Calendar::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return Calendar::query()
             ->whereKey($this->data['id'])

@@ -57,7 +57,7 @@ class CommentCreatedNotification extends Notification implements ShouldQueue
      */
     public function toArray($notifiable): array
     {
-        $user = $this->model->user_created;
+        $user = $this->model->createdBy;
         $morph = $this->model->model;
 
         $accept = [];
@@ -74,7 +74,7 @@ class CommentCreatedNotification extends Notification implements ShouldQueue
             [
                 'title' => __(
                     ':username commented on your post',
-                    ['username' => $user?->name],
+                    ['username' => $user?->getLabel()],
                 ),
                 'description' => $this->model->comment,
                 'icon' => 'chat',

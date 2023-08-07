@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\SerialNumber;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\SerialNumber;
 
-class DeleteSerialNumber extends BaseAction
+class DeleteSerialNumber extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:serial_numbers,id',
         ];
@@ -20,7 +20,7 @@ class DeleteSerialNumber extends BaseAction
         return [SerialNumber::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return SerialNumber::query()
             ->whereKey($this->data['id'])

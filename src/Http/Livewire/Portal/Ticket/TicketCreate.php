@@ -2,11 +2,11 @@
 
 namespace FluxErp\Http\Livewire\Portal\Ticket;
 
+use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Http\Requests\CreateTicketRequest;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
-use FluxErp\Services\TicketService;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -96,7 +96,7 @@ class TicketCreate extends Component
         $this->skipRender();
     }
 
-    public function save(): true
+    public function save(): bool
     {
         $this->ticket = array_merge($this->ticket, [
             'authenticatable_type' => Auth::user()->getMorphClass(),
@@ -104,13 +104,21 @@ class TicketCreate extends Component
             'ticket_type_id' => $this->ticketTypeId,
         ]);
 
-        $this->resetErrorBag();
-        $this->validate();
+        try {
+            $ticket = CreateTicket::make($this->ticket)
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
-        $ticketService = new TicketService();
-        $ticket = $ticketService->create($this->ticket);
+            return false;
+        }
 
-        $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id);
+        try {
+            $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id);
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
 
         $this->notification()->success(__('Ticket created…'));
 

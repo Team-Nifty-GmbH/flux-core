@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\WorkTime;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\WorkTime;
 use Illuminate\Validation\ValidationException;
 
-class DeleteWorkTime extends BaseAction
+class DeleteWorkTime extends FluxAction
 {
     public function __construct(array $data)
     {
@@ -21,7 +21,7 @@ class DeleteWorkTime extends BaseAction
         return [WorkTime::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return WorkTime::query()
             ->whereKey($this->data['id'])
@@ -29,9 +29,9 @@ class DeleteWorkTime extends BaseAction
             ->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (WorkTime::query()
             ->whereKey($this->data['id'])
@@ -42,7 +42,5 @@ class DeleteWorkTime extends BaseAction
                 'order_position' => [__('The given work time has an order position')],
             ])->errorBag('deleteWorkTime');
         }
-
-        return $this;
     }
 }

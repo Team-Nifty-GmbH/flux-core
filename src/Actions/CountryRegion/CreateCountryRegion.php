@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\CountryRegion;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCountryRegionRequest;
 use FluxErp\Models\CountryRegion;
 use Illuminate\Support\Facades\Validator;
 
-class CreateCountryRegion extends BaseAction
+class CreateCountryRegion extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateCountryRegionRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateCountryRegion extends BaseAction
         return [CountryRegion::class];
     }
 
-    public function execute(): CountryRegion
+    public function performAction(): CountryRegion
     {
         $countryRegion = new CountryRegion($this->data);
         $countryRegion->save();
@@ -28,13 +28,11 @@ class CreateCountryRegion extends BaseAction
         return $countryRegion->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new CountryRegion());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

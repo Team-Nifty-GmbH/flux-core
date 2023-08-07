@@ -2,7 +2,7 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('flux::nav.settings.clients') }}</h1>
+                <h1 class="text-xl font-semibold">{{ __('Clients') }}</h1>
                 <div class="mt-2 text-sm text-gray-300">{{__('Here you can manage your clients...')}}</div>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -75,7 +75,7 @@
             <div x-data="{index: @entangle('index').defer}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
-                    @if(user_can('api.clients.{id}.delete'))
+                    @if(user_can('action.client.delete'))
                         <x-button x-bind:class="index > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
                                   @click="window.$wireui.confirmDialog({
                                                             title: '{{ __('Delete client') }}',

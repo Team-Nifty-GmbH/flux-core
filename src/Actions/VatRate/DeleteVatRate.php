@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\VatRate;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\VatRate;
 
-class DeleteVatRate extends BaseAction
+class DeleteVatRate extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:vat_rates,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteVatRate extends BaseAction
         return [VatRate::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return VatRate::query()
             ->whereKey($this->data['id'])

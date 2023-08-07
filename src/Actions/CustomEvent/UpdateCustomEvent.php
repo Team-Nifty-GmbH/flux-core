@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\CustomEvent;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateCustomEventRequest;
 use FluxErp\Models\CustomEvent;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateCustomEvent extends BaseAction
+class UpdateCustomEvent extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateCustomEventRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateCustomEvent extends BaseAction
         return [CustomEvent::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $customEvent = CustomEvent::query()
             ->whereKey($this->data['id'])

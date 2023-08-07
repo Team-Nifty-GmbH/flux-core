@@ -2,7 +2,7 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('flux::nav.settings.additional-columns') }}</h1>
+                <h1 class="text-xl font-semibold">{{ __('Additional Columns') }}</h1>
                 <div class="mt-2 text-sm text-gray-300">{{__('Here you can manage all additional columns...')}}</div>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -74,9 +74,9 @@
             <div x-data="{index: @entangle('index').defer}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
-                    @if(user_can('api.additional-columns.{id}.delete'))
+                    @if(user_can('action.additional-column.delete'))
                         <x-button x-bind:class="index > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
-                                  @click="window.$wireui.confirmDialog({
+                                  x-on:click="window.$wireui.confirmDialog({
                                                             title: '{{ __('Delete additional column') }}',
                                                             description: '{{ __('Do you really want to delete this additional column?') }}',
                                                             icon: 'error',

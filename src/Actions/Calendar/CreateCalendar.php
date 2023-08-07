@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\Calendar;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCalendarRequest;
 use FluxErp\Models\Calendar;
 
-class CreateCalendar extends BaseAction
+class CreateCalendar extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateCalendarRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateCalendar extends BaseAction
         return [Calendar::class];
     }
 
-    public function execute(): Calendar
+    public function performAction(): Calendar
     {
         $calendar = new Calendar($this->data);
         $calendar->save();

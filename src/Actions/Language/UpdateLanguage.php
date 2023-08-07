@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\Language;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateLanguageRequest;
 use FluxErp\Models\Language;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateLanguage extends BaseAction
+class UpdateLanguage extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateLanguageRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateLanguage extends BaseAction
         return [Language::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $language = Language::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdateLanguage extends BaseAction
         return $language->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Language());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

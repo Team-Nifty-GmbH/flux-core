@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\Unit;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateUnitRequest;
 use FluxErp\Models\Unit;
 
-class CreateUnit extends BaseAction
+class CreateUnit extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateUnitRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateUnit extends BaseAction
         return [Unit::class];
     }
 
-    public function execute(): Unit
+    public function performAction(): Unit
     {
         $unit = new Unit($this->data);
         $unit->save();

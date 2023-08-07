@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\Price;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreatePriceRequest;
 use FluxErp\Models\Price;
 
-class CreatePrice extends BaseAction
+class CreatePrice extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreatePriceRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreatePrice extends BaseAction
         return [Price::class];
     }
 
-    public function execute(): Price
+    public function performAction(): Price
     {
         $price = new Price($this->data);
         $price->save();

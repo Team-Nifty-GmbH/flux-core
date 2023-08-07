@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\PaymentType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\PaymentType;
 
-class DeletePaymentType extends BaseAction
+class DeletePaymentType extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:payment_types,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeletePaymentType extends BaseAction
         return [PaymentType::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return PaymentType::query()
             ->whereKey($this->data['id'])

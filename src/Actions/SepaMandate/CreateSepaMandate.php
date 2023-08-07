@@ -2,18 +2,18 @@
 
 namespace FluxErp\Actions\SepaMandate;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateSepaMandateRequest;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
 use FluxErp\Models\SepaMandate;
 use Illuminate\Validation\ValidationException;
 
-class CreateSepaMandate extends BaseAction
+class CreateSepaMandate extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateSepaMandateRequest())->rules();
     }
 
@@ -22,7 +22,7 @@ class CreateSepaMandate extends BaseAction
         return [SepaMandate::class];
     }
 
-    public function execute(): SepaMandate
+    public function performAction(): SepaMandate
     {
         $sepaMandate = new SepaMandate($this->data);
         $sepaMandate->save();
@@ -30,9 +30,9 @@ class CreateSepaMandate extends BaseAction
         return $sepaMandate->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         $clientContactExists = Contact::query()
             ->whereKey($this->data['contact_id'])
@@ -56,7 +56,5 @@ class CreateSepaMandate extends BaseAction
         if ($errors) {
             throw ValidationException::withMessages($errors)->errorBag('createSepaMandate');
         }
-
-        return $this;
     }
 }

@@ -207,7 +207,7 @@
             <template x-for="(level, i) in levels" :key="level.id">
                 <li x-html="renderLevel(level, i)"></li>
             </template>
-            @can('api.media.post')
+            @can('action.media.upload')
                 <li>
                     <x-button class="w-full" outline :label="__('Add folder')" x-on:click="addFolder(levels, null)" />
                 </li>
@@ -217,18 +217,18 @@
     <div class="w-1/2 max-w-[96rem] flex flex-col gap-3">
         <div x-show="! selection.file_name && selected" class="flex flex-col gap-3" x-cloak>
             <div>
-                @can('api.media.post')
+                @can('action.media.upload')
                     <x-button x-show="! selection.is_static" negative :label="__('Delete')" x-on:click="deleteFolder(selection)" />
                 @endcan
-                @can('api.media.post')
+                @can('action.media.upload')
                     <x-button :label="__('Add folder')" x-on:click="addFolder(selectionProxy.children, selection)" />
                 @endcan
                 <x-button :label="__('Download folder')" x-on:click="$wire.downloadCollection(selection.id)" />
             </div>
-            @can('api.media.put')
+            @can('action.media.update')
                 <x-input x-bind:disabled="selection.is_static" :label="__('Name')" x-model="selection.name" />
             @endcan
-            @can('api.media.post')
+            @can('action.media.upload')
                 <div class="relative flex flex-col items-center justify-center"
                      x-on:drop="isDropping = false"
                      x-on:drop.prevent="handleFileDrop($event)"
@@ -264,12 +264,12 @@
         <div x-show="selection.file_name && selected" x-cloak class="flex flex-col gap-3">
             <div class="pb-1.5">
                 <x-button primary :label="__('Download')" x-on:click="$wire.download(selection.id)" />
-                @can('api.media.{id}.delete')
+                @can('action.media.delete')
                     <x-button negative :label="__('Delete')" x-on:click="deleteFile(selection)" />
                 @endcan
             </div>
             <div class="flex flex-col gap-1.5">
-                @can('api.media.{id}.put')
+                @can('action.media.update')
                     <x-input :label="__('Name')" x-model="selection.name" />
                     <x-input :label="__('File type')" disabled x-bind:value="selection.file_name?.split('.').pop()" />
                     <x-input :label="__('MIME-Type')" disabled x-bind:value="selection.mime_type" />
@@ -304,7 +304,7 @@
                 />
             </div>
         </div>
-        @can('api.media.{id}.put')
+        @can('action.media.update')
             <div x-show="selected" class="w-full flex justify-end">
                 <x-button primary :label="__('Save')" x-on:click="save()" />
             </div>

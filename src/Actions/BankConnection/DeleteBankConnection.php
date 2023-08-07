@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\BankConnection;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\BankConnection;
 
-class DeleteBankConnection extends BaseAction
+class DeleteBankConnection extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:bank_connections,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteBankConnection extends BaseAction
         return [BankConnection::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return BankConnection::query()
             ->whereKey($this->data['id'])

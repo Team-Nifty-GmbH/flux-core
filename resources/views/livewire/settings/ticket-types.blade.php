@@ -2,7 +2,7 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('flux::nav.settings.ticket-types') }}</h1>
+                <h1 class="text-xl font-semibold">{{ __('Ticket Types') }}</h1>
                 <div class="mt-2 text-sm text-gray-300">{{__('Here you can manage all ticket types...')}}</div>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -70,9 +70,9 @@
             <div x-data="{ticketTypeIndex: @entangle('ticketTypeIndex').defer}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
-                    @if(user_can('api.ticket-types.{id}.delete'))
+                    @if(user_can('action.ticket-type.delete'))
                         <x-button x-bind:class="ticketTypeIndex > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
-                                  @click="window.$wireui.confirmDialog({
+                                  x-on:click="window.$wireui.confirmDialog({
                                                             title: '{{ __('Delete ticket type') }}',
                                                             description: '{{ __('Do you really want to delete this ticket type?') }}',
                                                             icon: 'error',
@@ -101,9 +101,9 @@
             <div x-data="{additionalColumnIndex: @entangle('additionalColumnIndex').defer}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
-                    @if(user_can('api.additional-columns.{id}.delete'))
+                    @if(user_can('action.additional-column.delete'))
                         <x-button x-bind:class="additionalColumnIndex > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
-                                  @click="window.$wireui.confirmDialog({
+                                  x-on:click="window.$wireui.confirmDialog({
                                                             title: '{{ __('Delete additional column') }}',
                                                             description: '{{ __('Do you really want to delete this additional column?') }}',
                                                             icon: 'error',

@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\Discount;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateDiscountRequest;
 use FluxErp\Models\Discount;
 
-class CreateDiscount extends BaseAction
+class CreateDiscount extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateDiscountRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateDiscount extends BaseAction
         return [Discount::class];
     }
 
-    public function execute(): Discount
+    public function performAction(): Discount
     {
         $discount = new Discount($this->data);
         $discount->save();

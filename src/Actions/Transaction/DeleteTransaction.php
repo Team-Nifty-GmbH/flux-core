@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Transaction;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Transaction;
 
-class DeleteTransaction extends BaseAction
+class DeleteTransaction extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:transactions,id',
         ];
@@ -20,7 +20,7 @@ class DeleteTransaction extends BaseAction
         return [Transaction::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return Transaction::query()
             ->whereKey($this->data['id'])

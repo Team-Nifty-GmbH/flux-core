@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Address;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Address;
 
-class DeleteAddress extends BaseAction
+class DeleteAddress extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:addresses,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteAddress extends BaseAction
         return [Address::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         $address = Address::query()
             ->whereKey($this->data['id'])

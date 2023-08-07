@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\VatRate;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateVatRateRequest;
 use FluxErp\Models\VatRate;
 
-class CreateVatRate extends BaseAction
+class CreateVatRate extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateVatRateRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateVatRate extends BaseAction
         return [VatRate::class];
     }
 
-    public function execute(): VatRate
+    public function performAction(): VatRate
     {
         $vatRate = new VatRate($this->data);
         $vatRate->save();

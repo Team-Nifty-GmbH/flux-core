@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\TicketType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateTicketTypeRequest;
 use FluxErp\Models\TicketType;
 use Illuminate\Support\Facades\Validator;
 
-class CreateTicketType extends BaseAction
+class CreateTicketType extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateTicketTypeRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateTicketType extends BaseAction
         return [TicketType::class];
     }
 
-    public function execute(): TicketType
+    public function performAction(): TicketType
     {
         $ticketType = new TicketType($this->data);
         $ticketType->save();
@@ -28,13 +28,11 @@ class CreateTicketType extends BaseAction
         return $ticketType->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new TicketType());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

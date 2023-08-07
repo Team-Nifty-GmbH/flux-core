@@ -2,18 +2,19 @@
 
 namespace FluxErp\Http\Livewire\Product;
 
+use FluxErp\Actions\Product\CreateProduct;
+use FluxErp\Actions\Product\DeleteProduct;
+use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Helpers\PriceHelper;
-use FluxErp\Http\Requests\CreateProductRequest;
-use FluxErp\Http\Requests\UpdateProductRequest;
 use FluxErp\Models\Currency;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\VatRate;
-use FluxErp\Services\ProductService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\RedirectResponse;
 use Livewire\Component;
+use Livewire\Redirector;
 use WireUi\Traits\Actions;
 
 class Product extends Component
@@ -46,7 +47,7 @@ class Product extends Component
                 'parent',
             ])
             ->withCount('children')
-            ->first();
+            ->firstOrFail();
 
         $parent = $product->parent;
         $this->product = $product->toArray();
@@ -94,8 +95,11 @@ class Product extends Component
         return view('flux::livewire.product.product', ['tabs' => $tabs]);
     }
 
-    public function save(): true
+    public function save(): bool
     {
+        $this->skipRender();
+        $action = ($this->product['id'] ?? false) ? UpdateProduct::class : CreateProduct::class;
+
         if ($this->priceLists !== null) {
             $this->product['prices'] = collect($this->priceLists)
                 ->filter(fn ($priceList) => $priceList['price_net'] !== null || $priceList['price_gross'] !== null)
@@ -107,23 +111,20 @@ class Product extends Component
                 })
                 ->toArray();
         }
-        $validator = Validator::make(
-            $this->product,
-            $this->product['id']
-                ? (new UpdateProductRequest())->rules()
-                : (new CreateProductRequest())->rules()
-        );
-        $validated = $validator->validate();
 
-        $service = new ProductService();
-        if ($this->product['id']) {
-            $service->update($validated);
-        } else {
-            $service->create($validated);
+        try {
+            $product = $action::make($this->product)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
         }
 
-        $this->notification()->success(__('Product saved'));
-        $this->skipRender();
+        $this->product['id'] = $product->id;
+        $this->notification()->success(__('Product saved successfully.'));
 
         return true;
     }
@@ -150,5 +151,23 @@ class Product extends Component
         $this->priceLists = $priceLists->toArray();
 
         $this->skipRender();
+    }
+
+    public function delete(): false|RedirectResponse|Redirector
+    {
+        $this->skipRender();
+
+        try {
+            DeleteProduct::make($this->product)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            return redirect()->route('products.products');
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        return false;
     }
 }

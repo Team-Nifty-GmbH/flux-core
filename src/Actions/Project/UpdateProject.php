@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Project;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateProjectRequest;
 use FluxErp\Models\Project;
 use Illuminate\Database\Eloquent\Model;
@@ -10,11 +10,11 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateProject extends BaseAction
+class UpdateProject extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateProjectRequest())->rules();
     }
 
@@ -23,7 +23,7 @@ class UpdateProject extends BaseAction
         return [Project::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $project = Project::query()
             ->whereKey($this->data['id'])
@@ -35,7 +35,7 @@ class UpdateProject extends BaseAction
         return $project->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Project());
@@ -93,7 +93,5 @@ class UpdateProject extends BaseAction
                 ])->errorBag('updateProject');
             }
         }
-
-        return $this;
     }
 }

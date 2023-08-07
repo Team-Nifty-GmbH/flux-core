@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\CustomEvent;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\CustomEvent;
 
-class DeleteCustomEvent extends BaseAction
+class DeleteCustomEvent extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:custom_events,id',
         ];
@@ -20,7 +20,7 @@ class DeleteCustomEvent extends BaseAction
         return [CustomEvent::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return CustomEvent::query()
             ->whereKey($this->data['id'])

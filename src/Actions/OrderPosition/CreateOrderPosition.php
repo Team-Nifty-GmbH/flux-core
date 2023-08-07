@@ -2,27 +2,28 @@
 
 namespace FluxErp\Actions\OrderPosition;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Models\OrderPosition;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class CreateOrderPosition extends BaseAction
+class CreateOrderPosition extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = array_merge(
             (new CreateOrderPositionRequest())->rules(),
             [
                 'price_id' => [
                     Rule::requiredIf(
                         ($this->data['is_free_text'] ?? false) === false &&
-                        ($this->data['product_id'] ?? $this->data['price_list_id'] ?? false)
+                        (($this->data['product_id'] ?? false) && ($this->data['price_list_id'] ?? false))
                     ),
                     'integer',
+                    'nullable',
                     'exists:prices,id,deleted_at,NULL',
                     'exclude_if:is_free_text,true',
                 ],
@@ -48,7 +49,7 @@ class CreateOrderPosition extends BaseAction
                     'numeric',
                     'exclude_if:is_free_text,true',
                 ],
-                'vat_rate' => [
+                'vat_rate_percentage' => [
                     Rule::requiredIf(
                         ($this->data['is_free_text'] ?? false) === false && ($this->data['vat_rate_id'] ?? false)
                     ),
@@ -72,7 +73,7 @@ class CreateOrderPosition extends BaseAction
         return [OrderPosition::class];
     }
 
-    public function execute(): OrderPosition
+    public function performAction(): OrderPosition
     {
         $tags = Arr::pull($this->data, 'tags', []);
 
@@ -86,13 +87,11 @@ class CreateOrderPosition extends BaseAction
         return $orderPosition->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new OrderPosition());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\Role;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateRoleRequest;
 use FluxErp\Models\Role;
 use Illuminate\Database\Eloquent\Model;
 
-class CreateRole extends BaseAction
+class CreateRole extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateRoleRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateRole extends BaseAction
         return [Role::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $role = Role::create($this->data);
 

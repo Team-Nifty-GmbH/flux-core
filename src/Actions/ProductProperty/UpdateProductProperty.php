@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\ProductProperty;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateProductPropertyRequest;
 use FluxErp\Models\ProductProperty;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateProductProperty extends BaseAction
+class UpdateProductProperty extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateProductPropertyRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateProductProperty extends BaseAction
         return [ProductProperty::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $productProperty = ProductProperty::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdateProductProperty extends BaseAction
         return $productProperty->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new ProductProperty());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

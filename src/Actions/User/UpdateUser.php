@@ -2,17 +2,26 @@
 
 namespace FluxErp\Actions\User;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateUserRequest;
 use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateUser extends BaseAction
+class UpdateUser extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
-        $this->rules = (new UpdateUserRequest())->rules();
+        parent::boot($data);
+
+        $rules = (new UpdateUserRequest())->rules();
+
+        $this->rules = array_merge(
+            $rules,
+            [
+                'user_code' => $rules['user_code'] . ',' . $this->data['id'],
+                'email' => $rules['email'] . ',' . $this->data['id'],
+            ]
+        );
     }
 
     public static function models(): array
@@ -20,7 +29,7 @@ class UpdateUser extends BaseAction
         return [User::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $user = User::query()
             ->whereKey($this->data['id'])

@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\Role;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\EditRoleUserRequest;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
 
-class UpdateRoleUsers extends BaseAction
+class UpdateRoleUsers extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
-        $this->data = $this->data ? array_merge(['assign' => true], $this->data) : [];
+        parent::boot($data);
+        $this->setData($this->data ? array_merge(['assign' => true], $this->data) : []);
         $this->rules = (new EditRoleUserRequest())->rules();
     }
 
@@ -26,7 +26,7 @@ class UpdateRoleUsers extends BaseAction
         return [Role::class, User::class];
     }
 
-    public function execute(): array
+    public function performAction(): array
     {
         $role = Role::query()
             ->whereKey($this->data['id'])

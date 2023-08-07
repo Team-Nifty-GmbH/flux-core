@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\WorkTimeType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateWorkTimeTypeRequest;
 use FluxErp\Models\WorkTimeType;
 use Illuminate\Support\Facades\Validator;
 
-class CreateWorkTimeType extends BaseAction
+class CreateWorkTimeType extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateWorkTimeTypeRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateWorkTimeType extends BaseAction
         return [WorkTimeType::class];
     }
 
-    public function execute(): WorkTimeType
+    public function performAction(): WorkTimeType
     {
         $workTimeType = new WorkTimeType($this->data);
         $workTimeType->save();
@@ -28,13 +28,11 @@ class CreateWorkTimeType extends BaseAction
         return $workTimeType->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new WorkTimeType());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

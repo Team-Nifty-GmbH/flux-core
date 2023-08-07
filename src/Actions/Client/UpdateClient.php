@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\Client;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateClientRequest;
 use FluxErp\Models\Client;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateClient extends BaseAction
+class UpdateClient extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateClientRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateClient extends BaseAction
         return [Client::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $client = Client::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdateClient extends BaseAction
         return $client->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Client());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

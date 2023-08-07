@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\CountryRegion;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\CountryRegion;
 
-class DeleteCountryRegion extends BaseAction
+class DeleteCountryRegion extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:country_regions,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteCountryRegion extends BaseAction
         return [CountryRegion::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return CountryRegion::query()
             ->whereKey($this->data['id'])

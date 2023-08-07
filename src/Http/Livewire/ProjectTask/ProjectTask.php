@@ -2,15 +2,14 @@
 
 namespace FluxErp\Http\Livewire\ProjectTask;
 
-use FluxErp\Http\Requests\CreateProjectTaskRequest;
-use FluxErp\Http\Requests\UpdateProjectTaskRequest;
+use FluxErp\Actions\ProjectTask\CreateProjectTask;
+use FluxErp\Actions\ProjectTask\DeleteProjectTask;
+use FluxErp\Actions\ProjectTask\UpdateProjectTask;
 use FluxErp\Models\Project;
-use FluxErp\Services\ProjectTaskService;
 use FluxErp\Traits\Livewire\HasAdditionalColumns;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -92,7 +91,7 @@ class ProjectTask extends Component
         );
         $this->categories[] = $primaryCategory;
         $this->categories = to_tree($this->categories);
-        $this->categories = $this->categories[0]['children'];
+        $this->categories = $this->categories[0]['children'] ?? [];
 
         $this->availableStates = \FluxErp\Models\ProjectTask::getStatesFor('state')->map(function (string $state) {
             return [
@@ -117,43 +116,42 @@ class ProjectTask extends Component
     public function save(): false|array
     {
         $projectTask = $this->projectTask;
-        $projectTask['categories'] = [$this->projectTask['categories']];
+        $projectTask['categories'] = array_map('intval', [$this->projectTask['categories']]);
+        unset($projectTask['category_id']);
+        $action = ($this->projectTask['id'] ?? false) ? UpdateProjectTask::class : CreateProjectTask::class;
 
-        $validator = Validator::make(
-            $projectTask,
-            $this->projectTask['id'] ?? false
-                ? (new UpdateProjectTaskRequest())->rules()
-                : (new CreateProjectTaskRequest())->rules()
-        );
-        $validated = $validator->validate();
-
-        $service = new ProjectTaskService();
-        if ($this->projectTask['id'] ?? false) {
-            $response = $service->update($validated);
-        } else {
-            $response = $service->create($validated);
-        }
-
-        if ($response['errors'] ?? false) {
-            foreach ($response['errors'] as $error) {
-                $this->notification()->error($error);
-            }
+        try {
+            $response = $action::make($projectTask)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
             return false;
         }
 
+        $this->notification()->success(__('Project task saved'));
         $this->skipRender();
 
-        return ($response['data'] ?? $response)->toArray();
+        return $response->toArray();
     }
 
     public function delete(): bool
     {
-        $service = new ProjectTaskService();
+        try {
+            DeleteProjectTask::make($this->projectTask)
+                ->checkPermission()
+                ->validate()
+                ->execute();
 
-        $response = $service->delete($this->projectTask['id']);
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
-        return ($response['status'] ?? false) === 204;
+            return false;
+        }
+
+        return true;
     }
 
     public function getAdditionalColumns(): array

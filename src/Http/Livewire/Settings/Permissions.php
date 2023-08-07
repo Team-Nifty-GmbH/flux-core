@@ -2,18 +2,19 @@
 
 namespace FluxErp\Http\Livewire\Settings;
 
-use FluxErp\Http\Requests\CreateRoleRequest;
-use FluxErp\Http\Requests\UpdateRoleRequest;
+use FluxErp\Actions\Role\CreateRole;
+use FluxErp\Actions\Role\UpdateRole;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
-use FluxErp\Services\RoleService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Arr;
 use Livewire\Component;
+use WireUi\Traits\Actions;
 
 class Permissions extends Component
 {
+    use Actions;
+
     public array $roles;
 
     public array $permissions = [];
@@ -51,13 +52,6 @@ class Permissions extends Component
         $this->guards = array_keys(config('auth.guards'));
     }
 
-    protected function getRules(): array
-    {
-        $request = ($this->selectedRole['id'] ?? false) ? new UpdateRoleRequest() : new CreateRoleRequest();
-
-        return Arr::prependKeysWith($request->rules(), 'selectedRole.');
-    }
-
     public function render(): View
     {
         return view('flux::livewire.settings.permissions');
@@ -91,14 +85,19 @@ class Permissions extends Component
 
     public function saveTogglePermissions(): void
     {
-        $this->validate();
+        $action = ($this->selectedRole['id'] ?? false) ? UpdateRole::class : CreateRole::class;
+        try {
+            $role = $action::make($this->selectedRole)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
-        $service = new RoleService();
+            return;
+        }
 
-        if ($this->selectedRole['id'] ?? false) {
-            $service->update($this->selectedRole);
-        } else {
-            $role = $service->create($this->selectedRole);
+        if ($action === CreateRole::class) {
             $this->roles[] = $role->toArray();
         }
 

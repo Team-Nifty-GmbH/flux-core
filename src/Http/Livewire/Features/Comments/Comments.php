@@ -116,14 +116,18 @@ class Comments extends Component
         try {
             $comment = CreateComment::make($comment)->validate()->execute();
         } catch (ValidationException $e) {
-            validation_errors_to_notifications($e, $this);
+            exception_to_notifications($e, $this);
 
             return;
         }
 
         if ($this->filesArray) {
-            $this->saveFileUploadsToMediaLibrary('files', $comment->id, Comment::class);
-            $comment->load('media:id,name,model_type,model_id,disk');
+            try {
+                $this->saveFileUploadsToMediaLibrary('files', $comment->id, Comment::class);
+                $comment->load('media:id,name,model_type,model_id,disk');
+            } catch (\Exception $e) {
+                exception_to_notifications($e, $this);
+            }
         }
 
         $comment = $comment->toArray();
@@ -160,7 +164,7 @@ class Comments extends Component
                 ->validate()
                 ->execute();
         } catch (ValidationException $e) {
-            validation_errors_to_notifications($e, $this);
+            exception_to_notifications($e, $this);
         }
     }
 
@@ -169,7 +173,7 @@ class Comments extends Component
         try {
             DeleteComment::make(['id' => $id])->validate()->execute();
         } catch (ValidationException $e) {
-            validation_errors_to_notifications($e, $this);
+            exception_to_notifications($e, $this);
 
             return;
         }

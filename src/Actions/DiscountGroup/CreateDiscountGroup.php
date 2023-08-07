@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\DiscountGroup;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateDiscountGroupRequest;
 use FluxErp\Models\DiscountGroup;
 use Illuminate\Support\Arr;
 
-class CreateDiscountGroup extends BaseAction
+class CreateDiscountGroup extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateDiscountGroupRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateDiscountGroup extends BaseAction
         return [DiscountGroup::class];
     }
 
-    public function execute(): DiscountGroup
+    public function performAction(): DiscountGroup
     {
         $discounts = Arr::pull($this->data, 'discounts', []);
 

@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\Warehouse;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Warehouse;
 use Illuminate\Validation\ValidationException;
 
-class DeleteWarehouse extends BaseAction
+class DeleteWarehouse extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:warehouses,id,deleted_at,NULL',
         ];
@@ -21,7 +21,7 @@ class DeleteWarehouse extends BaseAction
         return [Warehouse::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return Warehouse::query()
             ->whereKey($this->data['id'])
@@ -29,9 +29,9 @@ class DeleteWarehouse extends BaseAction
             ->delete();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (Warehouse::query()
             ->whereKey($this->data['id'])
@@ -43,7 +43,5 @@ class DeleteWarehouse extends BaseAction
                 'children' => [__('The given warehouse has children')],
             ])->errorBag('deleteWarehouse');
         }
-
-        return $this;
     }
 }

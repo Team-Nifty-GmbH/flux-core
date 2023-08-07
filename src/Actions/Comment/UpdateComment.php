@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\Comment;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateCommentRequest;
 use FluxErp\Models\Comment;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateComment extends BaseAction
+class UpdateComment extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateCommentRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateComment extends BaseAction
         return [Comment::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $comment = Comment::query()
             ->whereKey($this->data['id'])

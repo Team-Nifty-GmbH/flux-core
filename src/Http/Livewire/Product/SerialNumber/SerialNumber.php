@@ -2,16 +2,20 @@
 
 namespace FluxErp\Http\Livewire\Product\SerialNumber;
 
+use FluxErp\Actions\SerialNumber\CreateSerialNumber;
+use FluxErp\Actions\SerialNumber\DeleteSerialNumber;
+use FluxErp\Actions\SerialNumber\UpdateSerialNumber;
 use FluxErp\Http\Requests\CreateSerialNumberRequest;
 use FluxErp\Http\Requests\UpdateSerialNumberRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\Product;
-use FluxErp\Services\SerialNumberService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Livewire\Component;
+use Livewire\Redirector;
 use WireUi\Traits\Actions;
 
 class SerialNumber extends Component
@@ -77,22 +81,22 @@ class SerialNumber extends Component
         return view('flux::livewire.product.serial-number.serial-number');
     }
 
-    /**
-     * @return \Illuminate\Http\RedirectResponse|void
-     */
-    public function delete()
+    public function delete(): false|RedirectResponse|Redirector
     {
-        if (! user_can('api.serial-numbers.{id}.delete')) {
-            $this->notification()->error(__('You dont have the permission to do that.'));
+        $this->skipRender();
 
-            return;
+        try {
+            DeleteSerialNumber::make($this->serialNumber)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            return redirect()->route('products.serial-numbers');
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
         }
 
-        (new SerialNumberService())->delete($this->serialNumber['id']);
-
-        $this->notification()->success(__('Serial number deleted'));
-
-        return redirect()->to(route('products.serial-numbers'));
+        return false;
     }
 
     public function updatedSerialNumberProductId($id): void
@@ -105,36 +109,21 @@ class SerialNumber extends Component
 
     public function save(): void
     {
-        $function = ($this->serialNumber['id'] ?? false) ? 'update' : 'create';
-        $permission = $function === 'update' ? 'api.serial-numbers.put' : 'api.serial-numbers.post';
+        $action = ($this->serialNumber['id'] ?? false) ? UpdateSerialNumber::class : CreateSerialNumber::class;
 
-        if (! user_can($permission)) {
-            $this->notification()->error(__('You dont have the permission to do that.'));
+        try {
+            $response = $action::make($this->serialNumber)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
             return;
         }
 
-        $this->resetErrorBag();
-        $validated = $this->validate()['serialNumber'];
-
-        $service = new SerialNumberService();
-        $response = $service->{$function}($validated);
-
-        if ($response instanceof \FluxErp\Models\SerialNumber) {
-            $response->load('product');
-            $this->serialNumber = $response->toArray();
-        } else {
-            if (! ($response['data'] ?? false)) {
-                foreach (Arr::prependKeysWith($response['errors'], 'serialNumber.') as $key => $error) {
-                    $this->addError($key, $error);
-                }
-
-                return;
-            }
-
-            $response['data']->load('product');
-            $this->serialNumber = $response['data']->toArray();
-        }
+        $response->load('product');
+        $this->serialNumber = $response->toArray();
 
         $this->notification()->success(__('Serial number saved'));
         $this->edit = false;
@@ -159,7 +148,7 @@ class SerialNumber extends Component
         if ($this->serialNumber['id'] ?? false) {
             $this->edit = false;
         } else {
-            return redirect()->to(route('products.serial-numbers'));
+            return redirect()->route('products.serial-numbers');
         }
     }
 

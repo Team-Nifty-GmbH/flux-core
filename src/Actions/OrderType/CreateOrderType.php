@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\OrderType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderTypeRequest;
 use FluxErp\Models\OrderType;
 use Illuminate\Support\Facades\Validator;
 
-class CreateOrderType extends BaseAction
+class CreateOrderType extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateOrderTypeRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateOrderType extends BaseAction
         return [OrderType::class];
     }
 
-    public function execute(): OrderType
+    public function performAction(): OrderType
     {
         $orderType = new OrderType($this->data);
         $orderType->save();
@@ -28,13 +28,11 @@ class CreateOrderType extends BaseAction
         return $orderType->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new OrderType());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\ProjectTask;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateProjectTaskRequest;
 use FluxErp\Models\Project;
 use FluxErp\Models\ProjectTask;
@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateProjectTask extends BaseAction
+class UpdateProjectTask extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateProjectTaskRequest())->rules();
     }
 
@@ -23,7 +23,7 @@ class UpdateProjectTask extends BaseAction
         return [ProjectTask::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $task = ProjectTask::query()
             ->whereKey($this->data['id'])
@@ -35,7 +35,7 @@ class UpdateProjectTask extends BaseAction
         return $task->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new ProjectTask());
@@ -56,7 +56,5 @@ class UpdateProjectTask extends BaseAction
                 'category_id' => [__('Project category not found')],
             ])->errorBag('updateProjectTask');
         }
-
-        return $this;
     }
 }

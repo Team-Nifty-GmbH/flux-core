@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\StockPosting;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\StockPosting;
 
-class DeleteStockPosting extends BaseAction
+class DeleteStockPosting extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:stock_postings,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteStockPosting extends BaseAction
         return [StockPosting::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return StockPosting::query()
             ->whereKey($this->data['id'])

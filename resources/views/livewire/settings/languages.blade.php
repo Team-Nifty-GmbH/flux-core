@@ -16,7 +16,7 @@
         </div>
         <x-slot name="footer">
             <div class="flex justify-between gap-x-4">
-                @if(user_can('api.languages.delete'))
+                @if(user_can('action.language.delete'))
                     <div x-bind:class="language.id > 0 || 'invisible'">
                         <x-button flat negative :label="__('Delete')" x-on:click="close" wire:click="delete"/>
                     </div>
@@ -35,7 +35,7 @@
                 <div class="mt-2 text-sm text-gray-300">{{ __('A list of all the languages') }}</div>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                @if(user_can('api.languages.post'))
+                @if(user_can('action.language.create'))
                     <x-button primary wire:click="showEditModal()">
                             {{ __('Add Language') }}
                     </x-button>

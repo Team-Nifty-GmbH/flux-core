@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\OrderPosition;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Http\Requests\FillOrderPositionRequest;
 use FluxErp\Models\Order;
@@ -15,11 +15,11 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-class FillOrderPositions extends BaseAction
+class FillOrderPositions extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new FillOrderPositionRequest())->rules();
     }
 
@@ -33,7 +33,7 @@ class FillOrderPositions extends BaseAction
         return [OrderPosition::class, Order::class];
     }
 
-    public function execute(): array
+    public function performAction(): array
     {
         // Fill validated order positions
         $orderPositions = [];
@@ -65,9 +65,9 @@ class FillOrderPositions extends BaseAction
         return $orderPositions;
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         // Validate Data
         $rules = (new CreateOrderPositionRequest())->rules();
@@ -88,8 +88,6 @@ class FillOrderPositions extends BaseAction
         }
 
         $this->data['order_positions'] = $orderPositions;
-
-        return $this;
     }
 
     private function validateOrderPosition(array $orderPosition, array $rules, array $parent = null): array

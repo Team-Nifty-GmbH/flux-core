@@ -38,6 +38,11 @@ class PriceList extends Model
         return $this->belongsTo(PriceList::class, 'parent_id');
     }
 
+    public function children(): HasMany
+    {
+        return $this->hasMany(PriceList::class, 'parent_id');
+    }
+
     public function prices(): HasMany
     {
         return $this->hasMany(Price::class);

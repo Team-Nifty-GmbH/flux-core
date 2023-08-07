@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateAdditionalColumnRequest;
 use FluxErp\Models\AdditionalColumn;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
-class UpdateAdditionalColumn extends BaseAction
+class UpdateAdditionalColumn extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateAdditionalColumnRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateAdditionalColumn extends BaseAction
         return [AdditionalColumn::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         if ($this->data['values'] ?? false) {
             $this->data['validations'] = null;
@@ -45,9 +45,9 @@ class UpdateAdditionalColumn extends BaseAction
         return $additionalColumn->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         $additionalColumn = AdditionalColumn::query()
             ->whereKey($this->data['id'])
@@ -61,7 +61,5 @@ class UpdateAdditionalColumn extends BaseAction
                 'values' => [__('Models with differing values exist')],
             ]);
         }
-
-        return $this;
     }
 }

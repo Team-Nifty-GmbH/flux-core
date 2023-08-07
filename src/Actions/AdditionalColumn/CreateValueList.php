@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateValueListRequest;
 use FluxErp\Models\AdditionalColumn;
 use Illuminate\Validation\ValidationException;
 
-class CreateValueList extends BaseAction
+class CreateValueList extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateValueListRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class CreateValueList extends BaseAction
         return [AdditionalColumn::class];
     }
 
-    public function execute(): AdditionalColumn
+    public function performAction(): AdditionalColumn
     {
         $valueList = new AdditionalColumn();
         $valueList->name = $this->data['name'];
@@ -31,9 +31,9 @@ class CreateValueList extends BaseAction
         return $valueList->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         if (! array_is_list($this->data['values'])) {
             throw ValidationException::withMessages([
@@ -50,7 +50,5 @@ class CreateValueList extends BaseAction
                 'name_model' => [__('Name model combination already exists')],
             ])->errorBag('createValueList');
         }
-
-        return $this;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Category;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateCategoryRequest;
 use FluxErp\Models\Category;
@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateCategory extends BaseAction
+class UpdateCategory extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateCategoryRequest())->rules();
     }
 
@@ -23,7 +23,7 @@ class UpdateCategory extends BaseAction
         return [Category::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $category = Category::query()
             ->whereKey($this->data['id'])
@@ -35,7 +35,7 @@ class UpdateCategory extends BaseAction
         return $category->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Category());
@@ -69,7 +69,5 @@ class UpdateCategory extends BaseAction
                 ])->errorBag('updateCategory');
             }
         }
-
-        return $this;
     }
 }

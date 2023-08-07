@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Discount;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Discount;
 
-class DeleteDiscount extends BaseAction
+class DeleteDiscount extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:discounts,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteDiscount extends BaseAction
         return [Discount::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return Discount::query()
             ->whereKey($this->data['id'])

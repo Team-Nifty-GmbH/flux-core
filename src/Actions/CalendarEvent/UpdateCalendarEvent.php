@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\CalendarEvent;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateCalendarEventRequest;
 use FluxErp\Models\CalendarEvent;
 use Illuminate\Database\Eloquent\Model;
 
-class UpdateCalendarEvent extends BaseAction
+class UpdateCalendarEvent extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateCalendarEventRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class UpdateCalendarEvent extends BaseAction
         return [CalendarEvent::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $calendarEvent = CalendarEvent::query()
             ->whereKey($this->data['id'])

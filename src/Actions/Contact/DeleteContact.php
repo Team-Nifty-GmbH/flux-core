@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Contact;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Contact;
 
-class DeleteContact extends BaseAction
+class DeleteContact extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:contacts,id,deleted_at,NULL',
         ];
@@ -20,7 +20,7 @@ class DeleteContact extends BaseAction
         return [Contact::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return Contact::query()
             ->whereKey($this->data['id'])

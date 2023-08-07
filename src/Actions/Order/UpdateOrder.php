@@ -2,18 +2,22 @@
 
 namespace FluxErp\Actions\Order;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Http\Requests\UpdateOrderRequest;
 use FluxErp\Models\Order;
+use FluxErp\Models\OrderType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
-class UpdateOrder extends BaseAction
+class UpdateOrder extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateOrderRequest())->rules();
     }
 
@@ -22,7 +26,7 @@ class UpdateOrder extends BaseAction
         return [Order::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $addresses = Arr::pull($this->data, 'addresses', []);
 
@@ -57,13 +61,42 @@ class UpdateOrder extends BaseAction
         return $order->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Order());
 
         $this->data = $validator->validate();
 
-        return $this;
+        $order = Order::query()
+            ->whereKey($this->data['id'])
+            ->first();
+
+        $updatedOrderType = false;
+        if ($this->data['order_type_id'] ?? false) {
+            $updatedOrderType = $order->order_type_id !== $this->data['order_type_id'] ?
+                $this->data['order_type_id'] : false;
+        }
+
+        if (($this->data['invoice_number'] ?? false)
+            || $updatedOrderType
+        ) {
+            $isPurchase = OrderType::query()
+                ->whereKey($updatedOrderType ?: $order->order_type_id)
+                ->whereIn('order_type_enum', [OrderTypeEnum::Purchase->value, OrderTypeEnum::PurchaseRefund->value])
+                ->exists();
+
+            if (Order::query()
+                ->where('id', '!=', $this->data['id'])
+                ->where('client_id', $order->client_id)
+                ->where('invoice_number', $this->data['invoice_number'] ?? $order->invoice_number)
+                ->when($isPurchase, fn (Builder $query) => $query->where('contact_id', $order->contact_id))
+                ->exists()
+            ) {
+                throw ValidationException::withMessages([
+                    'invoice_number' => [__('validation.unique', ['attribute' => 'invoice_number'])],
+                ])->errorBag('createOrder');
+            }
+        }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\OrderPosition;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateOrderPositionRequest;
 use FluxErp\Models\OrderPosition;
@@ -12,11 +12,11 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class UpdateOrderPosition extends BaseAction
+class UpdateOrderPosition extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateOrderPositionRequest())->rules();
     }
 
@@ -25,7 +25,7 @@ class UpdateOrderPosition extends BaseAction
         return [OrderPosition::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $tags = Arr::pull($this->data, 'tags', []);
 
@@ -43,7 +43,7 @@ class UpdateOrderPosition extends BaseAction
         return $orderPosition->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new OrderPosition());
@@ -87,7 +87,5 @@ class UpdateOrderPosition extends BaseAction
                 throw ValidationException::withMessages($errors)->errorBag('updateOrderPosition');
             }
         }
-
-        return $this;
     }
 }

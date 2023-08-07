@@ -2,17 +2,17 @@
 
 namespace FluxErp\Actions\AddressType;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateAddressTypeRequest;
 use FluxErp\Models\AddressType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
-class UpdateAddressType extends BaseAction
+class UpdateAddressType extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateAddressTypeRequest())->rules();
     }
 
@@ -21,7 +21,7 @@ class UpdateAddressType extends BaseAction
         return [AddressType::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $addressType = AddressType::query()
             ->whereKey($this->data['id'])
@@ -33,13 +33,11 @@ class UpdateAddressType extends BaseAction
         return $addressType->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new AddressType());
 
         $this->data = $validator->validate();
-
-        return $this;
     }
 }

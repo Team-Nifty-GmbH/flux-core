@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\AdditionalColumn;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\AdditionalColumn;
 
-class DeleteAdditionalColumn extends BaseAction
+class DeleteAdditionalColumn extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:additional_columns,id',
         ];
@@ -20,7 +20,7 @@ class DeleteAdditionalColumn extends BaseAction
         return [AdditionalColumn::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         $additionalColumn = AdditionalColumn::query()
             ->whereKey($this->data['id'])

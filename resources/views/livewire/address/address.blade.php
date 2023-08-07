@@ -37,7 +37,7 @@
                     </div>
                     <div wire:ignore>
                         @if($address['id'] ?? false)
-                            @can('api.addresses.put')
+                            @can('action.address.update')
                                 <x-button
                                     icon="pencil"
                                     x-cloak
@@ -50,7 +50,7 @@
                                     </div>
                                 </x-button>
                             @endcan
-                            @can('api.addresses.post')
+                            @can('action.address.create')
                                     <x-button
                                         x-cloak
                                         icon="document-duplicate"
@@ -63,7 +63,7 @@
                                         </div>
                                     </x-button>
                             @endcan
-                            @can('api.addresses.{id}.delete')
+                            @can('action.address.delete')
                                 <x-button
                                     x-cloak
                                     icon="trash"

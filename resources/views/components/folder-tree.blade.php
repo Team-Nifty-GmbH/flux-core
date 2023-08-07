@@ -8,7 +8,7 @@
                         <x-icon name="folder" class="h-4 w-4" />
                     </div>
                     <div class="cursor-default pl-2"
-                         @if(auth()->user()->can('api.media.put'))
+                         @if(auth()->user()->can('action.media.upload'))
                              wire:click="showFolder('{{ $treeItem['collection_name'] }}', {{ (int)$treeItem['is_static'] }})"
                            @endif
                     >{{ $treeItem['name'] }}</div>

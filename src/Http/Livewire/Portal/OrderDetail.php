@@ -220,9 +220,9 @@ class OrderDetail extends Component
 
         activity()->performedOn($order)
             ->event('downloaded')
-            ->log($mediaItem->collection_name . ' ' . $mediaItem->file_name);
+            ->log($mediaItem->collection_name . ' ' . $mediaItem->name);
 
-        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
+        return response()->download($mediaItem->getPath(), $mediaItem->name);
     }
 
     public function downloadMedia(int $id): BinaryFileResponse
@@ -239,9 +239,9 @@ class OrderDetail extends Component
 
         activity()->performedOn($order)
             ->event('downloaded')
-            ->log($mediaItem->collection_name . ' ' . $mediaItem->file_name);
+            ->log($mediaItem->collection_name . ' ' . $mediaItem->name);
 
-        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
+        return response()->download($mediaItem->getPath(), $mediaItem->name);
     }
 
     private function renderTree(array|Collection $tree, int $level = 0, string $loopPrefix = '', $parent = null): void

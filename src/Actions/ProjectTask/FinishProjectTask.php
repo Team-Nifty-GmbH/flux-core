@@ -2,16 +2,16 @@
 
 namespace FluxErp\Actions\ProjectTask;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\FinishProjectTaskRequest;
 use FluxErp\Models\ProjectTask;
 use Illuminate\Database\Eloquent\Model;
 
-class FinishProjectTask extends BaseAction
+class FinishProjectTask extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new FinishProjectTaskRequest())->rules();
     }
 
@@ -20,7 +20,7 @@ class FinishProjectTask extends BaseAction
         return [ProjectTask::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $task = ProjectTask::query()
             ->whereKey($this->data['id'])

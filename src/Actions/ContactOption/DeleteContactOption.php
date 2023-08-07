@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\ContactOption;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ContactOption;
 
-class DeleteContactOption extends BaseAction
+class DeleteContactOption extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:contact_options,id',
         ];
@@ -20,7 +20,7 @@ class DeleteContactOption extends BaseAction
         return [ContactOption::class];
     }
 
-    public function execute(): ?bool
+    public function performAction(): ?bool
     {
         return ContactOption::query()
             ->whereKey($this->data['id'])

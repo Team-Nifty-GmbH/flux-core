@@ -21,6 +21,11 @@ class PermissionService
         return UpdateUserPermissions::make(array_merge($data, ['give' => $give]))->execute();
     }
 
+    public function syncUserPermissions(array $data): array
+    {
+        return UpdateUserPermissions::make(array_merge($data, ['sync' => true]))->execute();
+    }
+
     public function delete(string $id): array
     {
         try {

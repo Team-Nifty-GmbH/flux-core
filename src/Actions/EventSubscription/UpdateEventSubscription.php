@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\EventSubscription;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateEventSubscriptionRequest;
 use FluxErp\Models\EventSubscription;
@@ -11,11 +11,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class UpdateEventSubscription extends BaseAction
+class UpdateEventSubscription extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new UpdateEventSubscriptionRequest())->rules();
     }
 
@@ -24,7 +24,7 @@ class UpdateEventSubscription extends BaseAction
         return [EventSubscription::class];
     }
 
-    public function execute(): Model
+    public function performAction(): Model
     {
         $eventSubscription = EventSubscription::query()
             ->whereKey($this->data['id'])
@@ -36,9 +36,9 @@ class UpdateEventSubscription extends BaseAction
         return $eventSubscription->withoutRelations()->fresh();
     }
 
-    public function validate(): static
+    public function validateData(): void
     {
-        parent::validate();
+        parent::validateData();
 
         $eventClass = Helper::classExists(classString: ucfirst($this->data['event']), isEvent: true);
 
@@ -74,7 +74,5 @@ class UpdateEventSubscription extends BaseAction
                 'subscription' => [__('Already subscribed')],
             ])->errorBag('createEventSubscription');
         }
-
-        return $this;
     }
 }

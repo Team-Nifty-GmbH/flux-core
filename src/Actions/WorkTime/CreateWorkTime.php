@@ -2,15 +2,15 @@
 
 namespace FluxErp\Actions\WorkTime;
 
-use FluxErp\Actions\BaseAction;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateWorkTimeRequest;
 use FluxErp\Models\WorkTime;
 
-class CreateWorkTime extends BaseAction
+class CreateWorkTime extends FluxAction
 {
-    public function __construct(array $data)
+    protected function boot(array $data): void
     {
-        parent::__construct($data);
+        parent::boot($data);
         $this->rules = (new CreateWorkTimeRequest())->rules();
     }
 
@@ -19,7 +19,7 @@ class CreateWorkTime extends BaseAction
         return [WorkTime::class];
     }
 
-    public function execute(): WorkTime
+    public function performAction(): WorkTime
     {
         $workTime = new WorkTime($this->data);
         $workTime->save();
