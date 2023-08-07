@@ -2,12 +2,14 @@
 
 namespace FluxErp\Actions;
 
+use FluxErp\Models\Permission;
 use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Events\NullDispatcher;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class FluxAction
@@ -61,6 +63,12 @@ abstract class FluxAction
 
     public static function canPerformAction(): void
     {
+        try {
+            Permission::findByName('action.' . static::name());
+        } catch (PermissionDoesNotExist) {
+            return;
+        }
+
         if (! auth()->user()->can('action.' . static::name())) {
             throw UnauthorizedException::forPermissions(['action.' . static::name()]);
         }
