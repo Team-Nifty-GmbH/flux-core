@@ -25,6 +25,7 @@ use FluxErp\Http\Livewire\Settings\Logs;
 use FluxErp\Http\Livewire\Settings\Notifications;
 use FluxErp\Http\Livewire\Settings\OrderTypes;
 use FluxErp\Http\Livewire\Settings\Permissions;
+use FluxErp\Http\Livewire\Settings\PriceLists;
 use FluxErp\Http\Livewire\Settings\Profile;
 use FluxErp\Http\Livewire\Settings\TicketTypes;
 use FluxErp\Http\Livewire\Settings\Translations;
@@ -98,6 +99,7 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/notifications', Notifications::class)->name('notifications')->registersMenuItem();
             Route::get('/order-types', OrderTypes::class)->name('order-types')->registersMenuItem();
             Route::get('/permissions', Permissions::class)->name('permissions')->registersMenuItem();
+            Route::get('/price-lists', PriceLists::class)->name('price-lists')->registersMenuItem();
             Route::get('/ticket-types', TicketTypes::class)->name('ticket-types')->registersMenuItem();
             Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
             Route::get('/users', Users::class)->name('users')->registersMenuItem();

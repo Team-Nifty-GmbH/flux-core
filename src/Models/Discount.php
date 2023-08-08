@@ -14,6 +14,7 @@ class Discount extends Model
 
     protected $hidden = [
         'uuid',
+        'pivot',
     ];
 
     protected $casts = [

@@ -2,9 +2,11 @@
 
 namespace FluxErp\Actions\PriceList;
 
+use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreatePriceListRequest;
 use FluxErp\Models\PriceList;
+use Illuminate\Validation\ValidationException;
 
 class CreatePriceList extends FluxAction
 {
@@ -24,6 +26,34 @@ class CreatePriceList extends FluxAction
         $priceList = new PriceList($this->data);
         $priceList->save();
 
-        return $priceList->fresh();
+        // Create Discount
+        if (($discount = ($this->data['discount'] ?? false)) && $this->data['discount']['discount'] != 0) {
+            CreateDiscount::make(
+                array_merge(
+                    $discount,
+                    [
+                        'model_type' => PriceList::class,
+                        'model_id' => $priceList->id,
+                    ]
+                )
+            )->execute();
+        }
+
+        return $priceList->fresh($discount ? ['discount'] : []);
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        // Check discount is max 1 if is_percentage = true
+        if (($this->data['discount'] ?? false)
+            && $this->data['discount']['is_percentage']
+            && $this->data['discount']['discount'] > 1
+        ) {
+            throw ValidationException::withMessages([
+                'discount.discount' => [__('validation.max', ['attribute' => 'discount', 'max' => 1])],
+            ])->errorBag('createPriceList');
+        }
     }
 }

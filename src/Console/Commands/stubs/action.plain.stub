@@ -1,0 +1,18 @@
+<?php
+
+namespace {{ namespace }};
+
+use FluxErp\Actions\FluxAction;
+
+class {{ class }} extends FluxAction
+{
+    public static function models(): array
+    {
+        return [];
+    }
+
+    public function performAction(): mixed
+    {
+        //
+    }
+}
