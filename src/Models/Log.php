@@ -16,6 +16,10 @@ class Log extends Model
         'updated_at',
     ];
 
+    protected $casts = [
+        'is_done' => 'boolean',
+    ];
+
     public function prunable(): void
     {
         static::where('created_at', '<', now()->subDays(config('logging.channels.database.days')));

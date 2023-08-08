@@ -48,19 +48,16 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
     {
         parent::boot();
 
-        static::creating(function (Contact $contact) {
-            $contact->getSerialNumber(['customer_number', 'creditor_number']);
-        });
-
         static::saving(function (Contact $contact) {
             // reset to original
-            if ($contact->wasChanged(['customer_number', 'creditor_number'])) {
+            if ($contact->wasChanged(['customer_number', 'creditor_number', 'debtor_number'])) {
                 $contact->customer_number = $contact->getOriginal('customer_number');
                 $contact->creditor_number = $contact->getOriginal('creditor_number');
+                $contact->creditor_number = $contact->getOriginal('debtor_number');
             }
 
-            if (! $contact->exists && ! $contact->order_number) {
-                $contact->getSerialNumber(['customer_number', 'creditor_number']);
+            if (! $contact->exists) {
+                $contact->getSerialNumber(['customer_number', 'creditor_number', 'debtor_number']);
             }
         });
 

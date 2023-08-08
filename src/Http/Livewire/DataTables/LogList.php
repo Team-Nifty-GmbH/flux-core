@@ -5,6 +5,8 @@ namespace FluxErp\Http\Livewire\DataTables;
 use FluxErp\Models\Log;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\DataTable;
+use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class LogList extends DataTable
@@ -53,6 +55,48 @@ class LogList extends DataTable
         ],
     ];
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        $this->availableCols = ModelInfo::forModel($this->model)->attributes->pluck('name')->toArray();
+        if (! $this->userFilters) {
+            $this->userFilters = [
+                [
+                    [
+                        'column' => 'is_done',
+                        'operator' => '=',
+                        'value' => false,
+                    ],
+                ],
+            ];
+        }
+    }
+
+
+    public function getRowActions(): array
+    {
+        return [
+            DataTableButton::make(label: __('Done'))
+                ->icon('check')
+                ->color('positive')
+                ->attributes([
+                    'x-on:click' => 'event.stopPropagation(); $wire.markAsDone(record.id)'
+                ])
+        ];
+    }
+
+    public function getTableActions(): array
+    {
+        return [
+            DataTableButton::make(label: __('Mark found as done'))
+                ->color('primary')
+                ->attributes([
+                    'x-on:click' => '$wire.markAllAsDone()'
+                ])
+        ];
+    }
+
     public function itemToArray($item): array
     {
         $item = parent::itemToArray($item);
@@ -71,5 +115,24 @@ class LogList extends DataTable
         ]];
 
         parent::updatedSearch();
+    }
+
+    public function markAsDone(Log $log): void
+    {
+        $this->skipRender();
+
+        $log->is_done = true;
+        $log->save();
+
+        $this->loadData();
+    }
+
+    public function markAllAsDone(): void
+    {
+        $this->skipRender();
+
+        $this->buildSearch()->update(['is_done' => true]);
+
+        $this->loadData();
     }
 }

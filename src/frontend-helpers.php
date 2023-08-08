@@ -23,7 +23,8 @@ if (! function_exists('format_number')) {
 if (! function_exists('exception_to_notifications')) {
     function exception_to_notifications(
         Exception $exception,
-        Livewire\Component $component
+        Livewire\Component $component,
+        bool $skipRender = true
     ): void {
         if (! method_exists($component, 'notification')) {
             throw new InvalidArgumentException('Component does not have a notification method.');
@@ -33,12 +34,16 @@ if (! function_exists('exception_to_notifications')) {
             foreach ($exception->errors() as $field => $messages) {
                 foreach ($messages as $message) {
                     $component->notification()->error($field, $message);
+                    $component->addError($field, $message);
                 }
             }
         } else {
             $component->notification()->error($exception->getMessage());
+            $component->addError('', $exception->getMessage());
         }
 
-        $component->skipRender();
+        if ($skipRender) {
+            $component->skipRender();
+        }
     }
 }
