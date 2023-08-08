@@ -1,0 +1,33 @@
+<?php
+
+namespace {{ namespace }};
+
+use FluxErp\Actions\FluxAction;
+
+class {{ class }} extends FluxAction
+{
+    protected function boot(array $data): void
+    {
+        parent::boot($data);
+    }
+
+    public static function name(): string
+    {
+        return '{{ name }}';
+    }
+
+    public static function description(): ?string
+    {
+        return '{{ description }}';
+    }
+
+    public static function models(): array
+    {
+        return [];
+    }
+
+    public function performAction(): mixed
+    {
+        //
+    }
+}

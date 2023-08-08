@@ -10,6 +10,7 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class PriceHelper
 {
@@ -33,28 +34,28 @@ class PriceHelper
         return new static($product);
     }
 
-    public function setContact(Contact $contact): self
+    public function setContact(Contact $contact): static
     {
         $this->contact = $contact;
 
         return $this;
     }
 
-    public function setTimestamp(string $timestamp): self
+    public function setTimestamp(string $timestamp): static
     {
         $this->timestamp = Carbon::parse($timestamp)->toDateTimeString();
 
         return $this;
     }
 
-    public function setPriceList(PriceList $priceList): self
+    public function setPriceList(PriceList $priceList): static
     {
         $this->priceList = $priceList;
 
         return $this;
     }
 
-    public function useDefault(bool $useDefault): self
+    public function useDefault(bool $useDefault): static
     {
         $this->useDefault = $useDefault;
 
@@ -84,13 +85,19 @@ class PriceHelper
                 ->where('product_id', $this->product->id)
                 ->whereRelation('priceList', 'is_default', true)
                 ->first();
+        } else {
+            $price?->setRelation('priceList', $this->priceList);
         }
 
         if (! $price) {
             return null;
         }
 
-        $price->setRelation('priceList', $this->priceList);
+        $productCategoriesDiscounts = $price->priceList->categoryDiscounts()
+            ->wherePivotIn('category_id', $this->product->categories()->pluck('id')->toArray())
+            ->get();
+
+        $this->calculateLowestDiscountedPrice($price, $productCategoriesDiscounts);
 
         if ($this->contact) {
             $discounts = Discount::query()
@@ -168,14 +175,7 @@ class PriceHelper
                     ->get()
             );
 
-            $maxPercentageDiscount = $discounts->max(fn ($item) => $item->is_percentage ? $item->discount : 0);
-            $maxFlatDiscount = $discounts->max(fn ($item) => $item->is_percentage ? 0 : $item->discount);
-
-            $discountedPercentage = bcmul($price->price, (1 - $maxPercentageDiscount));
-            $discountedFlat = bcsub($price->price, $maxFlatDiscount);
-
-            $price->price = bccomp($discountedPercentage, $discountedFlat) === -1 ?
-                $discountedPercentage : $discountedFlat;
+            $this->calculateLowestDiscountedPrice($price, $discounts->diff($productCategoriesDiscounts));
         }
 
         return $price;
@@ -214,7 +214,8 @@ class PriceHelper
 
         // If price was found, apply all the discounts in reverse order
         if ($price) {
-            $discountedPrice = $price->price;
+            $function = $this->priceList->is_net ? 'getNet' : 'getGross';
+            $discountedPrice = $price->{$function}($this->product->vatRate?->rate_percentage);
             foreach (array_reverse(array_filter($discounts)) as $discount) {
                 $discountedPrice = $discount->is_percentage ?
                     bcmul($discountedPrice, (1 - $discount->discount)) : bcsub($discountedPrice, $discount->discount);
@@ -230,5 +231,17 @@ class PriceHelper
         }
 
         return $price;
+    }
+
+    private function calculateLowestDiscountedPrice(Price $price, Collection $discounts): void
+    {
+        $maxPercentageDiscount = $discounts->max(fn ($item) => $item->is_percentage ? $item->discount : 0);
+        $maxFlatDiscount = $discounts->max(fn ($item) => $item->is_percentage ? 0 : $item->discount) ?: 0;
+
+        $discountedPercentage = bcmul($price->price, (1 - $maxPercentageDiscount));
+        $discountedFlat = bcsub($price->price, $maxFlatDiscount);
+
+        $price->price = bccomp($discountedPercentage, $discountedFlat) === -1 ?
+            $discountedPercentage : $discountedFlat;
     }
 }
