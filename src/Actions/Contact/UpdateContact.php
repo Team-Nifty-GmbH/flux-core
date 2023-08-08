@@ -71,6 +71,34 @@ class UpdateContact extends FluxAction
             }
         }
 
+        if (array_key_exists('creditor_number', $this->data)) {
+            $customerNumberExists = Contact::query()
+                ->where('id', '!=', $this->data['id'])
+                ->where('client_id', '=', $this->data['client_id'])
+                ->where('creditor_number', $this->data['creditor_number'])
+                ->exists();
+
+            if ($customerNumberExists) {
+                $errors += [
+                    'creditor_number' => [__('Creditor number already exists')],
+                ];
+            }
+        }
+
+        if (array_key_exists('debtor_number', $this->data)) {
+            $customerNumberExists = Contact::query()
+                ->where('id', '!=', $this->data['id'])
+                ->where('client_id', '=', $this->data['client_id'])
+                ->where('debtor_number', $this->data['debtor_number'])
+                ->exists();
+
+            if ($customerNumberExists) {
+                $errors += [
+                    'debtor_number' => [__('Debtor number already exists')],
+                ];
+            }
+        }
+
         $clientPaymentTypeExists = PaymentType::query()
             ->whereKey($this->data['payment_type_id'])
             ->where('client_id', $this->data['client_id'])

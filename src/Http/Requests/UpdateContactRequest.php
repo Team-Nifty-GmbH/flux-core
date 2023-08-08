@@ -31,6 +31,7 @@ class UpdateContactRequest extends BaseFormRequest
             ],
             'customer_number' => 'sometimes|string',
             'creditor_number' => 'string|nullable',
+            'debtor_number' => 'string|nullable',
             'payment_target_days' => 'sometimes|integer|nullable',
             'payment_reminder_days_1' => 'sometimes|integer|nullable',
             'payment_reminder_days_2' => 'sometimes|integer|nullable',

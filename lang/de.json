@@ -550,7 +550,6 @@
     "Translations": "Übersetzungen",
     "Users": "Benutzer",
     "Customer Portal": "Kundenportal",
-    "Currencies": "Währungen",
     "Price Lists": "Preislisten",
     "A list of all the price lists": "Liste aller Preislisten",
     "New Price List": "Neue Preisliste",
@@ -563,5 +562,9 @@
     "Parent": "Übergeordnet",
     "Product category discounts": "Produktkategorie Rabatte",
     "Category": "Kategorie",
-    "Discount": "Rabatt"
+    "Discount": "Rabatt",
+    "Currencies": "Währungen",
+    "Is Done": "Ist fertig",
+    "Done": "Fertig",
+    "Mark found as done": "Gefundene als abgeschlossen markieren"
 }
