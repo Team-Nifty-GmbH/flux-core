@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Discount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateDiscountRequest;
 use FluxErp\Models\Discount;
+use Illuminate\Validation\ValidationException;
 
 class CreateDiscount extends FluxAction
 {
@@ -25,5 +26,19 @@ class CreateDiscount extends FluxAction
         $discount->save();
 
         return $discount->fresh();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        // Check discount is max 1 if is_percentage = true
+        if ($this->data['is_percentage']
+            && $this->data['discount'] > 1
+        ) {
+            throw ValidationException::withMessages([
+                'discount' => [__('validation.max', ['attribute' => 'discount', 'max' => 1])],
+            ])->errorBag('createDiscount');
+        }
     }
 }

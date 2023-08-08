@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateDiscountRequest;
 use FluxErp\Models\Discount;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 class UpdateDiscount extends FluxAction
 {
@@ -30,5 +31,19 @@ class UpdateDiscount extends FluxAction
         $discount->save();
 
         return $discount->withoutRelations()->fresh();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        // Check discount is max 1 if is_percentage = true
+        if (($this->data['is_percentage'] ?? false)
+            && $this->data['discount'] > 1
+        ) {
+            throw ValidationException::withMessages([
+                'discount' => [__('validation.max', ['attribute' => 'discount', 'max' => 1])],
+            ])->errorBag('updateDiscount');
+        }
     }
 }

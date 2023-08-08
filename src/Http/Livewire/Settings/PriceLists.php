@@ -11,7 +11,6 @@ use FluxErp\Models\Category;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use Illuminate\Contracts\View\View;
-use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -33,6 +32,8 @@ class PriceLists extends Component
 
     public array $priceLists;
 
+    public array $categories;
+
     public array $discountedCategories = [];
 
     public array $newCategoryDiscount = [
@@ -47,6 +48,11 @@ class PriceLists extends Component
     {
         $this->priceLists = PriceList::query()
             ->get()
+            ->toArray();
+
+        $this->categories = Category::query()
+            ->where('model_type', Product::class)
+            ->get(['id', 'name'])
             ->toArray();
     }
 
@@ -86,19 +92,46 @@ class PriceLists extends Component
                             ->select(['id', 'discount', 'is_percentage']),
                 ])
                 ->get()
+                ->map(function ($item) {
+                    if (($item->discounts[0] ?? false) && $item->discounts[0]->is_percentage) {
+                        $item->discounts[0]->discount *= 100;
+                    }
+
+                    return $item;
+                })
                 ->toArray();
+
+            if ($this->selectedPriceList['discount']['is_percentage']
+                && $this->selectedPriceList['discount']['discount']
+            ) {
+                $this->selectedPriceList['discount']['discount'] *= 100;
+            }
+        } else {
+            $this->discountedCategories = [];
+
+            $this->newCategoryDiscount = [
+                'category_id' => null,
+                'discount' => null,
+                'is_percentage' => true,
+            ];
         }
 
         $this->editModal = true;
-        $this->resetErrorBag();
     }
 
     public function save(): void
     {
         $action = ($this->selectedPriceList['id'] ?? false) ? UpdatePriceList::class : CreatePriceList::class;
+        $selectedPriceList = $this->selectedPriceList;
+
+        if ($selectedPriceList['discount']['is_percentage']
+            && $selectedPriceList['discount']['discount']
+        ) {
+            $selectedPriceList['discount']['discount'] /= 100;
+        }
 
         try {
-            $priceList = $action::make($this->selectedPriceList)
+            $priceList = $action::make($selectedPriceList)
                 ->checkPermission()
                 ->validate()
                 ->execute();
@@ -123,11 +156,20 @@ class PriceLists extends Component
         $categoryIds = array_column($categories, 'id');
 
         foreach ($this->discountedCategories as $discountedCategory) {
+            if ($discountedCategory['discounts'][0]['is_percentage']
+                && $discountedCategory['discounts'][0]['discount']
+            ) {
+                $discountedCategory['discounts'][0]['discount'] /= 100;
+            }
+
             // Update category discount if category already discounted else create category discount
             if (($index = array_search($discountedCategory['id'], $categoryIds)) !== false) {
                 try {
-                    UpdateDiscount::make($discountedCategory['discounts'][0])->validate()->execute();
-                } catch (ValidationException) {
+                    UpdateDiscount::make($discountedCategory['discounts'][0])
+                        ->checkPermission()
+                        ->validate()
+                        ->execute();
+                } catch (\Exception) {
                     continue;
                 }
 
@@ -143,9 +185,10 @@ class PriceLists extends Component
                             ]
                         )
                     )
+                        ->checkPermission()
                         ->validate()
                         ->execute();
-                } catch (ValidationException) {
+                } catch (\Exception) {
                     continue;
                 }
 

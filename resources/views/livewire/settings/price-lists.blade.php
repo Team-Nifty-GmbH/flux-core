@@ -11,7 +11,7 @@
                 <div class="mt-2 text-sm text-gray-300">{{ __('A list of all the price lists') }}</div>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                @if(user_can('action.priceLists.create'))
+                @if(user_can('action.price-list.create'))
                     <button wire:click="showEditModal()"
                             type="button"
                             class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
@@ -71,49 +71,49 @@
                                 </td>
                                 <td>
                                     <div class="flex justify-center">
-                                        <x-input x-model="productCategory.discounts[0].discount"/>
+                                        <x-input x-model="productCategory.discounts[0].discount"
+                                                 :disabled="! (($selectedPriceList['id'] ?? false) ? user_can('action.discount.update') : user_can('action.discount.create'))"
+                                        />
                                     </div>
                                 </td>
                                 <td>
                                     <div class="flex justify-center">
                                         <x-checkbox
                                             x-model="productCategory.discounts[0].is_percentage"
+                                            :disabled="! (($selectedPriceList['id'] ?? false) ? user_can('action.discount.update') : user_can('action.discount.create'))"
                                         />
                                     </div>
                                 <td class="text-right">
-                                    <x-button icon="trash" negative x-on:click="$wire.removeCategoryDiscount(index)"/>
+                                    @if(($selectedPriceList['id'] ?? false) ? user_can('action.discount.update') : user_can('action.discount.create'))
+                                        <x-button icon="trash" negative x-on:click="$wire.removeCategoryDiscount(index)"/>
+                                    @endif
                                 </td>
                             </tr>
                         </template>
                     </x-table>
                     <div class="flex justify-between mt-4">
-                        <div>
-                            <x-select
-                                wire:model.defer="newCategoryDiscount.category_id"
-                                option-value="id"
-                                option-label="label"
-                                :clearable="false"
-                                :async-data="[
-                                    'api' => route('search', \FluxErp\Models\Category::class),
-                                    'params' => [
-                                        'where' => [
-                                            ['model_type', '=', \FluxErp\Models\Product::class],
-                                        ],
-                                    ]
-                                ]"
-                            />
-                        </div>
-                        <div>
-                            <x-input wire:model.defer="newCategoryDiscount.discount"/>
-                        </div>
-                        <div class="mt-2">
-                            <x-checkbox
-                                wire:model.defer="newCategoryDiscount.is_percentage"
-                            />
-                        </div>
-                        <div class="">
-                            <x-button primary icon="plus" wire:click="addCategoryDiscount"/>
-                        </div>
+                        @if(user_can('action.discount.create') && ($selectedPriceList['id'] ?? false) ? user_can('action.price-list.update') : user_can('action.price-list.create'))
+                            <div>
+                                <x-select
+                                    wire:model.defer="newCategoryDiscount.category_id"
+                                    option-value="id"
+                                    option-label="name"
+                                    :clearable="false"
+                                    :options="$categories"
+                                />
+                            </div>
+                            <div>
+                                <x-input wire:model.defer="newCategoryDiscount.discount"/>
+                            </div>
+                            <div class="mt-2">
+                                <x-checkbox
+                                    wire:model.defer="newCategoryDiscount.is_percentage"
+                                />
+                            </div>
+                            <div class="">
+                                <x-button primary icon="plus" wire:click="addCategoryDiscount"/>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -121,12 +121,15 @@
         <x-slot name="footer">
             <div class="flex justify-between gap-x-4">
                 <div x-bind:class="priceList.id > 0 || 'invisible'">
-                    <x-button flat negative :label="__('Delete')" x-on:click="close" wire:click="delete"/>
+                    @if(user_can('action.price-list.delete'))
+                        <x-button flat negative :label="__('Delete')" x-on:click="close" wire:click="delete"/>
+                    @endif
                 </div>
                 <div class="flex">
                     <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                    <x-button primary :label="__('Save')" wire:click="save"/>
-                    <x-errors />
+                    @if(($selectedPriceList['id'] ?? false) ? user_can('action.price-list.update') : user_can('action.price-list.create'))
+                        <x-button primary :label="__('Save')" wire:click="save"/>
+                    @endif
                 </div>
             </div>
         </x-slot>

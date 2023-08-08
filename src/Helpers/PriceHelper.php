@@ -236,7 +236,7 @@ class PriceHelper
     private function calculateLowestDiscountedPrice(Price $price, Collection $discounts): void
     {
         $maxPercentageDiscount = $discounts->max(fn ($item) => $item->is_percentage ? $item->discount : 0);
-        $maxFlatDiscount = $discounts->max(fn ($item) => $item->is_percentage ? 0 : $item->discount);
+        $maxFlatDiscount = $discounts->max(fn ($item) => $item->is_percentage ? 0 : $item->discount) ?: 0;
 
         $discountedPercentage = bcmul($price->price, (1 - $maxPercentageDiscount));
         $discountedFlat = bcsub($price->price, $maxFlatDiscount);

@@ -95,6 +95,16 @@ class UpdatePriceList extends FluxAction
             ];
         }
 
+        // Check discount is max 1 if is_percentage = true
+        if (($this->data['discount'] ?? false)
+            && $this->data['discount']['is_percentage']
+            && $this->data['discount']['discount'] > 1
+        ) {
+            $errors += [
+                'discount.discount' => [__('validation.max', ['attribute' => 'discount', 'max' => 1])],
+            ];
+        }
+
         if ($errors) {
             throw ValidationException::withMessages($errors)->errorBag('updatePriceList');
         }
