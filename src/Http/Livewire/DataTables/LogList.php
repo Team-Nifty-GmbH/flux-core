@@ -73,7 +73,6 @@ class LogList extends DataTable
         }
     }
 
-
     public function getRowActions(): array
     {
         return [
