@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Ticket;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateTicketRequest;
 use FluxErp\Models\Ticket;
+use FluxErp\Models\TicketType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -15,6 +16,18 @@ class UpdateTicket extends FluxAction
     {
         parent::boot($data);
         $this->rules = (new UpdateTicketRequest())->rules();
+
+        if ($this->data['ticket_type_id'] ?? false) {
+            TicketType::query()->whereKey($this->data['ticket_type_id'])->first();
+
+            $this->rules = array_merge(
+                $this->rules,
+                TicketType::query()
+                    ->whereKey($this->data['ticket_type_id'])
+                    ->first()
+                    ?->hasAdditionalColumnsValidationRules() ?? []
+            );
+        }
     }
 
     public static function models(): array

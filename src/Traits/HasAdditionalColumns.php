@@ -241,7 +241,7 @@ trait HasAdditionalColumns
     {
         $rules = [];
 
-        foreach ($this->getAdditionalColumns() as $column) {
+        foreach ($this->getAdditionalColumns(false) as $column) {
             if ($column->values) {
                 $rules[$column->name] = 'in:' . implode(',', $column->values);
             }
