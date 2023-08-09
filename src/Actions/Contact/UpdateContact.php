@@ -71,7 +71,7 @@ class UpdateContact extends FluxAction
             }
         }
 
-        if (array_key_exists('creditor_number', $this->data)) {
+        if (array_key_exists('creditor_number', $this->data) && ! is_null($this->data['creditor_number'])) {
             $customerNumberExists = Contact::query()
                 ->where('id', '!=', $this->data['id'])
                 ->where('client_id', '=', $this->data['client_id'])
@@ -85,7 +85,7 @@ class UpdateContact extends FluxAction
             }
         }
 
-        if (array_key_exists('debtor_number', $this->data)) {
+        if (array_key_exists('debtor_number', $this->data) && ! is_null($this->data['debtor_number'])) {
             $customerNumberExists = Contact::query()
                 ->where('id', '!=', $this->data['id'])
                 ->where('client_id', '=', $this->data['client_id'])
