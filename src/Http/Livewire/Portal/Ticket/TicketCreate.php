@@ -81,6 +81,13 @@ class TicketCreate extends Component
         return view('flux::livewire.portal.ticket.ticket-create');
     }
 
+    public function updatedAttachments(): void
+    {
+        $this->prepareForMediaLibrary('attachments');
+
+        $this->skipRender();
+    }
+
     public function show(): void
     {
         $this->ticket = [
