@@ -24,6 +24,9 @@ class QueryBuilder
     {
         $queryBuilder = LaravelQueryBuilder::for($model, $request);
 
+        $allowed = $model::getColumns();
+        $queryBuilder->allowedFields($allowed->pluck('Field')->toArray());
+
         if (! method_exists($model, 'relationships')) {
             return $queryBuilder;
         }
@@ -64,7 +67,6 @@ class QueryBuilder
             }
         }
 
-        $allowed = $model::getColumns();
         $modelFilters = self::calculateFilters($model);
 
         $additionalColumns = AdditionalColumn::query()

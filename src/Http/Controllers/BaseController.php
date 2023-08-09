@@ -5,6 +5,7 @@ namespace FluxErp\Http\Controllers;
 use FluxErp\Helpers\ModelFilter;
 use FluxErp\Helpers\QueryBuilder;
 use FluxErp\Helpers\ResponseHelper;
+use FluxErp\Traits\Filterable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -87,7 +88,9 @@ class BaseController extends Controller
 
             $data = $result['data']->paginate($perPage, $page, [], $result['urlParams']);
         } else {
-            $query = QueryBuilder::filterModel($this->model, $request);
+            $query = in_array(Filterable::class, class_uses_recursive($this->model)) ?
+                QueryBuilder::filterModel($this->model, $request) :
+                $this->model::query();
             $data = $query->paginate($perPage);
         }
 
