@@ -81,6 +81,13 @@ class TicketCreate extends Component
         return view('flux::livewire.portal.ticket.ticket-create');
     }
 
+    public function updatedAttachments(): void
+    {
+        $this->prepareForMediaLibrary('attachments');
+
+        $this->skipRender();
+    }
+
     public function show(): void
     {
         $this->ticket = [
@@ -115,7 +122,7 @@ class TicketCreate extends Component
         }
 
         try {
-            $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id);
+            $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, Ticket::class);
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
         }

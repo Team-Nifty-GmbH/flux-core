@@ -17,6 +17,16 @@ class CreateTicket extends FluxAction
     {
         parent::boot($data);
         $this->rules = (new CreateTicketRequest())->rules();
+
+        if ($this->data['ticket_type_id'] ?? false) {
+            $this->rules = array_merge(
+                $this->rules,
+                TicketType::query()
+                    ->whereKey($this->data['ticket_type_id'])
+                    ->first()
+                    ?->hasAdditionalColumnsValidationRules() ?? []
+            );
+        }
     }
 
     public static function models(): array
