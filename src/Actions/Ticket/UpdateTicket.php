@@ -18,8 +18,6 @@ class UpdateTicket extends FluxAction
         $this->rules = (new UpdateTicketRequest())->rules();
 
         if ($this->data['ticket_type_id'] ?? false) {
-            TicketType::query()->whereKey($this->data['ticket_type_id'])->first();
-
             $this->rules = array_merge(
                 $this->rules,
                 TicketType::query()
