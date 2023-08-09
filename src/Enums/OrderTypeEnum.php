@@ -27,4 +27,14 @@ enum OrderTypeEnum: string
             self::Retoure, self::Purchase => -1,
         };
     }
+
+    public function isPurchase(): bool
+    {
+        return self::getIsPurchase($this);
+    }
+
+    public static function getIsPurchase(self $value): bool
+    {
+        return in_array($value, [self::Purchase, self::PurchaseRefund]);
+    }
 }
