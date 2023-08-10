@@ -13,6 +13,8 @@ class UpdateCustomEvent extends FluxAction
     {
         parent::boot($data);
         $this->rules = (new UpdateCustomEventRequest())->rules();
+
+        $this->rules['name'] = $this->rules['name'] . ',' . $this->data['id'];
     }
 
     public static function models(): array

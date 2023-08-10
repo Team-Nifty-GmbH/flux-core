@@ -14,6 +14,9 @@ class UpdateLanguage extends FluxAction
     {
         parent::boot($data);
         $this->rules = (new UpdateLanguageRequest())->rules();
+
+        $this->rules['language_code'] = $this->rules['language_code'] . ',' . $this->data['id'];
+        $this->rules['iso_name'] = $this->rules['iso_name'] . ',' . $this->data['id'];
     }
 
     public static function models(): array

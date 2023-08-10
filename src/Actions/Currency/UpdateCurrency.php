@@ -13,6 +13,8 @@ class UpdateCurrency extends FluxAction
     {
         parent::boot($data);
         $this->rules = (new UpdateCurrencyRequest())->rules();
+
+        $this->rules['iso'] = $this->rules['iso'] . ',' . $this->data['id'];
     }
 
     public static function models(): array

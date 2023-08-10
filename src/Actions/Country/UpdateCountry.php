@@ -14,6 +14,8 @@ class UpdateCountry extends FluxAction
     {
         parent::boot($data);
         $this->rules = (new UpdateCountryRequest())->rules();
+
+        $this->rules['iso_alpha2'] = $this->rules['iso_alpha2'] . ',' . $this->data['id'];
     }
 
     public static function models(): array

@@ -14,6 +14,8 @@ class UpdateClient extends FluxAction
     {
         parent::boot($data);
         $this->rules = (new UpdateClientRequest())->rules();
+
+        $this->rules['client_code'] = $this->rules['client_code'] . ',' . $this->data['id'];
     }
 
     public static function models(): array
