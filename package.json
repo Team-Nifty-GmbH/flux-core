@@ -20,7 +20,7 @@
         "@tailwindcss/line-clamp": "^0.4.4",
         "@tailwindcss/typography": "^0.5.2",
         "alpinejs": "^3.12.3",
-        "autoprefixer": "10.4.14",
+        "autoprefixer": "10.4.15",
         "axios": "^1.4",
         "dotenv": "^16.3.1",
         "dotenv-expand": "^10.0.0",
