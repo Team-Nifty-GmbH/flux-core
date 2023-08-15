@@ -70,7 +70,7 @@ class PriceHelper
             ->where('product_id', $this->product->id)
             ->first();
 
-        if (! $price && $this->priceList->parent) {
+        if (! $price && $this->priceList?->parent) {
             $price = $this->calculatePriceFromPriceList($this->priceList, []);
         }
 
