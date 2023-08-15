@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\Tags\HasTags;
@@ -70,6 +71,11 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         return $this->hasMany(Product::class, 'parent_id');
     }
 
+    public function coverMedia(): HasOne
+    {
+        return $this->hasOne(Media::class, 'id', 'cover_media_id');
+    }
+
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'parent_id');
@@ -90,7 +96,7 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         return $this->belongsToMany(ProductProperty::class, 'product_product_property', 'product_id', 'product_prop_id');
     }
 
-    public function stockPostings()
+    public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class);
     }
@@ -125,6 +131,6 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->getFirstMediaUrl('images') ?: self::icon()->getUrl();
+        return $this->coverMedia()->first()?->getUrl() ?: $this->getFirstMediaUrl('images') ?: self::icon()->getUrl();
     }
 }

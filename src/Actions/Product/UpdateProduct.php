@@ -10,6 +10,7 @@ use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\ValidationException;
 
 class UpdateProduct extends FluxAction
@@ -18,6 +19,10 @@ class UpdateProduct extends FluxAction
     {
         parent::boot($data);
         $this->rules = (new UpdateProductRequest())->rules();
+
+        $this->rules['cover_media_id'][] = (new Exists('media', 'id'))
+            ->where('model_type', Product::class)
+            ->where('model_id', $this->data['id']);
     }
 
     public static function models(): array

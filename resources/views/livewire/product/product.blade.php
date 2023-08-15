@@ -1,5 +1,6 @@
 <div x-data="{
         product: $wire.entangle('product').defer,
+        additionalColumns: $wire.entangle('additionalColumns').defer,
         edit: false,
         priceLists: $wire.entangle('priceLists').defer,
         currency: $wire.entangle('currency').defer,

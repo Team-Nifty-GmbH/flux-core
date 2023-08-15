@@ -5,6 +5,7 @@ namespace FluxErp\Rules;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\InvokableRule;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 
 class MediaUploadType implements InvokableRule, DataAwareRule
 {
@@ -36,9 +37,9 @@ class MediaUploadType implements InvokableRule, DataAwareRule
             $fail(':input is not a valid :attribute.')->translate();
         }
 
-        $valid = match ($value) {
+        $valid = match (strtolower($value)) {
             'base64' => ! base64_decode($this->data['media']),
-            'url' => filter_var($this->data['media'], FILTER_VALIDATE_URL),
+            'url' => Str::isUrl($this->data['media']),
             'string' => is_string($this->data['media']),
             'stream' => is_resource($this->data['media']),
             default => ($this->data['media'] ?? null) instanceof UploadedFile
