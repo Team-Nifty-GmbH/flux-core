@@ -15,7 +15,7 @@
         <x-checkbox x-bind:readonly="!edit" label="{{ __('Is active') }}" x-model="product.is_active" />
         <x-checkbox x-bind:readonly="!edit" label="{{ __('Is highlight') }}" x-model="product.is_highlight" />
         <x-checkbox x-bind:readonly="!edit" label="{{ __('Is NOS') }}" x-model="product.is_nos" />
-        <x-checkbox x-bind:readonly="!edit" label="{{ __('Export to Webshop') }}" x-model="product.is_active_export_to_webshop" />
+        <x-checkbox x-bind:readonly="!edit" label="{{ __('Export to Webshop') }}" x-model="product.is_active_export_to_web_shop" />
         @show
         <x-input x-bind:readonly="!edit" label="{{ __('EAN') }}" x-model="product.ean" />
         <x-input x-bind:readonly="!edit" label="{{ __('Manufacturer product number') }}" x-model="product.manufacturer_product_number" />
@@ -46,4 +46,19 @@
             ]"
         ></x-model-select>
     </x-card>
+    @if($this->additionalColumns)
+        <x-card :title="__('Additional columns')">
+            <div class="flex flex-col gap-4">
+                <template x-for="additionalColumn in additionalColumns">
+                    <div>
+                        <x-label
+                            x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
+                            x-bind:for="additionalColumn.name"
+                        />
+                        <x-input x-bind:type="additionalColumn.field_type" x-model="product[additionalColumn.name]" :disabled="true"/>
+                    </div>
+                </template>
+            </div>
+        </x-card>
+    @endif
 </div>

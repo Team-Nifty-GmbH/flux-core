@@ -2,11 +2,12 @@
 
 namespace FluxErp\Rules;
 
+use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
-use Illuminate\Contracts\Validation\InvokableRule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
 
-class MorphExists implements InvokableRule, DataAwareRule
+class MorphExists implements ValidationRule, DataAwareRule
 {
     protected array $data;
 
@@ -17,14 +18,7 @@ class MorphExists implements InvokableRule, DataAwareRule
         $this->modelAttribute = $modelAttribute;
     }
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
-     */
-    public function __invoke($attribute, $value, $fail): void
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $prefix = strpos($attribute, '.') ? pathinfo($attribute, PATHINFO_FILENAME) . '.' : null;
 

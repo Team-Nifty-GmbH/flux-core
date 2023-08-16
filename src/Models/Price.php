@@ -32,6 +32,10 @@ class Price extends Model
         'uuid',
     ];
 
+    public bool $isCalculated = false;
+
+    public ?Price $basePrice = null;
+
     public function isNet(): Attribute
     {
         return Attribute::get(

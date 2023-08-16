@@ -19,6 +19,10 @@ class UpdateProductRequest extends BaseFormRequest
             (new Product())->hasAdditionalColumnsValidationRules(),
             [
                 'id' => 'required|integer|exists:products,id,deleted_at,NULL',
+                'cover_media_id' => [
+                    'integer',
+                    'nullable',
+                ],
                 'parent_id' => [
                     'integer',
                     'nullable',

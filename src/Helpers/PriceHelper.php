@@ -70,7 +70,7 @@ class PriceHelper
             ->where('product_id', $this->product->id)
             ->first();
 
-        if (! $price && $this->priceList->parent) {
+        if (! $price && $this->priceList?->parent) {
             $price = $this->calculatePriceFromPriceList($this->priceList, []);
         }
 
@@ -92,6 +92,8 @@ class PriceHelper
         if (! $price) {
             return null;
         }
+
+        $price->isCalculated = true;
 
         $productCategoriesDiscounts = $price->priceList->categoryDiscounts()
             ->wherePivotIn('category_id', $this->product->categories()->pluck('id')->toArray())
@@ -214,9 +216,14 @@ class PriceHelper
 
         // If price was found, apply all the discounts in reverse order
         if ($price) {
+            $discounts = array_filter($discounts);
+            if ($discounts) {
+                $price->basePrice = (new Price())->forceFill($price->toArray());
+            }
+
             $function = $this->priceList->is_net ? 'getNet' : 'getGross';
             $discountedPrice = $price->{$function}($this->product->vatRate?->rate_percentage);
-            foreach (array_reverse(array_filter($discounts)) as $discount) {
+            foreach (array_reverse($discounts) as $discount) {
                 $discountedPrice = $discount->is_percentage ?
                     bcmul($discountedPrice, (1 - $discount->discount)) : bcsub($discountedPrice, $discount->discount);
             }
@@ -235,6 +242,10 @@ class PriceHelper
 
     private function calculateLowestDiscountedPrice(Price $price, Collection $discounts): void
     {
+        if (! $price->basePrice && $discounts->count()) {
+            $price->basePrice = (new Price())->forceFill($price->toArray());
+        }
+
         $maxPercentageDiscount = $discounts->max(fn ($item) => $item->is_percentage ? $item->discount : 0);
         $maxFlatDiscount = $discounts->max(fn ($item) => $item->is_percentage ? 0 : $item->discount) ?: 0;
 
