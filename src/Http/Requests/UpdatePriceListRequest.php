@@ -26,8 +26,8 @@ class UpdatePriceListRequest extends BaseFormRequest
             'is_default' => 'boolean',
 
             'discount' => 'exclude_without:parent_id|exclude_if:parent_id,NULL|array',
-            'discount.discount' => 'numeric|nullable',
-            'discount.is_percentage' => 'required_with:discount.discount|boolean',
+            'discount.discount' => 'exclude_without:discount|present|numeric|nullable',
+            'discount.is_percentage' => 'exclude_without:discount|required|boolean',
         ];
     }
 }

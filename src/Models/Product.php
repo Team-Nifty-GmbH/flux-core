@@ -71,9 +71,9 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         return $this->hasMany(Product::class, 'parent_id');
     }
 
-    public function coverMedia(): HasOne
+    public function coverMedia(): BelongsTo
     {
-        return $this->hasOne(Media::class, 'id', 'cover_media_id');
+        return $this->belongsTo(Media::class, 'cover_media_id');
     }
 
     public function parent(): BelongsTo
