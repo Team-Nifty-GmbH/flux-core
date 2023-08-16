@@ -22,7 +22,7 @@ class UpdateProduct extends FluxAction
 
         $this->rules['cover_media_id'][] = (new Exists('media', 'id'))
             ->where('model_type', Product::class)
-            ->where('model_id', $this->data['id'] ?? false);
+            ->where('model_id', $this->data['id'] ?? null);
     }
 
     public static function models(): array
