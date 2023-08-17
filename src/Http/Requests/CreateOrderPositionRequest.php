@@ -20,6 +20,7 @@ class CreateOrderPositionRequest extends BaseFormRequest
             (new OrderPosition())->hasAdditionalColumnsValidationRules(),
             [
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
+                'ledger_account_id' => 'integer|nullable|exists:ledger_accounts,id',
                 'order_id' => 'required|integer|exists:orders,id,deleted_at,NULL',
                 'origin_position_id' => 'integer|nullable|exists:order_positions,id,deleted_at,NULL',
                 'parent_id' => 'sometimes|integer|nullable|exists:order_positions,id,deleted_at,NULL',

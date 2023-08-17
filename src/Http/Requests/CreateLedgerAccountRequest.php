@@ -1,0 +1,29 @@
+<?php
+
+namespace FluxErp\Http\Requests;
+
+use FluxErp\Enums\LedgerAccountTypeEnum;
+use Illuminate\Validation\Rules\Enum;
+
+class CreateLedgerAccountRequest extends BaseFormRequest
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'number' => 'required|numeric|max:255|unique:ledger_accounts,number',
+            'description' => 'nullable|string|max:255',
+            'ledger_account_type_enum' => [
+                'required',
+                'string',
+                new Enum(LedgerAccountTypeEnum::class),
+            ],
+            'is_automatic' => 'boolean',
+        ];
+    }
+}

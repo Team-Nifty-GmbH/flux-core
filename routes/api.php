@@ -21,6 +21,7 @@ use FluxErp\Http\Controllers\DiscountController;
 use FluxErp\Http\Controllers\DocumentTypeController;
 use FluxErp\Http\Controllers\EventSubscriptionController;
 use FluxErp\Http\Controllers\LanguageController;
+use FluxErp\Http\Controllers\LedgerAccountController;
 use FluxErp\Http\Controllers\LockController;
 use FluxErp\Http\Controllers\MediaController;
 use FluxErp\Http\Controllers\NotificationSettingsController;
@@ -204,6 +205,13 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization'])
         Route::post('/languages', [LanguageController::class, 'create']);
         Route::put('/languages', [LanguageController::class, 'update']);
         Route::delete('/languages/{id}', [LanguageController::class, 'delete']);
+
+        // LedgerAccounts
+        Route::get('/ledger-accounts/{id}', [LedgerAccountController::class, 'show']);
+        Route::get('/ledger-accounts', [LedgerAccountController::class, 'index']);
+        Route::post('/ledger-accounts', [LedgerAccountController::class, 'create']);
+        Route::put('/ledger-accounts', [LedgerAccountController::class, 'update']);
+        Route::delete('/ledger-accounts/{id}', [LedgerAccountController::class, 'delete']);
 
         //Locking
         Route::get('/user/locks', [LockController::class, 'showUserLocks']);

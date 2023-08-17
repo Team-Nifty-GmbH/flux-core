@@ -14,7 +14,7 @@ class PriceListList extends DataTable
         'name',
         'price_list_code',
         'is_net',
-        'is_default'
+        'is_default',
     ];
 
     public array $availableRelations = ['*'];

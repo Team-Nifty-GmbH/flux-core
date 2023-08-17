@@ -25,6 +25,7 @@ class UpdateOrderPositionRequest extends BaseFormRequest
                     'integer',
                     (new ExistsWithIgnore('clients', 'id'))->whereNull('deleted_at'),
                 ],
+                'ledger_account_id' => 'integer|nullable|exists:ledger_accounts,id',
                 'order_id' => [
                     'integer',
                     (new ExistsWithIgnore('orders', 'id'))->whereNull('deleted_at'),

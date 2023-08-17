@@ -135,6 +135,11 @@ class OrderPosition extends Model
         return $this->morphMany(Discount::class, 'model');
     }
 
+    public function ledgerAccount(): BelongsTo
+    {
+        return $this->belongsTo(LedgerAccount::class);
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);

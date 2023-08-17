@@ -80,8 +80,8 @@ class LogList extends DataTable
                 ->icon('check')
                 ->color('positive')
                 ->attributes([
-                    'x-on:click' => 'event.stopPropagation(); $wire.markAsDone(record.id)'
-                ])
+                    'x-on:click' => 'event.stopPropagation(); $wire.markAsDone(record.id)',
+                ]),
         ];
     }
 
@@ -91,8 +91,8 @@ class LogList extends DataTable
             DataTableButton::make(label: __('Mark found as done'))
                 ->color('primary')
                 ->attributes([
-                    'x-on:click' => '$wire.markAllAsDone()'
-                ])
+                    'x-on:click' => '$wire.markAllAsDone()',
+                ]),
         ];
     }
 
