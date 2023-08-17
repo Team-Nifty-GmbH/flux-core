@@ -87,9 +87,8 @@ class PriceLists extends Component
                 ->where('model_type', Product::class)
                 ->orderBy('sort_number', 'DESC')
                 ->with([
-                    'discounts' =>
-                        fn ($query) => $query->where('category_price_list.price_list_id', $priceList->id)
-                            ->select(['id', 'discount', 'is_percentage']),
+                    'discounts' => fn ($query) => $query->where('category_price_list.price_list_id', $priceList->id)
+                        ->select(['id', 'discount', 'is_percentage']),
                 ])
                 ->get()
                 ->map(function ($item) {
@@ -146,9 +145,8 @@ class PriceLists extends Component
             ->where('model_type', Product::class)
             ->orderBy('sort_number', 'DESC')
             ->with([
-                'discounts' =>
-                    fn ($query) => $query->where('category_price_list.price_list_id', $priceList->id)
-                        ->select(['id', 'discount', 'is_percentage']),
+                'discounts' => fn ($query) => $query->where('category_price_list.price_list_id', $priceList->id)
+                    ->select(['id', 'discount', 'is_percentage']),
             ])
             ->get()
             ->toArray();
