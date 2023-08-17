@@ -13,7 +13,7 @@ class UpdateLedgerAccount extends FluxAction
         parent::boot($data);
         $this->rules = (new UpdateLedgerAccountRequest())->rules();
 
-        $this->rules['number'] = $this->rules['number'] . ',' . $this->data['id'];
+        $this->rules['number'] = $this->rules['number'] . ',' . $this->data['id'] ?? 0;
     }
 
     public static function models(): array
