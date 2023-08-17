@@ -22,12 +22,8 @@ class LedgerAccountController extends BaseController
 
     public function create(CreateLedgerAccountRequest $request): JsonResponse
     {
-        try {
-            $ledgerAccount = CreateLedgerAccount::make($request->all())
-                ->execute();
-        } catch (ValidationException $e) {
-            return $e->getResponse();
-        }
+        $ledgerAccount = CreateLedgerAccount::make($request->all())
+            ->execute();
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
@@ -46,13 +42,13 @@ class LedgerAccountController extends BaseController
         $responses = [];
         foreach ($data as $key => $item) {
             try {
-                $responses[] = ResponseHelper::createArrayResponse(
+                $responses['responses'][] = ResponseHelper::createArrayResponse(
                     statusCode: 200,
                     data: $ledgerAccount = UpdateLedgerAccount::make($item)->validate()->execute(),
                     additions: ['id' => $ledgerAccount->id]
                 );
             } catch (ValidationException $e) {
-                $responses[] = ResponseHelper::createArrayResponse(
+                $responses['responses'][] = ResponseHelper::createArrayResponse(
                     statusCode: 422,
                     data: $e->errors(),
                     additions: [
@@ -69,20 +65,19 @@ class LedgerAccountController extends BaseController
 
     public function delete(string $id): JsonResponse
     {
-        $responses = [];
         try {
             DeleteLedgerAccount::make(['id' => $id])->validate()->execute();
-            $responses[] = ResponseHelper::createArrayResponse(
+            $response = ResponseHelper::createArrayResponse(
                 statusCode: 204,
                 statusMessage: 'ledger account deleted'
             );
         } catch (ValidationException $e) {
-            $responses[] = ResponseHelper::createArrayResponse(
+            $response = ResponseHelper::createArrayResponse(
                 statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
                 data: $e->errors()
             );
         }
 
-        return ResponseHelper::createResponseFromArrayResponse($responses);
+        return ResponseHelper::createResponseFromArrayResponse($response);
     }
 }

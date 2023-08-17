@@ -18,14 +18,14 @@ class UpdateLedgerAccountRequest extends BaseFormRequest
             'id' => 'required|integer|exists:ledger_accounts,id',
             'name' => 'sometimes|required|string|max:255',
             'number' => 'sometimes|required|numeric|max:255|unique:ledger_accounts,number',
-            'description' => 'sometimes|nullable|string|max:255',
+            'description' => 'nullable|string|max:255',
             'ledger_account_type_enum' => [
                 'sometimes',
                 'required',
                 'string',
                 new Enum(LedgerAccountTypeEnum::class),
             ],
-            'is_automatic' => 'sometimes|boolean',
+            'is_automatic' => 'boolean',
         ];
     }
 }

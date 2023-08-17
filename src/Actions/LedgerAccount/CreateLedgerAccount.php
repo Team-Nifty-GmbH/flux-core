@@ -11,7 +11,7 @@ class CreateLedgerAccount extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateLedgerAccountRequest())->rules() ;
+        $this->rules = (new CreateLedgerAccountRequest())->rules();
     }
 
     public static function models(): array
