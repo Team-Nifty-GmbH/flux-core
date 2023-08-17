@@ -16,7 +16,7 @@ class CreateLedgerAccountRequest extends BaseFormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'number' => 'required|numeric|max:255|unique:ledger_accounts,number',
+            'number' => 'required|numeric|unique:ledger_accounts,number',
             'description' => 'nullable|string|max:255',
             'ledger_account_type_enum' => [
                 'required',

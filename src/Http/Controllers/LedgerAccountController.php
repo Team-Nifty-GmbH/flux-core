@@ -42,13 +42,13 @@ class LedgerAccountController extends BaseController
         $responses = [];
         foreach ($data as $key => $item) {
             try {
-                $responses['responses'][] = ResponseHelper::createArrayResponse(
+                $responses[] = ResponseHelper::createArrayResponse(
                     statusCode: 200,
                     data: $ledgerAccount = UpdateLedgerAccount::make($item)->validate()->execute(),
                     additions: ['id' => $ledgerAccount->id]
                 );
             } catch (ValidationException $e) {
-                $responses['responses'][] = ResponseHelper::createArrayResponse(
+                $responses[] = ResponseHelper::createArrayResponse(
                     statusCode: 422,
                     data: $e->errors(),
                     additions: [
@@ -60,7 +60,13 @@ class LedgerAccountController extends BaseController
             }
         }
 
-        return ResponseHelper::createResponseFromArrayResponse($responses);
+        $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
+
+        return ResponseHelper::createResponseFromArrayResponse([
+            'status' => $statusCode,
+            'responses' => $responses,
+            'statusMessage' => $statusCode === 422 ? null : 'ledger account(s) updated',
+        ]);
     }
 
     public function delete(string $id): JsonResponse

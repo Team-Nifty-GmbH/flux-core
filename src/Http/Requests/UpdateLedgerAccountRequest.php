@@ -17,7 +17,7 @@ class UpdateLedgerAccountRequest extends BaseFormRequest
         return [
             'id' => 'required|integer|exists:ledger_accounts,id',
             'name' => 'sometimes|required|string|max:255',
-            'number' => 'sometimes|required|numeric|max:255|unique:ledger_accounts,number',
+            'number' => 'sometimes|required|numeric|unique:ledger_accounts,number',
             'description' => 'nullable|string|max:255',
             'ledger_account_type_enum' => [
                 'sometimes',
