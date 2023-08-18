@@ -91,7 +91,7 @@ class BaseController extends Controller
             $query = in_array(Filterable::class, class_uses_recursive($this->model)) ?
                 QueryBuilder::filterModel($this->model, $request) :
                 $this->model::query();
-            $data = $query->paginate($perPage);
+            $data = $query->paginate($perPage)->appends($request->query());
         }
 
         return ResponseHelper::createResponseFromBase(
