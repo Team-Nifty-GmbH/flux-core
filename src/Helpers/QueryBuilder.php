@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Schema;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder as LaravelQueryBuilder;
+use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class QueryBuilder
 {
@@ -72,12 +73,13 @@ class QueryBuilder
 
             $relatedAllowedFields = array_merge(
                 $relatedAllowedFields,
-                array_flip(
-                    array_map(
-                        fn ($item) => $includedItem . '.' . $item,
-                        array_diff(Schema::getColumnListing($related->getTable()), $related->getHidden())
-                    )
-                )
+                ModelInfo::forModel($related)->attributes
+                    ->where('hidden', false)
+                    ->where('virtual', false)
+                    ->pluck('name')
+                    ->map(fn ($value) => $includedItem . '.' . $value)
+                    ->flip()
+                    ->toArray()
             );
         }
 
