@@ -12,7 +12,7 @@ class CreateSerialNumberRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:serial_number_ranges,uuid',
+            'uuid' => 'string|uuid|unique:serial_numbers,uuid',
             'serial_number_range_id' => 'integer|exists:serial_number_ranges,id,deleted_at,NULL',
             'product_id' => 'integer|exists:products,id,deleted_at,NULL',
             'address_id' => 'integer|exists:addresses,id,deleted_at,NULL',
