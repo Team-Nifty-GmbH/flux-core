@@ -25,6 +25,7 @@ class CreateWorkTimeRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:work_times,uuid',
             'user_id' => [
                 'required',
                 'integer',

@@ -12,6 +12,7 @@ class CreateContactRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:contacts,uuid',
             'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
             'payment_type_id' => 'sometimes|integer|nullable|exists:payment_types,id,deleted_at,NULL',
             'price_list_id' => 'sometimes|integer|nullable|exists:price_lists,id,deleted_at,NULL',

@@ -27,10 +27,6 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
     use BroadcastsEvents, Commentable, Filterable, HasPackageFactory, HasFrontendAttributes, HasSerialNumberRange,
         HasUserModification, HasUuid, InteractsWithMedia, Lockable, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
         'has_sensitive_reminder' => 'boolean',
@@ -39,7 +35,6 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public static string $iconName = 'users';

@@ -18,6 +18,7 @@ class CreateTicketTypeRequest extends BaseFormRequest
         return array_merge(
             (new TicketType())->hasAdditionalColumnsValidationRules(),
             [
+                'uuid' => 'string|uuid|unique:ticket_types,uuid',
                 'name' => 'required|string',
                 'model_type' => [
                     'string',

@@ -13,17 +13,12 @@ class Widget extends Model implements Sortable
 {
     use HasPackageFactory, HasUuid, SortableTrait;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
     ];
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     protected static function booted(): void

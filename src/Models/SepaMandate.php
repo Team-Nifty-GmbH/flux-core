@@ -15,7 +15,6 @@ class SepaMandate extends Model
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
     protected $hidden = [
-        'uuid',
         'model_type',
     ];
 
@@ -25,7 +24,6 @@ class SepaMandate extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public function bankConnection(): BelongsTo

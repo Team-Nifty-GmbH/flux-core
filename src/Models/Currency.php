@@ -15,10 +15,6 @@ class Currency extends Model
 {
     use Commentable, Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
         'symbol' => 'string',
@@ -27,7 +23,6 @@ class Currency extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public function countries(): HasMany

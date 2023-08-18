@@ -31,11 +31,6 @@ class Presentation extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
-    ];
-
-    protected $hidden = [
-        'uuid',
     ];
 
     public array $translatable = [

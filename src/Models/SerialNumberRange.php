@@ -18,10 +18,6 @@ class SerialNumberRange extends Model
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
         'has_serial_number' => 'boolean',
@@ -29,7 +25,6 @@ class SerialNumberRange extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     protected static function booted(): void

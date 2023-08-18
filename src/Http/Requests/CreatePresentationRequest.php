@@ -19,6 +19,7 @@ class CreatePresentationRequest extends BaseFormRequest
         return array_merge(
             (new Presentation())->hasAdditionalColumnsValidationRules(),
             [
+                'uuid' => 'string|uuid|unique:presentations,uuid',
                 'name' => 'required|string',
                 'notice' => 'sometimes|string|nullable',
                 'model_type' => [

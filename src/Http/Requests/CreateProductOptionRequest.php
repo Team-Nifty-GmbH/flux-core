@@ -12,6 +12,7 @@ class CreateProductOptionRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:product_options,uuid',
             'product_option_group_id' => 'required|integer|exists:product_option_groups,id,deleted_at,NULL',
             'name' => 'required|string',
         ];

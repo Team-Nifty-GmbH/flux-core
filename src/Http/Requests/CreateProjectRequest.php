@@ -18,6 +18,7 @@ class CreateProjectRequest extends BaseFormRequest
         return array_merge(
             (new Project())->hasAdditionalColumnsValidationRules(),
             [
+                'uuid' => 'string|uuid|unique:projects,uuid',
                 'parent_id' => 'integer|nullable|exists:projects,id,deleted_at,NULL',
                 'category_id' => 'required|integer|exists:categories,id',
                 'project_name' => 'required|string',

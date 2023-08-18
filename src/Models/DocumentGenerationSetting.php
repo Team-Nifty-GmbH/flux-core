@@ -13,17 +13,12 @@ class DocumentGenerationSetting extends Model
 {
     use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
     ];
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public function documentType(): BelongsTo

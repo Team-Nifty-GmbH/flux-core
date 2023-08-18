@@ -15,6 +15,7 @@ class CreateTransactionRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:transactions,uuid',
             'account_id' => 'required|integer|exists:accounts,id,deleted_at,NULL',
             'currency_id' => 'integer|nullable|exists:currencies,id,deleted_at,NULL',
             'parent_id' => 'integer|nullable|exists:transactions,id',

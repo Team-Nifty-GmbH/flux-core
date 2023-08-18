@@ -12,7 +12,6 @@ class Snapshot extends Model
     use HasPackageFactory, HasUserModification, HasUuid;
 
     protected $hidden = [
-        'uuid',
         'model_type',
     ];
 
