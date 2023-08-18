@@ -20,6 +20,7 @@ class CreateSerialNumberRangeRequest extends BaseFormRequest
         return array_merge(
             (new SerialNumber())->hasAdditionalColumnsValidationRules(),
             [
+                'uuid' => 'string|uuid|unique:serial_numbers,uuid',
                 'client_id' => 'required|integer|exists:clients,id',
                 'model_type' => [
                     'required',

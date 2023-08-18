@@ -14,17 +14,12 @@ class BankConnection extends Model
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
     ];
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public function sepaMandates(): HasMany

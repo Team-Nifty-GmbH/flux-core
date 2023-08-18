@@ -19,6 +19,7 @@ class CreateOrderPositionRequest extends BaseFormRequest
         return array_merge(
             (new OrderPosition())->hasAdditionalColumnsValidationRules(),
             [
+                'uuid' => 'string|uuid|unique:order_positions,uuid',
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
                 'ledger_account_id' => 'integer|nullable|exists:ledger_accounts,id',
                 'order_id' => 'required|integer|exists:orders,id,deleted_at,NULL',

@@ -32,7 +32,6 @@ class Client extends Model implements HasMedia
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     protected $with = [

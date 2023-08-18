@@ -13,7 +13,6 @@ class Discount extends Model
     use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
     protected $hidden = [
-        'uuid',
         'pivot',
     ];
 
@@ -24,6 +23,5 @@ class Discount extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 }

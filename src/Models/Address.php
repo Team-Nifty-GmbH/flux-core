@@ -48,7 +48,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     protected string $detailRouteName = 'contacts.id?';

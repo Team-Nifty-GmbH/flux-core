@@ -18,6 +18,7 @@ class CreateProjectTaskRequest extends BaseFormRequest
         return array_merge(
             (new ProjectTask())->hasAdditionalColumnsValidationRules(),
             [
+                'uuid' => 'string|uuid|unique:project_tasks,uuid',
                 'project_id' => 'required|integer|exists:projects,id,deleted_at,NULL',
                 'categories' => 'prohibits:category_id|required_without:category_id|array',
                 'category_id' => 'prohibits:categories|required_without:categories|integer|exists:categories,id,model_type,'

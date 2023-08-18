@@ -18,7 +18,6 @@ class Token extends Authenticatable
 
     protected $guarded = [
         'id',
-        'uuid',
         'created_at',
         'created_by',
         'updated_at',

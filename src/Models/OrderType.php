@@ -18,10 +18,6 @@ class OrderType extends Model
 {
     use Filterable, HasEnums, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
         'print_layouts' => 'array',
@@ -32,7 +28,6 @@ class OrderType extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public $translatable = [

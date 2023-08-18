@@ -27,10 +27,6 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
     use Categorizable, Filterable, HasAdditionalColumns, HasPackageFactory, HasFrontendAttributes, HasSerialNumberRange,
         HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable, Searchable, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
         'is_active' => 'boolean',
@@ -47,7 +43,6 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public array $translatable = [

@@ -22,6 +22,7 @@ class CreateOrderRequest extends BaseFormRequest
             (new Order())->hasAdditionalColumnsValidationRules(),
             Arr::prependKeysWith((new CreateAddressRequest())->postalAddressRules(), 'address_delivery.'),
             [
+                'uuid' => 'string|uuid|unique:orders,uuid',
                 'parent_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
                 'contact_id' => [

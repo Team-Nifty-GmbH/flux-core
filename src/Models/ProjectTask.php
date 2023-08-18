@@ -30,17 +30,12 @@ class ProjectTask extends Model implements HasMedia
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     protected $casts = [
         'is_done' => 'boolean',
         'is_paid' => 'boolean',
         'state' => ProjectTaskState::class,
-    ];
-
-    protected $hidden = [
-        'uuid',
     ];
 
     public array $translatable = [

@@ -13,7 +13,6 @@ class InterfaceUser extends Authenticatable
     use HasApiTokens, SoftDeletes;
 
     protected $hidden = [
-        'uuid',
         'password',
     ];
 

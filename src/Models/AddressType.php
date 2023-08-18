@@ -14,10 +14,6 @@ class AddressType extends Model
 {
     use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes, HasTranslations;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
         'is_lock' => 'boolean',
@@ -26,7 +22,6 @@ class AddressType extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public array $translatable = [

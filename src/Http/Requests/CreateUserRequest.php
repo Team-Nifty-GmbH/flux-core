@@ -14,6 +14,7 @@ class CreateUserRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:users,uuid',
             'language_id' => 'sometimes|integer|exists:languages,id,deleted_at,NULL',
             'email' => 'required|email|unique:users,email',
             'firstname' => 'required|string',
