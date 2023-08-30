@@ -69,6 +69,7 @@ class PriceHelper
         $price = $this->priceList?->prices()
             ->where('product_id', $this->product->id)
             ->first();
+        $originalPrice = $price;
 
         if (! $price && $this->priceList?->parent) {
             $price = $this->calculatePriceFromPriceList($this->priceList, []);
@@ -92,8 +93,6 @@ class PriceHelper
         if (! $price) {
             return null;
         }
-
-        $price->isCalculated = true;
 
         $productCategoriesDiscounts = $price->priceList->categoryDiscounts()
             ->wherePivotIn('category_id', $this->product->categories()->pluck('id')->toArray())
@@ -178,6 +177,10 @@ class PriceHelper
             );
 
             $this->calculateLowestDiscountedPrice($price, $discounts->diff($productCategoriesDiscounts));
+        }
+
+        if (is_null($originalPrice)) {
+            $price->isCalculated = true;
         }
 
         return $price;
