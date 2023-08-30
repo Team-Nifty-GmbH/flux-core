@@ -3,6 +3,9 @@
 namespace FluxErp\Actions\Product;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
+use FluxErp\Actions\ProductCrossSelling\DeleteProductCrossSelling;
+use FluxErp\Actions\ProductCrossSelling\UpdateProductCrossSelling;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateProductRequest;
 use FluxErp\Models\Price;
@@ -33,6 +36,8 @@ class UpdateProduct extends FluxAction
     public function performAction(): Model
     {
         $productOptions = Arr::pull($this->data, 'product_options', []);
+        $productCrossSellings = Arr::pull($this->data, 'product_cross_sellings');
+
         $productProperties = Arr::mapWithKeys(
             Arr::pull($this->data, 'product_properties', []),
             fn ($item, $key) => [$item['id'] => $item['value']]
@@ -83,6 +88,30 @@ class UpdateProduct extends FluxAction
                         ->mapWithKeys(fn ($item) => [$item['id'] => ['count' => $item['count']]])
                         ->toArray()
                 );
+        }
+
+        if ($productCrossSellings !== null) {
+            $activeProductCrossSellings = [];
+            foreach ($productCrossSellings as $productCrossSelling) {
+                $productCrossSelling['product_id'] = $product->id;
+                if ($productCrossSelling['id'] ?? false) {
+                    $action = UpdateProductCrossSelling::make($productCrossSelling);
+                } else {
+                    $action = CreateProductCrossSelling::make($productCrossSelling);
+                }
+
+                $activeProductCrossSellings[] = $action->checkPermission()->validate()->execute()->id;
+            }
+
+            $removedProductCrossSellings = $product->productCrossSellings
+                ?->whereNotIn('id', $activeProductCrossSellings)
+                ->pluck('id')
+                ->toArray();
+            foreach ($removedProductCrossSellings as $removedProductCrossSelling) {
+                DeleteProductCrossSelling::make(['id' => $removedProductCrossSelling])
+                    ->checkPermission()
+                    ->execute();
+            }
         }
 
         return $product->withoutRelations()->fresh();

@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Product;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Http\Requests\CreateProductRequest;
 use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
@@ -24,6 +25,7 @@ class CreateProduct extends FluxAction
     public function performAction(): Product
     {
         $productOptions = Arr::pull($this->data, 'product_options', []);
+        $productCrossSellings = Arr::pull($this->data, 'product_cross_sellings', []);
         $productProperties = Arr::mapWithKeys(
             Arr::pull($this->data, 'product_properties', []),
             fn ($item, $key) => [$item['id'] => $item['value']]
@@ -52,6 +54,13 @@ class CreateProduct extends FluxAction
 
         if ($prices) {
             $product->prices()->createMany($prices);
+        }
+
+        if ($productCrossSellings) {
+            foreach ($productCrossSellings as $productCrossSelling) {
+                $productCrossSelling['product_id'] = $product->id;
+                CreateProductCrossSelling::make($productCrossSelling)->checkPermission()->validate()->execute()->id;
+            }
         }
 
         return $product->refresh();

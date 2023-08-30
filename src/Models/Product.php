@@ -24,7 +24,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends Model implements HasMedia, InteractsWithDataTables
 {
-    use Categorizable, Filterable, HasAdditionalColumns, HasPackageFactory, HasFrontendAttributes, HasSerialNumberRange,
+    use Categorizable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange,
         HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable, Searchable, SoftDeletes;
 
     protected $hidden = [
@@ -73,6 +73,11 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
     public function coverMedia(): BelongsTo
     {
         return $this->belongsTo(Media::class, 'cover_media_id');
+    }
+
+    public function productCrossSellings(): HasMany
+    {
+        return $this->hasMany(ProductCrossSelling::class);
     }
 
     public function parent(): BelongsTo
