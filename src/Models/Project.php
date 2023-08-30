@@ -27,11 +27,6 @@ class Project extends Model implements InteractsWithDataTables
 
     protected $guarded = [
         'id',
-        'uuid',
-    ];
-
-    protected $hidden = [
-        'uuid',
     ];
 
     protected $casts = [

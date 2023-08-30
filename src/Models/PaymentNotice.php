@@ -14,17 +14,12 @@ class PaymentNotice extends Model
 {
     use HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
     ];
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public $translatable = [

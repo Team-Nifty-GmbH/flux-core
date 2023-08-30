@@ -12,6 +12,7 @@ class CreateCountryRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:countries,uuid',
             'language_id' => 'required|integer|exists:languages,id,deleted_at,NULL',
             'currency_id' => 'required|integer|exists:currencies,id,deleted_at,NULL',
             'name' => 'required|string',

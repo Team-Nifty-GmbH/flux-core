@@ -14,7 +14,6 @@ class Media extends BaseMedia
     protected $hidden = [
         'model_type',
         'model_id',
-        'uuid',
         'collection_name',
         'name',
         'disk',
@@ -26,7 +25,6 @@ class Media extends BaseMedia
 
     protected $guarded = [
         'id',
-        'uuid',
         'created_at',
         'updated_at',
     ];

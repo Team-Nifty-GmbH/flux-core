@@ -18,6 +18,7 @@ class CreateCategoryRequest extends BaseFormRequest
         return array_merge(
             (new Category())->hasAdditionalColumnsValidationRules(),
             [
+                'uuid' => 'string|uuid|unique:categories,uuid',
                 'model_type' => [
                     'required',
                     'string',

@@ -33,7 +33,6 @@ class Comment extends Model implements HasMedia
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public function children(): hasMany

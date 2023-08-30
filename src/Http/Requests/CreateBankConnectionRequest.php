@@ -14,6 +14,7 @@ class CreateBankConnectionRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:bank_connections,uuid',
             'contact_id' => 'integer|nullable|exists:contacts,id,deleted_at,NULL',
             'iban' => ['required', 'string', new Iban()],
             'account_holder' => 'sometimes|string|nullable',

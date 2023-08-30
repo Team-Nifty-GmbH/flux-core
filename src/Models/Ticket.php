@@ -40,7 +40,6 @@ class Ticket extends Model implements HasMedia, InteractsWithDataTables
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     protected string $detailRouteName = 'tickets.id';

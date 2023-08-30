@@ -15,10 +15,6 @@ class DocumentType extends Model
 {
     use Filterable, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
         'is_active' => 'boolean',
@@ -26,7 +22,6 @@ class DocumentType extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public $translatable = [

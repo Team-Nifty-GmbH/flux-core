@@ -19,17 +19,12 @@ class Price extends Model
         'is_net',
     ];
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
     ];
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public bool $isCalculated = false;

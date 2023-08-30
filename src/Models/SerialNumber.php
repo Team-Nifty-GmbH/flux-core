@@ -22,17 +22,12 @@ class SerialNumber extends Model implements HasMedia, InteractsWithDataTables
     use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasFrontendAttributes, HasUserModification, HasUuid,
         InteractsWithMedia, Searchable;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
     ];
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public string $detailRouteName = 'products.serial-numbers.id?';

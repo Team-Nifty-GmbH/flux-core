@@ -30,11 +30,9 @@ class Category extends Model implements Sortable, InteractsWithDataTables
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     protected $hidden = [
-        'uuid',
         'pivot',
     ];
 

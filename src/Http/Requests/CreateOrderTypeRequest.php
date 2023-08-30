@@ -15,6 +15,7 @@ class CreateOrderTypeRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:order_types,uuid',
             'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
             'name' => 'required|string',
             'description' => 'string|nullable',

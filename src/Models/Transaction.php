@@ -16,10 +16,6 @@ class Transaction extends Model
 {
     use HasFrontendAttributes, HasUserModification, HasUuid, Searchable;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
         'amount' => Money::class,
@@ -28,7 +24,6 @@ class Transaction extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     protected static function boot()

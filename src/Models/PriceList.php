@@ -16,10 +16,6 @@ class PriceList extends Model
 {
     use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'is_net' => 'boolean',
         'is_default' => 'boolean',
@@ -27,7 +23,6 @@ class PriceList extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public function categoryDiscounts(): BelongsToMany

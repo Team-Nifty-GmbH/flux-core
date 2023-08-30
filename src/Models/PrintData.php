@@ -30,13 +30,11 @@ class PrintData extends Model implements HasMedia
 
     protected $guarded = [
         'id',
-        'uuid',
         'created_at',
         'updated_at',
     ];
 
     protected $hidden = [
-        'uuid',
         'data',
     ];
 

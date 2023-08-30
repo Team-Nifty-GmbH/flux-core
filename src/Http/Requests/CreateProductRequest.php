@@ -26,6 +26,7 @@ class CreateProductRequest extends BaseFormRequest
             [
                 'name' => 'required|string',
 
+                'uuid' => 'string|uuid|unique:products,uuid',
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
                 'parent_id' => 'integer|exists:products,id,deleted_at,NULL|nullable',
                 'vat_rate_id' => 'integer|exists:vat_rates,id,deleted_at,NULL|nullable',

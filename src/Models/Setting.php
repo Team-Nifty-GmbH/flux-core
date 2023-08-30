@@ -18,7 +18,6 @@ class Setting extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public function model(): MorphTo

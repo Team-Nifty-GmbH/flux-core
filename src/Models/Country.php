@@ -17,10 +17,6 @@ class Country extends Model
 {
     use Commentable, Filterable, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
         'is_active' => 'boolean',
@@ -30,7 +26,6 @@ class Country extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public $translatable = [

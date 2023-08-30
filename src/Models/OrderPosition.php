@@ -27,10 +27,6 @@ class OrderPosition extends Model
     use HasAdditionalColumns, HasPackageFactory, HasFrontendAttributes, HasSerialNumberRange, HasTags,
         HasUserModification, HasUuid, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $appends = [
         'unit_price',
     ];
@@ -61,7 +57,6 @@ class OrderPosition extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     protected static function booted(): void
