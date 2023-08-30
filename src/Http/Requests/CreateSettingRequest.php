@@ -16,6 +16,7 @@ class CreateSettingRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:settings,uuid',
             'key' => 'required|string|unique:settings,key',
             'model_type' => [
                 'required',

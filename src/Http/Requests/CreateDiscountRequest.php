@@ -16,6 +16,7 @@ class CreateDiscountRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:discounts,uuid',
             'model_type' => [
                 'required_with:model_id',
                 'string',

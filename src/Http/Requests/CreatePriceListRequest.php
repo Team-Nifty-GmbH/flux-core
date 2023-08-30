@@ -12,6 +12,7 @@ class CreatePriceListRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:price_lists,uuid',
             'parent_id' => 'nullable|integer|exists:price_lists,id,deleted_at,NULL',
             'name' => 'required|string',
             'price_list_code' => 'required|string|unique:price_lists,price_list_code',

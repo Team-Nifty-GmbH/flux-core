@@ -22,6 +22,7 @@ class CreateTicketRequest extends BaseFormRequest
         return array_merge(
             (new Ticket())->hasAdditionalColumnsValidationRules(),
             [
+                'uuid' => 'string|uuid|unique:tickets,uuid',
                 'authenticatable_type' => [
                     'required',
                     'string',

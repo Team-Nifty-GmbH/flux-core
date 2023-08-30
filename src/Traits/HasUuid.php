@@ -16,7 +16,7 @@ trait HasUuid
 
         static::saving(function ($model) {
             $originalUuid = $model->getOriginal('uuid');
-            if ($originalUuid !== $model->uuid) {
+            if ($originalUuid !== $model->uuid && ! is_null($originalUuid)) {
                 $model->uuid = $originalUuid;
             }
         });

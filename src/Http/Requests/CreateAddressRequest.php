@@ -18,6 +18,7 @@ class CreateAddressRequest extends BaseFormRequest
             (new Address())->hasAdditionalColumnsValidationRules(),
             $this->postalAddressRules(),
             [
+                'uuid' => 'string|uuid|unique:addresses,uuid',
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
                 'contact_id' => [
                     'required',

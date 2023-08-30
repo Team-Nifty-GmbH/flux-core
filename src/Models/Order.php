@@ -21,6 +21,7 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,7 +38,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
 {
     use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasPackageFactory, HasFrontendAttributes,
         HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
-        SoftDeletes;
+        SoftDeletes, Trackable;
 
     protected $with = [
         'currency',
@@ -77,13 +78,8 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
 
     public string $detailRouteName = 'orders.id?';
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public array $translatable = [

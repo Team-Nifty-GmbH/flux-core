@@ -22,6 +22,5 @@ class EmailTemplate extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 }

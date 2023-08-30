@@ -18,7 +18,6 @@ class WorkTimeType extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public $translatable = [

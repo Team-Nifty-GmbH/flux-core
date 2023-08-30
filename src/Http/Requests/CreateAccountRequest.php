@@ -14,6 +14,7 @@ class CreateAccountRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:accounts,uuid',
             'bank_connection_id' => 'integer|nullable|exists:bank_connections,id,deleted_at,NULL',
             'currency_id' => 'integer|nullable|exists:currencies,id,deleted_at,NULL',
             'name' => 'string|nullable',

@@ -41,7 +41,6 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference, Int
     ];
 
     protected $hidden = [
-        'uuid',
         'password',
     ];
 
@@ -52,7 +51,6 @@ class User extends Authenticatable implements HasMedia, HasLocalePreference, Int
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public static string $iconName = 'user';

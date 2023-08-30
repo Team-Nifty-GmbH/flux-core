@@ -17,6 +17,7 @@ class CreateCommentRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:comments,uuid',
             'model_type' => [
                 'required',
                 'string',

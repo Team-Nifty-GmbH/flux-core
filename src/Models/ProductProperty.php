@@ -16,7 +16,6 @@ class ProductProperty extends Model
     use Filterable, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
     protected $hidden = [
-        'uuid',
         'pivot',
     ];
 
@@ -26,7 +25,6 @@ class ProductProperty extends Model
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public array $translatable = [

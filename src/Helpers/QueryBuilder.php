@@ -17,15 +17,13 @@ use Illuminate\Support\Collection;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder as LaravelQueryBuilder;
+use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class QueryBuilder
 {
     public static function filterModel(object $model, Request $request = null): LaravelQueryBuilder
     {
         $queryBuilder = LaravelQueryBuilder::for($model, $request);
-
-        $allowed = $model::getColumns();
-        $queryBuilder->allowedFields($allowed->pluck('Field')->toArray());
 
         if (! method_exists($model, 'relationships')) {
             return $queryBuilder;
@@ -35,9 +33,6 @@ class QueryBuilder
             array_keys($model->relationships()),
             ['additionalColumns', 'relatedModel', 'relatedBy']
         );
-        if (count($includes) > 0) {
-            $queryBuilder->allowedIncludes($includes);
-        }
 
         $modelName = get_class($model);
 
@@ -45,7 +40,7 @@ class QueryBuilder
         $relatedAllowedSorts = [];
         foreach ($includes as $include) {
             $relatedModel = $model->$include()->getRelated();
-            if (in_array(Filterable::class, class_uses($relatedModel))) {
+            if (in_array(Filterable::class, class_uses_recursive($relatedModel))) {
                 $relatedAllowedFilters = array_merge(
                     $relatedAllowedFilters,
                     self::calculateFilters($relatedModel, $include)
@@ -65,6 +60,39 @@ class QueryBuilder
                     );
                 }
             }
+        }
+
+        $relatedAllowedFields = [];
+        foreach (explode(',', $request->include ?: '') as $includedItem) {
+            if (! in_array($includedItem = trim($includedItem), $includes)) {
+                continue;
+            }
+
+            $related = $model->$includedItem()->getRelated();
+
+            $relatedAllowedFields = array_merge(
+                $relatedAllowedFields,
+                ModelInfo::forModel($related)->attributes
+                    ->where('hidden', false)
+                    ->where('virtual', false)
+                    ->pluck('name')
+                    ->map(fn ($value) => $includedItem . '.' . $value)
+                    ->flip()
+                    ->toArray()
+            );
+        }
+
+        $allowed = $model::getColumns();
+        $allowedFields = array_flip(
+            array_map(
+                fn ($item) => $model->getTable() . '.' . $item,
+                $allowed->pluck('Field')->toArray()
+            )
+        );
+        $queryBuilder->allowedFields(array_keys(array_merge($allowedFields, $relatedAllowedFields)));
+
+        if (count($includes) > 0) {
+            $queryBuilder->allowedIncludes($includes);
         }
 
         $modelFilters = self::calculateFilters($model);

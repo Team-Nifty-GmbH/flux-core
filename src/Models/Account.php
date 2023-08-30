@@ -13,17 +13,12 @@ class Account extends Model
 {
     use HasUserModification, HasUuid, Searchable, SoftDeletes;
 
-    protected $hidden = [
-        'uuid',
-    ];
-
     protected $casts = [
         'uuid' => 'string',
     ];
 
     protected $guarded = [
         'id',
-        'uuid',
     ];
 
     public function bankConnection(): BelongsTo

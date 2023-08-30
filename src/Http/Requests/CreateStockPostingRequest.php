@@ -12,6 +12,7 @@ class CreateStockPostingRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'uuid' => 'string|uuid|unique:stock_postings,uuid',
             'warehouse_id' => 'required|integer|exists:warehouses,id,deleted_at,NULL',
             'product_id' => 'required|integer|exists:products,id,deleted_at,NULL',
             'purchase_price' => 'required|numeric',
