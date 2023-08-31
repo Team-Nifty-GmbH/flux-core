@@ -5,6 +5,7 @@ namespace FluxErp\Actions\OrderPosition;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -81,6 +82,39 @@ class CreateOrderPosition extends FluxAction
         PriceCalculation::fill($orderPosition, $this->data);
         unset($orderPosition->discounts);
         $orderPosition->save();
+
+        if ($this->data['product_id'] ?? false) {
+            $product = $orderPosition->product()->with('bundleProducts')->first();
+            $sortNumber = $orderPosition->sort_number;
+            $product->bundleProducts
+                ->map(function (Product $bundleProduct) use ($orderPosition, &$sortNumber) {
+                    $sortNumber++;
+
+                    return [
+                        'client_id' => $orderPosition->client_id,
+                        'order_id' => $orderPosition->order_id,
+                        'parent_id' => $orderPosition->id,
+                        'product_id' => $bundleProduct->id,
+                        'vat_rate_id' => $bundleProduct->vat_rate_id,
+                        'warehouse_id' => $orderPosition->warehouse_id,
+                        'amount' => bcmul($bundleProduct->pivot->count, $orderPosition->amount),
+                        'amount_bundle' => $bundleProduct->pivot->count,
+                        'name' => $bundleProduct->name,
+                        'product_number' => $bundleProduct->product_number,
+                        'sort_number' => $sortNumber,
+                        'purchase_price' => 0,
+                        'vat_rate_percentage' => 0,
+                        'is_net' => $orderPosition->is_net,
+                        'is_free_text' => false,
+                        'is_bundle_position' => true,
+                    ];
+                })
+                ->each(function (array $bundleProduct) {
+                    CreateOrderPosition::make($bundleProduct)
+                        ->validate()
+                        ->execute();
+                });
+        }
 
         $orderPosition->attachTags($tags);
 
