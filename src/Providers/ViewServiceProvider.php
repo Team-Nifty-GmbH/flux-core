@@ -29,8 +29,23 @@ class ViewServiceProvider extends ServiceProvider
     {
         /** use @extendFlux() at the end of the component, not the beginning */
         Blade::directive('extendFlux', function (string $expression) {
-            $finder = new FileViewFinder(app('files'), [flux_path('resources/views')]);
-            $filePath = $finder->find($expression);
+            $expression = trim($expression, '()');
+
+            // Split the expression into its components
+            $parts = explode(',', $expression);
+
+            // Trim and remove quotes from each part
+            $view = trim($parts[0], ' "\'');
+            $viewPaths = $parts[1] ?? false ? eval('return ' . $parts[1] . ';') : null;
+
+            if (is_string($viewPaths)) {
+                $viewPaths = [$viewPaths];
+            }
+
+            $viewPaths = array_merge($viewPaths ?? [], [flux_path('resources/views')]);
+
+            $finder = new FileViewFinder(app('files'), $viewPaths);
+            $filePath = $finder->find($view);
 
             return Blade::compileString(file_get_contents($filePath));
         });
