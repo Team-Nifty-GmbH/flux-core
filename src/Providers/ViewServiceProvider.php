@@ -29,14 +29,14 @@ class ViewServiceProvider extends ServiceProvider
     {
         /** use @extendFlux() at the end of the component, not the beginning */
         Blade::directive('extendFlux', function (string $expression) {
-            $expression = trim($expression, '()');
+            $expression = trim($expression, '\'');
 
             // Split the expression into its components
             $parts = explode(',', $expression);
 
             // Trim and remove quotes from each part
             $view = trim($parts[0], ' "\'');
-            $viewPaths = $parts[1] ?? false ? eval('return ' . $parts[1] . ';') : null;
+            $viewPaths = $parts[1] ?? false ? eval('return ' . trim($parts[1], ' "\'') . ';') : null;
 
             if (is_string($viewPaths)) {
                 $viewPaths = [$viewPaths];
