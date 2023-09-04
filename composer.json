@@ -24,7 +24,7 @@
         "spatie/laravel-tags": "^4.3",
         "spatie/laravel-translatable": "^6.0",
         "spatie/laravel-translation-loader": "^2.7",
-        "team-nifty-gmbh/tall-calendar": "^0.1.0",
+        "team-nifty-gmbh/tall-calendar": "^0.2.1",
         "team-nifty-gmbh/tall-datatables": "^0.4.0",
         "wireui/heroicons": "^2.3",
         "wireui/wireui": "^1.12"
