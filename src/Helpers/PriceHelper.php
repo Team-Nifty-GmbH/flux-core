@@ -38,6 +38,10 @@ class PriceHelper
     {
         $this->contact = $contact;
 
+        if(is_null($this->priceList)) {
+            $this->priceList = $contact->priceList;
+        }
+
         return $this;
     }
 
@@ -72,6 +76,9 @@ class PriceHelper
 
         if (! $price && $this->priceList?->parent) {
             $price = $this->calculatePriceFromPriceList($this->priceList, []);
+            if ($price) {
+                $price->isInherited = true;
+            }
         }
 
         if (! $price) {
@@ -92,8 +99,6 @@ class PriceHelper
         if (! $price) {
             return null;
         }
-
-        $price->isCalculated = true;
 
         $productCategoriesDiscounts = $price->priceList->categoryDiscounts()
             ->wherePivotIn('category_id', $this->product->categories()->pluck('id')->toArray())

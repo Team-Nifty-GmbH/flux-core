@@ -3,10 +3,13 @@
 namespace FluxErp\Actions\Product;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Http\Requests\CreateProductRequest;
 use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class CreateProduct extends FluxAction
 {
@@ -24,6 +27,7 @@ class CreateProduct extends FluxAction
     public function performAction(): Product
     {
         $productOptions = Arr::pull($this->data, 'product_options', []);
+        $productCrossSellings = Arr::pull($this->data, 'product_cross_sellings', []);
         $productProperties = Arr::mapWithKeys(
             Arr::pull($this->data, 'product_properties', []),
             fn ($item, $key) => [$item['id'] => $item['value']]
@@ -53,6 +57,16 @@ class CreateProduct extends FluxAction
         if ($prices) {
             $product->prices()->createMany($prices);
         }
+
+        try {
+            CreateProductCrossSelling::canPerformAction();
+            foreach ($productCrossSellings as $productCrossSelling) {
+                $productCrossSelling['product_id'] = $product->id;
+                try {
+                    CreateProductCrossSelling::make($productCrossSelling)->validate()->execute();
+                } catch (ValidationException) {}
+            }
+        } catch (UnauthorizedException) {}
 
         return $product->refresh();
     }

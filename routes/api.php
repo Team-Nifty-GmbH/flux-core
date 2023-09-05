@@ -35,6 +35,7 @@ use FluxErp\Http\Controllers\PriceController;
 use FluxErp\Http\Controllers\PriceListController;
 use FluxErp\Http\Controllers\PrintDataController;
 use FluxErp\Http\Controllers\ProductController;
+use FluxErp\Http\Controllers\ProductCrossSellingController;
 use FluxErp\Http\Controllers\ProductOptionController;
 use FluxErp\Http\Controllers\ProductOptionGroupController;
 use FluxErp\Http\Controllers\ProductPropertyController;
@@ -315,6 +316,13 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization'])
         Route::post('/products', [ProductController::class, 'create']);
         Route::put('/products', [ProductController::class, 'update']);
         Route::delete('/products/{id}', [ProductController::class, 'delete']);
+
+        // ProductCrossSellings
+        Route::get('/product-cross-sellings/{id}', [ProductCrossSellingController::class, 'show']);
+        Route::get('/product-cross-sellings', [ProductCrossSellingController::class, 'index']);
+        Route::post('/product-cross-sellings', [ProductCrossSellingController::class, 'create']);
+        Route::put('/product-cross-sellings', [ProductCrossSellingController::class, 'update']);
+        Route::delete('/product-cross-sellings/{id}', [ProductCrossSellingController::class, 'delete']);
 
         //ProductOptions
         Route::get('/product-options/{id}', [ProductOptionController::class, 'show']);

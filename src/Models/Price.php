@@ -27,7 +27,7 @@ class Price extends Model
         'id',
     ];
 
-    public bool $isCalculated = false;
+    public bool $isInherited = false;
 
     public ?Price $basePrice = null;
 

@@ -4,6 +4,7 @@ namespace FluxErp\Http\Requests;
 
 use FluxErp\Models\Category;
 use FluxErp\Models\Product;
+use Illuminate\Support\Arr;
 
 class CreateProductRequest extends BaseFormRequest
 {
@@ -14,8 +15,14 @@ class CreateProductRequest extends BaseFormRequest
      */
     public function rules(): array
     {
+        $productCrossSellingsRules = Arr::prependKeysWith(
+            Arr::except((new CreateProductCrossSellingRequest())->rules(), 'product_id'),
+            'product_cross_sellings.*.'
+        );
+
         return array_merge(
             (new Product())->hasAdditionalColumnsValidationRules(),
+            $productCrossSellingsRules,
             [
                 'name' => 'required|string',
 
