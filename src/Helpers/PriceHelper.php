@@ -16,6 +16,8 @@ class PriceHelper
 {
     private ?Contact $contact = null;
 
+    private ?Discount $discount = null;
+
     private ?PriceList $priceList = null;
 
     private Product $product;
@@ -41,9 +43,9 @@ class PriceHelper
         return $this;
     }
 
-    public function setTimestamp(string $timestamp): static
+    public function addDiscount(Discount $discount): static
     {
-        $this->timestamp = Carbon::parse($timestamp)->toDateTimeString();
+        $this->discount = $discount;
 
         return $this;
     }
@@ -51,6 +53,13 @@ class PriceHelper
     public function setPriceList(PriceList $priceList): static
     {
         $this->priceList = $priceList;
+
+        return $this;
+    }
+
+    public function setTimestamp(string $timestamp): static
+    {
+        $this->timestamp = Carbon::parse($timestamp)->toDateTimeString();
 
         return $this;
     }
@@ -180,6 +189,20 @@ class PriceHelper
             $this->calculateLowestDiscountedPrice($price, $discounts->diff($productCategoriesDiscounts));
         }
 
+        // Apply added discount
+        if ($this->discount) {
+            $this->calculateLowestDiscountedPrice($price, collect($this->discount));
+        }
+
+        // Calculated total discounts based on base price and end price
+        if ($price->basePrice) {
+            $function = $price->basePrice->priceList->is_net ? 'getNet' : 'getGross';
+            $originalPrice = $price->basePrice->{$function}($this->product->vatRate?->rate_percentage);
+
+            $price->discountFlat = bcsub($originalPrice, $price->price);
+            $price->discountPercentage = bcdiv($price->price, $originalPrice);
+        }
+
         return $price;
     }
 
@@ -226,6 +249,7 @@ class PriceHelper
             foreach (array_reverse($discounts) as $discount) {
                 $discountedPrice = $discount->is_percentage ?
                     bcmul($discountedPrice, (1 - $discount->discount)) : bcsub($discountedPrice, $discount->discount);
+                $price->appliedDiscounts[] = $discount;
             }
 
             $price->price = $discountedPrice;
@@ -246,13 +270,27 @@ class PriceHelper
             $price->basePrice = (new Price())->forceFill($price->toArray());
         }
 
-        $maxPercentageDiscount = $discounts->max(fn ($item) => $item->is_percentage ? $item->discount : 0);
-        $maxFlatDiscount = $discounts->max(fn ($item) => $item->is_percentage ? 0 : $item->discount) ?: 0;
+        $maxPercentageDiscount = $discounts->reduce(function (?Discount $carry, Discount $item) {
+            return $item->is_percentage && $item->discount > $carry?->discount ? $item : $carry;
+        });
 
-        $discountedPercentage = bcmul($price->price, (1 - $maxPercentageDiscount));
-        $discountedFlat = bcsub($price->price, $maxFlatDiscount);
+        $maxFlatDiscount = $discounts->reduce(function (?Discount $carry, Discount $item) {
+            return ! $item->is_percentage && $item->discount > $carry?->discount ? $item : $carry;
+        });
 
-        $price->price = bccomp($discountedPercentage, $discountedFlat) === -1 ?
-            $discountedPercentage : $discountedFlat;
+        $discountedPercentage = bcmul($price->price, (1 - $maxPercentageDiscount?->discount ?? 0));
+        $discountedFlat = bcsub($price->price, $maxFlatDiscount->discount ?? 0);
+
+        if (bccomp($discountedPercentage, $discountedFlat) === -1) {
+            $price->price = $discountedPercentage;
+            if ($maxPercentageDiscount) {
+                $price->appliedDiscounts[] = $maxPercentageDiscount;
+            }
+        } else {
+            $price->price = $discountedFlat;
+            if ($maxFlatDiscount) {
+                $price->appliedDiscounts[] = $maxFlatDiscount;
+            }
+        }
     }
 }

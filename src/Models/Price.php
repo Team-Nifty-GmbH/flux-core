@@ -27,6 +27,12 @@ class Price extends Model
         'id',
     ];
 
+    public array $appliedDiscounts = [];
+
+    public ?string $discountFlat = null;
+
+    public ?string $discountPercentage = null;
+
     public bool $isCalculated = false;
 
     public ?Price $basePrice = null;
