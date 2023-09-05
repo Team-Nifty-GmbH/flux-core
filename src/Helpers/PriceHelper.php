@@ -38,6 +38,10 @@ class PriceHelper
     {
         $this->contact = $contact;
 
+        if(is_null($this->priceList)) {
+            $this->priceList = $contact->priceList;
+        }
+
         return $this;
     }
 
