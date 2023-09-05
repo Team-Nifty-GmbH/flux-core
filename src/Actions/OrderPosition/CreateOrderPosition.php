@@ -9,6 +9,7 @@ use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class CreateOrderPosition extends FluxAction
 {
@@ -110,9 +111,11 @@ class CreateOrderPosition extends FluxAction
                     ];
                 })
                 ->each(function (array $bundleProduct) {
-                    CreateOrderPosition::make($bundleProduct)
-                        ->validate()
-                        ->execute();
+                    try {
+                        CreateOrderPosition::make($bundleProduct)
+                            ->validate()
+                            ->execute();
+                    } catch (ValidationException) {}
                 });
         }
 

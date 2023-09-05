@@ -9,6 +9,7 @@ use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -192,5 +193,14 @@ class OrderPosition extends Model
         return (string) (($this->relations['children'] ?? $this->children())
             ->where('is_alternative', false)
             ->sum('total_gross_price'));
+    }
+
+    public function buildSortQuery(): Builder
+    {
+        return static::query()
+            ->where('order_id', $this->order_id)
+            ->when($this->parent_id, function ($query) {
+                $query->where('parent_id', $this->parent_id);
+            });
     }
 }
