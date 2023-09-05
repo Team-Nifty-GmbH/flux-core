@@ -7,6 +7,7 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Discount extends Model
 {
@@ -24,4 +25,9 @@ class Discount extends Model
     protected $guarded = [
         'id',
     ];
+
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
+    }
 }
