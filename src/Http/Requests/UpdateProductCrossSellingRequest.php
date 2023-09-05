@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Requests;
 
 use FluxErp\Rules\ExistsWithIgnore;
-use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateProductCrossSellingRequest extends BaseFormRequest
 {

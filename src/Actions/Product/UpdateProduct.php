@@ -103,7 +103,7 @@ class UpdateProduct extends FluxAction
 
                 try {
                     $activeProductCrossSellings[] = $action->checkPermission()->validate()->execute();
-                } catch (ValidationException) {}
+                } catch (ValidationException|UnauthorizedException) {}
             }
 
             $removedProductCrossSellings = $product->productCrossSellings

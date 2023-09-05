@@ -73,10 +73,12 @@ class PriceHelper
         $price = $this->priceList?->prices()
             ->where('product_id', $this->product->id)
             ->first();
-        $originalPrice = $price;
 
         if (! $price && $this->priceList?->parent) {
             $price = $this->calculatePriceFromPriceList($this->priceList, []);
+            if ($price) {
+                $price->isInherited = true;
+            }
         }
 
         if (! $price) {
@@ -181,10 +183,6 @@ class PriceHelper
             );
 
             $this->calculateLowestDiscountedPrice($price, $discounts->diff($productCategoriesDiscounts));
-        }
-
-        if (is_null($originalPrice)) {
-            $price->isCalculated = true;
         }
 
         return $price;
