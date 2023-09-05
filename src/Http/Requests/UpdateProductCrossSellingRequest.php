@@ -5,16 +5,8 @@ namespace FluxErp\Http\Requests;
 use FluxErp\Rules\ExistsWithIgnore;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateProductCrossSellingRequest extends FormRequest
+class UpdateProductCrossSellingRequest extends BaseFormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return false;
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *

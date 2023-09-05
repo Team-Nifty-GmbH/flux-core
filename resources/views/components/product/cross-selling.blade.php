@@ -12,18 +12,18 @@
     <div style="display: none;">
         <div id="select">
             <x-select
-                    :label="__('Assign product')"
-                    x-on:selected="pushProduct($event.detail, $el.closest('[data-index]').getAttribute('data-index')); clear()"
-                    class="pb-4"
-                    option-value="id"
-                    option-label="label"
-                    option-description="description"
-                    :async-data="[
-                                        'api' => route('search', \FluxErp\Models\Product::class),
-                                        'params' => [
-                                            'fields' => ['id', 'product_number', 'name'],
-                                        ]
-                                    ]"
+                :label="__('Assign product')"
+                x-on:selected="pushProduct($event.detail, $el.closest('[data-index]').getAttribute('data-index')); clear()"
+                class="pb-4"
+                option-value="id"
+                option-label="label"
+                option-description="description"
+                :async-data="[
+                    'api' => route('search', \FluxErp\Models\Product::class),
+                    'params' => [
+                        'fields' => ['id', 'product_number', 'name'],
+                    ]
+                ]"
             />
         </div>
     </div>
@@ -44,10 +44,8 @@
                 </div>
                 <template x-for="(product, productIndex) in productCrossSelling.products">
                     <div class="grid grid-cols-3">
-                        <span x-text="product.product_number">
-                        </span>
-                        <span x-text="product.name">
-                        </span>
+                        <span x-text="product.product_number"></span>
+                        <span x-text="product.name"></span>
                         <div x-show="productCrossSelling.products.length > 1 && edit" x-transition>
                             <x-button.circle icon="trash" negative x-on:click="productCrossSelling.products.splice(productIndex, 1)" />
                         </div>

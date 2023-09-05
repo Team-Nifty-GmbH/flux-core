@@ -125,17 +125,14 @@ class Product extends Component
         }
 
         if ($this->productCrossSellings !== null) {
-            $this->product['product_cross_sellings'] = collect($this->productCrossSellings)
-                ->map(function (array $productCrossSelling) {
-                    $productCrossSelling['products'] = collect($productCrossSelling['products'])
-                        ->map(function (array $product) {
-                            return $product['id'];
-                        })
-                        ->toArray();
+            $this->product['product_cross_sellings'] = array_map(function (array $productCrossSelling) {
+                $productCrossSelling['products'] = array_map(
+                    fn (array $product) => $product['id'],
+                    $productCrossSelling['products']
+                );
 
-                    return $productCrossSelling;
-                })
-                ->toArray();
+                return $productCrossSelling;
+            }, $this->productCrossSellings);
         }
 
         try {

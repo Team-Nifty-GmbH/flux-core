@@ -8,6 +8,8 @@ use FluxErp\Http\Requests\CreateProductRequest;
 use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class CreateProduct extends FluxAction
 {
@@ -56,12 +58,15 @@ class CreateProduct extends FluxAction
             $product->prices()->createMany($prices);
         }
 
-        if ($productCrossSellings) {
+        try {
+            CreateProductCrossSelling::canPerformAction();
             foreach ($productCrossSellings as $productCrossSelling) {
                 $productCrossSelling['product_id'] = $product->id;
-                CreateProductCrossSelling::make($productCrossSelling)->checkPermission()->validate()->execute()->id;
+                try {
+                    CreateProductCrossSelling::make($productCrossSelling)->validate()->execute();
+                } catch (ValidationException) {}
             }
-        }
+        } catch (UnauthorizedException) {}
 
         return $product->refresh();
     }

@@ -4,6 +4,7 @@ namespace FluxErp\Http\Livewire\DataTables;
 
 use FluxErp\Models\ProductCrossSelling;
 use TeamNiftyGmbH\DataTable\DataTable;
+use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class ProductCrossSellingList extends DataTable
 {
@@ -16,6 +17,11 @@ class ProductCrossSellingList extends DataTable
 
     public function mount(): void
     {
+        $this->availableCols = ModelInfo::forModel($this->model)
+            ->attributes
+            ->pluck('name')
+            ->toArray();
+
         parent::mount();
     }
 }

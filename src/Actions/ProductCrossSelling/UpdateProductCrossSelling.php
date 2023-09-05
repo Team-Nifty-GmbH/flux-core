@@ -29,12 +29,12 @@ class UpdateProductCrossSelling extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
+        $productCrossSelling->fill($this->data);
+        $productCrossSelling->save();
+
         if (! is_null($products)) {
             $productCrossSelling->products()->sync($products);
         }
-
-        $productCrossSelling->fill($this->data);
-        $productCrossSelling->save();
 
         return $productCrossSelling->withoutRelations()->fresh();
     }

@@ -12,7 +12,14 @@ class ProductCrossSellingTableSeeder extends Seeder
      */
     public function run(): void
     {
-        foreach (Product::all(['id']) as $product) {
+        $productIds = Product::query()
+            ->select('id')
+            ->inRandomOrder()
+            ->take(ceil(Product::count() / 2))
+            ->get()
+            ->toArray();
+
+        foreach (Product::query()->whereIntegerInRaw('id', $productIds)->get(['id']) as $product) {
             $product->productCrossSellings()->createMany(
                 Product::factory()->count(3)->make()->toArray()
             );

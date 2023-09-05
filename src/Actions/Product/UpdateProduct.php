@@ -15,6 +15,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class UpdateProduct extends FluxAction
 {
@@ -100,18 +101,23 @@ class UpdateProduct extends FluxAction
                     $action = CreateProductCrossSelling::make($productCrossSelling);
                 }
 
-                $activeProductCrossSellings[] = $action->checkPermission()->validate()->execute()->id;
+                try {
+                    $activeProductCrossSellings[] = $action->checkPermission()->validate()->execute();
+                } catch (ValidationException) {}
             }
 
             $removedProductCrossSellings = $product->productCrossSellings
-                ?->whereNotIn('id', $activeProductCrossSellings)
+                ?->whereIntegerNotInRaw('id', $activeProductCrossSellings)
                 ->pluck('id')
                 ->toArray();
-            foreach ($removedProductCrossSellings as $removedProductCrossSelling) {
-                DeleteProductCrossSelling::make(['id' => $removedProductCrossSelling])
-                    ->checkPermission()
-                    ->execute();
-            }
+
+            try {
+                DeleteProductCrossSelling::canPerformAction();
+                foreach ($removedProductCrossSellings as $removedProductCrossSelling) {
+                    DeleteProductCrossSelling::make(['id' => $removedProductCrossSelling])
+                        ->execute();
+                }
+            } catch (UnauthorizedException) {}
         }
 
         return $product->withoutRelations()->fresh();
