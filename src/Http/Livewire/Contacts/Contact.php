@@ -8,7 +8,6 @@ use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Actions\Contact\UpdateContact;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact as ContactModel;
-use FluxErp\Models\Order;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Traits\Livewire\WithFileUploads;
@@ -59,6 +58,12 @@ class Contact extends Component
     public array $priceLists = [];
 
     public array $paymentTypes = [];
+
+    protected $queryString = [
+        'tab' => [
+            'except' => 'addresses',
+        ]
+    ];
 
     protected function getListeners(): array
     {
@@ -189,16 +194,6 @@ class Contact extends Component
     {
         if ($data['model']['id'] === $this->contactId) {
             $this->next();
-        }
-    }
-
-    public function updatedTab(): void
-    {
-        if ($this->tab === 'orders') {
-            $this->contact['orders'] = Order::query()
-                ->where('contact_id', $this->contactId)
-                ->get()
-                ->toArray();
         }
     }
 
