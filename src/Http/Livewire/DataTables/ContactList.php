@@ -6,6 +6,7 @@ use FluxErp\Models\Address;
 use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ContactList extends DataTable
 {
@@ -49,6 +50,15 @@ class ContactList extends DataTable
             ->toArray();
 
         parent::mount();
+    }
+
+    public function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label('New')
+                ->color('primary'),
+        ];
     }
 
     public function getBuilder(Builder $builder): Builder

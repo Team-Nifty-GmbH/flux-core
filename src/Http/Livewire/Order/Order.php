@@ -139,7 +139,10 @@ class Order extends Component
         $this->order['total_vats'] = [];
 
         foreach ($orderPositions as $orderPosition) {
-            if (data_get($orderPosition, 'is_alternative') || data_get($orderPosition, 'is_bundle_position')) {
+            if (data_get($orderPosition, 'is_alternative')
+                || data_get($orderPosition, 'is_bundle_position')
+                || data_get($orderPosition, 'is_free_text')
+            ) {
                 continue;
             }
 

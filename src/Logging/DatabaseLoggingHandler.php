@@ -4,6 +4,7 @@ namespace FluxErp\Logging;
 
 use Carbon\Carbon;
 use FluxErp\Models\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\LogRecord;
@@ -15,6 +16,10 @@ class DatabaseLoggingHandler extends AbstractProcessingHandler
         $context = (object) $record['context'];
         $uuid = property_exists($context, 'uuid') && ! empty($context->uuid) ? $context->uuid : null;
         unset($context->uuid);
+
+        if (Auth::check()) {
+            $record['extra']['user'] = get_class(Auth::user()) . ':' . Auth::user()->id;
+        }
 
         $data = [
             'foreign_uuid' => $uuid,

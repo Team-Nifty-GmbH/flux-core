@@ -70,7 +70,7 @@
     </x-card>
 
     <div class="flex justify-end space-x-5 pt-5">
-        <x-button :label="__('Cancel')" :href="route('settings.settings.clients')"/>
+        <x-button :label="__('Cancel')" :href="route('settings.clients')"/>
         <x-button primary :label="__('Save')" wire:click="save"/>
     </div>
 </div>

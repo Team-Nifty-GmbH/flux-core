@@ -9,6 +9,7 @@ use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -17,15 +18,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Casts\BcFloat;
 use TeamNiftyGmbH\DataTable\Casts\Money;
 use TeamNiftyGmbH\DataTable\Casts\Percentage;
 
-class OrderPosition extends Model
+class OrderPosition extends Model implements Sortable
 {
     use HasAdditionalColumns, HasPackageFactory, HasFrontendAttributes, HasSerialNumberRange, HasTags,
-        HasUserModification, HasUuid, SoftDeletes;
+        HasUserModification, HasUuid, SoftDeletes, SortableTrait;
 
     protected $appends = [
         'unit_price',
@@ -57,6 +60,11 @@ class OrderPosition extends Model
 
     protected $guarded = [
         'id',
+    ];
+
+    public array $sortable = [
+        'order_column_name' => 'sort_number',
+        'sort_when_creating' => true,
     ];
 
     protected static function booted(): void
@@ -192,5 +200,11 @@ class OrderPosition extends Model
         return (string) (($this->relations['children'] ?? $this->children())
             ->where('is_alternative', false)
             ->sum('total_gross_price'));
+    }
+
+    public function buildSortQuery(): Builder
+    {
+        return static::query()
+            ->where('order_id', $this->order_id);
     }
 }
