@@ -33,7 +33,7 @@ class Price extends Model
 
     public ?string $discountPercentage = null;
 
-    public bool $isCalculated = false;
+    public bool $isInherited = false;
 
     public ?Price $basePrice = null;
 

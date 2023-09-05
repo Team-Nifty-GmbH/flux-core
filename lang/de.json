@@ -304,6 +304,7 @@
     "Product number": "Produktnummer",
     "Attributes": "Attribute",
     "Is active": "Ist aktiv",
+    "Is Active": "Ist Aktiv",
     "Is highlight": "Ist hervorgehoben",
     "Is NOS": "Ist NOS",
     "Export to Webshop": "In Webshop exportieren",
@@ -566,5 +567,6 @@
     "Currencies": "Währungen",
     "Is Done": "Ist fertig",
     "Done": "Fertig",
-    "Mark found as done": "Gefundene als abgeschlossen markieren"
+    "Mark found as done": "Gefundene als abgeschlossen markieren",
+    "Discount Groups": "Rabattgruppen"
 }

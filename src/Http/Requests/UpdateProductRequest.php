@@ -101,6 +101,18 @@ class UpdateProductRequest extends BaseFormRequest
                 'categories' => 'array',
                 'categories.*' => 'integer|exists:' . Category::class . ',id,model_type,' . Product::class,
 
+                'product_cross_sellings' => 'array',
+                'product_cross_sellings.*.id' => [
+                    'sometimes',
+                    'required',
+                    'integer',
+                    'exists:product_cross_sellings,id',
+                ],
+                'product_cross_sellings.*.name' => 'required_without:id|string',
+                'product_cross_sellings.*.is_active' => 'boolean',
+                'product_cross_sellings.*.products' => 'required_without:product_cross_sellings.*.id|array',
+                'product_cross_sellings.*.products.*' => 'required|integer|exists:products,id,deleted_at,NULL',
+
                 'tags' => 'array',
                 'tags.*' => 'string',
             ],

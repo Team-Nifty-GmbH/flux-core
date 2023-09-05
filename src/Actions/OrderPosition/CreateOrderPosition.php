@@ -4,10 +4,13 @@ namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class CreateOrderPosition extends FluxAction
 {
@@ -76,11 +79,61 @@ class CreateOrderPosition extends FluxAction
     public function performAction(): OrderPosition
     {
         $tags = Arr::pull($this->data, 'tags', []);
+        $orderPosition = new OrderPosition();
 
-        $orderPosition = new OrderPosition($this->data);
+        if (is_int($this->data['sort_number'] ?? false)) {
+            $currentHighestSortNumber = OrderPosition::query()
+                ->where('order_id', $this->data['order_id'])
+                ->max('sort_number');
+            $this->data['sort_number'] = min($this->data['sort_number'], $currentHighestSortNumber + 1);
+
+            $orderPosition->sortable['sort_when_creating'] = false;
+            OrderPosition::query()->where('order_id', $this->data['order_id'])
+                ->where('sort_number', '>=', $this->data['sort_number'])
+                ->increment('sort_number');
+        }
+
+        $orderPosition->fill($this->data);
+
         PriceCalculation::fill($orderPosition, $this->data);
         unset($orderPosition->discounts);
+
         $orderPosition->save();
+
+        if ($this->data['product_id'] ?? false) {
+            $product = $orderPosition->product()->with('bundleProducts')->first();
+            $sortNumber = $orderPosition->sort_number;
+            $product->bundleProducts
+                ->map(function (Product $bundleProduct) use ($orderPosition, &$sortNumber) {
+                    $sortNumber++;
+
+                    return [
+                        'client_id' => $orderPosition->client_id,
+                        'order_id' => $orderPosition->order_id,
+                        'parent_id' => $orderPosition->id,
+                        'product_id' => $bundleProduct->id,
+                        'vat_rate_id' => $bundleProduct->vat_rate_id,
+                        'warehouse_id' => $orderPosition->warehouse_id,
+                        'amount' => bcmul($bundleProduct->pivot->count, $orderPosition->amount),
+                        'amount_bundle' => $bundleProduct->pivot->count,
+                        'name' => $bundleProduct->name,
+                        'product_number' => $bundleProduct->product_number,
+                        'sort_number' => $sortNumber,
+                        'purchase_price' => 0,
+                        'vat_rate_percentage' => 0,
+                        'is_net' => $orderPosition->is_net,
+                        'is_free_text' => false,
+                        'is_bundle_position' => true,
+                    ];
+                })
+                ->each(function (array $bundleProduct) {
+                    try {
+                        CreateOrderPosition::make($bundleProduct)
+                            ->validate()
+                            ->execute();
+                    } catch (ValidationException) {}
+                });
+        }
 
         $orderPosition->attachTags($tags);
 

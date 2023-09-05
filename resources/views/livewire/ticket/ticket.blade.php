@@ -42,7 +42,7 @@
                                     </x-label>
                                 </div>
                             </x-slot:header>
-                            <livewire:folder-tree :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
+                            <livewire:folder-tree :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" :is-public="true" />
                         </x-card>
                         <x-card>
                             <x-tabs

@@ -8,6 +8,7 @@ use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Currency;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\VatRate;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -24,6 +25,8 @@ class Product extends Component
     public array $product;
 
     public ?array $priceLists = null;
+
+    public ?array $productCrossSellings = null;
 
     public array $additionalColumns = [];
 
@@ -87,6 +90,7 @@ class Product extends Component
             'prices' => __('Prices'),
             'stock' => __('Stock'),
             'media' => __('Media'),
+            'cross-selling' => __('Cross Selling'),
         ];
 
         if ($this->product['children_count']) {
@@ -118,6 +122,17 @@ class Product extends Component
                     ];
                 })
                 ->toArray();
+        }
+
+        if ($this->productCrossSellings !== null) {
+            $this->product['product_cross_sellings'] = array_map(function (array $productCrossSelling) {
+                $productCrossSelling['products'] = array_map(
+                    fn (array $product) => $product['id'],
+                    $productCrossSelling['products']
+                );
+
+                return $productCrossSelling;
+            }, $this->productCrossSellings);
         }
 
         try {
@@ -157,6 +172,17 @@ class Product extends Component
         });
 
         $this->priceLists = $priceLists->toArray();
+
+        $this->skipRender();
+    }
+
+    public function getProductCrossSellings(): void
+    {
+        $this->productCrossSellings = ProductCrossSelling::query()
+            ->where('product_id', $this->product['id'])
+            ->with('products:id,name,product_number')
+            ->get()
+            ->toArray();
 
         $this->skipRender();
     }
