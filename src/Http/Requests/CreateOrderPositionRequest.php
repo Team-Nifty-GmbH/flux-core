@@ -107,7 +107,7 @@ class CreateOrderPositionRequest extends BaseFormRequest
                     'string',
                     'nullable',
                 ],
-                'sort_number' => 'required|integer|min:0',
+                'sort_number' => 'integer|min:0',
 
                 'is_alternative' => 'boolean',
                 'is_net' => 'required_if:is_free_text,false|boolean',

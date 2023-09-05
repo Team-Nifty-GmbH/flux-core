@@ -4,6 +4,7 @@ namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
@@ -78,10 +79,25 @@ class CreateOrderPosition extends FluxAction
     public function performAction(): OrderPosition
     {
         $tags = Arr::pull($this->data, 'tags', []);
+        $orderPosition = new OrderPosition();
 
-        $orderPosition = new OrderPosition($this->data);
+        if (is_int($this->data['sort_number'] ?? false)) {
+            $currentHighestSortNumber = OrderPosition::query()
+                ->where('order_id', $this->data['order_id'])
+                ->max('sort_number');
+            $this->data['sort_number'] = min($this->data['sort_number'], $currentHighestSortNumber + 1);
+
+            $orderPosition->sortable['sort_when_creating'] = false;
+            OrderPosition::query()->where('order_id', $this->data['order_id'])
+                ->where('sort_number', '>=', $this->data['sort_number'])
+                ->increment('sort_number');
+        }
+
+        $orderPosition->fill($this->data);
+
         PriceCalculation::fill($orderPosition, $this->data);
         unset($orderPosition->discounts);
+
         $orderPosition->save();
 
         if ($this->data['product_id'] ?? false) {

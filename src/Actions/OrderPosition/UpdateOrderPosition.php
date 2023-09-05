@@ -33,6 +33,17 @@ class UpdateOrderPosition extends FluxAction
             ->whereKey($this->data['id'] ?? null)
             ->firstOrNew();
 
+        if (is_int($this->data['sort_number'] ?? false)) {
+            $currentHighestSortNumber = OrderPosition::query()
+                ->where('order_id', $this->data['order_id'])
+                ->max('sort_number');
+            $this->data['sort_number'] = min($this->data['sort_number'], $currentHighestSortNumber + 1);
+
+            OrderPosition::query()->where('order_id', $this->data['order_id'])
+                ->where('sort_number', '>=', $this->data['sort_number'])
+                ->increment('sort_number');
+        }
+
         $orderPosition->fill($this->data);
         PriceCalculation::fill($orderPosition, $this->data);
         unset($orderPosition->discounts);
