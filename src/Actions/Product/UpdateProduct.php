@@ -107,7 +107,7 @@ class UpdateProduct extends FluxAction
             }
 
             $removedProductCrossSellings = $product->productCrossSellings()
-                ->whereNotIntegerInRaw('id', $activeProductCrossSellings)
+                ->whereIntegerNotInRaw('id', $activeProductCrossSellings)
                 ->get(['id'])
                 ->pluck('id')
                 ->toArray();
