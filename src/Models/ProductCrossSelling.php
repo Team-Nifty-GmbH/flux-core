@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,7 +31,8 @@ class ProductCrossSelling extends Model implements Sortable
 
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, 'product_cross_selling_product');
+        return $this->belongsToMany(Product::class, 'product_cross_selling_product')
+            ->using(ProductCrossSellingProduct::class);
     }
 
     public function buildSortQuery(): Builder
