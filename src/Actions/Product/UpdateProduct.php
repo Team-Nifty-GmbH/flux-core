@@ -102,12 +102,13 @@ class UpdateProduct extends FluxAction
                 }
 
                 try {
-                    $activeProductCrossSellings[] = $action->checkPermission()->validate()->execute();
+                    $activeProductCrossSellings[] = $action->checkPermission()->validate()->execute()->id;
                 } catch (ValidationException|UnauthorizedException) {}
             }
 
-            $removedProductCrossSellings = $product->productCrossSellings
-                ?->whereIntegerNotInRaw('id', $activeProductCrossSellings)
+            $removedProductCrossSellings = $product->productCrossSellings()
+                ->whereNotIntegerInRaw('id', $activeProductCrossSellings)
+                ->get(['id'])
                 ->pluck('id')
                 ->toArray();
 
