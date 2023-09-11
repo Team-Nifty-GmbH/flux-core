@@ -7,9 +7,11 @@
     <x-notifications z-index="z-50"></x-notifications>
     <x-dialog z-index="z-40" blur="md" align="center"/>
     <div x-data="{ open: false }" @keydown.window.escape="open = false" class="flex h-screen w-full flex-col">
-        <div id="nav">
-            <livewire:navigation/>
-        </div>
+        @persist('navigation')
+            <div id="nav">
+                <livewire:navigation/>
+            </div>
+        @endpersist
         <div class="md:pl-20">
             <main class="px-1.5 md:px-8">
                 {{ $slot }}

@@ -47,7 +47,7 @@ class DiscountGroupList extends BaseDiscountGroupList
 
     public function saveItem(array $discountGroup): bool
     {
-        $discountGroup['discounts'] = array_map(fn($discount) => $discount['id'], $discountGroup['discounts']);
+        $discountGroup['discounts'] = array_map(fn ($discount) => $discount['id'], $discountGroup['discounts']);
         $action = ($discountGroup['id'] ?? false)
             ? UpdateDiscountGroup::make($discountGroup)
             : CreateDiscountGroup::make($discountGroup);
@@ -70,7 +70,10 @@ class DiscountGroupList extends BaseDiscountGroupList
         $this->skipRender();
 
         try {
-            DeleteDiscountGroup::make($discountGroup->toArray())->checkPermission()->execute();
+            DeleteDiscountGroup::make($discountGroup->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
 

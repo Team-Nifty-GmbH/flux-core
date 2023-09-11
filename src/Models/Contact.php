@@ -90,32 +90,33 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
     {
         $directDiscountsQuery = $this->discounts()
             ->select('discounts.*')
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('from')
                     ->orWhere('from', '<=', now());
             })
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('till')
                     ->orWhere('till', '>=', now());
             })
             ->getQuery();
 
         $discountsThroughGroupsQuery = $this->discountGroups()
-            ->where('discount_groups.is_active', true)
             ->join('discount_discount_group', 'discount_groups.id', '=', 'discount_discount_group.discount_group_id')
             ->join('discounts', 'discounts.id', '=', 'discount_discount_group.discount_id')
             ->select('discounts.*')
-            ->where(function($query) {
+            ->where('discount_groups.is_active', true)
+            ->where(function ($query) {
                 $query->whereNull('from')
                     ->orWhere('from', '<=', now());
             })
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('till')
                     ->orWhere('till', '>=', now());
             })
             ->getQuery();
 
-        return Discount::withTrashed()
+        return Discount::query()
+            ->withoutGlobalScopes()
             ->fromSub($directDiscountsQuery
                 ->union($discountsThroughGroupsQuery), 'union_sub');
     }
@@ -125,7 +126,7 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
         return $this->getAllDiscountsQuery()
             ->get()
             ->sortByDesc('discount')
-            ->unique(fn($item) => $item->model_id . $item->model_type . $item->is_percentage)
+            ->unique(fn ($item) => $item->model_id . $item->model_type . $item->is_percentage)
             ->values();
     }
 
