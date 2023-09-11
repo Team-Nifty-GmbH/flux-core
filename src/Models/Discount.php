@@ -7,6 +7,7 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Discount extends Model
@@ -25,6 +26,11 @@ class Discount extends Model
     protected $guarded = [
         'id',
     ];
+
+    public function contacts(): BelongsToMany
+    {
+        return $this->belongsToMany(Contact::class, 'contact_discount');
+    }
 
     public function model(): MorphTo
     {

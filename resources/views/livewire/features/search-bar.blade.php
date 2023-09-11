@@ -1,11 +1,11 @@
 <div
     x-data="{
         show: false,
-        search: $wire.entangle('search'),
+        search: $wire.entangle('search', true),
         detailModel: null,
         detailId: null,
-        result: $wire.entangle('return'),
-        modelLabels: $wire.entangle('modelLabels'),
+        result: $wire.entangle('return', true),
+        modelLabels: $wire.entangle('modelLabels', true),
         showDetails(model, id) {
             if (model === this.detailModel && id === this.detailId) {
                 return;
@@ -38,7 +38,7 @@
                          x-on:click="show = true"
                          x-on:keydown="show = true"
                          x-on:keydown.enter="show = false"
-                         wire:model.debounce.500ms="search"
+                         wire:model.live.debounce.500ms="search"
                          placeholder="{{ __('Search everywhere...') }}"
                 />
             <div class="absolute z-[9] w-full pt-6" x-show="show" x-transition x-cloak>
