@@ -13,7 +13,7 @@
                 {{ __('Active') }}
             </label>
             <div class="col-span-2">
-                <x-toggle md x-bind:disabled="!edit" wire:model.defer="address.can_login"/>
+                <x-toggle md x-bind:disabled="!edit" wire:model="address.can_login"/>
             </div>
         </div>
         <div
@@ -23,7 +23,7 @@
                 {{ __('Login name') }}
             </label>
             <div class="col-span-2">
-                <x-input x-bind:readonly="!edit" wire:model.defer="address.login_name"/>
+                <x-input x-bind:readonly="!edit" wire:model="address.login_name"/>
             </div>
         </div>
         <div
@@ -33,7 +33,7 @@
                 {{ __('Password') }}
             </label>
             <div class="col-span-2">
-                <x-inputs.password x-bind:readonly="!edit" wire:model.defer="loginPassword"/>
+                <x-inputs.password x-bind:readonly="!edit" wire:model="loginPassword"/>
             </div>
         </div>
         <div
@@ -42,7 +42,7 @@
                    class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                 {{ __('Permissions') }}
             </label>
-            <div class="col-span-2 space-y-3" x-data="{permissions: @entangle('permissions').defer}">
+            <div class="col-span-2 space-y-3" x-data="{permissions: @entangle('permissions')}">
                 <x-button
                     primary
                     :label="__('Select all')"

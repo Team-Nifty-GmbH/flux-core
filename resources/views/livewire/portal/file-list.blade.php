@@ -2,7 +2,7 @@
     <x-select
         :label="__('Filter by path')"
         :options="$slugs"
-        wire:model="filterSlug"
+        wire:model.live="filterSlug"
         multiselect
     />
     @foreach($attachments as $media)

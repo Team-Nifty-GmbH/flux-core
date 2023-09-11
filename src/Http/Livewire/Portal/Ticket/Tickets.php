@@ -20,7 +20,7 @@ class Tickets extends Component
 
     public function show(): void
     {
-        $this->emitTo('portal.ticket.ticket-create', 'show');
+        $this->dispatch('show')->to('portal.ticket.ticket-create');
 
         $this->showTicketModal = true;
         $this->skipRender();

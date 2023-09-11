@@ -1,4 +1,4 @@
-<div class="py-6" x-data="{country: @entangle('selectedCountry'), countries: @entangle('countries').defer}">
+<div class="py-6" x-data="{country: @entangle('selectedCountry').live, countries: @entangle('countries')}">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
@@ -103,21 +103,21 @@
         </div>
     </div>
 
-    <x-modal.card :title="__('Edit Country')" wire:model.defer="editModal">
+    <x-modal.card :title="__('Edit Country')" wire:model="editModal">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
                     <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                         <div class="space-y-3 sm:col-span-6">
-                            <x-input wire:model="selectedCountry.name" :label="__('Country Name')"/>
-                            <x-select wire:model="selectedCountry.language_id" :label="__('Language')" :options="\FluxErp\Models\Language::all(['id', 'name'])->toArray()" option-value="id" option-label="name"/>
-                            <x-select wire:model="selectedCountry.currency_id" :label="__('Currency')" :options="\FluxErp\Models\Currency::all(['id', 'name'])->toArray()" option-value="id" option-label="name"/>
-                            <x-input wire:model="selectedCountry.iso_alpha2" :label="__('ISO alpha2')"/>
-                            <x-input wire:model="selectedCountry.iso_alpha3" :label="__('ISO alpha3')"/>
-                            <x-input wire:model="selectedCountry.iso_numeric" :label="__('ISO numeric')"/>
-                            <x-toggle wire:model="selectedCountry.is_active" lg :label="__('Active')"/>
-                            <x-toggle wire:model="selectedCountry.is_defualt" lg :label="__('Default')"/>
-                            <x-toggle wire:model="selectedCountry.is_eu_country" lg :label="__('EU Country')"/>
+                            <x-input wire:model.live="selectedCountry.name" :label="__('Country Name')"/>
+                            <x-select wire:model.live="selectedCountry.language_id" :label="__('Language')" :options="\FluxErp\Models\Language::all(['id', 'name'])->toArray()" option-value="id" option-label="name"/>
+                            <x-select wire:model.live="selectedCountry.currency_id" :label="__('Currency')" :options="\FluxErp\Models\Currency::all(['id', 'name'])->toArray()" option-value="id" option-label="name"/>
+                            <x-input wire:model.live="selectedCountry.iso_alpha2" :label="__('ISO alpha2')"/>
+                            <x-input wire:model.live="selectedCountry.iso_alpha3" :label="__('ISO alpha3')"/>
+                            <x-input wire:model.live="selectedCountry.iso_numeric" :label="__('ISO numeric')"/>
+                            <x-toggle wire:model.live="selectedCountry.is_active" lg :label="__('Active')"/>
+                            <x-toggle wire:model.live="selectedCountry.is_defualt" lg :label="__('Default')"/>
+                            <x-toggle wire:model.live="selectedCountry.is_eu_country" lg :label="__('EU Country')"/>
                         </div>
                     </div>
                 </div>

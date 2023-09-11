@@ -27,7 +27,7 @@ class TicketTypeEdit extends Component
         'delete',
     ];
 
-    protected function getRules(): array
+    public function getRules(): array
     {
         $rules = $this->isNew ?
             (new CreateTicketTypeRequest())->rules() : (new UpdateTicketTypeRequest())->getRules($this->ticketType);
@@ -96,7 +96,7 @@ class TicketTypeEdit extends Component
         $ticketType = $this->isNew ? $response->toArray() : $response['data']->toArray();
 
         $this->skipRender();
-        $this->emitUp('closeModal', $ticketType);
+        $this->dispatch('closeModal', $ticketType);
     }
 
     public function delete(): void
@@ -108,6 +108,6 @@ class TicketTypeEdit extends Component
         (new TicketTypeService())->delete($this->ticketType['id']);
 
         $this->skipRender();
-        $this->emitUp('closeModal', $this->ticketType, true);
+        $this->dispatch('closeModal', $this->ticketType, true);
     }
 }

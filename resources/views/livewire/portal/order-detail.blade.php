@@ -1,8 +1,8 @@
 <div x-data="{
-        order: $wire.entangle('order').defer,
-        childOrders: $wire.entangle('childOrders').defer,
-        detail: $wire.entangle('positionDetails').defer,
-        positionsSummary: $wire.entangle('positionsSummary').defer,
+        order: $wire.entangle('order'),
+        childOrders: $wire.entangle('childOrders'),
+        detail: $wire.entangle('positionDetails'),
+        positionsSummary: $wire.entangle('positionsSummary'),
         detailRoute: '{{ route('portal.orders.id', ['id' => ':id']) }}',
         selected: null,
     }"
@@ -18,7 +18,7 @@
      class="dark:text-white"
      x-on:data-table-record-selected="selected = Alpine.$data(document.getElementById('order-position-table').querySelector('[tall-datatable]')).selected"
 >
-    <x-modal.card id="detail-modal" wire:model.defer="detailModal">
+    <x-modal.card id="detail-modal" wire:model="detailModal">
         @section('product-modal.content')
             <div class="grid grid-cols-3 gap-5">
                 <div class="col-span-1">

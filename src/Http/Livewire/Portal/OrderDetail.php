@@ -204,7 +204,7 @@ class OrderDetail extends Component
         $this->positionDetails['image'] = $image?->toHtml();
         $this->detailModal = true;
 
-        $this->emitTo('folder-tree', 'renderFromTree', $position->product?->getMediaAsTree());
+        $this->dispatch('renderFromTree', $position->product?->getMediaAsTree())->to('folder-tree');
     }
 
     public function downloadInvoice(): BinaryFileResponse

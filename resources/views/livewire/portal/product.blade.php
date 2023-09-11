@@ -1,4 +1,4 @@
-<div class="dark:text-white" x-data="{comment: @entangle('comment').defer}">
+<div class="dark:text-white" x-data="{comment: @entangle('comment')}">
     <div>
         <div class="flex w-full flex-col-reverse justify-between md:flex-row">
             <h2 class="pt-5 text-base font-bold uppercase md:pt-0">

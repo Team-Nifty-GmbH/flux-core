@@ -39,7 +39,7 @@ class AdditionalColumnEdit extends Component
         'delete',
     ];
 
-    protected function getRules(): array
+    public function getRules(): array
     {
         $rules = $this->isNew ?
             (new CreateAdditionalColumnRequest())->rules() : (new UpdateAdditionalColumnRequest())->rules();
@@ -185,7 +185,7 @@ class AdditionalColumnEdit extends Component
         $this->notification()->success(__('Additional Column saved successful.'));
 
         $this->skipRender();
-        $this->emitUp('closeModal', $response['data']);
+        $this->dispatch('closeModal', $response['data']);
     }
 
     public function delete(): void
@@ -197,6 +197,6 @@ class AdditionalColumnEdit extends Component
         (new AdditionalColumnService())->delete($this->additionalColumn['id']);
 
         $this->skipRender();
-        $this->emitUp('closeModal', $this->additionalColumn, true);
+        $this->dispatch('closeModal', $this->additionalColumn, true);
     }
 }

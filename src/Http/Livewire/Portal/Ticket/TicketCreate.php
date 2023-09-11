@@ -71,7 +71,7 @@ class TicketCreate extends Component
             ->toArray();
     }
 
-    protected function getRules(): array
+    public function getRules(): array
     {
         return Arr::prependKeysWith((new CreateTicketRequest())->rules(), 'ticket.');
     }
@@ -130,7 +130,7 @@ class TicketCreate extends Component
         $this->notification()->success(__('Ticket created…'));
 
         $this->skipRender();
-        $this->emitUp('closeModal', $ticket->toArray());
+        $this->dispatch('closeModal', $ticket->toArray());
 
         return true;
     }

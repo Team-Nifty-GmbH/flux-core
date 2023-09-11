@@ -6,17 +6,17 @@
                     <div class="sm:col-span-6">
                         <x-input label="{{ __('Group') }}"
                                  placeholder="{{ __('Group') }}"
-                                 wire:model.defer="translation.group"/>
+                                 wire:model="translation.group"/>
                     </div>
                     <div class="sm:col-span-6">
                         <x-input label="{{ __('Key') }}"
                                  placeholder="{{ __('Key') }}"
-                                 wire:model.defer="translation.key"/>
+                                 wire:model="translation.key"/>
                     </div>
                     <div class="sm:col-span-6">
                         <x-input label="{{ __('Translation') }}"
                                  placeholder="{{ __('Translation') }}"
-                                 wire:model.defer="translation.translation"/>
+                                 wire:model="translation.translation"/>
                     </div>
                 </div>
             </div>

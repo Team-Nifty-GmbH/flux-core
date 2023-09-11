@@ -1,9 +1,9 @@
 <div
     class="p-10"
     x-data="{
-        notifications: $wire.entangle('notifications'),
-        notificationChannels: $wire.entangle('notificationChannels'),
-        notificationSettings: $wire.entangle('notificationSettings').defer,
+        notifications: $wire.entangle('notifications', true),
+        notificationChannels: $wire.entangle('notificationChannels', true),
+        notificationSettings: $wire.entangle('notificationSettings'),
         }"
 >
     <form class="space-y-5">
@@ -12,26 +12,26 @@
                 <label for="avatar" style="cursor: pointer">
                     <x-avatar class="m-auto" size="w-24 h-24" src="{{ $avatar }}"/>
                 </label>
-                <input type="file" accept="image/*" id="avatar" class="hidden" wire:model="avatar"/>
+                <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="avatar"/>
                 <div class="w-full space-y-5">
-                    <x-input :label="__('Firstname')" wire:model.defer="user.firstname"/>
-                    <x-input :label="__('Lastname')" wire:model.defer="user.lastname"/>
+                    <x-input :label="__('Firstname')" wire:model="user.firstname"/>
+                    <x-input :label="__('Lastname')" wire:model="user.lastname"/>
                 </div>
             </div>
             <div class="space-y-5">
-                <x-input :label="__('Email')" wire:model.defer="user.email"/>
-                <x-input :label="__('User code')" wire:model.defer="user.user_code"/>
+                <x-input :label="__('Email')" wire:model="user.email"/>
+                <x-input :label="__('User code')" wire:model="user.user_code"/>
             </div>
         </div>
         <x-select
-            wire:model.defer="user.language_id"
+            wire:model="user.language_id"
             :label="__('Language')"
             :options="$languages"
             option-label="name"
             option-value="id"
         />
-        <x-input type="password" :label="__('New password')" wire:model.defer="user.password"/>
-        <x-input type="password" :label="__('Repeat password')" wire:model.defer="user.password_confirmation"/>
+        <x-input type="password" :label="__('New password')" wire:model="user.password"/>
+        <x-input type="password" :label="__('Repeat password')" wire:model="user.password_confirmation"/>
     </form>
     <x-table>
         <x-slot name="title">

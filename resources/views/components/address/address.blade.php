@@ -8,7 +8,7 @@
         <div class="col-span-2 w-full">
             <x-input x-bind:readonly="!edit"
                      x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                     wire:model.lazy="address.company"/>
+                     wire:model.blur="address.company"/>
         </div>
     </div>
     <div
@@ -20,7 +20,7 @@
         <div class="col-span-2 w-full">
             <x-input x-bind:readonly="!edit"
                      x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                     wire:model.lazy="address.salutation"></x-input>
+                     wire:model.blur="address.salutation"></x-input>
         </div>
     </div>
     <div
@@ -32,7 +32,7 @@
         <div class="col-span-2">
             <x-input x-bind:readonly="!edit"
                      x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                     wire:model.lazy="address.title"/>
+                     wire:model.blur="address.title"/>
         </div>
     </div>
     <div
@@ -44,7 +44,7 @@
         <div class="col-span-2">
             <x-input x-bind:readonly="!edit"
                      x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                     wire:model.lazy="address.firstname"/>
+                     wire:model.blur="address.firstname"/>
         </div>
     </div>
     <div
@@ -56,7 +56,7 @@
         <div class="col-span-2">
             <x-input x-bind:readonly="!edit"
                      x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                     wire:model.lazy="address.lastname"/>
+                     wire:model.blur="address.lastname"/>
         </div>
     </div>
     <div
@@ -68,7 +68,7 @@
         <div class="col-span-2">
             <x-input x-bind:readonly="!edit"
                      x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                     wire:model.lazy="address.street"/>
+                     wire:model.blur="address.street"/>
         </div>
     </div>
     <div
@@ -80,7 +80,7 @@
         <div class="col-span-2">
             <x-select x-bind:readonly="!edit"
                       x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                      wire:model.defer="address.country_id"
+                      wire:model="address.country_id"
                       searchable
                       :options="$countries"
                       option-label="name"
@@ -97,12 +97,12 @@
             <div class="flex-none">
                 <x-input x-bind:readonly="!edit"
                          x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                         wire:model.lazy="address.zip"/>
+                         wire:model.blur="address.zip"/>
             </div>
             <div class="grow">
                 <x-input x-bind:readonly="!edit"
                          x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                         wire:model.lazy="address.city"/>
+                         wire:model.blur="address.city"/>
             </div>
         </div>
     </div>
@@ -115,7 +115,7 @@
         <div class="col-span-2">
             <x-select x-bind:disabled="!edit"
                       x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                      wire:model.defer="address.language_id" searchable
+                      wire:model="address.language_id" searchable
                       :options="$languages" option-label="name" option-value="id"></x-select>
         </div>
     </div>
@@ -125,7 +125,7 @@
 </h3>
 <div
     x-data="{
-        contactOptions: $wire.entangle('contactOptions').defer,
+        contactOptions: $wire.entangle('contactOptions'),
         removeContactOption: function (index, group) {
             this.contactOptions[group].splice(index, 1);
         },

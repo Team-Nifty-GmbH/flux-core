@@ -1,4 +1,4 @@
-<div class="py-6" x-data="{currency: @entangle('selectedCurrency').defer, currencies: @entangle('currencies').defer}">
+<div class="py-6" x-data="{currency: @entangle('selectedCurrency'), currencies: @entangle('currencies')}">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
@@ -67,15 +67,15 @@
         </div>
     </div>
 
-    <x-modal.card :title="__('Edit Currency')" wire:model.defer="editModal">
+    <x-modal.card :title="__('Edit Currency')" wire:model="editModal">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
                     <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">
                         <div class="space-y-3 sm:col-span-6">
-                            <x-input wire:model="selectedCurrency.name" :label="__('Currency Name')"/>
-                            <x-input wire:model="selectedCurrency.iso" :label="__('ISO')"/>
-                            <x-input wire:model="selectedCurrency.symbol" :label="__('Symbol')"/>
+                            <x-input wire:model.live="selectedCurrency.name" :label="__('Currency Name')"/>
+                            <x-input wire:model.live="selectedCurrency.iso" :label="__('ISO')"/>
+                            <x-input wire:model.live="selectedCurrency.symbol" :label="__('Symbol')"/>
                         </div>
                     </div>
                 </div>

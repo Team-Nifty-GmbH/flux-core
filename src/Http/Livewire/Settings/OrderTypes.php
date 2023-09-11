@@ -94,7 +94,7 @@ class OrderTypes extends Component
 
         $this->editModal = false;
         $this->skipRender();
-        $this->emitTo('data-tables.order-type-list', 'loadData');
+        $this->dispatch('loadData')->to('data-tables.order-type-list');
     }
 
     public function showEditModal(int $orderTypeId = null): void

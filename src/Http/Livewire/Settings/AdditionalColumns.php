@@ -36,9 +36,9 @@ class AdditionalColumns extends Component
         $this->index = is_null($index) ? -1 : $index;
 
         if (! is_null($index)) {
-            $this->emitTo('settings.additional-column-edit', 'show', $this->additionalColumns[$index]);
+            $this->dispatch('show', $this->additionalColumns[$index])->to('settings.additional-column-edit');
         } else {
-            $this->emitTo('settings.additional-column-edit', 'show');
+            $this->dispatch('show')->to('settings.additional-column-edit');
         }
 
         $this->showAdditionalColumnModal = true;
@@ -66,6 +66,6 @@ class AdditionalColumns extends Component
 
     public function delete(): void
     {
-        $this->emitTo('settings.additional-column-edit', 'delete');
+        $this->dispatch('delete')->to('settings.additional-column-edit');
     }
 }

@@ -1,13 +1,13 @@
-<div class="py-6" x-data="{language: @entangle('selectedLanguage').defer, languages: @entangle('languages').defer}">
-    <x-modal.card :title="__('Edit Language')" wire:model.defer="editModal">
+<div class="py-6" x-data="{language: @entangle('selectedLanguage'), languages: @entangle('languages')}">
+    <x-modal.card :title="__('Edit Language')" wire:model="editModal">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
                     <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">
                         <div class="space-y-3 sm:col-span-6">
-                            <x-input wire:model="selectedLanguage.name" :label="__('Language Name')"/>
-                            <x-input wire:model="selectedLanguage.iso_name" :label="__('ISO Name')"/>
-                            <x-input wire:model="selectedLanguage.language_code" :label="__('Language Code')"
+                            <x-input wire:model.live="selectedLanguage.name" :label="__('Language Name')"/>
+                            <x-input wire:model.live="selectedLanguage.iso_name" :label="__('ISO Name')"/>
+                            <x-input wire:model.live="selectedLanguage.language_code" :label="__('Language Code')"
                                      list="language-code-data" autocomplete="off"/>
                         </div>
                     </div>

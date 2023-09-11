@@ -31,7 +31,7 @@ class ClientLogos extends Component
     /**
      * @return string[][]
      */
-    protected function getRules(): array
+    public function getRules(): array
     {
         return [
             'logo.0' => [
@@ -105,7 +105,7 @@ class ClientLogos extends Component
         $this->notification()->success(__('Logo(s) uploaded'));
 
         $this->skipRender();
-        $this->emitUp('closeLogosModal');
+        $this->dispatch('closeLogosModal');
     }
 
     public function removeUpload(string $name): void

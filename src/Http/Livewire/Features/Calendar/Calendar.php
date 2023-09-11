@@ -46,7 +46,7 @@ class Calendar extends Component
 
     public string $editEventComponent = 'calendar.new-event';
 
-    protected function getRules(): array
+    public function getRules(): array
     {
         $rules = Arr::prependKeysWith(
             ($this->calendarEvent['id'] ?? false)
@@ -94,7 +94,7 @@ class Calendar extends Component
 
         $this->eventModal = false;
 
-        $this->emit('refreshCalendar');
+        $this->dispatch('refreshCalendar');
         $this->skipRender();
     }
 
@@ -215,8 +215,8 @@ class Calendar extends Component
         $this->events = array_values($events);
 
         $this->eventModal = false;
-        $this->emitTo('folder-tree', 'modelSaved', $calendarEvent->id);
-        $this->emit('refreshCalendar');
+        $this->dispatch('modelSaved', $calendarEvent->id)->to('folder-tree');
+        $this->dispatch('refreshCalendar');
 
         $this->skipRender();
     }

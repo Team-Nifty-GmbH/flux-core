@@ -28,7 +28,7 @@ class TranslationEdit extends Component
         'delete',
     ];
 
-    protected function getRules(): array
+    public function getRules(): array
     {
         $rules = $this->isNew ?
             (new CreateTranslationRequest())->rules() : (new UpdateTranslationRequest())->rules();
@@ -129,7 +129,7 @@ class TranslationEdit extends Component
         $this->notification()->success(__('Translation saved successful.'));
 
         $this->skipRender();
-        $this->emitUp('closeModal', $this->isNew ? $response : $response['data']);
+        $this->dispatch('closeModal', $this->isNew ? $response : $response['data']);
     }
 
     public function delete(): void
@@ -141,6 +141,6 @@ class TranslationEdit extends Component
         (new TranslationService())->delete($this->translation['id']);
 
         $this->skipRender();
-        $this->emitUp('closeModal', $this->translation, true);
+        $this->dispatch('closeModal', $this->translation, true);
     }
 }

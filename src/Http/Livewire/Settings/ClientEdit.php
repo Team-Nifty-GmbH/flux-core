@@ -27,7 +27,7 @@ class ClientEdit extends Component
         'delete',
     ];
 
-    protected function getRules(): array
+    public function getRules(): array
     {
         $rules = $this->isNew ?
             (new CreateClientRequest())->rules() : (new UpdateClientRequest())->getRules($this->client);
@@ -104,7 +104,7 @@ class ClientEdit extends Component
         $client = $this->isNew ? $response->toArray() : $response['data']->toArray();
 
         $this->skipRender();
-        $this->emitUp('closeModal', $client);
+        $this->dispatch('closeModal', $client);
     }
 
     public function delete(): void
@@ -116,7 +116,7 @@ class ClientEdit extends Component
         (new ClientService())->delete($this->client['id']);
 
         $this->skipRender();
-        $this->emitUp('closeModal', $this->client, true);
+        $this->dispatch('closeModal', $this->client, true);
     }
 
     public function addDay(): void

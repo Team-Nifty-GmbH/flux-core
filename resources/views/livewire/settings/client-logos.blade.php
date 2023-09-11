@@ -1,7 +1,7 @@
 <div>
     <div class="space-y-8 divide-y divide-gray-200">
         <div class="space-y-8 divide-y divide-gray-200">
-            <div x-data="{logo: @entangle('logo')}">
+            <div x-data="{logo: @entangle('logo').live}">
                 <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     <div class="sm:col-span-6">
                         {{__('Logo')}}
@@ -69,7 +69,7 @@
                                         </div>
 
                                     </label>
-                                    <input type="file" id="logo-upload" accept="image/*" wire:model="logo" class="hidden"
+                                    <input type="file" id="logo-upload" accept="image/*" wire:model.live="logo" class="hidden"
                                            @change="handleLogoSelect"/>
                                 </div>
                             </div>
@@ -164,7 +164,7 @@
                                         </div>
 
                                     </label>
-                                    <input type="file" id="logo-small-upload" wire:model="logoSmall" accept="image/*" class="hidden"
+                                    <input type="file" id="logo-small-upload" wire:model.live="logoSmall" accept="image/*" class="hidden"
                                            @change="handleLogoSmallSelect"/>
                                 </div>
                             </div>

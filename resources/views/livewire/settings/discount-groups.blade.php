@@ -40,7 +40,7 @@
                         reject: {
                             label: '{{ __('Cancel') }}',
                         }
-                    }, '{{ $this->id }}');
+                    }, '{{ $this->getId() }}');
     }
 }">
     <div id="edit-window">

@@ -1,6 +1,6 @@
 <div x-data="{
-    order: $wire.entangle('order'),
-    orderPositions: $wire.entangle('orderPositions'),
+    order: $wire.entangle('order', true),
+    orderPositions: $wire.entangle('orderPositions', true),
     formatter: @js(\FluxErp\Models\Order::typeScriptAttributes()),
 }">
     <x-slot:header>

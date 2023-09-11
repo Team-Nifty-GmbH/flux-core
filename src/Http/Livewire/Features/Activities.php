@@ -8,10 +8,13 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
+use Livewire\WithPagination;
 use TeamNiftyGmbH\DataTable\Helpers\Icon;
 
 class Activities extends Component
 {
+    use WithPagination;
+
     /** @var Model $this->modelType */
     public string $modelType = '';
 

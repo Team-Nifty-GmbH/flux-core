@@ -191,7 +191,7 @@ class OrderPositions extends Component
     {
         $ids = $selected ? (array) $selected : $this->selected;
 
-        $this->emitTo('data-tables.order-position-list', 'removeByKey', $ids);
+        $this->dispatch('removeByKey', $ids)->to('data-tables.order-position-list');
     }
 
     public function save(array $orderPosition, array $orderPositions): array

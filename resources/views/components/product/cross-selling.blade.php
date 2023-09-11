@@ -1,6 +1,6 @@
 <div
     x-data="{
-        productCrossSellings: $wire.entangle('productCrossSellings').defer,
+        productCrossSellings: $wire.entangle('productCrossSellings'),
         pushProduct: function (product, index) {
             this.productCrossSellings[index].products.push(product);
         }

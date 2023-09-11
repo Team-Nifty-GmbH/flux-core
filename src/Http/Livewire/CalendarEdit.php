@@ -42,7 +42,7 @@ class CalendarEdit extends Component
 
     public bool $editModal = false;
 
-    protected function getRules(): array
+    public function getRules(): array
     {
         return Arr::prependKeysWith(
             ($this->selectedCalendar['id'] ?? false)
@@ -115,7 +115,7 @@ class CalendarEdit extends Component
 
         $this->editModal = false;
 
-        $this->emitUp('updatedCalendar');
+        $this->dispatch('updatedCalendar');
         $this->skipRender();
     }
 
@@ -126,7 +126,7 @@ class CalendarEdit extends Component
         }
 
         Calendar::query()->whereKey($this->selectedCalendar['id'])->delete();
-        $this->emitUp('updatedCalendar');
+        $this->dispatch('updatedCalendar');
 
         $this->skipRender();
     }

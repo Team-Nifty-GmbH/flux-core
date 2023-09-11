@@ -1,7 +1,7 @@
 <div
     id="project-task-details"
     x-data="{
-        projectTask: $wire.entangle('projectTask').defer,
+        projectTask: $wire.entangle('projectTask'),
         showModal(id) {
             $wire.showProjectTask(id).then(() => {
                 Alpine.$data(document.getElementById('project-task-modal').querySelector('[wireui-modal]')).open()
@@ -10,7 +10,7 @@
         save() {
             $wire.save().then((task) => {
                 if (task) {
-                    $wire.emitTo('data-tables.project-tasks-list', 'refetchRecord', task, task.hasOwnProperty('id') ? 'updated' : 'created');
+                    $wire.dispatchTo('data-tables.project-tasks-list', 'refetchRecord', task, task.hasOwnProperty('id') ? 'updated' : 'created');
                     close();
                 }
             });
@@ -26,7 +26,7 @@
                         execute: () => {
                             $wire.delete().then((success) => {
                                 if (success) {
-                                    $wire.emitTo('data-tables.project-tasks-list', 'refetchRecord', this.projectTask, 'deleted');
+                                    $wire.dispatchTo('data-tables.project-tasks-list', 'refetchRecord', this.projectTask, 'deleted');
                                     close();
                                 }
                             });
@@ -36,7 +36,7 @@
                         label: '{{ __('Cancel') }}',
                     }
                 },
-                '{{ $this->id }}'
+                '{{ $this->getId() }}'
             );
         }
     }"
@@ -44,7 +44,7 @@
     x-on:new-project-task.window="showModal()"
 >
     <x-tabs
-        wire:model="tab"
+        wire:model.live="tab"
         :tabs="$tabs"
         x-bind:disabled="! projectTask.id"
     >

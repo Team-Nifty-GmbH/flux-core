@@ -2,7 +2,7 @@
 
 namespace FluxErp\States\ProjectTask;
 
-use Spatie\ModelStates\State;
+use FluxErp\States\State;
 use Spatie\ModelStates\StateConfig;
 use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 

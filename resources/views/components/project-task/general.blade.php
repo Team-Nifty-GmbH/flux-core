@@ -4,12 +4,12 @@
         class="w-full"
         align="left"
         :label="__('State')"
-        wire:model="projectTask.state"
+        wire:model.live="projectTask.state"
         formatters="formatter.state"
         avialable="availableStates"
     />
     <x-select
-        wire:model="projectTask.user_id"
+        wire:model.live="projectTask.user_id"
         :label="__('User')"
         option-value="id"
         option-label="label"
@@ -20,7 +20,7 @@
         ]"
     />
     <x-select
-        wire:model="projectTask.address_id"
+        wire:model.live="projectTask.address_id"
         :label="__('Customer')"
         option-value="id"
         option-label="label"
@@ -33,8 +33,8 @@
     <div>
         <div x-data="{
                     ...folderTree(),
-                    levels: $wire.entangle('categories').defer,
-                    openFolders: $wire.entangle('openCategories').defer,
+                    levels: $wire.entangle('categories'),
+                    openFolders: $wire.entangle('openCategories'),
                     multiSelect: false,
                     selected: $el.attributes.getNamedItem('x-model').value,
                 }"

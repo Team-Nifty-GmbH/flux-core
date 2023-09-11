@@ -46,14 +46,14 @@ class Calendars extends Component
     public function showEditModal(int $calendarId = null): void
     {
         $this->editModal = true;
-        $this->emitTo('calendar-edit', 'show', $calendarId, $this->calendars);
+        $this->dispatch('show', $calendarId, $this->calendars)->to('calendar-edit');
 
         $this->skipRender();
     }
 
     public function save()
     {
-        $this->emitTo('calendar-edit', 'save');
+        $this->dispatch('save')->to('calendar-edit');
 
         $this->skipRender();
     }

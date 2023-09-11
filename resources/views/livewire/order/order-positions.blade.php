@@ -1,12 +1,12 @@
 <div
     x-data="{
         selectedOrderPosition: {},
-        livewireSelectedOrderPosition: $wire.entangle('position').defer,
+        livewireSelectedOrderPosition: $wire.entangle('position'),
         orderPositions: [],
         selectedIndex: null,
-        order: $wire.entangle('order').defer,
+        order: $wire.entangle('order'),
         selected: [],
-        groups: $wire.entangle('groups').defer,
+        groups: $wire.entangle('groups'),
         selectedGroupId: 0,
         selectPositions(data) {
             const children = this.orderPositions.filter(record => record.slug_position?.startsWith(data.record.slug_position)).map(o => o.id);
@@ -23,7 +23,7 @@
     x-on:data-table-record-selected="selectPositions($event.detail)"
     x-on:open-modal="selectedOrderPosition = JSON.parse(JSON.stringify($event.detail.record)); selectedIndex = $event.detail.index, $wire.edit(selectedOrderPosition)"
 >
-    <x-modal.card wire:model.defer="showGroupAdd" title="{{  __('Add to group') }}">
+    <x-modal.card wire:model="showGroupAdd" title="{{  __('Add to group') }}">
         <x-native-select x-model="selectedGroupId">
             <option value="0">{{ __('No group') }}</option>
             <template x-for="group in groups">
@@ -39,8 +39,8 @@
             </div>
         </x-slot:footer>
     </x-modal.card>
-    <x-modal.card max-width="6xl" wire:model.defer="showOrderPosition" x-cloak x-transition>
-        <div class="relative" x-data="{show: $wire.entangle('showOrderPosition').defer}" >
+    <x-modal.card max-width="6xl" wire:model="showOrderPosition" x-cloak x-transition>
+        <div class="relative" x-data="{show: $wire.entangle('showOrderPosition')}" >
             <x-spinner  wire:target="position"/>
             <div class="space-y-2 p-4" colspan="100%">
                 <div class="flex w-full justify-items-stretch gap-3">
@@ -52,7 +52,7 @@
                                 class="pb-4"
                                 :disabled="($position['product_id'] ?? false)"
                                 :label="__('Product')"
-                                wire:model="productId"
+                                wire:model.live="productId"
                                 option-value="id"
                                 option-label="label"
                                 option-description="product_number"
@@ -71,7 +71,7 @@
                             <div x-cloak x-show="livewireSelectedOrderPosition.product_id">
                                 <x-select
                                     :label="__('Warehouse')"
-                                    wire:model="position.warehouse_id"
+                                    wire:model.live="position.warehouse_id"
                                     option-value="id"
                                     option-label="name"
                                     :async-data="route('search', \FluxErp\Models\Warehouse::class)"
@@ -91,7 +91,7 @@
                         >
                         </x-input>
                         <x-input type="number" :label="__('Discount')" x-model="livewireSelectedOrderPosition.discount_percentage"></x-input>
-                        <x-select :options="$vatRates" option-label="name" option-value="id" :label="__('Vat rate')" wire:model="position.vat_rate_id" />
+                        <x-select :options="$vatRates" option-label="name" option-value="id" :label="__('Vat rate')" wire:model.live="position.vat_rate_id" />
                     </div>
                 </div>
                 <x-textarea :label="__('Description')" x-model.lazy="livewireSelectedOrderPosition.description"></x-textarea>
@@ -111,7 +111,7 @@
                             $dispatch('order-positions-updated');
                             $wire.save(livewireSelectedOrderPosition, orderPositions).then((data) => {
                               if (data) {
-                                  $wire.emitTo('data-tables.order-position-list', selectedIndex !== null ? 'replaceByIndex' : 'addToBottom', data, selectedIndex);
+                                  $wire.dispatchTo('data-tables.order-position-list', selectedIndex !== null ? 'replaceByIndex' : 'addToBottom', data, selectedIndex);
                               }
                           })"
                         :label="__('Save')"

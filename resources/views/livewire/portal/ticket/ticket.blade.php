@@ -4,11 +4,11 @@
             {{ __('Ticket') . ': ' . $ticket['ticket_number'] }}
         </h1>
         <h2 class="pt-10 pb-8 text-base font-bold uppercase dark:text-gray-50">{{ __('Information') }}</h2>
-        <div class="md:flex md:space-x-12" x-data="{additionalColumns: @entangle('additionalColumns').defer, ticket: @entangle('ticket')}" >
+        <div class="md:flex md:space-x-12" x-data="{additionalColumns: @entangle('additionalColumns'), ticket: @entangle('ticket').live}" >
             <div class="flex-1">
                 <div class="space-y-5 dark:text-gray-50">
-                    <x-input wire:model="ticket.title" :disabled="true"/>
-                    <x-textarea wire:model="ticket.description" :disabled="true"/>
+                    <x-input wire:model.live="ticket.title" :disabled="true"/>
+                    <x-textarea wire:model.live="ticket.description" :disabled="true"/>
                     @if($ticket['model_type'] && $ticket['model_type']::getLivewireComponentWidget())
                         <x-card>
                             <livewire:is :component="$ticket['model_type']::getLivewireComponentWidget()" :modelId="$ticket['model_id']" />
@@ -29,7 +29,7 @@
             </div>
         </div>
         <x-tabs
-            wire:model="tab"
+            wire:model.live="tab"
             :tabs="[
                 'features.comments.comments' => __('Comments'),
                 'features.activities' => __('Activities'),

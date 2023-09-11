@@ -2,8 +2,8 @@
     x-data="wireui_notifications"
 >
     <div x-data="{
-         unread: @entangle('unread'),
-         showNotifications: @entangle('showNotifications'),
+         unread: @entangle('unread').live,
+         showNotifications: @entangle('showNotifications').live,
          closeNotification(notification) {
              $wire.markAsRead(notification.notification_id);
 
@@ -22,7 +22,7 @@
                     result => {
                         result.forEach(
                             notification => {
-                                addConfirmNotification({options: notification, componentId: '{{ $this->id }}'
+                                addConfirmNotification({options: notification, componentId: '{{ $this->getId() }}'
                             }
                         )
                     }

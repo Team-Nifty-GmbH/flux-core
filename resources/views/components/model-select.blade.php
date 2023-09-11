@@ -60,7 +60,7 @@
             {{ $attributes
                 ->except(['class'])
                 ->class(['pl-8' => $icon])
-                ->whereDoesntStartWith(['wire:model', 'type', 'wire:key'])
+                ->whereDoesntStartWith(['wire:model.live', 'type', 'wire:key'])
             }}>
             <x-slot name="prepend">
                 <div :class="{

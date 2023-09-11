@@ -1,5 +1,5 @@
 <div x-data="{
-    setting: $wire.entangle('setting').defer,
+    setting: $wire.entangle('setting'),
     calculateBackground() {
         return `linear-gradient(${this.setting.settings.nav.background.angle}deg, ${this.setting.settings.nav.background.start}, ${this.setting.settings.nav.background.end})`;
     }
@@ -12,23 +12,23 @@
     </div>
     <div class="grid-cols-3 gap-8 pb-8 md:grid">
         <x-card :title="__('General')">
-            <x-select :label="__('Dashboard module')" :options="$modules" wire:model.defer="setting.settings.dashboard_module"/>
-            <x-select :label="__('Calendars')" wire:model.defer="setting.settings.calendars" :options="$calendars" :multiselect="true" option-label="name" option-value="id" />
+            <x-select :label="__('Dashboard module')" :options="$modules" wire:model="setting.settings.dashboard_module"/>
+            <x-select :label="__('Calendars')" wire:model="setting.settings.calendars" :options="$calendars" :multiselect="true" option-label="name" option-value="id" />
         </x-card>
         <x-card :title="__('Navigation styling')">
             <div class="grid grid-cols-2 gap-4">
                 <div class="grid grid-cols-1 gap-2">
                     <div>
                         <x-label :label="__('Start color')" />
-                        <input class="w-full" type="color" x-on:change="calculateBackground()" wire:model.defer="setting.settings.nav.background.start" />
+                        <input class="w-full" type="color" x-on:change="calculateBackground()" wire:model="setting.settings.nav.background.start" />
                     </div>
                     <div>
                         <x-label><span x-text="'{{ __('Angle') }} ' + setting.settings.nav.background.angle + '°'"></span></x-label>
-                        <input class="w-full" type="range" x-on:change="calculateBackground()" min="0" max="360" wire:model="setting.settings.nav.background.angle" />
+                        <input class="w-full" type="range" x-on:change="calculateBackground()" min="0" max="360" wire:model.live="setting.settings.nav.background.angle" />
                     </div>
                     <div>
                         <x-label :label="__('End color')" />
-                        <input class="w-full" type="color" x-on:change="calculateBackground()" wire:model.defer="setting.settings.nav.background.end" />
+                        <input class="w-full" type="color" x-on:change="calculateBackground()" wire:model="setting.settings.nav.background.end" />
                     </div>
                 </div>
                 <div class="h-full w-full" x-bind:style="{backgroundImage: calculateBackground()}">
@@ -36,10 +36,10 @@
             </div>
             <div class="m-2 w-full border"></div>
             <x-label :label="__('Active menu item')" />
-            <input class="w-full" type="color" wire:model.defer="setting.settings.nav.active_item" />
+            <input class="w-full" type="color" wire:model="setting.settings.nav.active_item" />
             <x-label :label="__('Hover menu item')" />
-            <input class="w-full" type="color" wire:model.defer="setting.settings.nav.hover_item" />
-            <x-inputs.number min="12" max="48" step="2" :label="__('Icon size')" wire:model.defer="setting.settings.nav.icon_size" />
+            <input class="w-full" type="color" wire:model="setting.settings.nav.hover_item" />
+            <x-inputs.number min="12" max="48" step="2" :label="__('Icon size')" wire:model="setting.settings.nav.icon_size" />
         </x-card>
         <x-card :title="__('Append links')">
             <div class="space-y-5">

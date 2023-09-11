@@ -1,4 +1,4 @@
-<div class="py-6"  x-data="{translations: $wire.entangle('translations').defer, locale: @entangle('locale')}">
+<div class="py-6"  x-data="{translations: $wire.entangle('translations'), locale: @entangle('locale').live}">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
@@ -7,13 +7,13 @@
             </div>
             <div class="mt-6 sm:ml-16">
                 <div class="flex items-center py-3">
-                    <x-input spinner icon="search" placeholder="{{ __('Search…') }}" wire:model="search" />
+                    <x-input spinner icon="search" placeholder="{{ __('Search…') }}" wire:model.live="search" />
                 </div>
             </div>
             <div class="sm:ml-16">
                 <x-select
                     :label="__('Language')"
-                    wire:model="locale"
+                    wire:model.live="locale"
                     :options="$locales"
                     :clearable="false"
                 />
@@ -58,10 +58,10 @@
         </div>
     </div>
 
-    <x-modal.card z-index="z-30" wire:model.defer="showTranslationModal" :title="__('Edit Translation')">
+    <x-modal.card z-index="z-30" wire:model="showTranslationModal" :title="__('Edit Translation')">
         <livewire:settings.translation-edit/>
         <x-slot name="footer">
-            <div x-data="{index: @entangle('index').defer}" class="w-full">
+            <div x-data="{index: @entangle('index')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.translation.delete'))
@@ -77,12 +77,12 @@
                                                             reject: {
                                                                 label: '{{ __('Cancel') }}',
                                                             }
-                                                        }, '{{ $this->id }}')
+                                                        }, '{{ $this->getId() }}')
                                                         " label="{{ __('Delete') }}"/>
                     @endif
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$emitTo('settings.translation-edit', 'save')"/>
+                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.translation-edit', 'save')"/>
                     </div>
                 </div>
             </div>

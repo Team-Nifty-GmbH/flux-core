@@ -2,10 +2,10 @@
     class="py-6"
     x-on:data-table-row-clicked="$wire.show($event.detail.id)"
 >
-    <x-modal.card x-on:close="$wire.closeModal()" z-index="z-30" wire:model.defer="showUserModal" :title="__('Edit user')">
+    <x-modal.card x-on:close="$wire.closeModal()" z-index="z-30" wire:model="showUserModal" :title="__('Edit user')">
         <livewire:settings.user-edit/>
         <x-slot name="footer">
-            <div x-data="{userId: $wire.entangle('userId').defer}" class="w-full">
+            <div x-data="{userId: $wire.entangle('userId')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.user.delete'))
@@ -26,14 +26,14 @@
                                     reject: {
                                         label: '{{ __('Cancel') }}',
                                     }
-                                }, '{{ $this->id }}')
+                                }, '{{ $this->getId() }}')
                                 "
                             label="{{ __('Delete') }}"
                         />
                     @endif
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$emitTo('settings.user-edit', 'save')"/>
+                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.user-edit', 'save')"/>
                     </div>
                 </div>
             </div>

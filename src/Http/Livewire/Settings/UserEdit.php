@@ -131,8 +131,8 @@ class UserEdit extends Component
         }
 
         $this->notification()->success(__('User saved successful.'));
-        $this->emitUp('closeModal');
-        $this->emitTo('data-tables.user-list', 'loadData');
+        $this->dispatch('closeModal');
+        $this->dispatch('loadData')->to('data-tables.user-list');
 
         try {
             UpdateUserPermissions::make([
@@ -174,7 +174,7 @@ class UserEdit extends Component
                 ->execute();
 
             $this->skipRender();
-            $this->emitUp('closeModal');
+            $this->dispatch('closeModal');
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
 

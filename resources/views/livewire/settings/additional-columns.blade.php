@@ -39,7 +39,7 @@
                                 </th>
                             </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 bg-white" x-data="{additionalColumns: @entangle('additionalColumns').defer}">
+                            <tbody class="divide-y divide-gray-200 bg-white" x-data="{additionalColumns: @entangle('additionalColumns')}">
                                 <template x-for="(additionalColumn, index) in additionalColumns">
                                     <tr class="divide-x divide-gray-200">
                                         <td x-text="additionalColumn.name" class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6" />
@@ -68,10 +68,10 @@
         </div>
     </div>
 
-    <x-modal.card z-index="z-30" wire:model.defer="showAdditionalColumnModal" :title="__('Edit Additional Column')">
+    <x-modal.card z-index="z-30" wire:model="showAdditionalColumnModal" :title="__('Edit Additional Column')">
         <livewire:settings.additional-column-edit/>
         <x-slot name="footer">
-            <div x-data="{index: @entangle('index').defer}" class="w-full">
+            <div x-data="{index: @entangle('index')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.additional-column.delete'))
@@ -87,12 +87,12 @@
                                                             reject: {
                                                                 label: '{{ __('Cancel') }}',
                                                             }
-                                                        }, '{{ $this->id }}')
+                                                        }, '{{ $this->getId() }}')
                                                         " label="{{ __('Delete') }}"/>
                     @endif
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$emitTo('settings.additional-column-edit', 'save')"/>
+                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.additional-column-edit', 'save')"/>
                     </div>
                 </div>
             </div>

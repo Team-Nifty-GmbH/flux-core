@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 trait WithFileUploads
 {
     use WithFileUploadsBase {
-        WithFileUploadsBase::removeUpload as parentRemoveUpload;
+        WithFileUploadsBase::_removeUpload as parentRemoveUpload;
     }
 
     public array $filesArray = [];

@@ -35,7 +35,7 @@
                                     reject: {
                                         label: '{{ __('Cancel') }}',
                                     }
-                                    }, '{{ $this->id }}')
+                                    }, '{{ $this->getId() }}')
                         "
                     />
                 </x-dropdown>

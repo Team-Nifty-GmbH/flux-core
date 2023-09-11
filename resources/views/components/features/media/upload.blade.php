@@ -6,7 +6,7 @@
                 isDropping: false,
                 isUploading: false,
                 progress: 0,
-                filesArray: $wire.entangle('filesArray'),
+                filesArray: $wire.entangle('filesArray', true),
                 handleFileSelect(event) {
                     if (event.target.files.length) {
                         this.uploadFiles(event.target.files, event)

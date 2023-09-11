@@ -1,7 +1,7 @@
 <div class="w-full lg:col-span-2 lg:col-start-1 lg:flex lg:space-x-6">
     <section class="flex flex-col gap-4 basis-1/4" wire:ignore x-data="{
-        addresses: $wire.entangle('contact.addresses').defer,
-        address: $wire.entangle('address').defer,
+        addresses: $wire.entangle('contact.addresses'),
+        address: $wire.entangle('address'),
         selectAddress(address) {
             this.address = address;
             $dispatch('address-selected', address);
@@ -51,8 +51,8 @@
             </div>
         </x-card>
         <x-card class="space-y-2.5">
-            <x-select wire:model="contact.price_list_id" :clearable="false" :label="__('Price group')" :options="$this->priceLists" option-label="name" option-value="id"/>
-            <x-select wire:model="contact.payment_type_id" :clearable="false" :label="__('Payment type')" :options="$this->paymentTypes" option-label="name" option-value="id"/>
+            <x-select wire:model.live="contact.price_list_id" :clearable="false" :label="__('Price group')" :options="$this->priceLists" option-label="name" option-value="id"/>
+            <x-select wire:model.live="contact.payment_type_id" :clearable="false" :label="__('Payment type')" :options="$this->paymentTypes" option-label="name" option-value="id"/>
         </x-card>
     </section>
     <livewire:address.address :address="$this->address" :contact="$this->contact" />

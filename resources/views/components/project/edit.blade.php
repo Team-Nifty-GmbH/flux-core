@@ -4,7 +4,7 @@
         ...folderTree(),
         levels: [],
         projectTaskCategories: [],
-        openFolders: $wire.entangle('openCategories').defer,
+        openFolders: $wire.entangle('openCategories'),
         selectAttributes(obj) {
             return `x-bind:disabled='projectTaskCategories.includes(level.id) || ! edit'`;
         },
@@ -25,7 +25,7 @@
             class="w-full"
             align="left"
             :label="__('Project state')"
-            wire:model.defer="project.state"
+            wire:model="project.state"
             formatters="formatter.state"
             avialable="availableStates"
         />

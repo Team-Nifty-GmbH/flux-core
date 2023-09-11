@@ -6,7 +6,7 @@
                     this.$refs.tabMarker.classList.remove('hidden');
              })
          },
-        tab: $wire.entangle('{{ $attributes->wire('model')->value() }}'),
+        tab: $wire.entangle('{{ $attributes->wire('model')->value() }}', true),
         tabs: @js($tabs),
         tabRepositionMarker(tabButton) {
             this.$refs.tabMarker.style.width = tabButton.offsetWidth + 'px';

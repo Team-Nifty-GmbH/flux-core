@@ -4,11 +4,11 @@
         init() {
             $wire.loadData();
         },
-        activities: $wire.entangle('activities'),
+        activities: $wire.entangle('activities', true),
         activeActivity: null,
-        page: $wire.entangle('page'),
-        total: $wire.entangle('total'),
-        perPage: $wire.entangle('perPage'),
+        page: $wire.entangle('page', true),
+        total: $wire.entangle('total', true),
+        perPage: $wire.entangle('perPage', true),
         showProperties(id) {
             this.activeActivity = (this.activeActivity === id) ? null : id;
         }

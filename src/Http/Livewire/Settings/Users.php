@@ -30,7 +30,7 @@ class Users extends Component
     public function show(int $id = null): void
     {
         $this->userId = $id ?? 0;
-        $this->emitTo('settings.user-edit', 'show', $id);
+        $this->dispatch('show', $id)->to('settings.user-edit');
         $this->skipRender();
         $this->showUserModal = true;
     }
@@ -48,6 +48,6 @@ class Users extends Component
 
     public function delete(): void
     {
-        $this->emitTo('settings.user-edit', 'delete');
+        $this->dispatch('delete')->to('settings.user-edit');
     }
 }

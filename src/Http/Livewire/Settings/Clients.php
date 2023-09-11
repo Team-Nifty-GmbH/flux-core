@@ -40,9 +40,9 @@ class Clients extends Component
         $this->index = is_null($index) ? -1 : $index;
 
         if (! is_null($index)) {
-            $this->emitTo('settings.client-edit', 'show', $this->clients[$index]);
+            $this->dispatch('show', $this->clients[$index])->to('settings.client-edit');
         } else {
-            $this->emitTo('settings.client-edit', 'show');
+            $this->dispatch('show')->to('settings.client-edit');
         }
 
         $this->showClientLogosModal = false;
@@ -52,7 +52,7 @@ class Clients extends Component
 
     public function showLogos(int $id): void
     {
-        $this->emitTo('settings.client-logos', 'show', $id);
+        $this->dispatch('show', $id)->to('settings.client-logos');
 
         $this->showClientModal = false;
         $this->showClientLogosModal = true;
@@ -86,6 +86,6 @@ class Clients extends Component
 
     public function delete(): void
     {
-        $this->emitTo('settings.client-edit', 'delete');
+        $this->dispatch('delete')->to('settings.client-edit');
     }
 }

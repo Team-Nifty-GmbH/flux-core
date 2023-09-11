@@ -46,9 +46,9 @@ class Translations extends Component
         $this->index = is_null($index) ? -1 : $index;
 
         if (! is_null($index)) {
-            $this->emitTo('settings.translation-edit', 'show', $this->locale, $this->translations[$index]);
+            $this->dispatch('show', $this->locale, $this->translations[$index])->to('settings.translation-edit');
         } else {
-            $this->emitTo('settings.translation-edit', 'show', $this->locale);
+            $this->dispatch('show', $this->locale)->to('settings.translation-edit');
         }
 
         $this->showTranslationModal = true;
@@ -76,7 +76,7 @@ class Translations extends Component
 
     public function delete(): void
     {
-        $this->emitTo('settings.translation-edit', 'delete');
+        $this->dispatch('delete')->to('settings.translation-edit');
     }
 
     public function updatedLocale(): void

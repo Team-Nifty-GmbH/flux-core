@@ -75,55 +75,55 @@
         </div>
     </div>
 
-    <x-modal.card :title="__('Edit Template')" blur wire:model.defer="editModal">
+    <x-modal.card :title="__('Edit Template')" blur wire:model="editModal">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
                     <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                         <div class="sm:col-span-6">
-                            <x-input wire:model="selectedEmailTemplate.name" :label="__('Template Name')"/>
+                            <x-input wire:model.live="selectedEmailTemplate.name" :label="__('Template Name')"/>
                         </div>
                         <div class="sm:col-span-3">
-                            <x-input wire:model="selectedEmailTemplate.from" :label="__('From')"/>
+                            <x-input wire:model.live="selectedEmailTemplate.from" :label="__('From')"/>
                         </div>
                         <div class="sm:col-span-3">
-                            <x-input wire:model="selectedEmailTemplate.from_alias" :label="__('From Alias')"/>
+                            <x-input wire:model.live="selectedEmailTemplate.from_alias" :label="__('From Alias')"/>
                         </div>
                         <div class="sm:col-span-2">
-                            <x-input wire:model="selectedEmailTemplate.to" :label="__('To')"/>
+                            <x-input wire:model.live="selectedEmailTemplate.to" :label="__('To')"/>
                         </div>
                         <div class="sm:col-span-2">
-                            <x-input wire:model="selectedEmailTemplate.cc" :label="__('Cc')"/>
+                            <x-input wire:model.live="selectedEmailTemplate.cc" :label="__('Cc')"/>
                         </div>
 
                         <div class="sm:col-span-2">
-                            <x-input wire:model="selectedEmailTemplate.bcc" :label="__('Bcc')"/>
+                            <x-input wire:model.live="selectedEmailTemplate.bcc" :label="__('Bcc')"/>
                         </div>
 
                         <div class="sm:col-span-6">
-                            <x-input wire:model="selectedEmailTemplate.subject" :label="__('Subject')"/>
+                            <x-input wire:model.live="selectedEmailTemplate.subject" :label="__('Subject')"/>
                         </div>
 
                         <div class="sm:col-span-6">
-                            <x-textarea wire:model="selectedEmailTemplate.message" :label="__('Message')"/>
+                            <x-textarea wire:model.live="selectedEmailTemplate.message" :label="__('Message')"/>
                         </div>
 
                         <div class="sm:col-span-6">
-                            <x-native-select wire:model="selectedEmailTemplate.view" :label="__('View')"
+                            <x-native-select wire:model.live="selectedEmailTemplate.view" :label="__('View')"
                                              :options="array_values($emailTemplateViews)"/>
                         </div>
                     </div>
                     <div class="pt-6">
                         <x-checkbox :label="__('Can overwrite message')"
-                                    wire:model="selectedEmailTemplate.can_overwrite_message"/>
+                                    wire:model.live="selectedEmailTemplate.can_overwrite_message"/>
                         <x-checkbox :label="__('Can overwrite receiver')"
-                                    wire:model="selectedEmailTemplate.can_overwrite_receiver"/>
+                                    wire:model.live="selectedEmailTemplate.can_overwrite_receiver"/>
                         <x-checkbox :label="__('Can overwrite sender')"
-                                    wire:model="selectedEmailTemplate.can_overwrite_sender"/>
+                                    wire:model.live="selectedEmailTemplate.can_overwrite_sender"/>
                         <x-checkbox :label="__('Can overwrite subject')"
-                                    wire:model="selectedEmailTemplate.can_overwrite_subject"/>
+                                    wire:model.live="selectedEmailTemplate.can_overwrite_subject"/>
                         <x-checkbox :label="__('Should prohibit release')"
-                                    wire:model="selectedEmailTemplate.should_prohibit_release"/>
+                                    wire:model.live="selectedEmailTemplate.should_prohibit_release"/>
                     </div>
                 </div>
             </div>

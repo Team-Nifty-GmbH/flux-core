@@ -50,13 +50,13 @@
                 </li>
             @endforeach
         </ul>
-        <x-modal.card max-width="sm" blur :title="$selectedRole['name'] ?? ''" wire:model.defer="showToggleUsers">
+        <x-modal.card max-width="sm" blur :title="$selectedRole['name'] ?? ''" wire:model="showToggleUsers">
             <div class="space-y-6">
                 @foreach($users as $user)
                     <div class="flex">
                         <div class="flex-1 font-medium">{{ $user['name'] }}</div>
                         <div class="">
-                            <x-checkbox wire:model.defer="selectedUsers" :value="$user['id']"/>
+                            <x-checkbox wire:model="selectedUsers" :value="$user['id']"/>
                         </div>
                     </div>
                 @endforeach
@@ -72,24 +72,24 @@
         </x-modal.card>
 
         <x-modal.card max-width="md" blur :title="$selectedRole['name'] ?? __('New Role')"
-                      wire:model.defer="showTogglePermissions">
+                      wire:model="showTogglePermissions">
             <div class="space-y-6">
-                <x-input wire:model.defer="selectedRole.name" :label="__('Name')"/>
+                <x-input wire:model="selectedRole.name" :label="__('Name')"/>
                 <x-native-select
                     :label="__('Guard')"
                     :disabled="$selectedRole['id'] ?? false"
                     :options="$guards"
-                    wire:model.defer="selectedRole.guard_name"
+                    wire:model="selectedRole.guard_name"
                 />
                 <div>
                     <x-label :label="__('Permissions')"/>
-                    <x-input wire:model.debounce.500ms="searchPermission" icon="search"/>
+                    <x-input wire:model.live.debounce.500ms="searchPermission" icon="search"/>
                     <div class="max-h-96 space-y-6 overflow-y-auto">
                         @foreach($permissions as $permission)
                             <div class="flex">
                                 <div class="flex-1 font-medium">{{ __($permission['name']) }}</div>
                                 <div class="">
-                                    <x-checkbox wire:model.defer="selectedRole.permissions" :value="$permission['id']"/>
+                                    <x-checkbox wire:model="selectedRole.permissions" :value="$permission['id']"/>
                                 </div>
                             </div>
                         @endforeach
@@ -112,7 +112,7 @@
                                                             reject: {
                                                                 label: '{{ __('Cancel') }}',
                                                             }
-                                                        }, '{{ $this->id }}')
+                                                        }, '{{ $this->getId() }}')
                                                         " label="{{ __('Delete') }}"/>
                     @endif
                     <div class="flex">

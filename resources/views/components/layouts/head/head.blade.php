@@ -8,14 +8,11 @@
 <meta name="pusher-cluster" content="{{ config('broadcasting.connections.pusher.options.cluster', 'mt1') }}">
 @stack('meta')
 <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
-<livewire:scripts/>
 {!! WireUi::directives()->scripts(absolute: false) !!}
-@dataTablesScripts()
 @vite([
     'resources/js/app.js',
     'resources/js/alpine.js',
     'resources/css/app.css',
 ], 'flux/build')
-<livewire:styles/>
 @stack('scripts')
 {{$slot}}

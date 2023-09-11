@@ -1,7 +1,7 @@
 <div
     x-data="{
-        order: $wire.entangle('order').defer,
-        tab: $wire.entangle('tab'),
+        order: $wire.entangle('order'),
+        tab: $wire.entangle('tab', true),
         formatter: @js(\FluxErp\Models\Order::typeScriptAttributes()),
         orderPositions: [],
         createDocuments: false,
@@ -30,7 +30,7 @@
         <x-sidebar x-show="createDocuments">
             @section('create-documents-sidebar.content')
                 @foreach($printLayouts as $key => $printLayout)
-                    <x-checkbox wire:model.defer="selectedPrintLayouts.{{ $key }}" :label="$key" />
+                    <x-checkbox wire:model="selectedPrintLayouts.{{ $key }}" :label="$key" />
                 @endforeach
             @show
             <x-slot name="footer">
@@ -76,7 +76,7 @@
                     reject: {
                         label: '{{ __('Cancel') }}',
                     }
-                    }, '{{ $this->id }}')
+                    }, '{{ $this->getId() }}')
                     "/>
             @endif
             <x-button
@@ -89,7 +89,7 @@
         </div>
     </div>
     <x-tabs
-        wire:model="tab"
+        wire:model.live="tab"
         :tabs="[
                     'order-positions' => __('Order positions'),
                     'attachments' => __('Attachments'),
@@ -117,7 +117,7 @@
                         <x-select
                             :disabled="$order['is_locked']"
                             class="pb-4"
-                            wire:model="order.address_invoice_id"
+                            wire:model.live="order.address_invoice_id"
                             option-value="id"
                             option-label="label"
                             option-description="description"
@@ -160,7 +160,7 @@
                         <x-select
                             :disabled="$order['is_locked']"
                             class="pb-4"
-                            wire:model="order.address_delivery_id"
+                            wire:model.live="order.address_delivery_id"
                             option-value="id"
                             option-label="label"
                             option-description="description"
@@ -197,7 +197,7 @@
                                 option-label="name"
                                 :clearable="false"
                                 autocomplete="off"
-                                wire:model="order.client_id"
+                                wire:model.live="order.client_id"
                             />
                             <x-select
                                 :label="__('Price list')"
@@ -206,7 +206,7 @@
                                 option-label="name"
                                 :clearable="false"
                                 autocomplete="off"
-                                wire:model="order.price_list_id"
+                                wire:model.live="order.price_list_id"
                                 x-bind:disabled="order.is_locked"
                             />
                             <x-select
@@ -216,7 +216,7 @@
                                 option-label="name"
                                 :clearable="false"
                                 autocomplete="off"
-                                wire:model="order.payment_type_id"
+                                wire:model.live="order.payment_type_id"
                                 x-bind:disabled="order.is_locked"
                             />
                             <x-select
@@ -226,7 +226,7 @@
                                 option-label="name"
                                 :clearable="false"
                                 autocomplete="off"
-                                wire:model.defer="order.language_id"
+                                wire:model="order.language_id"
                                 x-bind:disabled="order.is_locked"
                             />
                         </div>
@@ -239,21 +239,21 @@
                                 class="w-full"
                                 align="left"
                                 :label="__('Order state')"
-                                wire:model="order.state"
+                                wire:model.live="order.state"
                                 formatters="formatter.state"
                                 avialable="availableStates.state"
                             />
                             <x-state
                                 align="left"
                                 :label="__('Payment state')"
-                                wire:model="order.payment_state"
+                                wire:model.live="order.payment_state"
                                 formatters="formatter.payment_state"
                                 avialable="availableStates.payment_state"
                             />
                             <x-state
                                 align="left"
                                 :label="__('Delivery state')"
-                                wire:model="order.delivery_state"
+                                wire:model.live="order.delivery_state"
                                 formatters="formatter.delivery_state"
                                 avialable="availableStates.delivery_state"
                             />
@@ -343,7 +343,7 @@
                     </x-card>
                     <x-card>
                         <div class="space-y-3">
-                            <x-input wire:model.defer="order.commission" :label="__('Commission')" />
+                            <x-input wire:model="order.commission" :label="__('Commission')" />
                         </div>
                     </x-card>
                     @section('content.right')

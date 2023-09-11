@@ -1,4 +1,4 @@
-<div class="py-6" x-data="{clients: @entangle('clients').defer, customerPortalUrl: '{{ route('settings.customer-portal', ['client' => ':clientId']) }}' }">
+<div class="py-6" x-data="{clients: @entangle('clients'), customerPortalUrl: '{{ route('settings.customer-portal', ['client' => ':clientId']) }}' }">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
@@ -69,10 +69,10 @@
         </div>
     </div>
 
-    <x-modal.card max-width="6xl" z-index="z-30" wire:model.defer="showClientModal" :title="__('Edit Client')">
+    <x-modal.card max-width="6xl" z-index="z-30" wire:model="showClientModal" :title="__('Edit Client')">
         <livewire:settings.client-edit/>
         <x-slot name="footer">
-            <div x-data="{index: @entangle('index').defer}" class="w-full">
+            <div x-data="{index: @entangle('index')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.client.delete'))
@@ -88,24 +88,24 @@
                                                             reject: {
                                                                 label: '{{ __('Cancel') }}',
                                                             }
-                                                        }, '{{ $this->id }}')
+                                                        }, '{{ $this->getId() }}')
                                                         " label="{{ __('Delete') }}"/>
                     @endif
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$emitTo('settings.client-edit', 'save')"/>
+                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.client-edit', 'save')"/>
                     </div>
                 </div>
             </div>
         </x-slot>
     </x-modal.card>
-    <x-modal.card wire:model.defer="showClientLogosModal" :title="__('Manage Logos')">
+    <x-modal.card wire:model="showClientLogosModal" :title="__('Manage Logos')">
         <livewire:settings.client-logos/>
         <x-slot name="footer">
             <div class="w-full">
                     <div class="flex justify-end gap-x-4">
                         <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$emitTo('settings.client-logos', 'save')"/>
+                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.client-logos', 'save')"/>
                     </div>
             </div>
         </x-slot>

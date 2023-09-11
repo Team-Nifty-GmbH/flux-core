@@ -90,8 +90,7 @@ class TicketTypes extends Component
         }
 
         if ($this->additionalColumnIndex !== -1 || $newAdditionalColumn) {
-            $this->emitTo(
-                'settings.additional-column-edit',
+            $this->dispatch(
                 'show',
                 ! $newAdditionalColumn ? $this->ticketTypes[$index] :
                     array_merge(
@@ -104,15 +103,14 @@ class TicketTypes extends Component
                             'model_id' => $this->ticketTypes[$index]['id'],
                         ]
                     )
-            );
+            )->to('settings.additional-column-edit');
 
             $this->showAdditionalColumnModal = true;
         } else {
-            $this->emitTo(
-                'settings.ticket-type-edit',
+            $this->dispatch(
                 'show',
                 ! is_null($index) ? $this->ticketTypes[$index] : []
-            );
+            )->to('settings.ticket-type-edit');
 
             $this->showTicketTypeModal = true;
         }
@@ -174,9 +172,9 @@ class TicketTypes extends Component
     public function delete(bool $additionalColumn = false): void
     {
         if ($additionalColumn) {
-            $this->emitTo('settings.additional-column-edit', 'delete');
+            $this->dispatch('delete')->to('settings.additional-column-edit');
         } else {
-            $this->emitTo('settings.ticket-type-edit', 'delete');
+            $this->dispatch('delete')->to('settings.ticket-type-edit');
         }
     }
 

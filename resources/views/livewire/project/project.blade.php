@@ -1,5 +1,5 @@
 <div x-data="{
-    project: $wire.entangle('project').defer,
+    project: $wire.entangle('project'),
     edit: false,
     deleteProject() {
         window.$wireui.confirmDialog(
@@ -22,7 +22,7 @@
                     label: '{{ __('Cancel') }}',
                 }
             },
-            '{{ $this->id }}'
+            '{{ $this->getId() }}'
         );
     }
 }"
@@ -85,7 +85,7 @@
         </div>
     </div>
     <x-tabs
-        wire:model="tab"
+        wire:model.live="tab"
         :tabs="$tabs"
         x-bind:disabled="! project.id"
         wire:ignore

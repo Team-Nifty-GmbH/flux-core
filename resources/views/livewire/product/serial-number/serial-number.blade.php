@@ -1,9 +1,9 @@
 <div
     class="dark:text-white"
     x-data="{
-        serialNumber: @entangle('serialNumber').defer,
-        productImage: $wire.entangle('productImage').defer,
-        edit: $wire.entangle('edit').defer,
+        serialNumber: @entangle('serialNumber'),
+        productImage: $wire.entangle('productImage'),
+        edit: $wire.entangle('edit'),
     }
 ">
     <!-- Page header -->
@@ -12,7 +12,7 @@
             <label for="avatar" style="cursor: pointer">
                 <x-avatar xl :label="$productImage === '' ? strtoupper(substr($serialNumber['id'] ?? '', 0, 2)) : false" src="{{ $productImage }}" />
             </label>
-            <input type="file" accept="image/*" id="avatar" class="hidden" wire:model="avatar"/>
+            <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="avatar"/>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="opacity-40 transition-opacity hover:opacity-100">
@@ -37,7 +37,7 @@
                     reject: {
                         label: '{{ __('Cancel') }}',
                     }
-                    }, '{{ $this->id }}')
+                    }, '{{ $this->getId() }}')
                     "/>
             @endcan
             @if(user_can('action.serial-number.create') && ($serialNumber['id'] ?? false))
@@ -57,7 +57,7 @@
         </div>
     </div>
     <x-tabs
-        wire:model="tab"
+        wire:model.live="tab"
         :tabs="[
                     'general' => __('General'),
                     'comments' => __('Comments'),

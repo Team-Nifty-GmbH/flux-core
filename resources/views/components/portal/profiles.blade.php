@@ -15,7 +15,7 @@
     <div
         class="pt-8"
         x-data="{
-            addresses: $wire.entangle('addresses').defer,
+            addresses: $wire.entangle('addresses'),
             editUserUrl: '{{ route('portal.profile.id?', ['id' => ':addressId']) }}'
             }"
     >

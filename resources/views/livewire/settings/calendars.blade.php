@@ -1,5 +1,5 @@
 <div class="py-6" x-data="{
-calendars: @entangle('calendars').defer
+calendars: @entangle('calendars')
 }">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">

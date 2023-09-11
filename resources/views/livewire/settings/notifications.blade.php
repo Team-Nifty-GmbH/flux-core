@@ -1,12 +1,12 @@
 <div class="py-6"
      x-data="{
-        notifications: $wire.entangle('notifications'),
-        notificationChannels: $wire.entangle('notificationChannels'),
-        notificationSettings: $wire.entangle('notificationSettings').defer,
-        notification: $wire.entangle('notification').defer,
+        notifications: $wire.entangle('notifications', true),
+        notificationChannels: $wire.entangle('notificationChannels', true),
+        notificationSettings: $wire.entangle('notificationSettings'),
+        notification: $wire.entangle('notification'),
         }"
 >
-    <x-modal.card wire:model="detailModal">
+    <x-modal.card wire:model.live="detailModal">
         <x-slot name="title">
             {{ __('Notification Settings') }}
         </x-slot>

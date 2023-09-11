@@ -1,17 +1,8 @@
-import Alpine from 'alpinejs'
-import focus from '@alpinejs/focus'
-import persist from '@alpinejs/persist'
-import collapse from '@alpinejs/collapse'
-import mask from '@alpinejs/mask'
 import folderTree from './components/folder-tree';
 import '../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
+import '../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables';
 
 window.folderTree = folderTree;
-
-Alpine.plugin(focus)
-Alpine.plugin(collapse)
-Alpine.plugin(persist)
-Alpine.plugin(mask)
 
 if (typeof window.Livewire === 'undefined') {
     throw 'Livewire Sortable.js Plugin: window.Livewire is undefined. Make sure @livewireScripts is placed above this script include';
@@ -163,5 +154,21 @@ Alpine.directive('tribute', (el, { modifiers, expression }, { evaluate }) => {
     tribute.attach(el);
 })
 
-window.Alpine = Alpine;
-Alpine.start();
+document.addEventListener('livewire:navigated', function() {
+    wireNavigation();
+});
+
+document.addEventListener('livewire:init', function() {
+    wireNavigation();
+});
+
+function wireNavigation() {
+    let links = [...document.querySelectorAll('a[href]')].filter(link => {
+        let hrefValue = link.getAttribute('href').trim();
+        return hrefValue !== '' && hrefValue !== '#';
+    });
+
+    links.forEach(link => {
+        link.setAttribute('wire:navigate', 'true')
+    });
+}

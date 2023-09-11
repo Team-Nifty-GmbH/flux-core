@@ -1,4 +1,4 @@
-<div x-data="{showWidget: $wire.entangle('show')}"
+<div x-data="{showWidget: $wire.entangle('show', true)}"
      x-show="showWidget"
      class="relative"
      x-on:render-search-bar-widget.window="$wire.renderSearchBarWidget($event.detail.model, $event.detail.id)"
