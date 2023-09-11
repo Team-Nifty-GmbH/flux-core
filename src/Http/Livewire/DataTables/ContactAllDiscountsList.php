@@ -15,23 +15,16 @@ class ContactAllDiscountsList extends DiscountList
 
     public int $contactId;
 
-    /**
-     * @return void
-     */
-    public function mount(): void
-    {
-        parent::mount();
-    }
-
     public function loadData(): void
     {
         $this->initialized = true;
 
         $this->setData(Contact::query()
-            ->whereKey($this->contactId)->firstOrFail()
+            ->whereKey($this->contactId)
+            ->firstOrFail()
             ->getAllDiscounts()
-            ->each(fn(Discount $discount) => $discount->load('model'))
-            ->map(fn(Discount $discount) => $this->itemToArray($discount))
+            ->each(fn (Discount $discount) => $discount->load('model'))
+            ->map(fn (Discount $discount) => $this->itemToArray($discount))
             ->toArray());
     }
 }

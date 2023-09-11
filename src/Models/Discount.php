@@ -27,13 +27,13 @@ class Discount extends Model
         'id',
     ];
 
-    public function model(): MorphTo
-    {
-        return $this->morphTo('model');
-    }
-
     public function contacts(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'contact_discount');
+    }
+
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
     }
 }
