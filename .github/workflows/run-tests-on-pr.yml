@@ -76,7 +76,7 @@ jobs:
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
       - name: Run Tests
-        run: ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml
+        run: composer test
         env:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
