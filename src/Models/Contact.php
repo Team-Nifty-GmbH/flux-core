@@ -86,6 +86,31 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
             ->using(ContactDiscountGroup::class);
     }
 
+    public function bankConnections(): HasMany
+    {
+        return $this->hasMany(BankConnection::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function priceList(): BelongsTo
+    {
+        return $this->belongsTo(PriceList::class);
+    }
+
+    public function sepaMandates(): HasMany
+    {
+        return $this->hasMany(SepaMandate::class);
+    }
+
+    public function serialNumbers(): HasManyThrough
+    {
+        return $this->hasManyThrough(SerialNumber::class, Address::class);
+    }
+
     public function getAllDiscountsQuery(): Builder
     {
         $directDiscountsQuery = $this->discounts()
@@ -117,8 +142,7 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
 
         return Discount::query()
             ->withoutGlobalScopes()
-            ->fromSub($directDiscountsQuery
-                ->union($discountsThroughGroupsQuery), 'union_sub');
+            ->fromSub($directDiscountsQuery->union($discountsThroughGroupsQuery), 'union_sub');
     }
 
     public function getAllDiscounts(): Collection
@@ -128,31 +152,6 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
             ->sortByDesc('discount')
             ->unique(fn ($item) => $item->model_id . $item->model_type . $item->is_percentage)
             ->values();
-    }
-
-    public function bankConnections(): HasMany
-    {
-        return $this->hasMany(BankConnection::class);
-    }
-
-    public function orders(): HasMany
-    {
-        return $this->hasMany(Order::class);
-    }
-
-    public function priceList(): BelongsTo
-    {
-        return $this->belongsTo(PriceList::class);
-    }
-
-    public function sepaMandates(): HasMany
-    {
-        return $this->hasMany(SepaMandate::class);
-    }
-
-    public function serialNumbers(): HasManyThrough
-    {
-        return $this->hasManyThrough(SerialNumber::class, Address::class);
     }
 
     /**
