@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Cache;
 
 class AdditionalColumn extends Model
 {
-    use HasPackageFactory, Filterable;
+    use Filterable, HasPackageFactory;
 
     protected $casts = [
         'values' => 'array',

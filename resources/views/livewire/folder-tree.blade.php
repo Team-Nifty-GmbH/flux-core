@@ -174,7 +174,7 @@
                         reject: {
                             label: '{{ __('Cancel') }}',
                         }
-                    }, '{{ $this->getId() }}');
+                    }, $wire.__instance.id);
                 },
                 deleteFolder(level) {
                     window.$wireui.confirmDialog({
@@ -195,7 +195,7 @@
                         reject: {
                             label: '{{ __('Cancel') }}',
                         }
-                    }, '{{ $this->getId() }}');
+                    }, $wire.__instance.id);
                 },
             }"
      class="flex gap-2 justify-between"

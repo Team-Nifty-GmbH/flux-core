@@ -83,7 +83,7 @@
                                                             reject: {
                                                                 label: '{{ __('Cancel') }}',
                                                             }
-                                                        }, '{{ $this->getId() }}')
+                                                        }, $wire.__instance.id)
                                                         " label="{{ __('Delete') }}"/>
                     @endif
                     <div class="flex">
@@ -115,7 +115,7 @@
                                                             reject: {
                                                                 label: '{{ __('Cancel') }}',
                                                             }
-                                                        }, '{{ $this->getId() }}')
+                                                        }, $wire.__instance.id)
                                                         " label="{{ __('Delete') }}"/>
                     @endif
                     <div class="flex">

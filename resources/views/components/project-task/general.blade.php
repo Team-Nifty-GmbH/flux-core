@@ -33,12 +33,14 @@
     <div>
         <div x-data="{
                     ...folderTree(),
+                    selection: [],
                     levels: $wire.entangle('categories'),
                     openFolders: $wire.entangle('openCategories'),
                     multiSelect: false,
                     selected: $el.attributes.getNamedItem('x-model').value,
                 }"
              x-model="projectTask.categories"
+             x-modelable="selection"
         >
             <ul class="flex flex-col gap-1" wire:ignore>
                 <template x-for="(level, i) in levels">

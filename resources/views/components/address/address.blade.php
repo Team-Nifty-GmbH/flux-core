@@ -8,7 +8,7 @@
         <div class="col-span-2 w-full">
             <x-input x-bind:readonly="!edit"
                      x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                     wire:model.blur="address.company"/>
+                     wire:model="address.company"/>
         </div>
     </div>
     <div
@@ -20,7 +20,7 @@
         <div class="col-span-2 w-full">
             <x-input x-bind:readonly="!edit"
                      x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                     wire:model.blur="address.salutation"></x-input>
+                     wire:model="address.salutation"></x-input>
         </div>
     </div>
     <div
@@ -32,7 +32,7 @@
         <div class="col-span-2">
             <x-input x-bind:readonly="!edit"
                      x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                     wire:model.blur="address.title"/>
+                     wire:model="address.title"/>
         </div>
     </div>
     <div
@@ -44,7 +44,7 @@
         <div class="col-span-2">
             <x-input x-bind:readonly="!edit"
                      x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                     wire:model.blur="address.firstname"/>
+                     wire:model="address.firstname"/>
         </div>
     </div>
     <div
@@ -56,7 +56,7 @@
         <div class="col-span-2">
             <x-input x-bind:readonly="!edit"
                      x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                     wire:model.blur="address.lastname"/>
+                     wire:model="address.lastname"/>
         </div>
     </div>
     <div
@@ -68,7 +68,7 @@
         <div class="col-span-2">
             <x-input x-bind:readonly="!edit"
                      x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                     wire:model.blur="address.street"/>
+                     wire:model="address.street"/>
         </div>
     </div>
     <div
@@ -97,12 +97,12 @@
             <div class="flex-none">
                 <x-input x-bind:readonly="!edit"
                          x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                         wire:model.blur="address.zip"/>
+                         wire:model="address.zip"/>
             </div>
             <div class="grow">
                 <x-input x-bind:readonly="!edit"
                          x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                         wire:model.blur="address.city"/>
+                         wire:model="address.city"/>
             </div>
         </div>
     </div>

@@ -40,7 +40,7 @@ class PriceHelper
     {
         $this->contact = $contact;
 
-        if(is_null($this->priceList)) {
+        if (is_null($this->priceList)) {
             $this->priceList = $contact->priceList;
         }
 

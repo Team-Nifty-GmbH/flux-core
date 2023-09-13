@@ -96,7 +96,7 @@
                                 <div x-show="isOpen('{{ $key }}')" x-transition class="mt-2 space-y-2 overflow-x-hidden text-white" role="menu"
                                      aria-label="Authentication" x-cloak>
                                     @foreach($navigation['children'] as $child)
-                                        <a x-on:click="$dispatch('activatesubitem', {subitem: '{{ $child['uri'] }}', item: '{{ $key }}'})"
+                                        <a x-on:click="activeSubItem = '{{ $child['uri'] }}'; activeItem = '{{ $key }}'"
                                            href="{{ $child['uri'] }}" role="menuitem"
                                            :class="activeSubItem === '{{ $child['uri'] }}' && 'rounded-md bg-primary-600/50 dark:bg-primary-700/5 hover:bg-primary-600/10'"
                                            class="dark:hover:text-light block truncate rounded-md p-2 pl-20 text-sm transition-colors duration-200 hover:bg-gray-800/50">

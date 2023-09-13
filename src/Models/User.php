@@ -30,10 +30,10 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
-class User extends Authenticatable implements HasMedia, HasLocalePreference, InteractsWithDataTables
+class User extends Authenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasApiTokens, HasCalendars, HasDatatableUserSettings,
-        HasPackageFactory, HasFrontendAttributes, HasRoles, HasUuid, HasWidgets, InteractsWithMedia, Lockable,
+        HasFrontendAttributes, HasPackageFactory, HasRoles, HasUuid, HasWidgets, InteractsWithMedia, Lockable,
         Notifiable, Searchable, SoftDeletes;
 
     protected $appends = [

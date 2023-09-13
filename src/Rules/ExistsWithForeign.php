@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\InvokableRule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Translation\PotentiallyTranslatedString;
 
-class ExistsWithForeign implements InvokableRule, DataAwareRule
+class ExistsWithForeign implements DataAwareRule, InvokableRule
 {
     protected array $data;
 

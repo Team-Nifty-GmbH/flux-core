@@ -10,7 +10,7 @@
         save() {
             $wire.save().then((task) => {
                 if (task) {
-                    $wire.dispatchTo('data-tables.project-tasks-list', 'refetchRecord', task, task.hasOwnProperty('id') ? 'updated' : 'created');
+                    $wire.dispatchTo('data-tables.project-tasks-list', 'refetchRecord', {record: task, event: task.hasOwnProperty('id') ? 'updated' : 'created'});
                     close();
                 }
             });
@@ -26,7 +26,7 @@
                         execute: () => {
                             $wire.delete().then((success) => {
                                 if (success) {
-                                    $wire.dispatchTo('data-tables.project-tasks-list', 'refetchRecord', this.projectTask, 'deleted');
+                                    $wire.dispatchTo('data-tables.project-tasks-list', 'refetchRecord', {record: this.projectTask, event: 'deleted'});
                                     close();
                                 }
                             });
@@ -36,7 +36,7 @@
                         label: '{{ __('Cancel') }}',
                     }
                 },
-                '{{ $this->getId() }}'
+                $wire.__instance.id
             );
         }
     }"

@@ -4,7 +4,6 @@ namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
-use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
@@ -54,10 +53,12 @@ class CreateOrderPosition extends FluxAction
                 ],
                 'vat_rate_percentage' => [
                     Rule::requiredIf(
+                        ($this->data['is_free_text'] ?? false) === false && ! ($this->data['vat_rate_id'] ?? false)
+                    ),
+                    Rule::excludeIf(
                         ($this->data['is_free_text'] ?? false) === false && ($this->data['vat_rate_id'] ?? false)
                     ),
                     'numeric',
-                    'exclude_if:is_free_text,true',
                 ],
                 'product_number' => [
                     Rule::requiredIf(
@@ -131,7 +132,8 @@ class CreateOrderPosition extends FluxAction
                         CreateOrderPosition::make($bundleProduct)
                             ->validate()
                             ->execute();
-                    } catch (ValidationException) {}
+                    } catch (ValidationException) {
+                    }
                 });
         }
 

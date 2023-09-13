@@ -1,19 +1,17 @@
 <div
     x-data="{
+        init() {
+            var meta = document.createElement('meta');
+            meta.name = 'currency-code';
+            meta.content = this.order.currency.iso;
+            document.getElementsByTagName('head')[0].appendChild(meta);
+        },
         order: $wire.entangle('order'),
-        tab: $wire.entangle('tab', true),
+        tab: $wire.entangle('tab').live,
         formatter: @js(\FluxErp\Models\Order::typeScriptAttributes()),
         orderPositions: [],
         createDocuments: false,
     }"
-    x-on:updated-order-positions="orderPositions = $event.detail; $wire.recalculateOrder($event.detail)"
-    x-on:order-positions-updated="$wire.set('hasUpdatedOrderPositions', true)"
-    x-init="() => {
-        var meta = document.createElement('meta');
-        meta.name = 'currency-code';
-        meta.content = order.currency.iso;
-        document.getElementsByTagName('head')[0].appendChild(meta);
-     }"
 >
     <x-modal.card id="preview" :fullscreen="true"  :title="__('Preview')">
         <iframe id="preview-iframe" src="#" loading="lazy" class="w-full min-h-screen"></iframe>
@@ -76,7 +74,7 @@
                     reject: {
                         label: '{{ __('Cancel') }}',
                     }
-                    }, '{{ $this->getId() }}')
+                    }, $wire.__instance.id)
                     "/>
             @endif
             <x-button
@@ -91,11 +89,11 @@
     <x-tabs
         wire:model.live="tab"
         :tabs="[
-                    'order-positions' => __('Order positions'),
-                    'attachments' => __('Attachments'),
-                    'accounting' => __('Accounting'),
-                    'comments' => __('Comments'),
-                    'related' => __('Related processes'),
+                    'order.order-positions' => __('Order positions'),
+                    'order.attachments' => __('Attachments'),
+                    'order.accounting' => __('Accounting'),
+                    'order.comments' => __('Comments'),
+                    'order.related' => __('Related processes'),
                 ]"
     >
         <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
@@ -175,13 +173,13 @@
                                 ]
                             ]" />
                         <div class="text-sm" x-bind:class="order.address_delivery_id === order.address_invoice_id && 'hidden'">
-                            <div x-text="order.address_delivery.company">
+                            <div x-text="order.address_delivery?.company">
                             </div>
-                            <div x-text="(order.address_delivery.firstname + ' ' + order.address_delivery.lastname).trim()">
+                            <div x-text="((order.address_delivery?.firstname ?? '') + ' ' + (order.address_delivery?.lastname ?? '')).trim()">
                             </div>
-                            <div x-text="order.address_delivery.street">
+                            <div x-text="order.address_delivery?.street">
                             </div>
-                            <div x-text="(order.address_delivery.zip + ' ' + order.address_delivery.city).trim()">
+                            <div x-text="((order.address_delivery?.zip ?? '') + ' ' + (order.address_delivery?.city ?? '')).trim()">
                             </div>
                         </div>
                     </x-card>
@@ -263,7 +261,7 @@
                 </div>
             </section>
             <section class="basis-8/12 pt-6 lg:pt-0">
-                <livewire:is :id="$order['id'] ?? null" :component="'order.' . $tab" wire:key="{{ uniqid() }}" />
+                <livewire:dynamic-component :order-id="$order['id'] ?? null" :is="$tab" :key="uniqid()" wire:model="order"/>
             </section>
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">

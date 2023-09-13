@@ -12,7 +12,7 @@
                     execute: () => {
                         $wire.delete().then((success) => {
                             if (success) {
-                                window.location.href = '{{ route('projects') }}';
+                                window.location.href = '{{ route('projects.projects') }}';
                                 close();
                             }
                         });
@@ -22,7 +22,7 @@
                     label: '{{ __('Cancel') }}',
                 }
             },
-            '{{ $this->getId() }}'
+            $wire.__instance.id
         );
     }
 }"

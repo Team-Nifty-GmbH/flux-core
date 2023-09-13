@@ -37,7 +37,7 @@
                     reject: {
                         label: '{{ __('Cancel') }}',
                     }
-                    }, '{{ $this->getId() }}')
+                    }, $wire.__instance.id)
                     "/>
             @endcan
             @if(user_can('action.serial-number.create') && ($serialNumber['id'] ?? false))

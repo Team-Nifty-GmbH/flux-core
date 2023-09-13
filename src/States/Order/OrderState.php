@@ -7,7 +7,7 @@ use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;
 use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 
-abstract class OrderState extends State implements HasFrontendFormatter, Arrayable
+abstract class OrderState extends State implements Arrayable, HasFrontendFormatter
 {
     abstract public function color(): string;
 

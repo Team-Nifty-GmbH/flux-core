@@ -31,8 +31,8 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, HasCalendars, Commentable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendarEvents,
-        HasPackageFactory, HasFrontendAttributes, HasRoles, HasUserModification, HasUuid, Lockable, Notifiable,
+    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendarEvents, HasCalendars,
+        HasFrontendAttributes, HasPackageFactory, HasRoles, HasUserModification, HasUuid, Lockable, Notifiable,
         Searchable, SoftDeletes;
 
     protected $hidden = [

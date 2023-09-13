@@ -44,7 +44,7 @@ If you want to extend the functionality you can extend the original component an
 
 namespace App\Http\Livewire\Order;
 
-use FluxErp\Http\Livewire\Order\Order as BaseOrder;
+use FluxErp\Livewire\Order\Order as BaseOrder;
 
 class Order extends BaseOrder
 {

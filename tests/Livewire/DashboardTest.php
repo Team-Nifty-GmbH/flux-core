@@ -143,9 +143,9 @@ class DashboardTest extends BaseSetup
                 ]
             )
             ->assertOk()
-            ->assertPayloadSet('widgets.0.name', 'New Name')
-            ->assertPayloadSet('widgets.0.width', 3)
-            ->assertPayloadSet('widgets.0.height', 3);
+            ->assertSet('widgets.0.name', 'New Name')
+            ->assertSet('widgets.0.width', 3)
+            ->assertSet('widgets.0.height', 3);
     }
 
     public function test_dashboard_unregistered_widget()

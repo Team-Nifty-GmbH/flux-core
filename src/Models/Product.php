@@ -95,6 +95,12 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         return $this->belongsToMany(ProductProperty::class, 'product_product_property', 'product_id', 'product_prop_id');
     }
 
+    public function purchasePrice(): float
+    {
+        // TODO: add calculation for purchase price
+        return 0;
+    }
+
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class);

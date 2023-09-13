@@ -22,7 +22,7 @@
                     result => {
                         result.forEach(
                             notification => {
-                                addConfirmNotification({options: notification, componentId: '{{ $this->getId() }}'
+                                addConfirmNotification({options: notification, componentId: $wire.__instance.id
                             }
                         )
                     }

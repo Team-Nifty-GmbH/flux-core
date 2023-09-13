@@ -24,8 +24,8 @@
         "spatie/laravel-tags": "^4.3",
         "spatie/laravel-translatable": "^6.0",
         "spatie/laravel-translation-loader": "^2.7",
-        "team-nifty-gmbh/tall-calendar": "^0.2.0",
-        "team-nifty-gmbh/tall-datatables": "^0.5.0",
+        "team-nifty-gmbh/tall-calendar": "^0.2.3",
+        "team-nifty-gmbh/tall-datatables": "^0.5.1",
         "wireui/heroicons": "^2.3",
         "wireui/wireui": "^1.12"
     },
@@ -63,8 +63,8 @@
     "scripts": {
         "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
         "analyse": "vendor/bin/phpstan analyse",
-        "test": "vendor/bin/pest",
-        "test-coverage": "vendor/bin/pest --coverage",
+        "test": "./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml",
+        "test-coverage": "XDEBUG_MODE=coverage ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml --coverage-html ./reports",
         "format": "vendor/bin/pint"
     },
     "config": {

@@ -27,6 +27,7 @@ module.exports = {
     },
     plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
     safelist: [
+        'indent-icon',
         {
             pattern: /(col|row)-span-\d+/
         },

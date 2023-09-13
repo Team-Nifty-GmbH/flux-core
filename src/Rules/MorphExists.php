@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
 
-class MorphExists implements ValidationRule, DataAwareRule
+class MorphExists implements DataAwareRule, ValidationRule
 {
     protected array $data;
 

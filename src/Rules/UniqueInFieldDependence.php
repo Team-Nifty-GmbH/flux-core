@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rules\DatabaseRule;
 
-class UniqueInFieldDependence implements Rule, DataAwareRule
+class UniqueInFieldDependence implements DataAwareRule, Rule
 {
     use DatabaseRule;
 

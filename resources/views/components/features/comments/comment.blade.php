@@ -35,7 +35,7 @@
                                     reject: {
                                         label: '{{ __('Cancel') }}',
                                     }
-                                    }, '{{ $this->getId() }}')
+                                    }, $wire.__instance.id)
                         "
                     />
                 </x-dropdown>

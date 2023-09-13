@@ -1,10 +1,14 @@
 <div
     class="space-y-5"
     x-data="{
+        init() {
+            loadLevels(project.category_id)
+        },
+        selected: [],
         ...folderTree(),
         levels: [],
         projectTaskCategories: [],
-        openFolders: $wire.entangle('openCategories'),
+        openFolders: $wire.$entangle('openCategories', false),
         selectAttributes(obj) {
             return `x-bind:disabled='projectTaskCategories.includes(level.id) || ! edit'`;
         },
@@ -14,12 +18,11 @@
         }
     }"
     x-model="project.categories"
-    x-modelable="project.categories"
-    x-init="loadLevels(project.category_id)"
+    x-modelable="selected"
 >
     <x-errors />
-    <x-input x-bind:readonly="!edit" x-model="project.project_name" label="{{ __('Name') }}" />
-    <x-input x-bind:readonly="!edit" x-model="project.display_name" label="{{ __('Display name') }}" />
+    <x-input x-bind:readonly="!edit" wire:model="project.project_name" label="{{ __('Name') }}" />
+    <x-input x-bind:readonly="!edit" wire:model="project.display_name" label="{{ __('Display name') }}" />
     <div class="flex justify-between">
         <x-state
             class="w-full"
@@ -29,12 +32,12 @@
             formatters="formatter.state"
             avialable="availableStates"
         />
-        <x-input type="date" x-bind:readonly="!edit" x-model="project.deadline" label="{{ __('Deadline') }}" />
-        <x-input type="date" x-bind:readonly="!edit" x-model="project.release_date" label="{{ __('Release date') }}" />
+        <x-input type="date" x-bind:readonly="!edit" wire:model="project.deadline" label="{{ __('Deadline') }}" />
+        <x-input type="date" x-bind:readonly="!edit" wire:model="project.release_date" label="{{ __('Release date') }}" />
     </div>
-    <x-textarea x-bind:readonly="!edit" x-model="project.description" label="{{ __('Description') }}" />
+    <x-textarea x-bind:readonly="!edit" wire:model="project.description" label="{{ __('Description') }}" />
     <x-model-select
-        x-model="project.category_id"
+        wire:model="project.category_id"
         :label="__('Categories')"
         option-value="id"
         option-label="label"

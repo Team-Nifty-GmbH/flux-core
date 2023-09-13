@@ -28,7 +28,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Contact extends Model implements HasMedia, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasPackageFactory, HasFrontendAttributes, HasSerialNumberRange,
+    use BroadcastsEvents, Commentable, Filterable, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange,
         HasUserModification, HasUuid, InteractsWithMedia, Lockable, SoftDeletes;
 
     protected $casts = [

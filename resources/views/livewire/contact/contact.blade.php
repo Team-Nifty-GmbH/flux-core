@@ -153,7 +153,7 @@
                         reject: {
                             label: '{{ __('Cancel') }}',
                         }
-                        }, '{{ $this->getId() }}')
+                        }, $wire.__instance.id)
                     "/>
                 @endcan
                 @can('action.contact.create')

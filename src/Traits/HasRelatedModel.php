@@ -134,7 +134,7 @@ trait HasRelatedModel
             $this->fireCustomModelEvent($event, $method)
         );
 
-        if (false === $result) {
+        if ($result === false) {
             return false;
         }
 

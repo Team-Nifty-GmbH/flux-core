@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\InvokableRule;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
-class MediaUploadType implements InvokableRule, DataAwareRule
+class MediaUploadType implements DataAwareRule, InvokableRule
 {
     protected array $data;
 
