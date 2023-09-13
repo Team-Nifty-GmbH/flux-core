@@ -60,10 +60,12 @@ class FluxServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if ($this->app->runningInConsole() && ! $this->app->runningUnitTests()) {
+        if ($this->app->runningInConsole()) {
             $this->offerPublishing();
             $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        } else {
+        }
+
+        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
             $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
             $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
             $this->registerLivewireComponents();
