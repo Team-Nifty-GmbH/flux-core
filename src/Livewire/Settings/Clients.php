@@ -99,7 +99,6 @@ class Clients extends ClientList
             unset($this->clients[$key]);
         }
 
-        $this->index = 0;
         $this->showClientModal = false;
         $this->skipRender();
     }

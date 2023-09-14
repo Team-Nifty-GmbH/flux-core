@@ -2,8 +2,8 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('Additional Columns') }}</h1>
-                <div class="mt-2 text-sm text-gray-300">{{__('Here you can manage all additional columns...')}}</div>
+                <h1 class="text-xl font-semibold dark:text-white">{{ __('Additional Columns') }}</h1>
+                <div class="mt-2 text-sm text-gray-300">{{ __('Here you can manage all additional columns...') }}</div>
             </div>
         </div>
         @include('tall-datatables::livewire.data-table')

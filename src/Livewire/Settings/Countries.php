@@ -86,7 +86,7 @@ class Countries extends CountryList
         $response = (new CountryService())->{$function}($validated['selectedCountry']);
 
         if (($response['status'] ?? false) === 200 || $response instanceof Model) {
-            $this->notification()->success('Successfully saved');
+            $this->notification()->success(__('Successfully saved'));
             $this->editModal = false;
         }
         $this->loadData();

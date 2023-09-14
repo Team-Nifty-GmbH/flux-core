@@ -49,8 +49,9 @@ class ContactList extends DataTable
     {
         return [
             DataTableButton::make()
-                ->label('New')
-                ->color('primary'),
+                ->label(__('Create'))
+                ->color('primary')
+                ->icon('plus'),
         ];
     }
 

@@ -18,8 +18,8 @@
         delete() {
             window.$wireui.confirmDialog(
                 {
-                    title: '{{ __('Delete Project task') }}',
-                    description: '{{ __('Do you really want to delete this Project task?') }}',
+                    title: '{{ __('Delete project task') }}',
+                    description: '{{ __('Do you really want to delete this project task?') }}',
                     icon: 'error',
                     accept: {
                         label: '{{ __('Delete') }}',

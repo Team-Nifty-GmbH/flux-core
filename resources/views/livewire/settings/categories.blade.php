@@ -54,7 +54,7 @@
                 ></x-select>
             </div>
             <x-slot:footer>
-                <div class="flex justify-between gap-x-4">
+                <div class="flex justify-end gap-x-4">
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close" />
                         <x-button primary spinner x-on:click="save()" :label="__('Save')" />

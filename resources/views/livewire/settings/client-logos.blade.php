@@ -4,7 +4,7 @@
             <div x-data="{logo: @entangle('logo').live}">
                 <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     <div class="sm:col-span-6">
-                        {{__('Logo')}}
+                        {{ __('Logo') }}
                     </div>
                     <div class="sm:col-span-6">
                         <div>
@@ -97,7 +97,7 @@
                         </div>
                     @endif
                     <div class="sm:col-span-6">
-                        {{__('Logo small')}}
+                        {{ __('Logo small') }}
                     </div>
                     <div class="sm:col-span-6">
                         <div>

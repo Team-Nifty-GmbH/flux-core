@@ -2,11 +2,11 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('Ticket Types') }}</h1>
-                <div class="mt-2 text-sm text-gray-300">{{__('Here you can manage all ticket types...')}}</div>
+                <h1 class="text-xl font-semibold dark:text-white">{{ __('Ticket Types') }}</h1>
+                <div class="mt-2 text-sm text-gray-300">{{ __('Here you can manage all ticket types...') }}</div>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                <x-button primary :label="__('New Ticket Type')" wire:click="show()" />
+                <x-button primary :label="__('Create')" wire:click="show()" />
             </div>
         </div>
         <div class="mt-8 flex flex-col">

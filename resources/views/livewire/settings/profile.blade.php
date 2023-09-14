@@ -35,7 +35,7 @@
     </form>
     <x-table>
         <x-slot name="title">
-            <h2 class="pt-6">{{ __('Notifications') }}</h2>
+            <h2 class="pt-6 dark:text-white">{{ __('Notifications') }}</h2>
         </x-slot>
         <x-slot name="header">
                 <th>{{ __('Notification') }}</th>

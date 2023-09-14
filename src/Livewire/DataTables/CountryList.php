@@ -23,6 +23,11 @@ class CountryList extends DataTable
         'is_eu_country',
     ];
 
+    public array $columnLabels = [
+        'language.name' => 'Language',
+        'currency.name' => 'Currency',
+    ];
+
     public function mount(): void
     {
         $attributes = ModelInfo::forModel($this->model)->attributes;
@@ -36,6 +41,9 @@ class CountryList extends DataTable
 
     public function getBuilder($builder): Builder
     {
-        return $builder->with(['language:id,name', 'currency:id,name']);
+        return $builder->with([
+            'language:id,name',
+            'currency:id,name',
+        ]);
     }
 }

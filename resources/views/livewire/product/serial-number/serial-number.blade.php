@@ -50,7 +50,7 @@
                 <template x-if="edit === true">
                     <div>
                         <x-button primary label="{{ __('Save') }}" x-on:click="$wire.save()"/>
-                        <x-button label="{{ _('Cancel') }}" x-on:click="$wire.cancel()"/>
+                        <x-button label="{{ __('Cancel') }}" x-on:click="$wire.cancel()"/>
                     </div>
                 </template>
             @endcan
