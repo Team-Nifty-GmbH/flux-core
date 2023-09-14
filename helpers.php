@@ -37,7 +37,7 @@ if (! function_exists('user_can')) {
             route_to_permission($permission) :
             $permission;
 
-        return auth()->user()->can($permissionName);
+        return auth()->user() && auth()->user()->can($permissionName);
     }
 }
 

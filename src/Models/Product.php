@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Categorizable;
+use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasFrontendAttributes;
@@ -24,8 +25,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends Model implements HasMedia, InteractsWithDataTables
 {
-    use Categorizable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange,
-        HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable, Searchable, SoftDeletes;
+    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
+        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable, Searchable,
+        SoftDeletes;
 
     protected $casts = [
         'uuid' => 'string',

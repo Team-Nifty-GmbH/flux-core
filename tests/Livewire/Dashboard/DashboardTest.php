@@ -1,12 +1,12 @@
 <?php
 
-namespace FluxErp\Tests\Livewire;
+namespace FluxErp\Tests\Livewire\Dashboard;
 
 use FluxErp\Contracts\UserWidget;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use FluxErp\Models\Widget;
-use FluxErp\Tests\Feature\BaseSetup;
+use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Component;
 use Livewire\Livewire;
