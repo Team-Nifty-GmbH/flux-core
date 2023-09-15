@@ -51,6 +51,8 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
     ->where('variant', '(outline|solid)')
     ->name('icons');
 
+Route::get('/login', \FluxErp\Livewire\Auth\Login::class)->name('login');
+
 Route::middleware(['auth:web'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);
     Route::get('/calendars', Calendar::class)->name('calendars')->registersMenuItem(icon: 'calendar');

@@ -570,5 +570,7 @@
     "Mark found as done": "Gefundene als abgeschlossen markieren",
     "Discount Groups": "Rabattgruppen",
     "Total Discounts": "Gesamtrabatte",
-    "Discounts": "Rabatte"
+    "Discounts": "Rabatte",
+    "Password reset link sent": "Passwort zurücksetzen Link gesendet",
+    "Login failed": "Anmeldung fehlgeschlagen"
 }
