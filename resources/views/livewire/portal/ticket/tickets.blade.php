@@ -3,7 +3,7 @@
         <livewire:portal.ticket.ticket-create/>
         <x-slot name="footer">
             <div class="w-full">
-                <div class="flex justify-between gap-x-4">
+                <div class="flex justify-end gap-x-4">
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close"/>
                         <x-button primary :label="__('Save')" wire:click="$dispatchTo('portal.ticket.ticket-create', 'save')"/>

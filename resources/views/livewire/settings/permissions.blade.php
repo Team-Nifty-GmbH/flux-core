@@ -6,7 +6,7 @@
                 <p class="mt-2 text-sm text-gray-300">{{ __('Here you can add permissions to roles and add users to roles...') }}</p>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                <x-button primary :label="__('Add Role')" wire:click="togglePermissions()"/>
+                <x-button primary :label="__('New Role')" wire:click="togglePermissions()"/>
             </div>
         </div>
         <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

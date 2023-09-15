@@ -65,7 +65,7 @@
             >
                 <span class="text-3xl text-white">{{ __('Release file to upload!') }}</span>
             </div>
-            <label class="order-2 flex w-full cursor-pointer select-none flex-col items-center justify-center rounded-md border-dashed border-gray-300 bg-gray-50 p-10 shadow hover:bg-slate-50"
+            <label class="order-2 flex w-full cursor-pointer select-none flex-col items-center justify-center rounded-md border-dashed border-gray-300 bg-gray-50 p-10 shadow hover:bg-slate-50 dark:bg-gray-700"
                    for="file-upload"
             >
                 <div class="pb-3">

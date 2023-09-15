@@ -30,7 +30,7 @@
                                 <div>
                                     <div class="text-sm text-gray-500">
                                         <span x-text="activity.causer.name"></span>
-                                        <span x-on:click="showProperties(activity.id)" href="#" class="cursor-pointer font-medium text-gray-900" x-text="activity.event"></span>
+                                        <span x-on:click="showProperties(activity.id)" href="#" class="cursor-pointer font-medium text-gray-900 dark:text-white" x-text="activity.event"></span>
                                         <div x-show="activity.id === activeActivity" x-collapse x-cloak>
                                             <template x-for="(value, name) in Object.fromEntries(Object.entries(activity.properties.attributes))">
                                                 <div>

@@ -13,19 +13,9 @@ class TicketList extends DataTable
     public array $enabledCols = [
         'title',
         'state',
-        'model.description',
+        'description',
         'created_at',
     ];
 
     public array $sortable = ['*'];
-
-    public function mount(): void
-    {
-        parent::mount();
-    }
-
-    public function getBuilder(Builder $builder): Builder
-    {
-        return $builder->with('model');
-    }
 }

@@ -5,11 +5,11 @@
     <div x-show="! showUserList">
         <div>
             <div class="flex w-full flex-col-reverse justify-between md:flex-row">
-                <h2 class="pt-5 text-base font-bold uppercase md:pt-0">
+                <h2 class="pt-5 text-base font-bold uppercase dark:text-white md:pt-0">
                     {{ __('Edit profile') }}
                 </h2>
             </div>
-            <h1 class="pt-5 text-5xl font-bold">
+            <h1 class="pt-5 text-5xl font-bold dark:text-white">
                 {{ ($address['id'] ?? false) ? trim($address['firstname'] . ' ' . $address['lastname']) : __('New address')}}
             </h1>
         </div>

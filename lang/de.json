@@ -698,5 +698,21 @@
     "Delete project task": "Aufgabe löschen",
     "Do you really want to delete this project task?": "Wollen Sie diese Aufgabe wirklich löschen?",
     "Password reset link sent": "Passwort zurücksetzen Link gesendet",
-    "Login failed": "Anmeldung fehlgeschlagen"
+    "Login failed": "Anmeldung fehlgeschlagen",
+    "Urgent request?": "Dringend?",
+    "Your service request will be processed by our team immediately upon receipt. Do you have an acute problem, feel free to call us.": "Ihre Serviceanfrage wird sofort nach Erhalt verarbeitet. Haben Sie ein akutes Problem, dann rufen Sie uns doch einfach an.",
+    "Download": "Datei herunterladen",
+    "Toggle Permissions": "Berechtigungen zuweisen",
+    "settings.price-lists.get": "Preislisten-Einstellungen anzeigen",
+    "settings.get": "Einstellungen anzeigen",
+    "products.get": "Produkte anzeigen",
+    "action.work-time-type.create": "Arbeitszeit-Typen erstellen",
+    "action.work-time-type.delete": "Arbeitszeit-Typen löschen",
+    "action.work-time-type.update": "Arbeitszeit-Typen aktualisieren",
+    "action.work-time.create": "Arbeitszeiten erstellen",
+    "action.work-time.delete": "Arbeitszeiten löschen",
+    "action.work-time.update": "Arbeitszeiten aktualisieren",
+    "Here you can manage the application users...": "Hier werden die Benutzer der Anwendung verwaltet...",
+    "New User": "Neuer Benutzer",
+    "User saved successful.": "Benutzer erfolgreich abgespeichert."
 }

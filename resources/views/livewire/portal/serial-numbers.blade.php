@@ -29,7 +29,7 @@
                             </p>
                         @endforeach
                     </div>
-                    <p class="text-center">{{ __('Serial number:') }} {{ $serialNumber->serial_number }}</p>
+                    <p class="text-center">{{ __('Serial number') }}: {{ $serialNumber->serial_number }}</p>
                 </a>
                     <div class="flex flex-col gap-y-3 pt-3">
                         @if(auth()->user()->can('service.{serialnumberid?}.get'))
