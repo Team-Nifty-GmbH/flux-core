@@ -90,7 +90,7 @@ class Languages extends LanguageList
         $response = (new LanguageService())->{$function}($validated['selectedLanguage']);
 
         if (($response['status'] ?? false) === 200 || $response instanceof Model) {
-            $this->notification()->success('Successfully saved');
+            $this->notification()->success(__('Successfully saved'));
             $this->editModal = false;
         }
 

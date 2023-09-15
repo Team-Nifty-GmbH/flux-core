@@ -26,6 +26,10 @@ class ProjectList extends DataTable
         'category.name',
     ];
 
+    public array $columnLabels = [
+        'category.name' => 'Category',
+    ];
+
     public array $sortable = ['*'];
 
     public array $availableRelations = ['*'];
@@ -46,7 +50,7 @@ class ProjectList extends DataTable
         return [
             DataTableButton::make()
                 ->color('primary')
-                ->label(__('New project'))
+                ->label(__('Create'))
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => "\$dispatch('create-project')",

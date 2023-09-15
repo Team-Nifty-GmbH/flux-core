@@ -34,7 +34,7 @@ class OrderTypeList extends DataTable
         return [
             DataTableButton::make()
                 ->color('primary')
-                ->label(__('New order type'))
+                ->label(__('Create'))
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$dispatch(\'data-table-row-clicked\')',

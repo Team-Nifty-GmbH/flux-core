@@ -28,7 +28,7 @@
     },
     deleteItem(recordId) {
         window.$wireui.confirmDialog({
-                        title: '{{ __('Delete Discount group') }}',
+                        title: '{{ __('Delete discount group') }}',
                         description: '{{ __('Do you really want to delete this discount group?') }}',
                         icon: 'error',
                         accept: {
@@ -73,7 +73,7 @@
             </div>
             <x-slot:footer>
                 <div class="flex justify-end gap-4">
-                    <x-button x-on:click="close()">{{ __('Cancel') }}</x-button>
+                    <x-button flat x-on:click="close()">{{ __('Cancel') }}</x-button>
                     <x-button primary class="mr-2" x-on:click="saveItem()">{{ __('Save') }}</x-button>
                 </div>
             </x-slot:footer>

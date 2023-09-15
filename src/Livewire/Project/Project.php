@@ -96,7 +96,7 @@ class Project extends Component
                 ->validate()
                 ->execute();
 
-            return redirect()->route('projects');
+            return redirect()->route('projects.projects');
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
         }

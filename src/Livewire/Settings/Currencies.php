@@ -84,7 +84,7 @@ class Currencies extends CurrencyList
         $response = (new CurrencyService())->{$function}($validated['selectedCurrency']);
 
         if (($response['status'] ?? false) === 200 || $response instanceof Model) {
-            $this->notification()->success('Successfully saved');
+            $this->notification()->success(__('Successfully saved'));
             $this->editModal = false;
         }
         $this->loadData();

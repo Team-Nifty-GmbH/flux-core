@@ -1,8 +1,8 @@
-<div class="py-6" x-data="{currency: @entangle('selectedCurrency'), currencies: @entangle('currencies')}">
+<div class="py-6" x-data="{currency: @entangle('selectedCurrency')}">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('Currencies') }}</h1>
+                <h1 class="text-xl font-semibold dark:text-white">{{ __('Currencies') }}</h1>
                 <div class="mt-2 text-sm text-gray-300">{{ __('A list of all the currencies') }}</div>
             </div>
         </div>

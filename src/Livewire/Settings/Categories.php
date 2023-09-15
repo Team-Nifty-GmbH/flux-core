@@ -34,7 +34,7 @@ class Categories extends CategoryList
     {
         return [
             DataTableButton::make()
-                ->label(__('Craete'))
+                ->label(__('Create'))
                 ->color('primary')
                 ->icon('plus')
                 ->attributes([

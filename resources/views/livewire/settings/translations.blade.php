@@ -2,8 +2,8 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('Translations') }}</h1>
-                <div class="mt-2 text-sm text-gray-300">{{__('Here you can manage your translations...')}}</div>
+                <h1 class="text-xl font-semibold dark:text-white">{{ __('Translations') }}</h1>
+                <div class="mt-2 text-sm text-gray-300">{{ __('Here you can manage your translations...') }}</div>
             </div>
             <div class="mt-6 sm:ml-16">
                 <div class="flex items-center py-3">
@@ -19,7 +19,7 @@
                 />
             </div>
             <div class="mt-6 sm:ml-16">
-                <x-button primary :label="__('New Translation')" wire:click="show()" />
+                <x-button primary :label="__('Create')" wire:click="show()" />
             </div>
         </div>
         <div class="mt-8 flex flex-col">

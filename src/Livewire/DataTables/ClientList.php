@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Client;
+use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
@@ -14,9 +15,14 @@ class ClientList extends DataTable
         'name',
         'client_code',
         'country.name',
-        'zip',
+        'postcode',
         'city',
         'phone',
+    ];
+
+    public array $columnLabels = [
+        'country.name' => 'Country',
+        'postcode' => 'Zip',
     ];
 
     public function mount(): void
@@ -28,5 +34,12 @@ class ClientList extends DataTable
             ->toArray();
 
         parent::mount();
+    }
+
+    public function getBuilder(Builder $builder): Builder
+    {
+        return $builder->with([
+            'country:id,name',
+        ]);
     }
 }

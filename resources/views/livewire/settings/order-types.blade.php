@@ -2,7 +2,7 @@
     <div class="px-4 sm:px-6 lg:px-8" wire:ignore>
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('Order Types') }}</h1>
+                <h1 class="text-xl font-semibold dark:text-white">{{ __('Order Types') }}</h1>
                 <div class="mt-2 text-sm text-gray-300">{{ __('A list of all the order types') }}</div>
             </div>
         </div>
