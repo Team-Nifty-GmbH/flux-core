@@ -10,10 +10,14 @@ class TicketList extends DataTable
 {
     protected string $model = Ticket::class;
 
+    public array $columnLabels = [
+        'ticket_type.name' => 'Ticket type',
+    ];
+
     public array $enabledCols = [
         'title',
         'state',
-        'model.description',
+        'ticket_type.name',
         'created_at',
     ];
 
@@ -26,6 +30,6 @@ class TicketList extends DataTable
 
     public function getBuilder(Builder $builder): Builder
     {
-        return $builder->with('model');
+        return $builder->with('ticketType:id,name');
     }
 }
