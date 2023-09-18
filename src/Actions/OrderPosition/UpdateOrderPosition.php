@@ -34,7 +34,8 @@ class UpdateOrderPosition extends FluxAction
             ->firstOrNew();
 
         if (is_int($this->data['sort_number'] ?? false)
-            && $orderPosition->sort_number !== $this->data['sort_number']) {
+            && $orderPosition->sort_number !== $this->data['sort_number']
+        ) {
             $currentHighestSortNumber = OrderPosition::query()
                 ->where('order_id', $this->data['order_id'])
                 ->max('sort_number');

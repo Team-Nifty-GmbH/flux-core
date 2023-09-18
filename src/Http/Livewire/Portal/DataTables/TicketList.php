@@ -10,6 +10,10 @@ class TicketList extends DataTable
 {
     protected string $model = Ticket::class;
 
+    public array $columnLabels = [
+        'ticket_type.name' => 'Ticket type',
+    ];
+
     public array $enabledCols = [
         'title',
         'state',
