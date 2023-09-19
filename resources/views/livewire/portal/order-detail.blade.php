@@ -127,7 +127,7 @@
                     <div class="flex justify-between">
                         <div class="flex justify-center items-center gap-1">
                             <div target="_blank">
-                                <span class="font-semibold">{{ \Illuminate\Support\Str::headline(__($attachment['collection_name'])) }}</span> {{ $attachment['file_name'] }}
+                                <span class="font-semibold">{{ __(\Illuminate\Support\Str::headline($attachment['collection_name'])) }}</span> {{ $attachment['file_name'] }}
                             </div>
                             <x-button primary xs flat :label="__('Download')" wire:click="downloadMedia({{ $attachment['id'] }})" />
                         </div>

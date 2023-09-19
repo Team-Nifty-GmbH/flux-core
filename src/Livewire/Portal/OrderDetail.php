@@ -94,9 +94,12 @@ class OrderDetail extends Component
         $this->attachments = $order->media()
             ->select(['id', 'collection_name', 'file_name', 'mime_type', 'disk'])
             ->where('disk', 'public')
-            ->whereIn('id', function ($query) {
-                $query->selectRaw('MAX(id)')
+            ->where('collection_name', '!=', 'default')
+            ->whereIn('id', function ($query) use ($order) {
+                return $query->selectRaw('MAX(id)')
                     ->from('media')
+                    ->where('model_id', $order->id)
+                    ->where('model_type', Order::class)
                     ->where('disk', 'public')
                     ->groupBy('collection_name');
             })
