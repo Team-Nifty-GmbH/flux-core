@@ -6,11 +6,12 @@ use FluxErp\Actions\ContactOption\CreateContactOption;
 use FluxErp\Actions\ContactOption\DeleteContactOption;
 use FluxErp\Actions\ContactOption\UpdateContactOption;
 use FluxErp\Helpers\ResponseHelper;
+use FluxErp\Models\ContactOption;
 use Illuminate\Validation\ValidationException;
 
 class ContactOptionService
 {
-    public function create(array $data): array
+    public function create(array $data): ContactOption
     {
         return CreateContactOption::make($data)->execute();
     }
