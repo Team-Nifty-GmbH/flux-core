@@ -2,13 +2,15 @@
 
 namespace FluxErp\Tests\Livewire\Contacts;
 
-use FluxErp\Livewire\Contacts\Contact;
+use FluxErp\Livewire\Contacts\Contact as ContactView;
 use FluxErp\Models\Address;
-use FluxErp\Tests\Livewire\BaseSetup;
+use FluxErp\Models\Client;
+use FluxErp\Models\Contact;
+use FluxErp\Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
-class ContactTest extends BaseSetup
+class ContactTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -16,12 +18,14 @@ class ContactTest extends BaseSetup
     {
         parent::setUp();
 
-        $this->contact = \FluxErp\Models\Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+        $dbClient = Client::factory()->create();
+
+        $this->contact = Contact::factory()->create([
+            'client_id' => $dbClient->id,
         ]);
 
         Address::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $dbClient->id,
             'contact_id' => $this->contact->id,
             'is_main_address' => true,
         ]);
@@ -29,7 +33,7 @@ class ContactTest extends BaseSetup
 
     public function test_renders_successfully()
     {
-        Livewire::test(Contact::class, ['id' => $this->contact->id])
+        Livewire::test(ContactView::class, ['id' => $this->contact->id])
             ->assertStatus(200);
     }
 }

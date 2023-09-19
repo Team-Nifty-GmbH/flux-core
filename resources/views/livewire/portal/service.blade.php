@@ -10,15 +10,15 @@
         <div class="flex-1">
             <div class="space-y-5 dark:text-gray-50">
                 <div class="w-full grid-cols-2 md:grid md:gap-5">
-                    <x-input wire:model.live="contactData.firstname" :placeholder="__('Firstname')"/>
-                    <x-input wire:model.live="contactData.lastname" :placeholder="__('Lastname')"/>
-                    <x-input wire:model.live="contactData.login_name" :placeholder="__('E-Mail')"/>
-                    <x-input wire:model.live="contactData.phone" :placeholder="__('Phone')"/>
+                    <x-input wire:model="contactData.firstname" :placeholder="__('Firstname')"/>
+                    <x-input wire:model="contactData.lastname" :placeholder="__('Lastname')"/>
+                    <x-input wire:model="contactData.login_name" :placeholder="__('E-Mail')"/>
+                    <x-input wire:model="contactData.phone" :placeholder="__('Phone')"/>
                 </div>
-                <x-input wire:model.live="contactData.company" :placeholder="__('Company')" />
-                <x-input wire:model.live="contactData.serial_number" :placeholder="__('Serial number')" />
-                <x-input wire:model.live="ticket.title" :placeholder="__('What is it about?')" />
-                <x-textarea wire:model.live="ticket.description" :placeholder="__('Your subject')" />
+                <x-input wire:model="contactData.company" :placeholder="__('Company')" />
+                <x-input wire:model="contactData.serial_number" :placeholder="__('Serial number')" />
+                <x-input wire:model="ticket.title" :placeholder="__('What is it about?')" />
+                <x-textarea wire:model="ticket.description" :placeholder="__('Your subject')" />
                 <h2 class="pt-20 pb-8 text-base font-bold uppercase">02. {{ __('Attachments') }}</h2>
                 <div class="text-portal-font-color font-bold">
                     {{ __('Photos and videos help us analyze the errors') }}

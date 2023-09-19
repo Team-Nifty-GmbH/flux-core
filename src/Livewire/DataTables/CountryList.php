@@ -39,7 +39,7 @@ class CountryList extends DataTable
         parent::mount();
     }
 
-    public function getBuilder($builder): Builder
+    public function getBuilder(Builder $builder): Builder
     {
         return $builder->with([
             'language:id,name',

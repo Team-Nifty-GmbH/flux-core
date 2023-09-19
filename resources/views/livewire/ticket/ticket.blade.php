@@ -2,7 +2,7 @@
      x-data="{
         formatter: @js(\FluxErp\Models\Ticket::typeScriptAttributes()),
         additionalColumns: $wire.entangle('additionalColumns'),
-        ticket: $wire.entangle('ticket', true)
+        ticket: $wire.entangle('ticket')
     }"
 >
     <div class="flex items-center space-x-5">
@@ -26,8 +26,8 @@
                 <div class="flex-1">
                     <div class="space-y-5 dark:text-gray-50">
                         <x-card class="space-y-4">
-                            <x-input :label="__('Title')" wire:model.live="ticket.title" :disabled="true"/>
-                            <x-textarea :label="__('Description')" wire:model.live="ticket.description" :disabled="true"/>
+                            <x-input :label="__('Title')" wire:model="ticket.title" :disabled="true"/>
+                            <x-textarea :label="__('Description')" wire:model="ticket.description" :disabled="true"/>
                         </x-card>
                         @if($ticket['model_type'] && $ticket['model_type']::getLivewireComponentWidget())
                             <x-card>

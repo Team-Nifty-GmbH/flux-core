@@ -75,7 +75,9 @@ class AdditionalColumnEdit extends Component
         $this->additionalColumn['values'] = [];
         $this->additionalColumn['is_customer_editable'] = false;
 
-        $models = get_subclasses_of(Model::class, 'FluxErp\\');
+        $appModels = get_subclasses_of(Model::class, 'App\\');
+        $fluxModels = get_subclasses_of(Model::class, 'FluxErp\\Models\\');
+        $models = array_merge($appModels, $fluxModels);
 
         foreach ($models as $model) {
             if (in_array(HasAdditionalColumns::class, class_uses_recursive($model))) {

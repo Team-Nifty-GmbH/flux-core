@@ -714,5 +714,16 @@
     "action.work-time.update": "Arbeitszeiten aktualisieren",
     "Here you can manage the application users...": "Hier werden die Benutzer der Anwendung verwaltet...",
     "New User": "Neuer Benutzer",
-    "User saved successful.": "Benutzer erfolgreich abgespeichert."
+    "User saved successful.": "Benutzer erfolgreich abgespeichert.",
+    "Create Additional Column": "Zusätzliche Spalte anlegen",
+    "Create Client": "Mandant anlegen",
+    "Edit Client": "Mandant bearbeiten",
+    "Create Country": "Land anlegen",
+    "Edit Country": "Land bearbeiten",
+    "Create Currency": "Währung anlegen",
+    "Edit Currency": "Währung bearbeiten",
+    "Create Language": "Sprache anlegen",
+    "Edit Language": "Sprache bearbeiten",
+    "Create Category": "Kategorie anlegen",
+    "Manage discount group": "Rabattgruppe verwalten"
 }

@@ -13,9 +13,8 @@ use FluxErp\Models\VatRate;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Livewire\Component;
-use Livewire\Redirector;
+use Livewire\Features\SupportRedirects\Redirector;
 use WireUi\Traits\Actions;
 
 class Product extends Component
@@ -187,7 +186,7 @@ class Product extends Component
         $this->skipRender();
     }
 
-    public function delete(): false|RedirectResponse|Redirector
+    public function delete(): false|Redirector
     {
         $this->skipRender();
 

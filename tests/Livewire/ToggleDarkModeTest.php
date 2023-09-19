@@ -3,13 +3,11 @@
 namespace FluxErp\Tests\Livewire;
 
 use FluxErp\Livewire\ToggleDarkMode;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ToggleDarkModeTest extends BaseSetup
+class ToggleDarkModeTest extends TestCase
 {
-    use DatabaseTransactions;
-
     public function test_renders_successfully()
     {
         Livewire::test(ToggleDarkMode::class)

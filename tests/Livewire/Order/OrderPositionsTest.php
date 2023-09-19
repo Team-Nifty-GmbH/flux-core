@@ -22,6 +22,8 @@ class OrderPositionsTest extends BaseSetup
 {
     use DatabaseTransactions;
 
+    private Order $order;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -29,12 +31,11 @@ class OrderPositionsTest extends BaseSetup
         $contact = Contact::factory()->create([
             'client_id' => $this->dbClient,
         ]);
+
         $address = Address::factory()->create([
             'client_id' => $this->dbClient,
             'contact_id' => $contact->id,
         ]);
-
-        $this->priceList = PriceList::factory()->create();
 
         $currency = Currency::factory()->create();
 
@@ -63,7 +64,7 @@ class OrderPositionsTest extends BaseSetup
             'is_locked' => false,
         ]);
 
-        $this->product = Product::factory()->create([
+        Product::factory()->create([
             'client_id' => $this->dbClient->id,
         ]);
 

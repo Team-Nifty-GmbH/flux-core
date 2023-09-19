@@ -11,9 +11,8 @@ use FluxErp\Traits\Livewire\HasAdditionalColumns;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Livewire\Component;
-use Livewire\Redirector;
+use Livewire\Features\SupportRedirects\Redirector;
 use WireUi\Traits\Actions;
 
 class Project extends Component
@@ -28,7 +27,7 @@ class Project extends Component
 
     public array $openCategories = [];
 
-    public $queryString = [
+    public array $queryString = [
         'tab' => ['except' => 'general'],
     ];
 
@@ -87,7 +86,7 @@ class Project extends Component
         return true;
     }
 
-    public function delete(): false|RedirectResponse|Redirector
+    public function delete(): false|Redirector
     {
         $this->skipRender();
         try {

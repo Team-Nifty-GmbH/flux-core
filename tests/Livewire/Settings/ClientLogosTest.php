@@ -3,14 +3,11 @@
 namespace FluxErp\Tests\Livewire\Settings;
 
 use FluxErp\Livewire\Settings\ClientLogos;
-use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ClientLogosTest extends BaseSetup
+class ClientLogosTest extends TestCase
 {
-    use DatabaseTransactions;
-
     public function test_renders_successfully()
     {
         Livewire::test(ClientLogos::class)

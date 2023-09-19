@@ -3,13 +3,11 @@
 namespace FluxErp\Tests\Livewire;
 
 use FluxErp\Livewire\FolderTree;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class FolderTreeTest extends BaseSetup
+class FolderTreeTest extends TestCase
 {
-    use DatabaseTransactions;
-
     public function test_renders_successfully()
     {
         Livewire::test(FolderTree::class)

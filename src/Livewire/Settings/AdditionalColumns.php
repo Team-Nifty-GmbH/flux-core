@@ -47,10 +47,9 @@ class AdditionalColumns extends AdditionalColumnList
     public function show(AdditionalColumn $record = null): void
     {
         $this->dispatch('show', $record?->toArray())->to('settings.additional-column-edit');
-        $this->create = ! $record->exists;
 
+        $this->create = ! $record->exists;
         $this->showAdditionalColumnModal = true;
-        $this->skipRender();
     }
 
     public function closeModal(): void

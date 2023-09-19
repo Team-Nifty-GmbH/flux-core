@@ -11,15 +11,15 @@
         </div>
         <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             @foreach($roles as $role)
-                <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
+                <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white dark:bg-secondary-800 text-center shadow">
                     <div class="flex flex-1 flex-col p-8">
-                        <h3 class="text-lg font-medium text-gray-900">{{ $role['name'] }}</h3>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ $role['name'] }}</h3>
                     </div>
                     <div>
                         <div class="-mt-px flex divide-x divide-gray-200">
                             <div class="flex w-0 flex-1">
                                 <a wire:click="toggleUsers({{ $role['id'] }})"
-                                   class="relative -mr-px inline-flex w-0 flex-1 cursor-pointer items-center justify-center rounded-bl-lg border border-transparent py-4 text-sm font-medium text-gray-700 hover:text-gray-500">
+                                   class="relative -mr-px inline-flex w-0 flex-1 cursor-pointer items-center justify-center rounded-bl-lg border border-transparent py-4 text-sm font-medium text-gray-700 dark:text-white hover:text-gray-500">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
                                          viewBox="0 0 24 24"
                                          stroke="currentColor" stroke-width="2">
@@ -32,7 +32,7 @@
                             @if($role['name'] !== 'Super Admin')
                                 <div class="flex w-0 flex-1">
                                     <a wire:click="togglePermissions({{ $role['id'] }})"
-                                       class="relative -mr-px inline-flex w-0 flex-1 cursor-pointer items-center justify-center rounded-bl-lg border border-transparent py-4 text-sm font-medium text-gray-700 hover:text-gray-500">
+                                       class="relative -mr-px inline-flex w-0 flex-1 cursor-pointer items-center justify-center rounded-bl-lg border border-transparent py-4 text-sm font-medium text-gray-700 dark:text-white hover:text-gray-500">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
                                              viewBox="0 0 24 24"
                                              stroke="currentColor" stroke-width="2">
@@ -108,6 +108,7 @@
                                                             accept: {
                                                                 label: '{{ __('Delete') }}',
                                                                 method: 'delete',
+                                                                params: {{ $selectedRole['id'] }}
                                                             },
                                                             reject: {
                                                                 label: '{{ __('Cancel') }}',

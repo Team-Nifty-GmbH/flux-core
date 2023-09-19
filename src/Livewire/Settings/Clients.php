@@ -64,11 +64,10 @@ class Clients extends ClientList
     public function show(Client $record = null): void
     {
         $this->dispatch('show', $record?->toArray())->to('settings.client-edit');
-        $this->create = ! $record->exists;
 
+        $this->create = ! $record->exists;
         $this->showClientLogosModal = false;
         $this->showClientModal = true;
-        $this->skipRender();
     }
 
     public function showCustomerPortal(Client $record): void

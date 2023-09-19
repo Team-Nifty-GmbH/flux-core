@@ -20,7 +20,7 @@ class AccountingTest extends BaseSetup
 {
     use DatabaseTransactions;
 
-    private Order $orders;
+    private Order $order;
 
     public function setUp(): void
     {
@@ -29,12 +29,11 @@ class AccountingTest extends BaseSetup
         $contact = Contact::factory()->create([
             'client_id' => $this->dbClient,
         ]);
+
         $address = Address::factory()->create([
             'client_id' => $this->dbClient,
             'contact_id' => $contact->id,
         ]);
-
-        $this->priceList = PriceList::factory()->create();
 
         $currency = Currency::factory()->create();
 

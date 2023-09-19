@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Project;
 
 use FluxErp\States\Project\Open;
+use Illuminate\Contracts\View\View;
 
 class ProjectList extends Project
 {
@@ -20,7 +21,7 @@ class ProjectList extends Project
         $this->project['category_id'] = null;
     }
 
-    public function render(): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
+    public function render(): View
     {
         return view('flux::livewire.project.project-list');
     }

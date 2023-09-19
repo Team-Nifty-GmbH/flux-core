@@ -3,11 +3,13 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\Role\CreateRole;
+use FluxErp\Actions\Role\DeleteRole;
 use FluxErp\Actions\Role\UpdateRole;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use Illuminate\Contracts\View\View;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -118,5 +120,22 @@ class Permissions extends Component
         $role = Role::query()->whereKey($this->selectedRole['id'])->first();
         $role->users()?->sync($this->selectedUsers);
         $this->showToggleUsers = false;
+    }
+
+    public function delete(int $roleId): void
+    {
+        try {
+            DeleteRole::make(['id' => $roleId])->validate()->execute();
+
+            $key = array_search($roleId, array_column($this->roles, 'id'));
+
+            if ($key !== false) {
+                unset($this->roles[$key]);
+            }
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        $this->showTogglePermissions = false;
     }
 }

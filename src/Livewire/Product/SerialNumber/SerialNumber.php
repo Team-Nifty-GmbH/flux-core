@@ -12,10 +12,9 @@ use FluxErp\Models\Product;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Livewire\Component;
-use Livewire\Redirector;
+use Livewire\Features\SupportRedirects\Redirector;
 use WireUi\Traits\Actions;
 
 class SerialNumber extends Component
@@ -35,7 +34,7 @@ class SerialNumber extends Component
 
     public bool $edit = false;
 
-    protected $queryString = [
+    protected array $queryString = [
         'tab' => ['except' => 'general'],
     ];
 
@@ -81,7 +80,7 @@ class SerialNumber extends Component
         return view('flux::livewire.product.serial-number.serial-number');
     }
 
-    public function delete(): false|RedirectResponse|Redirector
+    public function delete(): false|Redirector
     {
         $this->skipRender();
 
@@ -99,7 +98,7 @@ class SerialNumber extends Component
         return false;
     }
 
-    public function updatedSerialNumberProductId($id): void
+    public function updatedSerialNumberProductId(int $id): void
     {
         $this->serialNumber['product'] = Product::query()
             ->whereKey($id)
@@ -137,10 +136,7 @@ class SerialNumber extends Component
         $this->edit = true;
     }
 
-    /**
-     * @return \Illuminate\Http\RedirectResponse|void
-     */
-    public function cancel()
+    public function cancel(): void
     {
         $this->skipRender();
         $this->resetErrorBag();
@@ -148,7 +144,7 @@ class SerialNumber extends Component
         if ($this->serialNumber['id'] ?? false) {
             $this->edit = false;
         } else {
-            return redirect()->route('products.serial-numbers');
+            $this->redirect(route('products.serial-numbers'));
         }
     }
 

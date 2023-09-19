@@ -44,7 +44,7 @@
     }
 }">
     <div id="edit-window">
-        <x-modal.card>
+        <x-modal.card :title="__('Manage discount group')">
             <div class="flex flex-col gap-4">
                 <x-input x-model="discountGroup.name" label="{{ __('Name') }}" />
                 <x-toggle x-model="discountGroup.is_active" label="{{ __('Is Active') }}" />

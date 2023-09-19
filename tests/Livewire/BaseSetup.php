@@ -58,6 +58,5 @@ class BaseSetup extends TestCase
 
             $this->actingAs($this->user, 'web');
         }
-
     }
 }

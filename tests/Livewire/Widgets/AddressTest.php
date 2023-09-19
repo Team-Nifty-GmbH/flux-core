@@ -2,7 +2,8 @@
 
 namespace FluxErp\Tests\Livewire\Widgets;
 
-use FluxErp\Livewire\Widgets\Address;
+use FluxErp\Livewire\Widgets\Address as AddressView;
+use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -16,18 +17,19 @@ class AddressTest extends BaseSetup
     {
         parent::setUp();
 
-        $this->contact = Contact::factory()->create([
+        $contact = Contact::factory()->create([
             'client_id' => $this->dbClient->id,
         ]);
-        $this->address = \FluxErp\Models\Address::factory()->create([
-            'contact_id' => $this->contact->id,
+
+        $this->address = Address::factory()->create([
+            'contact_id' => $contact->id,
             'client_id' => $this->dbClient->id,
         ]);
     }
 
     public function test_renders_successfully()
     {
-        Livewire::test(Address::class, ['modelId' => $this->address->id])
+        Livewire::test(AddressView::class, ['modelId' => $this->address->id])
             ->assertStatus(200);
     }
 }

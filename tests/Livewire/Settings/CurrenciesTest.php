@@ -12,13 +12,6 @@ class CurrenciesTest extends BaseSetup
 {
     use DatabaseTransactions;
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        Currency::factory()->count(2)->create();
-    }
-
     public function test_renders_successfully()
     {
         Livewire::test(Currencies::class)

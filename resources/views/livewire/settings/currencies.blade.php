@@ -9,15 +9,15 @@
         @include('tall-datatables::livewire.data-table')
     </div>
 
-    <x-modal.card :title="__('Edit Currency')" wire:model="editModal">
+    <x-modal.card :title="$selectedCurrency['id'] ?? false ? __('Edit Currency') : __('Create Currency')" wire:model="editModal">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
                     <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">
                         <div class="space-y-3 sm:col-span-6">
-                            <x-input wire:model.live="selectedCurrency.name" :label="__('Currency Name')"/>
-                            <x-input wire:model.live="selectedCurrency.iso" :label="__('ISO')"/>
-                            <x-input wire:model.live="selectedCurrency.symbol" :label="__('Symbol')"/>
+                            <x-input wire:model="selectedCurrency.name" :label="__('Currency Name')"/>
+                            <x-input wire:model="selectedCurrency.iso" :label="__('ISO')"/>
+                            <x-input wire:model="selectedCurrency.symbol" :label="__('Symbol')"/>
                         </div>
                     </div>
                 </div>

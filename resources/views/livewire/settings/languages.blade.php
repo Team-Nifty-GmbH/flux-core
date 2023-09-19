@@ -1,13 +1,13 @@
 <div class="py-6" x-data="{language: @entangle('selectedLanguage')}">
-    <x-modal.card :title="__('Edit Language')" wire:model="editModal">
+    <x-modal.card :title="$selectedLanguage['id'] ?? false ? __('Edit Language') : __('Create Language')" wire:model="editModal">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
                     <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">
                         <div class="space-y-3 sm:col-span-6">
-                            <x-input wire:model.live="selectedLanguage.name" :label="__('Language Name')"/>
-                            <x-input wire:model.live="selectedLanguage.iso_name" :label="__('ISO Name')"/>
-                            <x-input wire:model.live="selectedLanguage.language_code" :label="__('Language Code')"
+                            <x-input wire:model="selectedLanguage.name" :label="__('Language Name')"/>
+                            <x-input wire:model="selectedLanguage.iso_name" :label="__('ISO Name')"/>
+                            <x-input wire:model="selectedLanguage.language_code" :label="__('Language Code')"
                                      list="language-code-data" autocomplete="off"/>
                         </div>
                     </div>

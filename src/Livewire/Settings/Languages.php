@@ -22,7 +22,7 @@ class Languages extends LanguageList
 
     public bool $editModal = false;
 
-    public function getRules(): mixed
+    public function getRules(): array
     {
         $languageRequest = ($this->selectedLanguage['id'] ?? false)
             ? new UpdateLanguageRequest()
@@ -107,6 +107,7 @@ class Languages extends LanguageList
             ->whereKey($this->selectedLanguage['id'])
             ->first()
             ->delete();
+
         $this->loadData();
     }
 }

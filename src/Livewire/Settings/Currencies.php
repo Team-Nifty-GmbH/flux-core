@@ -22,26 +22,13 @@ class Currencies extends CurrencyList
 
     public bool $editModal = false;
 
-    public function getRules(): mixed
+    public function getRules(): array
     {
         $currencyRequest = ($this->selectedCurrency['id'] ?? false)
             ? new UpdateCurrencyRequest()
             : new CreateCurrencyRequest();
 
         return Arr::prependKeysWith($currencyRequest->getRules($this->selectedCurrency), 'selectedCurrency.');
-    }
-
-    public function getRowActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
-                ->icon('pencil')
-                ->attributes([
-                    'x-on:click' => '$wire.showEditModal(record.id)',
-                ]),
-        ];
     }
 
     public function getTableActions(): array
@@ -53,6 +40,19 @@ class Currencies extends CurrencyList
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$wire.showEditModal()',
+                ]),
+        ];
+    }
+
+    public function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('Edit'))
+                ->color('primary')
+                ->icon('pencil')
+                ->attributes([
+                    'x-on:click' => '$wire.showEditModal(record.id)',
                 ]),
         ];
     }
@@ -96,7 +96,11 @@ class Currencies extends CurrencyList
             return;
         }
 
-        Currency::query()->whereKey($this->selectedCurrency['id'])->first()->delete();
+        Currency::query()
+            ->whereKey($this->selectedCurrency['id'])
+            ->first()
+            ->delete();
+
         $this->loadData();
     }
 }

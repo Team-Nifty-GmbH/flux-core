@@ -4,11 +4,11 @@ namespace FluxErp\Tests\Livewire\Widgets;
 
 use FluxErp\Livewire\Widgets\TotalProfit;
 use FluxErp\Models\Currency;
-use FluxErp\Tests\Livewire\BaseSetup;
+use FluxErp\Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
-class TotalProfitTest extends BaseSetup
+class TotalProfitTest extends TestCase
 {
     use DatabaseTransactions;
 

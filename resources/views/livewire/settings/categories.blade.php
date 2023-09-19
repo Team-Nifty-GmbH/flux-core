@@ -22,7 +22,7 @@
     category: $wire.$entangle('category'),
 }">
     <div id="category-modal">
-        <x-modal.card :title="__('Edit Category')">
+        <x-modal.card :title="$category->id ? __('Edit Category') : __('Create Category')">
             <div class="flex flex-col gap-4">
                 <x-input wire:model="category.name" :label="__('Name')"></x-input>
                 <x-toggle wire:model="category.is_active" :label="__('Active')"></x-toggle>
@@ -51,7 +51,7 @@
                                 ],
                             ],
                         ]"
-                ></x-select>
+                />
             </div>
             <x-slot:footer>
                 <div class="flex justify-end gap-x-4">

@@ -22,65 +22,43 @@ class CommentsTest extends BaseSetup
 {
     use DatabaseTransactions;
 
-    private Collection $addresses;
-
-    private Collection $clients;
-
-    private Collection $languages;
-
-    private Collection $orderTypes;
-
-    private Collection $paymentTypes;
-
-    private Collection $priceLists;
-
-    private Collection $orders;
-
-    private array $permissions;
+    private Order $order;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->clients = Client::factory()->count(2)->create();
-
-        $contacts = Contact::factory()->count(2)->create([
-            'client_id' => $this->clients[0]->id,
-        ]);
-        $this->addresses = Address::factory()->count(2)->create([
-            'client_id' => $this->clients[0]->id,
-            'contact_id' => $contacts[0]->id,
+        $contact = Contact::factory()->create([
+            'client_id' => $this->dbClient->id,
         ]);
 
-        $this->priceLists = PriceList::factory()->count(2)->create();
+        $addresses = Address::factory()->count(2)->create([
+            'client_id' => $this->dbClient->id,
+            'contact_id' => $contact->id,
+        ]);
 
-        $currencies = Currency::factory()->count(2)->create();
+        $currency = Currency::factory()->create();
 
-        $this->languages = Language::factory()->count(2)->create();
+        $language = Language::factory()->create();
 
-        $this->orderTypes = OrderType::factory()->count(2)->create([
-            'client_id' => $this->clients[0]->id,
+        $orderType = OrderType::factory()->create([
+            'client_id' => $this->dbClient->id,
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 
-        $this->paymentTypes = PaymentType::factory()->count(2)->create([
-            'client_id' => $this->clients[0]->id,
+        $paymentType = PaymentType::factory()->create([
+            'client_id' => $this->dbClient->id,
         ]);
 
-        $priceLists = PriceList::factory()->count(2)->create();
+        $priceList = PriceList::factory()->create();
 
-        $addresses = Address::factory()->count(2)->create([
-            'client_id' => $this->clients[0]->id,
-            'contact_id' => $contacts->random()->id,
-        ]);
-
-        $this->orders = Order::factory()->count(3)->create([
-            'client_id' => $this->clients[0]->id,
-            'language_id' => $this->languages[0]->id,
-            'order_type_id' => $this->orderTypes[0]->id,
-            'payment_type_id' => $this->paymentTypes[0]->id,
-            'price_list_id' => $priceLists[0]->id,
-            'currency_id' => $currencies[0]->id,
+        $this->order = Order::factory()->create([
+            'client_id' => $this->dbClient->id,
+            'language_id' => $language->id,
+            'order_type_id' => $orderType->id,
+            'payment_type_id' => $paymentType->id,
+            'price_list_id' => $priceList->id,
+            'currency_id' => $currency->id,
             'address_invoice_id' => $addresses->random()->id,
             'address_delivery_id' => $addresses->random()->id,
             'is_locked' => false,
@@ -89,7 +67,7 @@ class CommentsTest extends BaseSetup
 
     public function test_renders_successfully()
     {
-        Livewire::test(Comments::class, ['orderId' => $this->orders->first()->id])
+        Livewire::test(Comments::class, ['orderId' => $this->order->id])
             ->assertStatus(200);
     }
 }

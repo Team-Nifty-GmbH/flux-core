@@ -30,12 +30,11 @@ class OrderDetailTest extends BaseSetup
         $contact = Contact::factory()->create([
             'client_id' => $this->dbClient,
         ]);
+
         $address = Address::factory()->create([
             'client_id' => $this->dbClient,
             'contact_id' => $contact->id,
         ]);
-
-        $this->priceList = PriceList::factory()->create();
 
         $currency = Currency::factory()->create();
 
@@ -81,7 +80,7 @@ class OrderDetailTest extends BaseSetup
 
     public function test_renders_successfully()
     {
-        Livewire::test(OrderDetail::class, ['id' => $this->orders->first()->id])
+        Livewire::test(OrderDetail::class, ['id' => $this->orders[0]->id])
             ->assertStatus(200);
     }
 

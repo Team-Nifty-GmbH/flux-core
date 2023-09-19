@@ -2,13 +2,11 @@
 
 namespace FluxErp\Livewire\Auth;
 
-use FluxErp\Actions\Fortify\ResetUserPassword;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
-use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Component;

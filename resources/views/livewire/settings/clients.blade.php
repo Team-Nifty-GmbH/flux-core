@@ -9,7 +9,7 @@
         @include('tall-datatables::livewire.data-table')
     </div>
 
-    <x-modal.card max-width="6xl" z-index="z-30" wire:model="showClientModal" :title="__('Edit Client')">
+    <x-modal.card max-width="6xl" z-index="z-30" wire:model="showClientModal" :title="$create ? __('Create Client') : __('Edit Client')">
         <livewire:settings.client-edit/>
         <x-slot name="footer">
             <div x-data="{create: @entangle('create')}" class="w-full">

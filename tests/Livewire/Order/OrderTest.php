@@ -3,11 +3,12 @@
 namespace FluxErp\Tests\Livewire\Order;
 
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Livewire\Order\Order;
+use FluxErp\Livewire\Order\Order as OrderView;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
@@ -19,7 +20,7 @@ class OrderTest extends BaseSetup
 {
     use DatabaseTransactions;
 
-    private \FluxErp\Models\Order $orders;
+    private Order $order;
 
     public function setUp(): void
     {
@@ -28,12 +29,11 @@ class OrderTest extends BaseSetup
         $contact = Contact::factory()->create([
             'client_id' => $this->dbClient,
         ]);
+
         $address = Address::factory()->create([
             'client_id' => $this->dbClient,
             'contact_id' => $contact->id,
         ]);
-
-        $this->priceList = PriceList::factory()->create();
 
         $currency = Currency::factory()->create();
 
@@ -50,7 +50,7 @@ class OrderTest extends BaseSetup
 
         $priceList = PriceList::factory()->create();
 
-        $this->order = \FluxErp\Models\Order::factory()->create([
+        $this->order = Order::factory()->create([
             'client_id' => $this->dbClient,
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
@@ -65,7 +65,7 @@ class OrderTest extends BaseSetup
 
     public function test_renders_successfully()
     {
-        Livewire::test(Order::class, ['id' => $this->order->id])
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
             ->assertStatus(200);
     }
 }

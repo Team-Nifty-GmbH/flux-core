@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contacts\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
@@ -51,7 +52,7 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
     ->where('variant', '(outline|solid)')
     ->name('icons');
 
-Route::get('/login', \FluxErp\Livewire\Auth\Login::class)->name('login');
+Route::get('/login', Login::class)->name('login');
 
 Route::middleware(['auth:web'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);

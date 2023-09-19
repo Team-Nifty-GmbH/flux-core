@@ -13,7 +13,6 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
@@ -21,7 +20,7 @@ class RelatedTest extends BaseSetup
 {
     use DatabaseTransactions;
 
-    private Collection $orders;
+    private Order $order;
 
     public function setUp(): void
     {
@@ -30,12 +29,11 @@ class RelatedTest extends BaseSetup
         $contact = Contact::factory()->create([
             'client_id' => $this->dbClient,
         ]);
+
         $address = Address::factory()->create([
             'client_id' => $this->dbClient,
             'contact_id' => $contact->id,
         ]);
-
-        $this->priceList = PriceList::factory()->create();
 
         $currency = Currency::factory()->create();
 
@@ -52,7 +50,7 @@ class RelatedTest extends BaseSetup
 
         $priceList = PriceList::factory()->create();
 
-        $this->orders = Order::factory()->count(1)->create([
+        $this->order = Order::factory()->create([
             'client_id' => $this->dbClient,
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
@@ -64,8 +62,8 @@ class RelatedTest extends BaseSetup
             'is_locked' => false,
         ]);
 
-        $this->orders[] = Order::factory()->count(3)->create([
-            'parent_id' => $this->orders->first()->id,
+        Order::factory()->count(3)->create([
+            'parent_id' => $this->order->id,
             'client_id' => $this->dbClient,
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
@@ -80,7 +78,7 @@ class RelatedTest extends BaseSetup
 
     public function test_renders_successfully()
     {
-        Livewire::test(Related::class, ['orderId' => $this->orders->first()->id])
+        Livewire::test(Related::class, ['orderId' => $this->order->id])
             ->assertStatus(200);
     }
 }

@@ -29,7 +29,7 @@ class CategoryList extends DataTable
         parent::mount();
     }
 
-    public function getBuilder($builder): Builder
+    public function getBuilder(Builder $builder): Builder
     {
         return $builder->whereNull('parent_id')->with('children');
     }

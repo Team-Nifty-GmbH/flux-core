@@ -25,7 +25,7 @@ class Countries extends CountryList
 
     public bool $editModal = false;
 
-    public function getRules(): mixed
+    public function getRules(): array
     {
         $countryRequest = ($this->selectedCountry['id'] ?? false)
             ? new UpdateCountryRequest()
@@ -65,6 +65,7 @@ class Countries extends CountryList
         $this->selectedCountry = Country::query()->whereKey($countryId)->first()?->toArray() ?: [
             'language_id' => null,
             'currency_id' => null,
+            'is_active' => true,
         ];
 
         $this->editModal = true;
@@ -98,7 +99,11 @@ class Countries extends CountryList
             return;
         }
 
-        Country::query()->whereKey($this->selectedCountry['id'])->first()->delete();
+        Country::query()
+            ->whereKey($this->selectedCountry['id'])
+            ->first()
+            ->delete();
+
         $this->loadData();
     }
 }

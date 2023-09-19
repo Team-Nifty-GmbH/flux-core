@@ -2,24 +2,28 @@
 
 namespace FluxErp\Tests\Livewire\Product;
 
-use FluxErp\Livewire\Product\Product;
+use FluxErp\Livewire\Product\Product as ProductView;
+use FluxErp\Models\Client;
 use FluxErp\Models\Currency;
-use FluxErp\Tests\Livewire\BaseSetup;
+use FluxErp\Models\Product;
+use FluxErp\Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
-class ProductTest extends BaseSetup
+class ProductTest extends TestCase
 {
     use DatabaseTransactions;
 
-    private \FluxErp\Models\Product $product;
+    private Product $product;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->product = \FluxErp\Models\Product::factory()->create([
-            'client_id' => $this->dbClient->id,
+        $dbClient = Client::factory()->create();
+
+        $this->product = Product::factory()->create([
+            'client_id' => $dbClient->id,
         ]);
 
         Currency::factory()->create(['is_default' => true]);
@@ -27,7 +31,7 @@ class ProductTest extends BaseSetup
 
     public function test_renders_successfully()
     {
-        Livewire::test(Product::class, ['id' => $this->product->id])
+        Livewire::test(ProductView::class, ['id' => $this->product->id])
             ->assertStatus(200);
     }
 }

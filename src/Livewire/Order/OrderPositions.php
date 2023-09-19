@@ -267,7 +267,7 @@ class OrderPositions extends OrderPositionList
         $this->position['is_free_text'] = false;
         $this->position['unit_net_price'] = $price?->getNet($this->position['vat_rate_percentage']);
         $this->position['unit_gross_price'] = $price?->getGross($this->position['vat_rate_percentage']);
-        $this->position['purchase_price'] = $product->purchasePrice();
+        $this->position['purchase_price'] = $product?->purchasePrice();
 
         $this->position = $this->recalculatePosition($this->position);
 
@@ -292,7 +292,7 @@ class OrderPositions extends OrderPositionList
 
     public function addToGroup(): void
     {
-        // TODO: Implement addtoGroup() method.
+        // TODO: Implement addToGroup() method.
     }
 
     public function remove(array|string $selected = null): void
@@ -393,7 +393,8 @@ class OrderPositions extends OrderPositionList
                     $order['total_vats'][$orderPosition['vat_rate_id']]['total_vat_price'] ?? 0,
                     bcsub($orderPosition['total_gross_price'], $orderPosition['total_net_price'])
                 );
-            $order['total_vats'][$orderPosition['vat_rate_id']]['vat_rate_percentage'] = $orderPosition['vat_rate_percentage'];
+            $order['total_vats'][$orderPosition['vat_rate_id']]['vat_rate_percentage'] =
+                $orderPosition['vat_rate_percentage'];
         }
 
         $this->skipRender();

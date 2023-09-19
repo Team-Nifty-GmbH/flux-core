@@ -2,9 +2,10 @@
 
 namespace FluxErp\Tests\Livewire\Ticket;
 
-use FluxErp\Livewire\Ticket\Ticket;
+use FluxErp\Livewire\Ticket\Ticket as TicketView;
+use FluxErp\Models\Ticket;
+use FluxErp\Models\User;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
@@ -12,21 +13,21 @@ class TicketTest extends BaseSetup
 {
     use DatabaseTransactions;
 
-    private Collection $tickets;
+    private Ticket $ticket;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->tickets = \FluxErp\Models\Ticket::factory()->count(2)->create([
-            'authenticatable_type' => \FluxErp\Models\User::class,
+        $this->ticket = Ticket::factory()->create([
+            'authenticatable_type' => User::class,
             'authenticatable_id' => $this->user->id,
         ]);
     }
 
     public function test_renders_successfully()
     {
-        Livewire::test(Ticket::class, ['id' => $this->tickets->first()->id])
+        Livewire::test(TicketView::class, ['id' => $this->ticket->id])
             ->assertStatus(200);
     }
 }

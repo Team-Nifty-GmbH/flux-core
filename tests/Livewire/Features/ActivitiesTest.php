@@ -3,14 +3,11 @@
 namespace FluxErp\Tests\Livewire\Features;
 
 use FluxErp\Livewire\Features\Activities;
-use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ActivitiesTest extends BaseSetup
+class ActivitiesTest extends TestCase
 {
-    use DatabaseTransactions;
-
     public function test_renders_successfully()
     {
         Livewire::test(Activities::class)

@@ -7,11 +7,10 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
 use FluxErp\Traits\Livewire\WithAddressAuth;
 use FluxErp\Traits\Livewire\WithFileUploads;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Livewire\Component;
-use Livewire\Redirector;
+use Livewire\Features\SupportRedirects\Redirector;
 use WireUi\Traits\Actions;
 
 class Service extends Component
@@ -28,7 +27,7 @@ class Service extends Component
 
     public string $modelType = Ticket::class;
 
-    public function boot(): void
+    public function mount($serialNumberId = null): void
     {
         $ticket = new Ticket([
             'authenticatable_type' => get_class(Auth::user()),
@@ -38,10 +37,7 @@ class Service extends Component
         $this->ticket = $ticket->toArray();
 
         $this->contactData = Auth::user()->toArray();
-    }
 
-    public function mount($serialNumberId = null): void
-    {
         if ($serialNumberId) {
             $this->serialNumber = SerialNumber::query()->whereKey($serialNumberId)->first()->toArray();
             $this->contactData['serial_number'] = $this->serialNumber['serial_number'];
@@ -57,7 +53,7 @@ class Service extends Component
             ->layout('flux::components.layouts.portal');
     }
 
-    public function save(): false|Redirector|RedirectResponse
+    public function save(): false|Redirector
     {
         try {
             $ticket = CreateTicket::make($this->ticket)
