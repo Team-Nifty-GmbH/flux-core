@@ -18,7 +18,7 @@ class CreateContactRequest extends BaseFormRequest
             'price_list_id' => 'sometimes|integer|nullable|exists:price_lists,id,deleted_at,NULL',
             'customer_number' => 'sometimes|required|string|unique:contacts,customer_number',
             'creditor_number' => 'string|nullable|unique:contacts,creditor_number',
-            'debtor_number' => 'string|nullable|unique:contacts,debitor_number',
+            'debtor_number' => 'string|nullable|unique:contacts,debtor_number',
             'payment_target_days' => 'sometimes|integer|min:1|nullable',
             'payment_reminder_days_1' => 'sometimes|integer|min:1|nullable',
             'payment_reminder_days_2' => 'sometimes|integer|min:1|nullable',

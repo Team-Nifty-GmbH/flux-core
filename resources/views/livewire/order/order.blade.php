@@ -15,17 +15,19 @@
         document.getElementsByTagName('head')[0].appendChild(meta);
      }"
 >
-    <x-modal.card id="preview" :fullscreen="true"  :title="__('Preview')">
-        <iframe id="preview-iframe" src="#" loading="lazy" class="w-full min-h-screen"></iframe>
-        <x-slot name="footer">
-            <div class="flex justify-end gap-x-4">
-                <div class="flex">
-                    <x-button flat label="Cancel" x-on:click="close" />
-                    <x-button primary label="Save" wire:click="save" />
+    @section('modals')
+        <x-modal.card id="preview" :fullscreen="true"  :title="__('Preview')">
+            <iframe id="preview-iframe" src="#" loading="lazy" class="w-full min-h-screen"></iframe>
+            <x-slot name="footer">
+                <div class="flex justify-end gap-x-4">
+                    <div class="flex">
+                        <x-button flat label="Cancel" x-on:click="close" />
+                        <x-button primary label="Save" wire:click="save" />
+                    </div>
                 </div>
-            </div>
-        </x-slot>
-    </x-modal.card>
+            </x-slot>
+        </x-modal.card>
+    @show
     @section('create-documents-sidebar')
         <x-sidebar x-show="createDocuments">
             @section('create-documents-sidebar.content')
@@ -175,13 +177,13 @@
                                 ]
                             ]" />
                         <div class="text-sm" x-bind:class="order.address_delivery_id === order.address_invoice_id && 'hidden'">
-                            <div x-text="order.address_delivery.company">
+                            <div x-text="order.address_delivery?.company">
                             </div>
-                            <div x-text="(order.address_delivery.firstname + ' ' + order.address_delivery.lastname).trim()">
+                            <div x-text="((order.address_delivery?.firstname ?? '') + ' ' + (order.address_delivery?.lastname ?? '')).trim()">
                             </div>
-                            <div x-text="order.address_delivery.street">
+                            <div x-text="order.address_delivery?.street">
                             </div>
-                            <div x-text="(order.address_delivery.zip + ' ' + order.address_delivery.city).trim()">
+                            <div x-text="((order.address_delivery?.zip ?? '') + ' ' + (order.address_delivery?.city ?? '')).trim()">
                             </div>
                         </div>
                     </x-card>
@@ -267,87 +269,102 @@
             </section>
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">
-                    <x-card>
-                        <div class="space-y-4">
-                            @section('actions')
-                                @if($printLayouts)
-                                    <x-button
-                                        primary
-                                        class="w-full"
-                                        x-on:click="createDocuments = true"
-                                        :label="__('Send documents')"
-                                    />
-                                    <x-button
-                                        class="w-full"
-                                        x-on:click="createDocuments = true"
-                                        :label="__('Download documents')"
-                                    />
-                                    <x-button
-                                        class="w-full"
-                                        x-on:click="createDocuments = true"
-                                        :label="__('Print documents')"
-                                    />
-                                    <div class="dropdown-full-w">
-                                        <x-dropdown width="w-full">
-                                            <x-slot name="trigger">
-                                                <x-button class="w-full">
-                                                    {{ __('Preview') }}
-                                                </x-button>
-                                            </x-slot>
-                                            @foreach($printLayouts as $key => $printLayout)
-                                                <x-dropdown.item
-                                                    x-on:click="const preview = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['id' => $order['id'], 'view' => $key, 'model' => \FluxErp\Models\Order::class, '']) }}'; $openModal(preview)">
-                                                    {{ $key }}
-                                                </x-dropdown.item>
-                                            @endforeach
-                                        </x-dropdown>
-                                    </div>
-                                @endif
-                            @show
-                        </div>
-                    </x-card>
-                    <x-card>
-                        <div class="text-sm">
-                            <div class="flex justify-between py-2.5" x-model="order">
-                                <div>
-                                    {{ __('Sum net') }}
-                                </div>
-                                <div>
-                                    <span x-html="formatters.coloredMoney(order.total_net_price)">
-                                    </span>
-                                </div>
-                            </div>
-                            <template x-for="vat in order.total_vats">
-                                <div class="flex justify-between py-2.5">
-                                    <div>
-                                        <span>{{ __('Plus ') }}</span>
-                                        <span x-html="formatters.percentage(vat.vat_rate_percentage)">
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <span x-html="formatters.coloredMoney(vat.total_vat_price)">
-                                        </span>
-                                    </div>
-                                </div>
-                            </template>
-                            <div class="dark:bg-secondary-700 flex justify-between bg-gray-50 py-2.5">
-                                <div>
-                                    {{ __('Total gross') }}
-                                </div>
-                                <div>
-                                    <span x-html="formatters.coloredMoney(order.total_gross_price)">
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </x-card>
-                    <x-card>
-                        <div class="space-y-3">
-                            <x-input wire:model.defer="order.commission" :label="__('Commission')" />
-                        </div>
-                    </x-card>
                     @section('content.right')
-                    @endsection
+                        <x-card>
+                            <div class="space-y-4">
+                                @section('actions')
+                                    @if($printLayouts)
+                                        <x-button
+                                            primary
+                                            class="w-full"
+                                            x-on:click="createDocuments = true"
+                                            :label="__('Send documents')"
+                                        />
+                                        <x-button
+                                            class="w-full"
+                                            x-on:click="createDocuments = true"
+                                            :label="__('Download documents')"
+                                        />
+                                        <x-button
+                                            class="w-full"
+                                            x-on:click="createDocuments = true"
+                                            :label="__('Print documents')"
+                                        />
+                                        <div class="dropdown-full-w">
+                                            <x-dropdown width="w-full">
+                                                <x-slot name="trigger">
+                                                    <x-button class="w-full">
+                                                        {{ __('Preview') }}
+                                                    </x-button>
+                                                </x-slot>
+                                                @foreach($printLayouts as $key => $printLayout)
+                                                    <x-dropdown.item
+                                                        x-on:click="const preview = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['id' => $order['id'], 'view' => $key, 'model' => \FluxErp\Models\Order::class, '']) }}'; $openModal(preview)">
+                                                        {{ $key }}
+                                                    </x-dropdown.item>
+                                                @endforeach
+                                            </x-dropdown>
+                                        </div>
+                                    @endif
+                                @show
+                            </div>
+                        </x-card>
+                        <x-card>
+                            <div class="text-sm">
+                                <div class="flex justify-between py-2.5" x-model="order">
+                                    <div>
+                                        {{ __('Sum net') }}
+                                    </div>
+                                    <div>
+                                        <span x-html="formatters.coloredMoney(order.total_net_price)">
+                                        </span>
+                                    </div>
+                                </div>
+                                <template x-for="vat in order.total_vats">
+                                    <div class="flex justify-between py-2.5">
+                                        <div>
+                                            <span>{{ __('Plus ') }}</span>
+                                            <span x-html="formatters.percentage(vat.vat_rate_percentage)">
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span x-html="formatters.coloredMoney(vat.total_vat_price)">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div class="dark:bg-secondary-700 flex justify-between bg-gray-50 py-2.5">
+                                    <div>
+                                        {{ __('Total gross') }}
+                                    </div>
+                                    <div>
+                                        <span x-html="formatters.coloredMoney(order.total_gross_price)">
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </x-card>
+                        <x-card>
+                            <div class="space-y-3">
+                                @section('content.right.order_dates')
+                                    <x-datetime-picker wire:model="order.invoice_date" :without-time="true" :disabled="true" :label="__('Invoice Date')" />
+                                    <x-datetime-picker wire:model="order.system_delivery_date" :without-time="true" :disabled="$order['is_locked']" :label="__('Delivery Date')" />
+                                    <x-datetime-picker wire:model="order.order_date" :without-time="true" :disabled="$order['is_locked']" :label="__('Order Date')" />
+                                    <x-input wire:model.defer="order.commission" :disabled="$order['is_locked']" :label="__('Commission')" />
+                                @show
+                            </div>
+                        </x-card>
+                    @show
+                    <x-card>
+                        <div class="grid grid-cols-3 auto-cols-max gap-1">
+                            <span class="">{{ __('Created At') }}:</span>
+                            <span x-text="window.formatters.datetime(order.created_at)"></span>
+                            <span x-text="order.created_by?.name"></span>
+                            <span class="">{{ __('Updated At') }}:</span>
+                            <span x-text="window.formatters.datetime(order.updated_at)"></span>
+                            <span x-text="order.updated_by?.name"></span>
+                        </div>
+                    </x-card>
                 </div>
             </section>
         </div>

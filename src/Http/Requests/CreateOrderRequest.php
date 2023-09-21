@@ -57,6 +57,7 @@ class CreateOrderRequest extends BaseFormRequest
 
                 'address_delivery' => [
                     'array',
+                    'nullable',
                 ],
                 'address_delivery.id' => [
                     'integer',
@@ -76,16 +77,16 @@ class CreateOrderRequest extends BaseFormRequest
                     ValidStateRule::make(PaymentState::class),
                 ],
 
-                'payment_target' => 'required|integer|min:0',
+                'payment_target' => 'required_without_all:address_invoice_id,contact_id|integer|min:0',
                 'payment_discount_target' => 'integer|min:0|nullable',
                 'payment_discount_percent' => 'numeric|min:0|nullable',
                 'header_discount' => 'numeric|min:0|nullable',
                 'shipping_costs_net_price' => 'numeric|nullable',
                 'margin' => 'numeric|nullable',
                 'number_of_packages' => 'integer|nullable',
-                'payment_reminder_days_1' => 'required|integer|min:1',
-                'payment_reminder_days_2' => 'required|integer|min:1',
-                'payment_reminder_days_3' => 'required|integer|min:1',
+                'payment_reminder_days_1' => 'required_without_all:address_invoice_id,contact_id|integer|min:1',
+                'payment_reminder_days_2' => 'required_without_all:address_invoice_id,contact_id|integer|min:1',
+                'payment_reminder_days_3' => 'required_without_all:address_invoice_id,contact_id|integer|min:1',
 
                 'order_number' => 'sometimes|required|string|unique:orders',
                 'commission' => 'string|nullable',

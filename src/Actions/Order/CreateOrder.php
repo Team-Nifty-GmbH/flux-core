@@ -5,6 +5,8 @@ namespace FluxErp\Actions\Order;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Http\Requests\CreateOrderRequest;
+use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
@@ -28,14 +30,34 @@ class CreateOrder extends FluxAction
 
     public function performAction(): Order
     {
-        $this->data['currency_id'] = $this->data['currency_id'] ?? Currency::query()->first()?->id;
+        $this->data['currency_id'] = $this->data['currency_id']
+            ?? Currency::query()
+                ->where('is_default', true)
+                ->first()
+                ?->id;
         $addresses = Arr::pull($this->data, 'addresses', []);
+        $addressInvoice = Address::query()->whereKey($this->data['address_invoice_id'])->first();
 
         if (! ($this->data['address_delivery']['id'] ?? false) && ($this->data['address_delivery_id'] ?? false)) {
             $this->data['address_delivery_id'] = null;
         } elseif ($this->data['address_delivery']['id'] ?? false) {
             $this->data['address_delivery_id'] = $this->data['address_delivery']['id'];
         }
+
+        $contactId = $this->data['contact_id'] ?? $addressInvoice?->contact_id;
+        $contact = Contact::query()->whereKey($contactId)->first();
+
+        $this->data['payment_target'] = $this->data['payment_target'] ?? $contact->payment_target_days;
+        $this->data['payment_discount_target'] = $this->data['payment_discount_target'] ?? $contact->discount_days;
+        $this->data['payment_discount_percent'] = $this->data['payment_discount_percent'] ?? $contact->discount_percent;
+        $this->data['payment_reminder_days_1'] = $this->data['payment_reminder_days_1']
+            ?? $contact->payment_reminder_days_1;
+        $this->data['payment_reminder_days_2'] = $this->data['payment_reminder_days_2']
+            ?? $contact->payment_reminder_days_2;
+        $this->data['payment_reminder_days_3'] = $this->data['payment_reminder_days_3']
+            ?? $contact->payment_reminder_days_3;
+
+        $this->data['contact_id'] = $contactId;
 
         $order = new Order($this->data);
         if ($order->shipping_costs_net_price) {

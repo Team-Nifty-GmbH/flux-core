@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\InvokableRule;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
-class MediaUploadType implements InvokableRule, DataAwareRule
+class MediaUploadType implements DataAwareRule, InvokableRule
 {
     protected array $data;
 
@@ -38,7 +38,7 @@ class MediaUploadType implements InvokableRule, DataAwareRule
         }
 
         $valid = match (strtolower($value)) {
-            'base64' => ! base64_decode($this->data['media']),
+            'base64' => (bool) base64_decode($this->data['media']),
             'url' => Str::isUrl($this->data['media']),
             'string' => is_string($this->data['media']),
             'stream' => is_resource($this->data['media']),
