@@ -7,6 +7,7 @@ use FluxErp\Http\Requests\ReplaceMediaRequest;
 use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -52,6 +53,24 @@ class ReplaceMedia extends FluxAction
             ->setName($this->data['name'])
             ->usingFileName($this->data['file_name'])
             ->withCustomProperties($customProperties)
+            ->withProperties(
+                Arr::except(
+                    $this->data,
+                    [
+                        'name',
+                        'file_name',
+                        'disk',
+                        'conversion_disk',
+                        'collection_name',
+                        'mime_type',
+                        'size',
+                        'order_column',
+                        'custom_properties',
+                        'responsive_images',
+                        'manipulations',
+                    ]
+                )
+            )
             ->storingConversionsOnDisk(config('flux.media.conversion'))
             ->toMediaCollection(collectionName: $mediaItem->collection_name, diskName: $diskName);
 
