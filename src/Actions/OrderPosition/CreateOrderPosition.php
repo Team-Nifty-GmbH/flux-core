@@ -4,7 +4,6 @@ namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
-use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
@@ -23,7 +22,7 @@ class CreateOrderPosition extends FluxAction
                 'price_id' => [
                     Rule::requiredIf(
                         ($this->data['is_free_text'] ?? false) === false &&
-                        (($this->data['product_id'] ?? false) && ($this->data['price_list_id'] ?? false))
+                        (($this->data['product_id'] ?? false) && (! ($this->data['price_list_id'] ?? false)))
                     ),
                     'integer',
                     'nullable',
@@ -32,7 +31,7 @@ class CreateOrderPosition extends FluxAction
                 ],
                 'price_list_id' => [
                     Rule::requiredIf(
-                        ($this->data['is_free_text'] ?? false) === false && ($this->data['price_id'] ?? false)
+                        ($this->data['is_free_text'] ?? false) === false && ! ($this->data['price_id'] ?? false)
                     ),
                     'integer',
                     'exists:price_lists,id,deleted_at,NULL',
@@ -131,7 +130,8 @@ class CreateOrderPosition extends FluxAction
                         CreateOrderPosition::make($bundleProduct)
                             ->validate()
                             ->execute();
-                    } catch (ValidationException) {}
+                    } catch (ValidationException) {
+                    }
                 });
         }
 

@@ -21,6 +21,14 @@ class CreateCurrency extends FluxAction
 
     public function performAction(): Currency
     {
+        $this->data['is_default'] = ! Currency::query()->where('is_default', true)->exists()
+            ? true
+            : $this->data['is_default'];
+
+        if ($this->data['is_default']) {
+            Currency::query()->update(['is_default' => false]);
+        }
+
         $currency = new Currency($this->data);
         $currency->save();
 

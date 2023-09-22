@@ -74,6 +74,7 @@ class Order extends Component
 
         $this->order = $order->toArray();
         $this->order['contact']['avatar_url'] = $order->contact?->getAvatarUrl();
+        $this->order['invoice'] = $order->invoice()?->toArray();
 
         $this->priceLists = PriceList::query()
             ->get(['id', 'name'])

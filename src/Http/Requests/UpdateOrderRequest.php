@@ -81,6 +81,7 @@ class UpdateOrderRequest extends BaseFormRequest
 
                 'address_delivery' => [
                     'array',
+                    'nullable',
                 ],
                 'address_delivery.id' => [
                     'integer',
