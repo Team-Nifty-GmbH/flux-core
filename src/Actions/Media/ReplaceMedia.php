@@ -57,6 +57,8 @@ class ReplaceMedia extends FluxAction
                 Arr::except(
                     $this->data,
                     [
+                        'model_type',
+                        'model_id',
                         'media',
                         'media_type',
                         'categories',
