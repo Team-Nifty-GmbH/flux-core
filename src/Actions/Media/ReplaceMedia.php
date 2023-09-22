@@ -57,6 +57,9 @@ class ReplaceMedia extends FluxAction
                 Arr::except(
                     $this->data,
                     [
+                        'media',
+                        'media_type',
+                        'categories',
                         'name',
                         'file_name',
                         'disk',
