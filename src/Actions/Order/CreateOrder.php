@@ -47,6 +47,9 @@ class CreateOrder extends FluxAction
         $contactId = $this->data['contact_id'] ?? $addressInvoice?->contact_id;
         $contact = Contact::query()->whereKey($contactId)->first();
 
+        $this->data['approval_user_id'] = $this->data['approval_user_id'] ?? $contact->approval_user_id;
+        $this->data['bank_connection_id'] = $this->data['bank_connection_id']
+            ?? $contact->bankConnections()->first()?->id;
         $this->data['payment_target'] = $this->data['payment_target'] ?? $contact->payment_target_days;
         $this->data['payment_discount_target'] = $this->data['payment_discount_target'] ?? $contact->discount_days;
         $this->data['payment_discount_percent'] = $this->data['payment_discount_percent'] ?? $contact->discount_percent;

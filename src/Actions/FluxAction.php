@@ -132,6 +132,13 @@ abstract class FluxAction
         return $this->rules;
     }
 
+    public function mergeRules(array $rules): static
+    {
+        $this->rules = array_merge($this->rules, $rules);
+
+        return $this;
+    }
+
     public function setResult(mixed $result): static
     {
         $this->result = $result;
