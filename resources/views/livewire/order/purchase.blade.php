@@ -18,9 +18,10 @@
                 option-value="id"
                 option-label="label"
                 :clearable="false"
+                :disabled="$order['is_locked'] || ($order['is_confirmed'] && auth()->user()?->id !== $order['approval_user_id'])"
                 :template="[
-                            'name'   => 'user-option',
-                        ]"
+                        'name'   => 'user-option',
+                    ]"
                 :async-data="[
                         'api' => route('search', \FluxErp\Models\User::class),
                     ]"

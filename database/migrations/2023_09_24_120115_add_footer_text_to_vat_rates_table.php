@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('vat_rates', function (Blueprint $table) {
-            $table->string('footer_text')->after('name')->nullable();
+            $table->string('footer_text')->after('rate_percentage')->nullable();
         });
     }
 

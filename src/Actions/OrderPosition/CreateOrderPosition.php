@@ -80,7 +80,7 @@ class CreateOrderPosition extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags', []);
         $order = Order::query()
-            ->with('orderType')
+            ->with('orderType:id,order_type_enum')
             ->whereKey($this->data['order_id'])
             ->first();
         $orderPosition = new OrderPosition();
