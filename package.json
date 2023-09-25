@@ -12,7 +12,7 @@
         "@fontsource/inter": "^5.0.8",
         "@fullcalendar/core": "^6.1.7",
         "@fullcalendar/daygrid": "^6.1.9",
-        "@fullcalendar/interaction": "^6.1.8",
+        "@fullcalendar/interaction": "^6.1.9",
         "@fullcalendar/list": "^6.1.8",
         "@fullcalendar/timegrid": "^6.1.9",
         "@tailwindcss/aspect-ratio": "^0.4.0",
