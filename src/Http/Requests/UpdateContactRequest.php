@@ -29,6 +29,16 @@ class UpdateContactRequest extends BaseFormRequest
                 'nullable',
                 (new ExistsWithIgnore('price_lists', 'id'))->whereNull('deleted_at'),
             ],
+            'expense_ledger_account_id' => [
+                'integer',
+                'nullable',
+                (new ExistsWithIgnore('ledger_accounts', 'id')),
+            ],
+            'vat_rate_id' => [
+                'integer',
+                'nullable',
+                (new ExistsWithIgnore('vat_rates', 'id'))->whereNull('deleted_at'),
+            ],
             'customer_number' => 'sometimes|string',
             'creditor_number' => 'string|nullable',
             'debtor_number' => 'string|nullable',
@@ -39,6 +49,8 @@ class UpdateContactRequest extends BaseFormRequest
             'discount_days' => 'sometimes|integer|nullable',
             'discount_percent' => 'sometimes|numeric|nullable',
             'credit_line' => 'sometimes|numeric|nullable',
+            'vat_id' => 'sometimes|string|nullable',
+            'vendor_customer_number' => 'sometimes|string|nullable',
             'has_sensitive_reminder' => 'sometimes|boolean',
             'has_delivery_lock' => 'sometimes|boolean',
 

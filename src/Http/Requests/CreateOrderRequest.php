@@ -23,12 +23,18 @@ class CreateOrderRequest extends BaseFormRequest
             Arr::prependKeysWith((new CreateAddressRequest())->postalAddressRules(), 'address_delivery.'),
             [
                 'uuid' => 'string|uuid|unique:orders,uuid',
+                'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'parent_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
                 'contact_id' => [
                     'integer',
                     'nullable',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'contacts'),
+                ],
+                'bank_connection_id' => [
+                    'integer',
+                    'nullable',
+                    new ExistsWithForeign(foreignAttribute: 'contact_id', table: 'bank_connections'),
                 ],
                 'currency_id' => 'integer|exists:currencies,id,deleted_at,NULL',
                 'address_invoice_id' => [

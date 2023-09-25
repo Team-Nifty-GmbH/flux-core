@@ -571,5 +571,11 @@
     "Mark found as done": "Gefundene als abgeschlossen markieren",
     "Discount Groups": "Rabattgruppen",
     "Total Discounts": "Gesamtrabatte",
-    "Discounts": "Rabatte"
+    "Discounts": "Rabatte",
+    "Payment discount": "Skonto",
+    "Payment discount target": "Skontoziel",
+    "Payment target": "Zahlungsziel",
+    "Bank connection": "Bankverbindung",
+    "Authorisation user": "Freigabeberechtigter",
+    "Confirmed": "Bestätigt"
 }

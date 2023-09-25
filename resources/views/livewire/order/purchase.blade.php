@@ -9,6 +9,37 @@
         </x-modal>
     </div>
 @endsection
+@section('state-card')
+    <x-card>
+        <div class="space-y-3">
+            <x-select
+                :label="__('Authorisation user')"
+                wire:model="order.approval_user_id"
+                option-value="id"
+                option-label="label"
+                :clearable="false"
+                :template="[
+                            'name'   => 'user-option',
+                        ]"
+                :async-data="[
+                        'api' => route('search', \FluxErp\Models\User::class),
+                    ]"
+            />
+            <x-checkbox x-model="order.is_confirmed" :label="__('Confirmed')" :disabled="auth()->user()?->id !== $order['approval_user_id'] || $order['is_locked']" />
+            <x-inputs.number min="1" step="1" wire:model="order.payment_target" :label="__('Payment target')" :disabled="$order['is_locked']" class="w-full"/>
+            <x-inputs.number min="1" step="1" wire:model="order.payment_discount_target" :label="__('Payment discount target')" :disabled="$order['is_locked']" class="w-full"/>
+            <x-inputs.number step="0.01" min="0.01" max="99.99" wire:model="order.payment_discount_percent" :label="__('Payment discount')" :disabled="$order['is_locked']" class="w-full"/>
+            <x-select wire:model="order.bank_connection_id"
+                  :label="__('Bank connection')"
+                  :disabled="$order['is_locked']" class="w-full"
+                  :options="$order['contact']['bank_connections'] ?? []"
+                  option-value="id"
+                  option-label="iban"
+          />
+        </div>
+    </x-card>
+    @parent
+@endsection
 @section('content.right')
     @parent
     @section('content.right.order_dates')

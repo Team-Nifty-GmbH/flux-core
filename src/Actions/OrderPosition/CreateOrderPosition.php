@@ -4,6 +4,7 @@ namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
@@ -78,6 +79,10 @@ class CreateOrderPosition extends FluxAction
     public function performAction(): OrderPosition
     {
         $tags = Arr::pull($this->data, 'tags', []);
+        $order = Order::query()
+            ->with('orderType')
+            ->whereKey($this->data['order_id'])
+            ->first();
         $orderPosition = new OrderPosition();
 
         if (is_int($this->data['sort_number'] ?? false)) {
@@ -90,6 +95,10 @@ class CreateOrderPosition extends FluxAction
             OrderPosition::query()->where('order_id', $this->data['order_id'])
                 ->where('sort_number', '>=', $this->data['sort_number'])
                 ->increment('sort_number');
+        }
+
+        if ($order->orderType->order_type_enum->isPurchase() && ($this->data['ledger_account_id'] ?? false)) {
+            $this->data['ledger_account_id'] =  $order->contact->expense_ledger_account_id;
         }
 
         $orderPosition->fill($this->data);

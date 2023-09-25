@@ -56,6 +56,9 @@ class CreateOrder extends FluxAction
             ?? $contact->payment_reminder_days_2;
         $this->data['payment_reminder_days_3'] = $this->data['payment_reminder_days_3']
             ?? $contact->payment_reminder_days_3;
+        $this->data['bank_connection_id'] = $this->data['bank_connection_id']
+            ?? $contact->bankConnections()->first()?->id;
+        $this->data['approval_user_id'] = $this->data['approval_user_id'] ?? $contact->approval_user_id;
 
         $this->data['contact_id'] = $contactId;
 

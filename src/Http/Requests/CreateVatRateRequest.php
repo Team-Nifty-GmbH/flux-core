@@ -14,6 +14,7 @@ class CreateVatRateRequest extends BaseFormRequest
         return [
             'uuid' => 'string|uuid|unique:vat_rates,uuid',
             'name' => 'required|string',
+            'footer_text' => 'string|nullable',
             'rate_percentage' => 'required|numeric|lt:1|min:0',
         ];
     }
