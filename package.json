@@ -37,6 +37,6 @@
     "dependencies": {
         "@alpinejs/collapse": "^3.13.0",
         "apexcharts": "^3.42.0",
-        "dayjs": "^1.11.9"
+        "dayjs": "^1.11.10"
     }
 }
