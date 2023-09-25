@@ -40,9 +40,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('contacts', function (Blueprint $table) {
-            $table->dropForeign('approval_user_id');
-            $table->dropForeign('expense_ledger_account_id');
-            $table->dropForeign('vat_rate_id');
+            $table->dropForeign('contacts_approval_user_id_foreign');
+            $table->dropForeign('contacts_expense_ledger_account_id_foreign');
+            $table->dropForeign('contacts_vat_rate_id_foreign');
             $table->dropColumn([
                 'approval_user_id',
                 'expense_ledger_account_id',
