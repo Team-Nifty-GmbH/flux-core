@@ -1,10 +1,11 @@
 <div class="grid grid-cols-1 gap-4">
     <x-card>
         <div class="grid grid-cols-1 gap-2">
-            <x-input autofocus label="{{ __('Serial number') }}"
+            <x-input label="{{ __('Serial number') }}"
                      x-bind:readonly="! edit"
-                     placeholder="{{ __('Enter new or chose an existing…') }}"
-                     x-model="serialNumber.serial_number"/>
+                     placeholder="{{ __('Enter new or choose an existing…') }}"
+                     wire:model.blur="serialNumber.serial_number"
+            />
 
             <x-select
                 class="pb-4"

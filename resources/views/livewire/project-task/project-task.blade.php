@@ -40,8 +40,8 @@
             );
         }
     }"
-    x-on:data-table-row-clicked.window="showModal($event.detail.id)"
-    x-on:new-project-task.window="showModal()"
+    x-on:data-table-row-clicked.window="showModal($event.detail.id);"
+    x-on:new-project-task.window="showModal();"
 >
     <x-tabs
         wire:model.live="tab"
@@ -53,14 +53,19 @@
         <x-dynamic-component :component="'project-task.' . $tab" :project-task="$projectTask" />
     </x-tabs>
     <x-slot:footer>
-        <div class="flex justify-between gap-x-4">
-            <x-button
-                flat
-                negative
-                :label="__('Delete')"
-                x-on:click="Alpine.$data(document.getElementById('project-task-details')).delete()"
-            />
-            <div class="flex">
+        <div class="flex justify-between gap-x-4"
+             x-data="{projectTask: {id: null}}"
+             x-on:data-table-row-clicked.window="projectTask.id = $event.detail.id"
+        >
+            <div x-show="projectTask.id">
+                <x-button
+                    flat
+                    negative
+                    :label="__('Delete')"
+                    x-on:click="Alpine.$data(document.getElementById('project-task-details')).delete()"
+                />
+            </div>
+            <div class="flex w-full justify-end">
                 <x-button flat :label="__('Cancel')" x-on:click="close" />
                 <x-button primary :label="__('Save')" x-on:click="Alpine.$data(document.getElementById('project-task-details')).save()" />
             </div>

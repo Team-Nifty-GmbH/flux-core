@@ -14,10 +14,9 @@ use FluxErp\Services\PrintService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
-use Livewire\Redirector;
+use Livewire\Features\SupportRedirects\Redirector;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
 use ZipArchive;
@@ -164,7 +163,7 @@ class Order extends Component
         }
     }
 
-    public function delete(): false|RedirectResponse|Redirector
+    public function delete(): false|Redirector
     {
         $this->skipRender();
 

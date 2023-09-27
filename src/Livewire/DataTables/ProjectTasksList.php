@@ -24,6 +24,8 @@ class ProjectTasksList extends DataTable
         'state',
     ];
 
+    public array $projectTask = [];
+
     public array $availableRelations = ['*'];
 
     public array $sortable = ['*'];

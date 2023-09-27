@@ -8,6 +8,7 @@ use FluxErp\Services\TicketTypeService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -35,7 +36,7 @@ class TicketTypeEdit extends Component
         return Arr::prependKeysWith($rules, 'ticketType.');
     }
 
-    public function boot(): void
+    public function mount(): void
     {
         $this->ticketType = array_fill_keys(
             array_keys((new CreateTicketTypeRequest())->rules()),
@@ -60,6 +61,8 @@ class TicketTypeEdit extends Component
                 array_keys((new CreateTicketTypeRequest())->rules()),
                 null
             );
+
+        unset($this->ticketType['uuid']);
 
         $this->isNew = ! array_key_exists('id', $this->ticketType);
     }
@@ -96,7 +99,7 @@ class TicketTypeEdit extends Component
         $ticketType = $this->isNew ? $response->toArray() : $response['data']->toArray();
 
         $this->skipRender();
-        $this->dispatch('closeModal', $ticketType);
+        $this->dispatch('closeModal', $ticketType)->to('settings.ticket-types');
     }
 
     public function delete(): void
@@ -108,6 +111,6 @@ class TicketTypeEdit extends Component
         (new TicketTypeService())->delete($this->ticketType['id']);
 
         $this->skipRender();
-        $this->dispatch('closeModal', $this->ticketType, true);
+        $this->dispatch('closeModal', $this->ticketType, true)->to('settings.ticket-types');
     }
 }

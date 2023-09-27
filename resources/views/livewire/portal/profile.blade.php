@@ -26,7 +26,7 @@
                     {{ __('Salutation') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model.blur="address.salutation"/>
+                    <x-input wire:model="address.salutation"/>
                 </div>
             </div>
             <div
@@ -36,7 +36,7 @@
                     {{ __('Title') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model.blur="address.title"/>
+                    <x-input wire:model="address.title"/>
                 </div>
             </div>
             <div
@@ -46,7 +46,7 @@
                     {{ __('Firstname') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model.blur="address.firstname"/>
+                    <x-input wire:model="address.firstname"/>
                 </div>
             </div>
             <div
@@ -56,7 +56,7 @@
                     {{ __('Lastname') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model.blur="address.lastname"/>
+                    <x-input wire:model="address.lastname"/>
                 </div>
             </div>
             <div
@@ -66,7 +66,7 @@
                     {{ __('Street') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model.blur="address.street"/>
+                    <x-input wire:model="address.street"/>
                 </div>
             </div>
             <div
@@ -77,9 +77,12 @@
                 </label>
                 <div class="col-span-2">
                     <x-select
-                        wire:model="address.country_id" searchable
-                        :options="\FluxErp\Models\Country::all(['id', 'name'])" option-label="name"
-                        option-value="id"></x-select>
+                        wire:model="address.country_id"
+                        searchable
+                        :options="\FluxErp\Models\Country::all(['id', 'name'])"
+                        option-label="name"
+                        option-value="id"
+                    ></x-select>
                 </div>
             </div>
             <div
@@ -88,12 +91,12 @@
                        class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                     {{ __('Zip / City') }}
                 </label>
-                <div class="mt-1 w-full items-center space-y-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2">
+                <div class="mt-1 w-full items-center space-x-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2">
                     <div class="flex-none">
-                        <x-input wire:model.blur="address.zip"/>
+                        <x-input wire:model="address.zip"/>
                     </div>
                     <div class="grow">
-                        <x-input wire:model.blur="address.city"/>
+                        <x-input wire:model="address.city"/>
                     </div>
                 </div>
             </div>
@@ -105,8 +108,12 @@
                 </label>
                 <div class="col-span-2">
                     <x-select
-                        wire:model="address.language_id" searchable
-                        :options="\FluxErp\Models\Language::all()" option-label="name" option-value="id"></x-select>
+                        wire:model="address.language_id"
+                        searchable
+                        :options="\FluxErp\Models\Language::all()"
+                        option-label="name"
+                        option-value="id"
+                    ></x-select>
                 </div>
             </div>
             <div
@@ -116,7 +123,7 @@
                     {{ __('Password') }}
                 </label>
                 <div class="col-span-2">
-                    <x-inputs.password wire:model.blur="loginPassword"/>
+                    <x-inputs.password wire:model="loginPassword"/>
                 </div>
             </div>
         </form>
@@ -127,7 +134,7 @@
                     {{ __('Active') }}
                 </label>
                 <div class="col-span-2">
-                    <x-toggle md wire:model.blur="address.can_login"/>
+                    <x-toggle md wire:model="address.can_login"/>
                 </div>
             </div>
             <div
@@ -137,7 +144,7 @@
                     {{ __('Email') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model.blur="address.login_name"/>
+                    <x-input wire:model="address.login_name"/>
                 </div>
             </div>
             <div

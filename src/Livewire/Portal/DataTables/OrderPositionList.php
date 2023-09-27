@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire\DataTables\Portal;
+namespace FluxErp\Livewire\Portal\DataTables;
 
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;

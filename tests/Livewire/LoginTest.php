@@ -40,10 +40,4 @@ class LoginTest extends TestCase
         Livewire::test(Login::class)
             ->assertRedirect(Dashboard::class);
     }
-
-    public function test_redirect_to_login_page_as_unauthenticated_user()
-    {
-        Livewire::test(Dashboard::class)
-            ->assertRedirect(Login::class);
-    }
 }

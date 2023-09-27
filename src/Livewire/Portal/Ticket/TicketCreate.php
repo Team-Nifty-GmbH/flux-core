@@ -131,6 +131,7 @@ class TicketCreate extends Component
 
         $this->skipRender();
         $this->dispatch('closeModal', $ticket->toArray());
+        $this->dispatch('loadData')->to('portal.data-tables.ticket-list');
 
         return true;
     }

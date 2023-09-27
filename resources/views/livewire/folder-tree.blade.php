@@ -1,203 +1,203 @@
 <div x-data="{
-                ...folderTree(),
-                levels: [],
-                loadLevels() {
-                    $wire.getTree().then((result) => this.levels = result);
-                },
-                loadModel(modelType, modelId) {
-                    $wire.set('modelType', modelType, true);
-                    $wire.set('modelId', modelId, true);
-                    this.loadLevels();
-                },
-                selectionProxy: {},
-                selection: {},
-                selected: false,
-                treeSelect(level) {
-                    if (this.selection.id === level.id) {
-                        this.selected = false;
-                        this.selectionProxy = {};
-                        this.selection = {};
+        ...folderTree(),
+        levels: [],
+        loadLevels() {
+            $wire.getTree().then((result) => this.levels = result);
+        },
+        loadModel(modelType, modelId) {
+            $wire.set('modelType', modelType, true);
+            $wire.set('modelId', modelId, true);
+            this.loadLevels();
+        },
+        selectionProxy: {},
+        selection: {},
+        selected: false,
+        treeSelect(level) {
+            if (this.selection.id === level.id) {
+                this.selected = false;
+                this.selectionProxy = {};
+                this.selection = {};
 
-                        return;
-                    }
+                return;
+            }
 
-                    this.selectionProxy = level;
-                    this.selection = JSON.parse(JSON.stringify(level));
-                    this.selected = true;
-                },
-                convertSize(sizeBytes) {
-                    if (sizeBytes === null || sizeBytes === undefined) {
-                        return null
-                    }
+            this.selectionProxy = level;
+            this.selection = JSON.parse(JSON.stringify(level));
+            this.selected = true;
+        },
+        convertSize(sizeBytes) {
+            if (sizeBytes === null || sizeBytes === undefined) {
+                return null
+            }
 
-                    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+            const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
 
-                    if (sizeBytes <= 0) {
-                        return '0B';
-                    }
+            if (sizeBytes <= 0) {
+                return '0B';
+            }
 
-                    let i = 0;
-                    while (sizeBytes >= 1024 && i < units.length - 1) {
-                        sizeBytes /= 1024;
-                        i++;
-                    }
+            let i = 0;
+            while (sizeBytes >= 1024 && i < units.length - 1) {
+                sizeBytes /= 1024;
+                i++;
+            }
 
-                    const sizeStr = sizeBytes.toFixed(2);
+            const sizeStr = sizeBytes.toFixed(2);
 
-                    if (sizeStr.endsWith('.00')) {
-                        return sizeStr.slice(0, -3) + units[i];
-                    } else if (sizeStr.endsWith('0')) {
-                        return sizeStr.slice(0, -1) + units[i];
-                    }
+            if (sizeStr.endsWith('.00')) {
+                return sizeStr.slice(0, -3) + units[i];
+            } else if (sizeStr.endsWith('0')) {
+                return sizeStr.slice(0, -1) + units[i];
+            }
 
-                    return sizeStr + units[i];
+            return sizeStr + units[i];
+        },
+        isSelected(level) {
+            return this.selection.id === level.id;
+        },
+        itemAttributes() {
+            return 'x-bind:class=\u0022isSelected(level) ? \'bg-primary-600 text-white fill-white\' : \'\'\u0022';
+        },
+        recursiveRemove (list, id) {
+            return list.map ( item => { return {...item} }).filter ( item => {
+                if ( 'children' in item ) {
+                    item.children = this.recursiveRemove ( item.children, id );
+                }
+                return item.id !== id;
+            });
+        },
+        isFolder(level) {
+            return level.hasOwnProperty('children') && ! level.hasOwnProperty('file_name');
+        },
+        isDropping: false,
+        isUploading: false,
+        progress: 0,
+        filesArray: $wire.entangle('filesArray', true),
+        handleFileSelect(event) {
+            if (event.target.files.length) {
+                this.uploadFiles(event.target.files, event)
+            }
+        },
+        handleFileDrop(event) {
+            if (event.dataTransfer.files.length > 0) {
+                this.uploadFiles(event.dataTransfer.files, event)
+            }
+        },
+        uploadError(message) {
+            this.isUploading = false;
+            this.progress = 0;
+            window.$wireui.notify({
+                title: '{{  __('File upload failed') }}',
+                description: message ? message : '{{ __('Your file upload failed. Please try again.') }}',
+                icon: 'error'
+            });
+        },
+        uploadSuccess(success, files) {
+            this.isUploading = false
+            this.progress = 0
+            this.showLevel(null, this.selectionProxy);
+            $wire.get('latestUploads').forEach((file) => {
+                if(file.status === 201) {
+                    this.selectionProxy.children.push(file.data);
+                    this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
+                } else {
+                    this.uploadError(Object.values(file.errors).join(', '));
+                }
+            });
+        },
+        uploadProgress(progress) {
+            this.progress = progress
+        },
+        uploadFiles(files, event) {
+            this.isUploading = true;
+            let $this = this;
+            $wire.set('collection', this.selectionProxy.collection_name);
+            $wire.uploadMultiple('files', files,
+                function (success) {
+                    let uploadedFiles = event.target.files?.length ? event.target.files : event.dataTransfer.files;
+                    $this.uploadSuccess(success, uploadedFiles);
                 },
-                isSelected(level) {
-                    return this.selection.id === level.id;
+                function(error) {
+                   $this.uploadError();
                 },
-                itemAttributes() {
-                    return 'x-bind:class=\u0022isSelected(level) ? \'bg-primary-600 text-white fill-white\' : \'\'\u0022';
-                },
-                recursiveRemove (list, id) {
-                    return list.map ( item => { return {...item} }).filter ( item => {
-                        if ( 'children' in item ) {
-                            item.children = this.recursiveRemove ( item.children, id );
-                        }
-                        return item.id !== id;
-                    });
-                },
-                isFolder(level) {
-                    return level.hasOwnProperty('children') && ! level.hasOwnProperty('file_name');
-                },
-                isDropping: false,
-                isUploading: false,
-                progress: 0,
-                filesArray: $wire.entangle('filesArray', true),
-                handleFileSelect(event) {
-                    if (event.target.files.length) {
-                        this.uploadFiles(event.target.files, event)
-                    }
-                },
-                handleFileDrop(event) {
-                    if (event.dataTransfer.files.length > 0) {
-                        this.uploadFiles(event.dataTransfer.files, event)
-                    }
-                },
-                uploadError(message) {
-                    this.isUploading = false;
-                    this.progress = 0;
-                    window.$wireui.notify({
-                        title: '{{  __('File upload failed') }}',
-                        description: message ? message : '{{ __('Your file upload failed. Please try again.') }}',
-                        icon: 'error'
-                    });
-                },
-                uploadSuccess(success, files) {
-                    this.isUploading = false
-                    this.progress = 0
-                    this.showLevel(null, this.selectionProxy);
-                    $wire.get('latestUploads').forEach((file) => {
-                        if(file.status === 201) {
-                            this.selectionProxy.children.push(file.data);
-                            this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
-                        } else {
-                            this.uploadError(Object.values(file.errors).join(', '));
-                        }
-                    });
-                },
-                uploadProgress(progress) {
-                    this.progress = progress
-                },
-                uploadFiles(files, event) {
-                    this.isUploading = true;
-                    let $this = this;
-                    $wire.set('collection', this.selectionProxy.collection_name);
-                    $wire.uploadMultiple('files', files,
-                        function (success) {
-                            let uploadedFiles = event.target.files?.length ? event.target.files : event.dataTransfer.files;
-                            $this.uploadSuccess(success, uploadedFiles);
-                        },
-                        function(error) {
-                           $this.uploadError();
-                        },
-                        function (event) {
-                            $this.uploadProgress(event);
-                        }
-                    )
-                },
-                removeUpload(index) {
-                    $wire.removeUpload('files', index)
-                },
-                save() {
-                    $wire.save(this.selection).then(() => {
-                        Object.entries(this.selection).forEach(([key, value]) => {
-                            this.selectionProxy[key] = value
+                function (event) {
+                    $this.uploadProgress(event);
+                }
+            )
+        },
+        removeUpload(index) {
+            $wire.removeUpload('files', index)
+        },
+        save() {
+            $wire.save(this.selection).then(() => {
+                Object.entries(this.selection).forEach(([key, value]) => {
+                    this.selectionProxy[key] = value
+                });
+            });
+        },
+        addFolder(target, parent) {
+            let id = Math.random().toString(36).substr(2, 9);
+            let name = '{{ __('new_folder') }}' + '_' + target.length;
+            let collectionName = parent ? parent.collection_name + '.' + name : name;
+
+            if(parent) {
+                this.showLevel(null, parent);
+            }
+
+            target.push({
+                id: id,
+                is_static: false,
+                is_new: true,
+                collection_name: collectionName,
+                name: name,
+                children: [],
+            });
+
+            this.treeSelect(target[target.length - 1]);
+        },
+        deleteFile(level, event) {
+            window.$wireui.confirmDialog({
+                title: '{{ __('Delete file') }}',
+                description: '{{ __('Do you really want to delete this file?') }}',
+                icon: 'error',
+                accept: {
+                    label: '{{ __('Delete') }}',
+                    execute: () => {
+                        $wire.delete(level.id).then((success) => {
+                            this.selected = false;
+                            this.selection = {};
+
+                            this.levels = this.recursiveRemove(this.levels, level.id);
                         });
-                    });
+                    },
                 },
-                addFolder(target, parent) {
-                    let id = Math.random().toString(36).substr(2, 9);
-                    let name = '{{ __('new_folder') }}' + '_' + target.length;
-                    let collectionName = parent ? parent.collection_name + '.' + name : name;
+                reject: {
+                    label: '{{ __('Cancel') }}',
+                }
+            }, $wire.__instance.id);
+        },
+        deleteFolder(level) {
+            window.$wireui.confirmDialog({
+                title: '{{ __('Delete folder') }}',
+                description: '{{ __('Do you really want to delete this folder and all containing files?') }}',
+                icon: 'error',
+                accept: {
+                    label: '{{ __('Delete') }}',
+                    execute: () => {
+                        $wire.deleteCollection(level.collection_name).then((success) => {
+                            this.selected = false;
+                            this.selection = {};
 
-                    if(parent) {
-                        this.showLevel(null, parent);
-                    }
-
-                    target.push({
-                        id: id,
-                        is_static: false,
-                        is_new: true,
-                        collection_name: collectionName,
-                        name: name,
-                        children: [],
-                    });
-
-                    this.treeSelect(target[target.length - 1]);
+                            this.levels = this.recursiveRemove(this.levels, level.id);
+                        });
+                    },
                 },
-                deleteFile(level, event) {
-                    window.$wireui.confirmDialog({
-                        title: '{{ __('Delete file') }}',
-                        description: '{{ __('Do you really want to delete this file?') }}',
-                        icon: 'error',
-                        accept: {
-                            label: '{{ __('Delete') }}',
-                            execute: () => {
-                                $wire.delete(level.id).then((success) => {
-                                    this.selected = false;
-                                    this.selection = {};
-
-                                    this.levels = this.recursiveRemove(this.levels, level.id);
-                                });
-                            },
-                        },
-                        reject: {
-                            label: '{{ __('Cancel') }}',
-                        }
-                    }, $wire.__instance.id);
-                },
-                deleteFolder(level) {
-                    window.$wireui.confirmDialog({
-                        title: '{{ __('Delete folder') }}',
-                        description: '{{ __('Do you really want to delete this folder and all containing files?') }}',
-                        icon: 'error',
-                        accept: {
-                            label: '{{ __('Delete') }}',
-                            execute: () => {
-                                $wire.deleteCollection(level.collection_name).then((success) => {
-                                    this.selected = false;
-                                    this.selection = {};
-
-                                    this.levels = this.recursiveRemove(this.levels, level.id);
-                                });
-                            },
-                        },
-                        reject: {
-                            label: '{{ __('Cancel') }}',
-                        }
-                    }, $wire.__instance.id);
-                },
-            }"
+                reject: {
+                    label: '{{ __('Cancel') }}',
+                }
+            }, $wire.__instance.id);
+        },
+    }"
      class="flex gap-2 justify-between"
      x-init="loadLevels();"
      x-on:folder-tree-select="treeSelect($event.detail)"
@@ -223,7 +223,7 @@
                 @can('action.media.upload')
                     <x-button :label="__('Add folder')" x-on:click="addFolder(selectionProxy.children, selection)" />
                 @endcan
-                <x-button :label="__('Download folder')" x-on:click="$wire.downloadCollection(selection.id)" />
+                <x-button :label="__('Download folder')" x-on:click="$wire.downloadCollection(selection.collection_name)" />
             </div>
             @can('action.media.update')
                 <x-input x-bind:disabled="selection.is_static" :label="__('Name')" x-model="selection.name" />

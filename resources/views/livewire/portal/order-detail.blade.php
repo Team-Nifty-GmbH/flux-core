@@ -186,7 +186,7 @@
         @endif
         <div class="space-y-8">
             <div id="order-position-table" x-on:data-table-row-clicked="$wire.selectPosition($event.detail.id)">
-                <livewire:data-tables.portal.order-position-list
+                <livewire:portal.data-tables.order-position-list
                     :order-id="$order['id']"
                     :filters="[['column' => 'order_id', 'operator' => '=', 'value' => $order['id']]]"
                 />

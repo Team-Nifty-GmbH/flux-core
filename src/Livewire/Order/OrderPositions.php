@@ -62,6 +62,8 @@ class OrderPositions extends OrderPositionList
             ->get(['id', 'name', 'rate_percentage'])
             ->toArray();
 
+        $this->isSelectable = ! $this->order['is_locked'];
+
         parent::mount();
 
         $this->formatters = array_merge(

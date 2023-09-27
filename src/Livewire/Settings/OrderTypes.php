@@ -135,6 +135,7 @@ class OrderTypes extends Component
         }
         (new OrderTypeService())->delete($this->orderType['id']);
 
+        $this->dispatch('loadData')->to('data-tables.order-type-list');
         $this->skipRender();
     }
 }

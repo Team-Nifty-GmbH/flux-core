@@ -205,6 +205,7 @@ class PriceLists extends Component
         $this->notification()->success(__('Successfully saved'));
         $this->editModal = false;
 
+        $this->dispatch('loadData')->to('data-tables.price-list-list');
         $this->skipRender();
     }
 
@@ -223,6 +224,7 @@ class PriceLists extends Component
 
         $index = array_search($this->selectedPriceList['id'], array_column($this->priceLists, 'id'));
         unset($this->priceLists[$index]);
+        $this->dispatch('loadData')->to('data-tables.price-list-list');
     }
 
     public function addCategoryDiscount(): void

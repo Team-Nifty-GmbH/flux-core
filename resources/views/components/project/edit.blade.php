@@ -13,6 +13,7 @@
             return `x-bind:disabled='projectTaskCategories.includes(level.id) || ! edit'`;
         },
         loadLevels(id = null) {
+            $wire.project.category_id = id;
             $wire.loadCategories(id).then((result) => this.levels = result);
             $wire.loadProjectTaskCategories(this.project.id).then((result) => this.projectTaskCategories = result);
         }

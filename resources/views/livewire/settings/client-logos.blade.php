@@ -83,7 +83,7 @@
                                             class="w-0 flex-1 truncate pl-1">{{ $logo[0]?->getClientOriginalName() }}</span>
                                     </div>
                                     <div class="flex flex-shrink-0 space-x-4">
-                                        <x-button negative wire:click="removeUpload('logo')" :label="__('Delete')"/>
+                                        <x-button negative x-on:click="$wire.dispatchTo('settings.client-logos', 'removeUpload', { name: 'logo' })" :label="__('Delete')"/>
                                     </div>
                                 </div>
                             </div>
@@ -178,8 +178,7 @@
                                             class="w-0 flex-1 truncate pl-1">{{ $logoSmall[0]?->getClientOriginalName() }}</span>
                                     </div>
                                     <div class="flex flex-shrink-0 space-x-4">
-                                        <x-button negative wire:click="removeUpload('logoSmall')"
-                                                  :label="__('Delete')"/>
+                                        <x-button negative x-on:click="$wire.dispatchTo('settings.client-logos', 'removeUpload', { name: 'logoSmall' })" :label="__('Delete')"/>
                                     </div>
                                 </div>
                             </div>

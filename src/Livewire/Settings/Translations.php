@@ -25,7 +25,7 @@ class Translations extends Component
         'closeModal',
     ];
 
-    public function boot(): void
+    public function mount(): void
     {
         $this->translations = LanguageLine::all()->toArray();
 
@@ -52,7 +52,6 @@ class Translations extends Component
         }
 
         $this->showTranslationModal = true;
-        $this->skipRender();
     }
 
     public function closeModal(array $translation, bool $delete = false): void

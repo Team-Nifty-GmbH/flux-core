@@ -27,6 +27,11 @@ class Service extends Component
 
     public string $modelType = Ticket::class;
 
+    protected $listeners = [
+        'updateFilesArray',
+        'removeUpload'
+    ];
+
     public function mount($serialNumberId = null): void
     {
         $ticket = new Ticket([
@@ -75,5 +80,12 @@ class Service extends Component
         Event::dispatch('customerTicket.created', $ticket);
 
         return redirect()->route('portal.dashboard');
+    }
+
+    public function updateFilesArray(): void
+    {
+        $this->filesArray = array_map(fn ($item) => $item->getClientOriginalName(), $this->attachments);
+
+        $this->skipRender();
     }
 }

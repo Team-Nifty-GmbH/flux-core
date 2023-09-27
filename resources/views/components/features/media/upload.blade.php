@@ -3,56 +3,54 @@
 @endphp
 <div>
     <div x-data="{
-                isDropping: false,
-                isUploading: false,
-                progress: 0,
-                filesArray: $wire.entangle('filesArray', true),
-                handleFileSelect(event) {
-                    if (event.target.files.length) {
-                        this.uploadFiles(event.target.files, event)
-                    }
+        isDropping: false,
+        isUploading: false,
+        progress: 0,
+        filesArray: $wire.entangle('filesArray', true),
+        handleFileSelect(event) {
+            if (event.target.files.length) {
+                this.uploadFiles(event.target.files, event)
+            }
+        },
+        handleFileDrop(event) {
+            if (event.dataTransfer.files.length > 0) {
+                this.uploadFiles(event.dataTransfer.files, event)
+            }
+        },
+        uploadError() {
+            this.isUploading = false;
+            this.progress = 0;
+            window.$wireui.notify({
+                title: '{{ __('File upload failed') }}',
+                description: '{{ __('Your file upload failed. Please try again.') }}',
+                icon: 'error'
+            });
+        },
+        uploadSuccess(success, files) {
+            this.isUploading = false
+            this.progress = 0
+            $dispatch('file-uploaded', files);
+        },
+        uploadProgress(progress) {
+            this.progress = progress
+        },
+        uploadFiles(files, event) {
+            this.isUploading = true
+            let $this = this;
+            $wire.uploadMultiple('{{ $target }}', files,
+                function (success) {
+                    let uploadedFiles = event.target.files?.length ? event.target.files : event.dataTransfer.files;
+                    $this.uploadSuccess(success, uploadedFiles);
+                    $wire.dispatch('updateFilesArray');
                 },
-                handleFileDrop(event) {
-                    if (event.dataTransfer.files.length > 0) {
-                        this.uploadFiles(event.dataTransfer.files, event)
-                    }
+                function(error) {
+                   $this.uploadError();
                 },
-                uploadError() {
-                    this.isUploading = false;
-                    this.progress = 0;
-                    window.$wireui.notify({
-                        title: '{{ __('File upload failed') }}',
-                        description: '{{ __('Your file upload failed. Please try again.') }}',
-                        icon: 'error'
-                    });
-                },
-                uploadSuccess(success, files) {
-                    this.isUploading = false
-                    this.progress = 0
-                    $dispatch('file-uploaded', files);
-                },
-                uploadProgress(progress) {
-                    this.progress = progress
-                },
-                uploadFiles(files, event) {
-                    this.isUploading = true
-                    let $this = this;
-                    $wire.uploadMultiple('{{ $target }}', files,
-                        function (success) {
-                            let uploadedFiles = event.target.files?.length ? event.target.files : event.dataTransfer.files;
-                            $this.uploadSuccess(success, uploadedFiles);
-                        },
-                        function(error) {
-                           $this.uploadError();
-                        },
-                        function (event) {
-                            $this.uploadProgress(event);
-                        }
-                    )
-                },
-                removeUpload(index) {
-                    $wire.removeUpload('{{ $target }}', index)
-                },
+                function (event) {
+                    $this.uploadProgress(event);
+                }
+            )
+        },
     }">
         <div class="relative flex flex-col items-center justify-center"
              x-on:drop="isDropping = false"
@@ -89,10 +87,10 @@
                 <div class="flex items-center justify-between text-sm">
                     <div class="flex w-0 flex-1 items-center">
                         <x-icon name="paper-clip" class="h-4 w-4"/>
-                        <span class="w-0 flex-1 truncate pl-1" x-text="file.name"></span>
+                        <span class="w-0 flex-1 truncate pl-1" x-text="file"></span>
                     </div>
                     <div class="flex flex-shrink-0 space-x-4">
-                        <x-button negative x-on:click="removeUpload(index)" :label="__('Delete')" />
+                        <x-button negative x-on:click="$wire.dispatch('removeUpload', { name: '{{ $target }}', index: index })" :label="__('Delete')" />
                     </div>
                 </div>
             </template>

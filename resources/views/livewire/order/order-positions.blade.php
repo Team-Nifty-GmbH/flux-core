@@ -20,7 +20,7 @@
      x-on:data-table-record-selected="selectPositions($event.detail)"
      x-on:open-modal="selectedOrderPosition = JSON.parse(JSON.stringify($event.detail.record))"
 >
-    <x-modal.card wire:model="showGroupAdd" title="{{  __('Add to group') }}">
+    <x-modal.card wire:model="showGroupAdd" title="{{ __('Add to group') }}">
         <x-native-select x-model="selectedGroupId">
             <option value="0">{{ __('No group') }}</option>
             <template x-for="group in groups">
@@ -104,6 +104,7 @@
                     <x-button flat :label="__('Cancel')" x-on:click="close" />
                     <x-button
                             primary
+                            x-show="!order.is_locked"
                             x-on:click="$wire.save(livewireSelectedOrderPosition, orderPositions).then((data) => {
                             if(data !== false) {
                                 order = {...order, ...data.order};

@@ -1,11 +1,11 @@
 <div>
     <div>
         <div class="flex w-full flex-col-reverse justify-between md:flex-row">
-            <h2 class="pt-5 text-base font-bold uppercase md:pt-0">
+            <h2 class="pt-5 text-base font-bold uppercase dark:text-white md:pt-0">
                 {{ __('Edit profiles') }}
             </h2>
         </div>
-        <h1 class="pt-5 text-5xl font-bold">
+        <h1 class="pt-5 text-5xl font-bold dark:text-white">
             {{ __('Manage users') }}
         </h1>
         <div class="flex w-full justify-end pt-8">
@@ -48,5 +48,6 @@
                 </tr>
             </template>
             </tbody>
+        </table>
     </div>
 </div>

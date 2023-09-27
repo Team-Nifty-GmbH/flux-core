@@ -219,7 +219,7 @@ class Address extends Component
     {
         $this->addressOriginal = $this->address;
         $address = $this->address;
-        unset($address['id']);
+        unset($address['id'], $address['uuid']);
 
         $address['is_main_address'] = false;
         $this->address = $address;

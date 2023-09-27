@@ -9,10 +9,10 @@
     <!-- Page header -->
     <div class="mx-auto px-4 sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:px-8">
         <div class="flex items-center space-x-5">
-            <label for="avatar" style="cursor: pointer">
+            <label for="avatar">
                 <x-avatar xl :label="$productImage === '' ? strtoupper(substr($serialNumber['id'] ?? '', 0, 2)) : false" src="{{ $productImage }}" />
             </label>
-            <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="avatar"/>
+            <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="productImage" disabled/>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="opacity-40 transition-opacity hover:opacity-100">

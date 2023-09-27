@@ -93,7 +93,7 @@
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Zip / City') }}
         </label>
-        <div class="mt-1 w-full items-center space-y-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2">
+        <div class="mt-1 w-full items-center space-x-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2">
             <div class="flex-none">
                 <x-input x-bind:readonly="!edit"
                          x-bind:class="! edit && 'border-none bg-transparent shadow-none'"

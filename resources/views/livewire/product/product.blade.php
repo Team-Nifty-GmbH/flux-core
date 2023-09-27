@@ -58,7 +58,6 @@
             <x-button
                 x-cloak
                 primary
-                spinner
                 x-show="edit"
                 class="w-full"
                 x-on:click="$wire.save().then((success) => {
@@ -69,7 +68,6 @@
             <x-button
                 x-cloak
                 primary
-                spinner
                 x-show="edit"
                 class="w-full"
                 x-on:click="edit = false"

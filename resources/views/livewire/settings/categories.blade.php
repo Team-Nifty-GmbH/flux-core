@@ -22,7 +22,7 @@
     category: $wire.$entangle('category'),
 }">
     <div id="category-modal">
-        <x-modal.card :title="$category->id ? __('Edit Category') : __('Create Category')">
+        <x-modal.card :title="$category->id ? __('Edit Category') : __('Create Category')" x-on:close="$wire.close()">
             <div class="flex flex-col gap-4">
                 <x-input wire:model="category.name" :label="__('Name')"></x-input>
                 <x-toggle wire:model="category.is_active" :label="__('Active')"></x-toggle>
@@ -31,6 +31,7 @@
                         placeholder="{{ __('Model') }}"
                         wire:model.live="category.model_type"
                         :options="$models"
+                        :clearable="false"
                 />
                 <x-select
                         wire:model="category.parent_id"
@@ -57,7 +58,7 @@
                 <div class="flex justify-end gap-x-4">
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close" />
-                        <x-button primary spinner x-on:click="save()" :label="__('Save')" />
+                        <x-button primary wire:click="save" :label="__('Save')" />
                     </div>
                 </div>
             </x-slot:footer>

@@ -61,6 +61,7 @@ class UserEdit extends Component
         return view('flux::livewire.settings.user-edit',
             [
                 'permissions' => Permission::query()
+                    ->where('guard_name', '!=', 'address')
                     ->when($this->searchPermission, fn ($query) => $query->search($this->searchPermission))
                     ->paginate(pageName: 'permissionsPage'),
             ]
@@ -136,7 +137,7 @@ class UserEdit extends Component
 
         try {
             UpdateUserPermissions::make([
-                'user_id' => $this->user['id'],
+                'user_id' => $user['id'],
                 'permissions' => array_map('intval', $this->user['permissions'] ?? []),
                 'sync' => true,
             ])
@@ -149,7 +150,7 @@ class UserEdit extends Component
 
         try {
             UpdateUserRoles::make([
-                'user_id' => $this->user['id'],
+                'user_id' => $user['id'],
                 'roles' => array_map('intval', $this->user['roles']),
                 'sync' => true,
             ])
@@ -180,6 +181,8 @@ class UserEdit extends Component
 
             return false;
         }
+
+        $this->dispatch('loadData')->to('data-tables.user-list');
 
         return true;
     }

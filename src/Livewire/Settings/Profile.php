@@ -118,9 +118,11 @@ class Profile extends Component
             $response = $this->saveFileUploadsToMediaLibrary('avatar', auth()->id(), User::class);
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
+
+            return;
         }
 
-        $this->avatar = $response[0]['data']->getUrl();
+        $this->avatar = $response[0]->getUrl();
     }
 
     public function save(): void

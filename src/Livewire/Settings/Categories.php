@@ -79,4 +79,8 @@ class Categories extends CategoryList
 
         return true;
     }
+
+    public function close(): void
+    {
+    }
 }

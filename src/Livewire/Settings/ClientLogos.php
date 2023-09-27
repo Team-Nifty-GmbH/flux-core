@@ -26,11 +26,9 @@ class ClientLogos extends Component
     protected $listeners = [
         'show',
         'save',
+        'removeUpload'
     ];
 
-    /**
-     * @return string[][]
-     */
     public function getRules(): array
     {
         return [

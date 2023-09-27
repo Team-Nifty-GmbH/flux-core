@@ -12,7 +12,7 @@
     <x-modal.card max-width="6xl" z-index="z-30" wire:model="showClientModal" :title="$create ? __('Create Client') : __('Edit Client')">
         <livewire:settings.client-edit/>
         <x-slot name="footer">
-            <div x-data="{create: @entangle('create')}" class="w-full">
+            <div class="w-full" x-data="{create: @entangle('create')}">
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.client.delete'))
@@ -23,7 +23,9 @@
                                                             icon: 'error',
                                                             accept: {
                                                                 label: '{{ __('Delete') }}',
-                                                                method: 'delete',
+                                                                execute: () => {
+                                                                    $wire.dispatchTo('settings.client-edit', 'delete')
+                                                                }
                                                             },
                                                             reject: {
                                                                 label: '{{ __('Cancel') }}',

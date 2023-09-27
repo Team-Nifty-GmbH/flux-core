@@ -86,7 +86,7 @@ class Product extends Component
 
         (new CommentService())->create([
             'model_id' => $this->serialNumber['id'],
-            'model_type' => class_basename(SerialNumber::class),
+            'model_type' => SerialNumber::class,
             'comment' => $this->comment,
         ]);
 

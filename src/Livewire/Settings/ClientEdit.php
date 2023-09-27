@@ -35,7 +35,7 @@ class ClientEdit extends Component
         return Arr::prependKeysWith($rules, 'client.');
     }
 
-    public function boot(): void
+    public function mount(): void
     {
         $this->client = array_fill_keys(
             array_keys((new CreateClientRequest())->rules()),
@@ -101,10 +101,9 @@ class ClientEdit extends Component
 
         $this->notification()->success(__('Client saved successful.'));
 
-        $client = $this->isNew ? $response->toArray() : $response['data']->toArray();
-
+        $this->dispatch('loadData')->to('settings.clients');
+        $this->dispatch('closeModal')->to('settings.clients');
         $this->skipRender();
-        $this->dispatch('closeModal', $client);
     }
 
     public function delete(): void
@@ -115,8 +114,9 @@ class ClientEdit extends Component
 
         (new ClientService())->delete($this->client['id']);
 
+        $this->dispatch('loadData')->to('settings.clients');
+        $this->dispatch('closeModal')->to('settings.clients');
         $this->skipRender();
-        $this->dispatch('closeModal', $this->client, true);
     }
 
     public function addDay(): void

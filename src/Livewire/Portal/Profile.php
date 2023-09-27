@@ -41,6 +41,8 @@ class Profile extends Component
             $user->contact_id = auth()->user()->contact_id;
             $user->client_id = auth()->user()->client_id;
             $user->company = auth()->user()->company;
+            $user->language_id = null;
+            $user->country_id = null;
             $user->contact_options = [];
         } else {
             $user = Address::query()->whereKey($id)->first();

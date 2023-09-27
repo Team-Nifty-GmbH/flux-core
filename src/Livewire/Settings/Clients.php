@@ -17,6 +17,7 @@ class Clients extends ClientList
     public bool $create = true;
 
     protected $listeners = [
+        'loadData',
         'closeModal',
         'closeLogosModal',
     ];
@@ -84,32 +85,13 @@ class Clients extends ClientList
         $this->skipRender();
     }
 
-    public function closeModal(array $client, bool $delete = false): void
+    public function closeModal(): void
     {
-        $key = array_search($client['id'], array_column($this->clients, 'id'));
-
-        if (! $delete) {
-            if ($key === false) {
-                $this->clients[] = $client;
-            } else {
-                $this->clients[$key] = $client;
-            }
-        } elseif ($key !== false) {
-            unset($this->clients[$key]);
-        }
-
         $this->showClientModal = false;
-        $this->skipRender();
     }
 
     public function closeLogosModal(): void
     {
         $this->showClientLogosModal = false;
-        $this->skipRender();
-    }
-
-    public function delete(): void
-    {
-        $this->dispatch('delete')->to('settings.client-edit');
     }
 }

@@ -7,13 +7,16 @@ use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\TicketType;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class TicketTypes extends Component
 {
-    private array $dbTicketTypes;
+    #[Locked]
+    public array $dbTicketTypes = [];
 
-    private array $additionalColumns = [];
+    #[Locked]
+    public array $additionalColumns = [];
 
     public array $ticketTypes;
 
@@ -29,7 +32,7 @@ class TicketTypes extends Component
         'closeModal',
     ];
 
-    public function boot(): void
+    public function mount(): void
     {
         $this->dbTicketTypes = TicketType::query()
             ->orderBy('name->' . app()->getLocale(), 'ASC')
@@ -69,6 +72,8 @@ class TicketTypes extends Component
             $this->dbTicketTypes[$key]['additional_columns'] = $additionalColumns;
             $this->additionalColumns = array_merge($this->additionalColumns, $additionalColumns);
         }
+
+        $this->sortTicketTypes($this->dbTicketTypes);
     }
 
     public function render(): View
@@ -114,8 +119,6 @@ class TicketTypes extends Component
 
             $this->showTicketTypeModal = true;
         }
-
-        $this->skipRender();
     }
 
     public function closeModal(array $data, bool $delete = false): void
@@ -166,7 +169,6 @@ class TicketTypes extends Component
         $this->additionalColumnIndex = -1;
         $this->showTicketTypeModal = false;
         $this->showAdditionalColumnModal = false;
-        $this->skipRender();
     }
 
     public function delete(bool $additionalColumn = false): void

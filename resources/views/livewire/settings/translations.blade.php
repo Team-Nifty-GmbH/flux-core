@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <x-modal.card z-index="z-30" wire:model="showTranslationModal" :title="__('Edit Translation')">
+    <x-modal.card z-index="z-30" wire:model="showTranslationModal" :title="$index === -1 ? __('Create Translation') : __('Edit Translation')">
         <livewire:settings.translation-edit/>
         <x-slot name="footer">
             <div x-data="{index: @entangle('index')}" class="w-full">

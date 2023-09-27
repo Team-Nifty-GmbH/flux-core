@@ -37,6 +37,7 @@ class ProjectTask extends Component
             $this->showProjectTask($id);
         } else {
             $this->projectTask = [
+                'id' => 0,
                 'address_id' => null,
                 'project_id' => $projectId,
                 'user_id' => auth()->id(),

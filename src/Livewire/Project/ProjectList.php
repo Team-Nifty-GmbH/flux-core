@@ -16,9 +16,11 @@ class ProjectList extends Project
             ];
         })->toArray();
 
-        $this->project['state'] = Open::$name;
-        $this->project['categories'] = [];
-        $this->project['category_id'] = null;
+        $this->project = [
+            'state' => Open::$name,
+            'category_id' => null,
+            'categories' => [],
+        ];
     }
 
     public function render(): View

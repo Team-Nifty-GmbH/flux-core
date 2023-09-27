@@ -20,7 +20,9 @@ class Users extends Component
 
     public int $userId = 0;
 
-    protected $listeners = ['closeModal'];
+    protected $listeners = [
+        'closeModal',
+    ];
 
     public function render(): View|Factory|Application
     {
@@ -31,7 +33,6 @@ class Users extends Component
     {
         $this->userId = $id ?? 0;
         $this->dispatch('show', $id)->to('settings.user-edit');
-        $this->skipRender();
         $this->showUserModal = true;
     }
 

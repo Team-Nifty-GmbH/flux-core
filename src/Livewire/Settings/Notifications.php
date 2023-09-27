@@ -8,6 +8,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -23,6 +24,7 @@ class Notifications extends Component
 
     public string $notificationType = '';
 
+    #[Locked]
     public array $dirtyNotificationChannels = [];
 
     public array $notificationChannels = [];
@@ -79,22 +81,6 @@ class Notifications extends Component
         }
     }
 
-    public function updatingNotification(array $notification): void
-    {
-        $dirty = collect(Arr::dot($notification))->where(
-            fn ($value, $key) => $value !== data_get($this->notification, $key)
-        )->toArray();
-
-        foreach ($dirty as $key => $value) {
-            $path = explode('.', $key);
-
-            $data = data_get($notification, $path[0]);
-            $data['channel'] = $data['name'];
-            $data['notification_type'] = $this->notificationType;
-            $this->dirtyNotificationChannels[$path[0]] = $data;
-        }
-    }
-
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.settings.notifications');
@@ -102,6 +88,8 @@ class Notifications extends Component
 
     public function save(): void
     {
+        $this->getDirtyNotificationChannels($this->notification);
+
         array_walk($this->dirtyNotificationChannels, function (&$item) {
             $item['channel_value'] = array_values(array_filter(array_unique($item['channel_value'])));
         });
@@ -146,6 +134,38 @@ class Notifications extends Component
                 ->first() ?: [];
         }
 
+        $this->dirtyNotificationChannels = $this->notification;
+
         $this->skipRender();
+    }
+
+    public function closeModal(): void
+    {
+        $this->detailModal = false;
+
+        $this->skipRender();
+    }
+
+    private function getDirtyNotificationChannels(array $notification): void
+    {
+        $dirty = collect(Arr::dot($notification))->where(
+            fn ($value, $key) => $value !== data_get($this->dirtyNotificationChannels, $key)
+        )->toArray();
+
+        $removed = collect(Arr::dot($this->dirtyNotificationChannels))->where(
+            fn ($value, $key) => $value !== data_get($notification, $key)
+        )->toArray();
+
+        $dirty = array_merge($removed, $dirty);
+
+        $this->dirtyNotificationChannels = [];
+        foreach ($dirty as $key => $value) {
+            $path = explode('.', $key);
+
+            $data = data_get($notification, $path[0]);
+            $data['channel'] = $data['name'];
+            $data['notification_type'] = $this->notificationType;
+            $this->dirtyNotificationChannels[$path[0]] = $data;
+        }
     }
 }

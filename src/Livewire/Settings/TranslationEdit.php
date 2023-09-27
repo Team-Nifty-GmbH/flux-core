@@ -53,7 +53,7 @@ class TranslationEdit extends Component
         return Arr::prependKeysWith($rules, 'translation.');
     }
 
-    public function boot(): void
+    public function mount(): void
     {
         $this->translation = array_fill_keys(
             array_keys((new CreateTranslationRequest())->rules()),
@@ -74,6 +74,8 @@ class TranslationEdit extends Component
 
     public function show(string $locale, array $translation = []): void
     {
+        $this->resetErrorBag();
+
         $this->translation = $translation ?:
             array_fill_keys(
                 array_keys((new CreateTranslationRequest())->rules()),
