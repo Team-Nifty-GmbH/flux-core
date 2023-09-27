@@ -28,7 +28,7 @@
     },
     deleteItem(recordId) {
         window.$wireui.confirmDialog({
-                        title: '{{ __('Delete Discount group') }}',
+                        title: '{{ __('Delete discount group') }}',
                         description: '{{ __('Do you really want to delete this discount group?') }}',
                         icon: 'error',
                         accept: {
@@ -40,11 +40,11 @@
                         reject: {
                             label: '{{ __('Cancel') }}',
                         }
-                    }, '{{ $this->id }}');
+                    }, $wire.__instance.id);
     }
 }">
     <div id="edit-window">
-        <x-modal.card>
+        <x-modal.card :title="__('Manage discount group')">
             <div class="flex flex-col gap-4">
                 <x-input x-model="discountGroup.name" label="{{ __('Name') }}" />
                 <x-toggle x-model="discountGroup.is_active" label="{{ __('Is Active') }}" />
@@ -73,7 +73,7 @@
             </div>
             <x-slot:footer>
                 <div class="flex justify-end gap-4">
-                    <x-button x-on:click="close()">{{ __('Cancel') }}</x-button>
+                    <x-button flat x-on:click="close()">{{ __('Cancel') }}</x-button>
                     <x-button primary class="mr-2" x-on:click="saveItem()">{{ __('Save') }}</x-button>
                 </div>
             </x-slot:footer>

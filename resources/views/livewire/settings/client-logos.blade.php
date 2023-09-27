@@ -1,10 +1,10 @@
 <div>
     <div class="space-y-8 divide-y divide-gray-200">
         <div class="space-y-8 divide-y divide-gray-200">
-            <div x-data="{logo: @entangle('logo')}">
+            <div x-data="{logo: @entangle('logo').live}">
                 <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     <div class="sm:col-span-6">
-                        {{__('Logo')}}
+                        {{ __('Logo') }}
                     </div>
                     <div class="sm:col-span-6">
                         <div>
@@ -69,7 +69,7 @@
                                         </div>
 
                                     </label>
-                                    <input type="file" id="logo-upload" accept="image/*" wire:model="logo" class="hidden"
+                                    <input type="file" id="logo-upload" accept="image/*" wire:model.live="logo" class="hidden"
                                            @change="handleLogoSelect"/>
                                 </div>
                             </div>
@@ -83,7 +83,7 @@
                                             class="w-0 flex-1 truncate pl-1">{{ $logo[0]?->getClientOriginalName() }}</span>
                                     </div>
                                     <div class="flex flex-shrink-0 space-x-4">
-                                        <x-button negative wire:click="removeUpload('logo')" :label="__('Delete')"/>
+                                        <x-button negative x-on:click="$wire.dispatchTo('settings.client-logos', 'removeUpload', { name: 'logo' })" :label="__('Delete')"/>
                                     </div>
                                 </div>
                             </div>
@@ -97,7 +97,7 @@
                         </div>
                     @endif
                     <div class="sm:col-span-6">
-                        {{__('Logo small')}}
+                        {{ __('Logo small') }}
                     </div>
                     <div class="sm:col-span-6">
                         <div>
@@ -164,7 +164,7 @@
                                         </div>
 
                                     </label>
-                                    <input type="file" id="logo-small-upload" wire:model="logoSmall" accept="image/*" class="hidden"
+                                    <input type="file" id="logo-small-upload" wire:model.live="logoSmall" accept="image/*" class="hidden"
                                            @change="handleLogoSmallSelect"/>
                                 </div>
                             </div>
@@ -178,8 +178,7 @@
                                             class="w-0 flex-1 truncate pl-1">{{ $logoSmall[0]?->getClientOriginalName() }}</span>
                                     </div>
                                     <div class="flex flex-shrink-0 space-x-4">
-                                        <x-button negative wire:click="removeUpload('logoSmall')"
-                                                  :label="__('Delete')"/>
+                                        <x-button negative x-on:click="$wire.dispatchTo('settings.client-logos', 'removeUpload', { name: 'logoSmall' })" :label="__('Delete')"/>
                                     </div>
                                 </div>
                             </div>

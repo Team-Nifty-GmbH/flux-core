@@ -2,9 +2,9 @@
     <div class="space-y-8 divide-y divide-gray-200">
         <div class="space-y-8 divide-y divide-gray-200">
             <div x-data="{
-                selectedAdditionalColumns: @entangle('selectedAdditionalColumns').defer,
-                additionalColumns: @entangle('additionalColumns').defer,
-                ticket: @entangle('ticket').defer,
+                selectedAdditionalColumns: @entangle('selectedAdditionalColumns'),
+                additionalColumns: @entangle('additionalColumns'),
+                ticket: @entangle('ticket'),
                 save() {
                     this.$wire.save().then((result) => {
                         if (result === true) {
@@ -17,18 +17,18 @@
                     <div class="sm:col-span-6">
                         <x-input :label="__('Title')"
                                  :placeholder="__('What is it about?')"
-                                 wire:model.defer="ticket.title"/>
+                                 wire:model="ticket.title"/>
                     </div>
                     <div class="sm:col-span-6">
                         <x-textarea :label="__('Description')"
                                     :placeholder="__('Your subject')"
-                                    wire:model.defer="ticket.description"/>
+                                    wire:model="ticket.description"/>
                     </div>
                     <div class="sm:col-span-6">
                         <x-select
                             :label="__('Ticket Type')"
                             :placeholder="__('Ticket Type')"
-                            wire:model="ticketTypeId"
+                            wire:model.live="ticketTypeId"
                             :options="$ticketTypes"
                             option-label="name"
                             option-value="id"
@@ -54,7 +54,7 @@
                         class="text-portal-font-color sm:col-span-6">{{ __('Photos and videos help us analyze the errors') }}
                     </div>
                     <div class="sm:col-span-6">
-                        <x-features.media.upload wire:model="attachments"/>
+                        <x-features.media.upload wire:model.live="attachments"/>
                     </div>
                 </div>
             </div>

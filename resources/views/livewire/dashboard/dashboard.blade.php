@@ -1,7 +1,7 @@
 <div
     wire:ignore.self
      x-data="{
-        widgets: $wire.entangle('widgets').defer,
+        widgets: $wire.entangle('widgets'),
         widget: {},
         editWidgets() {
             this.widgetsSortable = new Sortable(document.getElementById('widgets'), {

@@ -64,9 +64,11 @@ class CreateProduct extends FluxAction
                 $productCrossSelling['product_id'] = $product->id;
                 try {
                     CreateProductCrossSelling::make($productCrossSelling)->validate()->execute();
-                } catch (ValidationException) {}
+                } catch (ValidationException) {
+                }
             }
-        } catch (UnauthorizedException) {}
+        } catch (UnauthorizedException) {
+        }
 
         return $product->refresh();
     }

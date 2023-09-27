@@ -2,10 +2,10 @@
     class="py-6"
     x-on:data-table-row-clicked="$wire.show($event.detail.id)"
 >
-    <x-modal.card x-on:close="$wire.closeModal()" z-index="z-30" wire:model.defer="showUserModal" :title="__('Edit user')">
+    <x-modal.card x-on:close="$wire.closeModal()" z-index="z-30" wire:model="showUserModal" :title="$userId ? __('Edit User') : __('Create User')">
         <livewire:settings.user-edit/>
         <x-slot name="footer">
-            <div x-data="{userId: $wire.entangle('userId').defer}" class="w-full">
+            <div x-data="{userId: $wire.entangle('userId')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.user.delete'))
@@ -26,14 +26,14 @@
                                     reject: {
                                         label: '{{ __('Cancel') }}',
                                     }
-                                }, '{{ $this->id }}')
+                                }, $wire.__instance.id)
                                 "
                             label="{{ __('Delete') }}"
                         />
                     @endif
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$emitTo('settings.user-edit', 'save')"/>
+                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.user-edit', 'save')"/>
                     </div>
                 </div>
             </div>
@@ -42,11 +42,11 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="mb-6 sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('Users') }}</h1>
+                <h1 class="text-xl font-semibold dark:text-white">{{ __('Users') }}</h1>
                 <p class="mt-2 text-sm text-gray-300">{{ __('Here you can manage the application users...') }}</p>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                <x-button primary :label="__('Add User')" wire:click="show()"/>
+                <x-button primary :label="__('New User')" wire:click="show()"/>
             </div>
         </div>
         <livewire:data-tables.user-list />

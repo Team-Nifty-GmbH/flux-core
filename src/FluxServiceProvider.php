@@ -44,7 +44,9 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Livewire\Exceptions\ComponentNotFoundException;
 use Livewire\Livewire;
+use Livewire\Mechanisms\ComponentRegistry;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
@@ -61,15 +63,16 @@ class FluxServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->offerPublishing();
             $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        } else {
-            $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
-            $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
         }
 
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
+        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
+            $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
+            $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
+            $this->registerLivewireComponents();
+            $this->registerBladeComponents();
+            $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
+        }
 
-        $this->registerBladeComponents();
-        $this->registerLivewireComponents();
         $this->registerMiddleware();
         $this->registerConfig();
         $this->registerMarcos();
@@ -127,7 +130,7 @@ class FluxServiceProvider extends ServiceProvider
             });
         }
 
-        Widget::autoDiscoverWidgets(flux_path('src/Http/Livewire/Widgets'), 'FluxErp\Http\Livewire\Widgets');
+        Widget::autoDiscoverWidgets(flux_path('src/Livewire/Widgets'), 'FluxErp\Livewire\Widgets');
         Widget::autoDiscoverWidgets();
 
         Action::autoDiscover(flux_path('src/Actions'), 'FluxErp\Actions');
@@ -336,16 +339,16 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function registerLivewireComponents(): void
     {
-        $livewireNamespace = 'FluxErp\\Http\\Livewire\\';
-        $manifest = app(\Livewire\LivewireComponentsFinder::class)->getManifest();
+        $livewireNamespace = 'FluxErp\\Livewire\\';
+        $componentRegistry = app(ComponentRegistry::class);
 
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
             // if an alias is already registered, skip it
-            if ($manifest[$alias] ?? false) {
-                continue;
+            try {
+                $componentRegistry->getClass($alias);
+            } catch (ComponentNotFoundException $e) {
+                Livewire::component($alias, $class);
             }
-
-            Livewire::component($alias, $class);
         }
     }
 

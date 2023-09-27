@@ -4,11 +4,11 @@
         init() {
             $wire.loadData();
         },
-        activities: $wire.entangle('activities'),
+        activities: $wire.entangle('activities', true),
         activeActivity: null,
-        page: $wire.entangle('page'),
-        total: $wire.entangle('total'),
-        perPage: $wire.entangle('perPage'),
+        page: $wire.entangle('page', true),
+        total: $wire.entangle('total', true),
+        perPage: $wire.entangle('perPage', true),
         showProperties(id) {
             this.activeActivity = (this.activeActivity === id) ? null : id;
         }
@@ -30,7 +30,7 @@
                                 <div>
                                     <div class="text-sm text-gray-500">
                                         <span x-text="activity.causer.name"></span>
-                                        <span x-on:click="showProperties(activity.id)" href="#" class="cursor-pointer font-medium text-gray-900" x-text="activity.event"></span>
+                                        <span x-on:click="showProperties(activity.id)" href="#" class="cursor-pointer font-medium text-gray-900 dark:text-white" x-text="activity.event"></span>
                                         <div x-show="activity.id === activeActivity" x-collapse x-cloak>
                                             <template x-for="(value, name) in Object.fromEntries(Object.entries(activity.properties.attributes))">
                                                 <div>

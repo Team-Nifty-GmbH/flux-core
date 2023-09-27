@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Categorizable;
+use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasFrontendAttributes;
@@ -24,8 +25,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends Model implements HasMedia, InteractsWithDataTables
 {
-    use Categorizable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange,
-        HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable, Searchable, SoftDeletes;
+    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
+        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable, Searchable,
+        SoftDeletes;
 
     protected $casts = [
         'uuid' => 'string',
@@ -93,6 +95,12 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
     public function productProperties(): BelongsToMany
     {
         return $this->belongsToMany(ProductProperty::class, 'product_product_property', 'product_id', 'product_prop_id');
+    }
+
+    public function purchasePrice(): float
+    {
+        // TODO: add calculation for purchase price
+        return 0;
     }
 
     public function stockPostings(): HasMany

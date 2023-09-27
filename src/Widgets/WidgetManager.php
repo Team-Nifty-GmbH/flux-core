@@ -6,6 +6,7 @@ use FluxErp\Contracts\UserWidget;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
 use Livewire\Livewire;
+use Livewire\Mechanisms\ComponentRegistry;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
@@ -21,7 +22,8 @@ class WidgetManager
      */
     public function register(string $name, string $widget): void
     {
-        $componentClass = Livewire::getClass($widget);
+        $componentRegistry = app(ComponentRegistry::class);
+        $componentClass = $componentRegistry->getClass($widget);
 
         if (! class_exists($componentClass)) {
             throw new \Exception("The provided widget class '{$componentClass}' does not exist.");
@@ -62,6 +64,7 @@ class WidgetManager
     {
         $namespace = $namespace ?: 'App\\Http\\Livewire\\Widgets';
         $path = $directory ?: app_path('Http/Livewire/Widgets');
+        $componentRegistry = app(ComponentRegistry::class);
 
         if (! is_dir($path)) {
             return;
@@ -91,7 +94,7 @@ class WidgetManager
                     if (class_exists($class) && str_starts_with($reflection->getNamespaceName(), config('livewire.class_namespace'))) {
                         $componentName = $class::getName();
                     } else {
-                        $componentName = Livewire::getAlias($class, $class);
+                        $componentName = $componentRegistry->getName($class);
                     }
 
                     try {

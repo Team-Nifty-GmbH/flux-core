@@ -27,7 +27,7 @@ use TeamNiftyGmbH\DataTable\Casts\Percentage;
 
 class OrderPosition extends Model implements Sortable
 {
-    use HasAdditionalColumns, HasPackageFactory, HasFrontendAttributes, HasSerialNumberRange, HasTags,
+    use HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasTags,
         HasUserModification, HasUuid, SoftDeletes, SortableTrait;
 
     protected $appends = [

@@ -4,7 +4,7 @@
         <label for="tabs" class="sr-only">{{ __('Select a tab') }}</label>
         <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
         <x-select
-            wire:model="tab"
+            wire:model.live="tab"
             class="mt-4 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-purple-500 focus:outline-none focus:ring-purple-500 sm:text-sm"
             :options="$items"
             option-label="label"

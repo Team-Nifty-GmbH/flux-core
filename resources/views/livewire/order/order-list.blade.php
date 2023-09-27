@@ -1,4 +1,4 @@
-<div x-data="{order: $wire.entangle('order').defer}" x-on:create-order="$openModal(document.getElementById('create'))">
+<div x-data="{order: $wire.entangle('order')}" x-on:create-order="$openModal(document.getElementById('create'))">
     <x-modal.card id="create" :title="__('New Order')">
         <section>
             <div class="space-y-2.5 divide-y divide-secondary-200">
@@ -7,13 +7,13 @@
                     option-label="name"
                     option-value="id"
                     :label="__('Order type')"
-                    wire:model.defer="order.order_type_id"
+                    wire:model="order.order_type_id"
                 />
                 <div class="pt-4">
                     <x-select
                         :label="__('Contact')"
                         class="pb-4"
-                        wire:model="order.contact_id"
+                        wire:model.live="order.contact_id"
                         option-value="contact_id"
                         option-label="label"
                         option-description="description"
@@ -41,7 +41,7 @@
                     <x-select
                         class="pb-4"
                         :label="__('Invoice Address')"
-                        wire:model.defer="order.address_invoice_id"
+                        wire:model="order.address_invoice_id"
                         option-value="id"
                         option-label="label"
                         option-description="description"
@@ -59,7 +59,7 @@
                     <x-select
                         :label="__('Delivery Address')"
                         class="pb-4"
-                        wire:model.defer="order.address_delivery_id"
+                        wire:model="order.address_delivery_id"
                         option-value="id"
                         option-label="label"
                         option-description="description"
@@ -83,7 +83,7 @@
                         option-label="name"
                         :clearable="false"
                         autocomplete="off"
-                        wire:model="order.client_id"
+                        wire:model.live="order.client_id"
                     />
                     <x-select
                         :label="__('Price list')"
@@ -92,7 +92,7 @@
                         option-label="name"
                         :clearable="false"
                         autocomplete="off"
-                        wire:model.defer="order.price_list_id"
+                        wire:model="order.price_list_id"
                         x-bind:disabled="order.is_locked"
                     />
                     <x-select
@@ -102,7 +102,7 @@
                         option-label="name"
                         :clearable="false"
                         autocomplete="off"
-                        wire:model.defer="order.payment_type_id"
+                        wire:model="order.payment_type_id"
                         x-bind:disabled="order.is_locked"
                     />
                     <x-select
@@ -112,7 +112,7 @@
                         option-label="name"
                         :clearable="false"
                         autocomplete="off"
-                        wire:model.defer="order.language_id"
+                        wire:model="order.language_id"
                         x-bind:disabled="order.is_locked"
                     />
                 </div>

@@ -37,7 +37,7 @@ if (! function_exists('user_can')) {
             route_to_permission($permission) :
             $permission;
 
-        return auth()->user()->can($permissionName);
+        return auth()->user() && auth()->user()->can($permissionName);
     }
 }
 
@@ -353,13 +353,18 @@ if (! function_exists('faker')) {
 if (! function_exists('livewire_component_exists')) {
     function livewire_component_exists(string $classOrAlias): bool
     {
+        $componentRegistry = app(\Livewire\Mechanisms\ComponentRegistry::class);
         try {
-            $class = \Livewire\Livewire::getClass($classOrAlias);
+            $class = $componentRegistry->getClass($classOrAlias);
         } catch (\Livewire\Exceptions\ComponentNotFoundException) {
             $class = false;
         }
 
-        $alias = \Livewire\Livewire::getAlias($classOrAlias);
+        try {
+            $alias = $componentRegistry->getName($classOrAlias);
+        } catch (\Livewire\Exceptions\ComponentNotFoundException) {
+            $alias = false;
+        }
 
         return $class || is_string($alias);
     }

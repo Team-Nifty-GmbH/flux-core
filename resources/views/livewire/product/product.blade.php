@@ -1,10 +1,10 @@
 <div x-data="{
-        product: $wire.entangle('product').defer,
-        additionalColumns: $wire.entangle('additionalColumns').defer,
+        product: $wire.entangle('product'),
+        additionalColumns: $wire.entangle('additionalColumns'),
         edit: false,
-        priceLists: $wire.entangle('priceLists').defer,
-        currency: $wire.entangle('currency').defer,
-        vatRates: $wire.entangle('vatRates').defer
+        priceLists: $wire.entangle('priceLists'),
+        currency: $wire.entangle('currency'),
+        vatRates: $wire.entangle('vatRates')
     }"
 >
     <div
@@ -45,7 +45,7 @@
                     reject: {
                         label: '{{ __('Cancel') }}',
                     }
-                    }, '{{ $this->id }}')
+                    }, $wire.__instance.id)
                     "/>
             @endif
             <x-button
@@ -58,7 +58,6 @@
             <x-button
                 x-cloak
                 primary
-                spinner
                 x-show="edit"
                 class="w-full"
                 x-on:click="$wire.save().then((success) => {
@@ -69,7 +68,6 @@
             <x-button
                 x-cloak
                 primary
-                spinner
                 x-show="edit"
                 class="w-full"
                 x-on:click="edit = false"
@@ -78,7 +76,7 @@
         </div>
     </div>
     <x-tabs
-        wire:model="tab"
+        wire:model.live="tab"
         :tabs="$tabs"
         wire:ignore
     >

@@ -2,11 +2,11 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('Ticket Types') }}</h1>
-                <div class="mt-2 text-sm text-gray-300">{{__('Here you can manage all ticket types...')}}</div>
+                <h1 class="text-xl font-semibold dark:text-white">{{ __('Ticket Types') }}</h1>
+                <div class="mt-2 text-sm text-gray-300">{{ __('Here you can manage all ticket types...') }}</div>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                <x-button primary :label="__('New Ticket Type')" wire:click="show()" />
+                <x-button primary :label="__('Create')" wire:click="show()" />
             </div>
         </div>
         <div class="mt-8 flex flex-col">
@@ -36,7 +36,7 @@
                                 </th>
                             </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 bg-white" x-data="{ticketTypes: @entangle('ticketTypes').defer}">
+                            <tbody class="divide-y divide-gray-200 bg-white" x-data="{ticketTypes: @entangle('ticketTypes')}">
                             <template x-for="(ticketType, index) in ticketTypes">
                                 <tr class="divide-x divide-gray-200">
                                     <td x-text="ticketType.field_type ? '&emsp;' + ticketType.name : ticketType.name" class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6" />
@@ -64,10 +64,10 @@
         </div>
     </div>
 
-    <x-modal.card z-index="z-30" wire:model.defer="showTicketTypeModal" :title="__('Edit Ticket Type')">
+    <x-modal.card z-index="z-30" wire:model="showTicketTypeModal" :title="$ticketTypeIndex === -1 ? __('Create Ticket Type') : __('Edit Ticket Type')">
         <livewire:settings.ticket-type-edit/>
         <x-slot name="footer">
-            <div x-data="{ticketTypeIndex: @entangle('ticketTypeIndex').defer}" class="w-full">
+            <div x-data="{ticketTypeIndex: @entangle('ticketTypeIndex')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.ticket-type.delete'))
@@ -83,22 +83,22 @@
                                                             reject: {
                                                                 label: '{{ __('Cancel') }}',
                                                             }
-                                                        }, '{{ $this->id }}')
+                                                        }, $wire.__instance.id)
                                                         " label="{{ __('Delete') }}"/>
                     @endif
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$emitTo('settings.ticket-type-edit', 'save')"/>
+                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.ticket-type-edit', 'save')"/>
                     </div>
                 </div>
             </div>
         </x-slot>
     </x-modal.card>
 
-    <x-modal.card z-index="z-30" wire:model.defer="showAdditionalColumnModal" :title="__('Edit Additional Column')">
+    <x-modal.card z-index="z-30" wire:model="showAdditionalColumnModal" :title="$additionalColumnIndex === -1 ? __('Create Additional Column') : __('Edit Additional Column')">
         <livewire:settings.additional-column-edit/>
         <x-slot name="footer">
-            <div x-data="{additionalColumnIndex: @entangle('additionalColumnIndex').defer}" class="w-full">
+            <div x-data="{additionalColumnIndex: @entangle('additionalColumnIndex')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.additional-column.delete'))
@@ -115,12 +115,12 @@
                                                             reject: {
                                                                 label: '{{ __('Cancel') }}',
                                                             }
-                                                        }, '{{ $this->id }}')
+                                                        }, $wire.__instance.id)
                                                         " label="{{ __('Delete') }}"/>
                     @endif
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$emitTo('settings.additional-column-edit', 'save')"/>
+                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.additional-column-edit', 'save')"/>
                     </div>
                 </div>
             </div>

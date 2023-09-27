@@ -1,8 +1,8 @@
 <div x-data="{
-        order: $wire.entangle('order').defer,
-        childOrders: $wire.entangle('childOrders').defer,
-        detail: $wire.entangle('positionDetails').defer,
-        positionsSummary: $wire.entangle('positionsSummary').defer,
+        order: $wire.entangle('order'),
+        childOrders: $wire.entangle('childOrders'),
+        detail: $wire.entangle('positionDetails'),
+        positionsSummary: $wire.entangle('positionsSummary'),
         detailRoute: '{{ route('portal.orders.id', ['id' => ':id']) }}',
         selected: null,
     }"
@@ -18,7 +18,7 @@
      class="dark:text-white"
      x-on:data-table-record-selected="selected = Alpine.$data(document.getElementById('order-position-table').querySelector('[tall-datatable]')).selected"
 >
-    <x-modal.card id="detail-modal" wire:model.defer="detailModal">
+    <x-modal.card id="detail-modal" wire:model="detailModal">
         @section('product-modal.content')
             <div class="grid grid-cols-3 gap-5">
                 <div class="col-span-1">
@@ -188,7 +188,7 @@
         @endif
         <div class="space-y-8">
             <div id="order-position-table" x-on:data-table-row-clicked="$wire.selectPosition($event.detail.id)">
-                <livewire:data-tables.portal.order-position-list
+                <livewire:portal.data-tables.order-position-list
                     :order-id="$order['id']"
                     :filters="[['column' => 'order_id', 'operator' => '=', 'value' => $order['id']]]"
                 />

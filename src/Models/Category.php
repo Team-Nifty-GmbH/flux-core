@@ -19,7 +19,7 @@ use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Category extends Model implements Sortable, InteractsWithDataTables
+class Category extends Model implements InteractsWithDataTables, Sortable
 {
     use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification,
         HasUuid, Searchable, SortableTrait;

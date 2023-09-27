@@ -77,7 +77,7 @@ sail build --no-cache
 ```bash
 cd vendor/flux-erp
 composer i
-./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml
+composer test
 ```
 
 # 2. Websockets

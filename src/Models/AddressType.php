@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AddressType extends Model
 {
-    use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes, HasTranslations;
+    use HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
     protected $casts = [
         'uuid' => 'string',

@@ -1,12 +1,12 @@
 <div>
-    <x-modal.card z-index="z-30" wire:model.defer="showTicketModal" :title="__('New Ticket')">
+    <x-modal.card z-index="z-30" wire:model="showTicketModal" :title="__('New Ticket')">
         <livewire:portal.ticket.ticket-create/>
         <x-slot name="footer">
             <div class="w-full">
-                <div class="flex justify-between gap-x-4">
+                <div class="flex justify-end gap-x-4">
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$emitTo('portal.ticket.ticket-create', 'save')"/>
+                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('portal.ticket.ticket-create', 'save')"/>
                     </div>
                 </div>
             </div>

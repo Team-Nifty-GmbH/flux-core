@@ -103,7 +103,8 @@ class UpdateProduct extends FluxAction
 
                 try {
                     $activeProductCrossSellings[] = $action->checkPermission()->validate()->execute()->id;
-                } catch (ValidationException|UnauthorizedException) {}
+                } catch (ValidationException|UnauthorizedException) {
+                }
             }
 
             $removedProductCrossSellings = $product->productCrossSellings()
@@ -117,7 +118,8 @@ class UpdateProduct extends FluxAction
                     DeleteProductCrossSelling::make(['id' => $removedProductCrossSelling])
                         ->execute();
                 }
-            } catch (UnauthorizedException) {}
+            } catch (UnauthorizedException) {
+            }
         }
 
         return $product->withoutRelations()->fresh();

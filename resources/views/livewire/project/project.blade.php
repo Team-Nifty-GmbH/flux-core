@@ -1,18 +1,18 @@
 <div x-data="{
-    project: $wire.entangle('project').defer,
+    project: $wire.entangle('project'),
     edit: false,
     deleteProject() {
         window.$wireui.confirmDialog(
             {
-                title: '{{ __('Delete Project') }}',
-                description: '{{ __('Do you really want to delete this Project?') }}',
+                title: '{{ __('Delete project') }}',
+                description: '{{ __('Do you really want to delete this project?') }}',
                 icon: 'error',
                 accept: {
                     label: '{{ __('Delete') }}',
                     execute: () => {
                         $wire.delete().then((success) => {
                             if (success) {
-                                window.location.href = '{{ route('projects') }}';
+                                window.location.href = '{{ route('projects.projects') }}';
                                 close();
                             }
                         });
@@ -22,7 +22,7 @@
                     label: '{{ __('Cancel') }}',
                 }
             },
-            '{{ $this->id }}'
+            $wire.__instance.id
         );
     }
 }"
@@ -85,7 +85,7 @@
         </div>
     </div>
     <x-tabs
-        wire:model="tab"
+        wire:model.live="tab"
         :tabs="$tabs"
         x-bind:disabled="! project.id"
         wire:ignore

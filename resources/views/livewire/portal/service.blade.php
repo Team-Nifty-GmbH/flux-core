@@ -24,7 +24,7 @@
                     {{ __('Photos and videos help us analyze the errors') }}
                 </div>
                 <div>
-                    <x-features.media.upload wire:model="attachments"/>
+                    <x-features.media.upload wire:model.live="attachments"/>
                 </div>
                 <div class="text-portal-font-color pt-12 font-bold">
                     {{ __(':client_name is committed to protecting and respecting your privacy. We will only use your personal information to manage your account and to provide you with the products and services you have requested.', ['client_name' => $customerClient['name']]) }}
@@ -32,12 +32,11 @@
                 <x-button primary wire:click.prevent="save()">{{ __('Send') }}</x-button>
                 <x-errors/>
             </div>
-
         </div>
         <div class="m-0 flex-none pt-16 dark:text-gray-50 md:max-w-[220px] md:pt-0">
             <h2 class="text-base font-bold uppercase">{!! __('Urgent request?') !!}</h2>
             <div class="pt-8">
-                {!! __('Your service request will be processed by our team immediately upon receipt. Do you have an acute problem, feel free to call us') !!}
+                {!! __('Your service request will be processed by our team immediately upon receipt. Do you have an acute problem, feel free to call us.') !!}
             </div>
             <div class="py-5 font-bold">
                 <a href="tel:+{{ $customerClient['phone'] }}">

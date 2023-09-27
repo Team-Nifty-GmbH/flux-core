@@ -31,8 +31,8 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, HasCalendars, Commentable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendarEvents,
-        HasPackageFactory, HasFrontendAttributes, HasRoles, HasUserModification, HasUuid, Lockable, Notifiable,
+    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendarEvents, HasCalendars,
+        HasFrontendAttributes, HasPackageFactory, HasRoles, HasUserModification, HasUuid, Lockable, Notifiable,
         Searchable, SoftDeletes;
 
     protected $hidden = [
@@ -53,6 +53,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     protected string $detailRouteName = 'contacts.id?';
 
     public static string $iconName = 'user';
+
+    public function getAuthPassword()
+    {
+        return $this->login_password;
+    }
 
     protected function loginPassword(): Attribute
     {

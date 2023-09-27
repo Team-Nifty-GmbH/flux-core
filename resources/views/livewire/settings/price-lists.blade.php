@@ -1,7 +1,7 @@
 <div class="py-6" x-data="{
-    priceList: @entangle('selectedPriceList'),
-    productCategories: @entangle('discountedCategories'),
-    newCategoryDiscount: @entangle('newCategoryDiscount')
+    priceList: @entangle('selectedPriceList').live,
+    productCategories: @entangle('discountedCategories').live,
+    newCategoryDiscount: @entangle('newCategoryDiscount').live
 }"
 >
     <div class="px-4 sm:px-6 lg:px-8">
@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    <x-modal.card wire:model.defer="editModal">
+    <x-modal.card wire:model="editModal">
         <x-slot name="title" class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
             {{ ($selectedPriceList['id'] ?? false) ? __('Edit Price List') : __('New Price List') }}
         </x-slot>
@@ -95,7 +95,7 @@
                         @if(user_can('action.discount.create') && ($selectedPriceList['id'] ?? false) ? user_can('action.price-list.update') : user_can('action.price-list.create'))
                             <div>
                                 <x-select
-                                    wire:model.defer="newCategoryDiscount.category_id"
+                                    wire:model="newCategoryDiscount.category_id"
                                     option-value="id"
                                     option-label="name"
                                     :clearable="false"
@@ -103,11 +103,11 @@
                                 />
                             </div>
                             <div>
-                                <x-input wire:model.defer="newCategoryDiscount.discount"/>
+                                <x-input wire:model="newCategoryDiscount.discount"/>
                             </div>
                             <div class="mt-2">
                                 <x-checkbox
-                                    wire:model.defer="newCategoryDiscount.is_percentage"
+                                    wire:model="newCategoryDiscount.is_percentage"
                                 />
                             </div>
                             <div class="">

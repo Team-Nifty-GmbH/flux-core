@@ -1,11 +1,18 @@
 <div
     x-data="{
+        init() {
+            $watch('show', value => {
+                if (! value) {
+                    showDetails(null, null);
+                }
+            })
+        },
         show: false,
         search: $wire.entangle('search', true),
         detailModel: null,
         detailId: null,
-        result: $wire.entangle('return', true),
-        modelLabels: $wire.entangle('modelLabels', true),
+        result: $wire.entangle('return'),
+        modelLabels: $wire.entangle('modelLabels'),
         showDetails(model, id) {
             if (model === this.detailModel && id === this.detailId) {
                 return;
@@ -15,13 +22,6 @@
             this.detailId = id;
             $dispatch('render-search-bar-widget', {model: model, id: id})
         },
-    }"
-    x-init="() => {
-        $watch('show', value => {
-            if (! value) {
-                showDetails(null, null);
-            }
-        })
     }"
 >
     <x-card class="flex w-full gap-2">

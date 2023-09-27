@@ -1,12 +1,12 @@
 <div class="py-6"
      x-data="{
-        notifications: $wire.entangle('notifications'),
-        notificationChannels: $wire.entangle('notificationChannels'),
-        notificationSettings: $wire.entangle('notificationSettings').defer,
-        notification: $wire.entangle('notification').defer,
+        notifications: $wire.entangle('notifications', true),
+        notificationChannels: $wire.entangle('notificationChannels', true),
+        notificationSettings: $wire.entangle('notificationSettings'),
+        notification: $wire.entangle('notification'),
         }"
 >
-    <x-modal.card wire:model="detailModal">
+    <x-modal.card wire:model.live="detailModal" x-on:close="$wire.closeModal()">
         <x-slot name="title">
             {{ __('Notification Settings') }}
         </x-slot>
@@ -17,15 +17,15 @@
                     <div x-text="notificationChannel.name"></div>
                 </div>
                 <template x-for="(channelValue, index) in notificationChannel.channel_value">
-                        <div class="flex">
-                            <div class="flex items-center pr-1.5 transition-all">
-                                <x-button.circle 2xs negative label="-" x-on:click.prevent="_.pull(notificationChannel.channel_value, channelValue)"></x-button.circle>
-                            </div>
-                            <div class="w-full">
-                                <x-input class="flex-grow" x-model="notificationChannel.channel_value[index]">
-                                </x-input>
-                            </div>
+                    <div class="flex">
+                        <div class="flex items-center pr-1.5 transition-all">
+                            <x-button.circle 2xs negative label="-" x-on:click.prevent="_.pull(notificationChannel.channel_value, channelValue)"></x-button.circle>
                         </div>
+                        <div class="w-full">
+                            <x-input class="flex-grow" x-model="notificationChannel.channel_value[index]">
+                            </x-input>
+                        </div>
+                    </div>
                 </template>
                 <x-button.circle 2xs positive label="+" x-on:click="notificationChannel.channel_value.push(null)"/>
             </div>
@@ -45,8 +45,8 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('Notifications') }}</h1>
-                <div class="mt-2 text-sm text-gray-300">{{__('Here you can manage notification settings..')}}</div>
+                <h1 class="text-xl font-semibold dark:text-white">{{ __('Notifications') }}</h1>
+                <div class="mt-2 text-sm text-gray-300">{{ __('Here you can manage notification settings...') }}</div>
             </div>
         </div>
         <x-table>

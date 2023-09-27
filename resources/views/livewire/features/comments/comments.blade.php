@@ -1,9 +1,9 @@
 <div class="relative">
     <section>
         <div x-data="{
-                comments: $wire.entangle('comments').defer,
-                stickyComments: $wire.entangle('stickyComments').defer,
-                commentId: $wire.entangle('commentId').defer,
+                comments: $wire.entangle('comments'),
+                stickyComments: $wire.entangle('stickyComments'),
+                commentId: $wire.entangle('commentId'),
                 uploadProgress: function(progress) {
                 },
                 uploadSuccess: function(files) {

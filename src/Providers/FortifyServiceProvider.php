@@ -69,10 +69,10 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::loginView(function () {
             if (request()->isPortal()) {
-                return view('flux::livewire.portal.auth.login');
+                return view('flux::fortify.portal-login');
             }
 
-            return view('flux::livewire.auth.login');
+            return view('flux::fortify.login');
         });
     }
 }

@@ -6,18 +6,18 @@
                     <div class="">
                         <x-input label="{{ __('Name') }}"
                                  placeholder="{{ __('Name') }}"
-                                 wire:model.defer="client.name"/>
+                                 wire:model="client.name"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Client Code') }}"
                                  placeholder="{{ __('Client Code') }}"
-                                 wire:model.defer="client.client_code"/>
+                                 wire:model="client.client_code"/>
                     </div>
                     <div class="">
                         <x-select
                             label="{{ __('Country') }}"
                             placeholder="{{ __('Country') }}"
-                            wire:model.defer="client.country_id"
+                            wire:model="client.country_id"
                             :options="$countries"
                             option-label="name"
                             option-value="id"
@@ -26,75 +26,75 @@
                     <div class="">
                         <x-input label="{{ __('CEO') }}"
                                  placeholder="{{ __('CEO') }}"
-                                 wire:model.defer="client.ceo"/>
+                                 wire:model="client.ceo"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Postcode') }}"
                                  placeholder="{{ __('Postcode') }}"
-                                 wire:model.defer="client.postcode"/>
+                                 wire:model="client.postcode"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('City') }}"
                                  placeholder="{{ __('City') }}"
-                                 wire:model.defer="client.city"/>
+                                 wire:model="client.city"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Street') }}"
                                  placeholder="{{ __('Street') }}"
-                                 wire:model.defer="client.street"/>
+                                 wire:model="client.street"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Phone') }}"
                                  placeholder="{{ __('Phone') }}"
-                                 wire:model.defer="client.phone"/>
+                                 wire:model="client.phone"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Fax') }}"
                                  placeholder="{{ __('Fax') }}"
-                                 wire:model.defer="client.fax"/>
+                                 wire:model="client.fax"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Email') }}"
                                  placeholder="{{ __('Email') }}"
-                                 wire:model.defer="client.email"/>
+                                 wire:model="client.email"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Website') }}"
                                  placeholder="{{ __('Website') }}"
-                                 wire:model.defer="client.website"/>
+                                 wire:model="client.website"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Bank Name') }}"
                                  placeholder="{{ __('Bank Name') }}"
-                                 wire:model.defer="client.bank_name"/>
+                                 wire:model="client.bank_name"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Bank Code') }}"
                                  placeholder="{{ __('Bank Code') }}"
-                                 wire:model.defer="client.bank_code"/>
+                                 wire:model="client.bank_code"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Bank Account') }}"
                                  placeholder="{{ __('Bank Account') }}"
-                                 wire:model.defer="client.bank_account"/>
+                                 wire:model="client.bank_account"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Bank Iban') }}"
                                  placeholder="{{ __('Bank Iban') }}"
-                                 wire:model.defer="client.bank_iban"/>
+                                 wire:model="client.bank_iban"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Bank Swift') }}"
                                  placeholder="{{ __('Bank Swift') }}"
-                                 wire:model.defer="client.bank_swift"/>
+                                 wire:model="client.bank_swift"/>
                     </div>
                     <div class="">
                         <x-input label="{{ __('Bank BIC') }}"
                                  placeholder="{{ __('Bank BIC') }}"
-                                 wire:model.defer="client.bank_bic"/>
+                                 wire:model="client.bank_bic"/>
                     </div>
                     <div class="mt-8">
-                        <x-checkbox :label="__('Active')" wire:model.defer="client.is_active"/>
+                        <x-checkbox :label="__('Active')" wire:model="client.is_active"/>
                     </div>
                 </div>
                 <div>
@@ -115,13 +115,13 @@
                         @foreach(($client['opening_hours'] ?? []) as $day => $hours)
                             <tr>
                                 <td>
-                                    <x-input wire:model.defer="client.opening_hours.{{ $day }}.day"/>
+                                    <x-input wire:model="client.opening_hours.{{ $day }}.day"/>
                                 </td>
                                 <td>
-                                    <x-input type="time" wire:model.defer="client.opening_hours.{{ $day }}.start"/>
+                                    <x-input type="time" wire:model="client.opening_hours.{{ $day }}.start"/>
                                 </td>
                                 <td>
-                                    <x-input type="time" wire:model.defer="client.opening_hours.{{ $day }}.end"/>
+                                    <x-input type="time" wire:model="client.opening_hours.{{ $day }}.end"/>
                                 </td>
                                 <td>
                                     <x-button.circle icon="x" negative sm wire:click="removeDay({{ $day }})"/>

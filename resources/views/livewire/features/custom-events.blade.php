@@ -1,6 +1,6 @@
 <div
     x-data="{
-        customEvents: $wire.entangle('customEvents')
+        customEvents: $wire.entangle('customEvents', true)
     }"
 >
     <div class="space-y-3 pb-3">

@@ -1,5 +1,5 @@
-<div class="py-6" x-data="{language: @entangle('selectedLanguage').defer, languages: @entangle('languages').defer}">
-    <x-modal.card :title="__('Edit Language')" wire:model.defer="editModal">
+<div class="py-6" x-data="{language: @entangle('selectedLanguage')}">
+    <x-modal.card :title="$selectedLanguage['id'] ?? false ? __('Edit Language') : __('Create Language')" wire:model="editModal">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
@@ -31,66 +31,11 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('Languages') }}</h1>
+                <h1 class="text-xl font-semibold dark:text-white">{{ __('Languages') }}</h1>
                 <div class="mt-2 text-sm text-gray-300">{{ __('A list of all the languages') }}</div>
             </div>
-            <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                @if(user_can('action.language.create'))
-                    <x-button primary wire:click="showEditModal()">
-                            {{ __('Add Language') }}
-                    </x-button>
-                @endif
-            </div>
         </div>
-        <div class="mt-8 flex flex-col">
-            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-300">
-                            <thead class="bg-gray-50">
-                            <tr class="divide-x divide-gray-200">
-                                <th scope="col"
-                                    class="py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                    {{ __('Language Name') }}
-                                </th>
-                                <th scope="col"
-                                    class="py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                    {{ __('ISO Name') }}
-                                </th>
-                                <th scope="col"
-                                    class="py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                    {{ __('Language Code') }}
-                                </th>
-                                <th scope="col" class="py-2 pl-2 pr-2 text-left text-sm font-semibold text-gray-900">
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200 bg-white">
-                            <template x-for="language in languages">
-                                <tr class="divide-x divide-gray-200">
-                                    <td x-text="language.name"
-                                        class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6">
-                                    </td>
-                                    <td x-text="language.iso_name"
-                                        class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6">
-                                    </td>
-                                    <td x-text="language.language_code"
-                                        class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6">
-                                    </td>
-                                    <td class="whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm text-gray-500">
-                                        <x-button x-on:click="$wire.showEditModal(language.id)" type="button"
-                                                  icon="pencil"
-                                                  class="inline-flex items-center rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                        </x-button>
-                                    </td>
-                                </tr>
-                            </template>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @include('tall-datatables::livewire.data-table')
     </div>
 
     <datalist id="language-code-data">

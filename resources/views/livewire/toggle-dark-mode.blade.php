@@ -1,5 +1,5 @@
 <div class="flex items-center justify-center gap-x-2" x-data="{
-    dark: @entangle('dark'),
+    dark: @entangle('dark').live,
     browserDarkMode() {
         return window.matchMedia('(prefers-color-scheme: dark)').matches
     },
@@ -27,7 +27,7 @@
         name="sun"
     />
 
-    <x-toggle x-model="dark" id="dark-mode-toggle.{{ $this->id }}" />
+    <x-toggle x-model="dark" id="dark-mode-toggle.{{ $this->getId() }}" />
 
     <x-icon
         class="dark:text-secondary-200 h-5 w-5 cursor-pointer text-gray-700"

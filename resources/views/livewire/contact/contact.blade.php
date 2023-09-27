@@ -1,9 +1,9 @@
 <div id="contact" class="min-h-full" wire:loading.class="opacity-60">
     <main class="py-10">
-        <x-modal.card z-index="z-30" title="{{ __('New contact') }}" blur wire:model.defer="newContactModal">
+        <x-modal.card z-index="z-30" title="{{ __('New contact') }}" blur wire:model="newContactModal">
             <x-errors />
-            <div x-data="{newContact: @entangle('newContact').defer}">
-                <x-select wire:model.defer="newContact.client_id" :options="\FluxErp\Models\Client::all()"
+            <div x-data="{newContact: $wire.entangle('newContact')}">
+                <x-select wire:model="newContact.client_id" :options="\FluxErp\Models\Client::all()"
                           label="{{ __('Client') }}" option-label="name" option-value="id"/>
                 <div class="space-y-6 sm:space-y-5">
                     <div
@@ -14,7 +14,7 @@
                         </label>
                         <div class="col-span-2">
                             <x-input
-                                     wire:model.defer="newContact.address.company"/>
+                                     wire:model="newContact.address.company"/>
                         </div>
                     </div>
                     <div
@@ -25,7 +25,7 @@
                         </label>
                         <div class="col-span-2">
                             <x-input
-                                     wire:model.defer="newContact.address.salutation"/>
+                                     wire:model="newContact.address.salutation"/>
                         </div>
                     </div>
                     <div
@@ -36,7 +36,7 @@
                         </label>
                         <div class="col-span-2">
                             <x-input
-                                     wire:model.defer="newContact.address.title"/>
+                                     wire:model="newContact.address.title"/>
                         </div>
                     </div>
                     <div
@@ -47,7 +47,7 @@
                         </label>
                         <div class="col-span-2">
                             <x-input
-                                     wire:model.defer="newContact.address.firstname"/>
+                                     wire:model="newContact.address.firstname"/>
                         </div>
                     </div>
                     <div
@@ -58,7 +58,7 @@
                         </label>
                         <div class="col-span-2">
                             <x-input
-                                     wire:model.defer="newContact.address.lastname"/>
+                                     wire:model="newContact.address.lastname"/>
                         </div>
                     </div>
                     <div
@@ -69,7 +69,7 @@
                         </label>
                         <div class="col-span-2">
                             <x-input
-                                     wire:model.defer="newContact.address.street"/>
+                                     wire:model="newContact.address.street"/>
                         </div>
                     </div>
                     <div
@@ -80,7 +80,7 @@
                         </label>
                         <div class="col-span-2">
                             <x-select
-                                      wire:model.defer="newContact.address.country_id" searchable
+                                      wire:model="newContact.address.country_id" searchable
                                       :options="\FluxErp\Models\Country::all(['id', 'name'])" option-label="name"
                                       option-value="id"></x-select>
                         </div>
@@ -91,14 +91,14 @@
                                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                             {{ __('Zip / City') }}
                         </label>
-                        <div class="mt-1 w-full items-center space-y-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2">
+                        <div class="mt-1 w-full items-center space-x-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2">
                             <div class="flex-none">
                                 <x-input
-                                         wire:model.defer="newContact.address.zip"/>
+                                         wire:model="newContact.address.zip"/>
                             </div>
                             <div class="grow">
                                 <x-input
-                                         wire:model.defer="newContact.address.city"/>
+                                         wire:model="newContact.address.city"/>
                             </div>
                         </div>
                     </div>
@@ -110,7 +110,7 @@
                         </label>
                         <div class="col-span-2">
                             <x-select
-                                      wire:model.defer="newContact.address.language_id" searchable
+                                      wire:model="newContact.address.language_id" searchable
                                       :options="\FluxErp\Models\Language::all()" option-label="name" option-value="id"></x-select>
                         </div>
                     </div>
@@ -130,7 +130,7 @@
                 <label for="avatar" style="cursor: pointer">
                     <x-avatar xl src="{{ $avatar }}" />
                 </label>
-                <input type="file" accept="image/*" id="avatar" class="hidden" wire:model="avatar"/>
+                <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="avatar"/>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                         <div
@@ -153,7 +153,7 @@
                         reject: {
                             label: '{{ __('Cancel') }}',
                         }
-                        }, '{{ $this->id }}')
+                        }, $wire.__instance.id)
                     "/>
                 @endcan
                 @can('action.contact.create')
@@ -162,7 +162,7 @@
             </div>
         </div>
         <x-tabs
-            wire:model="tab"
+            wire:model.live="tab"
             :tabs="$tabs"
             wire:ignore
         >

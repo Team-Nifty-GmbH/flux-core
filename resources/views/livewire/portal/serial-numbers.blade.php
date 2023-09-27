@@ -6,7 +6,7 @@
         {{ __('My products') }}
     </h1>
     <div class="pt-12">
-        <x-input wire:model.debounce.500ms="search" :placeholder="__('Product name, description…')" />
+        <x-input wire:model.live.debounce.500ms="search" :placeholder="__('Product name, description…')" />
     </div>
     <div class="grid grid-cols-1 gap-10 pt-14 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         @foreach($serialNumbers as $serialNumber)
@@ -29,7 +29,7 @@
                             </p>
                         @endforeach
                     </div>
-                    <p class="text-center">{{ __('Serial number:') }} {{ $serialNumber->serial_number }}</p>
+                    <p class="text-center">{{ __('Serial number') }}: {{ $serialNumber->serial_number }}</p>
                 </a>
                     <div class="flex flex-col gap-y-3 pt-3">
                         @if(auth()->user()->can('service.{serialnumberid?}.get'))

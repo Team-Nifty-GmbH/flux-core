@@ -19,8 +19,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class SerialNumber extends Model implements HasMedia, InteractsWithDataTables
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasFrontendAttributes, HasUserModification, HasUuid,
-        InteractsWithMedia, Searchable;
+    use Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasUserModification,
+        HasUuid, InteractsWithMedia, Searchable;
 
     protected $casts = [
         'uuid' => 'string',

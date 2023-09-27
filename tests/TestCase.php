@@ -53,6 +53,7 @@ abstract class TestCase extends BaseTestCase
             CalendarServiceProvider::class,
             FastPaginateProvider::class,
             QueryBuilderServiceProvider::class,
+            \Laravel\Fortify\FortifyServiceProvider::class,
             FortifyServiceProvider::class,
             DataTableServiceProvider::class,
             ActivitylogServiceProvider::class,

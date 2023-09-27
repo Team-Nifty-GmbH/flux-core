@@ -9,8 +9,8 @@
                     </div>
                     <div class="cursor-default pl-2"
                          @if(auth()->user()->can('action.media.upload'))
-                             wire:click="showFolder('{{ $treeItem['collection_name'] }}', {{ (int)$treeItem['is_static'] }})"
-                           @endif
+                             wire:click="showFolder('{{ $treeItem['collection_name'] }}', {{ (int) $treeItem['is_static'] }})"
+                         @endif
                     >{{ $treeItem['name'] }}</div>
                 </div>
                     <ul

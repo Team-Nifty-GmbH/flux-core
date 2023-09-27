@@ -2,24 +2,24 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="mb-6 sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold">{{ __('Permissions') }}</h1>
+                <h1 class="text-xl font-semibold dark:text-white">{{ __('Permissions') }}</h1>
                 <p class="mt-2 text-sm text-gray-300">{{ __('Here you can add permissions to roles and add users to roles...') }}</p>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                <x-button primary :label="__('Add Role')" wire:click="togglePermissions()"/>
+                <x-button primary :label="__('New Role')" wire:click="togglePermissions()"/>
             </div>
         </div>
         <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             @foreach($roles as $role)
-                <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow">
+                <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white dark:bg-secondary-800 text-center shadow">
                     <div class="flex flex-1 flex-col p-8">
-                        <h3 class="text-lg font-medium text-gray-900">{{ $role['name'] }}</h3>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ $role['name'] }}</h3>
                     </div>
                     <div>
                         <div class="-mt-px flex divide-x divide-gray-200">
                             <div class="flex w-0 flex-1">
                                 <a wire:click="toggleUsers({{ $role['id'] }})"
-                                   class="relative -mr-px inline-flex w-0 flex-1 cursor-pointer items-center justify-center rounded-bl-lg border border-transparent py-4 text-sm font-medium text-gray-700 hover:text-gray-500">
+                                   class="relative -mr-px inline-flex w-0 flex-1 cursor-pointer items-center justify-center rounded-bl-lg border border-transparent py-4 text-sm font-medium text-gray-700 dark:text-white hover:text-gray-500">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
                                          viewBox="0 0 24 24"
                                          stroke="currentColor" stroke-width="2">
@@ -32,7 +32,7 @@
                             @if($role['name'] !== 'Super Admin')
                                 <div class="flex w-0 flex-1">
                                     <a wire:click="togglePermissions({{ $role['id'] }})"
-                                       class="relative -mr-px inline-flex w-0 flex-1 cursor-pointer items-center justify-center rounded-bl-lg border border-transparent py-4 text-sm font-medium text-gray-700 hover:text-gray-500">
+                                       class="relative -mr-px inline-flex w-0 flex-1 cursor-pointer items-center justify-center rounded-bl-lg border border-transparent py-4 text-sm font-medium text-gray-700 dark:text-white hover:text-gray-500">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
                                              viewBox="0 0 24 24"
                                              stroke="currentColor" stroke-width="2">
@@ -50,13 +50,13 @@
                 </li>
             @endforeach
         </ul>
-        <x-modal.card max-width="sm" blur :title="$selectedRole['name'] ?? ''" wire:model.defer="showToggleUsers">
+        <x-modal.card max-width="sm" blur :title="$selectedRole['name'] ?? ''" wire:model="showToggleUsers">
             <div class="space-y-6">
                 @foreach($users as $user)
                     <div class="flex">
                         <div class="flex-1 font-medium">{{ $user['name'] }}</div>
                         <div class="">
-                            <x-checkbox wire:model.defer="selectedUsers" :value="$user['id']"/>
+                            <x-checkbox wire:model="selectedUsers" :value="$user['id']"/>
                         </div>
                     </div>
                 @endforeach
@@ -72,24 +72,24 @@
         </x-modal.card>
 
         <x-modal.card max-width="md" blur :title="$selectedRole['name'] ?? __('New Role')"
-                      wire:model.defer="showTogglePermissions">
+                      wire:model="showTogglePermissions">
             <div class="space-y-6">
-                <x-input wire:model.defer="selectedRole.name" :label="__('Name')"/>
+                <x-input wire:model="selectedRole.name" :label="__('Name')"/>
                 <x-native-select
                     :label="__('Guard')"
                     :disabled="$selectedRole['id'] ?? false"
                     :options="$guards"
-                    wire:model.defer="selectedRole.guard_name"
+                    wire:model="selectedRole.guard_name"
                 />
                 <div>
                     <x-label :label="__('Permissions')"/>
-                    <x-input wire:model.debounce.500ms="searchPermission" icon="search"/>
+                    <x-input wire:model.live.debounce.500ms="searchPermission" icon="search"/>
                     <div class="max-h-96 space-y-6 overflow-y-auto">
                         @foreach($permissions as $permission)
                             <div class="flex">
                                 <div class="flex-1 font-medium">{{ __($permission['name']) }}</div>
                                 <div class="">
-                                    <x-checkbox wire:model.defer="selectedRole.permissions" :value="$permission['id']"/>
+                                    <x-checkbox wire:model="selectedRole.permissions" :value="$permission['id']"/>
                                 </div>
                             </div>
                         @endforeach
@@ -108,11 +108,12 @@
                                                             accept: {
                                                                 label: '{{ __('Delete') }}',
                                                                 method: 'delete',
+                                                                params: {{ $selectedRole['id'] }}
                                                             },
                                                             reject: {
                                                                 label: '{{ __('Cancel') }}',
                                                             }
-                                                        }, '{{ $this->id }}')
+                                                        }, $wire.__instance.id)
                                                         " label="{{ __('Delete') }}"/>
                     @endif
                     <div class="flex">

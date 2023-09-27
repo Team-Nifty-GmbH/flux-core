@@ -5,14 +5,16 @@ namespace FluxErp\Traits\Livewire;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Media;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 trait WithFileUploads
 {
     use WithFileUploadsBase {
-        WithFileUploadsBase::removeUpload as parentRemoveUpload;
+        WithFileUploadsBase::_removeUpload as parentRemoveUpload;
     }
 
     public array $filesArray = [];
@@ -32,10 +34,17 @@ trait WithFileUploads
         return response()->download($mediaItem->getPath(), $mediaItem->name);
     }
 
-    public function downloadCollection(string $collection): BinaryFileResponse
+    public function downloadCollection(string $collection): ?BinaryFileResponse
     {
         $media = Media::query()
             ->where('collection_name', 'like', $collection . '%')
+            ->when($this->modelType ?? false,
+                fn ($query) => $query->where('model_type', $this->modelType)
+                    ->when(
+                        $this->modelId ?? false,
+                        fn ($query) => $query->where('model_id', $this->modelId)
+                    )
+            )
             ->get();
 
         // add files to a zip file
@@ -62,15 +71,21 @@ trait WithFileUploads
 
             $zip->addFile($file->getPath(), $relativePath);
         }
+
+        $count = $zip->count();
         $zip->close();
 
-        // download zip file
-        return response()->download($zipFileName)->deleteFileAfterSend(true);
+        if ($count) {
+            // download zip file
+            return response()->download($zipFileName)->deleteFileAfterSend();
+        } else {
+            return null;
+        }
     }
 
     public function removeUpload(string $name, int $index): void
     {
-        $this->parentRemoveUpload($name, $this->filesArray[$index]['key']);
+        $this->parentRemoveUpload($name, $this->{$name}[$index]->getFilename());
         unset($this->filesArray[$index]);
 
         $this->skipRender();
@@ -113,7 +128,8 @@ trait WithFileUploads
             $response[] = UploadMedia::make($file)
                 ->checkPermission()
                 ->validate()
-                ->execute();
+                ->execute()
+                ->toArray();
         }
 
         $this->filesArray = [];

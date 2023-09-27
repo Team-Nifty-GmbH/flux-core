@@ -1,18 +1,18 @@
 <div
     class="dark:text-white"
     x-data="{
-        serialNumber: @entangle('serialNumber').defer,
-        productImage: $wire.entangle('productImage').defer,
-        edit: $wire.entangle('edit').defer,
+        serialNumber: @entangle('serialNumber'),
+        productImage: $wire.entangle('productImage'),
+        edit: $wire.entangle('edit'),
     }
 ">
     <!-- Page header -->
     <div class="mx-auto px-4 sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:px-8">
         <div class="flex items-center space-x-5">
-            <label for="avatar" style="cursor: pointer">
+            <label for="avatar">
                 <x-avatar xl :label="$productImage === '' ? strtoupper(substr($serialNumber['id'] ?? '', 0, 2)) : false" src="{{ $productImage }}" />
             </label>
-            <input type="file" accept="image/*" id="avatar" class="hidden" wire:model="avatar"/>
+            <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="productImage" disabled/>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="opacity-40 transition-opacity hover:opacity-100">
@@ -37,7 +37,7 @@
                     reject: {
                         label: '{{ __('Cancel') }}',
                     }
-                    }, '{{ $this->id }}')
+                    }, $wire.__instance.id)
                     "/>
             @endcan
             @if(user_can('action.serial-number.create') && ($serialNumber['id'] ?? false))
@@ -50,14 +50,14 @@
                 <template x-if="edit === true">
                     <div>
                         <x-button primary label="{{ __('Save') }}" x-on:click="$wire.save()"/>
-                        <x-button label="{{ _('Cancel') }}" x-on:click="$wire.cancel()"/>
+                        <x-button label="{{ __('Cancel') }}" x-on:click="$wire.cancel()"/>
                     </div>
                 </template>
             @endcan
         </div>
     </div>
     <x-tabs
-        wire:model="tab"
+        wire:model.live="tab"
         :tabs="[
                     'general' => __('General'),
                     'comments' => __('Comments'),

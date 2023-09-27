@@ -1,6 +1,6 @@
 @php
-    $client = auth()->user()->contact->client;
-    $setting = $client->settings()->where('key', 'customerPortal')->first()?->toArray();
+    $client = auth()->user()?->contact->client ?? \FluxErp\Models\Client::first();
+    $setting = $client?->settings()->where('key', 'customerPortal')->first()?->toArray() ?? [];
 @endphp
 <!DOCTYPE html>
 <HTML class="font-portal h-full" lang="{{ str_replace('_', '-', app()->getLocale()) }}">

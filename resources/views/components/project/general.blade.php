@@ -2,7 +2,6 @@
      x-data="{
         formatter: @js(\FluxErp\Models\Project::typeScriptAttributes()),
      }"
-     wire:key="{{ uniqid() }}"
 >
     <div id="project-task-modal">
         <x-modal max-width="4xl">

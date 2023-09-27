@@ -2,7 +2,7 @@
     x-data="{
         additionalColumns: @js($additionalColumns),
         table: @js($table),
-        record: @entangle($wire).defer,
+        record: @entangle($wire),
         user: @js(auth()->user() instanceof \FluxErp\Models\User)
     }"
 >

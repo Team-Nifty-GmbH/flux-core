@@ -1,38 +1,38 @@
 <?php
 
-use FluxErp\Http\Livewire\Calendars\Calendar;
-use FluxErp\Http\Livewire\Contacts\Contact;
-use FluxErp\Http\Livewire\Dashboard\Dashboard;
-use FluxErp\Http\Livewire\DataTables\ContactList;
-use FluxErp\Http\Livewire\DataTables\DiscountGroupList;
-use FluxErp\Http\Livewire\DataTables\ProductList;
-use FluxErp\Http\Livewire\DataTables\SerialNumberList;
-use FluxErp\Http\Livewire\DataTables\TicketList;
-use FluxErp\Http\Livewire\Order\Order;
-use FluxErp\Http\Livewire\Order\OrderList;
-use FluxErp\Http\Livewire\Product\Product;
-use FluxErp\Http\Livewire\Product\SerialNumber\SerialNumber;
-use FluxErp\Http\Livewire\Project\Project;
-use FluxErp\Http\Livewire\Project\ProjectList;
-use FluxErp\Http\Livewire\Settings\AdditionalColumns;
-use FluxErp\Http\Livewire\Settings\Calendars;
-use FluxErp\Http\Livewire\Settings\Clients;
-use FluxErp\Http\Livewire\Settings\Countries;
-use FluxErp\Http\Livewire\Settings\Currencies;
-use FluxErp\Http\Livewire\Settings\CustomerPortal;
-use FluxErp\Http\Livewire\Settings\DiscountGroups;
-use FluxErp\Http\Livewire\Settings\Emails;
-use FluxErp\Http\Livewire\Settings\Languages;
-use FluxErp\Http\Livewire\Settings\Logs;
-use FluxErp\Http\Livewire\Settings\Notifications;
-use FluxErp\Http\Livewire\Settings\OrderTypes;
-use FluxErp\Http\Livewire\Settings\Permissions;
-use FluxErp\Http\Livewire\Settings\PriceLists;
-use FluxErp\Http\Livewire\Settings\Profile;
-use FluxErp\Http\Livewire\Settings\TicketTypes;
-use FluxErp\Http\Livewire\Settings\Translations;
-use FluxErp\Http\Livewire\Settings\Users;
-use FluxErp\Http\Livewire\Ticket\Ticket;
+use FluxErp\Livewire\Auth\Login;
+use FluxErp\Livewire\Calendars\Calendar;
+use FluxErp\Livewire\Contacts\Contact;
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\DataTables\ContactList;
+use FluxErp\Livewire\DataTables\ProductList;
+use FluxErp\Livewire\DataTables\ProjectTasksList;
+use FluxErp\Livewire\DataTables\SerialNumberList;
+use FluxErp\Livewire\DataTables\TicketList;
+use FluxErp\Livewire\Order\Order;
+use FluxErp\Livewire\Order\OrderList;
+use FluxErp\Livewire\Product\Product;
+use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
+use FluxErp\Livewire\Project\Project;
+use FluxErp\Livewire\Project\ProjectList;
+use FluxErp\Livewire\Settings\AdditionalColumns;
+use FluxErp\Livewire\Settings\Categories;
+use FluxErp\Livewire\Settings\Clients;
+use FluxErp\Livewire\Settings\Countries;
+use FluxErp\Livewire\Settings\Currencies;
+use FluxErp\Livewire\Settings\CustomerPortal;
+use FluxErp\Livewire\Settings\DiscountGroups;
+use FluxErp\Livewire\Settings\Languages;
+use FluxErp\Livewire\Settings\Logs;
+use FluxErp\Livewire\Settings\Notifications;
+use FluxErp\Livewire\Settings\OrderTypes;
+use FluxErp\Livewire\Settings\Permissions;
+use FluxErp\Livewire\Settings\PriceLists;
+use FluxErp\Livewire\Settings\Profile;
+use FluxErp\Livewire\Settings\TicketTypes;
+use FluxErp\Livewire\Settings\Translations;
+use FluxErp\Livewire\Settings\Users;
+use FluxErp\Livewire\Ticket\Ticket;
 use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
@@ -57,7 +57,14 @@ Route::middleware(['auth:web'])->group(function () {
     Route::get('/calendars', Calendar::class)->name('calendars')->registersMenuItem(icon: 'calendar');
     Route::get('/contacts', ContactList::class)->name('contacts')->registersMenuItem(icon: 'identification');
     Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
-    Route::get('/projects', ProjectList::class)->name('projects')->registersMenuItem(icon: 'briefcase');
+    Route::name('projects.')->prefix('projects')
+        ->group(function () {
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'briefcase');
+            Route::get('/list', ProjectList::class)->name('projects')->registersMenuItem();
+            Route::get('/project-tasks', ProjectTasksList::class)
+                ->name('project-tasks')
+                ->registersMenuItem(icon: 'briefcase');
+        });
     Route::get('/projects/{id}', Project::class)->name('projects.id?');
     Route::get('/orders', OrderList::class)->name('orders')->registersMenuItem(icon: 'shopping-bag');
     Route::get('/orders/{id}', Order::class)->name('orders.id?');
@@ -85,8 +92,8 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/additional-columns', AdditionalColumns::class)
                 ->name('additional-columns')
                 ->registersMenuItem();
-            Route::get('/calendars', Calendars::class)
-                ->name('calendars')
+            Route::get('/categories', Categories::class)
+                ->name('categories')
                 ->registersMenuItem();
             Route::get('/clients', Clients::class)
                 ->name('clients')
@@ -96,7 +103,6 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/countries', Countries::class)->name('countries')->registersMenuItem();
             Route::get('/currencies', Currencies::class)->name('currencies')->registersMenuItem();
             Route::get('/discount-groups', DiscountGroups::class)->name('discount-groups')->registersMenuItem();
-            Route::get('/emails', Emails::class)->name('emails')->registersMenuItem();
             Route::get('/languages', Languages::class)->name('languages')->registersMenuItem();
             Route::get('/logs', Logs::class)->name('logs')->registersMenuItem();
             Route::get('/notifications', Notifications::class)->name('notifications')->registersMenuItem();

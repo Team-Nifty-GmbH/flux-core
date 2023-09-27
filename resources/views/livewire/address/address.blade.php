@@ -1,8 +1,8 @@
 <section class="basis-3/4 pt-6 lg:pt-0"
      x-data="{
-        address: $wire.entangle('address').defer,
-        edit: $wire.entangle('edit').defer,
-        tab: $wire.entangle('tab'),
+        address: $wire.entangle('address'),
+        edit: $wire.entangle('edit'),
+        tab: $wire.entangle('tab').live,
         deleteAddressDialog() {
             window.$wireui.confirmDialog({
                 title: '{{ __('Delete address') }}',
@@ -20,7 +20,7 @@
                 reject: {
                     label: '{{ __('Cancel') }}',
                 }
-            }, '{{ $this->id }}')
+            }, $wire.__instance.id)
         }
     }"
     x-on:address-selected.window="edit = false; $wire.getAddress($event.detail.id, tab !== 'comments')"
@@ -42,7 +42,7 @@
                                     icon="pencil"
                                     x-cloak
                                     x-show="address.id"
-                                    wire:click="edit"
+                                    x-on:click="edit = true"
                                     primary
                                 >
                                     <div class="hidden sm:block">
@@ -80,7 +80,7 @@
                 </div>
                 <!-- Tabs -->
                 <x-tabs
-                    wire:model="tab"
+                    wire:model.live="tab"
                     :tabs="[
                         'address' => __('General'),
                         'permissions' => __('Permissions'),

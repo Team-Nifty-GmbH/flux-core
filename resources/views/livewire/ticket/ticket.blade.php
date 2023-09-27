@@ -1,7 +1,7 @@
 <div class="min-h-full"
      x-data="{
         formatter: @js(\FluxErp\Models\Ticket::typeScriptAttributes()),
-        additionalColumns: $wire.entangle('additionalColumns').defer,
+        additionalColumns: $wire.entangle('additionalColumns'),
         ticket: $wire.entangle('ticket')
     }"
 >
@@ -46,7 +46,7 @@
                         </x-card>
                         <x-card>
                             <x-tabs
-                                wire:model="tab"
+                                wire:model.live="tab"
                                 :tabs="[
                                     'features.comments.comments' => __('Comments'),
                                     'features.activities' => __('Activities'),
@@ -70,12 +70,12 @@
                         </div>
                     </x-slot:header>
                     <div class="space-y-4">
-                        <x-state wire:model="ticketState" formatters="formatter.state" avialable="availableStates"/>
+                        <x-state wire:model.live="ticketState" formatters="formatter.state" avialable="availableStates"/>
                         <livewire:features.custom-events :model="\FluxErp\Models\Ticket::class" :id="$ticket['id']" />
                         <x-select
                             :disabled="! user_can('action.ticket.update')"
                             :label="__('Ticket Type')"
-                            wire:model="ticket.ticket_type_id"
+                            wire:model.live="ticket.ticket_type_id"
                             option-value="id"
                             option-label="name"
                             :options="$ticketTypes"
@@ -84,7 +84,7 @@
                             :disabled="! user_can('action.ticket.update')"
                             multiselect
                             :label="__('Assigned')"
-                            wire:model="ticket.users"
+                            wire:model.live="ticket.users"
                             option-value="id"
                             option-label="label"
                             :template="[
@@ -112,7 +112,7 @@
                                 :disabled="! user_can('action.ticket.update')"
                                 x-on:selected="$wire.changeAuthor($event.detail.value)"
                                 class="pb-4"
-                                wire:model.defer="ticket.authenticatable_id"
+                                wire:model="ticket.authenticatable_id"
                                 option-value="id"
                                 option-label="label"
                                 option-description="description"

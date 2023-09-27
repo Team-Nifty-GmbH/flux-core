@@ -1,15 +1,15 @@
 <div x-data="{
-    address: $wire.entangle('address'),
-    showUserList: $wire.entangle('showUserList'),
+    address: $wire.entangle('address', true),
+    showUserList: $wire.entangle('showUserList', true),
 }">
     <div x-show="! showUserList">
         <div>
             <div class="flex w-full flex-col-reverse justify-between md:flex-row">
-                <h2 class="pt-5 text-base font-bold uppercase md:pt-0">
+                <h2 class="pt-5 text-base font-bold uppercase dark:text-white md:pt-0">
                     {{ __('Edit profile') }}
                 </h2>
             </div>
-            <h1 class="pt-5 text-5xl font-bold">
+            <h1 class="pt-5 text-5xl font-bold dark:text-white">
                 {{ ($address['id'] ?? false) ? trim($address['firstname'] . ' ' . $address['lastname']) : __('New address')}}
             </h1>
         </div>
@@ -26,7 +26,7 @@
                     {{ __('Salutation') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model.lazy="address.salutation"/>
+                    <x-input wire:model="address.salutation"/>
                 </div>
             </div>
             <div
@@ -36,7 +36,7 @@
                     {{ __('Title') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model.lazy="address.title"/>
+                    <x-input wire:model="address.title"/>
                 </div>
             </div>
             <div
@@ -46,7 +46,7 @@
                     {{ __('Firstname') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model.lazy="address.firstname"/>
+                    <x-input wire:model="address.firstname"/>
                 </div>
             </div>
             <div
@@ -56,7 +56,7 @@
                     {{ __('Lastname') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model.lazy="address.lastname"/>
+                    <x-input wire:model="address.lastname"/>
                 </div>
             </div>
             <div
@@ -66,7 +66,7 @@
                     {{ __('Street') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model.lazy="address.street"/>
+                    <x-input wire:model="address.street"/>
                 </div>
             </div>
             <div
@@ -77,9 +77,12 @@
                 </label>
                 <div class="col-span-2">
                     <x-select
-                        wire:model.defer="address.country_id" searchable
-                        :options="\FluxErp\Models\Country::all(['id', 'name'])" option-label="name"
-                        option-value="id"></x-select>
+                        wire:model="address.country_id"
+                        searchable
+                        :options="\FluxErp\Models\Country::all(['id', 'name'])"
+                        option-label="name"
+                        option-value="id"
+                    ></x-select>
                 </div>
             </div>
             <div
@@ -88,12 +91,12 @@
                        class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                     {{ __('Zip / City') }}
                 </label>
-                <div class="mt-1 w-full items-center space-y-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2">
+                <div class="mt-1 w-full items-center space-x-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2">
                     <div class="flex-none">
-                        <x-input wire:model.lazy="address.zip"/>
+                        <x-input wire:model="address.zip"/>
                     </div>
                     <div class="grow">
-                        <x-input wire:model.lazy="address.city"/>
+                        <x-input wire:model="address.city"/>
                     </div>
                 </div>
             </div>
@@ -105,8 +108,12 @@
                 </label>
                 <div class="col-span-2">
                     <x-select
-                        wire:model.defer="address.language_id" searchable
-                        :options="\FluxErp\Models\Language::all()" option-label="name" option-value="id"></x-select>
+                        wire:model="address.language_id"
+                        searchable
+                        :options="\FluxErp\Models\Language::all()"
+                        option-label="name"
+                        option-value="id"
+                    ></x-select>
                 </div>
             </div>
             <div
@@ -116,7 +123,7 @@
                     {{ __('Password') }}
                 </label>
                 <div class="col-span-2">
-                    <x-inputs.password wire:model.lazy="loginPassword"/>
+                    <x-inputs.password wire:model="loginPassword"/>
                 </div>
             </div>
         </form>
@@ -127,7 +134,7 @@
                     {{ __('Active') }}
                 </label>
                 <div class="col-span-2">
-                    <x-toggle md wire:model.lazy="address.can_login"/>
+                    <x-toggle md wire:model="address.can_login"/>
                 </div>
             </div>
             <div
@@ -137,7 +144,7 @@
                     {{ __('Email') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model.lazy="address.login_name"/>
+                    <x-input wire:model="address.login_name"/>
                 </div>
             </div>
             <div
@@ -150,7 +157,7 @@
                     @foreach($permissions as $permission)
                         <x-toggle
                             md
-                            wire:model="address.permissions"
+                            wire:model.live="address.permissions"
                             :id="uniqid()"
                             :value="$permission['id']"
                             :label="__($permission['name'])"
@@ -164,7 +171,7 @@
         </h3>
         <div
             x-data="{
-                contactOptions: $wire.entangle('contactOptions').defer,
+                contactOptions: $wire.entangle('contactOptions'),
                 removeContactOption: function (index, group) {
                     this.contactOptions[group].splice(index, 1);
                 },

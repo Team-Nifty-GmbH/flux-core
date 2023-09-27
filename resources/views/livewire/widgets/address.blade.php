@@ -1,5 +1,5 @@
 <div x-data="{
-    address: $wire.entangle('address'),
+    address: $wire.entangle('address', true),
     formatter: @js(\FluxErp\Models\Address::typeScriptAttributes()),
 }">
     <x-slot:header>
