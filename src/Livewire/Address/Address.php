@@ -17,6 +17,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Modelable;
+use Livewire\Attributes\Reactive;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -32,8 +35,10 @@ class Address extends Component
 
     public array $contact;
 
+    #[Url(as: 'address-tab')]
     public string $tab = 'address';
 
+    #[Modelable]
     public ?int $addressId = null;
 
     public ?string $loginPassword = null;
@@ -50,11 +55,6 @@ class Address extends Component
         'edit',
         'duplicate',
         'addAddress',
-    ];
-
-    protected $queryString = [
-        'tab' => ['except' => 'address'],
-        'addressId' => ['except' => null, 'as' => 'address'],
     ];
 
     protected function getListeners(): array
@@ -78,6 +78,11 @@ class Address extends Component
         if ($this->tab === 'permissions') {
             $this->updatedTab();
         }
+    }
+
+    public function updatedAddressId(): void
+    {
+        $this->getAddress($this->addressId);
     }
 
     protected function rules(): array

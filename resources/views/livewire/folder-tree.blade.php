@@ -97,12 +97,8 @@
             this.progress = 0
             this.showLevel(null, this.selectionProxy);
             $wire.get('latestUploads').forEach((file) => {
-                if(file.status === 201) {
-                    this.selectionProxy.children.push(file.data);
-                    this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
-                } else {
-                    this.uploadError(Object.values(file.errors).join(', '));
-                }
+                this.selectionProxy.children.push(file);
+                this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
             });
         },
         uploadProgress(progress) {
@@ -113,14 +109,14 @@
             let $this = this;
             $wire.set('collection', this.selectionProxy.collection_name);
             $wire.uploadMultiple('files', files,
-                function (success) {
+                function(success) {
                     let uploadedFiles = event.target.files?.length ? event.target.files : event.dataTransfer.files;
                     $this.uploadSuccess(success, uploadedFiles);
                 },
                 function(error) {
                    $this.uploadError();
                 },
-                function (event) {
+                function(event) {
                     $this.uploadProgress(event);
                 }
             )

@@ -25,10 +25,14 @@ class Login extends Component
     #[Locked]
     public bool $showPasswordReset = false;
 
+    protected string $dashboardRoute = 'dashboard';
+
+    protected string $guard = 'web';
+
     public function mount(): void
     {
-        if (Auth::guard('web')->check()) {
-            $this->redirect(route('dashboard'));
+        if (Auth::guard($this->guard)->check()) {
+            $this->redirect(route($this->dashboardRoute));
         }
     }
 
@@ -37,20 +41,24 @@ class Login extends Component
         return view('flux::livewire.auth.login');
     }
 
-    public function login(): void
+    public function login(): bool
     {
         $this->validate();
 
-        $login = Auth::guard('web')->attempt(['email' => $this->email, 'password' => $this->password]);
+        $login = $this->tryLogin();
 
         if ($login) {
-            $this->redirect(route('dashboard'));
+            $this->redirect(route($this->dashboardRoute));
+
+            return true;
         } else {
             $this->showPasswordReset = true;
             $this->reset('password');
             $this->notification()->error(__('Login failed'));
             $this->js('$focus.focus(document.getElementById(\'password\'));');
         }
+
+        return false;
     }
 
     public function resetPassword(): void
@@ -60,5 +68,10 @@ class Login extends Component
         Password::broker('users')->sendResetLink(['email' => $this->email]);
 
         $this->notification()->success(__('Password reset link sent'));
+    }
+
+    public function tryLogin(): bool
+    {
+        return Auth::guard($this->guard)->attempt(['email' => $this->email, 'password' => $this->password]);
     }
 }

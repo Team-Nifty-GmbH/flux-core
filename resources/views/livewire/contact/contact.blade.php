@@ -2,7 +2,7 @@
     <main class="py-10">
         <x-modal.card z-index="z-30" title="{{ __('New contact') }}" blur wire:model="newContactModal">
             <x-errors />
-            <div x-data="{newContact: @entangle('newContact')}">
+            <div x-data="{newContact: $wire.entangle('newContact')}">
                 <x-select wire:model="newContact.client_id" :options="\FluxErp\Models\Client::all()"
                           label="{{ __('Client') }}" option-label="name" option-value="id"/>
                 <div class="space-y-6 sm:space-y-5">

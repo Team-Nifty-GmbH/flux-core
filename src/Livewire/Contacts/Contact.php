@@ -17,6 +17,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -39,7 +40,8 @@ class Contact extends Component
 
     public int $contactId = 0;
 
-    public int $addressId = 0;
+    #[Url(as: 'address')]
+    public ?int $addressId = null;
 
     public string $searchModel;
 
@@ -47,6 +49,7 @@ class Contact extends Component
 
     public $avatar;
 
+    #[Url]
     public string $tab = 'addresses';
 
     public string $search = '';
@@ -58,12 +61,6 @@ class Contact extends Component
     public array $priceLists = [];
 
     public array $paymentTypes = [];
-
-    protected $queryString = [
-        'tab' => [
-            'except' => 'addresses',
-        ],
-    ];
 
     protected function getListeners(): array
     {
@@ -97,7 +94,7 @@ class Contact extends Component
         $this->contact = $contact->toArray();
 
         $this->address = $this->addressId ?
-            $contact->addresses->whereKey($this->addressId)->firstOrFail()->toArray() :
+            $contact->addresses()->whereKey($this->addressId)->firstOrFail()->toArray() :
             $contact->addresses->where('is_main_address', true)->first()->toArray();
 
         $this->priceLists = PriceList::query()->select(['id', 'name'])->get()->toArray();

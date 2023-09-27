@@ -4,7 +4,7 @@
         address: $wire.entangle('address'),
         selectAddress(address) {
             this.address = address;
-            $dispatch('address-selected', address);
+            $wire.addressId = address.id;
         },
     }"
     x-on:address-deleted.window="addresses = addresses.filter(address => address.id !== $event.detail.id); selectAddress(addresses[0]);"
@@ -55,5 +55,5 @@
             <x-select wire:model.live="contact.payment_type_id" :clearable="false" :label="__('Payment type')" :options="$this->paymentTypes" option-label="name" option-value="id"/>
         </x-card>
     </section>
-    <livewire:address.address :address="$this->address" :contact="$this->contact" />
+    <livewire:address.address :address="$this->address" :contact="$this->contact" wire:model="addressId" />
 </div>

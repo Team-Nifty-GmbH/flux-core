@@ -93,9 +93,10 @@ return [
             'expire' => 60,
         ],
 
-        'employers' => [
-            'provider' => 'users_employer',
-            'expire' => 15,
+        'addresses' => [
+            'provider' => 'addresses',
+            'table' => 'password_reset_tokens',
+            'expire' => 60,
         ],
 
     ],

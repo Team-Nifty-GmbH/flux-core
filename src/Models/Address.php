@@ -54,6 +54,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public static string $iconName = 'user';
 
+    public function getAuthPassword()
+    {
+        return $this->login_password;
+    }
+
     protected function loginPassword(): Attribute
     {
         return Attribute::set(
