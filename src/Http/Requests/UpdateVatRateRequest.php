@@ -15,6 +15,7 @@ class UpdateVatRateRequest extends BaseFormRequest
             'id' => 'required|integer|exists:vat_rates,id,deleted_at,NULL',
             'name' => 'required|string',
             'rate_percentage' => 'required|numeric|lt:1|min:0',
+            'footer_text' => 'string|nullable',
         ];
     }
 }

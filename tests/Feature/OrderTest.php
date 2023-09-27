@@ -57,6 +57,7 @@ class OrderTest extends BaseSetup
         $this->priceLists = PriceList::factory()->count(2)->create();
 
         $currencies = Currency::factory()->count(2)->create();
+        Currency::query()->first()->update(['is_default' => true]);
 
         $this->languages = Language::factory()->count(2)->create();
 

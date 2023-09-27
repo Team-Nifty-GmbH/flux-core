@@ -91,6 +91,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
         return $this->hasMany(BankConnection::class);
     }
 
+    public function ledgerAccount(): BelongsTo
+    {
+        return $this->belongsTo(LedgerAccount::class);
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
@@ -109,6 +114,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
     public function serialNumbers(): HasManyThrough
     {
         return $this->hasManyThrough(SerialNumber::class, Address::class);
+    }
+
+    public function vatRate(): BelongsTo
+    {
+        return $this->belongsTo(VatRate::class);
     }
 
     public function getAllDiscountsQuery(): Builder

@@ -74,13 +74,10 @@ class CreateComment extends FluxAction
             }
         }
 
-        $comment = new Comment();
-        $comment->model_type = $this->data['model_type'];
-        $comment->model_id = $this->data['model_id'];
-        $comment->parent_id = $this->data['parent_id'] ?? null;
-        $comment->comment = $this->data['comment'];
-        $comment->is_sticky = $this->data['is_sticky'] ?? false;
-        $comment->is_internal = $this->data['is_internal'] ?? true;
+        $this->data['is_sticky'] = $this->data['is_sticky'] ?? false;
+        $this->data['is_internal'] = $this->data['is_internal'] ?? true;
+
+        $comment = new Comment($this->data);
         $comment->save();
 
         return $comment->fresh();

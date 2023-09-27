@@ -60,6 +60,7 @@ class Order extends Component
                 'addresses',
                 'client:id,name',
                 'contact.media',
+                'contact.bankConnections:id,contact_id,iban',
                 'currency:id,iso,name,symbol',
                 'orderType:id,name,print_layouts,order_type_enum',
             ])
@@ -72,6 +73,7 @@ class Order extends Component
 
         $this->order = $order->toArray();
         $this->order['contact']['avatar_url'] = $order->contact?->getAvatarUrl();
+        $this->order['invoice'] = $order->invoice()?->toArray();
 
         $this->priceLists = PriceList::query()
             ->get(['id', 'name'])

@@ -121,20 +121,22 @@
                 </x-card>
             </template>
         </div>
-        @if($attachments)
-            <x-card :title="__('Attachments')">
-                @foreach($attachments as $attachment)
-                    <div class="flex justify-between">
-                        <div class="flex justify-center items-center gap-1">
-                            <div target="_blank">
-                                <span class="font-semibold">{{ __(\Illuminate\Support\Str::headline($attachment['collection_name'])) }}</span> {{ $attachment['file_name'] }}
+        @section('attachments')
+            @if($attachments)
+                <x-card :title="__('Attachments')">
+                    @foreach($attachments as $attachment)
+                        <div class="flex justify-between">
+                            <div class="flex justify-center items-center gap-1">
+                                <div target="_blank">
+                                    <span class="font-semibold">{{ __(\Illuminate\Support\Str::headline($attachment['collection_name'])) }}</span> {{ $attachment['file_name'] }}
+                                </div>
+                                <x-button primary xs flat :label="__('Download')" wire:click="downloadMedia({{ $attachment['id'] }})" />
                             </div>
-                            <x-button primary xs flat :label="__('Download')" wire:click="downloadMedia({{ $attachment['id'] }})" />
                         </div>
-                    </div>
-                @endforeach
-            </x-card>
-        @endif
+                    @endforeach
+                </x-card>
+            @endif
+        @show
         <x-card>
             <div class="grid grid-cols-1 lg:grid-cols-2">
                 <div class="grid grid-cols-2 gap-5">

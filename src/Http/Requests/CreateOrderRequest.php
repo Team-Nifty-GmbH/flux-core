@@ -23,12 +23,18 @@ class CreateOrderRequest extends BaseFormRequest
             Arr::prependKeysWith((new CreateAddressRequest())->postalAddressRules(), 'address_delivery.'),
             [
                 'uuid' => 'string|uuid|unique:orders,uuid',
+                'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'parent_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
                 'contact_id' => [
                     'integer',
                     'nullable',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'contacts'),
+                ],
+                'bank_connection_id' => [
+                    'integer',
+                    'nullable',
+                    new ExistsWithForeign(foreignAttribute: 'contact_id', table: 'bank_connections'),
                 ],
                 'currency_id' => 'integer|exists:currencies,id,deleted_at,NULL',
                 'address_invoice_id' => [
@@ -57,6 +63,7 @@ class CreateOrderRequest extends BaseFormRequest
 
                 'address_delivery' => [
                     'array',
+                    'nullable',
                 ],
                 'address_delivery.id' => [
                     'integer',
@@ -76,16 +83,16 @@ class CreateOrderRequest extends BaseFormRequest
                     ValidStateRule::make(PaymentState::class),
                 ],
 
-                'payment_target' => 'required|integer|min:0',
+                'payment_target' => 'required_without_all:address_invoice_id,contact_id|integer|min:0',
                 'payment_discount_target' => 'integer|min:0|nullable',
                 'payment_discount_percent' => 'numeric|min:0|nullable',
                 'header_discount' => 'numeric|min:0|nullable',
                 'shipping_costs_net_price' => 'numeric|nullable',
                 'margin' => 'numeric|nullable',
                 'number_of_packages' => 'integer|nullable',
-                'payment_reminder_days_1' => 'required|integer|min:1',
-                'payment_reminder_days_2' => 'required|integer|min:1',
-                'payment_reminder_days_3' => 'required|integer|min:1',
+                'payment_reminder_days_1' => 'required_without_all:address_invoice_id,contact_id|integer|min:1',
+                'payment_reminder_days_2' => 'required_without_all:address_invoice_id,contact_id|integer|min:1',
+                'payment_reminder_days_3' => 'required_without_all:address_invoice_id,contact_id|integer|min:1',
 
                 'order_number' => 'sometimes|required|string|unique:orders',
                 'commission' => 'string|nullable',

@@ -22,7 +22,7 @@ class CreateOrderPosition extends FluxAction
                 'price_id' => [
                     Rule::requiredIf(
                         ($this->data['is_free_text'] ?? false) === false &&
-                        (($this->data['product_id'] ?? false) && ($this->data['price_list_id'] ?? false))
+                        (($this->data['product_id'] ?? false) && (! ($this->data['price_list_id'] ?? false)))
                     ),
                     'integer',
                     'nullable',
@@ -31,7 +31,7 @@ class CreateOrderPosition extends FluxAction
                 ],
                 'price_list_id' => [
                     Rule::requiredIf(
-                        ($this->data['is_free_text'] ?? false) === false && ($this->data['price_id'] ?? false)
+                        ($this->data['is_free_text'] ?? false) === false && ! ($this->data['price_id'] ?? false)
                     ),
                     'integer',
                     'exists:price_lists,id,deleted_at,NULL',
@@ -80,6 +80,10 @@ class CreateOrderPosition extends FluxAction
     public function performAction(): OrderPosition
     {
         $tags = Arr::pull($this->data, 'tags', []);
+        $order = Order::query()
+            ->with('orderType:id,order_type_enum')
+            ->whereKey($this->data['order_id'])
+            ->first();
         $orderPosition = new OrderPosition();
 
         if (is_int($this->data['sort_number'] ?? false)) {
@@ -92,6 +96,10 @@ class CreateOrderPosition extends FluxAction
             OrderPosition::query()->where('order_id', $this->data['order_id'])
                 ->where('sort_number', '>=', $this->data['sort_number'])
                 ->increment('sort_number');
+        }
+
+        if ($order->orderType->order_type_enum->isPurchase() && ($this->data['ledger_account_id'] ?? false)) {
+            $this->data['ledger_account_id'] =  $order->contact->expense_ledger_account_id;
         }
 
         $orderPosition->fill($this->data);

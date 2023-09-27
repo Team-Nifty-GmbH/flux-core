@@ -26,6 +26,16 @@ class UpdateOrderRequest extends BaseFormRequest
             Arr::prependKeysWith((new CreateAddressRequest())->postalAddressRules(), 'address_delivery.'),
             [
                 'id' => 'required|integer|exists:orders,id,deleted_at,NULL',
+                'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
+                'bank_connection_id' => [
+                    'integer',
+                    'nullable',
+                    new ExistsWithForeign(
+                        foreignAttribute: 'contact_id',
+                        table: 'bank_connections',
+                        baseTable: 'orders'
+                    ),
+                ],
                 'address_invoice_id' => [
                     'sometimes',
                     'required',
@@ -81,6 +91,7 @@ class UpdateOrderRequest extends BaseFormRequest
 
                 'address_delivery' => [
                     'array',
+                    'nullable',
                 ],
                 'address_delivery.id' => [
                     'integer',
