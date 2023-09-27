@@ -1,10 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables\Portal;
+namespace FluxErp\Tests\Livewire\Portal\DataTables;
 
 use FluxErp\Database\Seeders\OrderPositionTableSeeder;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Livewire\DataTables\Portal\OrderPositionList;
+use FluxErp\Livewire\Portal\DataTables\OrderPositionList;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
