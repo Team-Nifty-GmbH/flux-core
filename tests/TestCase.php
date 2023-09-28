@@ -7,8 +7,11 @@ use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\FortifyServiceProvider;
 use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
+use FluxErp\Providers\ViewServiceProvider;
 use Hammerstone\FastPaginate\FastPaginateProvider;
+use Illuminate\Foundation\Console\StorageLinkCommand;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Artisan;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;
@@ -21,6 +24,7 @@ use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
 use WireUi\Providers\WireUiServiceProvider;
+use function Orchestra\Testbench\package_path;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -38,12 +42,17 @@ abstract class TestCase extends BaseTestCase
         config([
             'auth.defaults.guard' => 'sanctum',
         ]);
+
+        if (! file_exists(public_path('flux'))) {
+            symlink(package_path('public'), public_path('flux'));
+        }
     }
 
     public function getPackageProviders($app): array
     {
         return [
             LivewireServiceProvider::class,
+            ViewServiceProvider::class,
             PermissionServiceProvider::class,
             TagsServiceProvider::class,
             ScoutServiceProvider::class,
