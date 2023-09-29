@@ -10,24 +10,26 @@ class ContactsTest extends BaseSetup
 {
     use DatabaseTransactions;
 
-    public function test_contacts_page()
+    public function test_dashboard_page()
     {
-        $this->user->givePermissionTo(Permission::findByName('contacts.get', 'web'));
+        // Todo: add route permission
+        $this->user->assignRole('Super Admin');
 
-        $this->actingAs($this->user, 'web')->get('/contacts')
+
+        $this->actingAs($this->user, 'web')->get('portal.dashboard')
             ->assertStatus(200);
     }
 
-    public function test_contacts_no_user()
+    public function test_dashboard_no_user()
     {
-        $this->get('/contacts')
+        $this->get('/dashboard')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_contacts_without_permission()
+    public function test_dashboard_without_permission()
     {
-        $this->actingAs($this->user, 'web')->get('/contacts')
+        $this->actingAs($this->user, 'web')->get('portal.dashboard')
             ->assertStatus(403);
     }
 }
