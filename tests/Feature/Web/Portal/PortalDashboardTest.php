@@ -10,32 +10,25 @@ class PortalDashboardTest extends BaseSetup
 {
     use DatabaseTransactions;
 
-    public function test_contacts_page()
+    public function test_portal_dashboard_page()
     {
-        $this->user->givePermissionTo(Permission::findByName('contacts.get', 'web'));
+        // Todo: add route permission
+        $this->user->assignRole('Super Admin');
 
-        $this->actingAs($this->user, 'web')->get('/contacts')
+        $this->actingAs($this->user, 'web')->get('portal.localhost/dashboard')
             ->assertStatus(200);
     }
 
-    public function test_contacts_no_user()
+    public function test_portal_dashboard_no_user()
     {
-        $this->get('/contacts')
+        $this->get('portal.localhost/dashboard')
             ->assertStatus(302)
-            ->assertRedirect(route('login'));
+            ->assertRedirect(route('portal.localhost/login'));
     }
 
-    public function test_contacts_without_permission()
+    public function test_portal_dashboard_without_permission()
     {
-        $this->actingAs($this->user, 'web')->get('/contacts')
+        $this->actingAs($this->user, 'web')->get('portal.localhost/dashboard')
             ->assertStatus(403);
-    }
-
-    public function test_contacts_id_page()
-    {
-        $this->user->givePermissionTo(Permission::findByName('contacts.{id?}.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/contacts/1')
-            ->assertStatus(200);
     }
 }

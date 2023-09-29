@@ -25,4 +25,24 @@ class ProjectsTest extends BaseSetup
             ->assertStatus(301)
             ->assertRedirect(route('dashboard'));
     }
+
+    public function test_projects_id_no_user()
+    {
+        $id = 1;
+
+        $this->get('/projects/$id')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_projects_id_redirect_dashboard()
+    {
+        $id = 1;
+
+        $this->user->givePermissionTo(Permission::findByName('projects.{id}.get', 'web'));
+
+        $this->actingAs($this->user, guard: 'web')->get('/projects/$id')
+            ->assertStatus(301)
+            ->assertRedirect(route('dashboard'));
+    }
 }

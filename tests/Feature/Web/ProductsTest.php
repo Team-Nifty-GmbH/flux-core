@@ -25,4 +25,24 @@ class ProductsTest extends BaseSetup
             ->assertStatus(301)
             ->assertRedirect(route('dashboard'));
     }
+
+    public function test_products_id_no_user()
+    {
+        $id = 1;
+
+        $this->get('/products/$id')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_products_id_redirect_dashboard()
+    {
+        $id = 1;
+
+        $this->user->givePermissionTo(Permission::findByName('products.get', 'web'));
+
+        $this->actingAs($this->user, guard: 'web')->get('/products/$id')
+            ->assertStatus(301)
+            ->assertRedirect(route('dashboard'));
+    }
 }

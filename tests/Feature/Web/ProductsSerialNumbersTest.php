@@ -30,4 +30,31 @@ class ProductsSerialNumbersTest extends BaseSetup
         $this->actingAs($this->user, 'web')->get('/products/serial-numbers')
             ->assertStatus(403);
     }
+
+    public function test_products_id_serial_numbers_page()
+    {
+        $id = 1;
+
+        $this->user->givePermissionTo(Permission::findByName('products.serial-numbers.{id?}.get', 'web'));
+
+        $this->actingAs($this->user, 'web')->get('/products/serial-numbers/$id')
+            ->assertStatus(200);
+    }
+
+    public function test_products_id_serial_numbers_no_user()
+    {
+        $id = 1;
+
+        $this->get('/products/serial_numbers/$id')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_products_id_serial_numbers_without_permission()
+    {
+        $id = 1;
+
+        $this->actingAs($this->user, 'web')->get('/products/serial-numbers/$id')
+            ->assertStatus(403);
+    }
 }
