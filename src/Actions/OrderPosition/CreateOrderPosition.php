@@ -4,6 +4,7 @@ namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
