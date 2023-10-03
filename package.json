@@ -33,7 +33,7 @@
     "dependencies": {
         "@alpinejs/collapse": "^3.13.0",
         "@wireui/alpinejs-hold-directive": "^1.0.1",
-        "apexcharts": "^3.42.0",
+        "apexcharts": "^3.43.0",
         "dayjs": "^1.11.10"
     }
 }
