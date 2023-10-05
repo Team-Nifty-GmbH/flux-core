@@ -47,6 +47,8 @@ jobs:
         options: --health-cmd="curl -f http://localhost:3000/health" --health-interval=10s --health-timeout=5s --health-retries=3
       selenium:
         image: selenium/standalone-${{ matrix.browser }}
+        ports:
+          - 4444/tcp
     strategy:
       fail-fast: false
       matrix:
@@ -86,6 +88,7 @@ jobs:
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
           BROWSER: ${{ matrix.browser }}
+          DUSK_DRIVER_URL: http://0.0.0.0:${{ job.services.selenium.ports['4444'] }}
       - name: Upload screenshots
         uses: actions/upload-artifact@v2
         if: always()
