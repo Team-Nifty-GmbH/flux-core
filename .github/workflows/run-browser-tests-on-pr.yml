@@ -1,4 +1,4 @@
-name: tests
+name: browser tests
 
 on:
   push:
@@ -45,11 +45,13 @@ jobs:
         ports:
           - 3000/tcp
         options: --health-cmd="curl -f http://localhost:3000/health" --health-interval=10s --health-timeout=5s --health-retries=3
+      selenium:
+        image: selenium/standalone-${{ matrix.browser }}
     strategy:
       fail-fast: false
       matrix:
         php-versions: [ '8.2' ]
-        testsuite: ['Feature', 'Livewire']
+        browser: ['chrome', 'firefox']
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -77,9 +79,16 @@ jobs:
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
       - name: Run Tests
-        run: ./vendor/bin/testbench package:test --parallel -c ./phpunit.dist.xml --testsuite ${{ matrix.testsuite }}
+        run: ./vendor/bin/testbench package:test --parallel -c ./phpunit.dist.xml --testsuite Browser
         env:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
+          BROWSER: ${{ matrix.browser }}
+      - name: Upload screenshots
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: ${{ matrix.browser }}
+          path: screenshots/
