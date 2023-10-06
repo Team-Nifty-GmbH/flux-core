@@ -12,7 +12,7 @@ class SettingsDiscountGroupsTest extends BaseSetup
 
     public function test_settings_discount_groups_page()
     {
-        $this->user->givePermissionTo(Permission::findByName('settings.discount-groups.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('settings.discount-groups.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/settings/discount-groups')
             ->assertStatus(200);

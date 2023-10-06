@@ -12,7 +12,7 @@ class CalendarsTest extends BaseSetup
 
     public function test_calendars_page()
     {
-        $this->user->givePermissionTo(Permission::findByName('calendars.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('calendars.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/calendars')
             ->assertStatus(200);

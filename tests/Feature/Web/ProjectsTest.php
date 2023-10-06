@@ -3,12 +3,22 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
+use FluxErp\Models\Project;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class ProjectsTest extends BaseSetup
 {
     use DatabaseTransactions;
+
+    private Project $project;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->project = Project::factory()->create();
+    }
 
     public function test_projects_no_user()
     {
@@ -19,30 +29,68 @@ class ProjectsTest extends BaseSetup
 
     public function test_projects_redirect_dashboard()
     {
-        $this->user->givePermissionTo(Permission::findByName('projects.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('projects.get', 'web'));
 
         $this->actingAs($this->user, guard: 'web')->get('/projects')
             ->assertStatus(301)
             ->assertRedirect(route('dashboard'));
     }
 
-    public function test_projects_id_no_user()
+    public function test_projects_without_permission()
     {
-        $id = 1;
+        $this->actingAs($this->user, 'web')->get('/projects')
+            ->assertStatus(403);
+    }
 
-        $this->get('/projects/$id')
+    public function test_projects_list_page()
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('projects.list.get', 'web'));
+
+        $this->actingAs($this->user, 'web')->get('/projects/list')
+            ->assertStatus(200);
+    }
+
+    public function test_projects_list_no_user()
+    {
+        $this->get('/projects/list')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_projects_id_redirect_dashboard()
+    public function test_projects_list_without_permission()
     {
-        $id = 1;
+        $this->actingAs($this->user, 'web')->get('/projects/list')
+            ->assertStatus(403);
+    }
 
-        $this->user->givePermissionTo(Permission::findByName('projects.{id}.get', 'web'));
+    public function test_projects_id_page()
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('projects.{id}.get', 'web'));
 
-        $this->actingAs($this->user, guard: 'web')->get('/projects/$id')
-            ->assertStatus(301)
-            ->assertRedirect(route('dashboard'));
+        $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
+            ->assertStatus(200);
+    }
+
+    public function test_projects_id_no_user()
+    {
+        $this->get('/projects/' . $this->project->id)
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_projects_id_without_permission()
+    {
+        $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
+            ->assertStatus(403);
+    }
+
+    public function test_projects_id_project_not_found()
+    {
+        $this->project->delete();
+
+        $this->user->givePermissionTo(Permission::findOrCreate('projects.{id}.get', 'web'));
+
+        $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
+            ->assertStatus(404);
     }
 }

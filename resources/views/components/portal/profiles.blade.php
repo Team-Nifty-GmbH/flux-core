@@ -9,14 +9,14 @@
             {{ __('Manage users') }}
         </h1>
         <div class="flex w-full justify-end pt-8">
-            <x-button primary :label="__('New user')" :href="route('portal.profile.id?', 'new')" />
+            <x-button primary :label="__('New user')" :href="route('portal.profiles.id?', 'new')" />
         </div>
     </div>
     <div
         class="pt-8"
         x-data="{
             addresses: $wire.entangle('addresses'),
-            editUserUrl: '{{ route('portal.profile.id?', ['id' => ':addressId']) }}'
+            editUserUrl: '{{ route('portal.profiles.id?', ['id' => ':addressId']) }}'
             }"
     >
         <table class="min-w-full divide-y divide-gray-300">

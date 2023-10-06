@@ -1,6 +1,5 @@
 <?php
 
-use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contacts\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
@@ -64,10 +63,11 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/project-tasks', ProjectTasksList::class)
                 ->name('project-tasks')
                 ->registersMenuItem(icon: 'briefcase');
+            Route::get('/{id}', Project::class)->name('id');
         });
-    Route::get('/projects/{id}', Project::class)->name('projects.id?');
+
     Route::get('/orders', OrderList::class)->name('orders')->registersMenuItem(icon: 'shopping-bag');
-    Route::get('/orders/{id}', Order::class)->name('orders.id?');
+    Route::get('/orders/{id}', Order::class)->name('orders.id');
     Route::get('/tickets', TicketList::class)->name('tickets')->registersMenuItem(icon: 'wrench-screwdriver');
     Route::get('/tickets/{id}', Ticket::class)->name('tickets.id');
 
@@ -77,10 +77,10 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/list', ProductList::class)->name('products')->registersMenuItem();
             Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers')->registersMenuItem();
             Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
-            Route::get('/{id?}', Product::class)->name('id?');
+            Route::get('/{id}', Product::class)->name('id');
         });
 
-    Route::get('/my-profile/{id?}', Profile::class)->name('my-profile');
+    Route::get('/my-profile', Profile::class)->name('my-profile');
 
     Route::get('/media/{media}/{filename}', function (Media $media) {
         return $media;

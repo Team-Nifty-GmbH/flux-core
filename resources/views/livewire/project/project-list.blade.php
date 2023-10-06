@@ -18,7 +18,7 @@
                             x-on:click="$wire.save().then((project) => {
                                 if (project) {
                                     close();
-                                    let baseRoute = '{{ route('projects.id?', ['id' => ':id']) }}';
+                                    let baseRoute = '{{ route('projects.id', ['id' => ':id']) }}';
                                     window.location.href = baseRoute.replace(':id', project.id);
                                 }
                             });"

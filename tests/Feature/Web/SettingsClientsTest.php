@@ -12,7 +12,7 @@ class SettingsClientsTest extends BaseSetup
 
     public function test_settings_clients_page()
     {
-        $this->user->givePermissionTo(Permission::findByName('settings.clients.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('settings.clients.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/settings/clients')
             ->assertStatus(200);

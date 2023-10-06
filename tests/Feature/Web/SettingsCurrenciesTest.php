@@ -12,7 +12,7 @@ class SettingsCurrenciesTest extends BaseSetup
 
     public function test_settings_currencies_page()
     {
-        $this->user->givePermissionTo(Permission::findByName('settings.currencies.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('settings.currencies.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/settings/currencies')
             ->assertStatus(200);

@@ -34,7 +34,7 @@ class Profile extends Component
 
     public function mount(string $id = null): void
     {
-        if ($id === null || ! auth()->user()->can('profile.{id?}.get')) {
+        if ($id === null || ! auth()->user()->can('profiles.{id?}.get')) {
             $user = auth()->user();
         } elseif ($id === 'new') {
             $user = new Address();
@@ -87,7 +87,7 @@ class Profile extends Component
 
     public function showUsers(): void
     {
-        if (! auth()->user()->can('profile.{id?}.get')) {
+        if (! auth()->user()->can('profiles.{id?}.get')) {
             return;
         }
 
@@ -105,7 +105,7 @@ class Profile extends Component
     {
         $function = ($this->address['id'] ?? false) ? 'update' : 'create';
 
-        if ($function === 'create' && ! auth()->user()->can('profile.{id?}.get')) {
+        if ($function === 'create' && ! auth()->user()->can('profiles.{id?}.get')) {
             return;
         }
 
@@ -121,7 +121,7 @@ class Profile extends Component
 
         $response = (new AddressService())->{$function}($validated['address']);
 
-        if (auth()->user()->can('profile.{id?}.get') && auth()->id() !== ($this->address['id'] ?? false)) {
+        if (auth()->user()->can('profiles.{id?}.get') && auth()->id() !== ($this->address['id'] ?? false)) {
             $address = Address::query()->whereKey($response['data']?->id ?: $response->id)->first();
             $address->syncPermissions($this->address['permissions']);
         }

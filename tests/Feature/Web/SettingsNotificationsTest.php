@@ -12,7 +12,7 @@ class SettingsNotificationsTest extends BaseSetup
 
     public function test_settings_notifications_page()
     {
-        $this->user->givePermissionTo(Permission::findByName('settings.notifications.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('settings.notifications.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/settings/notifications')
             ->assertStatus(200);

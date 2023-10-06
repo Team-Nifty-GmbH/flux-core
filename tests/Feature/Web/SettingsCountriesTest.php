@@ -12,7 +12,7 @@ class SettingsCountriesTest extends BaseSetup
 
     public function test_settings_countries_page()
     {
-        $this->user->givePermissionTo(Permission::findByName('settings.countries.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('settings.countries.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/settings/countries')
             ->assertStatus(200);

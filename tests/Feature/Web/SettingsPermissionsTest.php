@@ -12,7 +12,7 @@ class SettingsPermissionsTest extends BaseSetup
 
     public function test_settings_permissions_page()
     {
-        $this->user->givePermissionTo(Permission::findByName('settings.permissions.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('settings.permissions.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/settings/permissions')
             ->assertStatus(200);

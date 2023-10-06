@@ -12,7 +12,7 @@ class SettingsTicketTypesTest extends BaseSetup
 
     public function test_settings_ticket_types_page()
     {
-        $this->user->givePermissionTo(Permission::findByName('settings.ticket-types.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('settings.ticket-types.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/settings/ticket-types')
             ->assertStatus(200);
