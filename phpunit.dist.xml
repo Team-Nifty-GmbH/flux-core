@@ -17,6 +17,7 @@
         <server name="APP_URL" value=""/>
         <server name="APP_KEY" value="base64:JmJwcdxmKz/kTL2+02xm6q7/sFltCaz0VNRgVQAxjbo="/>
         <server name="APP_ENV" value="testing"/>
+        <server name="PORTAL_DOMAIN" value="http://portal.localhost"/>
         <server name="BCRYPT_ROUNDS" value="4"/>
         <server name="CACHE_DRIVER" value="array"/>
         <server name="MAIL_MAILER" value="array"/>

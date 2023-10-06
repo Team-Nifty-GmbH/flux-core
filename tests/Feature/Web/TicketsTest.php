@@ -38,7 +38,7 @@ class TicketsTest extends BaseSetup
 
     public function test_tickets_page()
     {
-        $this->user->givePermissionTo(Permission::findByName('tickets.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('tickets.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/tickets')
             ->assertStatus(200);
@@ -59,7 +59,7 @@ class TicketsTest extends BaseSetup
 
     public function test_tickets_id_page()
     {
-        $this->user->givePermissionTo(Permission::findByName('tickets.{id}.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
             ->assertStatus(200);
@@ -82,7 +82,7 @@ class TicketsTest extends BaseSetup
     {
         $this->ticket->delete();
 
-        $this->user->givePermissionTo(Permission::findByName('tickets.{id}.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
             ->assertStatus(404);

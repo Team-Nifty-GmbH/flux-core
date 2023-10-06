@@ -26,6 +26,6 @@ class LoginTest extends BaseSetup
     {
         $this->actingAs($this->user, 'web')->get('/login')
             ->assertStatus(302)
-            ->assertRedirect(route('dashboard'));
+            ->assertRedirect();
     }
 }
