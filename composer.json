@@ -34,7 +34,7 @@
         "friendsofphp/php-cs-fixer": "^v3.6",
         "laravel/pint": "^1.1",
         "nunomaduro/collision": "^7.4",
-        "orchestra/testbench": "8.11.1",
+        "orchestra/testbench": "8.13.0",
         "phpstan/phpstan": "^1.9",
         "phpunit/phpunit": "^10.0",
         "squizlabs/php_codesniffer": "^3.6",
