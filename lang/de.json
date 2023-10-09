@@ -502,10 +502,10 @@
     "contacts.{id?}.get": "Kontaktdetails anzeigen",
     "contacts.get": "Kontakte anzeigen",
     "media.{media}.{filename}.get": "Medien anzeigen",
-    "my-profile.{id?}.get": "Mein Profil anzeigen",
+    "my-profile.get": "Mein Profil anzeigen",
     "orders.{id}.get": "Bestelldetails anzeigen",
     "orders.get": "Bestellungen anzeigen",
-    "products.{id?}.get": "Produktdetails anzeigen",
+    "products.{id}.get": "Produktdetails anzeigen",
     "products.list.get": "Produktliste anzeigen",
     "products.serial-numbers.{id?}.get": "Details zur Produktseriennummer anzeigen",
     "products.serial-numbers.get": "Produktseriennummern anzeigen",
@@ -745,7 +745,7 @@
     "calendar.get": "Kalendar anzeigen",
     "files.get": "Dateien anzeigen",
     "product.{id}.get": "Produkte anzeigen",
-    "profile.{id?}.get": "Benutzer verwalten",
+    "profiles.{id?}.get": "Benutzer verwalten",
     "serial-numbers.get": "Seriennummern anzeigen",
     "service.{serialnumberid?}.get": "Serviceanfrage erstellen"
 }

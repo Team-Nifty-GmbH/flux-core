@@ -127,7 +127,7 @@ class Profile extends Component
 
     public function save(): void
     {
-        if (! user_can('my-profile.{id?}.get') || auth()->id() !== $this->user['id']) {
+        if (! user_can('my-profile.get') || auth()->id() !== $this->user['id']) {
             return;
         }
 

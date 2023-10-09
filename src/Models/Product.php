@@ -52,7 +52,7 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         'description',
     ];
 
-    protected string $detailRouteName = 'products.id?';
+    protected string $detailRouteName = 'products.id';
 
     public static string $iconName = 'square-3-stack-3d';
 

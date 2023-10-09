@@ -14,7 +14,7 @@
             </h1>
         </div>
         <form class="pt-12">
-            @if(auth()->user()->can('profile.{id?}.get'))
+            @if(auth()->user()->can('profiles.{id?}.get'))
                 <div class="flex w-full justify-end">
                     <x-button primary wire:click="showUsers" :label="__('Edit users')" />
                 </div>
@@ -127,7 +127,7 @@
                 </div>
             </div>
         </form>
-        @if(auth()->user()->can('profile.{id?}.get') && auth()->id() !== ($address['id'] ?? ''))
+        @if(auth()->user()->can('profiles.{id?}.get') && auth()->id() !== ($address['id'] ?? ''))
             <div class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200 sm:pt-5">
                 <label for="{{ md5('address.can_login') }}"
                        class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
