@@ -23,8 +23,6 @@ class LoginTest extends TestCase
 
     public function test_redirect_to_dashboard_as_authenticated_user()
     {
-        $this->withoutVite();
-
         $language = Language::query()->where('language_code', config('app.locale'))->first();
         if (! $language) {
             $language = Language::factory()->create(['language_code' => config('app.locale')]);

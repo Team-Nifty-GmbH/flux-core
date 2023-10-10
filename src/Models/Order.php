@@ -76,7 +76,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
         'requires_approval' => 'boolean',
     ];
 
-    public string $detailRouteName = 'orders.id?';
+    public string $detailRouteName = 'orders.id';
 
     protected $guarded = [
         'id',

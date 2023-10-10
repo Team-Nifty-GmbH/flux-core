@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="pl-2">
-                <x-button outline icon="eye" href="{{ route('orders.id?', $order['id']) }}">
+                <x-button outline icon="eye" href="{{ route('orders.id', $order['id']) }}">
                 </x-button>
             </div>
         </div>

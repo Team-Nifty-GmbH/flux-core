@@ -28,7 +28,7 @@ Route::middleware(['auth:address'])->group(function () {
     Route::get('/files', FluxErp\Livewire\Portal\Files::class)
         ->name('portal.files')
         ->registersMenuItem(icon: 'folder-open');
-    Route::get('/my-profile/{id?}', FluxErp\Livewire\Portal\Profile::class)
+    Route::get('/my-profile', FluxErp\Livewire\Portal\Profile::class)
         ->name('portal.my-profile');
     Route::get('/orders/{id}', FluxErp\Livewire\Portal\OrderDetail::class)
         ->name('portal.orders.id');
@@ -37,8 +37,8 @@ Route::middleware(['auth:address'])->group(function () {
         ->registersMenuItem(icon: 'shopping-bag');
     Route::get('/product/{id}', FluxErp\Livewire\Portal\Product::class)
         ->name('portal.product');
-    Route::get('/profile/{id?}', FluxErp\Livewire\Portal\Profile::class)
-        ->name('portal.profile.id?');
+    Route::get('/profiles/{id?}', FluxErp\Livewire\Portal\Profile::class)
+        ->name('portal.profiles.id?');
     Route::get('/serial-numbers', FluxErp\Livewire\Portal\SerialNumbers::class)
         ->name('portal.serial-numbers')
         ->registersMenuItem(icon: 'tag');

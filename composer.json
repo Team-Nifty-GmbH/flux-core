@@ -35,7 +35,7 @@
         "laravel/dusk": "^7.11",
         "laravel/pint": "^1.1",
         "nunomaduro/collision": "^7.4",
-        "orchestra/testbench": "^8.0",
+        "orchestra/testbench": "8.11.1",
         "orchestra/testbench-dusk": "^8.11",
         "phpstan/phpstan": "^1.9",
         "phpunit/phpunit": "^10.0",
@@ -68,6 +68,7 @@
         ],
         "analyse": "vendor/bin/phpstan analyse",
         "test-coverage": "XDEBUG_MODE=coverage ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml --coverage-html ./reports",
+        "format": "vendor/bin/pint",
         "dusk:install-chromedriver": "@php vendor/bin/dusk-updater detect --auto-update --ansi"
     },
     "config": {
