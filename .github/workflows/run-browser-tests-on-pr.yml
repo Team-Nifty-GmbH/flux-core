@@ -53,7 +53,7 @@ jobs:
       fail-fast: false
       matrix:
         php-versions: [ '8.2' ]
-        browser: ['chrome', 'firefox']
+        browser: ['chrome']
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -80,6 +80,9 @@ jobs:
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
+      - name: Install ChromeDriver
+        run: ./vendor/bin/dusk-updater update --auto-update --ansi
+
       - name: Run Tests
         run: ./vendor/bin/testbench package:test --parallel -c ./phpunit.dist.xml --testsuite Browser
         env:
@@ -89,9 +92,3 @@ jobs:
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
           BROWSER: ${{ matrix.browser }}
           DUSK_DRIVER_URL: http://0.0.0.0:${{ job.services.selenium.ports['4444'] }}
-      - name: Upload screenshots
-        uses: actions/upload-artifact@v2
-        if: always()
-        with:
-          name: ${{ matrix.browser }}
-          path: screenshots/

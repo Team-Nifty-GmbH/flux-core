@@ -3,19 +3,15 @@
 namespace FluxErp\Tests;
 
 use Dotenv\Dotenv;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\FortifyServiceProvider;
 use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use Hammerstone\FastPaginate\FastPaginateProvider;
-use Illuminate\Support\Collection;
-use Facebook\WebDriver\Chrome\ChromeOptions;
-use Facebook\WebDriver\Remote\DesiredCapabilities;
-use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Laravel\Dusk\TestCase as BaseTestCase;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
-use Orchestra\Testbench\Concerns\CreatesApplication;
+use Orchestra\Testbench\Dusk\TestCase;
 use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
@@ -26,10 +22,8 @@ use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
 use WireUi\Providers\WireUiServiceProvider;
 
-abstract class DuskTestCase extends BaseTestCase
+abstract class DuskTestCase extends TestCase
 {
-    use CreatesApplication;
-
     protected function setUp(): void
     {
         if (file_exists(__DIR__ . '/../../../.env')) {
@@ -40,38 +34,9 @@ abstract class DuskTestCase extends BaseTestCase
         parent::setUp();
     }
 
-    /**
-     * Prepare for Dusk test execution.
-     *
-     * @beforeClass
-     */
-    public static function prepare(): void
-    {
-        if (! static::runningInSail()) {
-            static::startChromeDriver();
-        }
-    }
-
-    /**
-     * Create the RemoteWebDriver instance.
-     */
     protected function driver(): RemoteWebDriver
     {
-        $options = (new ChromeOptions())->addArguments(collect([
-            $this->shouldStartMaximized() ? '--start-maximized' : '--window-size=1920,1080',
-        ])->unless($this->hasHeadlessDisabled(), function (Collection $items) {
-            return $items->merge([
-                '--disable-gpu',
-                '--headless=new',
-            ]);
-        })->all());
-
-        return RemoteWebDriver::create(
-            $_ENV['DUSK_DRIVER_URL'] ?? 'http://localhost:8000',
-            DesiredCapabilities::chrome()->setCapability(
-                ChromeOptions::CAPABILITY, $options
-            )
-        );
+        return parent::driver();
     }
 
     public function getPackageProviders($app): array
@@ -96,23 +61,5 @@ abstract class DuskTestCase extends BaseTestCase
             RouteServiceProvider::class,
             SanctumServiceProvider::class,
         ];
-    }
-
-    /**
-     * Determine whether the Dusk command has disabled headless mode.
-     */
-    protected function hasHeadlessDisabled(): bool
-    {
-        return isset($_SERVER['DUSK_HEADLESS_DISABLED']) ||
-               isset($_ENV['DUSK_HEADLESS_DISABLED']);
-    }
-
-    /**
-     * Determine if the browser window should start maximized.
-     */
-    protected function shouldStartMaximized(): bool
-    {
-        return isset($_SERVER['DUSK_START_MAXIMIZED']) ||
-               isset($_ENV['DUSK_START_MAXIMIZED']);
     }
 }
