@@ -81,7 +81,7 @@ jobs:
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
       - name: Install ChromeDriver
-        run: ./vendor/bin/dusk-updater update 117.0.5938.132
+        run: composer dusk:install-chromedriver
 
       - name: Run Tests
         run: ./vendor/bin/testbench package:test --parallel -c ./phpunit.dist.xml --testsuite Browser
