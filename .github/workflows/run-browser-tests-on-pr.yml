@@ -92,3 +92,9 @@ jobs:
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
           BROWSER: ${{ matrix.browser }}
           DUSK_DRIVER_URL: http://0.0.0.0:${{ job.services.selenium.ports['4444'] }}
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.browser }}
+          path: tests/Browser/screenshots/*.png
