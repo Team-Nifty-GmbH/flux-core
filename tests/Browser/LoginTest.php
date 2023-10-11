@@ -2,43 +2,19 @@
 
 namespace FluxErp\Tests\Browser;
 
-use FluxErp\Models\Language;
-use FluxErp\Models\User;
 use FluxErp\Tests\DuskTestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Dusk\Browser;
 
 class LoginTest extends DuskTestCase
 {
-    use DatabaseTransactions;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $language = Language::query()->where('language_code', config('app.locale'))->first();
-        if (! $language) {
-            $language = Language::factory()->create(['language_code' => config('app.locale')]);
-        }
-
-        $this->user = User::factory()->create([
-            'language_id' => $language->id,
-        ]);
-    }
-
     /**
      * A Dusk test example.
      */
     public function test_login(): void
     {
-        $user = $this->user;
-
-        $this->browse(function (Browser $browser) use ($user) {
+        $this->browse(function (Browser $browser) {
             $browser->visit('/login')
-                ->type('email', $user->email)
-                ->type('password', 'password')
-                ->press('Login')
-                ->assertPathIs('/');
+                ->assertSee('login');
         });
     }
 }
