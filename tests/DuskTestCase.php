@@ -44,9 +44,9 @@ abstract class DuskTestCase extends TestCase
         return parent::driver();
     }
 
-    public function getPackageProviders($app): array
+    protected function getApplicationProviders($app): array
     {
-        return [
+        return array_merge(parent::getApplicationProviders($app), [
             LivewireServiceProvider::class,
             PermissionServiceProvider::class,
             TagsServiceProvider::class,
@@ -65,6 +65,6 @@ abstract class DuskTestCase extends TestCase
             FluxServiceProvider::class,
             RouteServiceProvider::class,
             SanctumServiceProvider::class,
-        ];
+        ]);
     }
 }
