@@ -21,6 +21,7 @@ use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
 use WireUi\Providers\WireUiServiceProvider;
+use function Orchestra\Testbench\package_path;
 
 abstract class DuskTestCase extends TestCase
 {
@@ -32,6 +33,10 @@ abstract class DuskTestCase extends TestCase
         }
 
         parent::setUp();
+
+        if (! file_exists(public_path('flux'))) {
+            symlink(package_path('public'), public_path('flux'));
+        }
     }
 
     protected function driver(): RemoteWebDriver
