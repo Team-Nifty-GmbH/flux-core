@@ -71,6 +71,11 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
         );
     }
 
+    public function children(): HasMany
+    {
+        return $this->hasMany(User::class, 'parent_id');
+    }
+
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
@@ -84,6 +89,11 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
     public function locks(): MorphMany
     {
         return $this->morphMany(Lock::class, 'authenticatable');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'parent_id');
     }
 
     public function settings(): MorphMany
