@@ -31,7 +31,7 @@ class DeleteUser extends FluxAction
         $user->tokens()->delete();
         $user->locks()->delete();
 
-        $user-children()->update(['parent_id' => $user->parent_id]);
+        $user->children()->update(['parent_id' => $user->parent_id]);
 
         return $user->delete();
     }

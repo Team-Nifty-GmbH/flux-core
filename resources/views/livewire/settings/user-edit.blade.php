@@ -17,9 +17,9 @@
             wire:model="user.parent_id"
             :label="__('Parent')"
             :options="$users"
-            option-label="user_code"
+            option-label="name"
             option-value="id"
-            option-description="name"
+            option-description="email"
         />
         <x-checkbox :label="__('Active')" wire:model="user.is_active"/>
         <x-inputs.password :label="__('New password')" wire:model="user.password"/>
