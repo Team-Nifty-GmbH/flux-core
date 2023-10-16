@@ -35,6 +35,8 @@ class UserEdit extends Component
 
     public array $roles = [];
 
+    public array $users = [];
+
     public bool $isSuperAdmin = false;
 
     protected $listeners = [
@@ -53,6 +55,11 @@ class UserEdit extends Component
 
         $this->roles = Role::query()
             ->get(['id', 'name', 'guard_name'])
+            ->toArray();
+
+        $this->users = User::query()
+            ->get(['id', 'firstname', 'lastname', 'email'])
+            ->append('name')
             ->toArray();
     }
 

@@ -20,6 +20,11 @@ class UpdateUserRequest extends BaseFormRequest
                 'integer',
                 (new ExistsWithIgnore('languages', 'id'))->whereNull('deleted_at'),
             ],
+            'parent_id' => [
+                'integer',
+                'nullable',
+                (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+            ],
             'email' => 'sometimes|required|email|unique:users,email',
             'firstname' => 'sometimes|required|string',
             'lastname' => 'sometimes|required|string',

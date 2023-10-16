@@ -13,6 +13,14 @@
             option-label="name"
             option-value="id"
         />
+        <x-select
+            wire:model="user.parent_id"
+            :label="__('Parent')"
+            :options="$users"
+            option-label="name"
+            option-value="id"
+            option-description="email"
+        />
         <x-checkbox :label="__('Active')" wire:model="user.is_active"/>
         <x-inputs.password :label="__('New password')" wire:model="user.password"/>
         <x-inputs.password :label="__('Repeat password')" wire:model="user.password_confirmation"/>
