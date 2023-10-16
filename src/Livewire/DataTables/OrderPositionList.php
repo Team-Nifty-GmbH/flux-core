@@ -98,6 +98,20 @@ class OrderPositionList extends DataTable
         return $tree;
     }
 
+    public function getReturnKeys(): array
+    {
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'is_net',
+                'is_alternative',
+                'depth',
+                'unit_net_price',
+                'unit_gross_price',
+            ]
+        );
+    }
+
     public function getLeftAppends(): array
     {
         return [
