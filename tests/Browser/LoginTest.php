@@ -11,7 +11,10 @@ class LoginTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/login')
-                ->screenshot('login-page');
+                ->type('email', 'test@test.de')
+                ->type('password', 'password')
+                ->clickAndWaitForReload('@login-button')
+                ->assertRouteIs('dashboard');
         });
     }
 }

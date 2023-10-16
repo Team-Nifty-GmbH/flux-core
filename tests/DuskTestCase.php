@@ -8,6 +8,7 @@ use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\FortifyServiceProvider;
 use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
+use FluxErp\Providers\ViewServiceProvider;
 use Hammerstone\FastPaginate\FastPaginateProvider;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
@@ -47,6 +48,7 @@ abstract class DuskTestCase extends TestCase
     protected function getApplicationProviders($app): array
     {
         return array_merge(parent::getApplicationProviders($app), [
+            ViewServiceProvider::class,
             LivewireServiceProvider::class,
             PermissionServiceProvider::class,
             TagsServiceProvider::class,
