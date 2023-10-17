@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateTicketTypeRequest;
 use FluxErp\Models\TicketType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
 class UpdateTicketType extends FluxAction
@@ -27,8 +28,14 @@ class UpdateTicketType extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
+        $roles = Arr::pull($this->data, 'roles');
+
         $ticketType->fill($this->data);
         $ticketType->save();
+
+        if (! is_null($roles)) {
+            $ticketType->roles()->sync($roles);
+        }
 
         return $ticketType->withoutRelations()->fresh();
     }

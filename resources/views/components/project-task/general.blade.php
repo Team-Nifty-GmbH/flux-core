@@ -6,7 +6,7 @@
         :label="__('State')"
         wire:model.live="projectTask.state"
         formatters="formatter.state"
-        avialable="availableStates"
+        available="availableStates"
     />
     <x-select
         wire:model.live="projectTask.user_id"

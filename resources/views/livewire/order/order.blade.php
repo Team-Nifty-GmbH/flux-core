@@ -241,21 +241,21 @@
                                 :label="__('Order state')"
                                 wire:model.live="order.state"
                                 formatters="formatter.state"
-                                avialable="availableStates.state"
+                                available="availableStates.state"
                             />
                             <x-state
                                 align="left"
                                 :label="__('Payment state')"
                                 wire:model.live="order.payment_state"
                                 formatters="formatter.payment_state"
-                                avialable="availableStates.payment_state"
+                                available="availableStates.payment_state"
                             />
                             <x-state
                                 align="left"
                                 :label="__('Delivery state')"
                                 wire:model.live="order.delivery_state"
                                 formatters="formatter.delivery_state"
-                                avialable="availableStates.delivery_state"
+                                available="availableStates.delivery_state"
                             />
                         </div>
                     </x-card>

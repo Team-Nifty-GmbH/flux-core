@@ -747,5 +747,7 @@
     "product.{id}.get": "Produkte anzeigen",
     "profiles.{id?}.get": "Benutzer verwalten",
     "serial-numbers.get": "Seriennummern anzeigen",
-    "service.{serialnumberid?}.get": "Serviceanfrage erstellen"
+    "service.{serialnumberid?}.get": "Serviceanfrage erstellen",
+    "Delete ticket": "Ticket löschen",
+    "Do you really want to delete this ticket?": "Wollen Sie dieses Ticket wirklich löschen?"
 }

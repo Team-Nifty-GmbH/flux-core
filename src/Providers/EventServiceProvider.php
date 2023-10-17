@@ -13,8 +13,10 @@ use FluxErp\Listeners\Order\PdfCreatedListener;
 use FluxErp\Listeners\Order\PdfCreatingListener;
 use FluxErp\Listeners\SnapshotEventSubscriber;
 use FluxErp\Listeners\Ticket\CommentCreatedListener;
+use FluxErp\Listeners\Ticket\TicketCreatedNotificationListener;
 use FluxErp\Listeners\WebhookEventSubscriber;
 use FluxErp\Models\Comment;
+use FluxErp\Notifications\Ticket\TicketCreatedNotification;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Cache\Events\KeyWritten;
@@ -46,6 +48,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         KeyWritten::class => [
             CacheKeyWrittenListener::class,
+        ],
+        TicketCreatedNotification::class => [
+            TicketCreatedNotificationListener::class,
         ],
     ];
 

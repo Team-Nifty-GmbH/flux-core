@@ -6,6 +6,7 @@ use FluxErp\Models\Ticket;
 use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TicketList extends DataTable
 {
@@ -36,6 +37,16 @@ class TicketList extends DataTable
             ->toArray();
 
         parent::mount();
+    }
+
+    public function getTableActions(): array
+    {
+        return [
+            DataTableButton::make(href: route('tickets.id', ['id' => 'new']))
+                ->label(__('Create'))
+                ->color('primary')
+                ->icon('plus'),
+        ];
     }
 
     public function getBuilder(Builder $builder): Builder

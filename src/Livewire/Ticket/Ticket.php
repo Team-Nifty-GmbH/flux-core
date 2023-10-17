@@ -2,15 +2,17 @@
 
 namespace FluxErp\Livewire\Ticket;
 
+use FluxErp\Actions\Ticket\CreateTicket;
+use FluxErp\Actions\Ticket\DeleteTicket;
+use FluxErp\Actions\Ticket\UpdateTicket;
 use FluxErp\Http\Requests\CreateTicketRequest;
-use FluxErp\Http\Requests\UpdateTicketRequest;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\TicketType;
-use FluxErp\Services\TicketService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Livewire\Features\SupportRedirects\Redirector;
 use WireUi\Traits\Actions;
 
 class Ticket extends Component
@@ -23,26 +25,13 @@ class Ticket extends Component
 
     public array $additionalColumns = [];
 
-    public string $ticketState;
-
     public array $ticketTypes;
 
     public array $states;
 
     public string $tab = 'features.comments.comments';
 
-    public function getRules(): array
-    {
-        return Arr::prependKeysWith(
-            ($this->ticket['id']
-                ? new UpdateTicketRequest()
-                : new CreateTicketRequest()
-            )->rules(),
-            'ticket.'
-        );
-    }
-
-    public function mount(int $id): void
+    public function mount(int|string $id): void
     {
         $states = \FluxErp\Models\Ticket::getStatesFor('state');
 
@@ -58,15 +47,29 @@ class Ticket extends Component
             ->get()
             ->toArray();
 
-        $ticketModel = \FluxErp\Models\Ticket::query()
-            ->with([
-                'users:id',
-                'users.media',
-                'ticketType:id,name',
-                'authenticatable',
-            ])
-            ->whereKey($id)
-            ->firstOrFail();
+        if ($id === 'new') {
+            $ticketModel = new \FluxErp\Models\Ticket(
+                array_fill_keys(
+                    array_keys((new CreateTicketRequest())->rules()),
+                    null
+                )
+            );
+
+            $ticketModel->id = 0;
+            $ticketModel->authenticatable_type = Auth::user()->getMorphClass();
+            $ticketModel->authenticatable_id = Auth::user()->getAuthIdentifier();
+        } else {
+            $ticketModel = \FluxErp\Models\Ticket::query()
+                ->with([
+                    'users:id',
+                    'users.media',
+                    'ticketType:id,name',
+                    'authenticatable',
+                ])
+                ->whereKey($id)
+                ->firstOrFail();
+        }
+
 
         $ticketModel->state = $ticketModel->state ?: \FluxErp\Models\Ticket::getDefaultStateFor('state');
 
@@ -89,13 +92,11 @@ class Ticket extends Component
         $this->ticket['authenticatable']['name'] = $ticketModel->authenticatable?->getLabel();
         $this->ticket['users'] = $ticketModel->users->pluck('id')->toArray();
 
-        $this->ticketState = $this->ticket['state'];
-
         $this->availableStates = collect($this->states)
             ->whereIn(
                 'name',
                 array_merge(
-                    [$this->ticketState],
+                    [$this->ticket['state']],
                     $ticketModel->state->transitionableStates()
                 )
             )
@@ -107,77 +108,80 @@ class Ticket extends Component
         return view('flux::livewire.ticket.ticket');
     }
 
-    public function updatedTicketState(): void
+    public function updateAdditionalColumns(?int $id): void
     {
-        if (! user_can('api.tickets.put')) {
-            $this->notification()->error(__('You dont have the permission to do that.'));
+        $this->additionalColumns = AdditionalColumn::query()
+            ->where('is_frontend_visible', true)
+            ->where(function (Builder $query) use ($id) {
+                $query->where('model_type', \FluxErp\Models\Ticket::class)
+                    ->when($id, function (Builder $query) use ($id) {
+                        $query->orWhere(function (Builder $query) use ($id) {
+                            $query->where('model_type', TicketType::class)
+                                ->where('model_id', $id);
+                        });
+                    });
+            })
+            ->get()
+            ->toArray();
+    }
 
-            return;
+    public function save(): bool|Redirector
+    {
+        $action = $this->ticket['id'] ? UpdateTicket::class : CreateTicket::class;
+
+        if ($action === CreateTicket::class) {
+            unset($this->ticket['uuid'], $this->ticket['model_type'], $this->ticket['model_id']);
         }
 
-        $ticketModel = \FluxErp\Models\Ticket::query()
-            ->whereKey($this->ticket['id'])
-            ->firstOrNew()
-            ->state
-            ->transitionTo($this->ticketState);
+        try {
+            $ticket = $action::make($this->ticket)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        if ($action === CreateTicket::class) {
+            return redirect(route('tickets.id', ['id' => $ticket->id]));
+        }
+
+        $this->ticket = array_merge($this->ticket, $ticket->load('authenticatable')->toArray());
+        $this->ticket['authenticatable']['avatar_url'] = $ticket->authenticatable->getAvatarUrl();
+        $this->ticket['authenticatable']['name'] = $ticket->authenticatable->getLabel();
 
         $this->availableStates = collect($this->states)
             ->whereIn(
                 'name',
                 array_merge(
-                    [$this->ticketState],
-                    $ticketModel->state->transitionableStates()
+                    [$this->ticket['state']],
+                    $ticket->state->transitionableStates()
                 )
             )
             ->toArray();
 
         $this->skipRender();
+
+        return true;
     }
 
-    public function updatedTicketUsers(): void
+    public function delete(): void
     {
-        $this->save();
-    }
+        $this->skipRender();
 
-    public function updatedTicketTicketTypeID(): void
-    {
-        $this->save();
-    }
-
-    public function changeAuthor(int $id): void
-    {
-        if (! user_can('api.tickets.put')) {
-            $this->notification()->error(__('You dont have the permission to do that.'));
+        try {
+            DeleteTicket::make($this->ticket)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
             return;
         }
 
-        $ticketService = new TicketService();
-        $this->ticket['authenticatable_id'] = $id;
-
-        $validated = $this->validate()['ticket'];
-        $updatedTicket = $ticketService->update($validated)->load('authenticatable');
-
-        $this->ticket = array_merge($this->ticket, $updatedTicket->toArray());
-        $this->ticket['authenticatable']['avatar_url'] = $updatedTicket->authenticatable->getAvatarUrl();
-        $this->ticket['authenticatable']['name'] = $updatedTicket->authenticatable->getLabel();
-
-        $this->skipRender();
-    }
-
-    public function save(): void
-    {
-        if (! user_can('api.tickets.put')) {
-            $this->notification()->error(__('You dont have the permission to do that.'));
-
-            return;
-        }
-
-        $ticketService = new TicketService();
-        $validated = $this->validate()['ticket'];
-
-        $ticketService->update($validated);
-
-        $this->skipRender();
+        $this->redirect(route('tickets'));
     }
 }
