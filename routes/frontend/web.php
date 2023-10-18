@@ -21,6 +21,7 @@ use FluxErp\Livewire\Settings\Countries;
 use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\CustomerPortal;
 use FluxErp\Livewire\Settings\DiscountGroups;
+use FluxErp\Livewire\Settings\FormBuilder;
 use FluxErp\Livewire\Settings\Languages;
 use FluxErp\Livewire\Settings\Logs;
 use FluxErp\Livewire\Settings\Notifications;
@@ -112,6 +113,7 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/ticket-types', TicketTypes::class)->name('ticket-types')->registersMenuItem();
             Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
             Route::get('/users', Users::class)->name('users')->registersMenuItem();
+            Route::get('/form-builder', FormBuilder::class)->name('form-builder')->registersMenuItem();
         });
 
     Route::name('search')->prefix('search')->group(function () {

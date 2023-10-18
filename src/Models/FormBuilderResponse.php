@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FormBuilderResponse extends Model
 {
-    use HasUpdates;
+    // use HasUpdates;
     use SoftDeletes;
 
     protected $with = ['form', 'user'];

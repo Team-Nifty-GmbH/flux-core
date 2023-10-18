@@ -40,11 +40,11 @@ class FormBuilderSection extends Model
 
     public function fields(): HasMany
     {
-        return $this->hasMany(BoltPlugin::getModel('Field'), 'section_id', 'id');
+        return $this->hasMany(FormBuilderField::class, 'section_id', 'id');
     }
 
     public function form(): BelongsTo
     {
-        return $this->belongsTo(BoltPlugin::getModel('Form'));
+        return $this->belongsTo(FormBuilderForm::class);
     }
 }

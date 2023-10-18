@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FormBuilderCollection extends Model
 {
-    use HasUpdates;
+    // use HasUpdates;
     use SoftDeletes;
 
     protected $guarded = [];

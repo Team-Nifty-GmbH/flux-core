@@ -11,9 +11,9 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class FormBuilderForm extends Model
 {
-    use HasActive;
+    // use HasActive;
     use HasTranslations;
-    use HasUpdates;
+    // use HasUpdates;
     use SoftDeletes;
 
     public array $translatable = ['name', 'description', 'details'];
