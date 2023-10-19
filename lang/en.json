@@ -190,5 +190,6 @@
     "settings.translations.get": "View translation settings",
     "settings.users.get": "View user settings",
     "tickets.{id}.get": "View ticket details",
-    "tickets.get": "View tickets"
+    "tickets.get": "View tickets",
+    "Order.order Number": "Order number"
 }

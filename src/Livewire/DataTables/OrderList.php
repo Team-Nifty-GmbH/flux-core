@@ -3,7 +3,6 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Order;
-use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -20,7 +19,9 @@ class OrderList extends DataTable
         'order_number',
         'invoice_number',
         'contact.customer_number',
-        'address_invoice.name',
+        'address_invoice.company',
+        'address_invoice.firstname',
+        'address_invoice.lastname',
         'total_net_price',
         'payment_state',
         'commission',
@@ -63,11 +64,6 @@ class OrderList extends DataTable
         ];
     }
 
-    public function getBuilder(Builder $builder): Builder
-    {
-        return $builder->with(['contact:id,customer_number', 'orderType:id,name', 'currency:id,iso']);
-    }
-
     public function getFormatters(): array
     {
         $formatters = parent::getFormatters();
@@ -84,10 +80,5 @@ class OrderList extends DataTable
     public function getReturnKeys(): array
     {
         return array_merge(parent::getReturnKeys(), ['currency.iso']);
-    }
-
-    public function getFilterableColumns(string $name = null): array
-    {
-        return $this->availableCols;
     }
 }
