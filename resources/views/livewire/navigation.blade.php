@@ -21,6 +21,11 @@
         </style>
     @endif
     <div  x-data="{
+            init() {
+                document.addEventListener('livewire:navigating', () => {
+                    this.closeMenu(true);
+                });
+            },
             activeItem: window.location.pathname.split('/')[1] || 'dashboard',
             activeSubItem: window.location.pathname,
             open: [],

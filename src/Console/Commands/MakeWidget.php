@@ -29,16 +29,16 @@ class MakeWidget extends Command
     {
         $name = $this->argument('name');
         $className = Str::studly($name);
-        $snakeCaseClassName = Str::snake($className);
+        $kebabCaseClassName = Str::kebab($className);
 
         $stub = $this->getStubContents();
-        $stub = str_replace(['{{class}}', '{{snake_case class}}'], [$className, $snakeCaseClassName], $stub);
+        $stub = str_replace(['{{class}}', '{{snake_case class}}'], [$className, $kebabCaseClassName], $stub);
 
         $fileName = $className . '.php';
-        $filePath = app_path('Http/Livewire/Widgets/' . $fileName);
+        $filePath = app_path('Livewire/Widgets/' . $fileName);
 
-        $viewPath = resource_path('views/livewire/widgets/' . $snakeCaseClassName . '.blade.php');
-        $viewContents = '<div>\n</div>';
+        $viewPath = resource_path('views/livewire/widgets/' . $kebabCaseClassName . '.blade.php');
+        $viewContents = '<div></div>';
 
         $filesystem = new Filesystem();
         $filesystem->ensureDirectoryExists(app_path('Http/Livewire/Widgets'));

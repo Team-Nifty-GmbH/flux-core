@@ -747,5 +747,7 @@
     "product.{id}.get": "Produkte anzeigen",
     "profiles.{id?}.get": "Benutzer verwalten",
     "serial-numbers.get": "Seriennummern anzeigen",
-    "service.{serialnumberid?}.get": "Serviceanfrage erstellen"
+    "service.{serialnumberid?}.get": "Serviceanfrage erstellen",
+    "Order.order Number": "Auftragsnummer",
+    "Order Positions": "Auftragspositionen"
 }

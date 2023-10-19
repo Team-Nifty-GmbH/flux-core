@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Livewire\Widgets;
+namespace App\Livewire\Widgets;
 
 use FluxErp\Contracts\UserWidget;
 use Illuminate\Contracts\View\Factory;
