@@ -32,7 +32,7 @@ class MakeWidget extends Command
         $kebabCaseClassName = Str::kebab($className);
 
         $stub = $this->getStubContents();
-        $stub = str_replace(['{{class}}', '{{snake_case class}}'], [$className, $kebabCaseClassName], $stub);
+        $stub = str_replace(['{{class}}', '{{kebab-case class}}'], [$className, $kebabCaseClassName], $stub);
 
         $fileName = $className . '.php';
         $filePath = app_path('Livewire/Widgets/' . $fileName);

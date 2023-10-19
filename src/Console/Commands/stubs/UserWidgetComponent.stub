@@ -12,7 +12,7 @@ class {{class}} extends Component implements UserWidget
 {
     public function render(): View|Factory
     {
-        return view('livewire.widgets.{{snake_case class}}');
+        return view('livewire.widgets.{{kebab-case class}}');
     }
 
     public static function getLabel(): string

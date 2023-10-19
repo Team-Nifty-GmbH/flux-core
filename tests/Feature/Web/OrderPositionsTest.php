@@ -20,8 +20,6 @@ class OrderPositionsTest extends BaseSetup
 {
     use DatabaseTransactions;
 
-    private Order $order;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -78,14 +76,14 @@ class OrderPositionsTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_orders_no_user()
+    public function test_order_positions_no_user()
     {
         $this->get('/orders/order-positions/list')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_orders_without_permission()
+    public function test_order_positions_without_permission()
     {
         $this->actingAs($this->user, 'web')->get('/orders/order-positions/list')
             ->assertStatus(403);
