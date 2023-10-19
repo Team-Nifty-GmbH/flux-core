@@ -15,7 +15,7 @@
             @endpersist
         @endif
         <div class="md:pl-20">
-            <main class="px-1.5 md:px-8">
+            <main class="px-1.5 md:px-8 pb-1.5 md:pb-8">
                 {{ $slot }}
             </main>
         </div>

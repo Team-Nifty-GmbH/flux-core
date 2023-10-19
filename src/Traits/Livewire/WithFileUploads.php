@@ -5,10 +5,8 @@ namespace FluxErp\Traits\Livewire;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Media;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Livewire\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 trait WithFileUploads
@@ -31,7 +29,7 @@ trait WithFileUploads
             return false;
         }
 
-        return response()->download($mediaItem->getPath(), $mediaItem->name);
+        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
 
     public function downloadCollection(string $collection): ?BinaryFileResponse
