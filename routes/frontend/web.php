@@ -4,6 +4,7 @@ use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contacts\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\ContactList;
+use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\DataTables\ProjectTasksList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
@@ -67,8 +68,15 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/{id}', Project::class)->name('id');
         });
 
-    Route::get('/orders', OrderList::class)->name('orders')->registersMenuItem(icon: 'shopping-bag');
-    Route::get('/orders/{id}', Order::class)->name('orders.id');
+    Route::name('orders.')->prefix('orders')
+        ->group(function () {
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'shopping-bag');
+            Route::get('/list', OrderList::class)->name('orders')->registersMenuItem();
+            Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions')
+                ->registersMenuItem();
+            Route::get('/{id}', Order::class)->name('id');
+        });
+
     Route::get('/tickets', TicketList::class)->name('tickets')->registersMenuItem(icon: 'wrench-screwdriver');
     Route::get('/tickets/{id}', Ticket::class)->name('tickets.id');
 

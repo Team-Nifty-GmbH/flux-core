@@ -2,6 +2,7 @@
     wire:ignore.self
      x-data="{
         widgets: $wire.entangle('widgets'),
+        removedIds: [],
         widget: {},
         editWidgets() {
             this.widgetsSortable = new Sortable(document.getElementById('widgets'), {
@@ -23,11 +24,16 @@
         },
         save() {
             this.editMode = false;
-            $wire.saveWidgets(this.widgetsSortable.toArray());
+            const activeWidgets = this.widgetsSortable.toArray();
+            $wire.saveWidgets(activeWidgets.filter(item => !this.removedIds.includes(item)));
         },
         edit(widget) {
             this.widget = this.widgets.find(w => w.id == widget);
             Alpine.$data(this.$refs.modal.querySelector('[wireui-modal]')).open();
+        },
+        removeWidget(widget) {
+            this.removedIds.push(widget.parentNode.parentNode.dataset.id);
+            widget.parentNode.parentNode.style.display = 'none';
         },
         widgetsSortable: {},
         availableWidgetsSortable: {},
@@ -71,10 +77,10 @@
         <div class="flex-initial w-full">
             <div id="widgets" class="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-12 auto-cols-fr grid-flow-dense gap-4">
                 @forelse($widgets as $widget)
-                    <div data-id="{{ $widget['id'] }}" x-bind:class="editMode && 'outline-offset-3 bg-primary-100 outline-2 outline-dashed outline-indigo-500'" class="rounded flex place-content-center relative {{ 'col-span-' . $widget['width'] . ' row-span-' . $widget['height'] }}">
+                    <div data-id="{{ $widget['id'] }}" x-bind:class="editMode && 'outline-offset-3 bg-primary-100 outline-2 outline-dashed outline-indigo-500'" class="rounded flex place-content-center relative col-span-full {{ 'md:col-span-' . $widget['width'] . ' row-span-' . $widget['height'] }}">
                         <div class="absolute top-2 right-2" x-cloak x-show="editMode">
                             <x-button.circle class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" x-on:click="edit($el.parentNode.parentNode.dataset.id)" primary icon="pencil"/>
-                            <x-button.circle class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative x-on:click="$el.parentNode.parentNode.remove()"/>
+                            <x-button.circle class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative x-on:click="removeWidget($el)"/>
                         </div>
                         <livewire:is :component="$widget['component_name']" wire:key="{{ uniqid() }}" />
                     </div>

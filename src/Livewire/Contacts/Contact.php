@@ -84,14 +84,13 @@ class Contact extends Component
             return $address->append('name');
         });
 
-        $contact->main_address = $contact->addresses
-            ->where('is_main_address', true)
-            ->first()
-            ->toArray();
-
         $this->avatar = $contact->getAvatarUrl();
 
         $this->contact = $contact->toArray();
+        $this->contact['main_address'] = $contact->addresses
+            ->where('is_main_address', true)
+            ->first()
+            ->toArray();
 
         $this->address = $this->addressId ?
             $contact->addresses()->whereKey($this->addressId)->firstOrFail()->toArray() :

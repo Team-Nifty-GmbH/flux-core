@@ -8,6 +8,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\Order;
+use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
@@ -15,11 +16,9 @@ use FluxErp\Models\PriceList;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
-class OrdersTest extends BaseSetup
+class OrderPositionsTest extends BaseSetup
 {
     use DatabaseTransactions;
-
-    private Order $order;
 
     protected function setUp(): void
     {
@@ -51,7 +50,7 @@ class OrdersTest extends BaseSetup
             'client_id' => $this->dbClient->id,
         ]);
 
-        $this->order = Order::factory()->create([
+        $order = Order::factory()->create([
             'client_id' => $this->dbClient->id,
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
@@ -62,57 +61,31 @@ class OrdersTest extends BaseSetup
             'address_delivery_id' => $address->id,
             'is_locked' => false,
         ]);
+
+        OrderPosition::factory()->create([
+            'client_id' => $this->dbClient->id,
+            'order_id' => $order->id,
+        ]);
     }
 
-    public function test_orders_page()
+    public function test_order_positions_page()
     {
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.list.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('orders.order-positions.list.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/orders/list')
+        $this->actingAs($this->user, 'web')->get('/orders/order-positions/list')
             ->assertStatus(200);
     }
 
-    public function test_orders_no_user()
+    public function test_order_positions_no_user()
     {
-        $this->get('/orders/list')
+        $this->get('/orders/order-positions/list')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_orders_without_permission()
+    public function test_order_positions_without_permission()
     {
-        $this->actingAs($this->user, 'web')->get('/orders/list')
+        $this->actingAs($this->user, 'web')->get('/orders/order-positions/list')
             ->assertStatus(403);
-    }
-
-    public function test_orders_id_page()
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
-            ->assertStatus(200);
-    }
-
-    public function test_orders_id_no_user()
-    {
-        $this->get('/orders/' . $this->order->id)
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_orders_id_without_permission()
-    {
-        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
-            ->assertStatus(403);
-    }
-
-    public function test_orders_id_order_not_found()
-    {
-        $this->order->delete();
-
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
-            ->assertStatus(404);
     }
 }

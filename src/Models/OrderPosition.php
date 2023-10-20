@@ -24,8 +24,9 @@ use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Casts\BcFloat;
 use TeamNiftyGmbH\DataTable\Casts\Money;
 use TeamNiftyGmbH\DataTable\Casts\Percentage;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class OrderPosition extends Model implements Sortable
+class OrderPosition extends Model implements InteractsWithDataTables, Sortable
 {
     use HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasTags,
         HasUserModification, HasUuid, SoftDeletes, SortableTrait;
@@ -206,5 +207,25 @@ class OrderPosition extends Model implements Sortable
     {
         return static::query()
             ->where('order_id', $this->order_id);
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->order?->getUrl();
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return $this->product?->getAvatarUrl();
     }
 }
