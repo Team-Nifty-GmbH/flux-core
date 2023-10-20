@@ -6,7 +6,7 @@ use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Actions\OrderPosition\PriceCalculation;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Helpers\PriceHelper;
-use FluxErp\Livewire\DataTables\OrderPositionList;
+use FluxErp\Livewire\DataTables\Order\OrderPositionList;
 use FluxErp\Models\Contact;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;

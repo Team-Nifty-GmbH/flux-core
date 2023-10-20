@@ -219,7 +219,7 @@
                 @can('action.media.upload')
                     <x-button :label="__('Add folder')" x-on:click="addFolder(selectionProxy.children, selection)" />
                 @endcan
-                <x-button :label="__('Download folder')" x-on:click="$wire.downloadCollection(selection.collection_name)" />
+                <x-button spinner :label="__('Download folder')" x-on:click="$wire.downloadCollection(selection.collection_name)" />
             </div>
             @can('action.media.update')
                 <x-input x-bind:disabled="selection.is_static" :label="__('Name')" x-model="selection.name" />
