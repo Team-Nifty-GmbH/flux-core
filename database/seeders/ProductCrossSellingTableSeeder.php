@@ -3,6 +3,7 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Models\Product;
+use FluxErp\Models\ProductCrossSelling;
 use Illuminate\Database\Seeder;
 
 class ProductCrossSellingTableSeeder extends Seeder
@@ -21,7 +22,7 @@ class ProductCrossSellingTableSeeder extends Seeder
 
         foreach (Product::query()->whereIntegerInRaw('id', $productIds)->get(['id']) as $product) {
             $product->productCrossSellings()->createMany(
-                Product::factory()->count(3)->make()->toArray()
+                ProductCrossSelling::factory()->count(3)->make()->toArray()
             );
         }
     }
