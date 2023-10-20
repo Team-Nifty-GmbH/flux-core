@@ -7,7 +7,9 @@
                     class="mt-2 text-sm text-gray-300">{{ __('Here you can manage all Forms created with Form Builder...') }}</div>
             </div>
         </div>
-        <livewire:data-tables.form-builder-form-list/>
+        <div>
+            @include('tall-datatables::livewire.data-table')
+        </div>
     </div>
     <x-modal.card wire:model="showModal" fullscreen>
         <x-slot name="title">
@@ -84,7 +86,7 @@
                                         <x-input wire:model="formData.{{$sectionIndex}}.fields.{{$fieldIndex}}.description" label="{{__('Description')}}"/>
                                     </div>
                                     <div class="col-span-1 sm:col-span-1">
-                                        <x-input wire:model="formData.{{$sectionIndex}}.fields.{{$fieldIndex}}.type" label="{{__('Type')}}"/>
+                                        <x-select :options="$fieldTypes" option-label="name" option-value="value" wire:model="formData.{{$sectionIndex}}.fields.{{$fieldIndex}}.type" label="{{__('Type')}}"/>
                                     </div>
                                     <div class="col-span-1 sm:col-span-1">
                                         <x-input wire:model="formData.{{$sectionIndex}}.fields.{{$fieldIndex}}.ordering" label="{{__('Ordering')}}"/>

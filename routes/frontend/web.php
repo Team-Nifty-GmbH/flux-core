@@ -113,7 +113,7 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/ticket-types', TicketTypes::class)->name('ticket-types')->registersMenuItem();
             Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
             Route::get('/users', Users::class)->name('users')->registersMenuItem();
-            Route::get('/form-builder', FormBuilder::class)->name('form-builder')->registersMenuItem();
+            Route::get('/form-builder', \FluxErp\Livewire\DataTables\FormBuilderFormList::class)->name('form-builder')->registersMenuItem();
         });
 
     Route::name('search')->prefix('search')->group(function () {
