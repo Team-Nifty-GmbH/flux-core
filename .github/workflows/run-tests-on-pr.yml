@@ -45,11 +45,15 @@ jobs:
         ports:
           - 3000/tcp
         options: --health-cmd="curl -f http://localhost:3000/health" --health-interval=10s --health-timeout=5s --health-retries=3
+      selenium:
+        image: selenium/standalone-${{ matrix.browser }}
+        ports:
+          - 4444/tcp
     strategy:
       fail-fast: false
       matrix:
         php-versions: [ '8.2' ]
-        testsuite: ['Feature', 'Livewire']
+        browser: [ 'chrome' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -76,10 +80,20 @@ jobs:
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
+      - name: Install ChromeDriver
+        run: composer dusk:install-chromedriver
+
       - name: Run Tests
-        run: ./vendor/bin/testbench package:test --parallel -c ./phpunit.dist.xml --testsuite ${{ matrix.testsuite }}
+        run: composer test
         env:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
+          DUSK_DRIVER_URL: http://0.0.0.0:${{ job.services.selenium.ports['4444'] }}
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.browser }}
+          path: tests/Browser/screenshots/*.png

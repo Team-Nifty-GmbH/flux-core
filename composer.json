@@ -67,6 +67,7 @@
             "@php ./vendor/bin/testbench package:discover --ansi"
         ],
         "analyse": "vendor/bin/phpstan analyse",
+        "test": "./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml",
         "test-coverage": "XDEBUG_MODE=coverage ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml --coverage-html ./reports",
         "format": "vendor/bin/pint",
         "dusk:install-chromedriver": "@php vendor/bin/dusk-updater detect --auto-update --ansi"
