@@ -73,6 +73,5 @@ abstract class DuskTestCase extends TestCase
     protected function getEnvironmentSetUp($app)
     {
         $app['config']->set('database.default', 'mysql');
-        $app['config']->set('database.connections.mysql.database', database_path('database.mysql'));
     }
 }
