@@ -9,25 +9,16 @@ use Laravel\Dusk\Browser;
 
 class LoginTest extends DuskTestCase
 {
-    private User $user;
-
-    protected function setUp(): void
+    public function test_login(): void
     {
-        parent::setUp();
-
         $language = Language::query()->where('language_code', config('app.locale'))->first();
         if (! $language) {
             $language = Language::factory()->create(['language_code' => config('app.locale')]);
         }
 
-        $this->user = User::factory()->create([
+        $user = User::factory()->create([
             'language_id' => $language->id,
         ]);
-    }
-
-    public function test_login(): void
-    {
-        $user = $this->user;
 
         $this->browse(function (Browser $browser) use ($user) {
             $browser->visit('/login')
