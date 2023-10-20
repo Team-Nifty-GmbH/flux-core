@@ -37,7 +37,7 @@ class LoginTest extends DuskTestCase
             $browser->visit('/login')
                 ->type('email', $user->email)
                 ->type('password', 'password')
-                ->clickAndWaitForReload('@login-button')
+                ->press('@login-button')
                 ->assertRouteIs('dashboard');
         });
     }
