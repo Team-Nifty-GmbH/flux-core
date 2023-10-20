@@ -46,19 +46,19 @@ class FormBuilderResponse extends Model
         return $this->belongsTo(FormBuilderForm::class);
     }
 
-//    /**
-//     * get status detail.
-//     */
-//    public function statusDetails(): array
-//    {
-//        $getStatues = BoltPlugin::getModel('FormsStatus')::where('key', $this->status)->first();
-//
-//        return [
-//            'class' => $getStatues->class ?? '',
-//            'icon' => $getStatues->icon ?? 'heroicon-o-status-online',
-//            'label' => $getStatues->label ?? $this->status,
-//            'key' => $getStatues->key ?? '',
-//            'color' => $getStatues->color ?? '',
-//        ];
-//    }
+    //    /**
+    //     * get status detail.
+    //     */
+    //    public function statusDetails(): array
+    //    {
+    //        $getStatues = BoltPlugin::getModel('FormsStatus')::where('key', $this->status)->first();
+    //
+    //        return [
+    //            'class' => $getStatues->class ?? '',
+    //            'icon' => $getStatues->icon ?? 'heroicon-o-status-online',
+    //            'label' => $getStatues->label ?? $this->status,
+    //            'key' => $getStatues->key ?? '',
+    //            'color' => $getStatues->color ?? '',
+    //        ];
+    //    }
 }

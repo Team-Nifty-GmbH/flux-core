@@ -10,6 +10,16 @@ class FormBuilderFormList extends DataTable
 {
     protected string $model = FormBuilderForm::class;
 
+    public array $enabledCols = [
+        'name',
+        'description',
+        'slug',
+        'details',
+        'is_active',
+        'start_date',
+        'end_date',
+    ];
+
     public function getRowActions(): array
     {
         return [
@@ -46,19 +56,19 @@ class FormBuilderFormList extends DataTable
 
     public function deleteItem(FormBuilderForm $form): void
     {
-//        $this->skipRender();
-//
-//        try {
-//            DeleteFormBuilderForm::make($form->toArray())
-//                ->checkPermission()
-//                ->validate()
-//                ->execute();
-//        } catch (\Exception $e) {
-//            exception_to_notifications($e, $this);
-//
-//            return;
-//        }
-//
-//        $this->loadData();
+        //        $this->skipRender();
+        //
+        //        try {
+        //            DeleteFormBuilderForm::make($form->toArray())
+        //                ->checkPermission()
+        //                ->validate()
+        //                ->execute();
+        //        } catch (\Exception $e) {
+        //            exception_to_notifications($e, $this);
+        //
+        //            return;
+        //        }
+        //
+        //        $this->loadData();
     }
 }

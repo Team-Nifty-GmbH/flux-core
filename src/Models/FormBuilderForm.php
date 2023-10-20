@@ -13,6 +13,7 @@ class FormBuilderForm extends Model
 {
     // use HasActive;
     use HasTranslations;
+
     // use HasUpdates;
     use SoftDeletes;
 
