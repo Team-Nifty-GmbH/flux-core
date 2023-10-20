@@ -756,5 +756,7 @@
     "Edit Commission Rate": "Provisionssatz bearbeiten",
     "Delete commission rate": "Provisionssatz löschen",
     "Do you really want to delete this commission rate?": "Wollen Sie diesen Provisionssatz wirklich löschen?",
-    "Commission Agent": "Vertreter"
+    "Commission Agent": "Vertreter",
+    "Commissions": "Provisionen",
+    "Order Position": "Auftragsposition"
 }

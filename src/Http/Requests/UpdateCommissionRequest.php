@@ -11,7 +11,7 @@ class UpdateCommissionRequest extends BaseFormRequest
     {
         return [
             'id' => 'required|integer|exists:commissions,id',
-            'commission' => 'required|numeric|min:0',
+            'commission' => 'required|numeric',
         ];
     }
 }

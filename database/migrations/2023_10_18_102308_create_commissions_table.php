@@ -16,7 +16,10 @@ return new class extends Migration
             $table->uuid();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('commission_rate_id')->nullable();
+            $table->unsignedBigInteger('order_id')->nullable();
             $table->unsignedBigInteger('order_position_id')->nullable();
+            $table->json('commission_rate');
+            $table->decimal('total_net_price', 40, 10);
             $table->decimal('commission', 40, 10);
             $table->timestamps();
 

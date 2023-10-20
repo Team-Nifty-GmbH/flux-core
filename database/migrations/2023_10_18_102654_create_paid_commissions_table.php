@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('distributed_commissions', function (Blueprint $table) {
+        Schema::create('paid_commissions', function (Blueprint $table) {
             $table->id();
             $table->uuid();
             $table->unsignedBigInteger('commission_id');
-            $table->decimal('commission', 40, 10)->unsigned();
+            $table->unsignedBigInteger('user_id');
+            $table->decimal('commission', 40, 10);
             $table->timestamps();
 
             $table->foreign('commission_id')->references('id')->on('commissions');
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('distributed_commissions');
+        Schema::dropIfExists('paid_commissions');
     }
 };

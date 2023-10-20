@@ -24,18 +24,34 @@ class CreateCommission extends FluxAction
 
     public function performAction(): Commission
     {
-        if (! array_key_exists('commission', $this->data)) {
-            $commissionRate = CommissionRate::query()
+        if (! array_key_exists('commission_rate', $this->data)) {
+            $commissionRateModel = CommissionRate::query()
                 ->whereKey($this->data['commission_rate_id'])
                 ->first();
 
+            $commissionRate = $commissionRateModel->commission_rate;
+            $this->data['commission_rate'] = $commissionRateModel->toArray();
+        } else {
+            $commissionRate = $this->data['commission_rate'];
+            $this->data['commission_rate'] = [
+                'id' => null,
+                'commission_rate' => $commissionRate,
+            ];
+        }
+
+        if (! array_key_exists('total_net_price', $this->data)) {
             $orderPosition = OrderPosition::query()
                 ->whereKey($this->data['order_position_id'])
                 ->first();
 
-            $price = $orderPosition->is_net ? $orderPosition->total_net_price : $orderPosition->total_gross_price;
-            $this->data['commission'] = bcround(bcmul($price, $commissionRate->commission_rate), 2);
+            $this->data['order_id'] = $orderPosition->order_id;
+            $this->data['total_net_price'] = $orderPosition->total_net_price;
         }
+
+        $this->data['commission'] = bcround(
+            bcmul($this->data['total_net_price'], $commissionRate),
+            2
+        );
 
         $commission = new Commission($this->data);
         $commission->save();
