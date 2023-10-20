@@ -69,4 +69,9 @@ abstract class DuskTestCase extends TestCase
             SanctumServiceProvider::class,
         ]);
     }
+
+    protected function getEnvironmentSetUp($app)
+    {
+        $this->app['config']->set('database.default', 'mysql');
+    }
 }
