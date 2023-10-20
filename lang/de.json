@@ -747,5 +747,14 @@
     "product.{id}.get": "Produkte anzeigen",
     "profiles.{id?}.get": "Benutzer verwalten",
     "serial-numbers.get": "Seriennummern anzeigen",
-    "service.{serialnumberid?}.get": "Serviceanfrage erstellen"
+    "service.{serialnumberid?}.get": "Serviceanfrage erstellen",
+    "Commission Rates": "Provisionssätze",
+    "User": "Mitarbeiter",
+    "Commission Rate": "Provisionssatz",
+    "Commission Rate (in %)": "Provisionssatz (in %)",
+    "Create Commission Rate": "Neuen Provisionssatz anlegen",
+    "Edit Commission Rate": "Provisionssatz bearbeiten",
+    "Delete commission rate": "Provisionssatz löschen",
+    "Do you really want to delete this commission rate?": "Wollen Sie diesen Provisionssatz wirklich löschen?",
+    "Commission Agent": "Vertreter"
 }

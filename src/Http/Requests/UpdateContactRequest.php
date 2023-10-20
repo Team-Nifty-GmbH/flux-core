@@ -19,6 +19,10 @@ class UpdateContactRequest extends BaseFormRequest
                 'integer',
                 (new ExistsWithIgnore('clients', 'id'))->whereNull('deleted_at'),
             ],
+            'agent_id' => [
+                'integer',
+                (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+            ],
             'payment_type_id' => [
                 'integer',
                 'nullable',
