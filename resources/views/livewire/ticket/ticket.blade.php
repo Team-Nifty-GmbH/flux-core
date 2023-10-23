@@ -45,15 +45,15 @@
                 <div class="flex-1">
                     <div class="space-y-5 dark:text-gray-50">
                         <x-card class="space-y-4">
-                            <x-input :label="__('Title')" wire:model="ticket.title" :disabled="(bool) $ticket['id']"/>
-                            <x-textarea :label="__('Description')" wire:model="ticket.description" :disabled="(bool) $ticket['id']"/>
+                            <x-input :label="__('Title')" wire:model="ticket.title" :disabled="true"/>
+                            <x-textarea :label="__('Description')" wire:model="ticket.description" :disabled="true"/>
                         </x-card>
                         @if($ticket['model_type'] && $ticket['model_type']::getLivewireComponentWidget())
                             <x-card>
                                 <livewire:is :component="$ticket['model_type']::getLivewireComponentWidget()" :modelId="$ticket['model_id']" />
                             </x-card>
                         @endif
-                        <x-card x-show="ticket.id">
+                        <x-card>
                             <x-slot:header>
                                 <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
                                     <x-label>
@@ -63,7 +63,7 @@
                             </x-slot:header>
                             <livewire:folder-tree :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" :is-public="true" />
                         </x-card>
-                        <x-card x-show="ticket.id">
+                        <x-card>
                             <x-tabs
                                 wire:model.live="tab"
                                 :tabs="[
@@ -92,7 +92,7 @@
                         <x-state wire:model.live="ticket.state" formatters="formatter.state" available="availableStates"/>
                         <livewire:features.custom-events :model="\FluxErp\Models\Ticket::class" :id="$ticket['id']" />
                         <x-select
-                            :disabled="$ticket['id'] && ! user_can('action.ticket.update')"
+                            :disabled="! user_can('action.ticket.update')"
                             x-on:selected="$wire.updateAdditionalColumns($event.detail.value)"
                             :label="__('Ticket Type')"
                             wire:model.live="ticket.ticket_type_id"
@@ -123,13 +123,16 @@
                                 <x-label>
                                     {{ __('Author') }}
                                 </x-label>
-                                <div class="pl-2" x-show="ticket.id && ticket.authenticatable_type == 'FluxErp\\Models\\Address'">
-                                    <x-button href="#" xs outline icon="eye" x-bind:href="'{{ route('contacts.id?', ':id') }}'.replace(':id', ticket.authenticatable.contact_id)">
+                                <x-toggle :left-label=" __('User') " :label=" __('Contact') " wire:model.live="authorType" />
+                                <div class="pl-2">
+                                    <x-button href="#" xs outline icon="eye"
+                                              x-bind:class="($wire.get('authorType') !== true || ! ticket.authenticatable_id) && 'cursor-not-allowed'"
+                                              x-bind:href="($wire.get('authorType') === true && ticket.authenticatable_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', ticket.authenticatable_id)" >
                                     </x-button>
                                 </div>
                             </div>
                             <x-select
-                                :disabled="$ticket['id'] && ! user_can('action.ticket.update')"
+                                :disabled="! user_can('action.ticket.update')"
                                 class="pb-4"
                                 wire:model="ticket.authenticatable_id"
                                 option-value="id"

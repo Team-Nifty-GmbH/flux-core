@@ -2,15 +2,14 @@
 
 namespace FluxErp\Livewire\Ticket;
 
-use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Actions\Ticket\DeleteTicket;
 use FluxErp\Actions\Ticket\UpdateTicket;
-use FluxErp\Http\Requests\CreateTicketRequest;
 use FluxErp\Models\AdditionalColumn;
+use FluxErp\Models\Address;
 use FluxErp\Models\TicketType;
+use FluxErp\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
 use WireUi\Traits\Actions;
@@ -29,9 +28,11 @@ class Ticket extends Component
 
     public array $states;
 
+    public bool $authorType = true;
+
     public string $tab = 'features.comments.comments';
 
-    public function mount(int|string $id): void
+    public function mount(int $id): void
     {
         $states = \FluxErp\Models\Ticket::getStatesFor('state');
 
@@ -47,28 +48,15 @@ class Ticket extends Component
             ->get()
             ->toArray();
 
-        if ($id === 'new') {
-            $ticketModel = new \FluxErp\Models\Ticket(
-                array_fill_keys(
-                    array_keys((new CreateTicketRequest())->rules()),
-                    null
-                )
-            );
-
-            $ticketModel->id = 0;
-            $ticketModel->authenticatable_type = Auth::user()->getMorphClass();
-            $ticketModel->authenticatable_id = Auth::user()->getAuthIdentifier();
-        } else {
-            $ticketModel = \FluxErp\Models\Ticket::query()
-                ->with([
-                    'users:id',
-                    'users.media',
-                    'ticketType:id,name',
-                    'authenticatable',
-                ])
-                ->whereKey($id)
-                ->firstOrFail();
-        }
+        $ticketModel = \FluxErp\Models\Ticket::query()
+            ->with([
+                'users:id',
+                'users.media',
+                'ticketType:id,name',
+                'authenticatable',
+            ])
+            ->whereKey($id)
+            ->firstOrFail();
 
 
         $ticketModel->state = $ticketModel->state ?: \FluxErp\Models\Ticket::getDefaultStateFor('state');
@@ -91,6 +79,8 @@ class Ticket extends Component
         $this->ticket['authenticatable']['avatar_url'] = $ticketModel->authenticatable?->getAvatarUrl();
         $this->ticket['authenticatable']['name'] = $ticketModel->authenticatable?->getLabel();
         $this->ticket['users'] = $ticketModel->users->pluck('id')->toArray();
+
+        $this->authorType = $this->ticket['authenticatable_type'] === Address::class;
 
         $this->availableStates = collect($this->states)
             ->whereIn(
@@ -127,14 +117,8 @@ class Ticket extends Component
 
     public function save(): bool|Redirector
     {
-        $action = $this->ticket['id'] ? UpdateTicket::class : CreateTicket::class;
-
-        if ($action === CreateTicket::class) {
-            unset($this->ticket['uuid'], $this->ticket['model_type'], $this->ticket['model_id']);
-        }
-
         try {
-            $ticket = $action::make($this->ticket)
+            $ticket = UpdateTicket::make($this->ticket)
                 ->checkPermission()
                 ->validate()
                 ->execute();
@@ -142,10 +126,6 @@ class Ticket extends Component
             exception_to_notifications($e, $this);
 
             return false;
-        }
-
-        if ($action === CreateTicket::class) {
-            return redirect(route('tickets.id', ['id' => $ticket->id]));
         }
 
         $this->ticket = array_merge($this->ticket, $ticket->load('authenticatable')->toArray());
@@ -183,5 +163,13 @@ class Ticket extends Component
         }
 
         $this->redirect(route('tickets'));
+    }
+
+    public function updatedAuthorType(): void
+    {
+        $this->ticket['authenticatable_type'] = $this->authorType ? Address::class : User::class;
+        $this->ticket['authenticatable_id'] = null;
+
+        $this->skipRender();
     }
 }
