@@ -61,7 +61,7 @@
                                     </x-label>
                                 </div>
                             </x-slot:header>
-                            <livewire:folder-tree :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" :is-public="true" />
+                            <livewire:folder-tree :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
                         </x-card>
                         <x-card>
                             <x-tabs
@@ -71,7 +71,13 @@
                                         'features.activities' => __('Activities'),
                                     ]"
                             >
-                                <livewire:is wire:key="{{ uniqid() }}" :component="$tab" :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
+                                <livewire:is
+                                    wire:key="{{ uniqid() }}"
+                                    is-public="true"
+                                    :component="$tab"
+                                    :model-type="\FluxErp\Models\Ticket::class"
+                                    :model-id="$ticket['id']"
+                                />
                             </x-tabs>
                         </x-card>
                     </div>
