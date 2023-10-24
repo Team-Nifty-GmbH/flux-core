@@ -4,12 +4,13 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Http\Requests\CreateTicketTypeRequest;
 use FluxErp\Http\Requests\UpdateTicketTypeRequest;
+use FluxErp\Models\Role;
+use FluxErp\Models\TicketType;
 use FluxErp\Services\TicketTypeService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
 use Livewire\Component;
+use TeamNiftyGmbH\DataTable\Helpers\ModelFinder;
 use WireUi\Traits\Actions;
 
 class TicketTypeEdit extends Component
@@ -19,6 +20,8 @@ class TicketTypeEdit extends Component
     public array $ticketType;
 
     public array $models;
+
+    public array $roles;
 
     public bool $isNew = true;
 
@@ -43,10 +46,18 @@ class TicketTypeEdit extends Component
             null
         );
 
-        $appModels = get_subclasses_of(Model::class, 'FluxErp\\');
-        $moduleModels = get_subclasses_of(Model::class, 'Modules\\');
+        $this->models = array_values(
+            ModelFinder::all(flux_path('src/Models'), flux_path('src'), 'FluxErp')
+                ->merge(ModelFinder::all())
+                ->unique()
+                ->sort()
+                ->toArray()
+        );
 
-        $this->models = array_merge($appModels, $moduleModels);
+        $this->roles = Role::query()
+            ->where('guard_name', 'web')
+            ->get(['id', 'name'])
+            ->toArray();
     }
 
     public function render(): View
@@ -65,6 +76,12 @@ class TicketTypeEdit extends Component
         unset($this->ticketType['uuid']);
 
         $this->isNew = ! array_key_exists('id', $this->ticketType);
+
+        $this->ticketType['roles'] = $this->isNew ? [] : TicketType::query()
+            ->join('role_ticket_type AS rtt', 'ticket_types.id', '=', 'rtt.ticket_type_id')
+            ->whereKey($this->ticketType['id'])
+            ->pluck('rtt.role_id')
+            ->toArray();
     }
 
     public function save(): void

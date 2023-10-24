@@ -42,7 +42,7 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
 
     /**
      * Get the array representation of the notification.
-     * The array should contain the folowing keys:
+     * The array should contain the following keys:
      * - title (string)
      * - description (string)
      * - icon (string, all heroicons)

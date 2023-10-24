@@ -18,6 +18,8 @@ class UpdateTicketTypeRequest extends BaseFormRequest
             [
                 'id' => 'required|integer|exists:ticket_types,id,deleted_at,NULL',
                 'name' => 'required|string',
+                'roles' => 'array',
+                'roles.*' => 'required|integer|exists:roles,id',
             ],
         );
     }
