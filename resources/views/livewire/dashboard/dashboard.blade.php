@@ -1,8 +1,3 @@
-@pushonce('scripts')
-    @vite([
-        'resources/js/apex-charts.js',
-    ], 'flux/build')
-@endpushonce
 <div
     wire:ignore.self
      x-data="{
