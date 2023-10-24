@@ -28,7 +28,7 @@ class Ticket extends Component
 
     public array $states;
 
-    public bool $authorType = true;
+    public bool $authorTypeContact = true;
 
     public string $tab = 'features.comments.comments';
 
@@ -80,7 +80,7 @@ class Ticket extends Component
         $this->ticket['authenticatable']['name'] = $ticketModel->authenticatable?->getLabel();
         $this->ticket['users'] = $ticketModel->users->pluck('id')->toArray();
 
-        $this->authorType = $this->ticket['authenticatable_type'] === Address::class;
+        $this->authorTypeContact = $this->ticket['authenticatable_type'] === Address::class;
 
         $this->availableStates = collect($this->states)
             ->whereIn(
@@ -167,7 +167,7 @@ class Ticket extends Component
 
     public function updatedAuthorType(): void
     {
-        $this->ticket['authenticatable_type'] = $this->authorType ? Address::class : User::class;
+        $this->ticket['authenticatable_type'] = $this->authorTypeContact ? Address::class : User::class;
         $this->ticket['authenticatable_id'] = null;
 
         $this->skipRender();

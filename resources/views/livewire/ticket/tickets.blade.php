@@ -3,9 +3,9 @@
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div x-data="{
-                        selectedAdditionalColumns: @entangle('selectedAdditionalColumns'),
-                        additionalColumns: @entangle('additionalColumns'),
-                        ticket: @entangle('ticket'),
+                        selectedAdditionalColumns: $wire.entangle('selectedAdditionalColumns'),
+                        additionalColumns: $wire.entangle('additionalColumns'),
+                        ticket: $wire.entangle('ticket'),
                         save() {
                             this.$wire.save().then((result) => {
                                 if (result === true) {

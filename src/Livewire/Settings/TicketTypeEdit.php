@@ -8,10 +8,9 @@ use FluxErp\Models\Role;
 use FluxErp\Models\TicketType;
 use FluxErp\Services\TicketTypeService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
 use Livewire\Component;
+use TeamNiftyGmbH\DataTable\Helpers\ModelFinder;
 use WireUi\Traits\Actions;
 
 class TicketTypeEdit extends Component
@@ -47,10 +46,13 @@ class TicketTypeEdit extends Component
             null
         );
 
-        $fluxModels = get_subclasses_of(Model::class, 'FluxErp\\Models\\');
-        $appModels = get_subclasses_of(Model::class, 'App\\Models\\');
-
-        $this->models = array_merge($appModels, $fluxModels);
+        $this->models = array_values(
+            ModelFinder::all(flux_path('src/Models'), flux_path('src'), 'FluxErp')
+                ->merge(ModelFinder::all())
+                ->unique()
+                ->sort()
+                ->toArray()
+        );
 
         $this->roles = Role::query()
             ->where('guard_name', 'web')

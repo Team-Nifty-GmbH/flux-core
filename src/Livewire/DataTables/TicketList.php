@@ -31,10 +31,6 @@ class TicketList extends DataTable
         'created_at',
     ];
 
-    public array $columnLabels = [
-        'ticket_type.name' => 'Ticket Type',
-    ];
-
     public bool $showFilterInputs = true;
 
     public array $availableRelations = ['*'];
@@ -159,7 +155,6 @@ class TicketList extends DataTable
         $this->attachments = [];
 
         $this->showTicketModal = true;
-        $this->skipRender();
     }
 
     public function save(): void
@@ -201,8 +196,6 @@ class TicketList extends DataTable
     public function updatedAttachments(): void
     {
         $this->prepareForMediaLibrary('attachments');
-
-        $this->skipRender();
     }
 
     public function updatedTicketTypeId(): void
@@ -222,7 +215,5 @@ class TicketList extends DataTable
 
         $this->selectedAdditionalColumns = $this->ticketTypeId ?
             $ticketTypeAdditionalColumns[$this->ticketTypeId] ?? [] : [];
-
-        $this->skipRender();
     }
 }

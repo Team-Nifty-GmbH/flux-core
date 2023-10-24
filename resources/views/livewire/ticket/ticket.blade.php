@@ -95,7 +95,7 @@
                         </div>
                     </x-slot:header>
                     <div class="space-y-4">
-                        <x-state wire:model.live="ticket.state" formatters="formatter.state" available="availableStates"/>
+                        <x-state wire:model="ticket.state" formatters="formatter.state" available="availableStates"/>
                         <livewire:features.custom-events :model="\FluxErp\Models\Ticket::class" :id="$ticket['id']" />
                         <x-select
                             :disabled="! user_can('action.ticket.update')"
@@ -129,11 +129,11 @@
                                 <x-label>
                                     {{ __('Author') }}
                                 </x-label>
-                                <x-toggle :left-label=" __('User') " :label=" __('Contact') " wire:model.live="authorType" />
+                                <x-toggle :left-label=" __('User') " :label=" __('Contact') " wire:model.live="authorTypeContact" />
                                 <div class="pl-2">
                                     <x-button href="#" xs outline icon="eye"
-                                              x-bind:class="($wire.get('authorType') !== true || ! ticket.authenticatable_id) && 'cursor-not-allowed'"
-                                              x-bind:href="($wire.get('authorType') === true && ticket.authenticatable_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', ticket.authenticatable_id)" >
+                                              x-bind:class="($wire.get('authorTypeContact') !== true || ! ticket.authenticatable_id) && 'cursor-not-allowed'"
+                                              x-bind:href="($wire.get('authorTypeContact') === true && ticket.authenticatable_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', ticket.authenticatable_id)" >
                                     </x-button>
                                 </div>
                             </div>
