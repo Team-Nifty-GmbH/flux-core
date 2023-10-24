@@ -57,6 +57,7 @@ class OrderList extends Component
         $contact = Contact::query()->whereKey($this->order['contact_id'])->first();
 
         $this->order['client_id'] = $contact->client_id ?: $this->order['client_id'];
+        $this->order['agent_id'] = $contact->agent_id ?: $this->order['agent_id'];
         $this->order['address_invoice_id'] = $contact->address_invoice_id;
         $this->order['address_delivery_id'] = $contact->address_delivery_id;
         $this->order['language_id'] = $contact->language_id ?: $this->order['language_id'];

@@ -26,6 +26,7 @@ class CreateOrderRequest extends BaseFormRequest
                 'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'parent_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
+                'agent_id' => 'integer|nullable|exists:users,id,deleted_at,Null',
                 'contact_id' => [
                     'integer',
                     'nullable',
@@ -60,6 +61,7 @@ class CreateOrderRequest extends BaseFormRequest
                     'integer',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'payment_types'),
                 ],
+                'responsible_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
 
                 'address_delivery' => [
                     'array',
@@ -130,6 +132,9 @@ class CreateOrderRequest extends BaseFormRequest
                     'integer',
                     'exists:address_types,id,deleted_at,NULL',
                 ],
+
+                'users' => 'array',
+                'users.*' => 'required|integer|exists:users,id,deleted_at,NULL',
             ]
         );
     }

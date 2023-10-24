@@ -161,6 +161,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
             ->withPivot('address_id');
     }
 
+    public function agent(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'agent_id');
+    }
+
     public function children(): HasMany
     {
         return $this->hasMany(Order::class, 'parent_id');
@@ -211,9 +216,19 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
         return $this->belongsTo(PriceList::class);
     }
 
+    public function responsibleUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'order_user');
     }
 
     /**

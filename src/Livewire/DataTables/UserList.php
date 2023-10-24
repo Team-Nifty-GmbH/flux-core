@@ -30,11 +30,6 @@ class UserList extends DataTable
         'name' => 'email',
     ];
 
-    public function mount(): void
-    {
-        parent::mount();
-    }
-
     public function getLeftAppends(): array
     {
         return [

@@ -200,6 +200,24 @@
                                 wire:model.live="order.client_id"
                             />
                             <x-select
+                                :label="__('Commission Agent')"
+                                option-value="id"
+                                option-label="label"
+                                :clearable="false"
+                                autocomplete="off"
+                                wire:model="order.agent_id"
+                                :template="[
+                                    'name'   => 'user-option',
+                                ]"
+                                :async-data="[
+                                    'api' => route('search', \FluxErp\Models\User::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'with' => 'media',
+                                    ]
+                                ]"
+                            />
+                            <x-select
                                 :label="__('Price list')"
                                 :options="$priceLists"
                                 option-value="id"
