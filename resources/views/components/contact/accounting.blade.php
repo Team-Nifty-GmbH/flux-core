@@ -101,28 +101,6 @@
         />
     </div>
     <div>
-        <div class="flex justify-end">
-            <x-select
-                x-on:selected="$wire.changeCommissionAgent($event.detail.value); $wire.dispatchTo('features.commission-rates', 'setUserId', [$event.detail.value])"
-                :label="__('Commission Agent')"
-                wire:model="contact.agent_id"
-                option-value="id"
-                option-label="label"
-                :disabled="! user_can('action.contact.update')"
-                :clearable="false"
-                :template="[
-                    'name'   => 'user-option',
-                ]"
-                :async-data="[
-                    'api' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'with' => 'media',
-                    ]
-                ]"
-            />
-        </div>
-
         <livewire:features.commission-rates :userId="null" :contactId="$this->contact['id']"/>
     </div>
 </div>

@@ -22,15 +22,12 @@ class CommissionList extends DataTable
 
     public array $columnLabels = [
         'user.name' => 'Commission Agent',
-        'order.order_number' => 'Order Number',
-        'order_position.name' => 'Order Position',
     ];
 
     public function mount(): void
     {
-        $attributes = ModelInfo::forModel($this->model)->attributes;
-
-        $this->availableCols = $attributes
+        $this->availableCols = ModelInfo::forModel($this->model)
+            ->attributes
             ->pluck('name')
             ->toArray();
 
@@ -42,15 +39,6 @@ class CommissionList extends DataTable
                 'commission_rate' => 'percentage',
             ]
         );
-    }
-
-    public function getBuilder(Builder $builder): Builder
-    {
-        return $builder->with([
-            'user:id,firstname,lastname',
-            'order:id,order_number',
-            'orderPosition:id,name',
-        ]);
     }
 
     public function itemToArray($item): array

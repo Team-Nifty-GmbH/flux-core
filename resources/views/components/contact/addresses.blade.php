@@ -53,6 +53,25 @@
         <x-card class="space-y-2.5">
             <x-select wire:model.live="contact.price_list_id" :clearable="false" :label="__('Price group')" :options="$this->priceLists" option-label="name" option-value="id"/>
             <x-select wire:model.live="contact.payment_type_id" :clearable="false" :label="__('Payment type')" :options="$this->paymentTypes" option-label="name" option-value="id"/>
+            <x-select
+                x-on:selected="$wire.changeCommissionAgent($event.detail.value)"
+                :label="__('Commission Agent')"
+                wire:model="contact.agent_id"
+                option-value="id"
+                option-label="label"
+                :disabled="! user_can('action.contact.update')"
+                :clearable="false"
+                :template="[
+                    'name'   => 'user-option',
+                ]"
+                :async-data="[
+                    'api' => route('search', \FluxErp\Models\User::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'with' => 'media',
+                    ]
+                ]"
+            />
         </x-card>
     </section>
     <livewire:address.address :address="$this->address" :contact="$this->contact" wire:model="addressId" />

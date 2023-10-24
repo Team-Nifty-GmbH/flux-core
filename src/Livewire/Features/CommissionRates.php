@@ -31,8 +31,6 @@ class CommissionRates extends DataTable
 
     public array $columnLabels = [
         'user.name' => 'Commission Agent',
-        'category.name' => 'Category',
-        'product.name' => 'Product',
     ];
 
     public string $orderBy = 'user_id';
@@ -89,15 +87,6 @@ class CommissionRates extends DataTable
                 'commission_rate' => 'percentage',
             ]
         );
-    }
-
-    public function getBuilder(Builder $builder): Builder
-    {
-        return $builder->with([
-            'user:id,firstname,lastname,email',
-            'category:id,name',
-            'product:id,name',
-        ]);
     }
 
     public function getBottomAppends(): array

@@ -25,7 +25,7 @@
         <x-inputs.password :label="__('New password')" wire:model="user.password"/>
         <x-inputs.password :label="__('Repeat password')" wire:model="user.password_confirmation"/>
     </form>
-    <div class="border-b border-gray-200" x-data="{active: 'roles', user: @entangle('user')}">
+    <div class="border-b border-gray-200" x-data="{active: 'roles', user: $wire.entangle('user')}">
         <nav class="mt-2 -mb-px flex space-x-8 pb-5" aria-label="Tabs">
             <div x-on:click="active = 'roles'"
                  x-bind:class="active === 'roles' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500'"

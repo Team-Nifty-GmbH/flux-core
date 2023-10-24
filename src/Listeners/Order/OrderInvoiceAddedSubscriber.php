@@ -80,6 +80,7 @@ class OrderInvoiceAddedSubscriber
                         )
                         ->first()
                         ?->id:
+                    case $commissionRateId = $defaultCommissionRateByContact?->id:
                         break;
                     default:
                         $commissionRateId = null;

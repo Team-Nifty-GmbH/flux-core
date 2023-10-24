@@ -205,7 +205,7 @@
                                 option-label="label"
                                 :clearable="false"
                                 autocomplete="off"
-                                wire:model.live="order.agent_id"
+                                wire:model="order.agent_id"
                                 :template="[
                                     'name'   => 'user-option',
                                 ]"
