@@ -16,6 +16,17 @@
                             :options="$models"
                         />
                     </div>
+                    <div class="sm:col-span-6">
+                        <x-select
+                            label="{{ __('Notifications') }}"
+                            placeholder="{{ __('Roles') }}"
+                            wire:model="ticketType.roles"
+                            :multiselect="true"
+                            :options="$roles"
+                            option-value="id"
+                            option-label="name"
+                        />
+                    </div>
                 </div>
                 <x-errors></x-errors>
             </div>

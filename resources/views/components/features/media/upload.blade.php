@@ -87,7 +87,7 @@
                 <div class="flex items-center justify-between text-sm">
                     <div class="flex w-0 flex-1 items-center">
                         <x-icon name="paper-clip" class="h-4 w-4"/>
-                        <span class="w-0 flex-1 truncate pl-1" x-text="file"></span>
+                        <span class="w-0 flex-1 truncate pl-1" x-text="file.name"></span>
                     </div>
                     <div class="flex flex-shrink-0 space-x-4">
                         <x-button negative x-on:click="$wire.dispatch('removeUpload', { name: '{{ $target }}', index: index })" :label="__('Delete')" />

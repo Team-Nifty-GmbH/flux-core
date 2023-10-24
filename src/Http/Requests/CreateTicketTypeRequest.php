@@ -25,6 +25,8 @@ class CreateTicketTypeRequest extends BaseFormRequest
                     'nullable',
                     new ClassExists(instanceOf: Model::class),
                 ],
+                'roles' => 'array',
+                'roles.*' => 'required|integer|exists:roles,id',
             ],
         );
     }

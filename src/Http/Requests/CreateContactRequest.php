@@ -18,6 +18,7 @@ class CreateContactRequest extends BaseFormRequest
             [
                 'uuid' => 'string|uuid|unique:contacts,uuid',
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
+                'agent_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'payment_type_id' => 'sometimes|integer|nullable|exists:payment_types,id,deleted_at,NULL',
                 'price_list_id' => 'sometimes|integer|nullable|exists:price_lists,id,deleted_at,NULL',
                 'expense_ledger_account_id' => 'sometimes|integer|nullable|exists:ledger_accounts,id',

@@ -29,6 +29,7 @@ class UpdateOrder extends FluxAction
     public function performAction(): Model
     {
         $addresses = Arr::pull($this->data, 'addresses', []);
+        $users = Arr::pull($this->data, 'users');
 
         $order = Order::query()
             ->whereKey($this->data['id'])
@@ -56,6 +57,10 @@ class UpdateOrder extends FluxAction
 
         if ($addresses) {
             $order->addresses()->sync($addresses);
+        }
+
+        if (! is_null($users)) {
+            $order->users()->sync($users);
         }
 
         return $order->withoutRelations()->fresh();

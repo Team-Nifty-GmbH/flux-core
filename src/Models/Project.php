@@ -45,7 +45,7 @@ class Project extends Model implements InteractsWithDataTables
         'project_category_template_id',
     ];
 
-    public string $detailRouteName = 'projects.id?';
+    public string $detailRouteName = 'projects.id';
 
     public string $categoryClass = ProjectTask::class;
 

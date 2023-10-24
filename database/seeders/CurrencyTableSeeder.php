@@ -9,6 +9,10 @@ class CurrencyTableSeeder extends Seeder
 {
     public function run()
     {
-        Currency::factory()->count(5)->create();
+        Currency::factory()->count(3)->create();
+
+        if (! Currency::query()->where('is_default', true)->exists()) {
+            Currency::factory()->create(['is_default' => true]);
+        }
     }
 }
