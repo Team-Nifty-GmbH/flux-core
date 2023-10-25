@@ -30,7 +30,7 @@ class Currency extends Model
         return $this->hasMany(Country::class);
     }
 
-    public static function default(): static
+    public static function default(): ?static
     {
         return static::query()->where('is_default', true)->first();
     }

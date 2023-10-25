@@ -6,7 +6,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="pusher-key" content="{{ config('broadcasting.connections.pusher.key') }}">
 <meta name="pusher-cluster" content="{{ config('broadcasting.connections.pusher.options.cluster', 'mt1') }}">
-<meta name="currency-code" content="{{ \FluxErp\Models\Currency::default()->iso }}">
+<meta name="currency-code" content="{{ \FluxErp\Models\Currency::default()?->iso }}">
 @stack('meta')
 <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
 {!! WireUi::directives()->scripts(absolute: false) !!}
