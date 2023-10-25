@@ -27,8 +27,14 @@ class DashboardTest extends BaseSetup
             public function render(): string
             {
                 return <<<'blade'
-                    <div>Hello from sample component</div>
+                    <div id="sample-component">Hello from sample component</div>
                 blade;
+            }
+
+            public function placeholder()
+            {
+                // because the dashboard renders widgets lazy this will be called
+                return $this->render();
             }
 
             public static function getLabel(): string
@@ -42,8 +48,14 @@ class DashboardTest extends BaseSetup
             public function render(): string
             {
                 return <<<'blade'
-                    <div>Hello from sample component 2</div>
+                    <div id="sample-component-2">Hello from sample component 2</div>
                 blade;
+            }
+
+            public function placeholder()
+            {
+                // because the dashboard renders widgets lazy this will be called
+                return $this->render();
             }
 
             public static function getLabel(): string
