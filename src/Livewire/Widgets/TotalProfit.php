@@ -57,13 +57,13 @@ class TotalProfit extends Component implements UserWidget
         $query = Order::query();
 
         $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
-        $parameters = $timeFrame->dateQueryParameters();
+        $parameters = $timeFrame->dateQueryParameters('invoice_date');
 
         if ($parameters && count($parameters) > 0) {
-            if ($parameters[1] === 'between') {
-                $query->whereBetween($parameters[0], $parameters[2]);
+            if ($parameters['operator'] === 'between') {
+                $query->whereBetween($parameters['column'], $parameters['value']);
             } else {
-                $query->where(...$parameters);
+                $query->where(...array_values($parameters));
             }
         }
 

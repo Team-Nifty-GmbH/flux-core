@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Charts;
 
+use FluxErp\Enums\TimeFrameEnum;
 use Livewire\Component;
 
 class Chart extends Component
@@ -19,7 +20,7 @@ class Chart extends Component
     ];
 
     public ?array $fill = [
-        'opacity' => 1
+        'opacity' => 1,
     ];
 
     public ?array $forecastDataPoints = null;
@@ -52,10 +53,27 @@ class Chart extends Component
 
     public ?array $yaxis = null;
 
+    public string $timeFrame = TimeFrameEnum::LastMonth->name;
+
+    public array $timeFrames;
 
     public function mount(): void
     {
+        $this->timeFrames = array_map(function (TimeFrameEnum $timeFrame) {
+            return [
+                'value' => $timeFrame->name,
+                'label' => __($timeFrame->value),
+            ];
+        }, TimeFrameEnum::cases());
+
         $this->calculateChart();
+    }
+
+    public function boot(): void
+    {
+        if ($this->series) {
+            $this->skipRender();
+        }
     }
 
     public function calculateChart()
@@ -67,11 +85,28 @@ class Chart extends Component
     {
         $public = [];
         $reflection = new \ReflectionClass(Chart::class);
-        $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
+        $properties = array_filter(
+            $reflection->getProperties(\ReflectionProperty::IS_PUBLIC),
+            fn ($property) => ! in_array($property->getName(), ['timeFrame'])
+        );
+
         foreach ($properties as $property) {
-            $public[$property->getName()] = $this->{$property->getName()};
+            $public[$property->getName()] = method_exists($this, 'get' . strtoupper($property->getName()))
+                ? $this->{'get' . strtoupper($property->getName())}()
+                : $this->{$property->getName()};
         }
 
         return array_filter($public);
+    }
+
+    public function updatedTimeFrame(): void
+    {
+        $this->calculateChart();
+        $this->js(
+            <<<'JS'
+                Alpine.$data($el.querySelector('[apex_chart]')).updateData();
+            JS
+        );
+        $this->skipRender();
     }
 }

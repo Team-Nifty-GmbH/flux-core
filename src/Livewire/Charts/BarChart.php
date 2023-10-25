@@ -16,13 +16,13 @@ class BarChart extends Chart
             'horizontal' => false,
             'endingShape' => 'rounded',
             'columnWidth' => '75%',
-        ]
+        ],
     ];
 
     public ?array $stroke = [
         'show' => true,
         'width' => 2,
-        'colors' => ['transparent']
+        'colors' => ['transparent'],
     ];
 
     public bool $showTotals = true;
@@ -34,6 +34,6 @@ class BarChart extends Chart
 
     public function placeholder(): View|Factory
     {
-        return view('flux::livewire.placeholders.horizontal-bar');
+        return view('flux::livewire.placeholders.vertical-bar');
     }
 }

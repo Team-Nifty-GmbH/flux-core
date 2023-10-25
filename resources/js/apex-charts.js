@@ -11,8 +11,12 @@ document.addEventListener('alpine:init', () => {
         init()
         {
             this.getLivewireData();
+            this.$el.setAttribute('apex_chart', '');
             document.addEventListener('livewire:navigating', () => {
                 this.chart.destroy();
+            });
+            this.$watch('options.chart.type', () => {
+                this.chart.updateOptions(this.options);
             });
         },
         renderChart() {
@@ -21,9 +25,41 @@ document.addEventListener('alpine:init', () => {
         },
         getLivewireData() {
             this.$wire.getOptions().then((options) => {
-                this.options = options;
 
-                this.options.series = this.options.series.map((series, index) => {
+                options.series = options.series.map((series, index) => {
+                    if (typeof series !== 'object') {
+                        return series;
+                    }
+                    series.sum = series.data?.reduce((a, b) => a + b, 0);
+
+                    if (! series.hasOwnProperty('color')) {
+                        return series;
+                    }
+
+                    const colorString = series.color.split('-');
+                    const color = colorString[0] || 'blue';
+                    const weight = colorString[1] || 500;
+                    series.color = window.colors[color][weight];
+                    series.colorName = color;
+
+
+                    return series;
+                });
+
+                this.options = Object.assign(this.options, options);
+
+                this.renderChart();
+            });
+        },
+        updateData() {
+            this.$wire.getOptions().then((options) => {
+                options.series = options.series.map((series) => {
+                    if (typeof series !== 'object') {
+                        return series;
+                    }
+
+                    series.sum = series.data.reduce((a, b) => a + b, 0);
+
                     if (! series.hasOwnProperty('color')) {
                         return series;
                     }
@@ -36,10 +72,16 @@ document.addEventListener('alpine:init', () => {
 
                     return series;
                 });
-                this.renderChart();
+                this.options = Object.assign(this.options, options);
+                //
+                // this.chart.updateOptions(this.options)
+                // this.options.series = options.series;
             });
         },
         options: {
+            chart: {
+                type: 'bar',
+            },
             yaxis: {
                 labels: {
                     formatter: function(val) {
