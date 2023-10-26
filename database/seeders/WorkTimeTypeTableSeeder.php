@@ -2,8 +2,6 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\User;
-use FluxErp\Models\Widget;
 use FluxErp\Models\WorkTimeType;
 use Illuminate\Database\Seeder;
 

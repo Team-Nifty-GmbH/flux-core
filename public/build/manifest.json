@@ -35,12 +35,12 @@
     "src": "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-bec9b33d.css",
+    "file": "assets/app-f2b29ec3.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
   "resources/js/alpine.js": {
-    "file": "assets/alpine-7e30df0a.js",
+    "file": "assets/alpine-248274ef.js",
     "imports": [
       "__commonjsHelpers-725317a4.js"
     ],
@@ -48,7 +48,7 @@
     "src": "resources/js/alpine.js"
   },
   "resources/js/apex-charts.js": {
-    "file": "assets/apex-charts-8156ad7e.js",
+    "file": "assets/apex-charts-13f530d5.js",
     "imports": [
       "__commonjsHelpers-725317a4.js"
     ],

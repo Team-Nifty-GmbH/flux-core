@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Charts;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 
-class BarChart extends Chart
+abstract class BarChart extends Chart
 {
     public ?array $chart = [
         'type' => 'bar',

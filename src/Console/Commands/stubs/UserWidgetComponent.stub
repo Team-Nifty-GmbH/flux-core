@@ -17,6 +17,6 @@ class {{class}} extends Component implements UserWidget
 
     public static function getLabel(): string
     {
-        return Str::headline(class_basename(self::class));
+        return __(Str::headline(class_basename(self::class)));
     }
 }

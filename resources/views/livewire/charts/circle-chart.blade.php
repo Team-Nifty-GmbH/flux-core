@@ -2,7 +2,7 @@
 @section('options')
     @parent
     <x-native-select
-        x-model="options.chart.type"
+        x-model="chartType"
         :options="[
                 [
                     'value' => 'donut',

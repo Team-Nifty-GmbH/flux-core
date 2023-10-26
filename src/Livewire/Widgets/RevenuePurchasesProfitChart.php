@@ -14,7 +14,7 @@ class RevenuePurchasesProfitChart extends BarChart implements UserWidget
 {
     public static function getLabel(): string
     {
-        return Str::headline(class_basename(self::class));
+        return __(Str::headline(class_basename(self::class)));
     }
 
     public function calculateChart(): void
@@ -33,71 +33,69 @@ class RevenuePurchasesProfitChart extends BarChart implements UserWidget
             }
         }
 
-        $monthlyRevenue = $this->getSum($baseQuery->clone()
-            ->whereHas('orderType', function ($query) {
-                $query->whereNotIn('order_type_enum', ['purchase', 'purchase-refund']);
-            }), $timeFrame);
-        $monthlyPurchases = $this->getSum($baseQuery->clone()
-            ->whereHas('orderType', function ($query) {
-                $query->whereIn('order_type_enum', ['purchase', 'purchase-refund']);
-            }), $timeFrame);
+        $totalRevenue = $this->getSum(
+            $baseQuery->clone()
+                ->whereHas('orderType', function ($query) {
+                    $query->whereNotIn('order_type_enum', ['purchase', 'purchase-refund']);
+                }),
+            $timeFrame,
+            'invoice_date',
+            'total_net_price'
+        );
+        $totalPurchases = $this->getSum(
+            $baseQuery->clone()
+                ->whereHas('orderType', function ($query) {
+                    $query->whereIn('order_type_enum', ['purchase', 'purchase-refund']);
+                }),
+            $timeFrame,
+            'invoice_date',
+            'total_net_price'
+        );
 
-        $monthlyProfit = [];
-        foreach ($monthlyRevenue as $key => $value) {
-            $monthlyProfit[$key] = (int) bcadd($value, $monthlyPurchases[$key] ?? 0, 2);
+        $totalProfit = [];
+        foreach ($totalRevenue as $key => $value) {
+            $totalProfit[$key] = (int) bcadd($value, $totalPurchases[$key] ?? 0, 2);
         }
 
-        $monthlyPurchases = array_map(fn ($value) => (int) bcmul($value, -1, 2), $monthlyPurchases);
-        $monthlyRevenue = array_map(fn ($value) => (int) $value, $monthlyRevenue);
+        $totalPurchases = array_map(fn ($value) => (int) bcmul($value, -1, 2), $totalPurchases);
+        $totalRevenue = array_map(fn ($value) => (int) $value, $totalRevenue);
 
-        $keys = array_unique(array_merge(array_keys($monthlyRevenue), array_keys($monthlyPurchases), array_keys($monthlyProfit)));
+        $keys = array_unique(array_merge(array_keys($totalRevenue), array_keys($totalPurchases), array_keys($totalProfit)));
         foreach ($keys as $key) {
-            $monthlyRevenue[$key] ??= 0;
-            $monthlyPurchases[$key] ??= 0;
-            $monthlyProfit[$key] ??= 0;
+            $totalRevenue[$key] ??= 0;
+            $totalPurchases[$key] ??= 0;
+            $totalProfit[$key] ??= 0;
         }
 
         // remove all values that are zero in all series
-        foreach ($monthlyRevenue as $key => $value) {
-            if ($value === 0 && $monthlyPurchases[$key] === 0 && $monthlyProfit[$key] === 0) {
-                unset($monthlyRevenue[$key]);
-                unset($monthlyPurchases[$key]);
-                unset($monthlyProfit[$key]);
+        foreach ($totalRevenue as $key => $value) {
+            if ($value === 0 && $totalPurchases[$key] === 0 && $totalProfit[$key] === 0) {
+                unset($totalRevenue[$key], $totalPurchases[$key], $totalProfit[$key]);
             }
         }
 
-        ksort($monthlyRevenue);
-        ksort($monthlyPurchases);
-        ksort($monthlyProfit);
+        ksort($totalRevenue);
+        ksort($totalPurchases);
+        ksort($totalProfit);
 
         $this->series = [
             [
                 'name' => __('Revenue'),
                 'color' => 'emerald',
-                'data' => array_values($monthlyRevenue),
+                'data' => array_values($totalRevenue),
             ],
             [
                 'name' => __('Purchases'),
                 'color' => 'red',
-                'data' => array_values($monthlyPurchases),
+                'data' => array_values($totalPurchases),
             ],
             [
                 'name' => __('Profit'),
                 'color' => 'indigo',
-                'data' => array_values($monthlyProfit),
+                'data' => array_values($totalProfit),
             ],
         ];
 
-        $this->xaxis['categories'] = array_keys($monthlyRevenue);
-    }
-
-    private function getSum(Builder $builder, TimeFrameEnum $timeFrameEnum): array
-    {
-        return $timeFrameEnum
-            ->groupQuery($builder, 'invoice_date')
-            ->addSelect(DB::raw('ROUND(SUM(total_net_price), 2) as total'))
-            ->get()
-            ->pluck('total', 'group_key')
-            ->toArray();
+        $this->xaxis['categories'] = array_keys($totalRevenue);
     }
 }

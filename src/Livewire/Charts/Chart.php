@@ -3,9 +3,11 @@
 namespace FluxErp\Livewire\Charts;
 
 use FluxErp\Enums\TimeFrameEnum;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
-class Chart extends Component
+abstract class Chart extends Component
 {
     public ?array $series = null;
 
@@ -57,6 +59,8 @@ class Chart extends Component
 
     public array $timeFrames;
 
+    abstract public function calculateChart(): void;
+
     public function mount(): void
     {
         $this->timeFrames = array_map(function (TimeFrameEnum $timeFrame) {
@@ -74,11 +78,6 @@ class Chart extends Component
         if ($this->series) {
             $this->skipRender();
         }
-    }
-
-    public function calculateChart()
-    {
-
     }
 
     public function getOptions(): array
@@ -108,5 +107,15 @@ class Chart extends Component
             JS
         );
         $this->skipRender();
+    }
+
+    public function getSum(Builder $builder, TimeFrameEnum $timeFrameEnum, string $dateField, string $aggregateField, ?string $aggregateFunction = 'SUM'): array
+    {
+        return $timeFrameEnum
+            ->groupQuery($builder, 'invoice_date')
+            ->addSelect(DB::raw('ROUND(' . $aggregateFunction .'(' . $aggregateField . '), 2) as total'))
+            ->get()
+            ->pluck('total', 'group_key')
+            ->toArray();
     }
 }

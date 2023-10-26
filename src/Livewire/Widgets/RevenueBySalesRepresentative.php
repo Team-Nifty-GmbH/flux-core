@@ -3,17 +3,40 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Contracts\UserWidget;
+use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Livewire\Charts\CircleChart;
 use FluxErp\Livewire\Charts\DonutChart;
 use FluxErp\Models\Order;
 use Illuminate\Support\Str;
 
-class RevenueBySalesRepresentative extends DonutChart implements UserWidget
+class RevenueBySalesRepresentative extends CircleChart implements UserWidget
 {
+    public ?array $chart = [
+        'type' => 'donut',
+    ];
+
+    public function getPlotOptions(): array
+    {
+        return [
+            'pie' => [
+                'donut' => [
+                    'labels' => [
+                        'show' => true,
+                        'total' => [
+                            'show' => true,
+                            'label' => __('Total'),
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
     public bool $showTotals = false;
 
     public static function getLabel(): string
     {
-        return Str::headline(class_basename(self::class));
+        return __(Str::headline(class_basename(self::class)));
     }
 
     public function calculateChart(): void
@@ -21,10 +44,19 @@ class RevenueBySalesRepresentative extends DonutChart implements UserWidget
         $baseQuery = Order::query()
             ->whereNotNull('invoice_date')
             ->whereNotNull('invoice_number')
-            ->whereNotNull('agent_id')
-            ->where('invoice_date', '>=', now()->subYear());
+            ->whereNotNull('agent_id');
 
-        $revenueBySalesRepresentative = $baseQuery->clone()
+        $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
+        $parameters = $timeFrame->dateQueryParameters('invoice_date');
+        if ($parameters && count($parameters) > 0) {
+            if ($parameters['operator'] === 'between') {
+                $baseQuery->whereBetween($parameters['column'], $parameters['value']);
+            } else {
+                $baseQuery->where(...array_values($parameters));
+            }
+        }
+
+        $revenueBySalesRepresentative = $baseQuery
             ->join('users', 'users.id', '=', 'agent_id')
             ->whereHas('orderType', function ($query) {
                 $query->whereNotIn('order_type_enum', ['purchase', 'purchase-refund']);
