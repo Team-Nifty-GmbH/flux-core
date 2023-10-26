@@ -45,7 +45,7 @@
                         </div>
                     </div>
                 @else
-                    @foreach($formData['sections'] as $sectionIndex => $section)
+                    @foreach($formData as $sectionIndex => $section)
                         <div class="grid grid-cols-6 gap-4">
                             <div class="col-span-1 sm:col-span-1">
                                 <x-input wire:model="formData.{{$sectionIndex}}.name" label="{{__('Name')}}"/>
@@ -69,7 +69,7 @@
                                 <x-checkbox wire:model="formData.{{$sectionIndex}}.compact" label="{{__('Compact')}}"/>
                             </div>
                         </div>
-                        @if(!array_key_exists('fields', $formData['sections'][$sectionIndex]))
+                        @if(!array_key_exists('fields', $formData[$sectionIndex]))
                             <div class="flex justify-center items-center">
                                 <div class="text-gray-400 text-sm">{{ __('No Fields') }}</div>
                                 <div class="col-span-1 sm:col-span-2">
@@ -77,7 +77,7 @@
                                 </div>
                             </div>
                         @else
-                            @foreach($formData['sections'][$sectionIndex]['fields'] as $fieldIndex => $field)
+                            @foreach($formData[$sectionIndex]['fields'] as $fieldIndex => $field)
                                 <div class="grid grid-cols-5 gap-4">
                                     <div class="col-span-1 sm:col-span-1">
                                         <x-input wire:model="formData.{{$sectionIndex}}.fields.{{$fieldIndex}}.name" label="{{__('Name')}}"/>
@@ -104,9 +104,11 @@
                     <div class="col-span-1 sm:col-span-2 pt-2 mt-2 border-t">
                         <x-button wire:click="addSection" label="{{ __('Add Section') }}"/>
                     </div>
+                    <div class="pt-2 mt-2 border-t">
+                        <div>Preview</div>
+
+                    </div>
                 @endif
-
-
             </div>
         </div>
         <x-slot name="footer">
@@ -115,6 +117,9 @@
             </x-button>
             <x-button secondary wire:click="closeModal">
                 {{ __('Close') }}
+            </x-button>
+            <x-button danger wire:click="debug">
+                {{ __('Debug') }}
             </x-button>
         </x-slot>
     </x-modal.card>

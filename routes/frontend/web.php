@@ -4,6 +4,7 @@ use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contacts\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\ContactList;
+use FluxErp\Livewire\DataTables\FormBuilderFormList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\DataTables\ProjectTasksList;
@@ -22,7 +23,6 @@ use FluxErp\Livewire\Settings\Countries;
 use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\CustomerPortal;
 use FluxErp\Livewire\Settings\DiscountGroups;
-use FluxErp\Livewire\Settings\FormBuilder;
 use FluxErp\Livewire\Settings\Languages;
 use FluxErp\Livewire\Settings\Logs;
 use FluxErp\Livewire\Settings\Notifications;
@@ -121,7 +121,7 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/ticket-types', TicketTypes::class)->name('ticket-types')->registersMenuItem();
             Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
             Route::get('/users', Users::class)->name('users')->registersMenuItem();
-            Route::get('/form-builder', \FluxErp\Livewire\DataTables\FormBuilderFormList::class)->name('form-builder')->registersMenuItem();
+            Route::get('/form-builder', FormBuilderFormList::class)->name('form-builder')->registersMenuItem();
         });
 
     Route::name('search')->prefix('search')->group(function () {

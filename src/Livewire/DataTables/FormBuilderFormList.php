@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\FormBuilderForm;
+use FluxErp\Models\FormBuilderSection;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -106,23 +107,53 @@ class FormBuilderFormList extends DataTable
 
     public function saveItem()
     {
-        //        $this->validate([
-        //            'form.name' => 'string|required',
-        //            'form.description' => 'string|required',
-        //            'form.slug' => 'string|required',
-        //            'form.details' => 'boolean',
-        //            'form.start_date' => 'date',
-        //            'form.end_date' => 'date',
-        //        ]);
+        $this->validate([
+            'form.name' => 'string|required',
+            'form.description' => 'string|required',
+            'form.slug' => 'string|required',
+            'form.is_active' => 'boolean',
+            'form.start_date' => 'date|nullable',
+            'form.end_date' => 'date|nullable',
+            'formData' => 'array',
+            'formData.*.name' => 'string|required',
+            'formData.*.ordering' => 'integer|required',
+            'formData.*.columns' => 'integer|required',
+            'formData.*.description' => 'string|required',
+            'formData.*.icon' => 'string|required',
+            'formData.*.aside' => 'boolean',
+            'formData.*.compact' => 'boolean',
+            'formData.*.fields' => 'array',
+            'formData.*.fields.*.name' => 'string|required',
+            'formData.*.fields.*.description' => 'string|required',
+            'formData.*.fields.*.type' => 'string|required',
+            'formData.*.fields.*.ordering' => 'integer|required',
+            'formData.*.fields.*.options' => 'boolean',
+        ]);
 
-        //        dd($this->form);
+//        dd($this->form);
 
         $this->showModal = false;
 
         if (isset($this->form['id'])) {
-            FormBuilderForm::find($this->form['id'])->update($this->form);
+            $formBuilderForm = FormBuilderForm::find($this->form['id'])->update($this->form);
         } else {
-            FormBuilderForm::create($this->form);
+            $formBuilderForm = FormBuilderForm::create($this->form);
+        }
+dd($formBuilderForm);
+        foreach ($this->formData as $section) {
+            if ($section['id'] !== null) {
+                $formBuilderSection = FormBuilderSection::find($section['id'])->update($section);
+            } else {
+                $formBuilderSection = FormBuilderSection::create($section);
+            }
+
+            foreach ($section['fields'] as $field) {
+                if ($field['id'] !== null) {
+                    $formBuilderSection->fields()->find($field['id'])->update($field);
+                } else {
+                    $formBuilderSection->fields()->create($field);
+                }
+            }
         }
 
         $this->resetForm();
@@ -130,7 +161,7 @@ class FormBuilderFormList extends DataTable
 
     public function addSection()
     {
-        $this->formData['sections'][] = [
+        $this->formData[] = [
             'id' => null,
             'name' => null,
             'ordering' => null,
@@ -142,19 +173,15 @@ class FormBuilderFormList extends DataTable
         ];
     }
 
-    public function editSection()
-    {
-
-    }
-
     public function deleteSection()
     {
 
     }
 
-    public function addFormField($index)
+    public function addFormField(int $index)
     {
-        $this->formData['sections'][$index]['fields'][] = [
+
+        $this->formData[$index]['fields'][] = [
             'id' => null,
             'name' => null,
             'description' => null,
@@ -164,14 +191,14 @@ class FormBuilderFormList extends DataTable
         ];
     }
 
-    public function editFormFiled()
+    public function saveFormField()
     {
 
     }
 
-    public function deleteFormField()
+    public function deleteFormField(int $index)
     {
-
+        unset($this->formData[$index]);
     }
 
     public function resetForm(): void
@@ -180,7 +207,6 @@ class FormBuilderFormList extends DataTable
             'name' => null,
             'description' => null,
             'slug' => null,
-            'details' => null,
             'is_active' => true,
             'start_date' => null,
             'end_date' => null,
@@ -192,5 +218,10 @@ class FormBuilderFormList extends DataTable
         $this->showModal = false;
         $this->formData = [];
         $this->resetForm();
+    }
+
+    public function debug()
+    {
+        dd($this->form, $this->formData);
     }
 }
