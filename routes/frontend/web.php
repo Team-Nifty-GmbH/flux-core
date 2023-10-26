@@ -10,6 +10,7 @@ use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\DataTables\ProjectTasksList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
 use FluxErp\Livewire\DataTables\TicketList;
+use FluxErp\Livewire\DataTables\TransactionList;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Product\Product;
@@ -91,8 +92,9 @@ Route::middleware(['auth:web'])->group(function () {
 
     Route::name('accounting.')->prefix('accounting')
         ->group(function () {
-            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'square-3-stack-3d');
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'banknotes');
             Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
+            Route::get('/transactions', TransactionList::class)->name('transactions')->registersMenuItem();
         });
 
     Route::get('/my-profile', Profile::class)->name('my-profile');

@@ -19,5 +19,8 @@ class BankConnectionTableSeeder extends Seeder
                 'contact_id' => $contact->id,
             ]);
         }
+
+        // bank connection with no contact
+        BankConnection::factory()->count(3)->create();
     }
 }

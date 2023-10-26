@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
@@ -10,14 +11,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Scout\Searchable;
 use TeamNiftyGmbH\DataTable\Casts\Money;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Transaction extends Model
+class Transaction extends Model implements InteractsWithDataTables
 {
-    use HasFrontendAttributes, HasUserModification, HasUuid, Searchable;
+    use HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, Searchable;
 
     protected $casts = [
         'uuid' => 'string',
+        'value_date' => 'date',
+        'booking_date' => 'date',
         'amount' => Money::class,
         'created_at' => 'datetime',
     ];
@@ -26,7 +30,7 @@ class Transaction extends Model
         'id',
     ];
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
@@ -81,5 +85,25 @@ class Transaction extends Model
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Transaction::class, 'parent_id');
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->counterpart_name;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->purpose;
+    }
+
+    public function getUrl(): ?string
+    {
+        return null;
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return null;
     }
 }

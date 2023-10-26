@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
@@ -11,7 +12,7 @@ use Laravel\Scout\Searchable;
 
 class Account extends Model
 {
-    use HasUserModification, HasUuid, Searchable, SoftDeletes;
+    use HasPackageFactory, HasUserModification, HasUuid, Searchable, SoftDeletes;
 
     protected $casts = [
         'uuid' => 'string',

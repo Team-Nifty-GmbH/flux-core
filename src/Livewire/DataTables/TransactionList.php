@@ -4,26 +4,68 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Transaction;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TransactionList extends DataTable
 {
     protected string $model = Transaction::class;
 
+    protected string $view = 'flux::livewire.transactions.transactions';
+
     public array $enabledCols = [
+        'value_date',
         'amount',
+        'counterpart_name',
         'purpose',
-        'created_at',
+        'order.invoice_number',
     ];
 
-    public function mount(): void
+    public array $formatters = [
+        'amount' => 'coloredMoney',
+    ];
+
+    public array $availableRelations = ['*'];
+
+    public bool $showFilterInputs = true;
+
+    public array $aggregatable = [
+        'amount',
+    ];
+
+    public string $search = '';
+
+    public function getTableActions(): array
     {
-        $attributes = ModelInfo::forModel($this->model)->attributes;
+        return [
+            DataTableButton::make()
+                ->label(__('Show unassigned payments'))
+                ->color('primary')
+                ->attributes([
+                    'x-on:click' => '$wire.showUnassignedPayments()',
+                ]),
+        ];
+    }
 
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
+    public function showTransaction(Transaction $transaction): array
+    {
+        return $transaction->toArray();
+    }
 
-        parent::mount();
+    public function showUnassignedPayments(): void
+    {
+        $this->userFilters = array_merge(
+            $this->userFilters,
+            [
+                [
+                    [
+                        'column' => 'order_id',
+                        'operator' => 'is null',
+                        'value' => '',
+                    ],
+                ],
+            ],
+        );
+
+        $this->loadData();
     }
 }
