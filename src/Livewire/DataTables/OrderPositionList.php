@@ -13,6 +13,14 @@ class OrderPositionList extends DataTable
 
     public bool $showFilterInputs = true;
 
+    public array $availableRelations = ['*'];
+
+    public array $sortable = ['*'];
+
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
+
     public array $enabledCols = [
         'product_number',
         'order.order_number',
@@ -21,26 +29,6 @@ class OrderPositionList extends DataTable
         'amount',
         'total_net_price',
     ];
-
-    public array $aggregatable = [
-        'total_net_price',
-        'total_gross_price',
-        'amount',
-    ];
-
-    public array $sortable = ['*'];
-
-    public array $availableRelations = ['*'];
-
-    public function mount(): void
-    {
-        $this->availableCols = ModelInfo::forModel(OrderPosition::class)
-            ->attributes
-            ->pluck('name')
-            ->toArray();
-
-        parent::mount();
-    }
 
     public function getBuilder(Builder $builder): Builder
     {
