@@ -40,7 +40,7 @@ jobs:
         run: |
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
-          git add public/build
+          git add -f public/build
           git commit -m "Build assets using Vite"
           git push --force https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git main
         env:
