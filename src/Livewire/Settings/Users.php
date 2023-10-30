@@ -31,6 +31,10 @@ class Users extends Component
 
     public function show(int $id = null): void
     {
+        if ($this->showUserModal) {
+            return;
+        }
+
         $this->userId = $id ?? 0;
         $this->dispatch('show', $id)->to('settings.user-edit');
         $this->showUserModal = true;

@@ -47,6 +47,7 @@ class CreateOrder extends FluxAction
         $contactId = $this->data['contact_id'] ?? $addressInvoice?->contact_id;
         $contact = Contact::query()->whereKey($contactId)->first();
 
+        $this->data['agent_id'] = $this->data['agent_id'] ?? $contact->agent_id;
         $this->data['approval_user_id'] = $this->data['approval_user_id'] ?? $contact->approval_user_id;
         $this->data['bank_connection_id'] = $this->data['bank_connection_id']
             ?? $contact->bankConnections()->first()?->id;
@@ -61,6 +62,8 @@ class CreateOrder extends FluxAction
             ?? $contact->payment_reminder_days_3;
 
         $this->data['contact_id'] = $contactId;
+
+        $users = Arr::pull($this->data, 'users');
 
         $order = new Order($this->data);
         if ($order->shipping_costs_net_price) {
@@ -79,6 +82,10 @@ class CreateOrder extends FluxAction
 
         if ($addresses) {
             $order->addresses()->attach($addresses);
+        }
+
+        if ($users) {
+            $order->users()->sync($users);
         }
 
         return $order->refresh();

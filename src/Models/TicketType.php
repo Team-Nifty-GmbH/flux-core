@@ -9,6 +9,7 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TicketType extends Model
@@ -22,6 +23,11 @@ class TicketType extends Model
     public array $translatable = [
         'name',
     ];
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'role_ticket_type');
+    }
 
     public function tickets(): HasMany
     {

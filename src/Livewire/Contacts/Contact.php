@@ -181,6 +181,23 @@ class Contact extends Component
         return false;
     }
 
+    public function changeCommissionAgent(int $id): void
+    {
+        try {
+            UpdateContact::make([
+                'id' => $this->contact['id'],
+                'agent_id' => $id,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        $this->skipRender();
+    }
+
     public function contactUpdatedEvent(array $data): void
     {
         $this->contact = $data['model'];

@@ -20,6 +20,25 @@
             </h1>
         </div>
     </div>
+    <div class="justify-end mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
+        @if(user_can('action.ticket.delete') && $ticket['id'])
+            <x-button negative label="{{ __('Delete') }}" x-on:click="
+                        window.$wireui.confirmDialog({
+                            title: '{{ __('Delete ticket') }}',
+                            description: '{{ __('Do you really want to delete this ticket?') }}',
+                            icon: 'error',
+                            accept: {
+                                label: '{{ __('Delete') }}',
+                                method: 'delete',
+                            },
+                            reject: {
+                                label: '{{ __('Cancel') }}',
+                            }
+                        }, $wire.__instance.id)
+                    "/>
+        @endif
+        <x-button primary :label="__('Save')" wire:click="save"/>
+    </div>
     <div class="w-full pt-6 lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
         <section class="relative basis-10/12">
             <div class="pr-6 md:flex md:space-x-12">
@@ -48,9 +67,9 @@
                             <x-tabs
                                 wire:model.live="tab"
                                 :tabs="[
-                                    'features.comments.comments' => __('Comments'),
-                                    'features.activities' => __('Activities'),
-                                ]"
+                                        'features.comments.comments' => __('Comments'),
+                                        'features.activities' => __('Activities'),
+                                    ]"
                             >
                                 <livewire:is
                                     wire:key="{{ uniqid() }}"
@@ -76,10 +95,11 @@
                         </div>
                     </x-slot:header>
                     <div class="space-y-4">
-                        <x-state wire:model.live="ticketState" formatters="formatter.state" avialable="availableStates"/>
+                        <x-state wire:model="ticket.state" formatters="formatter.state" available="availableStates"/>
                         <livewire:features.custom-events :model="\FluxErp\Models\Ticket::class" :id="$ticket['id']" />
                         <x-select
                             :disabled="! user_can('action.ticket.update')"
+                            x-on:selected="$wire.updateAdditionalColumns($event.detail.value)"
                             :label="__('Ticket Type')"
                             wire:model.live="ticket.ticket_type_id"
                             option-value="id"
@@ -87,14 +107,14 @@
                             :options="$ticketTypes"
                         />
                         <x-select
-                            :disabled="! user_can('action.ticket.update')"
+                            :disabled="$ticket['id'] && ! user_can('action.ticket.update')"
                             multiselect
                             :label="__('Assigned')"
                             wire:model.live="ticket.users"
                             option-value="id"
                             option-label="label"
                             :template="[
-                                'name'   => 'user-option',
+                                'name' => 'user-option',
                             ]"
                             :async-data="[
                                 'api' => route('search', \FluxErp\Models\User::class),
@@ -109,14 +129,16 @@
                                 <x-label>
                                     {{ __('Author') }}
                                 </x-label>
+                                <x-toggle :left-label=" __('User') " :label=" __('Contact') " wire:model.live="authorTypeContact" />
                                 <div class="pl-2">
-                                    <x-button href="#" xs outline icon="eye" x-bind:href="'{{ route('contacts.id?', ':id') }}'.replace(':id', ticket.authenticatable.contact_id)">
+                                    <x-button href="#" xs outline icon="eye"
+                                              x-bind:class="($wire.get('authorTypeContact') !== true || ! ticket.authenticatable_id) && 'cursor-not-allowed'"
+                                              x-bind:href="($wire.get('authorTypeContact') === true && ticket.authenticatable_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', ticket.authenticatable_id)" >
                                     </x-button>
                                 </div>
                             </div>
                             <x-select
                                 :disabled="! user_can('action.ticket.update')"
-                                x-on:selected="$wire.changeAuthor($event.detail.value)"
                                 class="pb-4"
                                 wire:model="ticket.authenticatable_id"
                                 option-value="id"
@@ -130,7 +152,7 @@
                                     'api' => route('search', $ticket['authenticatable_type'] ?: \FluxErp\Models\Address::class),
                                     'method' => 'POST',
                                     'params' => [
-                                        'with' => 'contact.media',
+                                        'with' => $ticket['authenticatable_type'] === \FluxErp\Models\Address::class ? 'contact.media' : 'media',
                                     ]
                                 ]"
                             />

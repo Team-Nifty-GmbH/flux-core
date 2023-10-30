@@ -17,9 +17,6 @@ return [
         \FluxErp\Models\Ticket::class => [
             'created' => \FluxErp\Notifications\Ticket\TicketCreatedNotification::class,
         ],
-        \FluxErp\Models\Pivots\CalendarEventInvite::class => [
-            'created' => \FluxErp\Notifications\Pivots\CalendarEventInvites\CalendarEventInviteCreated::class,
-        ],
     ],
 
     /*

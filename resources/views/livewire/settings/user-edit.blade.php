@@ -25,7 +25,7 @@
         <x-inputs.password :label="__('New password')" wire:model="user.password"/>
         <x-inputs.password :label="__('Repeat password')" wire:model="user.password_confirmation"/>
     </form>
-    <div class="border-b border-gray-200" x-data="{active: 'roles'}">
+    <div class="border-b border-gray-200" x-data="{active: 'roles', user: $wire.entangle('user')}">
         <nav class="mt-2 -mb-px flex space-x-8 pb-5" aria-label="Tabs">
             <div x-on:click="active = 'roles'"
                  x-bind:class="active === 'roles' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500'"
@@ -36,6 +36,13 @@
                  x-bind:class="active === 'permissions' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500'"
                  class="cursor-pointer whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium hover:border-gray-200 hover:text-gray-700">
                 {{ __('Permissions') }}
+            </div>
+            <div x-on:click="active = 'commission-rates'"
+                 x-bind:class="active === 'commission-rates' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500'"
+                 class="cursor-pointer whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium hover:border-gray-200 hover:text-gray-700"
+                 x-show="user.id"
+            >
+                {{ __('Commission Rates') }}
             </div>
         </nav>
         @if(user_can('api.roles.{id}.get') && user_can('action.role.update-users'))
@@ -81,5 +88,8 @@
                 </div>
             </div>
         @endif
+        <div x-show="active === 'commission-rates'">
+            <livewire:features.commission-rates :userId="$user['id'] ?? null" :contactId="null" cache-key="settings.users.commission-rates"/>
+        </div>
     </div>
 </div>

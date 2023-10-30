@@ -76,6 +76,16 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
         return $this->hasMany(User::class, 'parent_id');
     }
 
+    public function commissionRates(): HasMany
+    {
+        return $this->hasMany(CommissionRate::class);
+    }
+
+    public function commissions(): HasMany
+    {
+        return $this->hasMany(Commission::class);
+    }
+
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);

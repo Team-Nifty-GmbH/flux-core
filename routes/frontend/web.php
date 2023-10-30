@@ -3,6 +3,7 @@
 use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contacts\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\DataTables\CommissionList;
 use FluxErp\Livewire\DataTables\ContactList;
 use FluxErp\Livewire\DataTables\FormBuilderFormList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
@@ -87,6 +88,12 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers')->registersMenuItem();
             Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
             Route::get('/{id}', Product::class)->name('id');
+        });
+
+    Route::name('accounting.')->prefix('accounting')
+        ->group(function () {
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'square-3-stack-3d');
+            Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
         });
 
     Route::get('/my-profile', Profile::class)->name('my-profile');
