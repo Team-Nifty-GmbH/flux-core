@@ -34,4 +34,16 @@ class OrderPositionList extends DataTable
     {
         return $builder->orderBy('order_id');
     }
+
+    public function getFormatters(): array
+    {
+        return array_merge(
+            parent::getFormatters(),
+            [
+                'total_net_price' => 'coloredMoney',
+                'total_gross_price' => 'coloredMoney',
+                'margin' => 'coloredMoney',
+            ]
+        );
+    }
 }

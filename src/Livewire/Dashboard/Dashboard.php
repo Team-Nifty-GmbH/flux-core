@@ -55,7 +55,7 @@ class Dashboard extends Component
             auth()->user()->widgets()->createMany(array_filter($newItemIds));
         }
 
-        $this->widgets();
+        $this->skipRender();
     }
 
     public function updateWidget(array $widget): void

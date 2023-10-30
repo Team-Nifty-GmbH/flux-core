@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -10,10 +11,11 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use TeamNiftyGmbH\DataTable\Casts\Money;
 
 class Price extends Model
 {
-    use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
     protected $appends = [
         'is_net',
@@ -21,6 +23,7 @@ class Price extends Model
 
     protected $casts = [
         'uuid' => 'string',
+        'price' => Money::class,
     ];
 
     protected $guarded = [

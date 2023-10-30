@@ -112,7 +112,7 @@ abstract class Chart extends Component
     public function getSum(Builder $builder, TimeFrameEnum $timeFrameEnum, string $dateField, string $aggregateField, ?string $aggregateFunction = 'SUM'): array
     {
         return $timeFrameEnum
-            ->groupQuery($builder, 'invoice_date')
+            ->groupQuery($builder, $dateField)
             ->addSelect(DB::raw('ROUND(' . $aggregateFunction .'(' . $aggregateField . '), 2) as total'))
             ->get()
             ->pluck('total', 'group_key')
