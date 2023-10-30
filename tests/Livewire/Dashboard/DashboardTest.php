@@ -2,11 +2,11 @@
 
 namespace FluxErp\Tests\Livewire\Dashboard;
 
-use FluxErp\Contracts\UserWidget;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use FluxErp\Models\Widget;
 use FluxErp\Tests\Livewire\BaseSetup;
+use FluxErp\Traits\Widgetable;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Component;
 use Livewire\Livewire;
@@ -22,13 +22,21 @@ class DashboardTest extends BaseSetup
     {
         parent::setUp();
 
-        $this->components[] = new class extends Component implements UserWidget
+        $this->components[] = new class extends Component
         {
+            use Widgetable;
+
             public function render(): string
             {
                 return <<<'blade'
-                    <div>Hello from sample component</div>
+                    <div id="sample-component">Hello from sample component</div>
                 blade;
+            }
+
+            public function placeholder()
+            {
+                // because the dashboard renders widgets lazy this will be called
+                return $this->render();
             }
 
             public static function getLabel(): string
@@ -37,13 +45,21 @@ class DashboardTest extends BaseSetup
             }
         };
 
-        $this->components[] = new class extends Component implements UserWidget
+        $this->components[] = new class extends Component
         {
+            use Widgetable;
+
             public function render(): string
             {
                 return <<<'blade'
-                    <div>Hello from sample component 2</div>
+                    <div id="sample-component-2">Hello from sample component 2</div>
                 blade;
+            }
+
+            public function placeholder()
+            {
+                // because the dashboard renders widgets lazy this will be called
+                return $this->render();
             }
 
             public static function getLabel(): string

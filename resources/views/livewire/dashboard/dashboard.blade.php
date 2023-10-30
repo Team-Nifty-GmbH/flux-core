@@ -82,7 +82,7 @@
                             <x-button.circle class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" x-on:click="edit($el.parentNode.parentNode.dataset.id)" primary icon="pencil"/>
                             <x-button.circle class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative x-on:click="removeWidget($el)"/>
                         </div>
-                        <livewire:is :component="$widget['component_name']" wire:key="{{ uniqid() }}" />
+                        <livewire:is lazy :component="$widget['component_name']" wire:key="{{ uniqid() }}" />
                     </div>
                 @empty
                     <div class="col-span-12 h-96"></div>

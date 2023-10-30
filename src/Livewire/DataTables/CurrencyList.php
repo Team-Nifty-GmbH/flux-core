@@ -15,15 +15,11 @@ class CurrencyList extends DataTable
         'iso',
         'symbol',
     ];
+    public array $availableRelations = ['*'];
 
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel($this->model)->attributes;
+    public array $sortable = ['*'];
 
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
+    public array $aggregatable = ['*'];
 
-        parent::mount();
-    }
+    public array $availableCols = ['*'];
 }

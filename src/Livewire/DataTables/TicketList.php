@@ -33,11 +33,15 @@ class TicketList extends DataTable
 
     public bool $showFilterInputs = true;
 
-    public array $availableRelations = ['*'];
-
     protected string $model = Ticket::class;
 
+    public array $availableRelations = ['*'];
+
     public array $sortable = ['*'];
+
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 
     public array $ticket;
 
@@ -90,12 +94,6 @@ class TicketList extends DataTable
             ->whereNull('model_id')
             ->select(['id', 'name', 'model_type', 'model_id', 'field_type', 'values'])
             ->get()
-            ->toArray();
-
-        $attributes = ModelInfo::forModel(Ticket::class)->attributes;
-
-        $this->availableCols = $attributes
-            ->pluck('name')
             ->toArray();
 
         parent::mount();

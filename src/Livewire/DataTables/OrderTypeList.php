@@ -19,15 +19,13 @@ class OrderTypeList extends DataTable
         'print_layouts',
     ];
 
-    public array $columnLabels = [
-        'name' => 'Name',
-        'description' => 'Description',
-        'client.name' => 'Client',
-        'order_type_enum' => 'Order Type',
-        'print_layouts' => 'Print Layouts',
-    ];
+    public array $availableRelations = ['*'];
 
     public array $sortable = ['*'];
+
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 
     public function getTableActions(): array
     {
