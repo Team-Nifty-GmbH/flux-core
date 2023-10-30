@@ -2,25 +2,22 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use FluxErp\Contracts\UserWidget;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
+use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Component;
 
-class TotalProfit extends Component implements UserWidget
+class TotalProfit extends Component
 {
+    use Widgetable;
+
     public float $sum = 0;
 
     public string $timeFrame = TimeFrameEnum::LastMonth->name;
-
-    public static function getLabel(): string
-    {
-        return __('Total Profit');
-    }
 
     public function mount(): void
     {

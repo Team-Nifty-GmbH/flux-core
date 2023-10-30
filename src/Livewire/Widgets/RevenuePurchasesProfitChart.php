@@ -2,20 +2,14 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use FluxErp\Contracts\UserWidget;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Charts\BarChart;
 use FluxErp\Models\Order;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use FluxErp\Traits\Widgetable;
 
-class RevenuePurchasesProfitChart extends BarChart implements UserWidget
+class RevenuePurchasesProfitChart extends BarChart
 {
-    public static function getLabel(): string
-    {
-        return __(Str::headline(class_basename(self::class)));
-    }
+    use Widgetable;
 
     public function calculateChart(): void
     {
@@ -54,10 +48,10 @@ class RevenuePurchasesProfitChart extends BarChart implements UserWidget
 
         $totalProfit = [];
         foreach ($totalRevenue as $key => $value) {
-            $totalProfit[$key] = (int) bcadd($value, $totalPurchases[$key] ?? 0, 2);
+            $totalProfit[$key] = (int) bcadd($value, $totalPurchases[$key] ?? 0, 0);
         }
 
-        $totalPurchases = array_map(fn ($value) => (int) bcmul($value, -1, 2), $totalPurchases);
+        $totalPurchases = array_map(fn ($value) => (int) bcmul($value, -1, 0), $totalPurchases);
         $totalRevenue = array_map(fn ($value) => (int) $value, $totalRevenue);
 
         $keys = array_unique(array_merge(array_keys($totalRevenue), array_keys($totalPurchases), array_keys($totalProfit)));

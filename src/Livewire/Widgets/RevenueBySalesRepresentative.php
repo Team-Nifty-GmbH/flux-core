@@ -2,15 +2,16 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use FluxErp\Contracts\UserWidget;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Charts\CircleChart;
 use FluxErp\Livewire\Charts\DonutChart;
 use FluxErp\Models\Order;
-use Illuminate\Support\Str;
+use FluxErp\Traits\Widgetable;
 
-class RevenueBySalesRepresentative extends CircleChart implements UserWidget
+class RevenueBySalesRepresentative extends CircleChart
 {
+    use Widgetable;
+
     public ?array $chart = [
         'type' => 'donut',
     ];
@@ -33,11 +34,6 @@ class RevenueBySalesRepresentative extends CircleChart implements UserWidget
     }
 
     public bool $showTotals = false;
-
-    public static function getLabel(): string
-    {
-        return __(Str::headline(class_basename(self::class)));
-    }
 
     public function calculateChart(): void
     {
