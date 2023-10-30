@@ -25,11 +25,7 @@
         save() {
             this.editMode = false;
             const activeWidgets = this.widgetsSortable.toArray();
-            $wire.saveWidgets(activeWidgets.filter(item => !this.removedIds.includes(item))).then(
-                () => {
-                    window.location.reload()
-                }
-            );
+            $wire.saveWidgets(activeWidgets.filter(item => !this.removedIds.includes(item)));
         },
         edit(widget) {
             this.widget = this.widgets.find(w => w.id == widget);
