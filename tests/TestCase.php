@@ -39,6 +39,7 @@ abstract class TestCase extends BaseTestCase
 
         config([
             'auth.defaults.guard' => 'sanctum',
+            'database.connections.mysql.collation' => 'utf8mb4_unicode_ci'
         ]);
 
         if (! file_exists(public_path('flux'))) {
