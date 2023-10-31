@@ -35,6 +35,7 @@ abstract class TestCase extends BaseTestCase
             $dotenv->load();
         }
 
+        $this->refreshApplication();
         config([
             'database.connections.mysql.collation' => 'utf8mb4_unicode_ci',
         ]);
