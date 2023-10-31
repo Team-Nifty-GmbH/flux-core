@@ -18,7 +18,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
-use Livewire\Attributes\Reactive;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use WireUi\Traits\Actions;
@@ -55,6 +54,7 @@ class Address extends Component
         'edit',
         'duplicate',
         'addAddress',
+        'addressSelected',
     ];
 
     protected function getListeners(): array
@@ -182,7 +182,14 @@ class Address extends Component
     {
         $this->loginPassword = '';
 
-        $this->getAddress(($this->address['id'] ?? false) ?: $this->addresses[0]['id']);
+        $this->getAddress(
+            ($this->address['id'] ?? false) ?:
+                AddressModel::query()
+                    ->where('contact_id', $this->contact['id'])
+                    ->orderBy('is_main_address', 'desc')
+                    ->first()
+                    ?->id
+        );
 
         $this->edit = false;
 
@@ -241,6 +248,11 @@ class Address extends Component
         $this->edit = true;
 
         $this->skipRender();
+    }
+
+    public function addressSelected(int $id): void
+    {
+        $this->getAddress($id);
     }
 
     public function addressUpdatedEvent(array $data): void

@@ -87,14 +87,21 @@ class Contact extends Component
         $this->avatar = $contact->getAvatarUrl();
 
         $this->contact = $contact->toArray();
-        $this->contact['main_address'] = $contact->addresses
+
+        $mainAddress = $contact->addresses
             ->where('is_main_address', true)
-            ->first()
-            ->toArray();
+            ->first() ?:
+            $contact->addresses->first();
+
+        if (! $mainAddress) {
+            abort(404);
+        }
+
+        $this->contact['main_address'] = $mainAddress->toArray();
 
         $this->address = $this->addressId ?
             $contact->addresses()->whereKey($this->addressId)->firstOrFail()->toArray() :
-            $contact->addresses->where('is_main_address', true)->first()->toArray();
+            $mainAddress->toArray();
 
         $this->priceLists = PriceList::query()->select(['id', 'name'])->get()->toArray();
         $this->paymentTypes = PaymentType::query()->select(['id', 'name'])->get()->toArray();
