@@ -35,11 +35,14 @@ abstract class TestCase extends BaseTestCase
             $dotenv->load();
         }
 
+        config([
+            'database.connections.mysql.collation' => 'utf8mb4_unicode_ci',
+        ]);
+
         parent::setUp();
 
         config([
             'auth.defaults.guard' => 'sanctum',
-            'database.connections.mysql.collation' => 'utf8mb4_unicode_ci'
         ]);
 
         if (! file_exists(public_path('flux'))) {
