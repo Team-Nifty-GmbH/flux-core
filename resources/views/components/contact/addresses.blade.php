@@ -5,6 +5,7 @@
         selectAddress(address) {
             this.address = address;
             $wire.addressId = address.id;
+            $dispatch('address-selected', { id: address.id });
         },
     }"
     x-on:address-deleted.window="addresses = addresses.filter(address => address.id !== $event.detail.id); selectAddress(addresses[0]);"
