@@ -26,6 +26,8 @@ class OrderPositions extends OrderPositionList
 
     protected string $view = 'flux::livewire.order.order-positions';
 
+    public bool $isFilterable = true;
+
     public int $orderId;
 
     #[Modelable]
@@ -160,6 +162,7 @@ class OrderPositions extends OrderPositionList
             $orderPosition['amount'] = 1;
             $orderPosition['order_id'] = $this->orderId;
             $orderPosition['client_id'] = $this->order['client_id'];
+            $orderPosition['price_list_id'] = $this->order['price_list_id'];
             $orderPosition['is_net'] = $this->order['price_list']['is_net'];
             $orderPosition['is_free_text'] = false;
             $orderPosition['is_alternative'] = false;

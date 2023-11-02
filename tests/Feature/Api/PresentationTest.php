@@ -45,8 +45,8 @@ class PresentationTest extends BaseSetup
 
         $this->permissions = [
             'show' => Permission::findOrCreate('api.presentations.{id}.get'),
-            'preview' => Permission::findOrCreate('api.presentations.{id}.get.preview'),
-            'pdf' => Permission::findOrCreate('api.presentations.{id}.get.pdf'),
+            'preview' => Permission::findOrCreate('api.presentations.{id}.preview.get'),
+            'pdf' => Permission::findOrCreate('api.presentations.{id}.pdf.get'),
             'index' => Permission::findOrCreate('api.presentations.get'),
             'create' => Permission::findOrCreate('api.presentations.post'),
             'update' => Permission::findOrCreate('api.presentations.put'),
