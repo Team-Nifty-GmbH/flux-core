@@ -40,7 +40,7 @@
     "src": "resources/css/app.css"
   },
   "resources/js/alpine.js": {
-    "file": "assets/alpine-dc1a9ce1.js",
+    "file": "assets/alpine-2198f208.js",
     "imports": [
       "__commonjsHelpers-725317a4.js"
     ],
