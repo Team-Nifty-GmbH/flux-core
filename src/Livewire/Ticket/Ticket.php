@@ -165,7 +165,7 @@ class Ticket extends Component
         $this->redirect(route('tickets'));
     }
 
-    public function updatedAuthorType(): void
+    public function updatedAuthorTypeContact(): void
     {
         $this->ticket['authenticatable_type'] = $this->authorTypeContact ? Address::class : User::class;
         $this->ticket['authenticatable_id'] = null;

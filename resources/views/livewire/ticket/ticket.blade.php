@@ -48,6 +48,28 @@
                             <x-input :label="__('Title')" wire:model="ticket.title" :disabled="true"/>
                             <x-textarea :label="__('Description')" wire:model="ticket.description" :disabled="true"/>
                         </x-card>
+                        <div x-cloak x-show="additionalColumns?.length > 0">
+                            <x-card>
+                                <x-slot:header>
+                                    <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
+                                        <x-label>
+                                            {{ __('Additional columns') }}
+                                        </x-label>
+                                    </div>
+                                </x-slot:header>
+                                <div class="flex flex-col gap-4">
+                                    <template x-for="additionalColumn in additionalColumns">
+                                        <div>
+                                            <x-label
+                                                x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
+                                                x-bind:for="additionalColumn.name"
+                                            />
+                                            <x-input x-bind:class="(additionalColumn.field_type === 'color' || additionalColumn.field_type === 'checkbox') && '!w-auto'" x-bind:type="additionalColumn.field_type" x-model="ticket[additionalColumn.name]" :disabled="true"/>
+                                        </div>
+                                    </template>
+                                </div>
+                            </x-card>
+                        </div>
                         @if($ticket['model_type'] && $ticket['model_type']::getLivewireComponentWidget())
                             <x-card>
                                 <livewire:is :component="$ticket['model_type']::getLivewireComponentWidget()" :modelId="$ticket['model_id']" />
@@ -133,7 +155,7 @@
                                 <div class="pl-2">
                                     <x-button href="#" xs outline icon="eye"
                                               x-bind:class="($wire.get('authorTypeContact') !== true || ! ticket.authenticatable_id) && 'cursor-not-allowed'"
-                                              x-bind:href="($wire.get('authorTypeContact') === true && ticket.authenticatable_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', ticket.authenticatable_id)" >
+                                              x-bind:href="($wire.get('authorTypeContact') === true && ticket.authenticatable.contact_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', ticket.authenticatable.contact_id) + '?address=' + ticket.authenticatable_id" >
                                     </x-button>
                                 </div>
                             </div>
@@ -159,28 +181,6 @@
                         </div>
                     </div>
                 </x-card>
-                <div x-cloak x-show="additionalColumns?.length > 0">
-                    <x-card>
-                        <x-slot:header>
-                            <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
-                                <x-label>
-                                    {{ __('Additional columns') }}
-                                </x-label>
-                            </div>
-                        </x-slot:header>
-                        <div class="flex flex-col gap-4">
-                            <template x-for="additionalColumn in additionalColumns">
-                                <div>
-                                    <x-label
-                                        x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
-                                        x-bind:for="additionalColumn.name"
-                                    />
-                                    <x-input x-bind:type="additionalColumn.field_type" x-model="ticket[additionalColumn.name]" :disabled="true"/>
-                                </div>
-                            </template>
-                        </div>
-                    </x-card>
-                </div>
             </div>
         </section>
     </div>
