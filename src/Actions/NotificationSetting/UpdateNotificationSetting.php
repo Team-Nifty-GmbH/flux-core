@@ -32,9 +32,9 @@ class UpdateNotificationSetting extends FluxAction
                 'notifiable_id' => ! $this->data['is_anonymous'] ? Auth::id() : null,
                 'notification_type' => $this->data['notification_type'],
                 'channel' => config('notifications.channels.' . $this->data['channel'] . '.driver'),
-            ], [
-                'is_active' => $this->data['is_active'],
             ]);
+
+        $notificationSetting->is_active = $this->data['is_active'];
 
         if ($this->data['is_anonymous']) {
             $notificationSetting->channel_value = $this->data['channel_value'];
