@@ -128,7 +128,6 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
             Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
             Route::get('/users', Users::class)->name('users')->registersMenuItem();
         });
-
 });
 
 Route::name('search')->middleware('auth:web')->prefix('search')->group(function () {

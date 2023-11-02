@@ -5,7 +5,7 @@
             },
             syncToOrder() {
                 orderPositions = this.dataTableComponent.getData();
-                $wire.$parent.set('hasUpdatedOrderPositions', true)
+                $wire.$parent.set('hasUpdatedOrderPositions', true);
             },
             selectedOrderPosition: {},
             livewireSelectedOrderPosition: $wire.entangle('position'),
