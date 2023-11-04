@@ -13,12 +13,9 @@ window.initSW = function initSW() {
         return;
     }
 
-    let url = document.getElementById('service-worker').getAttribute('href');
-    url = new URL(url).pathname
-    navigator.serviceWorker.register(
-        '/service-worker.js'
-    )
-        .then(() => {
+    let url = '/pwa-service-worker';
+    navigator.serviceWorker.register(url)
+        .then((registration) => {
             initPush();
         });
 }

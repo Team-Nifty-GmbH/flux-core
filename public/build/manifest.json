@@ -64,12 +64,12 @@
     "src": "resources/js/app.js"
   },
   "resources/js/sw.js": {
-    "file": "assets/sw-f0019ecc.js",
+    "file": "assets/sw-88987bd0.js",
     "isEntry": true,
     "src": "resources/js/sw.js"
   },
   "resources/js/web-push.js": {
-    "file": "assets/web-push-1a558215.js",
+    "file": "assets/web-push-f98e8c16.js",
     "isEntry": true,
     "src": "resources/js/web-push.js"
   }

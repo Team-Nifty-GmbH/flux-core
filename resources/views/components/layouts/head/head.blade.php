@@ -20,6 +20,5 @@
 @if(auth()->check() && in_array(\NotificationChannels\WebPush\HasPushSubscriptions::class, class_uses_recursive(auth()->user())))
     @vite('resources/js/web-push.js', 'flux/build')
 @endif
-<link rel="modulepreload" id="service-worker" href="{{ \Illuminate\Support\Facades\Vite::asset('resources/js/sw.js', 'flux/build') }}">
 @stack('scripts')
 {{$slot}}

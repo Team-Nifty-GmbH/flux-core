@@ -3,17 +3,17 @@
     "name": "Flux ERP",
     "icons": [
         {
-            "src": "/flux/images/pwa/icons-vector.svg",
+            "src": "/flux/pwa/images/icons-vector.svg",
             "type": "image/svg+xml",
             "sizes": "512x512"
         },
         {
-            "src": "/flux/images/pwa/icons-192.png",
+            "src": "/flux/pwa/images/icons-192.png",
             "type": "image/png",
             "sizes": "192x192"
         },
         {
-            "src": "/flux/images/pwa/icons-512.png",
+            "src": "/flux/pwa/images/icons-512.png",
             "type": "image/png",
             "sizes": "512x512"
         }

@@ -5,11 +5,15 @@ self.addEventListener('push', function (e) {
 
     if (e.data) {
         let msg = e.data.json();
-        console.log(msg)
-        e.waitUntil(self.registration.showNotification(msg.title, {
-            body: msg.body,
-            icon: msg.icon,
-            actions: msg.actions
-        }));
+        e.waitUntil(self.registration.showNotification(msg.title, msg));
+    }
+});
+
+
+self.addEventListener('notificationclick', function (e) {
+    e.notification.close();
+
+    if (e.notification.data.url) {
+        clients.openWindow(e.notification.data.url);
     }
 });

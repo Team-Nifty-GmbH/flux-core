@@ -74,7 +74,6 @@
         </div>
     </div>
     <div class="flex gap-4 divide-x">
-        <x-button x-on:click="initSW()">Subscribe to web-push</x-button>
         <div class="flex-initial w-full">
             <div id="widgets" class="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-12 auto-cols-fr grid-flow-dense gap-4">
                 @forelse($widgets as $widget)
