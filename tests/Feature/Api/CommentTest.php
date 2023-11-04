@@ -33,7 +33,7 @@ class CommentTest extends BaseSetup
         $this->permissions = [
             'show' => Permission::findOrCreate('api.{modeltype}.comments.{id}.get'),
             'create' => Permission::findOrCreate('api.comments.post'),
-            'update' => Permission::findOrCreate('api.comments.update'),
+            'update' => Permission::findOrCreate('api.comments.put'),
             'delete' => Permission::findOrCreate('api.comments.{id}.delete'),
         ];
         Role::findOrCreate('Super Admin');

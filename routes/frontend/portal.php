@@ -18,7 +18,7 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
     ->where('variant', '(outline|solid)')
     ->name('portal.icons');
 
-Route::middleware(['auth:address'])->group(function () {
+Route::middleware(['auth:address', 'permission'])->group(function () {
     Route::get('/', FluxErp\Livewire\Portal\Dashboard::class)
         ->name('portal.dashboard')
         ->registersMenuItem(icon: 'home', order: -9999);

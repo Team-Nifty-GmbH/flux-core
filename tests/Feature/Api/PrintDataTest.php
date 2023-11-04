@@ -50,7 +50,7 @@ class PrintDataTest extends BaseSetup
             'show' => Permission::findOrCreate('api.print.{id}.get'),
             'preview' => Permission::findOrCreate('api.print.{id}.preview.get'),
             'pdf' => Permission::findOrCreate('api.print.{id}.pdf.get'),
-            'views' => Permission::findOrCreate('api.print.views.{path?}.get'),
+            'views' => Permission::findOrCreate('api.print.views.{model?}.get'),
             'index' => Permission::findOrCreate('api.print.get'),
             'create' => Permission::findOrCreate('api.print.post'),
             'update' => Permission::findOrCreate('api.print.put'),

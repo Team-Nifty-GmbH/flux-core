@@ -34,6 +34,8 @@ class TicketList extends DataTable
 
     protected string $model = Ticket::class;
 
+    public bool $isFilterable = true;
+
     public array $availableRelations = ['*'];
 
     public array $sortable = ['*'];
@@ -132,11 +134,6 @@ class TicketList extends DataTable
         $returnArray['user'] = $item->authenticatable?->getLabel();
 
         return $returnArray;
-    }
-
-    public function getFilterableColumns(string $name = null): array
-    {
-        return $this->availableCols;
     }
 
     public function show(): void

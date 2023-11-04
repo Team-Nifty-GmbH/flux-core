@@ -23,6 +23,11 @@ document.addEventListener('alpine:init', () => {
 
                 this.$watch('chartType', () => {
                     this.options.chart.type = this.chartType;
+                    if (this.chartType === 'area') {
+                        this.options.fill.opacity = 0.9;
+                    } else {
+                        this.options.fill.opacity = 1;
+                    }
                     this.chart.updateOptions(this.options);
                 });
             });
@@ -95,6 +100,18 @@ document.addEventListener('alpine:init', () => {
         },
         livewireOptions: {},
         defaultOptions: {
+            noData: {
+                text: undefined,
+                align: 'center',
+                verticalAlign: 'middle',
+                offsetX: 0,
+                offsetY: 0,
+                style: {
+                    color: undefined,
+                    fontSize: '14px',
+                    fontFamily: undefined
+                }
+            },
             chart: {
                 type: null,
             },
