@@ -6,6 +6,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="pusher-key" content="{{ config('broadcasting.connections.pusher.key') }}">
 <meta name="pusher-cluster" content="{{ config('broadcasting.connections.pusher.options.cluster', 'mt1') }}">
+<meta name="webpush-key" content="{{ config('webpush.vapid.public_key') }}">
 <meta name="currency-code" content="{{ \FluxErp\Models\Currency::default()?->iso }}">
 @stack('meta')
 <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
@@ -16,5 +17,9 @@
     'resources/js/apex-charts.js',
     'resources/css/app.css',
 ], 'flux/build')
+@if(auth()->check() && in_array(\NotificationChannels\WebPush\HasPushSubscriptions::class, class_uses_recursive(auth()->user())))
+    @vite('resources/js/web-push.js', 'flux/build')
+@endif
+<link rel="modulepreload" id="service-worker" href="{{ \Illuminate\Support\Facades\Vite::asset('resources/js/sw.js', 'flux/build') }}">
 @stack('scripts')
 {{$slot}}

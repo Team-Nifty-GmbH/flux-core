@@ -42,5 +42,9 @@ return [
         'broadcast' => [
             'driver' => \Illuminate\Notifications\Channels\BroadcastChannel::class,
         ],
+        'web_push' => [
+            'driver' => \NotificationChannels\WebPush\WebPushChannel::class,
+            'method' => 'toWebPush',
+        ],
     ],
 ];

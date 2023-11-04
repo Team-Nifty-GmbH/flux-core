@@ -788,5 +788,17 @@
     "Your subject": "Betreff",
     "zip": "PLZ",
     "Zip": "PLZ",
-    "Zip / City": "PLZ / Ort"
+    "Zip / City": "PLZ / Ort",
+    "done": "erledigt",
+    "in_progress": "in Bearbeitung",
+    "closed": "geschlossen",
+    "waiting_for_customer": "wartet auf Kunde",
+    "paid": "bezahlt",
+    "partial_paid": "teilweise bezahlt",
+    "canceled": "storniert",
+    "draft": "Entwurf",
+    "in_review": "in Prüfung",
+    "ready_for_delivery": "bereit für Lieferung",
+    "ready_for_packing": "bereit zum Packen",
+    "partial_delivered": "teilweise geliefert"
 }

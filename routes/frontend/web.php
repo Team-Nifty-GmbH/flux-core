@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Http\Controllers\PushSubscriptionController;
 use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contacts\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
@@ -54,6 +55,7 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
     ->name('icons');
 
 Route::middleware(['auth:web'])->group(function () {
+    Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);
     Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);
     Route::get('/calendars', Calendar::class)->name('calendars')->registersMenuItem(icon: 'calendar');
     Route::get('/contacts', ContactList::class)->name('contacts')->registersMenuItem(icon: 'identification');

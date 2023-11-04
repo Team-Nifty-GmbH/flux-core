@@ -1,0 +1,1 @@
+self.addEventListener("push",function(t){if(self.Notification&&self.Notification.permission==="granted"&&t.data){let i=t.data.json();console.log(i),t.waitUntil(self.registration.showNotification(i.title,{body:i.body,icon:i.icon,actions:i.actions}))}});

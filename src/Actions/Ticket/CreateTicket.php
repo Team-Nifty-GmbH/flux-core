@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Ticket;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateTicketRequest;
 use FluxErp\Models\AdditionalColumn;
+use FluxErp\Models\Client;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
 use Illuminate\Support\Arr;
@@ -65,7 +66,10 @@ class CreateTicket extends FluxAction
             }
         }
 
-        $ticket->getSerialNumber('ticket_number', Auth::user()?->client_id);
+        $ticket->getSerialNumber(
+            'ticket_number',
+            Auth::user()?->client_id ?? Client::query()->first()?->id
+        );
 
         $ticket->save();
 

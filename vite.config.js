@@ -11,6 +11,8 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/apex-charts.js',
                 'resources/js/alpine.js',
+                'resources/js/sw.js',
+                'resources/js/web-push.js',
             ],
             refresh: false
         }),

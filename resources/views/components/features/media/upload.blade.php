@@ -90,7 +90,7 @@
                         <span class="w-0 flex-1 truncate pl-1" x-text="file.name"></span>
                     </div>
                     <div class="flex flex-shrink-0 space-x-4">
-                        <x-button negative x-on:click="$wire.dispatch('removeUpload', { name: '{{ $target }}', index: index })" :label="__('Delete')" />
+                        <x-button negative x-on:click="$wire.removeFileUpload('{{ $target }}', index)" :label="__('Delete')" />
                     </div>
                 </div>
             </template>

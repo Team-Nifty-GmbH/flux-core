@@ -40,7 +40,7 @@
     "src": "resources/css/app.css"
   },
   "resources/js/alpine.js": {
-    "file": "assets/alpine-dc1a9ce1.js",
+    "file": "assets/alpine-2198f208.js",
     "imports": [
       "__commonjsHelpers-725317a4.js"
     ],
@@ -62,5 +62,15 @@
     ],
     "isEntry": true,
     "src": "resources/js/app.js"
+  },
+  "resources/js/sw.js": {
+    "file": "assets/sw-f0019ecc.js",
+    "isEntry": true,
+    "src": "resources/js/sw.js"
+  },
+  "resources/js/web-push.js": {
+    "file": "assets/web-push-1a558215.js",
+    "isEntry": true,
+    "src": "resources/js/web-push.js"
   }
 }

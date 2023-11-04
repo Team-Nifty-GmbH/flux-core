@@ -5,19 +5,19 @@ namespace FluxErp\Traits\Livewire;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Media;
 use Illuminate\Support\Str;
-use Livewire\TemporaryUploadedFile;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 trait WithFileUploads
 {
-    use WithFileUploadsBase {
-        WithFileUploadsBase::_removeUpload as parentRemoveUpload;
-    }
+    use WithFileUploadsBase;
 
     public array $filesArray = [];
 
     public string $collection = '';
+
+    public bool $filesArrayDirty = false;
 
     public function download(Media $mediaItem): false|BinaryFileResponse
     {
@@ -81,9 +81,8 @@ trait WithFileUploads
         }
     }
 
-    public function removeUpload(string $name, int $index): void
+    public function removeFileUpload(string $name, int $index): void
     {
-        $this->parentRemoveUpload($name, $this->{$name}[$index]->getFilename());
         unset($this->filesArray[$index]);
 
         $this->skipRender();
@@ -91,7 +90,7 @@ trait WithFileUploads
 
     public function prepareForMediaLibrary(string $name, int $modelId = null, string $modelType = null): void
     {
-        $this->filesArray = [];
+        $this->filesArrayDirty = true;
         $property = $this->getPropertyValue($name);
         $property = ! is_array($property) ? [$property] : $property;
 
@@ -119,9 +118,13 @@ trait WithFileUploads
 
     public function saveFileUploadsToMediaLibrary(string $name, int $modelId = null, string $modelType = null): array
     {
-        $this->prepareForMediaLibrary($name, $modelId, $modelType);
-        $response = [];
+        if (! $this->filesArray && ! $this->filesArrayDirty) {
+            $this->prepareForMediaLibrary($name, $modelId, $modelType);
+        } else {
+            $this->filesArray = array_map(fn ($file) => array_merge($file, ['model_type' => $modelType, 'model_id' => $modelId]), $this->filesArray);
+        }
 
+        $response = [];
         foreach ($this->filesArray as $file) {
             $response[] = UploadMedia::make($file)
                 ->checkPermission()
