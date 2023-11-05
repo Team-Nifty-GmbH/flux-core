@@ -59,8 +59,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: mbstring, dom, fileinfo, mysql, redis, bcmath, curl, intl
+          extensions: bcmath, fileinfo, intl, dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd, redis-phpredis/phpredis@5.3.7, igbinary, msgpack, lzf, zstd, lz4, memcached, gmp
           coverage: xdebug
+          tools: composer:v2
 
       - name: Setup Node
         uses: actions/setup-node@v2
