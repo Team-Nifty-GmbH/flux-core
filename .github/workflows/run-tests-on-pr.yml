@@ -57,8 +57,6 @@ jobs:
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
-        env:
-          runner: self-hosted
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: bcmath, fileinfo, intl, dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd, redis-phpredis/phpredis@5.3.7, igbinary, msgpack, lzf, zstd, lz4, memcached, gmp
