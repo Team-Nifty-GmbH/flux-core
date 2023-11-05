@@ -73,7 +73,7 @@ class CommentTest extends BaseSetup
 
     public function test_get_comments_model_instance_not_found()
     {
-        $this->user->givePermissionTo($this->permissions['show']);
+        $this->user->givePermissionTo($this->permissions['show'])->permissions;
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->get('/api/user/comments/' . ++$this->user->id);

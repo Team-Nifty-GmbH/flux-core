@@ -51,7 +51,7 @@ class RoleTest extends BaseSetup
 
     public function test_get_user_roles_user_not_found()
     {
-        $this->user->givePermissionTo($this->permissions['show']);
+        $this->user->givePermissionTo($this->permissions['show'])->permissions;
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->get('/api/roles/user/' . ++$this->user->id);
