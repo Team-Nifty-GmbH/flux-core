@@ -800,5 +800,6 @@
     "in_review": "in Prüfung",
     "ready_for_delivery": "bereit für Lieferung",
     "ready_for_packing": "bereit zum Packen",
-    "partial_delivered": "teilweise geliefert"
+    "partial_delivered": "teilweise geliefert",
+    "waiting_for_support": "wartet auf Support"
 }

@@ -35,10 +35,9 @@ class Ticket extends Component
     public function mount(int $id): void
     {
         $states = \FluxErp\Models\Ticket::getStatesFor('state');
-
         $this->states = array_map(function ($item) {
             return [
-                'label' => __(ucfirst(str_replace('_', ' ', $item))),
+                'label' => __($item),
                 'name' => $item,
             ];
         }, $states->toArray());

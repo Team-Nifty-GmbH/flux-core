@@ -2,8 +2,8 @@
 
 namespace FluxErp\States\Order;
 
+use FluxErp\States\State;
 use Illuminate\Contracts\Support\Arrayable;
-use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;
 use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 
