@@ -105,8 +105,6 @@ class SerialNumberTest extends BaseSetup
             'update' => Permission::findOrCreate('api.serial-numbers.put'),
             'delete' => Permission::findOrCreate('api.serial-numbers.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_serial_number()

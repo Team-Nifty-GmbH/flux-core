@@ -44,8 +44,6 @@ class ProductPropertyTest extends BaseSetup
             'update' => Permission::findOrCreate('api.product-properties.put'),
             'delete' => Permission::findOrCreate('api.product-properties.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_product_property()

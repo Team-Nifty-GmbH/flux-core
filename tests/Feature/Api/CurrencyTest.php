@@ -34,8 +34,6 @@ class CurrencyTest extends BaseSetup
             'update' => Permission::findOrCreate('api.currencies.put'),
             'delete' => Permission::findOrCreate('api.currencies.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_currency()

@@ -52,8 +52,6 @@ class SerialNumberRangeTest extends BaseSetup
             'update' => Permission::findOrCreate('api.serial-number-ranges.put'),
             'delete' => Permission::findOrCreate('api.serial-number-ranges.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_serial_number_range()

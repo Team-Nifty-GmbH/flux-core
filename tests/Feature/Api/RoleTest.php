@@ -32,8 +32,6 @@ class RoleTest extends BaseSetup
             'delete' => Permission::findOrCreate('api.roles.{id}.delete'),
             'test' => Permission::findOrCreate('api.test'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_user_roles()

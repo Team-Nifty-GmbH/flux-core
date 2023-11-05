@@ -60,8 +60,6 @@ class StockPostingTest extends BaseSetup
             'create' => Permission::findOrCreate('api.stock-postings.post'),
             'delete' => Permission::findOrCreate('api.stock-postings.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_stock_posting()

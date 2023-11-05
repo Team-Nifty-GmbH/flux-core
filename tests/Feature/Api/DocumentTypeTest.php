@@ -34,8 +34,6 @@ class DocumentTypeTest extends BaseSetup
             'update' => Permission::findOrCreate('api.document-types.put'),
             'delete' => Permission::findOrCreate('api.document-types.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_document_type()

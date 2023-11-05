@@ -48,8 +48,6 @@ class EventSubscriptionTest extends BaseSetup
             'update' => Permission::findOrCreate('api.event-subscriptions.put'),
             'delete' => Permission::findOrCreate('api.event-subscriptions.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_events()

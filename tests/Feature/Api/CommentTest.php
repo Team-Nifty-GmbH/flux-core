@@ -37,8 +37,6 @@ class CommentTest extends BaseSetup
             'delete' => Permission::findOrCreate('api.comments.{id}.delete'),
         ];
         Role::findOrCreate('Super Admin');
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_user_comments()

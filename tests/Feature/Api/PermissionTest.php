@@ -28,8 +28,6 @@ class PermissionTest extends BaseSetup
             'revoke' => Permission::findOrCreate('api.permissions.revoke.put'),
             'delete' => Permission::findOrCreate('api.permissions.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_user_permissions()

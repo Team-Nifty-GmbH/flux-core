@@ -33,8 +33,6 @@ class CustomEventTest extends BaseSetup
             'update' => Permission::findOrCreate('api.custom-events.put'),
             'delete' => Permission::findOrCreate('api.custom-events.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_custom_event()
