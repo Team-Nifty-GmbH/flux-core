@@ -73,6 +73,18 @@ class OrderPositionList extends BaseOrderPositionList
             ->reorder('sort_number');
     }
 
+    public function getReturnKeys(): array
+    {
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'is_alternative',
+                'is_net',
+                'depth',
+            ]
+        );
+    }
+
     public function getResultFromQuery(Builder $query): array
     {
         $tree = to_flat_tree($query->get()->toArray());

@@ -28,6 +28,7 @@ class UpdateOrderRequest extends BaseFormRequest
                 'id' => 'required|integer|exists:orders,id,deleted_at,NULL',
                 'agent_id' => [
                     'integer',
+                    'nullable',
                     (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
                 ],
                 'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',

@@ -87,20 +87,12 @@ class UserEdit extends Component
 
     public function show(int $id = null): void
     {
-        $user = User::query()->whereKey($id)->with(['roles'])->firstOrNew();
+        $user = User::query()
+            ->whereKey($id)
+            ->with(['roles'])
+            ->firstOrNew();
 
         $this->resetErrorBag();
-
-        if ($user->is_locked) {
-            $this->notification()->error(__('Record locked.'));
-            $this->skipRender();
-
-            return;
-        }
-
-        if ($user->exists) {
-            $user?->lock()->updateOrCreate([]);
-        }
 
         $this->user = $user->toArray();
         $this->isSuperAdmin = $user->hasRole('Super Admin');

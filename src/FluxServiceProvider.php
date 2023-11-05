@@ -68,11 +68,11 @@ class FluxServiceProvider extends ServiceProvider
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
             $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
             $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
-            $this->registerLivewireComponents();
             $this->registerBladeComponents();
             $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         }
 
+        $this->registerLivewireComponents();
         $this->registerMiddleware();
         $this->registerConfig();
         $this->registerMarcos();
@@ -409,9 +409,7 @@ class FluxServiceProvider extends ServiceProvider
     {
         $kernel = app()->make(Kernel::class);
         $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);
-        $kernel->appendMiddlewareToGroup('api', Permissions::class);
 
-        $kernel->appendMiddlewareToGroup('web', Permissions::class);
         $kernel->appendMiddlewareToGroup('web', Localization::class);
 
         $this->app['router']->aliasMiddleware('abilities', CheckAbilities::class);

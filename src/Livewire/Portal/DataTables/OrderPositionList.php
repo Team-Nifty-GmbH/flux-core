@@ -30,9 +30,28 @@ class OrderPositionList extends DataTable
         'total_net_price',
     ];
 
+    public array $availableCols = [
+        'slug_position',
+        'name',
+        'unit_net_price',
+        'amount',
+        'total_net_price',
+        'total_gross_price',
+        'total_base_gross_price',
+        'total_base_net_price',
+        'vat_price',
+        'vat_rate_percentage',
+        'description',
+        'is_alternative',
+    ];
+
     public ?bool $isSearchable = false;
 
     public bool $isFilterable = false;
+
+    public array $availableRelations = [];
+
+    public array $aggregatable = [];
 
     public function mount(): void
     {

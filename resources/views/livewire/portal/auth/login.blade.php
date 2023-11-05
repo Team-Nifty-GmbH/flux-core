@@ -22,8 +22,10 @@
     </div>
     <div class="flex min-h-full justify-center">
         <div class="flex flex-1 flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
-            <h1 class="pb-16 text-center text-5xl">{{ __('Login') }}</h1>
-            <h2 class="text-center text-2xl">{{ __('For more transparency, quality and speed in all service processes') }}</h2>
+            @section('headline')
+                <h1 class="pb-16 text-center text-5xl">{{ __('Login') }}</h1>
+                <h2 class="text-center text-2xl">{{ __('For more transparency, quality and speed in all service processes') }}</h2>
+            @show
             <div class="mx-auto w-full max-w-sm pt-16 lg:w-96">
                 <div class="mt-8">
                     @if($errors->any())

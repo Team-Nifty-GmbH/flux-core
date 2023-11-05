@@ -53,7 +53,7 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
     ->where('variant', '(outline|solid)')
     ->name('icons');
 
-Route::middleware(['auth:web'])->group(function () {
+Route::middleware(['auth:web', 'permission'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);
     Route::get('/calendars', Calendar::class)->name('calendars')->registersMenuItem(icon: 'calendar');
     Route::get('/contacts', ContactList::class)->name('contacts')->registersMenuItem(icon: 'identification');
@@ -128,8 +128,8 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
             Route::get('/users', Users::class)->name('users')->registersMenuItem();
         });
+});
 
-    Route::name('search')->prefix('search')->group(function () {
-        Route::any('/{model}', SearchController::class)->where('model', '(.*)');
-    });
+Route::name('search')->middleware('auth:web')->prefix('search')->group(function () {
+    Route::any('/{model}', SearchController::class)->where('model', '(.*)');
 });
