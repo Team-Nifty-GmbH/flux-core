@@ -38,12 +38,17 @@ jobs:
         run: |
           npm run build
 
+      - name: Fix code styling
+        run: |
+          composer format
+
       - name: Commit and push changes
         run: |
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
+          git add .
           git add -f public/build
-          git commit -m "Build assets using Vite"
+          git commit -m "Build assets using Vite, fix code styling"
           git push --force https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git main
         env:
           PAT: ${{ secrets.PAT }}
