@@ -8,7 +8,7 @@
                 @section('password-reset-dialog')
                     <x-modal name="password-reset">
                         <x-card :title="__('Reset password')">
-                            <x-input wire:model="email" :label="__('Email')" name="email" type="email" required/>
+                            <x-input wire:model="email" :label="__('Email')" name="reset-email" type="email" required/>
                             <x-slot:footer>
                                 <x-button wire:click="resetPassword()" primary class="w-full" :label="__('Reset password')" x-on:click="close()"></x-button>
                             </x-slot:footer>
@@ -26,7 +26,7 @@
                                 </div>
                             </div>
                         @endif
-                        <x-button spinner primary class="w-full" :label="__('Login')" type="submit"></x-button>
+                        <x-button spinner primary class="w-full" :label="__('Login')" type="submit" dusk="login-button"></x-button>
                     </form>
                 @show
             </div>
