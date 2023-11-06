@@ -55,8 +55,6 @@ class SettingTest extends BaseSetup
             'user-settings' => Permission::findOrCreate('api.user.settings.get'),
             'update' => Permission::findOrCreate('api.settings.put'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_settings()

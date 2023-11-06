@@ -56,8 +56,6 @@ class PrintDataTest extends BaseSetup
             'update' => Permission::findOrCreate('api.print.put'),
             'delete' => Permission::findOrCreate('api.print.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_print_data()

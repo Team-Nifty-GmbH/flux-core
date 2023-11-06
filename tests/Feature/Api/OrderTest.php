@@ -97,8 +97,6 @@ class OrderTest extends BaseSetup
             'update' => Permission::findOrCreate('api.orders.put'),
             'delete' => Permission::findOrCreate('api.orders.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_order()

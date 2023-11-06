@@ -46,8 +46,6 @@ class ValueListTest extends BaseSetup
             'update' => Permission::findOrCreate('api.value-lists.put'),
             'delete' => Permission::findOrCreate('api.value-lists.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_value_list()

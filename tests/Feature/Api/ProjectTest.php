@@ -61,8 +61,6 @@ class ProjectTest extends BaseSetup
             'finish' => Permission::findOrCreate('api.projects.finish.post'),
             'statistics' => Permission::findOrCreate('api.projects.{id}.statistics.get'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_project()

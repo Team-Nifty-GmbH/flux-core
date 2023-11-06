@@ -57,8 +57,6 @@ class MediaTest extends BaseSetup
             'update' => Permission::findOrCreate('api.media.put'),
             'delete' => Permission::findOrCreate('api.media.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_upload_media_to_project_task()

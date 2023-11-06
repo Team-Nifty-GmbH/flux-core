@@ -71,8 +71,6 @@ class SepaMandateTest extends BaseSetup
             'update' => Permission::findOrCreate('api.sepa-mandates.put'),
             'delete' => Permission::findOrCreate('api.sepa-mandates.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_sepa_mandate()

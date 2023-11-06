@@ -44,8 +44,6 @@ class BankConnectionTest extends BaseSetup
             'update' => Permission::findOrCreate('api.bank-connections.put'),
             'delete' => Permission::findOrCreate('api.bank-connections.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_bank_connection()

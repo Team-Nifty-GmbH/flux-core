@@ -55,8 +55,6 @@ class ContactTest extends BaseSetup
             'update' => Permission::findOrCreate('api.contacts.put'),
             'delete' => Permission::findOrCreate('api.contacts.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_contact()

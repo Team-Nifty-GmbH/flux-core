@@ -34,8 +34,6 @@ class PaymentTypeTest extends BaseSetup
             'update' => Permission::findOrCreate('api.payment-types.put'),
             'delete' => Permission::findOrCreate('api.payment-types.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_payment_type()
