@@ -12,6 +12,7 @@ use FluxErp\Providers\ViewServiceProvider;
 use Hammerstone\FastPaginate\FastPaginateProvider;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
+use Orchestra\Testbench\Concerns\CreatesApplication;
 use Orchestra\Testbench\Dusk\TestCase;
 use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
@@ -26,6 +27,8 @@ use function Orchestra\Testbench\package_path;
 
 abstract class DuskTestCase extends TestCase
 {
+    use CreatesApplication;
+
     protected function setUp(): void
     {
         if (file_exists(__DIR__ . '/../../../.env')) {
