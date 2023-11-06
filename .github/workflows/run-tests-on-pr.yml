@@ -9,7 +9,7 @@ on:
 jobs:
   laravel:
     name: Laravel (PHP ${{ matrix.php-versions }})
-    runs-on: ubuntu-latest
+    runs-on: test_runner
     env:
       DB_DATABASE: laravel
       DB_USERNAME: root
@@ -89,15 +89,30 @@ jobs:
       - name: Install ChromeDriver
         run: composer dusk:install-chromedriver
 
-      - name: Run Tests
-        run: composer test
+      - name: Run Feature Tests
+        run: composer test-feature
         env:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
           GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
           DUSK_DRIVER_URL: http://0.0.0.0:${{ job.services.selenium.ports['4444'] }}
-
+      - name: Run Livewire Tests
+        run: composer test-livewire
+        env:
+          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
+          GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
+          DUSK_DRIVER_URL: http://0.0.0.0:${{ job.services.selenium.ports['4444'] }}
+      - name: Run Browser Tests
+        run: composer test-browser
+        env:
+          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
+          GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
+          DUSK_DRIVER_URL: http://0.0.0.0:${{ job.services.selenium.ports['4444'] }}
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         if: failure()
