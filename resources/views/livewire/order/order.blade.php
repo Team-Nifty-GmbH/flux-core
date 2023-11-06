@@ -96,6 +96,7 @@
                     'order.accounting' => __('Accounting'),
                     'order.comments' => __('Comments'),
                     'order.related' => __('Related processes'),
+                    'order.activities' => __('Activities'),
                 ]"
     >
         <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">

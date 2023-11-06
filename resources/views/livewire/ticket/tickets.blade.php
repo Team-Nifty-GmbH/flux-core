@@ -42,7 +42,22 @@
                                     x-html="ticketTypeAdditionalColumn.label ? ticketTypeAdditionalColumn.label : ticketTypeAdditionalColumn.name"
                                     x-bind:for="ticketTypeAdditionalColumn.name"
                                 />
-                                <x-input x-bind:type="ticketTypeAdditionalColumn.field_type" x-model="ticket[ticketTypeAdditionalColumn.name]"/>
+                                <template x-if="ticketTypeAdditionalColumn.field_type === 'select'">
+                                    <x-native-select
+                                        x-model="ticket[ticketTypeAdditionalColumn.name]"
+                                        x-bind:options="ticketTypeAdditionalColumn.values"
+                                    >
+                                        <option value="" disabled selected>
+                                            {{ __('Please select') }}
+                                        </option>
+                                        <template x-for="value in ticketTypeAdditionalColumn.values">
+                                            <option x-bind:value="value" x-text="value"></option>
+                                        </template>
+                                    </x-native-select>
+                                </template>
+                                <template x-if="ticketTypeAdditionalColumn.field_type !== 'select'">
+                                    <x-input x-bind:type="ticketTypeAdditionalColumn.field_type" x-model="ticket[ticketTypeAdditionalColumn.name]"/>
+                                </template>
                             </div>
                         </template>
                         <template x-for="additionalColumn in additionalColumns">

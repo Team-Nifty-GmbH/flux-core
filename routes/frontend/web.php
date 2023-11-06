@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Http\Controllers\PushSubscriptionController;
 use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contacts\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
@@ -67,6 +68,8 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 ->registersMenuItem(icon: 'briefcase');
             Route::get('/{id}', Project::class)->name('id');
         });
+
+    Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);
 
     Route::name('orders.')->prefix('orders')
         ->group(function () {

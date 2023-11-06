@@ -12,7 +12,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TicketList extends DataTable
@@ -109,7 +108,7 @@ class TicketList extends DataTable
                 ->color('primary')
                 ->icon('plus')
                 ->attributes([
-                    'x-on:click' => "\$wire.show()",
+                    'x-on:click' => '$wire.show()',
                 ]),
         ];
     }
@@ -167,6 +166,7 @@ class TicketList extends DataTable
 
         try {
             $ticket = CreateTicket::make($this->ticket)
+                ->checkPermission()
                 ->validate()
                 ->execute();
         } catch (\Exception $e) {

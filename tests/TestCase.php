@@ -12,6 +12,7 @@ use Hammerstone\FastPaginate\FastPaginateProvider;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
+use NotificationChannels\WebPush\WebPushServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;
 use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
@@ -68,6 +69,7 @@ abstract class TestCase extends BaseTestCase
             FluxServiceProvider::class,
             RouteServiceProvider::class,
             SanctumServiceProvider::class,
+            WebPushServiceProvider::class,
         ];
     }
 

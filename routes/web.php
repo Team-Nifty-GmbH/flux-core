@@ -4,6 +4,7 @@ use FluxErp\Http\Controllers\PresentationController;
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\PrintDataController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Vite;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,3 +23,8 @@ Route::get('presentation/public/{uuid}', [PresentationController::class, 'showHt
 Route::any('print/{view}/{model}/{id}/{asPdf?}', [PrintController::class, 'render'])
     ->where('model', '(.*)')
     ->name('print.render');
+
+Route::get('/pwa-service-worker', function () {
+    return response(Vite::content('resources/js/sw.js', 'flux/build'))
+        ->header('Content-Type', 'application/javascript');
+})->name('pwa-service-worker');

@@ -21,6 +21,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use Spatie\Permission\Traits\HasRoles;
@@ -32,8 +33,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 class User extends Authenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasApiTokens, HasCalendars, HasDatatableUserSettings,
-        HasFrontendAttributes, HasPackageFactory, HasRoles, HasUuid, HasWidgets, InteractsWithMedia, Notifiable,
-        Searchable, SoftDeletes;
+        HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles, HasUuid, HasWidgets,
+        InteractsWithMedia, Notifiable, Searchable, SoftDeletes;
 
     protected $appends = [
         'name',

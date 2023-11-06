@@ -242,13 +242,19 @@ class Order extends Component
             $states = \FluxErp\Models\Order::getStatesFor($fieldName)
                 ->map(function ($item) {
                     return [
-                        'label' => __(ucfirst(str_replace('_', ' ', $item))),
+                        'label' => __($item),
                         'name' => $item,
                     ];
                 });
 
             $this->availableStates[$fieldName] = $states
-                ->whereIn('name', $model->{$fieldName}->transitionableStates())
+                ->whereIn(
+                    'name',
+                    array_merge(
+                        [$model->{$fieldName}],
+                        $model->{$fieldName}->transitionableStates()
+                    )
+                )
                 ->toArray();
         }
     }

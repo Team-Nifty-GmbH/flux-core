@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
+use NotificationChannels\WebPush\WebPushMessage;
 
 class CommentCreatedNotification extends Notification implements ShouldQueue
 {
@@ -82,5 +83,20 @@ class CommentCreatedNotification extends Notification implements ShouldQueue
             ],
             $accept
         );
+    }
+
+    public function toWebPush($notifiable): ?WebPushMessage
+    {
+        if (! method_exists($notifiable, 'pushSubscriptions') || ! $notifiable->pushSubscriptions()->exists()) {
+            return null;
+        }
+
+        $notification = $this->toArray($notifiable);
+
+        return (new WebPushMessage)
+            ->icon($notification['img'])
+            ->title($notification['title'])
+            ->body($notification['description'])
+            ->data(['url' => $notification['accept']['url'] ?? '']);
     }
 }

@@ -110,7 +110,7 @@ class Profile extends Component
             return;
         }
 
-        $this->avatar = $response[0]->getUrl();
+        $this->avatar = $response[0]['original_url'];
     }
 
     public function save(): void

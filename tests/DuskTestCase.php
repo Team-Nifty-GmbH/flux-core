@@ -12,6 +12,7 @@ use FluxErp\Providers\ViewServiceProvider;
 use Hammerstone\FastPaginate\FastPaginateProvider;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
+use NotificationChannels\WebPush\WebPushServiceProvider;
 use Orchestra\Testbench\Dusk\TestCase;
 use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
@@ -62,6 +63,7 @@ abstract class DuskTestCase extends TestCase
             FluxServiceProvider::class,
             RouteServiceProvider::class,
             SanctumServiceProvider::class,
+            WebPushServiceProvider::class,
         ]);
     }
 

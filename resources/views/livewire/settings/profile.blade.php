@@ -36,6 +36,7 @@
     <x-table>
         <x-slot name="title">
             <h2 class="pt-6 dark:text-white">{{ __('Notifications') }}</h2>
+            <x-button primary x-on:click="initSW()">{{ __('Activate Web Push') }}</x-button>
         </x-slot>
         <x-slot name="header">
                 <th>{{ __('Notification') }}</th>

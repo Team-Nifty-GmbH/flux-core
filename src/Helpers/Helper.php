@@ -81,6 +81,7 @@ class Helper
             'number',
             'email',
             'password',
+            'range',
             'date',
             'time',
             'tel',
@@ -90,6 +91,7 @@ class Helper
             'week',
             'url',
             'checkbox',
+            'select',
         ];
     }
 }
