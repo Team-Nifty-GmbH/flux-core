@@ -45,10 +45,6 @@ jobs:
         ports:
           - 3000/tcp
         options: --health-cmd="curl -f http://localhost:3000/health" --health-interval=10s --health-timeout=5s --health-retries=3
-      selenium:
-        image: selenium/standalone-${{ matrix.browser }}
-        ports:
-          - 4444/tcp
     strategy:
       fail-fast: false
       matrix:
