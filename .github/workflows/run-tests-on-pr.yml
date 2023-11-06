@@ -48,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: [ '8.2', '8.3' ]
+        php-versions: [ '8.2' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -59,14 +59,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: bcmath, fileinfo, intl, dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd, redis-phpredis/phpredis@5.3.7, igbinary, msgpack, lzf, zstd, lz4, memcached, gmp
+          extensions: mbstring, dom, fileinfo, mysql
           coverage: xdebug
-          tools: composer:v2
-
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: '18'
 
       - name: Cache composer dependencies
         run: |
