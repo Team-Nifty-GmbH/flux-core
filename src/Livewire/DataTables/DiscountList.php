@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Models\Discount;
 use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class DiscountList extends DataTable
 {

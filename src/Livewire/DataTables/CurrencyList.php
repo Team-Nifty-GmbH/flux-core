@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Currency;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class CurrencyList extends DataTable
 {
@@ -15,6 +14,7 @@ class CurrencyList extends DataTable
         'iso',
         'symbol',
     ];
+
     public array $availableRelations = ['*'];
 
     public array $sortable = ['*'];

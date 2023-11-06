@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Charts\CircleChart;
-use FluxErp\Livewire\Charts\DonutChart;
 use FluxErp\Models\Order;
 use FluxErp\Traits\Widgetable;
 

@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Models\Country;
 use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class CountryList extends DataTable
 {

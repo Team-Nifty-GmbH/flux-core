@@ -3,9 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Client;
-use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class ClientList extends DataTable
 {

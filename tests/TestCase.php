@@ -23,6 +23,7 @@ use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
 use WireUi\Providers\WireUiServiceProvider;
+
 use function Orchestra\Testbench\package_path;
 
 abstract class TestCase extends BaseTestCase

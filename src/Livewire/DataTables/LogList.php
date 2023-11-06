@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Models\Log;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 

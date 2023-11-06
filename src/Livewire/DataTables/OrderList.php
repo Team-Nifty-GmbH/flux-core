@@ -39,6 +39,7 @@ class OrderList extends DataTable
     public function getTableActions(): array
     {
         $this->getIncludedRelations();
+
         return [
             DataTableButton::make()
                 ->color('primary')

@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\DiscountGroup;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class DiscountGroupList extends DataTable
 {

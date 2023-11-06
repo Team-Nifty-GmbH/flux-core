@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Ramsey\Uuid\Uuid;
-use Spatie\Permission\PermissionRegistrar;
 
 class MediaTest extends BaseSetup
 {

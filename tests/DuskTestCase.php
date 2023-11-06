@@ -3,7 +3,6 @@
 namespace FluxErp\Tests;
 
 use Dotenv\Dotenv;
-use Facebook\WebDriver\Remote\RemoteWebDriver;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\FortifyServiceProvider;
 use FluxErp\Providers\RouteServiceProvider;
@@ -23,6 +22,7 @@ use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
 use WireUi\Providers\WireUiServiceProvider;
+
 use function Orchestra\Testbench\package_path;
 
 abstract class DuskTestCase extends TestCase

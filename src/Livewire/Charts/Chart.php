@@ -113,7 +113,7 @@ abstract class Chart extends Component
     {
         return $timeFrameEnum
             ->groupQuery($builder, $dateField)
-            ->addSelect(DB::raw('ROUND(' . $aggregateFunction .'(' . $aggregateField . '), 2) as total'))
+            ->addSelect(DB::raw('ROUND(' . $aggregateFunction . '(' . $aggregateField . '), 2) as total'))
             ->get()
             ->pluck('total', 'group_key')
             ->toArray();

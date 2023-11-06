@@ -3,7 +3,6 @@
 namespace FluxErp\Tests\Livewire\Settings;
 
 use FluxErp\Livewire\Settings\Currencies;
-use FluxErp\Models\Currency;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;

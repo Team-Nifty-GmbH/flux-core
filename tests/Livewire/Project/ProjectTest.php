@@ -25,8 +25,8 @@ class ProjectTest extends BaseSetup
         ]);
 
         $categories = Category::factory()->count(2)->create([
-                'model_type' => ProjectTask::class,
-                'parent_id' => $category->id,
+            'model_type' => ProjectTask::class,
+            'parent_id' => $category->id,
         ]);
 
         $this->project = Project::factory()->create([

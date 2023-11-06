@@ -10,7 +10,6 @@ use FluxErp\Traits\Widgetable;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Component;
 use Livewire\Livewire;
-use Spatie\Permission\PermissionRegistrar;
 
 class DashboardTest extends BaseSetup
 {

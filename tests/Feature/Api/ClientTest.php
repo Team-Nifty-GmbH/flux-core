@@ -9,7 +9,6 @@ use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class ClientTest extends BaseSetup
 {

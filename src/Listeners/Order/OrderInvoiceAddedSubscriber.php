@@ -59,33 +59,33 @@ class OrderInvoiceAddedSubscriber
             } elseif ($orderPosition->product_id) {
                 switch (true) {
                     case $commissionRateId = $contactCommissionRates
-                        ->where('product_id', $orderPosition->product_id)
-                        ->first()
-                        ?->id:
+                    ->where('product_id', $orderPosition->product_id)
+                    ->first()
+                    ?->id:
                     case $commissionRateId = $contactCommissionRates
-                        ->whereIn(
-                            'category_id',
-                            $orderPosition->product->categories()->pluck('id')->toArray()
-                        )
-                        ->first()
-                        ?->id:
+                    ->whereIn(
+                        'category_id',
+                        $orderPosition->product->categories()->pluck('id')->toArray()
+                    )
+                    ->first()
+                    ?->id:
                     case $commissionRateId = $defaultCommissionRates
-                        ->where('product_id', $orderPosition->product_id)
-                        ->first()
-                        ?->id:
+                    ->where('product_id', $orderPosition->product_id)
+                    ->first()
+                    ?->id:
                     case $commissionRateId = $defaultCommissionRates
-                        ->whereIn(
-                            'category_id',
-                            $orderPosition->product->categories()->pluck('id')->toArray()
-                        )
-                        ->first()
-                        ?->id:
+                    ->whereIn(
+                        'category_id',
+                        $orderPosition->product->categories()->pluck('id')->toArray()
+                    )
+                    ->first()
+                    ?->id:
                     case $commissionRateId = $defaultCommissionRateByContact?->id:
                     case $commissionRateId = $defaultCommissionRates
-                        ->whereNull('category_id')
-                        ->whereNull('product_id')
-                        ->first()
-                        ?->id:
+                    ->whereNull('category_id')
+                    ->whereNull('product_id')
+                    ->first()
+                    ?->id:
                         break;
                     default:
                         $commissionRateId = null;

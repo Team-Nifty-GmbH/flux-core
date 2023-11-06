@@ -10,7 +10,6 @@ use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class CommentTest extends BaseSetup
 {

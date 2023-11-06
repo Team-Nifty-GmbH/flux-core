@@ -6,7 +6,6 @@ use FluxErp\Models\Category;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class CategoryList extends DataTable
 {

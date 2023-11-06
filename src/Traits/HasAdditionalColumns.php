@@ -256,8 +256,6 @@ trait HasAdditionalColumns
 
     /**
      * Add value to the list of columns overridden by meta.
-     *
-     * @param  mixed  $value
      */
     public function setFallbackValue(string $key, mixed $value = null): self
     {
@@ -453,8 +451,6 @@ trait HasAdditionalColumns
 
     /**
      * Get meta value for key.
-     *
-     * @param  mixed  $default
      */
     public function getMeta(string $key, mixed $default = null): mixed
     {
@@ -1045,9 +1041,6 @@ trait HasAdditionalColumns
     /**
      * Query records having meta with a specific key and value.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
-     *
-     * @param  mixed  $operator
-     * @param  mixed  $value
      */
     public function scopeWhereMeta(
         Builder $query,
@@ -1075,9 +1068,6 @@ trait HasAdditionalColumns
     /**
      * Query records having meta with a specific key and value with "or" clause.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
-     *
-     * @param  mixed  $operator
-     * @param  mixed  $value
      */
     public function scopeOrWhereMeta(
         Builder $query,
@@ -1092,8 +1082,6 @@ trait HasAdditionalColumns
      * Query records having raw meta with a specific key and value without checking type.
      * Make sure that the supplied $value is a string or string castable.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
-     *
-     * @param  mixed  $value
      */
     public function scopeWhereRawMeta(
         Builder $query,
@@ -1118,8 +1106,6 @@ trait HasAdditionalColumns
      * Query records having raw meta with a specific key and value without checking type with "or" clause.
      * Make sure that the supplied $value is a string or string castable.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
-     *
-     * @param  mixed  $value
      */
     public function scopeOrWhereRawMeta(
         Builder $query,
@@ -1133,8 +1119,6 @@ trait HasAdditionalColumns
     /**
      * Query records having meta with a specific value and the given type.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
-     *
-     * @param  mixed  $value
      */
     public function scopeWhereMetaOfType(
         Builder $query,
@@ -1159,8 +1143,6 @@ trait HasAdditionalColumns
     /**
      * Query records having meta with a specific value and the given type with "or" clause.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
-     *
-     * @param  mixed  $value
      */
     public function scopeOrWhereMetaOfType(
         Builder $query,

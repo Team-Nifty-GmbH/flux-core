@@ -13,7 +13,7 @@ class CommissionRate extends Model
     use HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $guarded = [
-        'id'
+        'id',
     ];
 
     public function category(): BelongsTo

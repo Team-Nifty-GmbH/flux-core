@@ -3,9 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Commission;
-use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class CommissionList extends DataTable
 {

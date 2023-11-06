@@ -90,7 +90,7 @@ class Profile extends Component
     public function getRules(): array
     {
         return [
-            'user.password' => 'confirmed'
+            'user.password' => 'confirmed',
         ];
     }
 

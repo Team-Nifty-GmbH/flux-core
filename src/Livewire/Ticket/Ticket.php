@@ -57,7 +57,6 @@ class Ticket extends Component
             ->whereKey($id)
             ->firstOrFail();
 
-
         $ticketModel->state = $ticketModel->state ?: \FluxErp\Models\Ticket::getDefaultStateFor('state');
 
         $this->additionalColumns = AdditionalColumn::query()
