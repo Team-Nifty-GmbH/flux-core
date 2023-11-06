@@ -25,10 +25,6 @@ return new class extends Migration
             $table->json('name');
             $table->timestamps();
 
-            $table->uuid('uuid')->after('id');
-            $table->unsignedBigInteger('created_by')->after('created_at')->nullable();
-            $table->unsignedBigInteger('updated_by')->after('updated_at')->nullable();
-
             $table->foreign('created_by')->references('id')->on('users');
             $table->foreign('updated_by')->references('id')->on('users');
         });
