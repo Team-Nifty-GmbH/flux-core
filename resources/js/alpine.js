@@ -165,7 +165,7 @@ document.addEventListener('livewire:init', function() {
 function wireNavigation() {
     let links = [...document.querySelectorAll('a[href]')].filter(link => {
         let hrefValue = link.getAttribute('href').trim();
-        return hrefValue !== '' && hrefValue !== '#';
+        return hrefValue !== '' && hrefValue !== '#' && (hrefValue.startsWith(window.location.origin) || hrefValue.startsWith('/'));
     });
 
     links.forEach(link => {
