@@ -40,11 +40,6 @@ abstract class DuskTestCase extends TestCase
         }
     }
 
-    protected function driver(): RemoteWebDriver
-    {
-        return parent::driver();
-    }
-
     protected function getApplicationProviders($app): array
     {
         return array_merge(parent::getApplicationProviders($app), [
