@@ -24,8 +24,9 @@ class TicketCreatedNotificationListener
             ->roles()
             ->pluck('id')
             ->toArray();
+
         $users = User::query()
-            ->whereHas('roles', fn(Builder $query) => $query->whereIntegerInRaw('id', $notificationRoles))
+            ->whereHas('roles', fn (Builder $query) => $query->whereIntegerInRaw('id', $notificationRoles))
             ->get();
 
         $eloquentEventSubscriber->notifiables = $eloquentEventSubscriber->notifiables->merge($users);

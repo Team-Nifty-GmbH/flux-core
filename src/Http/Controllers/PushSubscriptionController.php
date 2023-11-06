@@ -21,7 +21,7 @@ class PushSubscriptionController extends BaseController
         $pushSubscription = UpsertPushSubscription::make($request->validated())->execute();
 
         return ResponseHelper::createResponseFromBase(
-            statusCode: 201,
+            statusCode: 200,
             data: $pushSubscription,
             statusMessage: 'push subscription upserted'
         );
