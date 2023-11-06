@@ -9,7 +9,7 @@ on:
 jobs:
   laravel:
     name: Laravel (PHP ${{ matrix.php-versions }})
-    runs-on: test_runner
+    runs-on: ubuntu-latest
     env:
       DB_DATABASE: laravel
       DB_USERNAME: root
