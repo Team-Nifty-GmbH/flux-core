@@ -3,7 +3,9 @@
 use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contacts\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\DataTables\CommissionList;
 use FluxErp\Livewire\DataTables\ContactList;
+use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\DataTables\ProjectTasksList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
@@ -51,7 +53,7 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
     ->where('variant', '(outline|solid)')
     ->name('icons');
 
-Route::middleware(['auth:web'])->group(function () {
+Route::middleware(['auth:web', 'permission'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);
     Route::get('/calendars', Calendar::class)->name('calendars')->registersMenuItem(icon: 'calendar');
     Route::get('/contacts', ContactList::class)->name('contacts')->registersMenuItem(icon: 'identification');
@@ -66,8 +68,15 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/{id}', Project::class)->name('id');
         });
 
-    Route::get('/orders', OrderList::class)->name('orders')->registersMenuItem(icon: 'shopping-bag');
-    Route::get('/orders/{id}', Order::class)->name('orders.id');
+    Route::name('orders.')->prefix('orders')
+        ->group(function () {
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'shopping-bag');
+            Route::get('/list', OrderList::class)->name('orders')->registersMenuItem();
+            Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions')
+                ->registersMenuItem();
+            Route::get('/{id}', Order::class)->name('id');
+        });
+
     Route::get('/tickets', TicketList::class)->name('tickets')->registersMenuItem(icon: 'wrench-screwdriver');
     Route::get('/tickets/{id}', Ticket::class)->name('tickets.id');
 
@@ -78,6 +87,12 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers')->registersMenuItem();
             Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
             Route::get('/{id}', Product::class)->name('id');
+        });
+
+    Route::name('accounting.')->prefix('accounting')
+        ->group(function () {
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'square-3-stack-3d');
+            Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
         });
 
     Route::get('/my-profile', Profile::class)->name('my-profile');
@@ -113,8 +128,8 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
             Route::get('/users', Users::class)->name('users')->registersMenuItem();
         });
+});
 
-    Route::name('search')->prefix('search')->group(function () {
-        Route::any('/{model}', SearchController::class)->where('model', '(.*)');
-    });
+Route::name('search')->middleware('auth:web')->prefix('search')->group(function () {
+    Route::any('/{model}', SearchController::class)->where('model', '(.*)');
 });

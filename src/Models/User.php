@@ -9,7 +9,6 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\HasWidgets;
 use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\Lockable;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -33,8 +32,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 class User extends Authenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasApiTokens, HasCalendars, HasDatatableUserSettings,
-        HasFrontendAttributes, HasPackageFactory, HasRoles, HasUuid, HasWidgets, InteractsWithMedia, Lockable,
-        Notifiable, Searchable, SoftDeletes;
+        HasFrontendAttributes, HasPackageFactory, HasRoles, HasUuid, HasWidgets, InteractsWithMedia, Notifiable,
+        Searchable, SoftDeletes;
 
     protected $appends = [
         'name',
@@ -71,6 +70,21 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
         );
     }
 
+    public function children(): HasMany
+    {
+        return $this->hasMany(User::class, 'parent_id');
+    }
+
+    public function commissionRates(): HasMany
+    {
+        return $this->hasMany(CommissionRate::class);
+    }
+
+    public function commissions(): HasMany
+    {
+        return $this->hasMany(Commission::class);
+    }
+
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
@@ -84,6 +98,11 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
     public function locks(): MorphMany
     {
         return $this->morphMany(Lock::class, 'authenticatable');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'parent_id');
     }
 
     public function settings(): MorphMany

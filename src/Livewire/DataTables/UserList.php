@@ -18,6 +18,12 @@ class UserList extends DataTable
 
     public array $availableRelations = ['*'];
 
+    public array $sortable = ['*'];
+
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
+
     public array $formatters = [
         'avatar' => 'image',
     ];
@@ -29,11 +35,6 @@ class UserList extends DataTable
     public array $bottomAppend = [
         'name' => 'email',
     ];
-
-    public function mount(): void
-    {
-        parent::mount();
-    }
 
     public function getLeftAppends(): array
     {

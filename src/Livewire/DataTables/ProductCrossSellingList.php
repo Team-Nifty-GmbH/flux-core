@@ -15,13 +15,11 @@ class ProductCrossSellingList extends DataTable
         'is_active',
     ];
 
-    public function mount(): void
-    {
-        $this->availableCols = ModelInfo::forModel($this->model)
-            ->attributes
-            ->pluck('name')
-            ->toArray();
+    public array $availableRelations = ['*'];
 
-        parent::mount();
-    }
+    public array $sortable = ['*'];
+
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 }

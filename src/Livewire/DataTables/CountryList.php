@@ -23,21 +23,13 @@ class CountryList extends DataTable
         'is_eu_country',
     ];
 
-    public array $columnLabels = [
-        'language.name' => 'Language',
-        'currency.name' => 'Currency',
-    ];
+    public array $availableRelations = ['*'];
 
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel($this->model)->attributes;
+    public array $sortable = ['*'];
 
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
+    public array $aggregatable = ['*'];
 
-        parent::mount();
-    }
+    public array $availableCols = ['*'];
 
     public function getBuilder(Builder $builder): Builder
     {

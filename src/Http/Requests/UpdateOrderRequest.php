@@ -26,6 +26,11 @@ class UpdateOrderRequest extends BaseFormRequest
             Arr::prependKeysWith((new CreateAddressRequest())->postalAddressRules(), 'address_delivery.'),
             [
                 'id' => 'required|integer|exists:orders,id,deleted_at,NULL',
+                'agent_id' => [
+                    'integer',
+                    'nullable',
+                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+                ],
                 'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'bank_connection_id' => [
                     'integer',
@@ -87,6 +92,11 @@ class UpdateOrderRequest extends BaseFormRequest
                         table: 'payment_types',
                         baseTable: 'orders'
                     ),
+                ],
+                'responsible_user_id' => [
+                    'integer',
+                    'nullable',
+                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
                 ],
 
                 'address_delivery' => [
@@ -167,6 +177,13 @@ class UpdateOrderRequest extends BaseFormRequest
                     'integer',
                     'distinct',
                     (new ExistsWithIgnore('address_types', 'id'))->whereNull('deleted_at'),
+                ],
+
+                'users' => 'array',
+                'users.*' => [
+                    'integer',
+                    'nullable',
+                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
                 ],
             ],
         );

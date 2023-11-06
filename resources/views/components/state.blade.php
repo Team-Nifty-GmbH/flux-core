@@ -1,6 +1,6 @@
 <div x-data="{
     model: $wire.entangle('{{ $attributes->wire('model')->value }}', {{ $attributes->wire('model')->hasModifier('live') ? 'true' : 'false' }}),
-    availableStates: $wire.entangle('{{ $attributes->get('avialable') }}'),
+    availableStates: $wire.entangle('{{ $attributes->get('available') }}'),
     @if($attributes->wire('formatter')->value)
         formatter: $wire.entangle('{{ $attributes->wire('formatter')->value }}'),
     @else

@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Models\User;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -31,6 +30,10 @@ class Users extends Component
 
     public function show(int $id = null): void
     {
+        if ($this->showUserModal) {
+            return;
+        }
+
         $this->userId = $id ?? 0;
         $this->dispatch('show', $id)->to('settings.user-edit');
         $this->showUserModal = true;
@@ -38,12 +41,6 @@ class Users extends Component
 
     public function closeModal(): void
     {
-        User::query()
-            ->whereKey($this->userId)
-            ->first()
-            ?->lock()
-            ->delete();
-
         $this->reset();
     }
 

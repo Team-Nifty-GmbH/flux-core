@@ -3,6 +3,10 @@
             get dataTableComponent() {
                 return Alpine.$data($el.querySelector('[tall-datatable]'));
             },
+            syncToOrder() {
+                orderPositions = this.dataTableComponent.getData();
+                $wire.$parent.set('hasUpdatedOrderPositions', true);
+            },
             selectedOrderPosition: {},
             livewireSelectedOrderPosition: $wire.entangle('position'),
             selected: $wire.entangle('selected'),
@@ -98,7 +102,7 @@
         <x-slot:footer>
             <div class="flex justify-between gap-x-4">
                 <div x-show="selectedOrderPosition.id">
-                    <x-button flat negative :label="__('Delete')" x-on:click="close; $wire.remove(selectedOrderPosition.id)" />
+                    <x-button flat negative :label="__('Delete')" x-on:click="close; $wire.remove(selectedOrderPosition.id).then(() => {syncToOrder();});" />
                 </div>
                 <div class="flex w-full justify-end">
                     <x-button flat :label="__('Cancel')" x-on:click="close" />
@@ -106,12 +110,12 @@
                             primary
                             x-show="!order.is_locked"
                             x-on:click="$wire.save(livewireSelectedOrderPosition, orderPositions).then((data) => {
-                            if(data !== false) {
-                                order = {...order, ...data.order};
-                                $wire.$parent.hasUpdatedOrderPositions = true;
-                                orderPositions = data.orderPositions;
-                                close();
-                            }
+                                syncToOrder();
+                                if(data !== false) {
+                                    order = {...order, ...data.order};
+                                    $wire.$parent.set('hasUpdatedOrderPositions', true);
+                                    close();
+                                }
                         })"
                             :label="__('Save')"
                     />
@@ -138,13 +142,13 @@
                                 x-transition
                         >
                             <x-button
-                                    x-on:click="$wire.remove(selected).then(() => {selected = []});"
+                                    x-on:click="$wire.remove(selected).then(() => {selected = []; syncToOrder();});"
                                     icon="trash"
                                     negative
                                     :label="__('Delete selected')"
                             />
                             <x-button
-                                    x-on:click="$wire.addToGroup();"
+                                    x-on:click="$wire.addToGroup().then(() => {syncToOrder();});"
                                     icon="duplicate"
                                     :label="__('Add to group')"
                             />

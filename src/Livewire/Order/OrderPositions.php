@@ -6,7 +6,7 @@ use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Actions\OrderPosition\PriceCalculation;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Helpers\PriceHelper;
-use FluxErp\Livewire\DataTables\OrderPositionList;
+use FluxErp\Livewire\DataTables\Order\OrderPositionList;
 use FluxErp\Models\Contact;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
@@ -25,6 +25,8 @@ class OrderPositions extends OrderPositionList
     use Actions;
 
     protected string $view = 'flux::livewire.order.order-positions';
+
+    public bool $isFilterable = true;
 
     public int $orderId;
 
@@ -160,6 +162,7 @@ class OrderPositions extends OrderPositionList
             $orderPosition['amount'] = 1;
             $orderPosition['order_id'] = $this->orderId;
             $orderPosition['client_id'] = $this->order['client_id'];
+            $orderPosition['price_list_id'] = $this->order['price_list_id'];
             $orderPosition['is_net'] = $this->order['price_list']['is_net'];
             $orderPosition['is_free_text'] = false;
             $orderPosition['is_alternative'] = false;

@@ -230,8 +230,6 @@ class FillOrderPositions extends FluxAction
                         'integer',
                         'nullable',
                         'exists:price_lists,id,deleted_at,NULL',
-                        'exists:prices,price_list_id,product_id,' . ($validated['product_id'] ?? 'NULL')
-                        . ',deleted_at,NULL',
                     ],
                     'unit_price' => [
                         new Numeric(),

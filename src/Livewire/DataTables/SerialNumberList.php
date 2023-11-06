@@ -23,20 +23,13 @@ class SerialNumberList extends DataTable
 
     public array $sortable = ['*'];
 
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
+
     public array $formatters = [
         'avatar' => 'image',
     ];
-
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel(SerialNumber::class)->attributes;
-
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
-
-        parent::mount();
-    }
 
     public function getBuilder(Builder $builder): Builder
     {

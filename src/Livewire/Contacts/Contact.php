@@ -84,18 +84,24 @@ class Contact extends Component
             return $address->append('name');
         });
 
-        $contact->main_address = $contact->addresses
-            ->where('is_main_address', true)
-            ->first()
-            ->toArray();
-
         $this->avatar = $contact->getAvatarUrl();
 
         $this->contact = $contact->toArray();
 
+        $mainAddress = $contact->addresses
+            ->where('is_main_address', true)
+            ->first() ?:
+            $contact->addresses->first();
+
+        if (! $mainAddress) {
+            abort(404);
+        }
+
+        $this->contact['main_address'] = $mainAddress->toArray();
+
         $this->address = $this->addressId ?
             $contact->addresses()->whereKey($this->addressId)->firstOrFail()->toArray() :
-            $contact->addresses->where('is_main_address', true)->first()->toArray();
+            $mainAddress->toArray();
 
         $this->priceLists = PriceList::query()->select(['id', 'name'])->get()->toArray();
         $this->paymentTypes = PaymentType::query()->select(['id', 'name'])->get()->toArray();
@@ -180,6 +186,23 @@ class Contact extends Component
         }
 
         return false;
+    }
+
+    public function changeCommissionAgent(int $id): void
+    {
+        try {
+            UpdateContact::make([
+                'id' => $this->contact['id'],
+                'agent_id' => $id,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        $this->skipRender();
     }
 
     public function contactUpdatedEvent(array $data): void

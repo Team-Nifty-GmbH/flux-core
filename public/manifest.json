@@ -1,6 +1,6 @@
 {
-    "short_name": "TN-Connect",
-    "name": "A Laravel based open source ERP system",
+    "short_name": "Flux",
+    "name": "Flux ERP",
     "icons": [
         {
             "src": "/flux/images/pwa/icons-vector.svg",

@@ -200,6 +200,24 @@
                                 wire:model.live="order.client_id"
                             />
                             <x-select
+                                :label="__('Commission Agent')"
+                                option-value="id"
+                                option-label="label"
+                                :disabled="$order['is_locked']"
+                                autocomplete="off"
+                                wire:model="order.agent_id"
+                                :template="[
+                                    'name'   => 'user-option',
+                                ]"
+                                :async-data="[
+                                    'api' => route('search', \FluxErp\Models\User::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'with' => 'media',
+                                    ]
+                                ]"
+                            />
+                            <x-select
                                 :label="__('Price list')"
                                 :options="$priceLists"
                                 option-value="id"
@@ -241,21 +259,21 @@
                                 :label="__('Order state')"
                                 wire:model.live="order.state"
                                 formatters="formatter.state"
-                                avialable="availableStates.state"
+                                available="availableStates.state"
                             />
                             <x-state
                                 align="left"
                                 :label="__('Payment state')"
                                 wire:model.live="order.payment_state"
                                 formatters="formatter.payment_state"
-                                avialable="availableStates.payment_state"
+                                available="availableStates.payment_state"
                             />
                             <x-state
                                 align="left"
                                 :label="__('Delivery state')"
                                 wire:model.live="order.delivery_state"
                                 formatters="formatter.delivery_state"
-                                avialable="availableStates.delivery_state"
+                                available="availableStates.delivery_state"
                             />
                         </div>
                     </x-card>
@@ -263,7 +281,7 @@
                 </div>
             </section>
             <section class="basis-8/12 pt-6 lg:pt-0">
-                <livewire:dynamic-component :order-id="$order['id'] ?? null" :is="$tab" :key="uniqid()" wire:model="order"/>
+                <livewire:dynamic-component :order-id="$order['id'] ?? null" :key="$tab" :is="$tab" wire:model="order"/>
             </section>
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">

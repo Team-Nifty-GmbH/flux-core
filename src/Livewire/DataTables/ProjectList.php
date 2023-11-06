@@ -30,20 +30,13 @@ class ProjectList extends DataTable
         'category.name' => 'Category',
     ];
 
-    public array $sortable = ['*'];
-
     public array $availableRelations = ['*'];
 
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel($this->model)->attributes;
+    public array $sortable = ['*'];
 
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
+    public array $aggregatable = ['*'];
 
-        parent::mount();
-    }
+    public array $availableCols = ['*'];
 
     public function getTableActions(): array
     {
