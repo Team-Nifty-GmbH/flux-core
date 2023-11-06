@@ -2,8 +2,15 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\FormBuilderField\CreateFormBuilderField;
+use FluxErp\Actions\FormBuilderField\UpdateFormBuilderField;
+use FluxErp\Actions\FormBuilderForm\CreateFormBuilderForm;
+use FluxErp\Actions\FormBuilderForm\UpdateFormBuilderForm;
+use FluxErp\Actions\FormBuilderSection\CreateFormBuilderSection;
+use FluxErp\Actions\FormBuilderSection\UpdateFormBuilderSection;
 use FluxErp\Models\FormBuilderForm;
-use FluxErp\Models\FormBuilderSection;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -24,7 +31,14 @@ class FormBuilderFormList extends DataTable
 
     public bool $showModal = false;
 
-    public array $form = [];
+    public array $form = [
+        'name' => null,
+        'description' => null,
+        'slug' => null,
+        'is_active' => true,
+        'start_date' => null,
+        'end_date' => null,
+    ];
 
     public array $formData = [];
 
@@ -45,6 +59,10 @@ class FormBuilderFormList extends DataTable
         ['value' => 'range', 'name' => 'Range'],
     ];
 
+    public function mount(): void
+    {
+        parent::mount();
+    }
 
     public function getRowActions(): array
     {
@@ -101,62 +119,56 @@ class FormBuilderFormList extends DataTable
 
     public function editItem($id = null)
     {
-        $id == null ? $this->resetForm() : $this->form = FormBuilderForm::find($id)->toArray();
+        $id == null ?: $this->form = FormBuilderForm::find($id)->toArray();
         $this->showModal = true;
     }
 
     public function saveItem()
     {
-        $this->validate([
-            'form.name' => 'string|required',
-            'form.description' => 'string|required',
-            'form.slug' => 'string|required',
-            'form.is_active' => 'boolean',
-            'form.start_date' => 'date|nullable',
-            'form.end_date' => 'date|nullable',
-            'formData' => 'array',
-            'formData.*.name' => 'string|required',
-            'formData.*.ordering' => 'integer|required',
-            'formData.*.columns' => 'integer|required',
-            'formData.*.description' => 'string|required',
-            'formData.*.icon' => 'string|required',
-            'formData.*.aside' => 'boolean',
-            'formData.*.compact' => 'boolean',
-            'formData.*.fields' => 'array',
-            'formData.*.fields.*.name' => 'string|required',
-            'formData.*.fields.*.description' => 'string|required',
-            'formData.*.fields.*.type' => 'string|required',
-            'formData.*.fields.*.ordering' => 'integer|required',
-            'formData.*.fields.*.options' => 'boolean',
-        ]);
+        $action = ($this->form['id'] ?? false) ? UpdateFormBuilderForm::class : CreateFormBuilderForm::class;
+        try {
+            $action::make($this->form)
+                ->validate()
+                ->checkPermission()
+                ->execute();
 
-//        dd($this->form);
-
-        $this->showModal = false;
-
-        if (isset($this->form['id'])) {
-            $formBuilderForm = FormBuilderForm::find($this->form['id'])->update($this->form);
-        } else {
-            $formBuilderForm = FormBuilderForm::create($this->form);
+            $this->reset('form');
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
         }
-dd($formBuilderForm);
+
         foreach ($this->formData as $section) {
-            if ($section['id'] !== null) {
-                $formBuilderSection = FormBuilderSection::find($section['id'])->update($section);
-            } else {
-                $formBuilderSection = FormBuilderSection::create($section);
+            $section['form_id'] = $this->form['id'];
+            try {
+                $action = ($section['id'] ?? false) ? UpdateFormBuilderSection::class : CreateFormBuilderSection::class;
+                $action::make($section)
+                    ->validate()
+                    ->checkPermission()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
             }
 
             foreach ($section['fields'] as $field) {
-                if ($field['id'] !== null) {
-                    $formBuilderSection->fields()->find($field['id'])->update($field);
-                } else {
-                    $formBuilderSection->fields()->create($field);
+                $field->section_id = $section['id'];
+                try {
+                    $action = ($field['id'] ?? false) ? UpdateFormBuilderField::class : CreateFormBuilderField::class;
+                    $action::make($field)
+                        ->validate()
+                        ->checkPermission()
+                        ->execute();
+                } catch (ValidationException|UnauthorizedException $e) {
+                    exception_to_notifications($e, $this);
                 }
             }
         }
 
-        $this->resetForm();
+        $this->showModal = false;
+    }
+
+    public function boot(): void
+    {
+        // override boot to force rendering
     }
 
     public function addSection()
@@ -201,24 +213,6 @@ dd($formBuilderForm);
         unset($this->formData[$index]);
     }
 
-    public function resetForm(): void
-    {
-        $this->form = [
-            'name' => null,
-            'description' => null,
-            'slug' => null,
-            'is_active' => true,
-            'start_date' => null,
-            'end_date' => null,
-        ];
-    }
-
-    public function closeModal()
-    {
-        $this->showModal = false;
-        $this->formData = [];
-        $this->resetForm();
-    }
 
     public function debug()
     {

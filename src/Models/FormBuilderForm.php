@@ -73,7 +73,7 @@ class FormBuilderForm extends Model
 
     public function sections(): HasMany
     {
-        return $this->hasMany(FormBuilderSection::class);
+        return $this->hasMany(FormBuilderSection::class, 'form_id', 'id');
     }
 
     public function fields(): HasManyThrough
@@ -83,12 +83,12 @@ class FormBuilderForm extends Model
 
     public function responses(): hasMany
     {
-        return $this->hasMany(FormBuilderResponse::class);
+        return $this->hasMany(FormBuilderResponse::class, 'form_id', 'id');
     }
 
     public function fieldsResponses(): HasMany
     {
-        return $this->hasMany(BoltPlugin::getModel('FieldResponse'));
+        return $this->hasMany(FormBuilderFieldResponse::class, 'form_id', 'id');
     }
 
     /**

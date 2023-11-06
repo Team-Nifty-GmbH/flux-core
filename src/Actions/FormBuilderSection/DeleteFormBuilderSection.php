@@ -1,0 +1,30 @@
+<?php
+
+namespace FluxErp\Actions\FormBuilderSection;
+
+use FluxErp\Actions\FluxAction;
+use FluxErp\Models\FormBuilderSection;
+
+class DeleteFormBuilderSection extends FluxAction
+{
+    protected function  boot(array $boot): void
+    {
+        parent::boot($boot);
+        $this->rules = [
+            'id' => 'required|integer|exists:form_builder_sections,id',
+        ];
+    }
+
+    public static function models(): array
+    {
+        return [FormBuilderSection::class];
+    }
+
+    public function performAction(): ?bool
+    {
+        return FormBuilderSection::query()
+            ->whereKey($this->data['id'])
+            ->first()
+            ->delete();
+    }
+}

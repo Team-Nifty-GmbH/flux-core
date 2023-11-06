@@ -20,6 +20,11 @@ use FluxErp\Http\Controllers\CustomEventController;
 use FluxErp\Http\Controllers\DiscountController;
 use FluxErp\Http\Controllers\DocumentTypeController;
 use FluxErp\Http\Controllers\EventSubscriptionController;
+use FluxErp\Http\Controllers\FormBuilderFieldController;
+use FluxErp\Http\Controllers\FormBuilderFieldResponseController;
+use FluxErp\Http\Controllers\FormBuilderFormController;
+use FluxErp\Http\Controllers\FormBuilderResponseController;
+use FluxErp\Http\Controllers\FormBuilderSectionController;
 use FluxErp\Http\Controllers\LanguageController;
 use FluxErp\Http\Controllers\LedgerAccountController;
 use FluxErp\Http\Controllers\LockController;
@@ -199,6 +204,41 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization'])
 
         //Events
         Route::get('/events', [EventSubscriptionController::class, 'getEvents']);
+
+        //FormBuilderForm
+        Route::get('/form-builder/forms/{id}', [FormBuilderFormController::class, 'show']);
+        Route::get('/form-builder/forms', [FormBuilderFormController::class, 'index']);
+        Route::post('/form-builder/forms', [FormBuilderFormController::class, 'create']);
+        Route::put('/form-builder/forms', [FormBuilderFormController::class, 'update']);
+        Route::delete('/form-builder/forms/{id}', [FormBuilderFormController::class, 'delete']);
+
+        //FormBuilderSection
+        Route::get('/form-builder/sections/{id}', [FormBuilderSectionController::class, 'show']);
+        Route::get('/form-builder/sections', [FormBuilderSectionController::class, 'index']);
+        Route::post('/form-builder/sections', [FormBuilderSectionController::class, 'create']);
+        Route::put('/form-builder/sections', [FormBuilderSectionController::class, 'update']);
+        Route::delete('/form-builder/sections/{id}', [FormBuilderSectionController::class, 'delete']);
+
+        //FormBuilderField
+        Route::get('/form-builder/fields/{id}', [FormBuilderFieldController::class, 'show']);
+        Route::get('/form-builder/fields', [FormBuilderFieldController::class, 'index']);
+        Route::post('/form-builder/fields', [FormBuilderFieldController::class, 'create']);
+        Route::put('/form-builder/fields', [FormBuilderFieldController::class, 'update']);
+        Route::delete('/form-builder/fields/{id}', [FormBuilderFieldController::class, 'delete']);
+
+        //FormBuilderResponse
+        Route::get('/form-builder/responses/{id}', [FormBuilderResponseController::class, 'show']);
+        Route::get('/form-builder/responses', [FormBuilderResponseController::class, 'index']);
+        Route::post('/form-builder/responses', [FormBuilderResponseController::class, 'create']);
+        Route::put('/form-builder/responses', [FormBuilderResponseController::class, 'update']);
+        Route::delete('/form-builder/responses/{id}', [FormBuilderResponseController::class, 'delete']);
+
+        //FormBuilderFieldsResponse
+        Route::get('/form-builder/fields-responses/{id}', [FormBuilderFieldResponseController::class, 'show']);
+        Route::get('/form-builder/fields-responses', [FormBuilderFieldResponseController::class, 'index']);
+        Route::post('/form-builder/fields-responses', [FormBuilderFieldResponseController::class, 'create']);
+        Route::put('/form-builder/fields-responses', [FormBuilderFieldResponseController::class, 'update']);
+        Route::delete('/form-builder/fields-responses/{id}', [FormBuilderFieldResponseController::class, 'delete']);
 
         //Languages
         Route::get('/languages/{id}', [LanguageController::class, 'show']);

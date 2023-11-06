@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('form_builder_field_respones', function (Blueprint $table) {
+        Schema::create('form_builder_field_responses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('form_id')->constrained('form_builder_forms');
             $table->foreignId('field_id')->constrained('form_builder_fields');
@@ -21,6 +21,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('form_builder_field_respones');
+        Schema::dropIfExists('form_builder_field_responses');
     }
 };
