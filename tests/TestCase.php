@@ -81,6 +81,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function defineEnvironment($app): void
     {
+        $app['config']->set('database.default', 'mysql');
         $app['config']->set('database.connections.mysql.collation', 'utf8mb4_unicode_ci');
     }
 }
