@@ -64,12 +64,4 @@ abstract class DuskTestCase extends TestCase
             SanctumServiceProvider::class,
         ]);
     }
-
-    public function getEnvironmentSetUp($app): void
-    {
-        if (file_exists(base_path('../../../../../../.env'))) {
-            $dotenv = Dotenv::createImmutable(base_path('../../../../../../'));
-            $dotenv->load();
-        }
-    }
 }
