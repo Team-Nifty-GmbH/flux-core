@@ -37,6 +37,22 @@
         <server name="SCOUT_DRIVER" value="collection"/>
         <server name="BROADCAST_DRIVER" value="log"/>
         <server name="GOTENBERG_HOST" value="http://localhost"/>
+
+
+        <env name="APP_URL" value=""/>
+        <env name="APP_KEY" value="base64:JmJwcdxmKz/kTL2+02xm6q7/sFltCaz0VNRgVQAxjbo="/>
+        <env name="APP_ENV" value="testing"/>
+        <env name="PORTAL_DOMAIN" value="http://portal.localhost"/>
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_USERNAME" value="root"/>
+        <env name="DB_PASSWORD" value="password"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SCOUT_DRIVER" value="collection"/>
+        <env name="BROADCAST_DRIVER" value="log"/>
+        <env name="GOTENBERG_HOST" value="http://localhost"/>
     </php>
     <source>
         <include>
