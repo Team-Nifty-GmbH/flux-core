@@ -8,9 +8,9 @@ use FluxErp\Models\FormBuilderSection;
 
 class CreateFormBuilderSection extends FluxAction
 {
-    protected function  boot(array $boot):void
+    protected function  boot(array $data):void
     {
-        parent::boot($boot);
+        parent::boot($data);
         $this->rules = (new CreateFormBuilderSectionRequest())->rules();
     }
 
