@@ -88,8 +88,6 @@ class AddressTest extends BaseSetup
             'update' => Permission::findOrCreate('api.addresses.put'),
             'delete' => Permission::findOrCreate('api.addresses.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_address()

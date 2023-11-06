@@ -29,8 +29,6 @@ class ClientTest extends BaseSetup
             'show' => Permission::findOrCreate('api.clients.{id}.get'),
             'index' => Permission::findOrCreate('api.clients.get'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_client()

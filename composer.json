@@ -20,7 +20,7 @@
         "spatie/laravel-medialibrary": "^10.0",
         "spatie/laravel-model-info": "^1.4",
         "spatie/laravel-model-states": "^2.4",
-        "spatie/laravel-permission": "^5.5",
+        "spatie/laravel-permission": "^6.0",
         "spatie/laravel-query-builder": "^5.0",
         "spatie/laravel-tags": "^4.3",
         "spatie/laravel-translatable": "^6.0",
@@ -33,9 +33,11 @@
     "require-dev": {
         "brianium/paratest": "^7.0",
         "friendsofphp/php-cs-fixer": "^v3.6",
+        "laravel/dusk": "^7.11",
         "laravel/pint": "^1.1",
         "nunomaduro/collision": "^7.4",
         "orchestra/testbench": "^8.13",
+        "orchestra/testbench-dusk": "^8.11",
         "phpstan/phpstan": "^1.9",
         "phpunit/phpunit": "^10.0",
         "squizlabs/php_codesniffer": "^3.6",
@@ -62,11 +64,17 @@
         }
     },
     "scripts": {
-        "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
+        "post-autoload-dump": [
+            "@php ./vendor/bin/testbench package:discover --ansi"
+        ],
         "analyse": "vendor/bin/phpstan analyse",
         "test": "./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml",
+        "test-browser": "./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dusk.xml --testsuite Browser",
+        "test-feature": "./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml --testsuite Feature",
+        "test-livewire": "./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml --testsuite Livewire",
         "test-coverage": "XDEBUG_MODE=coverage ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml --coverage-html ./reports",
-        "format": "vendor/bin/pint"
+        "format": "vendor/bin/pint",
+        "dusk:install-chromedriver": "@php vendor/bin/dusk-updater detect --auto-update --ansi"
     },
     "config": {
         "sort-packages": true,

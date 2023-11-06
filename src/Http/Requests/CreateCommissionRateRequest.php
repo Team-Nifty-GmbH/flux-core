@@ -14,19 +14,17 @@ class CreateCommissionRateRequest extends BaseFormRequest
         return [
             'user_id' => 'required|integer|exists:users,id,deleted_at,NULL',
             'contact_id' => [
-                'required_without_all:category_id,product_id',
                 'integer',
                 'nullable',
                 'exists:contacts,id,deleted_at,NULL',
             ],
             'category_id' => [
-                'required_without_all:contact_id,product_id',
+                'exclude_unless:product_id,null',
                 'integer',
                 'nullable',
                 'exists:categories,id,model_type,' . Product::class,
             ],
             'product_id' => [
-                'required_without_all:contact_id,category_id',
                 'integer',
                 'nullable',
                 'exists:products,id,deleted_at,NULL',

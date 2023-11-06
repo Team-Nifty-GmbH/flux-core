@@ -70,8 +70,6 @@ class ProjectTaskTest extends BaseSetup
             'finish' => Permission::findOrCreate('api.projects.tasks.finish.post'),
             'import' => Permission::findOrCreate('api.projects.tasks.import.post'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_project_task()

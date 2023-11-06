@@ -30,8 +30,6 @@ class UnitTest extends BaseSetup
             'update' => Permission::findOrCreate('api.units.put'),
             'delete' => Permission::findOrCreate('api.units.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_unit()

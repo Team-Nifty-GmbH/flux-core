@@ -48,8 +48,6 @@ class WarehouseTest extends BaseSetup
             'update' => Permission::findOrCreate('api.warehouses.put'),
             'delete' => Permission::findOrCreate('api.warehouses.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_warehouse()

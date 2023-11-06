@@ -101,7 +101,6 @@ class DashboardTest extends BaseSetup
             ->assertSeeLivewire('sample-component');
 
         Permission::findOrCreate('widget.sample-component');
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
 
         Livewire::test('dashboard.dashboard')
             ->assertOk()
@@ -111,7 +110,6 @@ class DashboardTest extends BaseSetup
     public function test_dashboard_show_widget_with_permission()
     {
         $permission = Permission::findOrCreate('widget.sample-component');
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
 
         Livewire::test('dashboard.dashboard')
             ->assertOk()

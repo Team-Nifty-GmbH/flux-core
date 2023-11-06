@@ -60,8 +60,6 @@ class TicketTest extends BaseSetup
             'delete' => Permission::findOrCreate('api.tickets.{id}.delete'),
             'toggle' => Permission::findOrCreate('api.tickets.toggle.post'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_ticket()

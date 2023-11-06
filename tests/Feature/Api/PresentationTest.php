@@ -52,8 +52,6 @@ class PresentationTest extends BaseSetup
             'update' => Permission::findOrCreate('api.presentations.put'),
             'delete' => Permission::findOrCreate('api.presentations.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_presentation()

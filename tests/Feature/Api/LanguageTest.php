@@ -37,8 +37,6 @@ class LanguageTest extends BaseSetup
             'update' => Permission::findOrCreate('api.languages.put'),
             'delete' => Permission::findOrCreate('api.languages.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_language()

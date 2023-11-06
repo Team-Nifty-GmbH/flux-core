@@ -47,8 +47,6 @@ class CountryRegionTest extends BaseSetup
             'update' => Permission::findOrCreate('api.country-regions.put'),
             'delete' => Permission::findOrCreate('api.country-regions.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_country_region()

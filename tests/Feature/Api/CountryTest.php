@@ -47,8 +47,6 @@ class CountryTest extends BaseSetup
             'update' => Permission::findOrCreate('api.countries.put'),
             'delete' => Permission::findOrCreate('api.countries.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_country()

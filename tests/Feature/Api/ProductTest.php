@@ -64,8 +64,6 @@ class ProductTest extends BaseSetup
             'update' => Permission::findOrCreate('api.products.put'),
             'delete' => Permission::findOrCreate('api.products.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_product()

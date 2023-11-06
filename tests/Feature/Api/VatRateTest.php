@@ -33,8 +33,6 @@ class VatRateTest extends BaseSetup
             'update' => Permission::findOrCreate('api.vat-rates.put'),
             'delete' => Permission::findOrCreate('api.vat-rates.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_vat_rate()

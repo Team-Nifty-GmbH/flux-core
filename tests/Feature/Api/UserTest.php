@@ -40,8 +40,6 @@ class UserTest extends BaseSetup
             'update' => Permission::findOrCreate('api.users.put'),
             'delete' => Permission::findOrCreate('api.users.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_user()

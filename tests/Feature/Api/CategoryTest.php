@@ -48,8 +48,6 @@ class CategoryTest extends BaseSetup
             'update' => Permission::findOrCreate('api.categories.put'),
             'delete' => Permission::findOrCreate('api.categories.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_category()

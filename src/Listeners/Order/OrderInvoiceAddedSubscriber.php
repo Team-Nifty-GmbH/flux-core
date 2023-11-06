@@ -81,6 +81,11 @@ class OrderInvoiceAddedSubscriber
                         ->first()
                         ?->id:
                     case $commissionRateId = $defaultCommissionRateByContact?->id:
+                    case $commissionRateId = $defaultCommissionRates
+                        ->whereNull('category_id')
+                        ->whereNull('product_id')
+                        ->first()
+                        ?->id:
                         break;
                     default:
                         $commissionRateId = null;

@@ -39,8 +39,6 @@ class ProductOptionTest extends BaseSetup
             'update' => Permission::findOrCreate('api.product-options.put'),
             'delete' => Permission::findOrCreate('api.product-options.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_product_option()
