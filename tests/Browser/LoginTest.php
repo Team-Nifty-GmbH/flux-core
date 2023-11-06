@@ -5,13 +5,12 @@ namespace FluxErp\Tests\Browser;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use FluxErp\Tests\DuskTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Dusk\Browser;
 
 class LoginTest extends DuskTestCase
 {
-    use DatabaseMigrations, DatabaseTransactions;
+    use DatabaseTransactions;
 
     private User $user;
 
