@@ -68,5 +68,6 @@ abstract class DuskTestCase extends TestCase
     public function defineEnvironment($app): void
     {
         $app['config']->set('database.default', 'mysql');
+        $app['config']->set('database.connections.mysql.database', 'laravel');
     }
 }
