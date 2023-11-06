@@ -35,6 +35,8 @@ class UserEdit extends Component
 
     public array $roles = [];
 
+    public array $users = [];
+
     public bool $isSuperAdmin = false;
 
     protected $listeners = [
@@ -53,6 +55,11 @@ class UserEdit extends Component
 
         $this->roles = Role::query()
             ->get(['id', 'name', 'guard_name'])
+            ->toArray();
+
+        $this->users = User::query()
+            ->get(['id', 'firstname', 'lastname', 'email'])
+            ->append('name')
             ->toArray();
     }
 
@@ -80,20 +87,12 @@ class UserEdit extends Component
 
     public function show(int $id = null): void
     {
-        $user = User::query()->whereKey($id)->with(['roles'])->firstOrNew();
+        $user = User::query()
+            ->whereKey($id)
+            ->with(['roles'])
+            ->firstOrNew();
 
         $this->resetErrorBag();
-
-        if ($user->is_locked) {
-            $this->notification()->error(__('Record locked.'));
-            $this->skipRender();
-
-            return;
-        }
-
-        if ($user->exists) {
-            $user?->lock()->updateOrCreate([]);
-        }
 
         $this->user = $user->toArray();
         $this->isSuperAdmin = $user->hasRole('Super Admin');

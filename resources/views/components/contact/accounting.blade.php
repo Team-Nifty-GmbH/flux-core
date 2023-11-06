@@ -100,4 +100,7 @@
             ]"
         />
     </div>
+    <div>
+        <livewire:features.commission-rates :userId="null" :contactId="$this->contact['id']"/>
+    </div>
 </div>

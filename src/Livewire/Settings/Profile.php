@@ -2,17 +2,17 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Http\Requests\UpdateUserRequest;
+use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
+use FluxErp\Actions\User\UpdateUser;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
-use FluxErp\Services\NotificationSettingsService;
-use FluxErp\Services\UserService;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
 
 class Profile extends Component
@@ -82,28 +82,16 @@ class Profile extends Component
         }
     }
 
-    public function updatingNotificationSettings(array $notificationSettings): void
+    public function updatingNotificationSettings($value, $key): void
     {
-        $dirty = array_diff_assoc(Arr::dot($this->notificationSettings), Arr::dot($notificationSettings));
-
-        foreach ($dirty as $key => $value) {
-            $key = basename($key, '.is_active');
-            $notification = explode('.', $key);
-            $data = data_get($notificationSettings, $key);
-            $data['notification_type'] = $notification[0];
-            $data['channel'] = $notification[1];
-
-            $this->dirtyNotifications[$key] = $data;
-        }
+        $this->dirtyNotifications[] = $key;
     }
 
     public function getRules(): array
     {
-        $rules = (new UpdateUserRequest())->getRules($this->user);
-
-        $rules['password'][] = 'confirmed';
-
-        return Arr::prependKeysWith($rules, 'user.');
+        return [
+            'user.password' => 'confirmed'
+        ];
     }
 
     public function render(): View|Factory|Application
@@ -127,25 +115,38 @@ class Profile extends Component
 
     public function save(): void
     {
-        if (! user_can('my-profile.get') || auth()->id() !== $this->user['id']) {
-            return;
-        }
-
         $this->validate();
 
-        $notificationSettingsService = new NotificationSettingsService();
-        $notificationSettingsService->update(array_values($this->dirtyNotifications));
-
-        $userService = new UserService();
-        $response = $userService->update($this->user);
-
-        if ($response['status'] < 300) {
+        try {
+            UpdateUser::make($this->user)
+                ->checkPermission()
+                ->validate()
+                ->execute();
             $this->notification()->success(__('Profile saved successful.'));
-        } else {
-            $this->notification()->error(
-                implode(',', array_keys($response['errors'])),
-                implode(', ', Arr::dot($response['errors']))
-            );
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        $dirtyNotifications = [];
+        foreach ($this->dirtyNotifications as $key) {
+            $key = basename($key, '.is_active');
+            $notification = explode('.', $key);
+            $data = data_get($this->notificationSettings, $key);
+            $data['notification_type'] = $notification[0];
+            $data['channel'] = $notification[1];
+
+            $dirtyNotifications[$key] = $data;
+        }
+
+        foreach ($dirtyNotifications as $notificationSetting) {
+            try {
+                UpdateNotificationSetting::make($notificationSetting)
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
         }
 
         $this->skipRender();

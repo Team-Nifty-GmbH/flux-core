@@ -21,7 +21,18 @@ class TicketList extends DataTable
         'created_at',
     ];
 
+    public array $availableCols = [
+        'title',
+        'description',
+        'ticket_number',
+        'state',
+        'ticket_type.name',
+        'created_at',
+    ];
+
     public array $sortable = ['*'];
+
+    public array $availableRelations = [];
 
     public function getBuilder(Builder $builder): Builder
     {

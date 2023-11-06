@@ -20,26 +20,11 @@ class ClientList extends DataTable
         'phone',
     ];
 
-    public array $columnLabels = [
-        'country.name' => 'Country',
-        'postcode' => 'Zip',
-    ];
+    public array $availableRelations = ['*'];
 
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel($this->model)->attributes;
+    public array $sortable = ['*'];
 
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
+    public array $aggregatable = ['*'];
 
-        parent::mount();
-    }
-
-    public function getBuilder(Builder $builder): Builder
-    {
-        return $builder->with([
-            'country:id,name',
-        ]);
-    }
+    public array $availableCols = ['*'];
 }

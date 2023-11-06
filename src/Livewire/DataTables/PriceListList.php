@@ -21,14 +21,7 @@ class PriceListList extends DataTable
 
     public array $sortable = ['*'];
 
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel(PriceList::class)->attributes;
+    public array $aggregatable = ['*'];
 
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
-
-        parent::mount();
-    }
+    public array $availableCols = ['*'];
 }

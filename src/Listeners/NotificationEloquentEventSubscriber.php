@@ -3,10 +3,17 @@
 namespace FluxErp\Listeners;
 
 use FluxErp\Models\NotificationSetting;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Notification;
 
 class NotificationEloquentEventSubscriber
 {
+    public Collection $notifiables;
+
+    public Model $model;
+
     /**
      * Handle incoming events.
      */
@@ -19,14 +26,16 @@ class NotificationEloquentEventSubscriber
             return;
         }
 
+        $this->model = $model[0];
+
         // Subscribers to the morph model.
-        $notifiable = event_subscribers($event, $model[0]->model_id, $model[0]->model_type);
-        // Subsribers to this model
-        $notifiables = $notifiable->merge(event_subscribers($event, $model[0]->id, get_class($model[0])));
+        $this->notifiables = event_subscribers($event, $model[0]->model_id, $model[0]->model_type);
+        // Subscribers to this model
+        $this->notifiables = $this->notifiables->merge(event_subscribers($event, $model[0]->id, get_class($model[0])));
 
         if (method_exists($model[0], 'notifiable')) {
             // Subscribers to the notifiable model.
-            $notifiables = $notifiables->merge($model[0]->notifiable()->get());
+            $this->notifiables = $this->notifiables->merge($model[0]->notifiable()->get());
         }
 
         // Anonymous subscribers.
@@ -52,13 +61,15 @@ class NotificationEloquentEventSubscriber
             })
             ->filter();
 
-        $notifiables = $notifiables->merge($anonymousNotifiables);
+        $this->notifiables = $this->notifiables->merge($anonymousNotifiables);
 
-        if (! $notifiables->count()) {
+        app()->make(Dispatcher::class)->dispatch($notification, $this);
+
+        if (! $this->notifiables->count()) {
             return;
         }
 
-        Notification::send($notifiables, new $notification($model[0], $event));
+        Notification::send($this->notifiables, new $notification($this->model, $event));
     }
 
     /**

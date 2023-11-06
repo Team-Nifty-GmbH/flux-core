@@ -202,7 +202,8 @@ class OrderDetail extends Component
         $this->positionDetails['product'] = $position
             ->product()
             ->select(['id', 'description', 'product_number'])
-            ->first();
+            ->first()
+            ?->toArray();
 
         $this->positionDetails['image'] = $image?->toHtml();
         $this->detailModal = true;

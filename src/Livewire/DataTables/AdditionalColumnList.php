@@ -19,14 +19,11 @@ class AdditionalColumnList extends DataTable
         'values',
     ];
 
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel($this->model)->attributes;
+    public array $availableRelations = ['*'];
 
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
+    public array $sortable = ['*'];
 
-        parent::mount();
-    }
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 }

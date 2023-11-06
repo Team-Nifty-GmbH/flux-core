@@ -43,7 +43,7 @@ class EventSubscriptionTest extends BaseSetup
         $this->permissions = [
             'show' => Permission::findOrCreate('api.events.get'),
             'index' => Permission::findOrCreate('api.event-subscriptions.get'),
-            'getUserSubscriptions' => Permission::findOrCreate('api.event-subscriptions.user'),
+            'getUserSubscriptions' => Permission::findOrCreate('api.event-subscriptions.user.get'),
             'create' => Permission::findOrCreate('api.event-subscriptions.post'),
             'update' => Permission::findOrCreate('api.event-subscriptions.put'),
             'delete' => Permission::findOrCreate('api.event-subscriptions.{id}.delete'),

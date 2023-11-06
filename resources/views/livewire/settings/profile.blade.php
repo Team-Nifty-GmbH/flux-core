@@ -40,26 +40,24 @@
         <x-slot name="header">
                 <th>{{ __('Notification') }}</th>
                 <template x-for="(notificationChannel, name) in notificationChannels">
-                    <th>
+                    <th class="text-left">
                         <div x-text="name"/>
                     </th>
                 </template>
         </x-slot>
-        <template x-for="(notification,key) in notificationSettings">
+        @foreach($notificationSettings as $notificationName => $notification)
             <tr>
                 <td>
-                    <div x-text="key"></div>
+                    <div>{{ $notificationName }}</div>
                 </td>
-                <template x-for="(channelSettings,channel) in notification">
+                @foreach($notification as $channel => $channelSettings)
                     <td>
                         <x-checkbox
-                            x-bind:disabled="channelSettings.is_disabled"
-                            x-model="notificationSettings[key][channel].is_active"
+                            wire:model.live="notificationSettings.{{ $notificationName }}.{{ $channel }}.is_active"
                         />
                     </td>
-                </template>
-            </tr>
-        </template>
+                @endforeach
+        @endforeach
     </x-table>
     <div class="flex justify-end space-x-5 pt-5">
         <x-button :label="__('Cancel')" x-on:click="window.history.back()"/>

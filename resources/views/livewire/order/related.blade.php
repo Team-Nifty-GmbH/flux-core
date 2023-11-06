@@ -11,6 +11,6 @@
         <livewire:data-tables.order-list cache-key="order.related.order-list.children" :filters="[['parent_id', '=', $orderId]]" />
     </x-card>
     <x-card :title="__('Tickets')">
-        <livewire:data-tables.ticket-list cache-key="order.related.ticket-list" :filters="[['model_id', '=', $orderId], ['model_type', '=', \FluxErp\Models\Order::class]]" />
+        <livewire:data-tables.ticket-list cache-key="order.related.ticket-list" :filters="[['model_id', '=', $orderId], ['model_type', '=', \FluxErp\Models\Order::class]]" :model-type="\FluxErp\Models\Order::class" :model-id="$orderId" />
     </x-card>
 </div>

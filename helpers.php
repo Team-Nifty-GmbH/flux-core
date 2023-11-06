@@ -389,3 +389,10 @@ if (! function_exists('flux_path')) {
         return __DIR__ . ($path ? DIRECTORY_SEPARATOR . $path : $path);
     }
 }
+
+if (! function_exists('model')) {
+    function model(string $class): Illuminate\Database\Eloquent\Model
+    {
+        return app($class);
+    }
+}

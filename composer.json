@@ -25,9 +25,9 @@
         "spatie/laravel-translatable": "^6.0",
         "spatie/laravel-translation-loader": "^2.7",
         "team-nifty-gmbh/tall-calendar": "^0.2.3",
-        "team-nifty-gmbh/tall-datatables": "^0.5.2",
+        "team-nifty-gmbh/tall-datatables": "^0.7.0",
         "wireui/heroicons": "^2.3",
-        "wireui/wireui": "^1.12"
+        "wireui/wireui": "^1.18.4"
     },
     "require-dev": {
         "brianium/paratest": "^7.0",

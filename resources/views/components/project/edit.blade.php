@@ -31,7 +31,7 @@
             :label="__('Project state')"
             wire:model="project.state"
             formatters="formatter.state"
-            avialable="availableStates"
+            available="availableStates"
         />
         <x-input type="date" x-bind:readonly="!edit" wire:model="project.deadline" label="{{ __('Deadline') }}" />
         <x-input type="date" x-bind:readonly="!edit" wire:model="project.release_date" label="{{ __('Release date') }}" />

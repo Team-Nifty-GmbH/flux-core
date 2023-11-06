@@ -17,22 +17,22 @@ trait Lockable
         });
 
         static::saving(function ($model) {
-            if ($model->is_locked && Auth::user()->is($model?->lock->user)) {
+            if ($model->is_locked && Auth::user()->isNot($model?->lock->user)) {
                 throw new HttpResponseException(
                     ResponseHelper::createResponseFromBase(
                         statusCode: 423,
-                        data: ['locked' => 'model is locked by another user']
+                        data: ['locked' => ['model is locked by another user']]
                     )
                 );
             }
         });
 
         static::deleting(function ($model) {
-            if ($model->is_locked && Auth::user()->is($model?->lock->user)) {
+            if ($model->is_locked && Auth::user()->isNot($model?->lock->user)) {
                 throw new HttpResponseException(
                     ResponseHelper::createResponseFromBase(
                         statusCode: 423,
-                        data: ['locked' => 'model is locked by another user']
+                        data: ['locked' => ['model is locked by another user']]
                     )
                 );
             }

@@ -2,10 +2,9 @@
 
 namespace FluxErp\Widgets;
 
-use FluxErp\Contracts\UserWidget;
+use FluxErp\Traits\Widgetable;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
-use Livewire\Livewire;
 use Livewire\Mechanisms\ComponentRegistry;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -62,9 +61,9 @@ class WidgetManager
 
     public function autoDiscoverWidgets(string $directory = null, string $namespace = null): void
     {
-        $namespace = $namespace ?: 'App\\Http\\Livewire\\Widgets';
-        $path = $directory ?: app_path('Http/Livewire/Widgets');
         $componentRegistry = app(ComponentRegistry::class);
+        $namespace = $namespace ?: config('livewire.class_namespace') . '\\Widgets';
+        $path = $directory ?: app_path('Livewire/Widgets');
 
         if (! is_dir($path)) {
             return;
@@ -83,7 +82,7 @@ class WidgetManager
                     : '';
                 $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
 
-                if (! class_exists($class) || ! in_array(UserWidget::class, class_implements($class))) {
+                if (! class_exists($class) || ! in_array(Widgetable::class, class_uses_recursive($class))) {
                     continue;
                 }
 
@@ -91,10 +90,10 @@ class WidgetManager
 
                 // Check if the class is a valid Livewire component
                 if ($reflection->isSubclassOf(Component::class) && ! $reflection->isAbstract()) {
-                    if (class_exists($class) && str_starts_with($reflection->getNamespaceName(), config('livewire.class_namespace'))) {
-                        $componentName = $class::getName();
-                    } else {
+                    if (class_exists($class) && str_starts_with($reflection->getNamespaceName(), $namespace)) {
                         $componentName = $componentRegistry->getName($class);
+                    } else {
+                        continue;
                     }
 
                     try {

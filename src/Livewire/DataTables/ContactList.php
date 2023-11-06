@@ -26,24 +26,17 @@ class ContactList extends DataTable
         'city',
     ];
 
+    public array $availableRelations = ['*'];
+
     public array $sortable = ['*'];
 
-    public array $availableRelations = ['*'];
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 
     public array $formatters = [
         'avatar' => 'image',
     ];
-
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel(Address::class)->attributes;
-
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
-
-        parent::mount();
-    }
 
     public function getTableActions(): array
     {
@@ -66,10 +59,5 @@ class ContactList extends DataTable
         $returnArray['avatar'] = $item->getAvatarUrl();
 
         return $returnArray;
-    }
-
-    public function getFilterableColumns(string $name = null): array
-    {
-        return $this->availableCols;
     }
 }

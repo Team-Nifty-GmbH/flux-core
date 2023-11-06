@@ -18,16 +18,13 @@ class CategoryList extends DataTable
         'is_active',
     ];
 
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel($this->model)->attributes;
+    public array $availableRelations = ['*'];
 
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
+    public array $sortable = ['*'];
 
-        parent::mount();
-    }
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 
     public function getBuilder(Builder $builder): Builder
     {

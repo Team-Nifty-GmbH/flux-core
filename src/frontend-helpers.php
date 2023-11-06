@@ -30,16 +30,22 @@ if (! function_exists('exception_to_notifications')) {
             throw new InvalidArgumentException('Component does not have a notification method.');
         }
 
-        if (method_exists($exception, 'errors')) {
-            foreach ($exception->errors() as $field => $messages) {
-                foreach ($messages as $message) {
-                    $component->notification()->error($field, $message);
-                    $component->addError($field, $message);
+        switch (true) {
+            case method_exists($exception, 'errors') && $errors = $exception->errors():
+            case method_exists($exception, 'getResponse')
+                && $errors = json_decode($exception->getResponse()->getContent(), true)['errors'] ?? []:
+
+                foreach ($errors as $field => $messages) {
+                    foreach ($messages as $message) {
+                        $component->notification()->error($field, __($message));
+                        $component->addError($field, __($message));
+                    }
                 }
-            }
-        } else {
-            $component->notification()->error($exception->getMessage());
-            $component->addError('', $exception->getMessage());
+
+                break;
+            default:
+                $component->notification()->error($exception->getMessage());
+                $component->addError('', $exception->getMessage());
         }
 
         if (! $exception instanceof \Illuminate\Validation\ValidationException) {

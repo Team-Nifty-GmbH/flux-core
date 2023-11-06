@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Contact;
 use FluxErp\Rules\ExistsWithIgnore;
 
 class UpdateContactRequest extends BaseFormRequest
@@ -13,49 +14,57 @@ class UpdateContactRequest extends BaseFormRequest
      */
     public function rules(): array
     {
-        return [
-            'id' => 'required|integer|exists:contacts,id,deleted_at,NULL',
-            'client_id' => [
-                'integer',
-                (new ExistsWithIgnore('clients', 'id'))->whereNull('deleted_at'),
-            ],
-            'payment_type_id' => [
-                'integer',
-                'nullable',
-                (new ExistsWithIgnore('payment_types', 'id'))->whereNull('deleted_at'),
-            ],
-            'price_list_id' => [
-                'integer',
-                'nullable',
-                (new ExistsWithIgnore('price_lists', 'id'))->whereNull('deleted_at'),
-            ],
-            'expense_ledger_account_id' => [
-                'integer',
-                'nullable',
-                (new ExistsWithIgnore('ledger_accounts', 'id')),
-            ],
-            'vat_rate_id' => [
-                'integer',
-                'nullable',
-                (new ExistsWithIgnore('vat_rates', 'id'))->whereNull('deleted_at'),
-            ],
-            'customer_number' => 'sometimes|string',
-            'creditor_number' => 'string|nullable',
-            'debtor_number' => 'string|nullable',
-            'payment_target_days' => 'sometimes|integer|nullable',
-            'payment_reminder_days_1' => 'sometimes|integer|nullable',
-            'payment_reminder_days_2' => 'sometimes|integer|nullable',
-            'payment_reminder_days_3' => 'sometimes|integer|nullable',
-            'discount_days' => 'sometimes|integer|nullable',
-            'discount_percent' => 'sometimes|numeric|nullable',
-            'credit_line' => 'sometimes|numeric|nullable',
-            'vat_id' => 'sometimes|string|nullable',
-            'vendor_customer_number' => 'sometimes|string|nullable',
-            'has_sensitive_reminder' => 'sometimes|boolean',
-            'has_delivery_lock' => 'sometimes|boolean',
+        return array_merge(
+            (new Contact())->hasAdditionalColumnsValidationRules(),
+            [
+                'id' => 'required|integer|exists:contacts,id,deleted_at,NULL',
+                'client_id' => [
+                    'integer',
+                    (new ExistsWithIgnore('clients', 'id'))->whereNull('deleted_at'),
+                ],
+                'agent_id' => [
+                    'integer',
+                    'nullable',
+                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+                ],
+                'payment_type_id' => [
+                    'integer',
+                    'nullable',
+                    (new ExistsWithIgnore('payment_types', 'id'))->whereNull('deleted_at'),
+                ],
+                'price_list_id' => [
+                    'integer',
+                    'nullable',
+                    (new ExistsWithIgnore('price_lists', 'id'))->whereNull('deleted_at'),
+                ],
+                'expense_ledger_account_id' => [
+                    'integer',
+                    'nullable',
+                    (new ExistsWithIgnore('ledger_accounts', 'id')),
+                ],
+                'vat_rate_id' => [
+                    'integer',
+                    'nullable',
+                    (new ExistsWithIgnore('vat_rates', 'id'))->whereNull('deleted_at'),
+                ],
+                'customer_number' => 'sometimes|string',
+                'creditor_number' => 'string|nullable',
+                'debtor_number' => 'string|nullable',
+                'payment_target_days' => 'sometimes|integer|nullable',
+                'payment_reminder_days_1' => 'sometimes|integer|nullable',
+                'payment_reminder_days_2' => 'sometimes|integer|nullable',
+                'payment_reminder_days_3' => 'sometimes|integer|nullable',
+                'discount_days' => 'sometimes|integer|nullable',
+                'discount_percent' => 'sometimes|numeric|nullable',
+                'credit_line' => 'sometimes|numeric|nullable',
+                'vat_id' => 'sometimes|string|nullable',
+                'vendor_customer_number' => 'sometimes|string|nullable',
+                'has_sensitive_reminder' => 'sometimes|boolean',
+                'has_delivery_lock' => 'sometimes|boolean',
 
-            'discount_groups' => 'array',
-            'discount_groups.*' => 'integer|exists:discount_groups,id',
-        ];
+                'discount_groups' => 'array',
+                'discount_groups.*' => 'integer|exists:discount_groups,id',
+            ]
+        );
     }
 }
