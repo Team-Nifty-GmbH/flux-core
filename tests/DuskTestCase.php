@@ -12,7 +12,6 @@ use FluxErp\Providers\ViewServiceProvider;
 use Hammerstone\FastPaginate\FastPaginateProvider;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
-use Orchestra\Testbench\Concerns\CreatesApplication;
 use Orchestra\Testbench\Dusk\TestCase;
 use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
@@ -27,8 +26,6 @@ use function Orchestra\Testbench\package_path;
 
 abstract class DuskTestCase extends TestCase
 {
-    use CreatesApplication;
-
     protected function setUp(): void
     {
         if (file_exists(__DIR__ . '/../../../.env')) {
@@ -51,8 +48,8 @@ abstract class DuskTestCase extends TestCase
     protected function getApplicationProviders($app): array
     {
         return array_merge(parent::getApplicationProviders($app), [
-            ViewServiceProvider::class,
             LivewireServiceProvider::class,
+            ViewServiceProvider::class,
             PermissionServiceProvider::class,
             TagsServiceProvider::class,
             ScoutServiceProvider::class,
@@ -73,8 +70,11 @@ abstract class DuskTestCase extends TestCase
         ]);
     }
 
-    protected function getEnvironmentSetUp($app)
+    public function getEnvironmentSetUp($app): void
     {
-        $app['config']->set('database.default', 'mysql');
+        if (file_exists(base_path('../../../../../../.env'))) {
+            $dotenv = Dotenv::createImmutable(base_path('../../../../../../'));
+            $dotenv->load();
+        }
     }
 }
