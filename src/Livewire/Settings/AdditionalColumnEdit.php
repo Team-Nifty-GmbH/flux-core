@@ -79,6 +79,7 @@ class AdditionalColumnEdit extends Component
             ->merge(ModelInfo::forAllModels(flux_path('src/Models'), flux_path('src'), 'FluxErp'))
             ->filter(fn ($model) => in_array(HasAdditionalColumns::class, $model->traits->toArray()))
             ->map(fn ($model) => $model->class)
+            ->sort()
             ->toArray();
 
         $this->fieldTypes = Helper::getHtmlInputFieldTypes();

@@ -101,9 +101,6 @@ trait WithFileUploads
 
         foreach ($property as $file) {
             /** @var TemporaryUploadedFile $file */
-            // fix suffix as livewire sometimes changes this
-            $suffix = pathinfo($file->getClientOriginalName(), \PATHINFO_EXTENSION);
-
             $this->filesArray[] = [
                 'key' => $file->getFilename(),
                 'name' => $file->getClientOriginalName(),
@@ -121,7 +118,10 @@ trait WithFileUploads
         if (! $this->filesArray && ! $this->filesArrayDirty) {
             $this->prepareForMediaLibrary($name, $modelId, $modelType);
         } else {
-            $this->filesArray = array_map(fn ($file) => array_merge($file, ['model_type' => $modelType, 'model_id' => $modelId]), $this->filesArray);
+            $this->filesArray = array_map(
+                fn ($file) => array_merge($file, ['model_type' => $modelType, 'model_id' => $modelId]),
+                $this->filesArray
+            );
         }
 
         $response = [];

@@ -22,6 +22,7 @@ class Activities extends BaseActivities
         if ($this->initialized) {
             $this->skipRender();
         }
+
         $this->modelId = $this->order['id'];
     }
 

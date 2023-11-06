@@ -35,12 +35,10 @@ jobs:
           npm ci
 
       - name: Build assets using Vite
-        run: |
-          npm run build
+        run: npm run build
 
       - name: Fix code styling
-        run: |
-          composer format
+        run: composer format
 
       - name: Commit and push changes
         run: |

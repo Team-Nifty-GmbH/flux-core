@@ -23,7 +23,7 @@ class PushSubscriptionController extends BaseController
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
             data: $pushSubscription,
-            statusMessage: __('push subscription upserted')
+            statusMessage: 'push subscription upserted'
         );
     }
 }

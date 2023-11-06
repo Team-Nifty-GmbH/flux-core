@@ -12,7 +12,6 @@ class UpsertPushSubscription extends FluxAction
     {
         parent::boot($data);
         $this->rules = (new UpsertPushSubscriptionRequest())->rules();
-
     }
 
     public static function models(): array
@@ -22,9 +21,7 @@ class UpsertPushSubscription extends FluxAction
 
     public function performAction(): PushSubscription
     {
-        $user = auth()->user();
-
-        return $user->updatePushSubscription(
+        return auth()->user()->updatePushSubscription(
             $this->data['endpoint'],
             $this->data['keys']['p256dh'],
             $this->data['keys']['auth']

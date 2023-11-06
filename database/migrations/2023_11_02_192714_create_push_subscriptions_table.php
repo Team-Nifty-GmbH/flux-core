@@ -6,14 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 class CreatePushSubscriptionsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
-        Schema::connection(config('webpush.database_connection'))->create(config('webpush.table_name'), function (Blueprint $table) {
+        Schema::create(config('webpush.table_name'), function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->morphs('subscribable');
             $table->string('endpoint', 500)->unique();
@@ -24,13 +19,8 @@ class CreatePushSubscriptionsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
-        Schema::connection(config('webpush.database_connection'))->dropIfExists(config('webpush.table_name'));
+        Schema::dropIfExists(config('webpush.table_name'));
     }
 }

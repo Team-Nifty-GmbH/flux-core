@@ -49,7 +49,6 @@ abstract class TestCase extends BaseTestCase
 
     public function getPackageProviders($app): array
     {
-
         return [
             LivewireServiceProvider::class,
             ViewServiceProvider::class,

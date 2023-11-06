@@ -68,7 +68,7 @@ class CreateTicket extends FluxAction
 
         $ticket->getSerialNumber(
             'ticket_number',
-            Auth::user()?->client_id ?? Client::query()->first()?->id
+            Auth::user()?->client_id ?? Client::query()->where('is_active', true)->first()?->id
         );
 
         $ticket->save();

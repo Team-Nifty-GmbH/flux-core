@@ -55,7 +55,6 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
     ->name('icons');
 
 Route::middleware(['auth:web', 'permission'])->group(function () {
-    Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);
     Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);
     Route::get('/calendars', Calendar::class)->name('calendars')->registersMenuItem(icon: 'calendar');
     Route::get('/contacts', ContactList::class)->name('contacts')->registersMenuItem(icon: 'identification');
@@ -69,6 +68,8 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 ->registersMenuItem(icon: 'briefcase');
             Route::get('/{id}', Project::class)->name('id');
         });
+
+    Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);
 
     Route::name('orders.')->prefix('orders')
         ->group(function () {
