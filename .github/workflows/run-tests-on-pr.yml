@@ -90,7 +90,7 @@ jobs:
         run: composer dusk:install-chromedriver
 
       - name: Run Tests
-        run: ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml --testsuite Browser
+        run: composer test
         env:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
