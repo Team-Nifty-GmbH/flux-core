@@ -15,9 +15,6 @@ return new class extends Migration
             $table->integer('ordering')->default(1);
             $table->integer('columns')->default(1);
             $table->text('description')->nullable();
-            $table->string('icon')->nullable();
-            $table->boolean('aside')->default(0);
-            $table->boolean('compact')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

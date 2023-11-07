@@ -9,7 +9,7 @@ class CreateFormBuilderSectionRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
@@ -19,9 +19,6 @@ class CreateFormBuilderSectionRequest extends FormRequest
             'ordering' => 'nullable|integer',
             'columns' => 'nullable|integer',
             'description' => 'nullable|string|max:255',
-            'icon' => 'nullable|string|max:255',
-            'aside' => 'nullable|boolean',
-            'compact' => 'nullable|boolean',
         ];
     }
 }

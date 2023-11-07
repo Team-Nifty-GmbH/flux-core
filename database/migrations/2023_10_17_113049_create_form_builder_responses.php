@@ -12,9 +12,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('form_id')->constrained('form_builder_forms');
             $table->foreignId('user_id')->nullable()->constrained('users');
-            $table->integer('extension_item_id')->nullable();
-            $table->string('status')->default('NEW');
-            $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
