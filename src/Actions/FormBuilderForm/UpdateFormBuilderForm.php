@@ -32,12 +32,4 @@ class UpdateFormBuilderForm extends FluxAction
         $formBuilderForm->save();
         return $formBuilderForm->refresh();
     }
-
-    public function validateData(): void
-    {
-        $validator = Validator($this->data, $this->rules);
-        $validator->addModel(new FormBuilderForm());
-
-        $this->data = $validator->validate();
-    }
 }

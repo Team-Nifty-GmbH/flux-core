@@ -7,19 +7,17 @@ use FluxErp\Models\FormBuilderField;
 
 class DeleteFormBuilderField extends FluxAction
 {
-    protected function  boot(array $data): void
+    protected function boot(array $data): void
     {
         parent::boot($data);
         $this->rules = [
-            'id' => 'required|integer|exists:form_builder_fields,id',
+            'id' => 'required|integer|exists:form_builder_fields,id,deleted_at,NULL',
         ];
     }
 
     public static function models(): array
     {
-        return [
-            FormBuilderField::class,
-        ];
+        return [FormBuilderField::class];
     }
 
     public function performAction(): ?bool
@@ -28,13 +26,5 @@ class DeleteFormBuilderField extends FluxAction
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
-    }
-
-    public function validateData(): void
-    {
-        $validator = Validator($this->data, $this->rules);
-        $validator->addModel(new FormBuilderField());
-
-        $this->data = $validator->validate();
     }
 }

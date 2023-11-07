@@ -25,11 +25,4 @@ class UpdateFormBuilderResponse extends FluxAction
         $formBuilderResponse->save();
         return $formBuilderResponse->refresh();
     }
-
-    public function validateData(): void
-    {
-        $validator = Validator($this->data, $this->rules);
-        $validator->addModel(new FormBuilderResponse());
-        $this->data = $validator->validate();
-    }
 }

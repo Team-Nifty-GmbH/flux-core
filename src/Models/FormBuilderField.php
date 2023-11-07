@@ -24,17 +24,17 @@ class FormBuilderField extends Model
 
     protected static function booted(): void
     {
-        static::deleting(function (Field $field) {
-            if ($field->isForceDeleting()) {
-                $field->fieldResponses()->withTrashed()->get()->each(function ($item) {
-                    $item->forceDelete();
-                });
-            } else {
-                $field->fieldResponses->each(function ($item) {
-                    $item->delete();
-                });
-            }
-        });
+//        static::deleting(function (Field $field) {
+//            if ($field->isForceDeleting()) {
+//                $field->fieldResponses()->withTrashed()->get()->each(function ($item) {
+//                    $item->forceDelete();
+//                });
+//            } else {
+//                $field->fieldResponses->each(function ($item) {
+//                    $item->delete();
+//                });
+//            }
+//        });
     }
 
     public function form(): BelongsTo

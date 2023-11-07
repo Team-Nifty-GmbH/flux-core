@@ -15,9 +15,7 @@ class CreateFormBuilderResponse extends FluxAction
     }
     public static function models(): array
     {
-        return [
-            FormBuilderResponse::class,
-        ];
+        return [FormBuilderResponse::class];
     }
 
     public function performAction(): FormBuilderResponse
@@ -28,13 +26,5 @@ class CreateFormBuilderResponse extends FluxAction
         $formBuilderResponse->save();
 
         return $formBuilderResponse->refresh();
-    }
-
-    public function validateData(): void
-    {
-        $validator = Validator($this->data, $this->rules);
-        $validator->addModel(new FormBuilderResponse());
-
-        $this->data = $validator->validate();
     }
 }

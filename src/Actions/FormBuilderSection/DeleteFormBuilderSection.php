@@ -11,7 +11,7 @@ class DeleteFormBuilderSection extends FluxAction
     {
         parent::boot($data);
         $this->rules = [
-            'id' => 'required|integer|exists:form_builder_sections,id',
+            'id' => 'required|integer|exists:form_builder_sections,id,deleted_at,NULL',
         ];
     }
 

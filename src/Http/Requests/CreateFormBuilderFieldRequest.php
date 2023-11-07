@@ -14,7 +14,7 @@ class CreateFormBuilderFieldRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'section_id' => 'nullable|exists:form_builder_sections,id',
+            'section_id' => 'required|exists:form_builder_sections,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
             'type' => 'required|string|max:255',

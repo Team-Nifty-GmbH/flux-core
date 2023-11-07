@@ -28,6 +28,8 @@ class FormBuilderForm extends Model
         'user_id' => 'integer',
     ];
 
+    protected $appends = ['sections'];
+
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderForm $form) {
@@ -91,39 +93,8 @@ class FormBuilderForm extends Model
         return $this->hasMany(FormBuilderFieldResponse::class, 'form_id', 'id');
     }
 
-    /**
-     * Check if the form dates is available.
-     *
-     * @return Attribute<string, never>
-     */
-    protected function dateAvailable(): Attribute
+    public function getSectionsAttribute()
     {
-        return Attribute::make(
-            get: fn () => $this->start_date === null ||
-                (
-                    $this->start_date !== null
-                    && $this->end_date !== null
-                    && now()->between($this->start_date, $this->end_date)
-                ),
-        );
-    }
-
-    /**
-     * Check if the form require login.
-     *
-     * @return Attribute<string, never>
-     */
-    protected function needLogin(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => optional($this->options)['require-login'] && ! auth()->check(),
-        );
-    }
-
-    public function onePerUser(): bool
-    {
-        return optional($this->options)['require-login']
-            && optional($this->options)['one-entry-per-user']
-            && $this->responses()->where('user_id', auth()->user()->id)->exists();
+        return $this->sections()->with('fields')->get();
     }
 }

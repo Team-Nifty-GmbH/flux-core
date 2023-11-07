@@ -27,12 +27,4 @@ class CreateFormBuilderSection extends FluxAction
         $formBuilderSection->save();
         return $formBuilderSection->refresh();
     }
-
-    public function validateData(): void
-    {
-        $validator = Validator($this->data, $this->rules);
-        $validator->addModel(new FormBuilderSection());
-
-        $this->data = $validator->validate();
-    }
 }

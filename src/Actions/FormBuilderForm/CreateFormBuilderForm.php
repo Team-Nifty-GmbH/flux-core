@@ -5,7 +5,6 @@ namespace FluxErp\Actions\FormBuilderForm;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateFormBuilderFormRequest;
 use FluxErp\Models\FormBuilderForm;
-use Illuminate\Support\Facades\Validator;
 use Str;
 
 class CreateFormBuilderForm extends FluxAction
@@ -18,9 +17,7 @@ class CreateFormBuilderForm extends FluxAction
 
     public static function models(): array
     {
-        return [
-            FormBuilderForm::class,
-        ];
+        return [FormBuilderForm::class];
     }
 
     public function performAction(): FormBuilderForm
@@ -35,13 +32,5 @@ class CreateFormBuilderForm extends FluxAction
         $formBuilderForm->save();
 
         return $formBuilderForm->refresh();
-    }
-
-    public function validateData(): void
-    {
-        $validator = Validator($this->data, $this->rules);
-        $validator->addModel(new FormBuilderForm());
-
-        $this->data = $validator->validate();
     }
 }

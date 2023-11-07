@@ -3,7 +3,6 @@
 namespace FluxErp\Actions\FormBuilderForm;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Models\FormBuilderForm;
 
 class DeleteFormBuilderForm extends FluxAction
@@ -12,7 +11,7 @@ class DeleteFormBuilderForm extends FluxAction
     {
         parent::boot($data);
         $this->rules = [
-            'id' => 'required|integer|exists:form_builder_forms,id',
+            'id' => 'required|integer|exists:form_builder_forms,id,deleted_at,NULL',
         ];
     }
 
@@ -27,13 +26,5 @@ class DeleteFormBuilderForm extends FluxAction
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
-    }
-
-    public function validateData(): void
-    {
-        $validator = Validator($this->data, $this->rules);
-        $validator->addModel(new FormBuilderForm());
-
-        $this->data = $validator->validate();
     }
 }

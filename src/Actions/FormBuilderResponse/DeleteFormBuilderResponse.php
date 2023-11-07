@@ -11,7 +11,7 @@ class DeleteFormBuilderResponse extends FluxAction
     {
         parent::boot($data);
         $this->rules = [
-            'id' => 'required|exists:form_builder_responses,id',
+            'id' => 'required|exists:form_builder_responses,id,deleted_at,NULL',
         ];
     }
     public static function models(): array

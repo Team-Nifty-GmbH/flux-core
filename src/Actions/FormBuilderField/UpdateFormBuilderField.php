@@ -15,9 +15,7 @@ class UpdateFormBuilderField extends FluxAction
     }
     public static function models(): array
     {
-        return [
-            FormBuilderField::class,
-        ];
+        return [FormBuilderField::class];
     }
 
     public function performAction(): FormBuilderField
@@ -26,12 +24,5 @@ class UpdateFormBuilderField extends FluxAction
         $formBuilderField->fill($this->data);
         $formBuilderField->save();
         return $formBuilderField->refresh();
-    }
-
-    public function validateData(): void
-    {
-        $validator = Validator($this->data, $this->rules);
-        $validator->addModel(new FormBuilderField());
-        $this->data = $validator->validate();
     }
 }
