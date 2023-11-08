@@ -34,7 +34,7 @@ class FormBuilderResponse extends Model
 
     public function fieldsResponses(): HasMany
     {
-        return $this->hasMany(FormBuilderFieldResponse::class);
+        return $this->hasMany(FormBuilderFieldResponse::class, 'form_id', 'id');
     }
 
     public function user(): BelongsTo
@@ -44,6 +44,6 @@ class FormBuilderResponse extends Model
 
     public function form(): BelongsTo
     {
-        return $this->belongsTo(FormBuilderForm::class);
+        return $this->belongsTo(FormBuilderForm::class, 'form_id', 'id');
     }
 }

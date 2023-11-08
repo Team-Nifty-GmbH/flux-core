@@ -21,11 +21,6 @@ class FormBuilderFieldResponse extends Model
         return $this->belongsTo(FormBuilderField::class);
     }
 
-    public function parentResponse()
-    {
-        return $this->belongsTo(FormBuilderResponse::class, 'response_id', 'id');
-    }
-
     public function form()
     {
         return $this->belongsTo(FormBuilderForm::class);
