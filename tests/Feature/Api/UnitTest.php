@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class UnitTest extends BaseSetup
 {
@@ -30,8 +29,6 @@ class UnitTest extends BaseSetup
             'update' => Permission::findOrCreate('api.units.put'),
             'delete' => Permission::findOrCreate('api.units.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_unit()

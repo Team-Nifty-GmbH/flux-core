@@ -100,7 +100,7 @@ class CreateOrderPosition extends FluxAction
         }
 
         if ($order->orderType->order_type_enum->isPurchase() && ($this->data['ledger_account_id'] ?? false)) {
-            $this->data['ledger_account_id'] =  $order->contact->expense_ledger_account_id;
+            $this->data['ledger_account_id'] = $order->contact->expense_ledger_account_id;
         }
 
         $orderPosition->fill($this->data);

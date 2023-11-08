@@ -3,9 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Commission;
-use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class CommissionList extends DataTable
 {
@@ -24,13 +22,16 @@ class CommissionList extends DataTable
         'user.name' => 'Commission Agent',
     ];
 
+    public array $availableRelations = ['*'];
+
+    public array $sortable = ['*'];
+
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
+
     public function mount(): void
     {
-        $this->availableCols = ModelInfo::forModel($this->model)
-            ->attributes
-            ->pluck('name')
-            ->toArray();
-
         parent::mount();
 
         $this->formatters = array_merge(

@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class ValueListTest extends BaseSetup
 {
@@ -46,8 +45,6 @@ class ValueListTest extends BaseSetup
             'update' => Permission::findOrCreate('api.value-lists.put'),
             'delete' => Permission::findOrCreate('api.value-lists.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_value_list()

@@ -18,6 +18,12 @@ class UserList extends DataTable
 
     public array $availableRelations = ['*'];
 
+    public array $sortable = ['*'];
+
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
+
     public array $formatters = [
         'avatar' => 'image',
     ];

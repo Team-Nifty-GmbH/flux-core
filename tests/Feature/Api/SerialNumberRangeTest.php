@@ -11,7 +11,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class SerialNumberRangeTest extends BaseSetup
 {
@@ -52,8 +51,6 @@ class SerialNumberRangeTest extends BaseSetup
             'update' => Permission::findOrCreate('api.serial-number-ranges.put'),
             'delete' => Permission::findOrCreate('api.serial-number-ranges.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_serial_number_range()

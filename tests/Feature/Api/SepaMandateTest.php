@@ -14,7 +14,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class SepaMandateTest extends BaseSetup
 {
@@ -71,8 +70,6 @@ class SepaMandateTest extends BaseSetup
             'update' => Permission::findOrCreate('api.sepa-mandates.put'),
             'delete' => Permission::findOrCreate('api.sepa-mandates.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_sepa_mandate()

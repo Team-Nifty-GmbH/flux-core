@@ -18,7 +18,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class ProjectTest extends BaseSetup
 {
@@ -61,8 +60,6 @@ class ProjectTest extends BaseSetup
             'finish' => Permission::findOrCreate('api.projects.finish.post'),
             'statistics' => Permission::findOrCreate('api.projects.{id}.statistics.get'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_project()

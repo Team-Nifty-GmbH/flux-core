@@ -10,7 +10,6 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class VatRateTest extends BaseSetup
 {
@@ -33,8 +32,6 @@ class VatRateTest extends BaseSetup
             'update' => Permission::findOrCreate('api.vat-rates.put'),
             'delete' => Permission::findOrCreate('api.vat-rates.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_vat_rate()

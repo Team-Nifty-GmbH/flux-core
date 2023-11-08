@@ -12,7 +12,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class UserTest extends BaseSetup
 {
@@ -40,8 +39,6 @@ class UserTest extends BaseSetup
             'update' => Permission::findOrCreate('api.users.put'),
             'delete' => Permission::findOrCreate('api.users.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_user()

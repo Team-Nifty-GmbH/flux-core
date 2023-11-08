@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\File;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class PresentationTest extends BaseSetup
 {
@@ -45,15 +44,13 @@ class PresentationTest extends BaseSetup
 
         $this->permissions = [
             'show' => Permission::findOrCreate('api.presentations.{id}.get'),
-            'preview' => Permission::findOrCreate('api.presentations.{id}.get.preview'),
-            'pdf' => Permission::findOrCreate('api.presentations.{id}.get.pdf'),
+            'preview' => Permission::findOrCreate('api.presentations.{id}.preview.get'),
+            'pdf' => Permission::findOrCreate('api.presentations.{id}.pdf.get'),
             'index' => Permission::findOrCreate('api.presentations.get'),
             'create' => Permission::findOrCreate('api.presentations.post'),
             'update' => Permission::findOrCreate('api.presentations.put'),
             'delete' => Permission::findOrCreate('api.presentations.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_presentation()

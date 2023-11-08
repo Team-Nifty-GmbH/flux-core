@@ -80,7 +80,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/media/{filename}', [MediaController::class, 'downloadPublic'])->name('media.public');
 Route::post('/auth/token', [AuthController::class, 'authenticate']);
 
-Route::middleware(['auth:sanctum', 'abilities:user', 'localization'])
+Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission'])
     ->name('api.')
     ->group(function () {
         //Validate Token

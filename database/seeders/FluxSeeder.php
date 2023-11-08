@@ -26,6 +26,7 @@ class FluxSeeder extends Seeder
         $this->call(CurrencyTableSeeder::class);
         $this->call(CountryTableSeeder::class);
         $this->call(CountryRegionTableSeeder::class);
+        $this->call(WorkTimeTypeTableSeeder::class);
 
         $this->call(ClientTableSeeder::class);
         $this->call(PaymentTypeTableSeeder::class);

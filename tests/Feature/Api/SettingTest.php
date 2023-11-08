@@ -9,7 +9,6 @@ use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class SettingTest extends BaseSetup
 {
@@ -55,8 +54,6 @@ class SettingTest extends BaseSetup
             'user-settings' => Permission::findOrCreate('api.user.settings.get'),
             'update' => Permission::findOrCreate('api.settings.put'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_settings()

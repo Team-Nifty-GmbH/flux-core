@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Models\ProjectTask;
 use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
@@ -30,6 +29,10 @@ class ProjectTasksList extends DataTable
 
     public array $sortable = ['*'];
 
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
+
     protected $listeners = [
         'refetchRecord',
     ];
@@ -37,17 +40,6 @@ class ProjectTasksList extends DataTable
     public function refetchRecord(int|array $record, string $event): void
     {
         $this->eloquentEventOccurred('echo' . $event, ['model' => $record]);
-    }
-
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel($this->model)->attributes;
-
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
-
-        parent::mount();
     }
 
     public function getTableActions(): array

@@ -12,7 +12,6 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class BankConnectionTest extends BaseSetup
 {
@@ -44,8 +43,6 @@ class BankConnectionTest extends BaseSetup
             'update' => Permission::findOrCreate('api.bank-connections.put'),
             'delete' => Permission::findOrCreate('api.bank-connections.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_bank_connection()

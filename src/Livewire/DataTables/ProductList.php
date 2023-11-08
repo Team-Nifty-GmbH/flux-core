@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Product;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class ProductList extends DataTable
 {
@@ -19,24 +18,15 @@ class ProductList extends DataTable
 
     public array $availableRelations = ['*'];
 
-    public bool $showFilterInputs = true;
-
     public array $sortable = ['*'];
+
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 
     public array $formatters = [
         'product_image' => 'image',
     ];
-
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel(Product::class)->attributes;
-
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
-
-        parent::mount();
-    }
 
     public function itemToArray($item): array
     {

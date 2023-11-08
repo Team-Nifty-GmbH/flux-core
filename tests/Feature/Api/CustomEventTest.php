@@ -9,7 +9,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class CustomEventTest extends BaseSetup
 {
@@ -33,8 +32,6 @@ class CustomEventTest extends BaseSetup
             'update' => Permission::findOrCreate('api.custom-events.put'),
             'delete' => Permission::findOrCreate('api.custom-events.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_custom_event()

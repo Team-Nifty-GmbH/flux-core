@@ -5,7 +5,6 @@ namespace FluxErp\Tests\Livewire\Order;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Order\Comments;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
@@ -14,7 +13,6 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 

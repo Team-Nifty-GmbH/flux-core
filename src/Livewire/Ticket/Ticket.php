@@ -35,10 +35,9 @@ class Ticket extends Component
     public function mount(int $id): void
     {
         $states = \FluxErp\Models\Ticket::getStatesFor('state');
-
         $this->states = array_map(function ($item) {
             return [
-                'label' => __(ucfirst(str_replace('_', ' ', $item))),
+                'label' => __($item),
                 'name' => $item,
             ];
         }, $states->toArray());
@@ -57,7 +56,6 @@ class Ticket extends Component
             ])
             ->whereKey($id)
             ->firstOrFail();
-
 
         $ticketModel->state = $ticketModel->state ?: \FluxErp\Models\Ticket::getDefaultStateFor('state');
 
@@ -165,7 +163,7 @@ class Ticket extends Component
         $this->redirect(route('tickets'));
     }
 
-    public function updatedAuthorType(): void
+    public function updatedAuthorTypeContact(): void
     {
         $this->ticket['authenticatable_type'] = $this->authorTypeContact ? Address::class : User::class;
         $this->ticket['authenticatable_id'] = null;

@@ -126,6 +126,10 @@ class InitPermissions extends Command
      */
     protected function isVendorRoute(\Illuminate\Routing\Route $route): bool
     {
+        if (array_search('permission', $route->getAction('middleware'))) {
+            return false;
+        }
+
         if ($route->action['uses'] instanceof Closure) {
             $path = (new ReflectionFunction($route->action['uses']))
                 ->getFileName();

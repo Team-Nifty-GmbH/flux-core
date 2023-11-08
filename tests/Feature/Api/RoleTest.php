@@ -8,7 +8,6 @@ use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class RoleTest extends BaseSetup
 {
@@ -32,8 +31,6 @@ class RoleTest extends BaseSetup
             'delete' => Permission::findOrCreate('api.roles.{id}.delete'),
             'test' => Permission::findOrCreate('api.test'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_user_roles()
@@ -53,7 +50,7 @@ class RoleTest extends BaseSetup
 
     public function test_get_user_roles_user_not_found()
     {
-        $this->user->givePermissionTo($this->permissions['show']);
+        $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->get('/api/roles/user/' . ++$this->user->id);

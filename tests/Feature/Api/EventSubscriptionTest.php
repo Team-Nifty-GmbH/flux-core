@@ -11,7 +11,6 @@ use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class EventSubscriptionTest extends BaseSetup
 {
@@ -43,13 +42,11 @@ class EventSubscriptionTest extends BaseSetup
         $this->permissions = [
             'show' => Permission::findOrCreate('api.events.get'),
             'index' => Permission::findOrCreate('api.event-subscriptions.get'),
-            'getUserSubscriptions' => Permission::findOrCreate('api.event-subscriptions.user'),
+            'getUserSubscriptions' => Permission::findOrCreate('api.event-subscriptions.user.get'),
             'create' => Permission::findOrCreate('api.event-subscriptions.post'),
             'update' => Permission::findOrCreate('api.event-subscriptions.put'),
             'delete' => Permission::findOrCreate('api.event-subscriptions.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_events()

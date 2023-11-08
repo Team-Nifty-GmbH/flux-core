@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Models\Project;
 use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
@@ -30,20 +29,13 @@ class ProjectList extends DataTable
         'category.name' => 'Category',
     ];
 
-    public array $sortable = ['*'];
-
     public array $availableRelations = ['*'];
 
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel($this->model)->attributes;
+    public array $sortable = ['*'];
 
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
+    public array $aggregatable = ['*'];
 
-        parent::mount();
-    }
+    public array $availableCols = ['*'];
 
     public function getTableActions(): array
     {

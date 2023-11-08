@@ -7,7 +7,6 @@ use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class PermissionTest extends BaseSetup
 {
@@ -28,8 +27,6 @@ class PermissionTest extends BaseSetup
             'revoke' => Permission::findOrCreate('api.permissions.revoke.put'),
             'delete' => Permission::findOrCreate('api.permissions.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_user_permissions()
@@ -49,7 +46,7 @@ class PermissionTest extends BaseSetup
 
     public function test_get_user_permissions_user_not_found()
     {
-        $this->user->givePermissionTo($this->permissions['show']);
+        $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->get('/api/permissions/user/' . ++$this->user->id);

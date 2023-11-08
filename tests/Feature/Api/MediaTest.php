@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Ramsey\Uuid\Uuid;
-use Spatie\Permission\PermissionRegistrar;
 
 class MediaTest extends BaseSetup
 {
@@ -57,8 +56,6 @@ class MediaTest extends BaseSetup
             'update' => Permission::findOrCreate('api.media.put'),
             'delete' => Permission::findOrCreate('api.media.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_upload_media_to_project_task()

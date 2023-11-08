@@ -9,7 +9,6 @@ use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class DocumentTypeTest extends BaseSetup
 {
@@ -34,8 +33,6 @@ class DocumentTypeTest extends BaseSetup
             'update' => Permission::findOrCreate('api.document-types.put'),
             'delete' => Permission::findOrCreate('api.document-types.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_document_type()

@@ -7,6 +7,7 @@ use FluxErp\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use NotificationChannels\WebPush\WebPushMessage;
 
 class TicketCreatedNotification extends Notification implements ShouldQueue
 {
@@ -77,5 +78,20 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
                 'url' => config('app.url') . $this->model->detailRoute(false),
             ],
         ];
+    }
+
+    public function toWebPush($notifiable): ?WebPushMessage
+    {
+        if (! method_exists($notifiable, 'pushSubscriptions') || ! $notifiable->pushSubscriptions()->exists()) {
+            return null;
+        }
+
+        $notification = $this->toArray($notifiable);
+
+        return (new WebPushMessage)
+            ->icon($notification['img'])
+            ->title($notification['title'])
+            ->body($notification['description'])
+            ->data(['url' => $notification['accept']['url'] ?? '']);
     }
 }

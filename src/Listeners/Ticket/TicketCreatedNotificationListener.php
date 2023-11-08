@@ -4,7 +4,7 @@ namespace FluxErp\Listeners\Ticket;
 
 use FluxErp\Listeners\NotificationEloquentEventSubscriber;
 use FluxErp\Models\User;
-use Illuminate\Database\Query\JoinClause;
+use Illuminate\Database\Eloquent\Builder;
 
 class TicketCreatedNotificationListener
 {
@@ -19,13 +19,14 @@ class TicketCreatedNotificationListener
             return;
         }
 
+        $notificationRoles = $eloquentEventSubscriber->model
+            ->ticketType
+            ->roles()
+            ->pluck('id')
+            ->toArray();
+
         $users = User::query()
-            ->join('model_has_roles', function (JoinClause $join) {
-                $join->on('users.id', '=', 'model_has_roles.model_id')
-                    ->where('model_has_roles.model_type', User::class);
-            })
-            ->join('role_ticket_type AS rtt', 'model_has_roles.role_id', '=', 'rtt.role_id')
-            ->where('rtt.ticket_type_id', $eloquentEventSubscriber->model->ticket_type_id)
+            ->whereHas('roles', fn (Builder $query) => $query->whereIntegerInRaw('id', $notificationRoles))
             ->get();
 
         $eloquentEventSubscriber->notifiables = $eloquentEventSubscriber->notifiables->merge($users);

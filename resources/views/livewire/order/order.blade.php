@@ -96,6 +96,7 @@
                     'order.accounting' => __('Accounting'),
                     'order.comments' => __('Comments'),
                     'order.related' => __('Related processes'),
+                    'order.activities' => __('Activities'),
                 ]"
     >
         <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
@@ -203,7 +204,7 @@
                                 :label="__('Commission Agent')"
                                 option-value="id"
                                 option-label="label"
-                                :clearable="false"
+                                :disabled="$order['is_locked']"
                                 autocomplete="off"
                                 wire:model="order.agent_id"
                                 :template="[
@@ -281,7 +282,7 @@
                 </div>
             </section>
             <section class="basis-8/12 pt-6 lg:pt-0">
-                <livewire:dynamic-component :order-id="$order['id'] ?? null" :is="$tab" :key="uniqid()" wire:model="order"/>
+                <livewire:dynamic-component :order-id="$order['id'] ?? null" :key="$tab" :is="$tab" wire:model="order"/>
             </section>
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">

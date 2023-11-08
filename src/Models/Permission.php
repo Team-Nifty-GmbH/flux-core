@@ -6,7 +6,6 @@ use FluxErp\Traits\Filterable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Laravel\Scout\Searchable;
 use Spatie\Permission\Models\Permission as SpatiePermission;
-use Spatie\Permission\PermissionRegistrar;
 
 class Permission extends SpatiePermission
 {
@@ -20,7 +19,7 @@ class Permission extends SpatiePermission
             User::class,
             'model',
             config('permission.table_names.model_has_permissions'),
-            PermissionRegistrar::$pivotPermission,
+            config('permission.column_names.permission_pivot_key'),
             config('permission.column_names.model_morph_key')
         );
     }

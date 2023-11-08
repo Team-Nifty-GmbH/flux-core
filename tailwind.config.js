@@ -27,6 +27,7 @@ module.exports = {
     },
     plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
     safelist: [
+        'ring-offset-2',
         'indent-icon',
         'md:col-span-1',
         'md:col-span-2',

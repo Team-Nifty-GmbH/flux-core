@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Models\Log;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
@@ -23,6 +22,14 @@ class LogList extends DataTable
     ];
 
     public ?bool $isSearchable = true;
+
+    public array $availableRelations = ['*'];
+
+    public array $sortable = ['*'];
+
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 
     public array $formatters = [
         'message' => 'string',
@@ -59,7 +66,6 @@ class LogList extends DataTable
     {
         parent::mount();
 
-        $this->availableCols = ModelInfo::forModel($this->model)->attributes->pluck('name')->toArray();
         if (! $this->userFilters) {
             $this->userFilters = [
                 [

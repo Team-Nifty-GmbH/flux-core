@@ -9,7 +9,6 @@ use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class PaymentTypeTest extends BaseSetup
 {
@@ -34,8 +33,6 @@ class PaymentTypeTest extends BaseSetup
             'update' => Permission::findOrCreate('api.payment-types.put'),
             'delete' => Permission::findOrCreate('api.payment-types.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_payment_type()
