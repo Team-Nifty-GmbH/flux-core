@@ -7,17 +7,12 @@ use Illuminate\Validation\Rule;
 
 class CreateFormBuilderFieldRequest extends FormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'section_id' => 'required|exists:form_builder_sections,id',
+            'section_id' => 'required|integer|exists:form_builder_sections,id,deleted_at,NULL',
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
             'type' => [
                 'required',
                 Rule::in([
@@ -35,7 +30,7 @@ class CreateFormBuilderFieldRequest extends FormRequest
                     'range',
                 ])
             ],
-            'ordering' => 'nullable|integer',
+            'ordering' => 'nullable|integer|min:0',
             'options' => 'nullable|array',
         ];
     }

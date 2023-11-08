@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
+use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,10 +15,9 @@ class FormBuilderField extends Model
     use HasTranslations;
     use SoftDeletes;
     use HasPackageFactory;
+    use HasUuid;
 
-    public array $translatable = ['name'];
-
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'options' => 'array',
@@ -40,16 +40,16 @@ class FormBuilderField extends Model
 
     public function form(): BelongsTo
     {
-        return $this->belongsTo(FormBuilderForm::class, 'form_id', 'id');
+        return $this->belongsTo(FormBuilderForm::class, 'form_id');
     }
 
     public function section(): BelongsTo
     {
-        return $this->belongsTo(FormBuilderSection::class, 'section_id', 'id');
+        return $this->belongsTo(FormBuilderSection::class, 'section_id');
     }
 
     public function fieldResponses(): HasMany
     {
-        return $this->hasMany(FormBuilderFieldResponse::class, 'field_id', 'id');
+        return $this->hasMany(FormBuilderFieldResponse::class, 'field_id');
     }
 }

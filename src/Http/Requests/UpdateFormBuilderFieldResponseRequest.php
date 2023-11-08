@@ -15,9 +15,9 @@ class UpdateFormBuilderFieldResponseRequest extends FormRequest
     {
         return [
             'id' => 'required|exists:form_builder_field_responses,id,deleted_at,NULL',
-            'form_id' => 'required|exists:form_builder_forms,id',
-            'field_id' => 'required|exists:form_builder_fields,id',
-            'response_id' => 'required|exists:form_builder_responses,id',
+            'form_id' => 'required|integer|exists:form_builder_forms,id,deleted_at,NULL',
+            'field_id' => 'required|integer|exists:form_builder_fields,id,deleted_at,NULL',
+            'response_id' => 'required|integer|exists:form_builder_responses,id,deleted_at,NULL',
             'response' => 'required|string',
         ];
     }

@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,16 +13,17 @@ class FormBuilderResponse extends Model
 {
     use SoftDeletes;
     use HasPackageFactory;
+    use HasUuid;
 
     protected $with = ['form', 'user'];
 
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderResponse $response) {
             if ($response->isForceDeleting()) {
-                $response->fieldsResponses()->withTrashed()->get()->each(function ($item) {
+                $response->fieldResponses()->withTrashed()->get()->each(function ($item) {
                     $item->forceDelete();
                 });
             } else {
@@ -32,18 +34,18 @@ class FormBuilderResponse extends Model
         });
     }
 
-    public function fieldsResponses(): HasMany
+    public function fieldResponses(): HasMany
     {
-        return $this->hasMany(FormBuilderFieldResponse::class, 'form_id', 'id');
+        return $this->hasMany(FormBuilderFieldResponse::class, 'form_id');
     }
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(config('auth.providers.users.model'));
+        return $this->belongsTo(User::class);
     }
 
     public function form(): BelongsTo
     {
-        return $this->belongsTo(FormBuilderForm::class, 'form_id', 'id');
+        return $this->belongsTo(FormBuilderForm::class, 'form_id');
     }
 }

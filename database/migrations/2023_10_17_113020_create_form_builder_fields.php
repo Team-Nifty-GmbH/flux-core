@@ -10,12 +10,13 @@ return new class extends Migration
     {
         Schema::create('form_builder_fields', function (Blueprint $table) {
             $table->id();
+            $table->uuid();
             $table->foreignId('section_id')->constrained('form_builder_sections');
-            $table->text('name');
+            $table->string('name');
             $table->text('description')->nullable();
             $table->string('type');
-            $table->integer('ordering')->default(1);
-            $table->text('options')->nullable();
+            $table->unsignedInteger('ordering')->default(0);
+            $table->json('options')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

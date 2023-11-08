@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
+use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,23 +16,23 @@ class FormBuilderForm extends Model
     use HasTranslations;
     use SoftDeletes;
     use HasPackageFactory;
+    use HasUuid;
 
-    public array $translatable = ['name', 'description', 'details'];
-
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     protected $casts = [
+        'options' => 'array',
+        'is_active' => 'boolean',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
-        'options' => 'array',
-        'user_id' => 'integer',
+
     ];
 
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderForm $form) {
             if ($form->isForceDeleting()) {
-                $form->fieldsResponses()->withTrashed()->get()->each(function ($item) {
+                $form->fieldResponses()->withTrashed()->get()->each(function ($item) {
                     $item->forceDelete();
                 });
                 $form->responses()->withTrashed()->get()->each(function ($item) {
@@ -62,7 +63,7 @@ class FormBuilderForm extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(config('auth.providers.users.model'));
+        return $this->belongsTo(User::class);
     }
 
     public function sections(): HasMany
@@ -70,18 +71,8 @@ class FormBuilderForm extends Model
         return $this->hasMany(FormBuilderSection::class, 'form_id', 'id');
     }
 
-    public function fields(): HasManyThrough
-    {
-        return $this->hasManyThrough(FormBuilderField::class, FormBuilderSection::class);
-    }
-
     public function responses(): hasMany
     {
         return $this->hasMany(FormBuilderResponse::class, 'form_id', 'id');
-    }
-
-    public function fieldsResponses(): HasMany
-    {
-        return $this->hasMany(FormBuilderFieldResponse::class, 'form_id', 'id');
     }
 }

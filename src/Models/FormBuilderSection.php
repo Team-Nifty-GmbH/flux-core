@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
+use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,10 +15,11 @@ class FormBuilderSection extends Model
     use HasTranslations;
     use SoftDeletes;
     use HasPackageFactory;
+    use HasUuid;
 
     public array $translatable = ['name'];
 
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     protected static function booted(): void
     {
@@ -42,11 +44,11 @@ class FormBuilderSection extends Model
 
     public function fields(): HasMany
     {
-        return $this->hasMany(FormBuilderField::class, 'section_id', 'id');
+        return $this->hasMany(FormBuilderField::class, 'section_id');
     }
 
     public function form(): BelongsTo
     {
-        return $this->belongsTo(FormBuilderForm::class, 'form_id', 'id');
+        return $this->belongsTo(FormBuilderForm::class, 'form_id');
     }
 }

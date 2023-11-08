@@ -10,20 +10,20 @@ return new class extends Migration
     {
         Schema::create('form_builder_forms', function (Blueprint $table) {
             $table->id();
+            $table->uuid();
             $table->bigInteger('user_id')->nullable()->unsigned();
             $table->nullableMorphs('model');
-            $table->text('name');
+            $table->string('name');
             $table->text('description')->nullable();
             $table->string('slug');
-            $table->boolean('is_active');
-            $table->longText('options')->nullable();
+            $table->json('options')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
             $table->foreign('user_id')
-                ->onUpdate('cascade')
                 ->nullOnDelete()
                 ->references('id')
                 ->on('users');

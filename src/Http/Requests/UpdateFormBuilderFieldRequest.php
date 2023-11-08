@@ -16,7 +16,7 @@ class UpdateFormBuilderFieldRequest extends FormRequest
     {
         return [
             'id' => 'required|exists:form_builder_fields,id,deleted_at,NULL',
-            'section_id' => 'nullable|exists:form_builder_sections,id',
+            'section_id' => 'required|integer|exists:form_builder_sections,id,deleted_at,NULL',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'type' => [
@@ -36,7 +36,7 @@ class UpdateFormBuilderFieldRequest extends FormRequest
                     'range',
                 ])
             ],
-            'ordering' => 'nullable|integer',
+            'ordering' => 'nullable|integer|min:0',
             'options' => 'nullable|array',
         ];
     }
