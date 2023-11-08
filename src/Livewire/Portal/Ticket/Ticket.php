@@ -2,8 +2,10 @@
 
 namespace FluxErp\Livewire\Portal\Ticket;
 
+use FluxErp\Htmlables\TabButton;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\TicketType;
+use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +13,8 @@ use Livewire\Component;
 
 class Ticket extends Component
 {
+    use WithTabs;
+
     public array $ticket;
 
     public array $additionalColumns = [];
@@ -48,5 +52,13 @@ class Ticket extends Component
     public function render(): View
     {
         return view('flux::livewire.portal.ticket.ticket');
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('features.comments.comments')->label(__('Comments')),
+            TabButton::make('features.activities')->label(__('Activities')),
+        ];
     }
 }

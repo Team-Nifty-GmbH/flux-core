@@ -81,17 +81,9 @@
                 <!-- Tabs -->
                 <x-tabs
                     wire:model.live="tab"
-                    :tabs="[
-                        'address' => __('General'),
-                        'permissions' => __('Permissions'),
-                        'comments' => __('Comments'),
-                        'serial-numbers' => __('Serial numbers'),
-                        'additional-columns' => __('Additional columns'),
-                    ]"
+                    :tabs="$tabs"
                     wire:loading
-                >
-                    <x-dynamic-component :component="'address.' . $tab" />
-                </x-tabs>
+                />
             </div>
             <div class="pb-6">
                 <div x-cloak x-show="edit" x-transition.duration.400ms

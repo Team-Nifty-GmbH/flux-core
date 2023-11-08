@@ -28,13 +28,7 @@
                 </div>
             </div>
         </div>
-        <x-tabs
-            wire:model.live="tab"
-            :tabs="[
-                'features.comments.comments' => __('Comments'),
-                'features.activities' => __('Activities'),
-            ]"
-        >
+        <x-tabs wire:model.live="tab" :tabs="$tabs">
             <livewire:is wire:key="{{ uniqid() }}" :component="$tab" :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
         </x-tabs>
     </div>

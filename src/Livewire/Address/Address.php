@@ -5,11 +5,13 @@ namespace FluxErp\Livewire\Address;
 use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Address\DeleteAddress;
 use FluxErp\Actions\Address\UpdateAddress;
+use FluxErp\Htmlables\TabButton;
 use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Http\Requests\UpdateAddressRequest;
 use FluxErp\Models\Address as AddressModel;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
+use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -24,7 +26,7 @@ use WireUi\Traits\Actions;
 
 class Address extends Component
 {
-    use Actions;
+    use Actions, WithTabs;
 
     public array $address;
 
@@ -35,7 +37,7 @@ class Address extends Component
     public array $contact;
 
     #[Url(as: 'address-tab')]
-    public string $tab = 'address';
+    public string $tab = 'address.address';
 
     #[Modelable]
     public ?int $addressId = null;
@@ -75,7 +77,7 @@ class Address extends Component
     {
         $this->getAddress($this->addressId ?: $this->address['id'], false);
 
-        if ($this->tab === 'permissions') {
+        if ($this->tab === 'address.permissions') {
             $this->updatedTab();
         }
     }
@@ -101,6 +103,17 @@ class Address extends Component
         return view('flux::livewire.address.address');
     }
 
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('address.address')->label(__('Address')),
+            TabButton::make('address.permissions')->label(__('Permissions')),
+            TabButton::make('address.comments')->label(__('Comments')),
+            TabButton::make('address.serial-numbers')->label(__('Serial numbers')),
+            TabButton::make('address.additional-columns')->label(__('Additional columns')),
+        ];
+    }
+
     public function updated($propertyName): void
     {
         $this->validateOnly($propertyName);
@@ -113,7 +126,7 @@ class Address extends Component
 
     public function updatedTab(): void
     {
-        if ($this->tab === 'permissions') {
+        if ($this->tab === 'address.permissions') {
             $this->permissions = Permission::query()
                 ->where('guard_name', 'address')
                 ->get()

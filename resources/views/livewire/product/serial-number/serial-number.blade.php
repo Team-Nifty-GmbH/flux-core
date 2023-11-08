@@ -58,18 +58,6 @@
     </div>
     <x-tabs
         wire:model.live="tab"
-        :tabs="[
-                    'general' => __('General'),
-                    'comments' => __('Comments'),
-                ]"
-    >
-    </x-tabs>
-    <div class="relative mx-auto">
-        <div wire:loading wire:ignore class="absolute right-0 top-0 left-0 bottom-0 bg-white/30 backdrop-blur-sm" style="z-index: 1">
-            <div class="absolute right-0 top-0 left-0 bottom-0 flex items-center justify-center">
-                <x-spinner />
-            </div>
-        </div>
-        <x-dynamic-component :component="'product.serial-number.' . $tab"/>
-    </div>
+        :tabs="$tabs"
+    />
 </div>

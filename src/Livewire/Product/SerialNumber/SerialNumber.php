@@ -5,10 +5,12 @@ namespace FluxErp\Livewire\Product\SerialNumber;
 use FluxErp\Actions\SerialNumber\CreateSerialNumber;
 use FluxErp\Actions\SerialNumber\DeleteSerialNumber;
 use FluxErp\Actions\SerialNumber\UpdateSerialNumber;
+use FluxErp\Htmlables\TabButton;
 use FluxErp\Http\Requests\CreateSerialNumberRequest;
 use FluxErp\Http\Requests\UpdateSerialNumberRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\Product;
+use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -19,7 +21,7 @@ use WireUi\Traits\Actions;
 
 class SerialNumber extends Component
 {
-    use Actions;
+    use Actions, WithTabs;
 
     public array $serialNumber = [
         'serial_number' => null,
@@ -30,7 +32,7 @@ class SerialNumber extends Component
 
     public string $comment = '';
 
-    public string $tab = 'general';
+    public string $tab = 'product.serial-number.general';
 
     public bool $edit = false;
 
@@ -78,6 +80,14 @@ class SerialNumber extends Component
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.product.serial-number.serial-number');
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('product.serial-number.general')->label(__('General')),
+            TabButton::make('product.serial-number.comments')->label(__('Comments')),
+        ];
     }
 
     public function delete(): false|Redirector

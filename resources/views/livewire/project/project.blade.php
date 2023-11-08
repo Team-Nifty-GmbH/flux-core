@@ -90,12 +90,5 @@
         x-bind:disabled="! project.id"
         wire:ignore
     >
-        <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
-            <section class="w-full lg:pt-0">
-                <x-errors />
-                <x-spinner />
-                <x-dynamic-component :component="'project.' . $tab" :project="$project" :key="uniqid()" />
-            </section>
-        </div>
     </x-tabs>
 </div>
