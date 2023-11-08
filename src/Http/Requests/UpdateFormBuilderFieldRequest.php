@@ -18,7 +18,7 @@ class UpdateFormBuilderFieldRequest extends FormRequest
             'id' => 'required|exists:form_builder_fields,id,deleted_at,NULL',
             'section_id' => 'nullable|exists:form_builder_sections,id',
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
             'type' => [
                 'required',
                 Rule::in([

@@ -66,5 +66,9 @@ class FluxSeeder extends Seeder
 
         $this->call(TicketTypeTableSeeder::class);
         $this->call(TicketTableSeeder::class);
+
+        $this->call(FormBuilderFormTableSeeder::class);
+        $this->call(FormBuilderSectionTableSeeder::class);
+        $this->call(FormBuilderFieldTableSeeder::class);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ class FormBuilderSection extends Model
 {
     use HasTranslations;
     use SoftDeletes;
+    use HasPackageFactory;
 
     public array $translatable = ['name'];
 
@@ -45,6 +47,6 @@ class FormBuilderSection extends Model
 
     public function form(): BelongsTo
     {
-        return $this->belongsTo(FormBuilderForm::class);
+        return $this->belongsTo(FormBuilderForm::class, 'form_id', 'id');
     }
 }

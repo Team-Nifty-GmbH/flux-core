@@ -5,7 +5,6 @@ use FluxErp\Livewire\Contacts\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\CommissionList;
 use FluxErp\Livewire\DataTables\ContactList;
-use FluxErp\Livewire\DataTables\FormBuilderFormList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\DataTables\ProjectTasksList;
@@ -128,7 +127,6 @@ Route::middleware(['auth:web'])->group(function () {
             Route::get('/ticket-types', TicketTypes::class)->name('ticket-types')->registersMenuItem();
             Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
             Route::get('/users', Users::class)->name('users')->registersMenuItem();
-            Route::get('/form-builder', FormBuilderFormList::class)->name('form-builder')->registersMenuItem();
         });
 
     Route::name('search')->prefix('search')->group(function () {

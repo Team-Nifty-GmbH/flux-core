@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FormBuilderResponse extends Model
 {
-    // use HasUpdates;
     use SoftDeletes;
+    use HasPackageFactory;
 
     protected $with = ['form', 'user'];
 
@@ -45,20 +46,4 @@ class FormBuilderResponse extends Model
     {
         return $this->belongsTo(FormBuilderForm::class);
     }
-
-    //    /**
-    //     * get status detail.
-    //     */
-    //    public function statusDetails(): array
-    //    {
-    //        $getStatues = BoltPlugin::getModel('FormsStatus')::where('key', $this->status)->first();
-    //
-    //        return [
-    //            'class' => $getStatues->class ?? '',
-    //            'icon' => $getStatues->icon ?? 'heroicon-o-status-online',
-    //            'label' => $getStatues->label ?? $this->status,
-    //            'key' => $getStatues->key ?? '',
-    //            'color' => $getStatues->color ?? '',
-    //        ];
-    //    }
 }

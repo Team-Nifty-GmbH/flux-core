@@ -11,14 +11,12 @@ return new class extends Migration
         Schema::create('form_builder_forms', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('user_id')->nullable()->unsigned();
+            $table->nullableMorphs('model');
             $table->text('name');
             $table->text('description')->nullable();
             $table->string('slug');
-            $table->integer('ordering')->default(1);
             $table->boolean('is_active');
-            $table->longText('details')->nullable();
             $table->longText('options')->nullable();
-            $table->text('extensions')->nullable();
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date')->nullable();
             $table->timestamps();
