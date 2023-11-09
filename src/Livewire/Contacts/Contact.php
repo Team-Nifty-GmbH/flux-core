@@ -6,11 +6,13 @@ use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Contact\CreateContact;
 use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Actions\Contact\UpdateContact;
+use FluxErp\Htmlables\TabButton;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact as ContactModel;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Traits\Livewire\WithFileUploads;
+use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -23,7 +25,7 @@ use WireUi\Traits\Actions;
 
 class Contact extends Component
 {
-    use Actions, WithFileUploads;
+    use Actions, WithFileUploads, WithTabs;
 
     public array $address;
 
@@ -50,7 +52,7 @@ class Contact extends Component
     public $avatar;
 
     #[Url]
-    public string $tab = 'addresses';
+    public string $tab = 'contact.addresses';
 
     public string $search = '';
 
@@ -109,15 +111,18 @@ class Contact extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.contact.contact', [
-            'tabs' => [
-                'addresses' => __('Addresses'),
-                'orders' => __('Orders'),
-                'accounting' => __('Accounting'),
-                'tickets' => __('Tickets'),
-                'statistics' => __('Statistics'),
-            ],
-        ]);
+        return view('flux::livewire.contact.contact');
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('contact.addresses')->label(__('Addresses')),
+            TabButton::make('contact.orders')->label(__('Orders')),
+            TabButton::make('contact.accounting')->label(__('Accounting')),
+            TabButton::make('contact.tickets')->label(__('Tickets')),
+            TabButton::make('contact.statistics')->label(__('Statistics')),
+        ];
     }
 
     public function updatedContact(): void

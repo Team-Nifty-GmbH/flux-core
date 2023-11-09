@@ -7,6 +7,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -43,12 +44,13 @@ class Login extends Component
 
     public function login(): bool
     {
+        $target = Session::get('url.intended', route($this->dashboardRoute));
         $this->validate();
 
         $login = $this->tryLogin();
 
         if ($login) {
-            $this->redirect(route($this->dashboardRoute));
+            $this->redirect($target);
 
             return true;
         } else {

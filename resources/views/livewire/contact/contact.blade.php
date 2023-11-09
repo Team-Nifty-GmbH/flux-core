@@ -163,16 +163,8 @@
         </div>
         <x-tabs
             wire:model.live="tab"
-            :tabs="$tabs"
+            :$tabs
             wire:ignore
-        >
-            <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
-                <section class="w-full lg:pt-0">
-                    <x-errors />
-                    <x-spinner />
-                    <x-dynamic-component :component="'contact.' . $tab" />
-                </section>
-            </div>
-        </x-tabs>
+        />
     </main>
 </div>

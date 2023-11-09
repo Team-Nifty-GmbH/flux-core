@@ -6,13 +6,16 @@ use Closure;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
+use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
+use Livewire\Mechanisms\ComponentRegistry;
 use ReflectionClass;
 use ReflectionFunction;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
+use function Livewire\invade;
 
 class InitPermissions extends Command
 {
@@ -46,10 +49,9 @@ class InitPermissions extends Command
         $this->registerActionPermission();
         $this->registerRoutePermissions();
         $this->registerWidgetPermissions();
+        $this->registerTabPermissions();
 
-        foreach ($this->currentPermissions as $id => $currentPermission) {
-            Permission::query()->whereKey($id)->delete();
-        }
+        Permission::query()->whereIntegerInRaw('id', array_keys($this->currentPermissions))->delete();
     }
 
     private function registerRoutePermissions(): void
@@ -118,6 +120,24 @@ class InitPermissions extends Command
         foreach (Widget::all() as $widget) {
             $permission = Permission::findOrCreate('widget.' . $widget['name'], 'web');
             unset($this->currentPermissions[$permission->id]);
+        }
+    }
+
+    public function registerTabPermissions(): void
+    {
+        $this->info('Registering tab permissions');
+        $registry = app(ComponentRegistry::class);
+        foreach(invade($registry)->aliases as $alias => $component) {
+            if (! in_array(WithTabs::class, class_uses_recursive($component))) {
+                continue;
+            }
+
+            $componentInstance = new $component;
+
+            foreach ($componentInstance->getTabs() as $tab) {
+                $permission = Permission::findOrCreate('tab.' . $tab->component, 'web');
+                unset($this->currentPermissions[$permission->id]);
+            }
         }
     }
 

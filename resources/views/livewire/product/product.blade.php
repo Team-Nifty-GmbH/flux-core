@@ -77,25 +77,7 @@
     </div>
     <x-tabs
         wire:model.live="tab"
-        :tabs="$tabs"
+        :$tabs
         wire:ignore
-    >
-        <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
-            <section class="basis-10/12 pt-6 lg:pt-0">
-                <x-errors />
-                <x-dynamic-component :component="'product.' . $tab" :product="$product" :key="uniqid()" />
-            </section>
-            <section class="relative basis-2/12">
-                <div class="sticky top-6 space-y-6">
-                    <x-card>
-                        <div class="space-y-4">
-                            @section('actions')
-                            @show
-                            <livewire:features.custom-events :model="\FluxErp\Models\Product::class" :id="$product['id']" />
-                        </div>
-                    </x-card>
-                </div>
-            </section>
-        </div>
-    </x-tabs>
+    />
 </div>
