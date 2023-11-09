@@ -22,7 +22,7 @@ class TicketCreatedNotificationListener
         $notificationRoles = $eloquentEventSubscriber->model
             ->ticketType
             ->roles()
-            ->pluck('id')
+            ->pluck('roles.id')
             ->toArray();
 
         $users = User::query()

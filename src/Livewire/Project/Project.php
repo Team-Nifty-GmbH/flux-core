@@ -5,9 +5,11 @@ namespace FluxErp\Livewire\Project;
 use FluxErp\Actions\Project\CreateProject;
 use FluxErp\Actions\Project\DeleteProject;
 use FluxErp\Actions\Project\UpdateProject;
+use FluxErp\Htmlables\TabButton;
 use FluxErp\Models\Category;
 use FluxErp\Models\ProjectTask;
 use FluxErp\Traits\Livewire\HasAdditionalColumns;
+use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -17,11 +19,11 @@ use WireUi\Traits\Actions;
 
 class Project extends Component
 {
-    use Actions, HasAdditionalColumns;
+    use Actions, HasAdditionalColumns, WithTabs;
 
     public array $project = [];
 
-    public string $tab = 'general';
+    public string $tab = 'project.general';
 
     public array $availableStates = [];
 
@@ -52,13 +54,16 @@ class Project extends Component
 
     public function render(): View|Factory|Application
     {
-        $tabs = [
-            'general' => __('General'),
-            'comments' => __('Comments'),
-            'statistics' => __('Statistics'),
-        ];
+        return view('flux::livewire.project.project');
+    }
 
-        return view('flux::livewire.project.project', ['tabs' => $tabs]);
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('project.general')->label(__('General')),
+            TabButton::make('project.comments')->label(__('Comments')),
+            TabButton::make('project.statistics')->label(__('Statistics')),
+        ];
     }
 
     public function save(): array|bool
