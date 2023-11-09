@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Enums\FormBuilderTypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,20 +16,7 @@ class CreateFormBuilderFieldRequest extends FormRequest
             'description' => 'nullable|string',
             'type' => [
                 'required',
-                Rule::in([
-                    'text',
-                    'textarea',
-                    'select',
-                    'checkbox',
-                    'radio',
-                    'date',
-                    'time',
-                    'datetime',
-                    'number',
-                    'email',
-                    'password',
-                    'range',
-                ])
+                Rule::in(FormBuilderTypeEnum::values())
             ],
             'ordering' => 'nullable|integer|min:0',
             'options' => 'nullable|array',

@@ -39,13 +39,13 @@ class FormBuilderResponse extends Model
         return $this->hasMany(FormBuilderFieldResponse::class, 'form_id');
     }
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
     public function form(): BelongsTo
     {
         return $this->belongsTo(FormBuilderForm::class, 'form_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

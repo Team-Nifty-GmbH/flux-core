@@ -38,6 +38,11 @@ class FormBuilderField extends Model
         });
     }
 
+    public function fieldResponses(): HasMany
+    {
+        return $this->hasMany(FormBuilderFieldResponse::class, 'field_id');
+    }
+
     public function form(): BelongsTo
     {
         return $this->belongsTo(FormBuilderForm::class, 'form_id');
@@ -46,10 +51,5 @@ class FormBuilderField extends Model
     public function section(): BelongsTo
     {
         return $this->belongsTo(FormBuilderSection::class, 'section_id');
-    }
-
-    public function fieldResponses(): HasMany
-    {
-        return $this->hasMany(FormBuilderFieldResponse::class, 'field_id');
     }
 }

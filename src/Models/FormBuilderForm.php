@@ -61,9 +61,9 @@ class FormBuilderForm extends Model
         });
     }
 
-    public function user(): BelongsTo
+    public function responses(): hasMany
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(FormBuilderResponse::class, 'form_id', 'id');
     }
 
     public function sections(): HasMany
@@ -71,8 +71,8 @@ class FormBuilderForm extends Model
         return $this->hasMany(FormBuilderSection::class, 'form_id', 'id');
     }
 
-    public function responses(): hasMany
+    public function user(): BelongsTo
     {
-        return $this->hasMany(FormBuilderResponse::class, 'form_id', 'id');
+        return $this->belongsTo(User::class);
     }
 }
