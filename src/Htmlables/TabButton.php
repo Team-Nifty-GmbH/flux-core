@@ -147,14 +147,12 @@ class TabButton implements Htmlable
         return $this;
     }
 
-
     public function rounded(bool $rounded = true): static
     {
         $this->rounded = $rounded;
 
         return $this;
     }
-
 
     public function squared(bool $squared = true): static
     {
@@ -163,14 +161,12 @@ class TabButton implements Htmlable
         return $this;
     }
 
-
     public function outline(bool $outline = true): static
     {
         $this->outline = $outline;
 
         return $this;
     }
-
 
     public function flat(bool $flat = true): static
     {
@@ -179,14 +175,12 @@ class TabButton implements Htmlable
         return $this;
     }
 
-
     public function full(bool $full = true): static
     {
         $this->full = $full;
 
         return $this;
     }
-
 
     public function color(string $color = null): static
     {
@@ -195,14 +189,12 @@ class TabButton implements Htmlable
         return $this;
     }
 
-
     public function size(string $size = null): static
     {
         $this->size = $size;
 
         return $this;
     }
-
 
     public function label(string $label = null): static
     {
@@ -211,14 +203,12 @@ class TabButton implements Htmlable
         return $this;
     }
 
-
     public function icon(string $icon = null): static
     {
         $this->icon = $icon;
 
         return $this;
     }
-
 
     public function rightIcon(string $rightIcon): static
     {
@@ -227,7 +217,6 @@ class TabButton implements Htmlable
         return $this;
     }
 
-
     public function spinner(string $spinner): static
     {
         $this->spinner = $spinner;
@@ -235,14 +224,12 @@ class TabButton implements Htmlable
         return $this;
     }
 
-
     public function loadingDelay(string $loadingDelay): static
     {
         $this->loadingDelay = $loadingDelay;
 
         return $this;
     }
-
 
     public function href(string $href): static
     {
