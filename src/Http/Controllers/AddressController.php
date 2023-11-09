@@ -2,7 +2,6 @@
 
 namespace FluxErp\Http\Controllers;
 
-use FluxErp\Helpers\QueryBuilder;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Models\Address;
@@ -16,14 +15,6 @@ class AddressController extends BaseController
     {
         parent::__construct();
         $this->model = new Address();
-    }
-
-    public function index(Request $request): JsonResponse
-    {
-        $query = QueryBuilder::filterModel($this->model, $request);
-
-        return ResponseHelper::createResponseFromBase(statusCode: 200, data: $query->paginate($request->per_page))
-            ->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 
     public function create(CreateAddressRequest $request, AddressService $addressService): JsonResponse

@@ -88,17 +88,7 @@
             />
         </div>
     </div>
-    <x-tabs
-        wire:model.live="tab"
-        :tabs="[
-                    'order.order-positions' => __('Order positions'),
-                    'order.attachments' => __('Attachments'),
-                    'order.accounting' => __('Accounting'),
-                    'order.comments' => __('Comments'),
-                    'order.related' => __('Related processes'),
-                    'order.activities' => __('Activities'),
-                ]"
-    >
+    <x-tabs wire:model.live="tab" :$tabs>
         <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">

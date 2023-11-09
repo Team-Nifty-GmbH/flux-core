@@ -22,7 +22,7 @@
         @show
     </x-card>
     <x-card class="space-y-2.5" :title="__('Assignment')">
-        <x-model-select
+        <x-select
             multiselect
             wire:model="product.categories"
             :label="__('Categories')"
@@ -33,8 +33,8 @@
                 'api' => route('search', \FluxErp\Models\Category::class),
                 'method' => 'POST',
             ]"
-        ></x-model-select>
-        <x-model-select
+        ></x-select>
+        <x-select
             multiselect
             wire:model="product.tags"
             :label="__('Tags')"
@@ -44,7 +44,7 @@
                 'api' => route('search', \FluxErp\Models\Tag::class),
                 'method' => 'POST',
             ]"
-        ></x-model-select>
+        ></x-select>
     </x-card>
     @if($this->additionalColumns)
         <x-card :title="__('Additional columns')">
