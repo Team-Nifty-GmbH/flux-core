@@ -27,6 +27,8 @@ class ProjectsProjectTasksTest extends BaseSetup
 
     public function test_projects_project_tasks_without_permission()
     {
+        Permission::findOrCreate('projects.project-tasks.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/projects/project-tasks')
             ->assertStatus(403);
     }

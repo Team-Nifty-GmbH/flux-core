@@ -46,6 +46,8 @@ class MediaTest extends BaseSetup
 
     public function test_download_media_without_permission()
     {
+        Permission::findOrCreate('media.{media}.{filename}.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
             ->assertStatus(403);
     }

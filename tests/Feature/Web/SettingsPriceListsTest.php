@@ -27,6 +27,8 @@ class SettingsPriceListsTest extends BaseSetup
 
     public function test_settings_price_lists_without_permission()
     {
+        Permission::findOrCreate('settings.price-lists.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/settings/price-lists')
             ->assertStatus(403);
     }

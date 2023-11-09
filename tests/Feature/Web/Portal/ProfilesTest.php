@@ -46,6 +46,8 @@ class ProfilesTest extends PortalSetup
 
     public function test_portal_profiles_without_permission()
     {
+        Permission::findOrCreate('profiles.{id?}.get', 'address');
+
         $this->actingAs($this->user, 'address')->get(
             route('portal.profiles.id?', ['id' => $this->user->id])
         )

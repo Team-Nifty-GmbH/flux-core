@@ -27,6 +27,8 @@ class CalendarsTest extends BaseSetup
 
     public function test_calendars_without_permission()
     {
+        Permission::findOrCreate('calendars.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/calendars')
             ->assertStatus(403);
     }

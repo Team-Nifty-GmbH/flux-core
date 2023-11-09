@@ -27,6 +27,8 @@ class SettingsClientsTest extends BaseSetup
 
     public function test_settings_clients_without_permission()
     {
+        Permission::findOrCreate('settings.clients.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/settings/clients')
             ->assertStatus(403);
     }

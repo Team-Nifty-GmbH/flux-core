@@ -27,6 +27,8 @@ class SettingsOrderTypesTest extends BaseSetup
 
     public function test_settings_order_types_without_permission()
     {
+        Permission::findOrCreate('settings.order-types.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/settings/order-types')
             ->assertStatus(403);
     }

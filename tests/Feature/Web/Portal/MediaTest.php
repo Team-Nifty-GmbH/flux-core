@@ -48,6 +48,8 @@ class MediaTest extends PortalSetup
 
     public function test_download_media_without_permission()
     {
+        Permission::findOrCreate('media.{media}.{filename}.get', 'address');
+
         $this->actingAs($this->user, 'address')
             ->get($this->portalDomain . '/media/' . $this->media->id . '/' . $this->filename)
             ->assertStatus(403);

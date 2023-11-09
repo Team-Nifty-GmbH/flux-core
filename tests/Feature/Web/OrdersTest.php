@@ -81,6 +81,8 @@ class OrdersTest extends BaseSetup
 
     public function test_orders_without_permission()
     {
+        Permission::findOrCreate('orders.list.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/orders/list')
             ->assertStatus(403);
     }
@@ -102,6 +104,8 @@ class OrdersTest extends BaseSetup
 
     public function test_orders_id_without_permission()
     {
+        Permission::findOrCreate('orders.{id}.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
             ->assertStatus(403);
     }

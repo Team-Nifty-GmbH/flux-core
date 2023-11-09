@@ -51,6 +51,8 @@ class ServiceTest extends PortalSetup
 
     public function test_portal_service_without_permission()
     {
+        Permission::findOrCreate('service.{serialnumberid?}.get', 'address');
+
         $this->actingAs($this->user, 'address')->get(route('portal.service', ['serialNumberId' => null]))
             ->assertStatus(403);
     }

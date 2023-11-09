@@ -85,6 +85,8 @@ class OrderPositionsTest extends BaseSetup
 
     public function test_order_positions_without_permission()
     {
+        Permission::findOrCreate('orders.order-positions.list.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/orders/order-positions/list')
             ->assertStatus(403);
     }

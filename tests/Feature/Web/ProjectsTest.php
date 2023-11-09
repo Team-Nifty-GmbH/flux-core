@@ -38,6 +38,8 @@ class ProjectsTest extends BaseSetup
 
     public function test_projects_without_permission()
     {
+        Permission::findOrCreate('projects.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/projects')
             ->assertStatus(403);
     }
@@ -59,6 +61,8 @@ class ProjectsTest extends BaseSetup
 
     public function test_projects_list_without_permission()
     {
+        Permission::findOrCreate('projects.list.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/projects/list')
             ->assertStatus(403);
     }
@@ -80,6 +84,8 @@ class ProjectsTest extends BaseSetup
 
     public function test_projects_id_without_permission()
     {
+        Permission::findOrCreate('projects.{id}.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
             ->assertStatus(403);
     }

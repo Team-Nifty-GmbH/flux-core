@@ -27,6 +27,8 @@ class SettingsUsersTest extends BaseSetup
 
     public function test_settings_users_without_permission()
     {
+        Permission::findOrCreate('settings.users.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/settings/users')
             ->assertStatus(403);
     }
