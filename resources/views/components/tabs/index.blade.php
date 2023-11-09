@@ -23,11 +23,9 @@
     @endif
     @if($slot->isNotEmpty())
         {{ $slot }}
+    @elseif($tabs[$this->{$attributes->wire('model')->value()}]?->isLivewireComponent)
+        <livewire:dynamic-component :is="$this->{$attributes->wire('model')->value()}" wire:key="{{ uniqid() }}"/>
     @else
-        @if($tabs[$this->{$attributes->wire('model')->value()}]?->isLivewireComponent)
-            <livewire:dynamic-component :is="$this->{$attributes->wire('model')->value()}" wire:key="{{ uniqid() }}"/>
-        @else
-            <x-dynamic-component :component="$this->{$attributes->wire('model')->value()}" />
-        @endif
+        <x-dynamic-component :component="$this->{$attributes->wire('model')->value()}" />
     @endif
 </div>

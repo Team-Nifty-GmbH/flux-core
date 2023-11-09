@@ -21,7 +21,7 @@ class Ticket extends Component
 
     public array $attachments = [];
 
-    public string $tab = 'features.comments.comments';
+    public string $tab = 'portal.ticket.comments';
 
     public function mount(int $id): void
     {
@@ -57,8 +57,8 @@ class Ticket extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('features.comments.comments')->label(__('Comments')),
-            TabButton::make('features.activities')->label(__('Activities')),
+            TabButton::make('portal.ticket.comments')->label(__('Comments'))->isLivewireComponent(),
+            TabButton::make('portal.ticket.activities')->label(__('Activities'))->isLivewireComponent(),
         ];
     }
 }

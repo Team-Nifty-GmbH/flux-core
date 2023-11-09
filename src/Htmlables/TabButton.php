@@ -91,9 +91,6 @@ class TabButton implements Htmlable
         return true;
     }
 
-    /**
-     * Render a button only if the closure is true
-     */
     public function when(\Closure|bool $condition): static
     {
         $this->shouldRender = (bool) value($condition);
@@ -101,9 +98,6 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * Get content as a string of HTML.
-     */
     public function toHtml(): ?string
     {
         if (! $this->shouldRender || ! $this->userHasTabPermission(false)) {
@@ -153,9 +147,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function rounded(bool $rounded = true): static
     {
         $this->rounded = $rounded;
@@ -163,9 +155,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function squared(bool $squared = true): static
     {
         $this->squared = $squared;
@@ -173,9 +163,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function outline(bool $outline = true): static
     {
         $this->outline = $outline;
@@ -183,9 +171,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function flat(bool $flat = true): static
     {
         $this->flat = $flat;
@@ -193,9 +179,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function full(bool $full = true): static
     {
         $this->full = $full;
@@ -203,9 +187,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function color(string $color = null): static
     {
         $this->color = $color;
@@ -213,9 +195,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function size(string $size = null): static
     {
         $this->size = $size;
@@ -223,9 +203,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function label(string $label = null): static
     {
         $this->label = $label;
@@ -233,9 +211,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function icon(string $icon = null): static
     {
         $this->icon = $icon;
@@ -243,9 +219,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function rightIcon(string $rightIcon): static
     {
         $this->rightIcon = $rightIcon;
@@ -253,9 +227,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function spinner(string $spinner): static
     {
         $this->spinner = $spinner;
@@ -263,9 +235,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function loadingDelay(string $loadingDelay): static
     {
         $this->loadingDelay = $loadingDelay;
@@ -273,9 +243,7 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    /**
-     * @return $this
-     */
+
     public function href(string $href): static
     {
         $this->href = $href;

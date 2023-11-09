@@ -51,9 +51,7 @@ class InitPermissions extends Command
         $this->registerWidgetPermissions();
         $this->registerTabPermissions();
 
-        foreach ($this->currentPermissions as $id => $currentPermission) {
-            Permission::query()->whereKey($id)->delete();
-        }
+        Permission::query()->whereIntegerInRaw('id', array_keys($this->currentPermissions))->delete();
     }
 
     private function registerRoutePermissions(): void
@@ -130,9 +128,10 @@ class InitPermissions extends Command
         $this->info('Registering tab permissions');
         $registry = app(ComponentRegistry::class);
         foreach(invade($registry)->aliases as $alias => $component) {
-            if(! in_array(WithTabs::class, class_uses_recursive($component))) {
+            if (! in_array(WithTabs::class, class_uses_recursive($component))) {
                 continue;
             }
+
             $componentInstance = new $component;
 
             foreach ($componentInstance->getTabs() as $tab) {

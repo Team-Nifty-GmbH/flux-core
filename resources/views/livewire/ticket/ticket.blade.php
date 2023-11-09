@@ -88,13 +88,11 @@
                         <x-card>
                             <x-tabs
                                 wire:model.live="tab"
-                                :tabs="$tabs"
+                                :$tabs
                             >
                                 <livewire:is
                                     wire:key="{{ uniqid() }}"
-                                    is-public="true"
                                     :component="$tab"
-                                    :model-type="\FluxErp\Models\Ticket::class"
                                     :model-id="$ticket['id']"
                                 />
                             </x-tabs>

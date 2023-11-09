@@ -88,7 +88,7 @@
             />
         </div>
     </div>
-    <x-tabs wire:model.live="tab" :tabs="$tabs">
+    <x-tabs wire:model.live="tab" :$tabs>
         <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">

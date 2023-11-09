@@ -28,8 +28,8 @@
                 </div>
             </div>
         </div>
-        <x-tabs wire:model.live="tab" :tabs="$tabs">
-            <livewire:is wire:key="{{ uniqid() }}" :component="$tab" :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
+        <x-tabs wire:model.live="tab" :$tabs>
+            <livewire:is wire:key="{{ uniqid() }}" :component="$tab" :model-id="$ticket['id']" />
         </x-tabs>
     </div>
 </div>

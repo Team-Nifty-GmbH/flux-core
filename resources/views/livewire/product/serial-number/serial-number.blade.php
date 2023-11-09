@@ -58,6 +58,6 @@
     </div>
     <x-tabs
         wire:model.live="tab"
-        :tabs="$tabs"
+        :$tabs
     />
 </div>

@@ -32,7 +32,7 @@ class Ticket extends Component
 
     public bool $authorTypeContact = true;
 
-    public string $tab = 'features.comments.comments';
+    public string $tab = 'ticket.comments';
 
     public function mount(int $id): void
     {
@@ -101,8 +101,8 @@ class Ticket extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('features.comments.comments')->label(__('Comments')),
-            TabButton::make('features.activities')->label(__('Activities')),
+            TabButton::make('ticket.comments')->label(__('Comments'))->isLivewireComponent(),
+            TabButton::make('ticket.activities')->label(__('Activities'))->isLivewireComponent(),
         ];
     }
 

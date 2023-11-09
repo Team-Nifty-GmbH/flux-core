@@ -8,16 +8,16 @@ trait WithTabs
 {
     protected array $_tabs = [];
 
+    abstract public function getTabs(): array;
+
     public function renderingWithTabs(View $view): void
     {
         $this->_tabs = $this->getTabs();
 
-        event('flux-core.livewire.rendering-with-tabs', $this);
+        event('tabs.rendering: ' . get_class($this), $this);
 
         $view->with('tabs', collect($this->_tabs)->keyBy('component')->toArray());
     }
-
-    abstract public function getTabs(): array;
 
     public function setTabsToRender(array $tabs): void
     {

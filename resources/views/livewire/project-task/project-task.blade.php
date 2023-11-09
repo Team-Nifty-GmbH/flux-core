@@ -45,7 +45,7 @@
 >
     <x-tabs
         wire:model.live="projectTaskTab"
-        :tabs="$tabs"
+        :$tabs
         x-bind:disabled="! projectTask.id"
     />
     <x-slot:footer>

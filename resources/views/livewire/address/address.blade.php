@@ -81,7 +81,7 @@
                 <!-- Tabs -->
                 <x-tabs
                     wire:model.live="tab"
-                    :tabs="$tabs"
+                    :$tabs
                     wire:loading
                 />
             </div>

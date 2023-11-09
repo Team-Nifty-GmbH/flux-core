@@ -86,9 +86,8 @@
     </div>
     <x-tabs
         wire:model.live="tab"
-        :tabs="$tabs"
+        :$tabs
         x-bind:disabled="! project.id"
         wire:ignore
-    >
-    </x-tabs>
+    />
 </div>
