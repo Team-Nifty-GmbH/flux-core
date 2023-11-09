@@ -69,7 +69,7 @@
         ],
         "analyse": "vendor/bin/phpstan analyse",
         "test": "./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml",
-        "test-browser": "./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dusk.xml --testsuite Browser",
+        "test-browser": "./vendor/bin/testbench package:test --configuration ./phpunit.dusk.xml --testsuite Browser",
         "test-feature": "./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml --testsuite Feature",
         "test-livewire": "./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml --testsuite Livewire",
         "test-coverage": "XDEBUG_MODE=coverage ./vendor/bin/testbench package:test --parallel --configuration ./phpunit.dist.xml --coverage-html ./reports",

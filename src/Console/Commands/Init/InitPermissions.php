@@ -50,6 +50,7 @@ class InitPermissions extends Command
         foreach ($this->currentPermissions as $id => $currentPermission) {
             Permission::query()->whereKey($id)->delete();
         }
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 
     private function registerRoutePermissions(): void

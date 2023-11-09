@@ -164,7 +164,7 @@ class Address extends Component
             return null;
         }
 
-        $model->syncPermissions($this->address['permissions'] ?? []);
+        $model->syncPermissions(array_map(fn ($permission) => (int) $permission, $this->address['permissions'] ?? []));
 
         // TODO: remove all locks
         $this->notification()->success(__('Address saved'));
