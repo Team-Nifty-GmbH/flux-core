@@ -42,12 +42,22 @@ trait HasUserModification
 
     public function updatedBy(): Attribute
     {
-        return Attribute::get(
-            fn () => $this->activityAttributeQuery('updated')
+        return Attribute::get(function () {
+            $activity = $this->activityAttributeQuery('updated')
                 ->orderBy('id', 'desc')
-                ->first()
-                ?->causer ?: $this->createdBy
-        );
+                ->first();
+
+            if ($activity?->causer_id === $this->id
+                && $activity?->causer_type === $this->getMorphClass()
+            ) {
+                return [
+                    'causer_type' => $activity->causer_type,
+                    'causer_id' => $activity->causer_id,
+                ];
+            }
+
+            return $activity?->causer ?: $this->createdBy;
+        });
     }
 
     public function deletedBy(): Attribute
