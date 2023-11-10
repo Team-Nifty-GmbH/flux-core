@@ -16,9 +16,9 @@ class FormBuilderFormFactory extends Factory
             'name' => $this->faker->name(),
             'description' => $this->faker->text(),
             'slug' => $this->faker->slug(),
-            'is_active' => $this->faker->boolean(),
             'start_date' => Carbon::now()->subWeeks(rand(1, 52)),
             'end_date' => Carbon::now()->addWeeks(rand(1, 52)),
+            'is_active' => $this->faker->boolean(),
         ];
     }
 }

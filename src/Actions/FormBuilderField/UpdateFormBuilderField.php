@@ -21,7 +21,10 @@ class UpdateFormBuilderField extends FluxAction
 
     public function performAction(): FormBuilderField
     {
-        $formBuilderField = FormBuilderField::find($this->data['id']);
+        $formBuilderField = FormBuilderField::query()
+            ->whereKey($this->data['id'])
+            ->first();
+
         $formBuilderField->fill($this->data);
         $formBuilderField->save();
 

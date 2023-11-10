@@ -13,9 +13,9 @@ class FormBuilderSectionFactory extends Factory
     {
         return [
             'name' => $this->faker->name(),
+            'description' => $this->faker->text(),
             'ordering' => $this->faker->randomNumber(),
             'columns' => $this->faker->randomNumber(),
-            'description' => $this->faker->text(),
         ];
     }
 }

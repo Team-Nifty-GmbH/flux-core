@@ -17,16 +17,16 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('slug');
             $table->json('options')->nullable();
-            $table->boolean('is_active')->default(true);
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();
 
             $table->foreign('user_id')
-                ->nullOnDelete()
                 ->references('id')
-                ->on('users');
+                ->on('users')
+                ->nullOnDelete();
         });
     }
 

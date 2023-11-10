@@ -17,8 +17,6 @@ class FormBuilderFieldFactory extends Factory
             'description' => $this->faker->text(),
             'ordering' => $this->faker->randomNumber(),
             'options' => $this->faker->words(),
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
         ];
     }
 }

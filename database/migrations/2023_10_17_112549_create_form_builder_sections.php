@@ -13,9 +13,9 @@ return new class extends Migration
             $table->uuid();
             $table->foreignId('form_id')->constrained('form_builder_forms');
             $table->string('name')->nullable();
+            $table->text('description')->nullable();
             $table->unsignedInteger('ordering')->default(0);
             $table->unsignedInteger('columns')->default(1);
-            $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

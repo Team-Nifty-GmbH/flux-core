@@ -24,9 +24,7 @@ class CreateFormBuilderForm extends FluxAction
     {
         $formBuilderForm = new FormBuilderForm();
 
-        $this->data['slug'] = $this->data['slug'] == null ?
-            Str::slug($this->data['name']) :
-            Str::slug($this->data['slug']);
+        $this->data['slug'] = Str::slug($this->data['slug'] ?? $this->data['name']);
 
         $formBuilderForm->fill($this->data);
         $formBuilderForm->save();
