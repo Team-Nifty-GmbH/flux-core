@@ -5,8 +5,5 @@
             "spacing": "one"
         },
         "Laravel/laravel_phpdoc_alignment": false
-    },
-    "exclude": [
-        "modules"
-    ]
+    }
 }
