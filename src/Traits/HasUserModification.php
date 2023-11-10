@@ -4,7 +4,6 @@ namespace FluxErp\Traits;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Arr;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -51,7 +50,10 @@ trait HasUserModification
             if ($activity?->causer_id === $this->id
                 && $activity?->causer_type === $this->getMorphClass()
             ) {
-                return Arr::only($activity->toArray(), ['causer_type', 'causer_id']);
+                return [
+                    'causer_type' => $activity->causer_type,
+                    'causer_id' => $activity->causer_id,
+                ];
             }
 
             return $activity?->causer ?: $this->createdBy;
