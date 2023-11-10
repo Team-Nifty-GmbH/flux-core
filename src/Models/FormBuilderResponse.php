@@ -15,9 +15,14 @@ class FormBuilderResponse extends Model
     use HasUuid;
     use SoftDeletes;
 
-    protected $with = ['form', 'user'];
+    protected $with = [
+        'form',
+        'user'
+    ];
 
-    protected $guarded = ['id'];
+    protected $guarded = [
+        'id'
+    ];
 
     protected static function booted(): void
     {

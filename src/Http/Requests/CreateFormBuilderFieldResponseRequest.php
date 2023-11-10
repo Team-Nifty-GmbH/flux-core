@@ -2,9 +2,7 @@
 
 namespace FluxErp\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class CreateFormBuilderFieldResponseRequest extends FormRequest
+class CreateFormBuilderFieldResponseRequest extends BaseFormRequest
 {
     public function rules(): array
     {

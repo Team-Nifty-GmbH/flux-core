@@ -5,7 +5,7 @@ namespace FluxErp\Actions\FormBuilderForm;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateFormBuilderFormRequest;
 use FluxErp\Models\FormBuilderForm;
-use Str;
+use Illuminate\Support\Str;
 
 class UpdateFormBuilderForm extends FluxAction
 {

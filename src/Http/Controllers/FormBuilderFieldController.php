@@ -9,6 +9,7 @@ use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\CreateFormBuilderFieldRequest;
 use FluxErp\Http\Requests\UpdateFormBuilderFieldRequest;
 use FluxErp\Models\FormBuilderField;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
 class FormBuilderFieldController extends BaseController
@@ -19,7 +20,7 @@ class FormBuilderFieldController extends BaseController
         $this->model = new FormBuilderField();
     }
 
-    public function create(CreateFormBuilderFieldRequest $request)
+    public function create(CreateFormBuilderFieldRequest $request): JsonResponse
     {
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
@@ -28,7 +29,7 @@ class FormBuilderFieldController extends BaseController
         );
     }
 
-    public function update(UpdateFormBuilderFieldRequest $request)
+    public function update(UpdateFormBuilderFieldRequest $request): JsonResponse
     {
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
@@ -37,20 +38,20 @@ class FormBuilderFieldController extends BaseController
         );
     }
 
-    public function delete(int $id)
+    public function delete(int $id): JsonResponse
     {
         try {
             DeleteFormBuilderField::make(['id' => $id])
                 ->validate()
                 ->execute();
         } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
+            return ResponseHelper::createResponseFromBase(
                 statusCode: 404,
                 data: $e->errors()
             );
         }
 
-        return ResponseHelper::createArrayResponse(
+        return ResponseHelper::createResponseFromBase(
             statusCode: 204,
             statusMessage: 'form builder field deleted'
         );

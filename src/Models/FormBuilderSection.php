@@ -13,13 +13,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class FormBuilderSection extends Model
 {
     use HasPackageFactory;
-    use HasTranslations;
     use HasUuid;
     use SoftDeletes;
 
-    public array $translatable = ['name'];
-
-    protected $guarded = ['id'];
+    protected $guarded = [
+        'id'
+    ];
 
     protected static function booted(): void
     {

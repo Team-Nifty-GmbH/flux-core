@@ -9,6 +9,7 @@ use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\CreateFormBuilderFieldResponseRequest;
 use FluxErp\Http\Requests\UpdateFormBuilderFieldResponseRequest;
 use FluxErp\Models\FormBuilderFieldResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
 class FormBuilderFieldResponseController extends BaseController
@@ -19,7 +20,7 @@ class FormBuilderFieldResponseController extends BaseController
         $this->model = new FormBuilderFieldResponse();
     }
 
-    public function create(CreateFormBuilderFieldResponseRequest $request)
+    public function create(CreateFormBuilderFieldResponseRequest $request): JsonResponse
     {
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
@@ -28,7 +29,7 @@ class FormBuilderFieldResponseController extends BaseController
         );
     }
 
-    public function update(UpdateFormBuilderFieldResponseRequest $request)
+    public function update(UpdateFormBuilderFieldResponseRequest $request): JsonResponse
     {
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
@@ -37,20 +38,20 @@ class FormBuilderFieldResponseController extends BaseController
         );
     }
 
-    public function delete(int $id)
+    public function delete(int $id): JsonResponse
     {
         try {
             DeleteFormBuilderFieldResponse::make(['id' => $id])
                 ->validate()
                 ->execute();
         } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
+            return ResponseHelper::createResponseFromBase(
                 statusCode: 404,
                 data: $e->errors()
             );
         }
 
-        return ResponseHelper::createArrayResponse(
+        return ResponseHelper::createResponseFromBase(
             statusCode: 204,
             statusMessage: 'form builder field response deleted'
         );

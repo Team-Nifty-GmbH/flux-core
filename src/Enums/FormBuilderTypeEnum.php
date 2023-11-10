@@ -20,5 +20,4 @@ enum FormBuilderTypeEnum: string
     case Email = 'email';
     case Password = 'password';
     case Range = 'range';
-
 }

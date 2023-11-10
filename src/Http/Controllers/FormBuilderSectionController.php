@@ -9,6 +9,7 @@ use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\CreateFormBuilderSectionRequest;
 use FluxErp\Http\Requests\UpdateFormBuilderSectionRequest;
 use FluxErp\Models\FormBuilderSection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
 class FormBuilderSectionController extends BaseController
@@ -19,7 +20,7 @@ class FormBuilderSectionController extends BaseController
         $this->model = new FormBuilderSection();
     }
 
-    public function create(CreateFormBuilderSectionRequest $request)
+    public function create(CreateFormBuilderSectionRequest $request): JsonResponse
     {
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
@@ -28,7 +29,7 @@ class FormBuilderSectionController extends BaseController
         );
     }
 
-    public function update(UpdateFormBuilderSectionRequest $request)
+    public function update(UpdateFormBuilderSectionRequest $request): JsonResponse
     {
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
@@ -37,20 +38,20 @@ class FormBuilderSectionController extends BaseController
         );
     }
 
-    public function delete(string $id): array
+    public function delete(string $id): JsonResponse
     {
         try {
             DeleteFormBuilderSection::make(['id' => $id])
                 ->validate()
                 ->execute();
         } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
+            return ResponseHelper::createResponseFromBase(
                 statusCode: 404,
                 data: $e->errors()
             );
         }
 
-        return ResponseHelper::createArrayResponse(
+        return ResponseHelper::createResponseFromBase(
             statusCode: 204,
             statusMessage: 'form builder section deleted'
         );

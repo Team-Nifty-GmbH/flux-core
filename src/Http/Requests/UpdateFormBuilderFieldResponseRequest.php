@@ -2,9 +2,7 @@
 
 namespace FluxErp\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class UpdateFormBuilderFieldResponseRequest extends FormRequest
+class UpdateFormBuilderFieldResponseRequest extends BaseFormRequest
 {
     public function rules(): array
     {
@@ -13,7 +11,7 @@ class UpdateFormBuilderFieldResponseRequest extends FormRequest
             'form_id' => 'required|integer|exists:form_builder_forms,id,deleted_at,NULL',
             'field_id' => 'required|integer|exists:form_builder_fields,id,deleted_at,NULL',
             'response_id' => 'required|integer|exists:form_builder_responses,id,deleted_at,NULL',
-            'response' => 'required|string',
+            'response' => 'required',
         ];
     }
 }

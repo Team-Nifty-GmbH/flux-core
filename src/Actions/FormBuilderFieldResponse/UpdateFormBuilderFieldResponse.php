@@ -24,6 +24,7 @@ class UpdateFormBuilderFieldResponse extends FluxAction
         $formBuilderFieldResponse = FormBuilderFieldResponse::query()
             ->whereKey($this->data['id'])
             ->first();
+
         $formBuilderFieldResponse->fill($this->data);
         $formBuilderFieldResponse->save();
 

@@ -3,10 +3,9 @@
 namespace FluxErp\Http\Requests;
 
 use FluxErp\Enums\FormBuilderTypeEnum;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class CreateFormBuilderFieldRequest extends FormRequest
+class CreateFormBuilderFieldRequest extends BaseFormRequest
 {
     public function rules(): array
     {

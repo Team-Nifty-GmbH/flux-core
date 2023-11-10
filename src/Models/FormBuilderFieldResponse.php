@@ -14,9 +14,13 @@ class FormBuilderFieldResponse extends Model
     use HasUuid;
     use SoftDeletes;
 
-    protected $with = ['field'];
+    protected $with = [
+        'field'
+    ];
 
-    protected $guarded = ['id'];
+    protected $guarded = [
+        'id'
+    ];
 
     public function field(): BelongsTo
     {

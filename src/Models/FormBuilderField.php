@@ -13,11 +13,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class FormBuilderField extends Model
 {
     use HasPackageFactory;
-    use HasTranslations;
     use HasUuid;
     use SoftDeletes;
 
-    protected $guarded = ['id'];
+    protected $guarded = [
+        'id'
+    ];
 
     protected $casts = [
         'options' => 'array',

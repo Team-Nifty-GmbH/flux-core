@@ -2,9 +2,7 @@
 
 namespace FluxErp\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class CreateFormBuilderFormRequest extends FormRequest
+class CreateFormBuilderFormRequest extends BaseFormRequest
 {
     public function rules(): array
     {
@@ -14,10 +12,10 @@ class CreateFormBuilderFormRequest extends FormRequest
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'slug' => 'nullable|string|max:255',
-            'is_active' => 'nullable|boolean',
             'options' => 'nullable|array',
             'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
+            'end_date' => 'nullable|after:start_date|date',
+            'is_active' => 'boolean',
         ];
     }
 }

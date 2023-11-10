@@ -13,18 +13,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class FormBuilderForm extends Model
 {
     use HasPackageFactory;
-    use HasTranslations;
     use HasUuid;
     use SoftDeletes;
 
-    protected $guarded = ['id'];
+    protected $guarded = [
+        'id'
+    ];
 
     protected $casts = [
         'options' => 'array',
-        'is_active' => 'boolean',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
-
+        'is_active' => 'boolean',
     ];
 
     protected static function booted(): void
@@ -62,12 +62,12 @@ class FormBuilderForm extends Model
 
     public function responses(): hasMany
     {
-        return $this->hasMany(FormBuilderResponse::class, 'form_id', 'id');
+        return $this->hasMany(FormBuilderResponse::class, 'form_id');
     }
 
     public function sections(): HasMany
     {
-        return $this->hasMany(FormBuilderSection::class, 'form_id', 'id');
+        return $this->hasMany(FormBuilderSection::class, 'form_id');
     }
 
     public function user(): BelongsTo

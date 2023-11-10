@@ -38,18 +38,18 @@ class FormBuilderFormController extends BaseController
         );
     }
 
-    public function delete(string $id): array
+    public function delete(string $id): JsonResponse
     {
         try {
             DeleteFormBuilderForm::make(['id' => $id])->validate()->execute();
         } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
+            return ResponseHelper::createResponseFromBase(
                 statusCode: 404,
                 data: $e->errors()
             );
         }
 
-        return ResponseHelper::createArrayResponse(
+        return ResponseHelper::createResponseFromBase(
             statusCode: 204,
             statusMessage: 'form builder form deleted'
         );
