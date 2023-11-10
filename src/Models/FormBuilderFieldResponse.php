@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FormBuilderFieldResponse extends Model
 {
-    use SoftDeletes;
     use HasPackageFactory;
     use HasUuid;
+    use SoftDeletes;
 
     protected $with = ['field'];
 

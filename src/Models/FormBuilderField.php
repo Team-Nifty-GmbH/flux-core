@@ -12,10 +12,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FormBuilderField extends Model
 {
-    use HasTranslations;
-    use SoftDeletes;
     use HasPackageFactory;
+    use HasTranslations;
     use HasUuid;
+    use SoftDeletes;
 
     protected $guarded = ['id'];
 

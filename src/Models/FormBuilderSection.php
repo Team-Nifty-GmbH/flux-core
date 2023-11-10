@@ -12,10 +12,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FormBuilderSection extends Model
 {
-    use HasTranslations;
-    use SoftDeletes;
     use HasPackageFactory;
+    use HasTranslations;
     use HasUuid;
+    use SoftDeletes;
 
     public array $translatable = ['name'];
 

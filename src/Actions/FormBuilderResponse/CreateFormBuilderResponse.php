@@ -13,6 +13,7 @@ class CreateFormBuilderResponse extends FluxAction
         parent::boot($data);
         $this->rules = (new CreateFormBuilderResponseRequest())->rules();
     }
+
     public static function models(): array
     {
         return [FormBuilderResponse::class];

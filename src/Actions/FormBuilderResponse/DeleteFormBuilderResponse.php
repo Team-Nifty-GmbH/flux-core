@@ -14,6 +14,7 @@ class DeleteFormBuilderResponse extends FluxAction
             'id' => 'required|exists:form_builder_responses,id,deleted_at,NULL',
         ];
     }
+
     public static function models(): array
     {
         return [FormBuilderResponse::class];

@@ -13,6 +13,7 @@ class UpdateFormBuilderField extends FluxAction
         parent::boot($data);
         $this->rules = (new UpdateFormBuilderFieldRequest())->rules();
     }
+
     public static function models(): array
     {
         return [FormBuilderField::class];
@@ -23,6 +24,7 @@ class UpdateFormBuilderField extends FluxAction
         $formBuilderField = FormBuilderField::find($this->data['id']);
         $formBuilderField->fill($this->data);
         $formBuilderField->save();
+
         return $formBuilderField->refresh();
     }
 }

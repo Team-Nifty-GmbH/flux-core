@@ -16,7 +16,7 @@ class CreateFormBuilderFieldRequest extends FormRequest
             'description' => 'nullable|string',
             'type' => [
                 'required',
-                Rule::in(FormBuilderTypeEnum::values())
+                Rule::in(FormBuilderTypeEnum::values()),
             ],
             'ordering' => 'nullable|integer|min:0',
             'options' => 'nullable|array',

@@ -8,11 +8,12 @@ use FluxErp\Models\FormBuilderFieldResponse;
 
 class UpdateFormBuilderFieldResponse extends FluxAction
 {
-    protected function  boot(array $data): void
+    protected function boot(array $data): void
     {
         parent::boot($data);
         $this->rules = (new UpdateFormBuilderFieldResponseRequest())->rules();
     }
+
     public static function models(): array
     {
         return [FormBuilderFieldResponse::class];

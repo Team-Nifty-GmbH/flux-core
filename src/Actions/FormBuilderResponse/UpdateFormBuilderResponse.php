@@ -11,8 +11,9 @@ class UpdateFormBuilderResponse extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules =(new UpdateFormBuilderResponseRequest())->rules();
+        $this->rules = (new UpdateFormBuilderResponseRequest())->rules();
     }
+
     public static function models(): array
     {
         return [FormBuilderResponse::class];
@@ -23,6 +24,7 @@ class UpdateFormBuilderResponse extends FluxAction
         $formBuilderResponse = FormBuilderResponse::find($this->data['id']);
         $formBuilderResponse->fill($this->data);
         $formBuilderResponse->save();
+
         return $formBuilderResponse->refresh();
     }
 }

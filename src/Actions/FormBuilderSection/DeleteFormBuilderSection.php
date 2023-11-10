@@ -7,7 +7,7 @@ use FluxErp\Models\FormBuilderSection;
 
 class DeleteFormBuilderSection extends FluxAction
 {
-    protected function  boot(array $data): void
+    protected function boot(array $data): void
     {
         parent::boot($data);
         $this->rules = [

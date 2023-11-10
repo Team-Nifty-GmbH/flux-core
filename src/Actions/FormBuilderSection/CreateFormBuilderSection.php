@@ -8,7 +8,7 @@ use FluxErp\Models\FormBuilderSection;
 
 class CreateFormBuilderSection extends FluxAction
 {
-    protected function  boot(array $data):void
+    protected function boot(array $data): void
     {
         parent::boot($data);
         $this->rules = (new CreateFormBuilderSectionRequest())->rules();
@@ -25,6 +25,7 @@ class CreateFormBuilderSection extends FluxAction
 
         $formBuilderSection->fill($this->data);
         $formBuilderSection->save();
+
         return $formBuilderSection->refresh();
     }
 }

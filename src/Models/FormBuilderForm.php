@@ -9,14 +9,13 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class FormBuilderForm extends Model
 {
-    use HasTranslations;
-    use SoftDeletes;
     use HasPackageFactory;
+    use HasTranslations;
     use HasUuid;
+    use SoftDeletes;
 
     protected $guarded = ['id'];
 

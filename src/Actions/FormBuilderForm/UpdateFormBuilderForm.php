@@ -30,6 +30,7 @@ class UpdateFormBuilderForm extends FluxAction
 
         $formBuilderForm->fill($this->data);
         $formBuilderForm->save();
+
         return $formBuilderForm->refresh();
     }
 }

@@ -11,9 +11,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FormBuilderResponse extends Model
 {
-    use SoftDeletes;
     use HasPackageFactory;
     use HasUuid;
+    use SoftDeletes;
 
     protected $with = ['form', 'user'];
 

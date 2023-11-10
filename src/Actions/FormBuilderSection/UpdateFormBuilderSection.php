@@ -25,6 +25,7 @@ class UpdateFormBuilderSection extends FluxAction
 
         $formBuilderSection->fill($this->data);
         $formBuilderSection->save();
+
         return $formBuilderSection->refresh();
     }
 }
