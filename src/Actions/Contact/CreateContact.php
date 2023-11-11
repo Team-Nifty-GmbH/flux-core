@@ -4,7 +4,6 @@ namespace FluxErp\Actions\Contact;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateContactRequest;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
