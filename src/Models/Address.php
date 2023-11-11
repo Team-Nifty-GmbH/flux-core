@@ -55,6 +55,22 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public static string $iconName = 'user';
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        self::saving(function (Address $address) {
+            if ($address->isDirty('lastname') || $address->isDirty('firstname') || $address->isDirty('company')) {
+                $name = [
+                    $address->company,
+                    trim($address->firstname . ' ' . $address->lastname),
+                ];
+
+                $address->name = implode(', ', array_filter($name));
+            }
+        });
+    }
+
     public function getAuthPassword()
     {
         return $this->login_password;
@@ -75,13 +91,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
                 ->orderBy('is_primary', 'desc')
                 ->first()
                 ->value ?? null
-        );
-    }
-
-    protected function name(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->getLabel()
         );
     }
 
@@ -120,6 +129,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     public function contactOptions(): HasMany
     {
         return $this->hasMany(ContactOption::class);
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
     }
 
     public function language(): BelongsTo
@@ -176,19 +190,13 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public function getLabel(): ?string
     {
-        return trim(
-            ($this->company ?? '') . ' ' .
-            ($this->firstname ?? '') . ' ' .
-            ($this->lastname ?? '')
-        );
+        return $this->name;
     }
 
     public function getDescription(): ?string
     {
         return trim(
-            ($this->company ?? '') . ' ' .
-            ($this->firstname ?? '') . ' ' .
-            ($this->lastname ?? '') . ' ' .
+            $this->name . ' ' .
             ($this->street ?? '') . ' ' .
             ($this->zip ?? '') . ' ' .
             ($this->city ?? '') . ' ' .

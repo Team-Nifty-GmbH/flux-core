@@ -80,10 +80,6 @@ class Contact extends Component
             ->when($this->contactId, fn ($query) => $query->whereKey($this->contactId))
             ->firstOrFail();
 
-        $contact->addresses->map(function (Address $address) {
-            return $address->append('name');
-        });
-
         $this->avatar = $contact->getAvatarUrl();
 
         $this->contact = $contact->toArray();
@@ -134,41 +130,6 @@ class Contact extends Component
         $this->contactId = $contactId;
         $this->addressId = $addressId;
         $this->mount();
-    }
-
-    public function save(): false|RedirectResponse|Redirector
-    {
-        $action = ($this->newContact['address']['id'] ?? false) ? UpdateContact::class : CreateContact::class;
-
-        try {
-            $contact = $action::make($this->newContact)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->newContact['address']['contact_id'] = $contact->id;
-        $this->newContact['address']['client_id'] = $contact->client_id;
-
-        try {
-            CreateAddress::make($this->newContact['address'])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-            $contact->forceDelete();
-
-            return false;
-        }
-
-        $this->notification()->success(__('Contact saved'));
-
-        return redirect(route('contacts.id?', ['id' => $contact->id]));
     }
 
     public function delete(): false|RedirectResponse|Redirector
