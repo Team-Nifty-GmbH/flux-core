@@ -18,8 +18,13 @@ class Login extends \FluxErp\Livewire\Auth\Login
         return view('flux::livewire.portal.auth.login');
     }
 
-    public function tryLogin(): bool
+    protected function tryLogin(): bool
     {
         return Auth::guard('address')->attempt(['login_name' => $this->email, 'password' => $this->password]);
+    }
+
+    protected function retrieveUserByCredentials()
+    {
+        return Auth::guard('address')->getProvider()->retrieveByCredentials(['login_name' => $this->email]);
     }
 }

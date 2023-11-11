@@ -20,7 +20,6 @@ class Login extends Component
     #[Rule(['required', 'email'])]
     public string $email;
 
-    #[Rule(['required'])]
     public string $password = '';
 
     #[Locked]
@@ -47,7 +46,14 @@ class Login extends Component
         $target = Session::get('url.intended', route($this->dashboardRoute));
         $this->validate();
 
-        $login = $this->tryLogin();
+        if ($this->password) {
+            $login = $this->tryLogin();
+        } else {
+            $this->sendMagicLink();
+            $this->notification()->success(__('Login link sent, check your inbox'));
+
+            return true;
+        }
 
         if ($login) {
             $this->redirect($target);
@@ -63,6 +69,14 @@ class Login extends Component
         return false;
     }
 
+    public function sendMagicLink(): void
+    {
+        $user = $this->retrieveUserByCredentials();
+        if ($user && method_exists($user, 'sendLoginLink')) {
+            $user->sendLoginLink();
+        }
+    }
+
     public function resetPassword(): void
     {
         $this->validateOnly('email');
@@ -72,8 +86,13 @@ class Login extends Component
         $this->notification()->success(__('Password reset link sent'));
     }
 
-    public function tryLogin(): bool
+    protected function tryLogin(): bool
     {
         return Auth::guard($this->guard)->attempt(['email' => $this->email, 'password' => $this->password]);
+    }
+
+    protected function retrieveUserByCredentials()
+    {
+        return Auth::guard('web')->getProvider()->retrieveByCredentials(['email' => $this->email]);
     }
 }

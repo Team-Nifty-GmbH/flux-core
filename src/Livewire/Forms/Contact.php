@@ -46,7 +46,7 @@ class Contact extends Form
             ->execute();
 
         $address = array_merge($this->toArray(), ['contact_id' => $response->id]);
-        if ($action instanceof  UpdateContact) {
+        if ($action instanceof UpdateContact) {
             $addressId = $response->addresses()->where('is_main_address', true)->first()?->id;
             $address = array_merge($address, ['id' => $addressId]);
         }

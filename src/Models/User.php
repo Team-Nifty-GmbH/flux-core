@@ -22,6 +22,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
@@ -165,11 +166,18 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
         return $this->getFirstMediaUrl('avatar') ?: self::icon()->getUrl();
     }
 
-    public function sendLoginLink(?string $inte): void
+    public function sendLoginLink(): void
     {
         $plaintext = Str::uuid()->toString();
         $expires = now()->addMinutes(15);
-        Cache::put('login_token_' . $plaintext, ['user' => $this, 'guard' => 'web'], $expires);
+        Cache::put('login_token_' . $plaintext,
+            [
+                'user' => $this,
+                'guard' => 'web',
+                'intended_url' => Session::get('url.intended', route('dashboard')),
+            ],
+            $expires
+        );
 
         Mail::to($this->email)->queue(new MagicLoginLink($plaintext, $expires));
     }

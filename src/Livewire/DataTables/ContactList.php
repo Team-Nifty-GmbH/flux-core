@@ -2,9 +2,6 @@
 
 namespace FluxErp\Livewire\DataTables;
 
-use FluxErp\Actions\Address\CreateAddress;
-use FluxErp\Actions\Contact\CreateContact;
-use FluxErp\Actions\Contact\UpdateContact;
 use FluxErp\Livewire\Forms\Contact;
 use FluxErp\Models\Address;
 use Illuminate\Database\Eloquent\Builder;
@@ -57,7 +54,7 @@ class ContactList extends DataTable
                 ->attributes([
                     'x-on:click' => '$wire.show()',
                 ])
-                ->when(fn() => auth()->user()->can('create', $this->model)),
+                ->when(fn () => auth()->user()->can('create', $this->model)),
         ];
     }
 

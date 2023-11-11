@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
@@ -21,7 +22,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 use Spatie\Permission\Traits\HasRoles;
@@ -215,5 +220,21 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     public function getAvatarUrl(): ?string
     {
         return $this->contact?->getFirstMediaUrl('avatar') ?: self::icon()->getUrl();
+    }
+
+    public function sendLoginLink(): void
+    {
+        $plaintext = Str::uuid()->toString();
+        $expires = now()->addMinutes(15);
+        Cache::put('login_token_' . $plaintext,
+            [
+                'user' => $this,
+                'guard' => 'address',
+                'intended_url' => Session::get('url.intended', route('portal.dashboard')),
+            ],
+            $expires
+        );
+
+        Mail::to($this->login_name)->queue(new MagicLoginLink($plaintext, $expires));
     }
 }

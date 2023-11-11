@@ -14,18 +14,15 @@ class LoginLinkController extends Controller
 {
     public function __invoke(Request $request): RedirectResponse|View|Factory
     {
-        $user = Cache::pull('login_token_' . $request->token);
+        $login = Cache::pull('login_token_' . $request->token);
 
         try {
-            Auth::guard($user['guard'])->login($user['user']);
-        } catch (\Exception $e) {
-            return view('flux::login-link-failed');
+            Auth::guard($login['guard'])->login($login['user']);
+        } catch (\Exception) {
         }
 
-        if (Auth::check()) {
-            return redirect()->route('dashboard');
-        }
-
-        return view('flux::login-link-failed');
+        return Auth::guard($login['guard'])->check()
+            ? redirect()->to($login['intended_url'])
+            : view('flux::login-link-failed');
     }
 }

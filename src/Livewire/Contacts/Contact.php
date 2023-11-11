@@ -2,12 +2,9 @@
 
 namespace FluxErp\Livewire\Contacts;
 
-use FluxErp\Actions\Address\CreateAddress;
-use FluxErp\Actions\Contact\CreateContact;
 use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Actions\Contact\UpdateContact;
 use FluxErp\Htmlables\TabButton;
-use FluxErp\Models\Address;
 use FluxErp\Models\Contact as ContactModel;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
