@@ -4,10 +4,12 @@ namespace FluxErp\Livewire\Ticket;
 
 use FluxErp\Actions\Ticket\DeleteTicket;
 use FluxErp\Actions\Ticket\UpdateTicket;
+use FluxErp\Htmlables\TabButton;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\TicketType;
 use FluxErp\Models\User;
+use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
@@ -16,7 +18,7 @@ use WireUi\Traits\Actions;
 
 class Ticket extends Component
 {
-    use Actions;
+    use Actions, WithTabs;
 
     public array $ticket;
 
@@ -30,7 +32,7 @@ class Ticket extends Component
 
     public bool $authorTypeContact = true;
 
-    public string $tab = 'features.comments.comments';
+    public string $tab = 'ticket.comments';
 
     public function mount(int $id): void
     {
@@ -94,6 +96,14 @@ class Ticket extends Component
     public function render(): View
     {
         return view('flux::livewire.ticket.ticket');
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('ticket.comments')->label(__('Comments'))->isLivewireComponent(),
+            TabButton::make('ticket.activities')->label(__('Activities'))->isLivewireComponent(),
+        ];
     }
 
     public function updateAdditionalColumns(?int $id): void

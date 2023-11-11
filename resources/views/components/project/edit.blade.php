@@ -37,7 +37,7 @@
         <x-input type="date" x-bind:readonly="!edit" wire:model="project.release_date" label="{{ __('Release date') }}" />
     </div>
     <x-textarea x-bind:readonly="!edit" wire:model="project.description" label="{{ __('Description') }}" />
-    <x-model-select
+    <x-select
         wire:model="project.category_id"
         :label="__('Categories')"
         option-value="id"
@@ -58,7 +58,7 @@
                     ],
                 ],
             ]"
-    ></x-model-select>
+    ></x-select>
     <div class="pt-1.5">
         <ul wire:ignore class="flex flex-col gap-1">
             <template x-for="(level, i) in levels">
