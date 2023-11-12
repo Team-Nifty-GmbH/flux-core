@@ -2,112 +2,59 @@
 
 namespace FluxErp\Http\Controllers;
 
-use FluxErp\Helpers\Helper;
+use FluxErp\Actions\Lock\ForceUnlock;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\LockRequest;
-use FluxErp\Models\Lock;
-use Illuminate\Database\Eloquent\Builder;
+use FluxErp\Http\Requests\LockRecordRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
-class LockController extends BaseController
+class LockController extends Controller
 {
     public function __construct()
     {
         parent::__construct();
     }
 
-    public function showUserLocks(Request $request): JsonResponse
+    public function showUserLocks(): JsonResponse
     {
-        $locks = Lock::query()
-            ->where('created_by', Auth::id())
-            ->get();
-
-        return ResponseHelper::createResponseFromBase(statusCode: 200, data: $locks);
+        return ResponseHelper::createResponseFromBase(statusCode: 200, data: auth()->user()->locks()->get());
     }
 
-    public function index(Request $request): JsonResponse
+    public function lock(LockRecordRequest $request): JsonResponse
     {
-        $perPage = $request->per_page > 500 || $request->per_page < 1 ? 25 : $request->per_page;
+        $model = $request->get('model_type')::query()
+            ->whereKey($request->get('model_id'))
+            ->firstOrFail();
 
-        $locks = Lock::query()
-            ->paginate($perPage);
-
-        return ResponseHelper::createResponseFromBase(statusCode: 200, data: $locks);
-    }
-
-    /**
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function lock(string $modelType, Request $request): JsonResponse
-    {
-        $modelClass = Helper::classExists($modelType, isModel: true);
-
-        if (! $modelClass) {
-            return ResponseHelper::createResponseFromBase(statusCode: 404);
-        }
-
-        $columns = $modelClass::getColumns()
-            ->filter(function ($item) {
-                return str_contains($item->Type, 'int');
-            })
-            ->pluck('Field')
-            ->toArray();
-
-        $validationStrings = array_fill(0, count($columns), 'sometimes|required|integer');
-
-        $validator = Validator::make(
-            $request->all(),
-            array_merge(array_combine($columns, $validationStrings), (new LockRequest())->rules())
-        );
-
-        if ($validator->fails()) {
-            return ResponseHelper::createResponseFromBase(statusCode: 422);
-        }
-
-        $validated = $validator->validated();
-
-        $lock = $validated['lock'] ?? true;
-        unset($validated['lock']);
-
-        $query = $modelClass::query()
-            ->when($lock, function (Builder $query) {
-                return $query->whereDoesntHave('lock');
-            }, function (Builder $query) use ($request) {
-                return $query->whereRelation('lock', 'created_by', $request->user()->id);
-            });
-
-        foreach ($validated as $key => $value) {
-            $query->where($key, $value);
-        }
-
-        $instances = $query->get();
-
-        if (! $instances) {
-            return ResponseHelper::createResponseFromBase(
-                statusCode: 202,
-                statusMessage: 'no records found to (un)lock'
+        return $model->lock() || auth()->user()->is($model->getLockedBy())
+            ? ResponseHelper::createResponseFromBase(
+                statusCode: 201,
+                data: $model,
+                statusMessage: 'record locked'
+            )
+            : ResponseHelper::locked(
+                'record is already locked by ' . $model->getLockedBy()?->name ?? 'unknown'
             );
-        }
+    }
 
-        if ($lock) {
-            foreach ($instances as $instance) {
-                $instance->lock()->create();
-            }
-        } else {
-            Lock::query()
-                ->where('model_type', $modelClass)
-                ->whereIntegerInRaw('model_id', $instances->pluck('id')->toArray())
-                ->where('created_by', $request->user()->id)
-                ->delete();
-        }
+    public function unlock(LockRecordRequest $request): JsonResponse
+    {
+        $model = $request->get('model_type')::query()
+            ->whereKey($request->get('model_id'))
+            ->firstOrFail();
 
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 200,
-            data: $instances->pluck('id'),
-            statusMessage: $lock ? 'records locked' : 'records unlocked'
-        );
+        $unlocked = ! $model->getHasLockAttribute() || $model->unlock();
+
+        return $unlocked
+            ? ResponseHelper::noContent()
+            : ResponseHelper::locked('could not unlock record');
+    }
+
+    public function forceUnlock(LockRecordRequest $request)
+    {
+        $forceUnlock = ForceUnlock::make($request->all())->execute();
+
+        return $forceUnlock
+            ? ResponseHelper::noContent()
+            : ResponseHelper::locked('could not unlock record');
     }
 }

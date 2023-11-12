@@ -3,56 +3,131 @@
 namespace FluxErp\Traits;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Models\Lock;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Fluent;
 
 trait Lockable
 {
     protected static function bootLockable(): void
     {
-        static::addGlobalScope(function ($builder) {
-            $builder->with('lock');
-        });
-
-        static::saving(function ($model) {
-            if ($model->is_locked && Auth::user()->isNot($model?->lock->user)) {
+        $lockCheck = function (Model $model) {
+            if ($model->getHasLockAttribute() && auth()->user()->isNot($model->getLockedBy())) {
                 throw new HttpResponseException(
                     ResponseHelper::createResponseFromBase(
                         statusCode: 423,
-                        data: ['locked' => ['model is locked by another user']]
+                        data: ['locked' => ['model is locked by ' . $model->getLockedBy()->name]]
                     )
                 );
             }
-        });
+        };
 
-        static::deleting(function ($model) {
-            if ($model->is_locked && Auth::user()->isNot($model?->lock->user)) {
-                throw new HttpResponseException(
-                    ResponseHelper::createResponseFromBase(
-                        statusCode: 423,
-                        data: ['locked' => ['model is locked by another user']]
-                    )
-                );
-            }
-        });
+        static::saving($lockCheck);
+
+        static::deleting($lockCheck);
     }
 
     public function initializeLockable(): void
     {
-        $this->setAppends(array_merge($this->appends ?? [], ['is_locked']));
+        $this->setAppends(array_merge($this->appends ?? [], ['has_lock']));
     }
 
-    public function getIsLockedAttribute(): bool
+    public function getLockName(): string
     {
-        $lock = $this->lock;
-
-        return $lock !== null && Auth::user() && Auth::user()->isNot($lock?->user);
+        return 'lockable:' . static::class . ':' . $this->id;
     }
 
-    public function lock(): MorphOne
+    public function getLockOwner(): ?string
     {
-        return $this->morphOne(Lock::class, 'model');
+        return data_get(Session::get('locks'), $this->getLockName());
+    }
+
+    public function getLockedBy(): Authenticatable|Fluent|null
+    {
+        return Cache::get('cache_' . $this->getLockName());
+    }
+
+    public function lock(): bool
+    {
+
+        $lockDuration = config('session.lifetime') * 60;
+        $lock = Cache::lock($this->getLockName(), $lockDuration);
+
+        if ($isLocked = $lock->get()) {
+            $currentLocks = Session::get('locks', []);
+            Session::put(
+                'locks',
+                array_merge($currentLocks, [$this->getLockName() => $lock->owner()])
+            );
+            // Store all locks in the user locks cache
+            Cache::put(
+                'user-locks:' . auth()->user()?->getMorphClass() ?? 'system' . ':' . auth()->user()->id,
+                array_merge(
+                    Cache::get(
+                        'user-locks:' . auth()->user()?->getMorphClass() ?? 'system' . ':' . auth()->user()->id,
+                        []
+                    ),
+                    [$this->getLockName() => $lock->owner()]
+                ),
+            );
+            Cache::put(
+                'cache_' . $this->getLockName(),
+                auth()->user() ?? new Fluent(['name' => 'system']),
+                $lockDuration
+            );
+        }
+
+        return $isLocked;
+    }
+
+    public function unlock(): bool
+    {
+        if ($unlocked = Cache::restoreLock($this->getLockName(), $this->getLockOwner())->release()) {
+            $this->removeLockFromCache();
+        }
+
+        return $unlocked;
+    }
+
+    public function getHasLockAttribute(): bool
+    {
+        return Cache::has('cache_' . $this->getLockName());
+    }
+
+    public function getLockedByAttribute(): ?Authenticatable
+    {
+        return $this->getLockedBy();
+    }
+
+    public function forceUnlock(): void
+    {
+        Cache::lock($this->getLockName())->forceRelease();
+        $this->removeLockFromCache();
+    }
+
+    private function removeLockFromCache(): void
+    {
+        Cache::forget('cache_' . $this->getLockName());
+
+        $currentLocks = Session::get('locks', []);
+        unset($currentLocks[$this->getLockName()]);
+        Session::put(
+            'locks',
+            $currentLocks,
+        );
+
+        $userLocks = Cache::get(
+            'user-locks:' . auth()->user()?->getMorphClass() ?? 'system' . ':' . auth()->user()->id,
+            []
+        );
+        unset($userLocks[$this->getLockName()]);
+
+        Cache::put(
+            'user-locks:' . auth()->user()?->id ?? 'system',
+            $userLocks,
+        );
     }
 }

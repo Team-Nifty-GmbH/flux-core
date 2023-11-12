@@ -58,6 +58,7 @@ use FluxErp\Http\Controllers\ValueListController;
 use FluxErp\Http\Controllers\VatRateController;
 use FluxErp\Http\Controllers\WarehouseController;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
@@ -215,9 +216,12 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::delete('/ledger-accounts/{id}', [LedgerAccountController::class, 'delete']);
 
         //Locking
-        Route::get('/user/locks', [LockController::class, 'showUserLocks']);
-        Route::get('/locks', [LockController::class, 'index']);
-        Route::get('/{modelType}/lock', [LockController::class, 'lock']);
+        Route::group(['middleware' => StartSession::class], function () {
+            Route::get('/user-locks', [LockController::class, 'showUserLocks']);
+            Route::post('/lock', [LockController::class, 'lock']);
+            Route::post('/unlock', [LockController::class, 'unlock']);
+            Route::post('/force-unlock', [LockController::class, 'forceUnlock']);
+        });
 
         //Media
         Route::get('/media/private/{id}', [MediaController::class, 'download']);

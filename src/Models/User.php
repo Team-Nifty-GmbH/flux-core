@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Helpers\LockHelper;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasFrontendAttributes;
@@ -9,6 +10,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\HasWidgets;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\Lockable;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -34,7 +36,7 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
 {
     use BroadcastsEvents, Commentable, Filterable, HasApiTokens, HasCalendars, HasDatatableUserSettings,
         HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles, HasUuid, HasWidgets,
-        InteractsWithMedia, Notifiable, Searchable, SoftDeletes;
+        InteractsWithMedia, Lockable, Notifiable, Searchable, SoftDeletes;
 
     protected $appends = [
         'name',
@@ -96,9 +98,9 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
         return $this->belongsTo(Language::class);
     }
 
-    public function locks(): MorphMany
+    public function locks(): LockHelper
     {
-        return $this->morphMany(Lock::class, 'authenticatable');
+        return new LockHelper($this);
     }
 
     public function parent(): BelongsTo

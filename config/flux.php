@@ -43,7 +43,6 @@ return [
         'event_subscription' => \FluxErp\Models\EventSubscription::class,
         'interface_user' => \FluxErp\Models\InterfaceUser::class,
         'language' => \FluxErp\Models\Language::class,
-        'lock' => \FluxErp\Models\Lock::class,
         'log' => \FluxErp\Models\Log::class,
         'media' => \FluxErp\Models\Media::class,
         'meta' => \FluxErp\Models\Meta::class,
