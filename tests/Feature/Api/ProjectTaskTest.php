@@ -165,8 +165,8 @@ class ProjectTaskTest extends BaseSetup
         $this->assertEquals($projectTask['user_id'], $dbTask->user_id);
         $this->assertEquals($projectTask['name'], $dbTask->name);
         $this->assertFalse($dbTask->is_paid);
-        $this->assertEquals($this->user->id, $dbTask->created_by->id);
-        $this->assertEquals($this->user->id, $dbTask->updated_by->id);
+        $this->assertEquals($this->user->id, $dbTask->created_by?->id);
+        $this->assertEquals($this->user->id, $dbTask->updated_by?->id);
 
         foreach ($this->additionalColumns as $additionalColumn) {
             $this->assertEquals($projectTask[$additionalColumn->name], $task->{$additionalColumn->name});
@@ -219,8 +219,8 @@ class ProjectTaskTest extends BaseSetup
             $dbTask->getTranslation('name', $languageCode)
         );
         $this->assertFalse($dbTask->is_paid);
-        $this->assertEquals($this->user->id, $dbTask->created_by->id);
-        $this->assertEquals($this->user->id, $dbTask->updated_by->id);
+        $this->assertEquals($this->user->id, $dbTask->created_by?->id);
+        $this->assertEquals($this->user->id, $dbTask->updated_by?->id);
 
         foreach ($this->additionalColumns as $additionalColumn) {
             $this->assertEquals($projectTask[$additionalColumn->name], $task->{$additionalColumn->name});
@@ -372,7 +372,7 @@ class ProjectTaskTest extends BaseSetup
         $this->assertEquals($projectTask['address_id'], $dbTask->address_id);
         $this->assertEquals($projectTask['user_id'], $dbTask->user_id);
         $this->assertEquals($projectTask['name'], $dbTask->name);
-        $this->assertEquals($this->user->id, $dbTask->updated_by->id);
+        $this->assertEquals($this->user->id, $dbTask->updated_by?->id);
 
         foreach ($this->additionalColumns as $additionalColumn) {
             $this->assertEquals($projectTask[$additionalColumn->name], $task->{$additionalColumn->name});
@@ -425,7 +425,7 @@ class ProjectTaskTest extends BaseSetup
             $projectTask['locales'][$languageCode]['name'],
             $dbTask->getTranslation('name', $languageCode)
         );
-        $this->assertEquals($this->user->id, $dbTask->updated_by->id);
+        $this->assertEquals($this->user->id, $dbTask->updated_by?->id);
 
         foreach ($this->additionalColumns as $additionalColumn) {
             $this->assertEquals($projectTask[$additionalColumn->name], $dbTask->{$additionalColumn->name});
@@ -782,7 +782,7 @@ class ProjectTaskTest extends BaseSetup
         $this->assertEquals($projectTask['address_id'], $dbTask->address_id);
         $this->assertEquals($projectTask['user_id'], $dbTask->user_id);
         $this->assertEquals($projectTask['name'], $dbTask->name);
-        $this->assertEquals($this->user->id, $dbTask->updated_by->id);
+        $this->assertEquals($this->user->id, $dbTask->updated_by?->id);
 
         foreach ($this->additionalColumns as $additionalColumn) {
             $this->assertEquals($projectTask[$additionalColumn->name], $task->{$additionalColumn->name});
