@@ -34,9 +34,6 @@ class FormBuilderForm extends Model
                 $item->delete();
             });
             $form->sections->each(function ($item) {
-                $item->fields->each(function ($item) {
-                    $item->delete();
-                });
                 $item->delete();
             });
         });
