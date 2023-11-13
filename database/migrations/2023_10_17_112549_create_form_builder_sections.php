@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('form_builder_sections', function (Blueprint $table) {
             $table->id();
             $table->uuid();
-            $table->foreignId('form_id')->constrained('form_builder_forms');
+            $table->foreignId('form_id')->constrained('form_builder_forms')->cascadeOnDelete();
             $table->string('name')->nullable();
             $table->text('description')->nullable();
             $table->unsignedInteger('ordering')->default(0);

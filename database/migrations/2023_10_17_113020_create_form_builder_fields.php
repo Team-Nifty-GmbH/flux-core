@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('form_builder_fields', function (Blueprint $table) {
             $table->id();
             $table->uuid();
-            $table->foreignId('section_id')->constrained('form_builder_sections');
+            $table->foreignId('section_id')->constrained('form_builder_sections')->cascadeOnDelete();
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('type');

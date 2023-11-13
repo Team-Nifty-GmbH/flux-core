@@ -24,15 +24,9 @@ class FormBuilderResponse extends Model
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderResponse $response) {
-            if ($response->isForceDeleting()) {
-                $response->fieldResponses()->withTrashed()->get()->each(function ($item) {
-                    $item->forceDelete();
-                });
-            } else {
-                $response->fieldsResponses->each(function ($item) {
-                    $item->delete();
-                });
-            }
+            $response->fieldsResponses->each(function ($item) {
+                $item->delete();
+            });
         });
     }
 

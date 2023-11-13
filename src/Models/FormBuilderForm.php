@@ -27,33 +27,18 @@ class FormBuilderForm extends Model
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderForm $form) {
-            if ($form->isForceDeleting()) {
-                $form->fieldResponses()->withTrashed()->get()->each(function ($item) {
-                    $item->forceDelete();
-                });
-                $form->responses()->withTrashed()->get()->each(function ($item) {
-                    $item->forceDelete();
-                });
-                $form->sections()->withTrashed()->get()->each(function ($item) {
-                    $item->fields()->withTrashed()->get()->each(function ($item) {
-                        $item->forceDelete();
-                    });
-                    $item->forceDelete();
-                });
-            } else {
-                $form->fieldsResponses->each(function ($item) {
+            $form->fieldsResponses->each(function ($item) {
+                $item->delete();
+            });
+            $form->responses->each(function ($item) {
+                $item->delete();
+            });
+            $form->sections->each(function ($item) {
+                $item->fields->each(function ($item) {
                     $item->delete();
                 });
-                $form->responses->each(function ($item) {
-                    $item->delete();
-                });
-                $form->sections->each(function ($item) {
-                    $item->fields->each(function ($item) {
-                        $item->delete();
-                    });
-                    $item->delete();
-                });
-            }
+                $item->delete();
+            });
         });
     }
 

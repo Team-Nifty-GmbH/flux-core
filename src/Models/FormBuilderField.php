@@ -24,15 +24,9 @@ class FormBuilderField extends Model
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderField $field) {
-            if ($field->isForceDeleting()) {
-                $field->fieldResponses()->withTrashed()->get()->each(function ($item) {
-                    $item->forceDelete();
-                });
-            } else {
-                $field->fieldResponses->each(function ($item) {
-                    $item->delete();
-                });
-            }
+            $field->fieldResponses->each(function ($item) {
+                $item->delete();
+            });
         });
     }
 

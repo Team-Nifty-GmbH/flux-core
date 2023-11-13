@@ -20,21 +20,12 @@ class FormBuilderSection extends Model
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderSection $section) {
-            if ($section->isForceDeleting()) {
-                $section->fields()->withTrashed()->get()->each(function ($item) {
-                    $item->fieldResponses()->withTrashed()->get()->each(function ($item) {
-                        $item->forceDelete();
-                    });
-                    $item->forceDelete();
-                });
-            } else {
-                $section->fields->each(function ($item) {
-                    $item->fieldResponses->each(function ($item) {
-                        $item->delete();
-                    });
+            $section->fields->each(function ($item) {
+                $item->fieldResponses->each(function ($item) {
                     $item->delete();
                 });
-            }
+                $item->delete();
+            });
         });
     }
 
