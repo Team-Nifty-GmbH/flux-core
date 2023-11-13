@@ -4,7 +4,6 @@ namespace FluxErp\Database\Factories;
 
 use FluxErp\Models\FormBuilderField;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Carbon;
 
 class FormBuilderFieldFactory extends Factory
 {

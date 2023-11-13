@@ -11,17 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FormBuilderResponse extends Model
 {
-    use HasPackageFactory;
-    use HasUuid;
-    use SoftDeletes;
+    use HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $with = [
         'form',
-        'user'
     ];
 
     protected $guarded = [
-        'id'
+        'id',
     ];
 
     protected static function booted(): void

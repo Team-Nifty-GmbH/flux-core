@@ -230,7 +230,6 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::get('/form-builder/responses/{id}', [FormBuilderResponseController::class, 'show']);
         Route::get('/form-builder/responses', [FormBuilderResponseController::class, 'index']);
         Route::post('/form-builder/responses', [FormBuilderResponseController::class, 'create']);
-        Route::put('/form-builder/responses', [FormBuilderResponseController::class, 'update']);
         Route::delete('/form-builder/responses/{id}', [FormBuilderResponseController::class, 'delete']);
 
         //FormBuilderFieldsResponse

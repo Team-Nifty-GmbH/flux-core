@@ -3,7 +3,6 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasTranslations;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
@@ -12,12 +11,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FormBuilderForm extends Model
 {
-    use HasPackageFactory;
-    use HasUuid;
-    use SoftDeletes;
+    use HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $guarded = [
-        'id'
+        'id',
     ];
 
     protected $casts = [

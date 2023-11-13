@@ -10,16 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FormBuilderFieldResponse extends Model
 {
-    use HasPackageFactory;
-    use HasUuid;
-    use SoftDeletes;
-
-    protected $with = [
-        'field'
-    ];
+    use HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $guarded = [
-        'id'
+        'id',
     ];
 
     public function field(): BelongsTo
