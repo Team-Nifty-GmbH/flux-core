@@ -21,9 +21,6 @@ class FormBuilderSection extends Model
     {
         static::deleting(function (FormBuilderSection $section) {
             $section->fields->each(function ($item) {
-                $item->fieldResponses->each(function ($item) {
-                    $item->delete();
-                });
                 $item->delete();
             });
         });

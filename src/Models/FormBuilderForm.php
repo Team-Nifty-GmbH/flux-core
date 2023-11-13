@@ -27,13 +27,10 @@ class FormBuilderForm extends Model
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderForm $form) {
-            $form->fieldsResponses->each(function ($item) {
+            $form->sections->each(function ($item) {
                 $item->delete();
             });
             $form->responses->each(function ($item) {
-                $item->delete();
-            });
-            $form->sections->each(function ($item) {
                 $item->delete();
             });
         });
