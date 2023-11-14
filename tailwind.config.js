@@ -9,6 +9,7 @@ module.exports = {
         './resources/**/*.blade.php',
         './resources/**/*.js',
         './resources/**/*.vue',
+        './src/Htmlables/**/*.php',
         './vendor/wireui/wireui/resources/**/*.blade.php',
         './vendor/wireui/wireui/ts/**/*.ts',
         './vendor/wireui/wireui/src/View/**/*.php',
@@ -27,6 +28,7 @@ module.exports = {
     },
     plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
     safelist: [
+        'ring-offset-2',
         'indent-icon',
         'md:col-span-1',
         'md:col-span-2',

@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\DiscountGroup;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class DiscountGroupList extends DataTable
 {
@@ -17,15 +16,11 @@ class DiscountGroupList extends DataTable
 
     public array $availableRelations = ['*'];
 
-    public function mount(): void
-    {
-        $this->availableCols = ModelInfo::forModel($this->model)
-            ->attributes
-            ->pluck('name')
-            ->toArray();
+    public array $sortable = ['*'];
 
-        parent::mount();
-    }
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 
     public function getDiscounts(DiscountGroup $discountGroup): array
     {

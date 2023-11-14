@@ -6,7 +6,6 @@ use FluxErp\Models\Category;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class CategoryList extends DataTable
 {
@@ -18,16 +17,13 @@ class CategoryList extends DataTable
         'is_active',
     ];
 
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel($this->model)->attributes;
+    public array $availableRelations = ['*'];
 
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
+    public array $sortable = ['*'];
 
-        parent::mount();
-    }
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 
     public function getBuilder(Builder $builder): Builder
     {

@@ -12,7 +12,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TicketList extends DataTable
@@ -33,11 +32,17 @@ class TicketList extends DataTable
 
     public bool $showFilterInputs = true;
 
-    public array $availableRelations = ['*'];
-
     protected string $model = Ticket::class;
 
+    public bool $isFilterable = true;
+
+    public array $availableRelations = ['*'];
+
     public array $sortable = ['*'];
+
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 
     public array $ticket;
 
@@ -92,12 +97,6 @@ class TicketList extends DataTable
             ->get()
             ->toArray();
 
-        $attributes = ModelInfo::forModel(Ticket::class)->attributes;
-
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
-
         parent::mount();
     }
 
@@ -109,7 +108,7 @@ class TicketList extends DataTable
                 ->color('primary')
                 ->icon('plus')
                 ->attributes([
-                    'x-on:click' => "\$wire.show()",
+                    'x-on:click' => '$wire.show()',
                 ]),
         ];
     }
@@ -135,11 +134,6 @@ class TicketList extends DataTable
         $returnArray['user'] = $item->authenticatable?->getLabel();
 
         return $returnArray;
-    }
-
-    public function getFilterableColumns(string $name = null): array
-    {
-        return $this->availableCols;
     }
 
     public function show(): void
@@ -172,6 +166,7 @@ class TicketList extends DataTable
 
         try {
             $ticket = CreateTicket::make($this->ticket)
+                ->checkPermission()
                 ->validate()
                 ->execute();
         } catch (\Exception $e) {

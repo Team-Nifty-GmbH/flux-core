@@ -11,7 +11,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class OrderTypeTest extends BaseSetup
 {
@@ -37,8 +36,6 @@ class OrderTypeTest extends BaseSetup
             'update' => Permission::findOrCreate('api.order-types.put'),
             'delete' => Permission::findOrCreate('api.order-types.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_order_type()

@@ -2,21 +2,18 @@
 
 namespace App\Livewire\Widgets;
 
-use FluxErp\Contracts\UserWidget;
+use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
-class {{class}} extends Component implements UserWidget
+class {{class}} extends Component
 {
+    use Widgetable;
+
     public function render(): View|Factory
     {
         return view('livewire.widgets.{{kebab-case class}}');
-    }
-
-    public static function getLabel(): string
-    {
-        return Str::headline(class_basename(self::class));
     }
 }

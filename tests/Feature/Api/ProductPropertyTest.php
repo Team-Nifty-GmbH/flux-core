@@ -12,7 +12,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class ProductPropertyTest extends BaseSetup
 {
@@ -44,8 +43,6 @@ class ProductPropertyTest extends BaseSetup
             'update' => Permission::findOrCreate('api.product-properties.put'),
             'delete' => Permission::findOrCreate('api.product-properties.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_product_property()

@@ -12,6 +12,7 @@ use Hammerstone\FastPaginate\FastPaginateProvider;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
+use NotificationChannels\WebPush\WebPushServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;
 use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
@@ -22,6 +23,7 @@ use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
 use WireUi\Providers\WireUiServiceProvider;
+
 use function Orchestra\Testbench\package_path;
 
 abstract class TestCase extends BaseTestCase
@@ -68,6 +70,7 @@ abstract class TestCase extends BaseTestCase
             FluxServiceProvider::class,
             RouteServiceProvider::class,
             SanctumServiceProvider::class,
+            WebPushServiceProvider::class,
         ];
     }
 
@@ -77,5 +80,11 @@ abstract class TestCase extends BaseTestCase
             $dotenv = Dotenv::createImmutable(base_path('../../../../../../'));
             $dotenv->load();
         }
+    }
+
+    protected function defineEnvironment($app): void
+    {
+        $app['config']->set('database.default', 'mysql');
+        $app['config']->set('database.connections.mysql.collation', 'utf8mb4_unicode_ci');
     }
 }

@@ -28,6 +28,6 @@ class CreateRole extends FluxAction
             $role->givePermissionTo($this->data['permissions']);
         }
 
-        return $role;
+        return $role->fresh()->load('permissions');
     }
 }

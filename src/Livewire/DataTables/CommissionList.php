@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Commission;
-use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class CommissionList extends DataTable
 {
@@ -24,13 +23,16 @@ class CommissionList extends DataTable
         'user.name' => 'Commission Agent',
     ];
 
+    public array $availableRelations = ['*'];
+
+    public array $sortable = ['*'];
+
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
+
     public function mount(): void
     {
-        $this->availableCols = ModelInfo::forModel($this->model)
-            ->attributes
-            ->pluck('name')
-            ->toArray();
-
         parent::mount();
 
         $this->formatters = array_merge(
@@ -46,5 +48,28 @@ class CommissionList extends DataTable
         $item->commission_rate = $item->commission_rate['commission_rate'];
 
         return parent::itemToArray($item);
+    }
+
+    public function getReturnKeys(): array
+    {
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'order_id',
+            ]
+        );
+    }
+
+    public function getRowActions(): array
+    {
+        return [
+            DataTableButton::make(label: __('View Order'))
+                ->color('primary')
+                ->icon('eye')
+                ->href('#')
+                ->attributes([
+                    'x-bind:href' => '\'/orders/\' + record.order_id',
+                ]),
+        ];
     }
 }

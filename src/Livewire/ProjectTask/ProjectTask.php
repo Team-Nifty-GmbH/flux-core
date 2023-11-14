@@ -5,8 +5,10 @@ namespace FluxErp\Livewire\ProjectTask;
 use FluxErp\Actions\ProjectTask\CreateProjectTask;
 use FluxErp\Actions\ProjectTask\DeleteProjectTask;
 use FluxErp\Actions\ProjectTask\UpdateProjectTask;
+use FluxErp\Htmlables\TabButton;
 use FluxErp\Models\Project;
 use FluxErp\Traits\Livewire\HasAdditionalColumns;
+use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -15,13 +17,13 @@ use WireUi\Traits\Actions;
 
 class ProjectTask extends Component
 {
-    use Actions, HasAdditionalColumns;
+    use Actions, HasAdditionalColumns, WithTabs;
 
     public array $projectTask = [];
 
     public ?int $projectId = null;
 
-    public string $tab = 'general';
+    public string $projectTaskTab = 'project-task.general';
 
     public array $availableStates = [];
 
@@ -49,20 +51,29 @@ class ProjectTask extends Component
 
     public function render(): View|Factory|Application
     {
-        $tabs = [
-            'general' => __('General'),
-            'comments' => __('Comments'),
-            'media' => __('Media'),
-        ];
+        return view('flux::livewire.project-task.project-task');
+    }
 
-        return view('flux::livewire.project-task.project-task', ['tabs' => $tabs]);
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('project-task.general')->label(__('General')),
+            TabButton::make('project-task.comments')->label(__('Comments'))
+                ->attributes([
+                    'x-bind:disabled' => '! $wire.projectTask.id',
+                ]),
+            TabButton::make('project-task.media')->label(__('Media'))
+                ->attributes([
+                    'x-bind:disabled' => '! $wire.projectTask.id',
+                ]),
+        ];
     }
 
     public function showProjectTask(?int $projectTask): void
     {
         $this->resetErrorBag();
 
-        $this->reset('tab');
+        $this->reset('projectTaskTab');
 
         $projectTask = \FluxErp\Models\ProjectTask::query()
             ->whereKey($projectTask)

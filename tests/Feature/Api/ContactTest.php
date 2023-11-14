@@ -14,7 +14,6 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class ContactTest extends BaseSetup
 {
@@ -55,8 +54,6 @@ class ContactTest extends BaseSetup
             'update' => Permission::findOrCreate('api.contacts.put'),
             'delete' => Permission::findOrCreate('api.contacts.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_contact()

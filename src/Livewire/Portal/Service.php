@@ -29,7 +29,7 @@ class Service extends Component
 
     protected $listeners = [
         'updateFilesArray',
-        'removeUpload'
+        'removeUpload',
     ];
 
     public function mount($serialNumberId = null): void

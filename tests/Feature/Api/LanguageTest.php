@@ -14,7 +14,6 @@ use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class LanguageTest extends BaseSetup
 {
@@ -37,8 +36,6 @@ class LanguageTest extends BaseSetup
             'update' => Permission::findOrCreate('api.languages.put'),
             'delete' => Permission::findOrCreate('api.languages.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_language()

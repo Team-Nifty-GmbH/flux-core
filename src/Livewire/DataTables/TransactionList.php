@@ -24,15 +24,7 @@ class TransactionList extends DataTable
         'amount' => 'coloredMoney',
     ];
 
-    public array $availableRelations = ['*'];
-
     public bool $showFilterInputs = true;
-
-    public array $aggregatable = [
-        'amount',
-    ];
-
-    public string $search = '';
 
     public function getTableActions(): array
     {
@@ -45,12 +37,10 @@ class TransactionList extends DataTable
                 ]),
         ];
     }
-
     public function showTransaction(Transaction $transaction): array
     {
         return $transaction->toArray();
     }
-
     public function showUnassignedPayments(): void
     {
         $this->userFilters = array_merge(

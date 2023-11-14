@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Order;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class OrderList extends DataTable
@@ -19,9 +18,7 @@ class OrderList extends DataTable
         'order_number',
         'invoice_number',
         'contact.customer_number',
-        'address_invoice.company',
-        'address_invoice.firstname',
-        'address_invoice.lastname',
+        'address_invoice.name',
         'total_net_price',
         'payment_state',
         'commission',
@@ -31,28 +28,16 @@ class OrderList extends DataTable
 
     public array $sortable = ['*'];
 
-    public array $aggregatable = [
-        'total_net_price',
-        'total_gross_price',
-        'total_vats',
-    ];
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 
     public bool $showModal = false;
 
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel(Order::class)->attributes;
-
-        $this->availableCols = array_merge(
-            $attributes->pluck('name')->toArray(),
-            ['currency.iso'],
-        );
-
-        parent::mount();
-    }
-
     public function getTableActions(): array
     {
+        $this->getIncludedRelations();
+
         return [
             DataTableButton::make()
                 ->color('primary')

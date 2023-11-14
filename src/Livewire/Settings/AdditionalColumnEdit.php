@@ -11,10 +11,10 @@ use FluxErp\Rules\UniqueInFieldDependence;
 use FluxErp\Services\AdditionalColumnService;
 use FluxErp\Traits\HasAdditionalColumns;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
+use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use WireUi\Traits\Actions;
 
 class AdditionalColumnEdit extends Component
@@ -75,15 +75,12 @@ class AdditionalColumnEdit extends Component
         $this->additionalColumn['values'] = [];
         $this->additionalColumn['is_customer_editable'] = false;
 
-        $appModels = get_subclasses_of(Model::class, 'App\\');
-        $fluxModels = get_subclasses_of(Model::class, 'FluxErp\\Models\\');
-        $models = array_merge($appModels, $fluxModels);
-
-        foreach ($models as $model) {
-            if (in_array(HasAdditionalColumns::class, class_uses_recursive($model))) {
-                $this->models[] = $model;
-            }
-        }
+        $this->models = ModelInfo::forAllModels()
+            ->merge(ModelInfo::forAllModels(flux_path('src/Models'), flux_path('src'), 'FluxErp'))
+            ->filter(fn ($model) => in_array(HasAdditionalColumns::class, $model->traits->toArray()))
+            ->map(fn ($model) => $model->class)
+            ->sort()
+            ->toArray();
 
         $this->fieldTypes = Helper::getHtmlInputFieldTypes();
 

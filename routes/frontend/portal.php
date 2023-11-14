@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Http\Controllers\LoginLinkController;
 use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
@@ -18,7 +19,9 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
     ->where('variant', '(outline|solid)')
     ->name('portal.icons');
 
-Route::middleware(['auth:address'])->group(function () {
+Route::get('/login-link', LoginLinkController::class)->name('login-link');
+
+Route::middleware(['auth:address', 'permission'])->group(function () {
     Route::get('/', FluxErp\Livewire\Portal\Dashboard::class)
         ->name('portal.dashboard')
         ->registersMenuItem(icon: 'home', order: -9999);

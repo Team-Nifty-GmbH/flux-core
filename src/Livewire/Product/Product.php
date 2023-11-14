@@ -6,10 +6,12 @@ use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Helpers\PriceHelper;
+use FluxErp\Htmlables\TabButton;
 use FluxErp\Models\Currency;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\VatRate;
+use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -19,7 +21,7 @@ use WireUi\Traits\Actions;
 
 class Product extends Component
 {
-    use Actions;
+    use Actions, WithTabs;
 
     public array $product;
 
@@ -33,10 +35,10 @@ class Product extends Component
 
     public array $vatRates = [];
 
-    public string $tab = 'general';
+    public string $tab = 'product.general';
 
     protected $queryString = [
-        'tab' => ['except' => 'general'],
+        'tab' => ['except' => 'product.general'],
     ];
 
     public function mount(int $id): void
@@ -84,14 +86,6 @@ class Product extends Component
 
     public function render(): View|Factory|Application
     {
-        $tabs = [
-            'general' => __('General'),
-            'prices' => __('Prices'),
-            'stock' => __('Stock'),
-            'media' => __('Media'),
-            'cross-selling' => __('Cross Selling'),
-        ];
-
         if ($this->product['children_count']) {
             // add children tab on third position
             $tabs = array_merge(
@@ -101,7 +95,18 @@ class Product extends Component
             );
         }
 
-        return view('flux::livewire.product.product', ['tabs' => $tabs]);
+        return view('flux::livewire.product.product');
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('product.general')->label(__('General')),
+            TabButton::make('product.prices')->label(__('Prices')),
+            TabButton::make('product.stock')->label(__('Stock')),
+            TabButton::make('product.media')->label(__('Media')),
+            TabButton::make('product.cross-selling')->label(__('Cross Selling')),
+        ];
     }
 
     public function save(): bool

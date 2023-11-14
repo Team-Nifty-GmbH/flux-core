@@ -104,6 +104,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
         return $this->hasMany(Order::class);
     }
 
+    public function paymentType(): BelongsTo
+    {
+        return $this->belongsTo(PaymentType::class);
+    }
+
     public function priceList(): BelongsTo
     {
         return $this->belongsTo(PriceList::class);

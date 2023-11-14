@@ -19,6 +19,10 @@ class OrderList extends DataTable
 
     public array $sortable = ['*'];
 
+    public array $availableRelations = [];
+
+    public array $aggregatable = [];
+
     public bool $showFilterInputs = true;
 
     public function mount(): void

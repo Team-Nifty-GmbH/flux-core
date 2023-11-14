@@ -44,14 +44,10 @@
     x-on:new-project-task.window="showModal();"
 >
     <x-tabs
-        wire:model.live="tab"
-        :tabs="$tabs"
+        wire:model.live="projectTaskTab"
+        :$tabs
         x-bind:disabled="! projectTask.id"
-    >
-        <x-errors />
-        <x-spinner />
-        <x-dynamic-component :component="'project-task.' . $tab" :project-task="$projectTask" />
-    </x-tabs>
+    />
     <x-slot:footer>
         <div class="flex justify-between gap-x-4"
              x-data="{projectTask: {id: null}}"

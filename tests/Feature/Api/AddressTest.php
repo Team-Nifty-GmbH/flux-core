@@ -16,7 +16,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class AddressTest extends BaseSetup
 {
@@ -88,8 +87,6 @@ class AddressTest extends BaseSetup
             'update' => Permission::findOrCreate('api.addresses.put'),
             'delete' => Permission::findOrCreate('api.addresses.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_address()

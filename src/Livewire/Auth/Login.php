@@ -2,11 +2,13 @@
 
 namespace FluxErp\Livewire\Auth;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -19,7 +21,6 @@ class Login extends Component
     #[Rule(['required', 'email'])]
     public string $email;
 
-    #[Rule(['required'])]
     public string $password = '';
 
     #[Locked]
@@ -43,12 +44,20 @@ class Login extends Component
 
     public function login(): bool
     {
+        $target = Session::get('url.intended', route($this->dashboardRoute));
         $this->validate();
 
-        $login = $this->tryLogin();
+        if ($this->password) {
+            $login = $this->tryLogin();
+        } else {
+            $this->sendMagicLink();
+            $this->notification()->success(__('Login link sent, check your inbox'));
+
+            return true;
+        }
 
         if ($login) {
-            $this->redirect(route($this->dashboardRoute));
+            $this->redirect($target);
 
             return true;
         } else {
@@ -61,6 +70,14 @@ class Login extends Component
         return false;
     }
 
+    public function sendMagicLink(): void
+    {
+        $user = $this->retrieveUserByCredentials();
+        if ($user && method_exists($user, 'sendLoginLink')) {
+            $user->sendLoginLink();
+        }
+    }
+
     public function resetPassword(): void
     {
         $this->validateOnly('email');
@@ -70,8 +87,15 @@ class Login extends Component
         $this->notification()->success(__('Password reset link sent'));
     }
 
-    public function tryLogin(): bool
+    protected function tryLogin(): bool
     {
         return Auth::guard($this->guard)->attempt(['email' => $this->email, 'password' => $this->password]);
+    }
+
+    protected function retrieveUserByCredentials(): ?Authenticatable
+    {
+        return Auth::guard('web')
+            ->getProvider()
+            ->retrieveByCredentials(['email' => $this->email]);
     }
 }

@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Currency;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class CurrencyList extends DataTable
 {
@@ -16,14 +15,11 @@ class CurrencyList extends DataTable
         'symbol',
     ];
 
-    public function mount(): void
-    {
-        $attributes = ModelInfo::forModel($this->model)->attributes;
+    public array $availableRelations = ['*'];
 
-        $this->availableCols = $attributes
-            ->pluck('name')
-            ->toArray();
+    public array $sortable = ['*'];
 
-        parent::mount();
-    }
+    public array $aggregatable = ['*'];
+
+    public array $availableCols = ['*'];
 }

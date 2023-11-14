@@ -1,129 +1,5 @@
-<div id="contact" class="min-h-full" wire:loading.class="opacity-60">
+<div id="contact" class="min-h-full">
     <main class="py-10">
-        <x-modal.card z-index="z-30" title="{{ __('New contact') }}" blur wire:model="newContactModal">
-            <x-errors />
-            <div x-data="{newContact: $wire.entangle('newContact')}">
-                <x-select wire:model="newContact.client_id" :options="\FluxErp\Models\Client::all()"
-                          label="{{ __('Client') }}" option-label="name" option-value="id"/>
-                <div class="space-y-6 sm:space-y-5">
-                    <div
-                        class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200 sm:pt-5">
-                        <label for="{{ md5('newContact.address.company') }}"
-                               class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                            {{ __('Company') }}
-                        </label>
-                        <div class="col-span-2">
-                            <x-input
-                                     wire:model="newContact.address.company"/>
-                        </div>
-                    </div>
-                    <div
-                        class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="{{ md5('address.salutation') }}"
-                               class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                            {{ __('Salutation') }}
-                        </label>
-                        <div class="col-span-2">
-                            <x-input
-                                     wire:model="newContact.address.salutation"/>
-                        </div>
-                    </div>
-                    <div
-                        class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="{{ md5('address.title') }}"
-                               class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                            {{ __('Title') }}
-                        </label>
-                        <div class="col-span-2">
-                            <x-input
-                                     wire:model="newContact.address.title"/>
-                        </div>
-                    </div>
-                    <div
-                        class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="{{ md5('address.firstname') }}"
-                               class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                            {{ __('Firstname') }}
-                        </label>
-                        <div class="col-span-2">
-                            <x-input
-                                     wire:model="newContact.address.firstname"/>
-                        </div>
-                    </div>
-                    <div
-                        class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="{{ md5('address.lastname') }}"
-                               class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                            {{ __('Lastname') }}
-                        </label>
-                        <div class="col-span-2">
-                            <x-input
-                                     wire:model="newContact.address.lastname"/>
-                        </div>
-                    </div>
-                    <div
-                        class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="{{ md5('address.street') }}"
-                               class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                            {{ __('Street') }}
-                        </label>
-                        <div class="col-span-2">
-                            <x-input
-                                     wire:model="newContact.address.street"/>
-                        </div>
-                    </div>
-                    <div
-                        class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="{{ md5('address.country_id') }}"
-                               class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                            {{ __('Country') }}
-                        </label>
-                        <div class="col-span-2">
-                            <x-select
-                                      wire:model="newContact.address.country_id" searchable
-                                      :options="\FluxErp\Models\Country::all(['id', 'name'])" option-label="name"
-                                      option-value="id"></x-select>
-                        </div>
-                    </div>
-                    <div
-                        class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="postal-code"
-                               class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                            {{ __('Zip / City') }}
-                        </label>
-                        <div class="mt-1 w-full items-center space-x-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2">
-                            <div class="flex-none">
-                                <x-input
-                                         wire:model="newContact.address.zip"/>
-                            </div>
-                            <div class="grow">
-                                <x-input
-                                         wire:model="newContact.address.city"/>
-                            </div>
-                        </div>
-                    </div>
-                    <div
-                        class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="{{ md5('address.language_id') }}"
-                               class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                            {{ __('Language') }}
-                        </label>
-                        <div class="col-span-2">
-                            <x-select
-                                      wire:model="newContact.address.language_id" searchable
-                                      :options="\FluxErp\Models\Language::all()" option-label="name" option-value="id"></x-select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <x-slot name="footer">
-                <div class="flex justify-end gap-x-4">
-                    <x-button flat label="{{ __('Cancel') }}" x-on:click="close"/>
-                    <x-button primary label="{{ __('Save') }}" wire:click="save"/>
-                </div>
-            </x-slot>
-        </x-modal.card>
-        <!-- Page header -->
         <div
             class="mx-auto px-4 sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:px-8">
             <div class="flex items-center space-x-5">
@@ -156,23 +32,12 @@
                         }, $wire.__instance.id)
                     "/>
                 @endcan
-                @can('action.contact.create')
-                    <x-button primary label="{{ __('New') }}" x-on:click="$openModal('newContactModal')"/>
-                @endcan
             </div>
         </div>
         <x-tabs
             wire:model.live="tab"
-            :tabs="$tabs"
+            :$tabs
             wire:ignore
-        >
-            <div class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
-                <section class="w-full lg:pt-0">
-                    <x-errors />
-                    <x-spinner />
-                    <x-dynamic-component :component="'contact.' . $tab" />
-                </section>
-            </div>
-        </x-tabs>
+        />
     </main>
 </div>

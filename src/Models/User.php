@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasFrontendAttributes;
@@ -9,7 +10,6 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\HasWidgets;
 use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\Lockable;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -19,9 +19,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use Spatie\Permission\Traits\HasRoles;
@@ -33,12 +38,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 class User extends Authenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasApiTokens, HasCalendars, HasDatatableUserSettings,
-        HasFrontendAttributes, HasPackageFactory, HasRoles, HasUuid, HasWidgets, InteractsWithMedia, Lockable,
-        Notifiable, Searchable, SoftDeletes;
-
-    protected $appends = [
-        'name',
-    ];
+        HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles, HasUuid, HasWidgets,
+        InteractsWithMedia, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'password',
@@ -55,13 +56,13 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
 
     public static string $iconName = 'user';
 
-    protected function name(): Attribute
+    protected static function booted(): void
     {
-        return Attribute::get(
-            fn ($value, $attributes) => trim(
-                ($attributes['firstname'] ?? '') . ' ' . ($attributes['lastname'] ?? '')
-            ) ?: null
-        );
+        static::saving(function (User $user) {
+            if ($user->isDirty('lastname') || $user->isDirty('firstname')) {
+                $user->name = trim($user->firstname . ' ' . $user->lastname);
+            }
+        });
     }
 
     protected function password(): Attribute
@@ -161,5 +162,21 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
     public function getAvatarUrl(): ?string
     {
         return $this->getFirstMediaUrl('avatar') ?: self::icon()->getUrl();
+    }
+
+    public function sendLoginLink(): void
+    {
+        $plaintext = Str::uuid()->toString();
+        $expires = now()->addMinutes(15);
+        Cache::put('login_token_' . $plaintext,
+            [
+                'user' => $this,
+                'guard' => 'web',
+                'intended_url' => Session::get('url.intended', route('dashboard')),
+            ],
+            $expires
+        );
+
+        Mail::to($this->email)->queue(new MagicLoginLink($plaintext, $expires));
     }
 }

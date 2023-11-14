@@ -2,7 +2,6 @@
 
 namespace FluxErp\Database\Factories;
 
-use FluxErp\Models\Comment;
 use FluxErp\Models\CommissionRate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

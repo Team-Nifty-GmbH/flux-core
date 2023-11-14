@@ -48,7 +48,7 @@ return new class extends Migration
                 'expense_ledger_account_id',
                 'vat_rate_id',
                 'vat_id',
-                'vendor_customer_number'
+                'vendor_customer_number',
             ]);
         });
     }

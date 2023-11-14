@@ -10,7 +10,6 @@ use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class CommentTest extends BaseSetup
 {
@@ -33,12 +32,10 @@ class CommentTest extends BaseSetup
         $this->permissions = [
             'show' => Permission::findOrCreate('api.{modeltype}.comments.{id}.get'),
             'create' => Permission::findOrCreate('api.comments.post'),
-            'update' => Permission::findOrCreate('api.comments.update'),
+            'update' => Permission::findOrCreate('api.comments.put'),
             'delete' => Permission::findOrCreate('api.comments.{id}.delete'),
         ];
         Role::findOrCreate('Super Admin');
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_user_comments()
@@ -75,7 +72,7 @@ class CommentTest extends BaseSetup
 
     public function test_get_comments_model_instance_not_found()
     {
-        $this->user->givePermissionTo($this->permissions['show']);
+        $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->get('/api/user/comments/' . ++$this->user->id);

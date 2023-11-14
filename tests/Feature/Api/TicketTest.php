@@ -13,7 +13,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class TicketTest extends BaseSetup
 {
@@ -60,8 +59,6 @@ class TicketTest extends BaseSetup
             'delete' => Permission::findOrCreate('api.tickets.{id}.delete'),
             'toggle' => Permission::findOrCreate('api.tickets.toggle.post'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_ticket()

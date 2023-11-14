@@ -5,12 +5,14 @@ namespace FluxErp\Livewire\Order;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
+use FluxErp\Htmlables\TabButton;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Services\PrintService;
+use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -23,7 +25,7 @@ use ZipArchive;
 
 class Order extends Component
 {
-    use Actions;
+    use Actions, WithTabs;
 
     public array $order;
 
@@ -98,6 +100,18 @@ class Order extends Component
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.order.' . $this->order['order_type']['order_type_enum'] ?: 'order');
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('order.order-positions')->label(__('Order positions')),
+            TabButton::make('order.attachments')->label(__('Attachments')),
+            TabButton::make('order.accounting')->label(__('Accounting')),
+            TabButton::make('order.comments')->label(__('Comments')),
+            TabButton::make('order.related')->label(__('Related processes')),
+            TabButton::make('order.activities')->label(__('Activities')),
+        ];
     }
 
     public function updatedOrderAddressInvoiceId(): void
@@ -242,13 +256,19 @@ class Order extends Component
             $states = \FluxErp\Models\Order::getStatesFor($fieldName)
                 ->map(function ($item) {
                     return [
-                        'label' => __(ucfirst(str_replace('_', ' ', $item))),
+                        'label' => __($item),
                         'name' => $item,
                     ];
                 });
 
             $this->availableStates[$fieldName] = $states
-                ->whereIn('name', $model->{$fieldName}->transitionableStates())
+                ->whereIn(
+                    'name',
+                    array_merge(
+                        [$model->{$fieldName}],
+                        $model->{$fieldName}->transitionableStates()
+                    )
+                )
                 ->toArray();
         }
     }

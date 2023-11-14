@@ -19,7 +19,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class OrderTest extends BaseSetup
 {
@@ -97,8 +96,6 @@ class OrderTest extends BaseSetup
             'update' => Permission::findOrCreate('api.orders.put'),
             'delete' => Permission::findOrCreate('api.orders.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_order()

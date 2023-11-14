@@ -10,7 +10,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class ProductOptionTest extends BaseSetup
 {
@@ -39,8 +38,6 @@ class ProductOptionTest extends BaseSetup
             'update' => Permission::findOrCreate('api.product-options.put'),
             'delete' => Permission::findOrCreate('api.product-options.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_product_option()

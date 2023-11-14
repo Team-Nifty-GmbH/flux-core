@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class CountryTest extends BaseSetup
 {
@@ -47,8 +46,6 @@ class CountryTest extends BaseSetup
             'update' => Permission::findOrCreate('api.countries.put'),
             'delete' => Permission::findOrCreate('api.countries.{id}.delete'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_country()

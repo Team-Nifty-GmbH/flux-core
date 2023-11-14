@@ -26,6 +26,7 @@ class FluxSeeder extends Seeder
         $this->call(CurrencyTableSeeder::class);
         $this->call(CountryTableSeeder::class);
         $this->call(CountryRegionTableSeeder::class);
+        $this->call(WorkTimeTypeTableSeeder::class);
 
         $this->call(ClientTableSeeder::class);
         $this->call(PaymentTypeTableSeeder::class);
@@ -68,5 +69,9 @@ class FluxSeeder extends Seeder
 
         $this->call(TicketTypeTableSeeder::class);
         $this->call(TicketTableSeeder::class);
+
+        $this->call(FormBuilderFormTableSeeder::class);
+        $this->call(FormBuilderSectionTableSeeder::class);
+        $this->call(FormBuilderFieldTableSeeder::class);
     }
 }

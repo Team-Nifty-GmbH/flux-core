@@ -94,8 +94,6 @@ class FolderTree extends Component
             return false;
         }
 
-        dd($this->files);
-
         return ($item['file_name'] ?? false) ? $this->saveFile($item) : $this->saveFolder($item);
     }
 

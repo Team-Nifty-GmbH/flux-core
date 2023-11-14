@@ -9,7 +9,6 @@ use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
 
 class ClientTest extends BaseSetup
 {
@@ -29,8 +28,6 @@ class ClientTest extends BaseSetup
             'show' => Permission::findOrCreate('api.clients.{id}.get'),
             'index' => Permission::findOrCreate('api.clients.get'),
         ];
-
-        $this->app->make(PermissionRegistrar::class)->registerPermissions();
     }
 
     public function test_get_client()
