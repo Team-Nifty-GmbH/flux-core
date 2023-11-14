@@ -10,7 +10,7 @@ trait HasTranslations
 {
     use BaseHasTranslations;
 
-    public bool $hasAdditionalColumns;
+    public bool $hasAdditionalColumns = false;
 
     public function initializeHasTranslations(): void
     {
