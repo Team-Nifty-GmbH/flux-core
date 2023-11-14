@@ -13,7 +13,6 @@ class Validator extends BaseValidator
 
     public function addModel(Model $model)
     {
-        dd($model);
         $this->model = $model;
         $traits = class_uses_recursive($model);
 
@@ -25,8 +24,12 @@ class Validator extends BaseValidator
         }
 
         if (in_array(HasTranslations::class, $traits)) {
-            if ($rules = $model->hasTranslationsValidationRules($this->getRules(), $this->getData())) {
-                $this->addRules($rules);
+            try {
+                if ($rules = $model->hasTranslationsValidationRules($this->getRules(), $this->getData())) {
+                    $this->addRules($rules);
+                }
+            } catch (\Throwable $e) {
+                dd($e, $model);
             }
         }
     }
