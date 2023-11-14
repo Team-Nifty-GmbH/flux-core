@@ -40,12 +40,6 @@ jobs:
         ports:
           - 7700/tcp
         options: --health-cmd="wget --no-verbose --spider http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
-      gotenberg:
-        image: 'gotenberg/gotenberg:7'
-        ports:
-          - 3000/tcp
-        options: --health-cmd="curl -f http://localhost:3000/health" --health-interval=10s --health-timeout=5s --health-retries=3
-    strategy:
       fail-fast: false
       matrix:
         php-versions: [ '8.2' ]

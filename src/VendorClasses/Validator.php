@@ -13,6 +13,7 @@ class Validator extends BaseValidator
 
     public function addModel(Model $model)
     {
+        dd($model);
         $this->model = $model;
         $traits = class_uses_recursive($model);
 
