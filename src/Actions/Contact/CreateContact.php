@@ -23,7 +23,6 @@ class CreateContact extends FluxAction
 
     public function performAction(): Contact
     {
-        $this->data['customer_number'] = $this->data['customer_number'] ?? uniqid();
         $discountGroups = Arr::pull($this->data, 'discount_groups', []);
 
         $contact = new Contact($this->data);
@@ -31,6 +30,13 @@ class CreateContact extends FluxAction
 
         if ($discountGroups) {
             $contact->discountGroups()->attach($discountGroups);
+        }
+
+        if (! ($this->data['customer_number'] ?? false)) {
+            $contact->getSerialNumber(
+                'customer_number',
+                $contact->client_id,
+            );
         }
 
         return $contact->withoutRelations()->fresh();

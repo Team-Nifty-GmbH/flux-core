@@ -68,10 +68,10 @@ class FluxServiceProvider extends ServiceProvider
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
             $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
             $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
-            $this->registerBladeComponents();
-            $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         }
 
+        $this->registerBladeComponents();
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerLivewireComponents();
         $this->registerMiddleware();
         $this->registerConfig();

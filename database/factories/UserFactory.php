@@ -33,10 +33,14 @@ class UserFactory extends Factory
             $userCode .= '_' . Str::uuid();
         }
 
+        $firstname = $this->faker->firstName();
+        $lastname = $this->faker->lastName();
+
         return [
             'email' => $this->faker->safeEmail(),
-            'firstname' => $this->faker->firstName(),
-            'lastname' => $this->faker->lastName(),
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'name' => $firstname . ' ' . $lastname,
             'password' => 'password',
             'user_code' => $userCode,
             'is_active' => $this->faker->boolean(75),
