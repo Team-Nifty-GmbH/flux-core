@@ -38,6 +38,10 @@ class ProjectTask extends Model implements HasMedia
         'state' => ProjectTaskState::class,
     ];
 
+    public array $translatable = [
+        'name',
+    ];
+
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
