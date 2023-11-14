@@ -24,12 +24,8 @@ class Validator extends BaseValidator
         }
 
         if (in_array(HasTranslations::class, $traits)) {
-            try {
-                if ($rules = $model->hasTranslationsValidationRules($this->getRules(), $this->getData())) {
-                    $this->addRules($rules);
-                }
-            } catch (\Throwable $e) {
-                dd($e, $model);
+            if ($rules = $model->hasTranslationsValidationRules($this->getRules(), $this->getData())) {
+                $this->addRules($rules);
             }
         }
     }
