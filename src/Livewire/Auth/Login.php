@@ -94,6 +94,8 @@ class Login extends Component
 
     protected function retrieveUserByCredentials(): ?Authenticatable
     {
-        return Auth::guard('web')->getProvider()->retrieveByCredentials(['email' => $this->email]);
+        return Auth::guard('web')
+            ->getProvider()
+            ->retrieveByCredentials(['email' => $this->email]);
     }
 }
