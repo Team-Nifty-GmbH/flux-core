@@ -35,7 +35,7 @@
     "src": "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-94175a42.css",
+    "file": "assets/app-7a87e217.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },

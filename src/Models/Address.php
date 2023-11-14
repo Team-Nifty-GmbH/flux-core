@@ -7,6 +7,7 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasCalendarEvents;
 use FluxErp\Traits\HasFrontendAttributes;
+use FluxErp\Traits\HasMailMessages;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -33,8 +34,8 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendarEvents, HasCalendars,
-        HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid, Lockable,
-        Notifiable, Searchable, SoftDeletes;
+        HasFrontendAttributes, HasMailMessages, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid,
+        Lockable, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'login_password',

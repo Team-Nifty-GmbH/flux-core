@@ -11,6 +11,7 @@ use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\DataTables\ProjectTasksList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
 use FluxErp\Livewire\DataTables\TicketList;
+use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Product\Product;
@@ -26,6 +27,7 @@ use FluxErp\Livewire\Settings\CustomerPortal;
 use FluxErp\Livewire\Settings\DiscountGroups;
 use FluxErp\Livewire\Settings\Languages;
 use FluxErp\Livewire\Settings\Logs;
+use FluxErp\Livewire\Settings\MailAccounts;
 use FluxErp\Livewire\Settings\Notifications;
 use FluxErp\Livewire\Settings\OrderTypes;
 use FluxErp\Livewire\Settings\Permissions;
@@ -56,6 +58,7 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
 
 Route::middleware(['auth:web', 'permission'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);
+    Route::get('/mail', Mail::class)->name('mail')->registersMenuItem(icon: 'envelope');
     Route::get('/calendars', Calendar::class)->name('calendars')->registersMenuItem(icon: 'calendar');
     Route::get('/contacts', ContactList::class)->name('contacts')->registersMenuItem(icon: 'identification');
     Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
@@ -130,6 +133,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
             Route::get('/ticket-types', TicketTypes::class)->name('ticket-types')->registersMenuItem();
             Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
             Route::get('/users', Users::class)->name('users')->registersMenuItem();
+            Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts')->registersMenuItem();
         });
 });
 

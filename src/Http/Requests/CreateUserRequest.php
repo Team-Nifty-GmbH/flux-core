@@ -23,6 +23,8 @@ class CreateUserRequest extends BaseFormRequest
             'password' => ['required', Password::min(8)->mixedCase()->numbers()],
             'user_code' => 'required|string|unique:users,user_code',
             'is_active' => 'sometimes|boolean',
+            'mail_accounts' => 'sometimes|required|array',
+            'mail_accounts.*' => 'integer|exists:mail_accounts,id',
         ];
     }
 }

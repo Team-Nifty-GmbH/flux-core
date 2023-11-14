@@ -23,6 +23,7 @@ use FluxErp\Http\Controllers\EventSubscriptionController;
 use FluxErp\Http\Controllers\LanguageController;
 use FluxErp\Http\Controllers\LedgerAccountController;
 use FluxErp\Http\Controllers\LockController;
+use FluxErp\Http\Controllers\MailAccountController;
 use FluxErp\Http\Controllers\MediaController;
 use FluxErp\Http\Controllers\NotificationSettingsController;
 use FluxErp\Http\Controllers\OrderController;
@@ -218,6 +219,13 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::get('/user/locks', [LockController::class, 'showUserLocks']);
         Route::get('/locks', [LockController::class, 'index']);
         Route::get('/{modelType}/lock', [LockController::class, 'lock']);
+
+        //MailAccounts
+        Route::get('/mail-accounts/{id}', [MailAccountController::class, 'show']);
+        Route::get('/mail-accounts', [MailAccountController::class, 'index']);
+        Route::post('/mail-accounts', [MailAccountController::class, 'create']);
+        Route::put('/mail-accounts', [MailAccountController::class, 'update']);
+        Route::delete('/mail-accounts/{id}', [MailAccountController::class, 'delete']);
 
         //Media
         Route::get('/media/private/{id}', [MediaController::class, 'download']);

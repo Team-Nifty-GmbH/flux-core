@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateUserRequest;
 use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 class UpdateUser extends FluxAction
 {
@@ -31,12 +32,16 @@ class UpdateUser extends FluxAction
 
     public function performAction(): Model
     {
+        $mailAccounts = Arr::pull($this->data, 'mail_accounts', []);
+
         $user = User::query()
             ->whereKey($this->data['id'])
             ->first();
 
         $user->fill($this->data);
         $user->save();
+
+        $user->mailAccounts()->sync($mailAccounts);
 
         // Delete all tokens of the user if the user is set to is_active = false
         if (! ($this->data['is_active'] ?? true)) {

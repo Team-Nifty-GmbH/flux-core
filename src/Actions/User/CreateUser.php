@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateUserRequest;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
+use Illuminate\Support\Arr;
 
 class CreateUser extends FluxAction
 {
@@ -22,6 +23,8 @@ class CreateUser extends FluxAction
 
     public function performAction(): User
     {
+        $mailAccounts = Arr::pull($this->data, 'mail_accounts', []);
+
         $this->data['is_active'] = $this->data['is_active'] ?? true;
         $this->data['language_id'] = array_key_exists('language_id', $this->data) ?
             $this->data['language_id'] :
@@ -29,6 +32,8 @@ class CreateUser extends FluxAction
 
         $user = new User($this->data);
         $user->save();
+
+        $user->mailAccounts()->sync($mailAccounts);
 
         return $user->refresh();
     }

@@ -14,6 +14,7 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasFrontendAttributes;
+use FluxErp\Traits\HasMailMessages;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasRelatedModel;
 use FluxErp\Traits\HasSerialNumberRange;
@@ -36,8 +37,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends Model implements HasMedia, InteractsWithDataTables
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes, HasPackageFactory,
-        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
+    use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes, HasMailMessages,
+        HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
         SoftDeletes, Trackable;
 
     protected $with = [

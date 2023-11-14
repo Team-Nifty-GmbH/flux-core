@@ -9,6 +9,7 @@ use FluxErp\Actions\User\DeleteUser;
 use FluxErp\Actions\User\UpdateUser;
 use FluxErp\Http\Requests\CreateUserRequest;
 use FluxErp\Models\Language;
+use FluxErp\Models\MailAccount;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
@@ -35,6 +36,8 @@ class UserEdit extends Component
 
     public array $roles = [];
 
+    public array $mailAccounts = [];
+
     public array $users = [];
 
     public bool $isSuperAdmin = false;
@@ -55,6 +58,10 @@ class UserEdit extends Component
 
         $this->roles = Role::query()
             ->get(['id', 'name', 'guard_name'])
+            ->toArray();
+
+        $this->mailAccounts = MailAccount::query()
+            ->get(['id', 'email'])
             ->toArray();
 
         $this->users = User::query()
@@ -89,7 +96,7 @@ class UserEdit extends Component
     {
         $user = User::query()
             ->whereKey($id)
-            ->with(['roles'])
+            ->with(['roles', 'mailAccounts:id'])
             ->firstOrNew();
 
         $this->resetErrorBag();
@@ -102,6 +109,7 @@ class UserEdit extends Component
             ->pluck(['id'])
             ->toArray();
         $this->user['roles'] = $user->roles()->get(['id'])->pluck(['id'])->toArray();
+        $this->user['mail_accounts'] = $user->mailAccounts->pluck('id')->toArray();
 
         $this->updatedUserRoles();
         $this->skipRender();
