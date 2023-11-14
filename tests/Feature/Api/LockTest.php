@@ -100,7 +100,6 @@ class LockTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
         $user->firstname = Str::random();
 
-
         $response = $this->actingAs($this->user)
             ->put('/api/users', $user->toArray());
 
@@ -113,7 +112,7 @@ class LockTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['lock']);
 
         Sanctum::actingAs($this->user, ['user']);
-        Auth::login($this->user);
+        Auth::guard('web')->login($this->user);
         $this->users[0]->lock();
 
         $this->users[0]->firstname = Str::random();
