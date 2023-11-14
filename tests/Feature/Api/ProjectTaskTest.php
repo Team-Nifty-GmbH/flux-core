@@ -165,6 +165,9 @@ class ProjectTaskTest extends BaseSetup
         $this->assertEquals($projectTask['user_id'], $dbTask->user_id);
         $this->assertEquals($projectTask['name'], $dbTask->name);
         $this->assertFalse($dbTask->is_paid);
+        $dbTask->created_by->id;
+        $this->user->id;
+        $dbTask->updated_by->id;
         $this->assertEquals($this->user->id, $dbTask->created_by->id);
         $this->assertEquals($this->user->id, $dbTask->updated_by->id);
 
