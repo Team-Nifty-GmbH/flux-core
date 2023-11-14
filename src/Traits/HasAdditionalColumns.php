@@ -121,7 +121,6 @@ trait HasAdditionalColumns
      */
     public function initializeHasAdditionalColumns(): void
     {
-        $this->initializeHasTranslations();
         $this->mergeCasts(
             Cache::store('array')->rememberForever(
                 'meta_casts_' . get_class($this),
