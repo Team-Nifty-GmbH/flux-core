@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer install --no-interaction --ignore-platform-reqs
-          npm ci
+          npm i
 
       - name: Build assets using Vite
         run: npm run build
