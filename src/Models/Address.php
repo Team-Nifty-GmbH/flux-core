@@ -60,18 +60,16 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public static string $iconName = 'user';
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
-        self::saving(function (Address $address) {
+        static::saving(function (Address $address) {
             if ($address->isDirty('lastname') || $address->isDirty('firstname') || $address->isDirty('company')) {
                 $name = [
                     $address->company,
                     trim($address->firstname . ' ' . $address->lastname),
                 ];
 
-                $address->name = implode(', ', array_filter($name));
+                $address->name = implode(', ', array_filter($name)) ?: null;
             }
         });
     }

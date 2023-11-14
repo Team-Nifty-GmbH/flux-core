@@ -35,7 +35,7 @@ class UserFactory extends Factory
 
         $firstname = $this->faker->firstName();
         $lastname = $this->faker->lastName();
-        
+
         return [
             'email' => $this->faker->safeEmail(),
             'firstname' => $firstname,

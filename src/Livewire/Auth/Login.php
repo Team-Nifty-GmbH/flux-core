@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Auth;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -91,7 +92,7 @@ class Login extends Component
         return Auth::guard($this->guard)->attempt(['email' => $this->email, 'password' => $this->password]);
     }
 
-    protected function retrieveUserByCredentials()
+    protected function retrieveUserByCredentials(): ?Authenticatable
     {
         return Auth::guard('web')->getProvider()->retrieveByCredentials(['email' => $this->email]);
     }

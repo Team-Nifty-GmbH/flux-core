@@ -30,7 +30,7 @@
                             <x-button spinner primary class="w-full" :label="__('Login')" type="submit" dusk="login-button"></x-button>
                         </div>
                         <div x-transition x-cloak x-show="$wire.email && ! $wire.password">
-                            <x-button spinner primary class="w-full" :label="__('Send Login Link')" type="submit" dusk="login-button"></x-button>
+                            <x-button spinner primary class="w-full" :label="__('Send Login Link')" type="submit" dusk="magic-login-button"></x-button>
                         </div>
                     </form>
                 @show

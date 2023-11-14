@@ -2,11 +2,14 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\Contact\CreateContact;
 use FluxErp\Livewire\Forms\Contact;
 use FluxErp\Models\Address;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -54,7 +57,7 @@ class ContactList extends DataTable
                 ->attributes([
                     'x-on:click' => '$wire.show()',
                 ])
-                ->when(fn () => auth()->user()->can('create', $this->model)),
+                ->when(fn () => CreateContact::canPerformAction(false)),
         ];
     }
 
@@ -86,7 +89,7 @@ class ContactList extends DataTable
     {
         try {
             $this->contact->save();
-        } catch (\Exception $e) {
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return false;

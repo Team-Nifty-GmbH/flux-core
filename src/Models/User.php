@@ -56,11 +56,9 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
 
     public static string $iconName = 'user';
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
-        self::saving(function (User $user) {
+        static::saving(function (User $user) {
             if ($user->isDirty('lastname') || $user->isDirty('firstname')) {
                 $user->name = trim($user->firstname . ' ' . $user->lastname);
             }

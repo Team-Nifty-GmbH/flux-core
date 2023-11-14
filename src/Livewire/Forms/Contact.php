@@ -17,25 +17,25 @@ class Contact extends Form
 
     public ?int $client_id = null;
 
+    public ?int $countryId = null;
+
+    public ?int $language_id = null;
+
     public ?string $company = null;
 
-    public ?string $salutation = null;
-
     public ?string $title = null;
+
+    public ?string $salutation = null;
 
     public ?string $firstname = null;
 
     public ?string $lastname = null;
 
-    public ?string $street = null;
-
-    public ?int $countryId = null;
-
     public ?string $zip = null;
 
     public ?string $city = null;
 
-    public ?int $language_id = null;
+    public ?string $street = null;
 
     public function save(): void
     {
@@ -66,7 +66,9 @@ class Contact extends Form
     {
         parent::reset(...$properties);
 
-        $this->client_id = Client::query()->count() === 1 ? Client::query()->first()->id : null;
+        $this->client_id = Client::query()->where('is_active', true)->count() === 1
+            ? Client::query()->where('is_active', true)->first()->id
+            : null;
         $this->language_id = Language::query()->count() === 1 ? Language::query()->first()->id : null;
     }
 }
