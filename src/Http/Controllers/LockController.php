@@ -2,6 +2,8 @@
 
 namespace FluxErp\Http\Controllers;
 
+use FluxErp\Actions\Lock\CreateLock;
+use FluxErp\Actions\Lock\DeleteLock;
 use FluxErp\Actions\Lock\ForceUnlock;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\LockRecordRequest;
@@ -23,11 +25,11 @@ class LockController extends Controller
     {
         $model = $request->get('model_type')::query()
             ->whereKey($request->get('model_id'))
-            ->firstOrFail();
+            ->first();
 
-        return $model->lock() || auth()->user()->is($model->getLockedBy())
+        return CreateLock::make($request->all())->execute()
             ? ResponseHelper::createResponseFromBase(
-                statusCode: 201,
+                statusCode: 200,
                 data: $model,
                 statusMessage: 'record locked'
             )
@@ -38,11 +40,7 @@ class LockController extends Controller
 
     public function unlock(LockRecordRequest $request): JsonResponse
     {
-        $model = $request->get('model_type')::query()
-            ->whereKey($request->get('model_id'))
-            ->firstOrFail();
-
-        $unlocked = ! $model->getHasLockAttribute() || $model->unlock();
+        $unlocked = DeleteLock::make($request->all())->execute();
 
         return $unlocked
             ? ResponseHelper::noContent()

@@ -9,6 +9,7 @@ use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -90,7 +91,7 @@ class LockTest extends BaseSetup
         $response->assertStatus(204);
     }
 
-    public function test_write_locked_record()
+    public function test_update_locked_record()
     {
         $user = $this->users[0];
         $user->lock();
@@ -106,16 +107,14 @@ class LockTest extends BaseSetup
         $response->assertStatus(423);
     }
 
-    public function test_write_own_locked_record()
+    public function test_update_own_locked_record()
     {
         $this->user->givePermissionTo($this->permissions['update_user']);
         $this->user->givePermissionTo($this->permissions['lock']);
 
         Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)
-            ->post('/api/lock', ['model_type' => User::class, 'model_id' => $this->users[0]->id]);
-        $response->assertStatus(201);
+        Auth::login($this->user);
+        $this->users[0]->lock();
 
         $this->users[0]->firstname = Str::random();
         $response = $this->actingAs($this->user)

@@ -7,8 +7,10 @@ use FluxErp\Http\Requests\LockRecordRequest;
 use FluxErp\Traits\Lockable;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
-class ForceUnlock extends FluxAction
+class DeleteLock extends FluxAction
 {
+    protected static bool $hasPermission = false;
+
     protected function boot(array $data): void
     {
         parent::boot($data);
@@ -24,14 +26,12 @@ class ForceUnlock extends FluxAction
             ->toArray();
     }
 
-    public function performAction(): mixed
+    public function performAction(): bool
     {
         $model = $this->data['model_type']::query()
             ->whereKey($this->data['model_id'])
             ->first();
 
-        $model->forceUnlock();
-
-        return $model;
+        return $model->getHasLockAttribute() || $model->unlock();
     }
 }

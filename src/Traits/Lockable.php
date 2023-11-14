@@ -56,7 +56,7 @@ trait Lockable
         $lockDuration = config('session.lifetime') * 60;
         $lock = Cache::lock($this->getLockName(), $lockDuration);
 
-        if ($isLocked = $lock->get()) {
+        if ($hasLock = $lock->get()) {
             $currentLocks = Session::get('locks', []);
             Session::put(
                 'locks',
@@ -80,7 +80,7 @@ trait Lockable
             );
         }
 
-        return $isLocked;
+        return $hasLock;
     }
 
     public function unlock(): bool

@@ -24,6 +24,8 @@ abstract class FluxAction
 
     protected static Dispatcher $dispatcher;
 
+    protected static bool $hasPermission = true;
+
     abstract public static function models(): array;
 
     abstract public function performAction(): mixed;

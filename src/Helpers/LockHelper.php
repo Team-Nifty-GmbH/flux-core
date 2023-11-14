@@ -2,6 +2,7 @@
 
 namespace FluxErp\Helpers;
 
+use FluxErp\Actions\Lock\ForceUnlock;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Cache;
 
@@ -18,11 +19,7 @@ class LockHelper
     {
         foreach ($this->locks as $lock => $owner) {
             $record = explode(':', $lock);
-            $model = $record[1]::query()
-                ->whereKey($record[2])
-                ->firstOrFail();
-
-            $model->forceUnlock();
+            ForceUnlock::make(['model_type' => $record[1], 'model_id' => $record[2]])->execute();
         }
     }
 
