@@ -1,6 +1,7 @@
 .idea
 .phpunit.result.cache
 composer.lock
+package-lock.json
 coverage
 phpunit.xml
 phpstan.neon
