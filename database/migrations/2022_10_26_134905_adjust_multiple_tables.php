@@ -14,13 +14,6 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('project_tasks', function (Blueprint $table) {
-            $table->dropForeign('project_tasks_created_by_foreign');
-            $table->dropForeign('project_tasks_updated_by_foreign');
-            $table->dropForeign('project_tasks_deleted_by_foreign');
-            $table->dropColumn(['created_by', 'updated_by', 'deleted_by']);
-        });
-
         return;
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "created", "FluxErp\\\\Models\\\\Address", "created", id, "FluxErp\\\\Models\\\\User", created_by, created_at, created_at FROM addresses WHERE created_by IS NOT NULL');
