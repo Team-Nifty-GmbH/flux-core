@@ -22,7 +22,7 @@ class LedgerAccountController extends BaseController
 
     public function create(CreateLedgerAccountRequest $request): JsonResponse
     {
-        $ledgerAccount = CreateLedgerAccount::make($request->all())
+        $ledgerAccount = CreateLedgerAccount::make($request->validated())
             ->execute();
 
         return ResponseHelper::createResponseFromBase(

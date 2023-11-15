@@ -26,9 +26,9 @@ class SepaMandate extends Model
         'id',
     ];
 
-    public function bankConnection(): BelongsTo
+    public function contactBankConnection(): BelongsTo
     {
-        return $this->belongsTo(BankConnection::class);
+        return $this->belongsTo(ContactBankConnection::class);
     }
 
     public function contact(): BelongsTo

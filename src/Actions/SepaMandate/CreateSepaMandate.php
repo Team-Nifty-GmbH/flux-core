@@ -4,8 +4,8 @@ namespace FluxErp\Actions\SepaMandate;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateSepaMandateRequest;
-use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\SepaMandate;
 use Illuminate\Validation\ValidationException;
 
@@ -44,8 +44,8 @@ class CreateSepaMandate extends FluxAction
             $errors[] = ['contact_id' => [__('Client has no such contact')]];
         }
 
-        $contactBankConnectionExists = BankConnection::query()
-            ->whereKey($this->data['bank_connection_id'])
+        $contactBankConnectionExists = ContactBankConnection::query()
+            ->whereKey($this->data['contact_bank_connection_id'])
             ->where('contact_id', $this->data['contact_id'])
             ->exists();
 

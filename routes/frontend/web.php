@@ -20,6 +20,7 @@ use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
 use FluxErp\Livewire\Project\Project;
 use FluxErp\Livewire\Project\ProjectList;
 use FluxErp\Livewire\Settings\AdditionalColumns;
+use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\Clients;
 use FluxErp\Livewire\Settings\Countries;
@@ -120,6 +121,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 ->registersMenuItem();
             Route::get('/clients', Clients::class)
                 ->name('clients')
+                ->registersMenuItem();
+            Route::get('/bank-connections', BankConnections::class)
+                ->name('bank-connections')
                 ->registersMenuItem();
             Route::get('/clients/{client}/customer-portal', CustomerPortal::class)
                 ->name('customer-portal');

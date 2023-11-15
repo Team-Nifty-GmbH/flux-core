@@ -67,9 +67,9 @@ class Transaction extends Model implements InteractsWithDataTables
         });
     }
 
-    public function account(): BelongsTo
+    public function bankConnection(): BelongsTo
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(BankConnection::class);
     }
 
     public function children(): HasMany

@@ -2,8 +2,8 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\BankConnection;
 use FluxErp\Models\Client;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\SepaMandate;
 use Illuminate\Database\Seeder;
 
@@ -15,7 +15,7 @@ class SepaMandateTableSeeder extends Seeder
     public function run(): void
     {
         $clients = Client::all();
-        $bankConnections = BankConnection::all();
+        $bankConnections = ContactBankConnection::all();
         foreach ($bankConnections as $bankConnection) {
             SepaMandate::factory()->count(rand(0, 3))->create([
                 'bank_connection_id' => $bankConnection->id,

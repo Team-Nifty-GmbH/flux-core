@@ -8,9 +8,11 @@
                     .querySelector('[wire\\:id]')
                     .getAttribute('wire:id'));
                 if (transaction.order_id) {
+                    dataTable.set('search', '');
                     dataTable.set('userFilters', [[{column: 'id', operator: '=', value: transaction.order_id}]]);
                 } else {
-                    dataTable.set('search', [['transaction_id', transaction.purpose]]);
+                    dataTable.set('search', transaction.purpose || transaction.counterpart_name || '');
+                    dataTable.set('userFilters', []);
                 }
                 $openModal('transaction-details');
             })

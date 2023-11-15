@@ -2,18 +2,18 @@
 
 namespace FluxErp\Services;
 
-use FluxErp\Actions\BankConnection\CreateBankConnection;
-use FluxErp\Actions\BankConnection\DeleteBankConnection;
-use FluxErp\Actions\BankConnection\UpdateBankConnection;
+use FluxErp\Actions\ContactBankConnection\CreateContactBankConnection;
+use FluxErp\Actions\ContactBankConnection\DeleteContactBankConnection;
+use FluxErp\Actions\ContactBankConnection\UpdateContactBankConnection;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Models\BankConnection;
+use FluxErp\Models\ContactBankConnection;
 use Illuminate\Validation\ValidationException;
 
-class BankConnectionService
+class ContactBankConnectionService
 {
-    public function create(array $data): BankConnection
+    public function create(array $data): ContactBankConnection
     {
-        return CreateBankConnection::make($data)->execute();
+        return CreateContactBankConnection::make($data)->execute();
     }
 
     public function update(array $data): array
@@ -27,7 +27,7 @@ class BankConnectionService
             try {
                 $responses[] = ResponseHelper::createArrayResponse(
                     statusCode: 200,
-                    data: $bankConnection = UpdateBankConnection::make($item)->validate()->execute(),
+                    data: $bankConnection = UpdateContactBankConnection::make($item)->validate()->execute(),
                     additions: ['id' => $bankConnection->id]
                 );
             } catch (ValidationException $e) {
@@ -56,7 +56,7 @@ class BankConnectionService
     public function delete(string $id): array
     {
         try {
-            DeleteBankConnection::make(['id' => $id])->validate()->execute();
+            DeleteContactBankConnection::make(['id' => $id])->validate()->execute();
         } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,

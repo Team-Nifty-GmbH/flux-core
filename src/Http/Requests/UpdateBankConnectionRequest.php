@@ -2,8 +2,6 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\Iban;
-
 class UpdateBankConnectionRequest extends BaseFormRequest
 {
     /**
@@ -14,12 +12,15 @@ class UpdateBankConnectionRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:bank_connections,id,deleted_at,NULL',
-            'contact_id' => 'integer|nullable|exists:contacts,id,deleted_at,NULL',
-            'iban' => ['sometimes', 'string', new Iban()],
+            'id' => 'required|integer|exists:bank_connections,id',
+            'currency_id' => 'integer|nullable|exists:currencies,id,deleted_at,NULL',
+            'ledger_account_id' => 'integer|nullable|exists:ledger_accounts,id',
+            'name' => 'sometimes|required|string|max:255',
             'account_holder' => 'sometimes|string|nullable',
             'bank_name' => 'sometimes|string|nullable',
             'bic' => 'sometimes|string|nullable',
+            'credit_limit' => 'sometimes|numeric|nullable|min:0',
+            'is_active' => 'boolean',
         ];
     }
 }

@@ -23,9 +23,9 @@ class UpdateSepaMandateRequest extends BaseFormRequest
                 'integer',
                 (new ExistsWithIgnore('contacts', 'id'))->whereNull('deleted_at'),
             ],
-            'bank_connection_id' => [
+            'contact_bank_connection_id' => [
                 'integer',
-                (new ExistsWithIgnore('bank_connections', 'id'))->whereNull('deleted_at'),
+                (new ExistsWithIgnore('contact_bank_connections', 'id'))->whereNull('deleted_at'),
             ],
             'signed_date' => 'sometimes|date|nullable',
         ];

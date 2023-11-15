@@ -37,10 +37,12 @@ class TransactionList extends DataTable
                 ]),
         ];
     }
+
     public function showTransaction(Transaction $transaction): array
     {
         return $transaction->toArray();
     }
+
     public function showUnassignedPayments(): void
     {
         $this->userFilters = array_merge(

@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Http\Requests\CreateClientRequest;
 use FluxErp\Http\Requests\UpdateClientRequest;
+use FluxErp\Models\BankConnection;
 use FluxErp\Models\Country;
 use FluxErp\Services\ClientService;
 use Illuminate\Contracts\View\View;
@@ -53,7 +54,13 @@ class ClientEdit extends Component
 
     public function render(): View
     {
-        return view('flux::livewire.settings.client-edit');
+        return view('flux::livewire.settings.client-edit', [
+            'bankConnections' => BankConnection::query()
+                ->where('is_active', true)
+                ->select(['id', 'name'])
+                ->get()
+                ->toArray(),
+        ]);
     }
 
     public function show(array $client = []): void

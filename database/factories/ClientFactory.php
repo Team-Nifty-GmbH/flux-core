@@ -44,12 +44,6 @@ class ClientFactory extends Factory
             'fax' => $this->faker->phoneNumber(),
             'email' => $this->faker->companyEmail(),
             'website' => $this->faker->url(),
-            'bank_name' => $this->faker->company(),
-            'bank_code' => $this->faker->numerify('#########'),
-            'bank_account' => $this->faker->name(),
-            'bank_iban' => $this->faker->iban(),
-            'bank_swift' => $this->faker->swiftBicNumber(),
-            'bank_bic' => $this->faker->swiftBicNumber(),
             'is_active' => $this->faker->boolean(90),
         ];
     }

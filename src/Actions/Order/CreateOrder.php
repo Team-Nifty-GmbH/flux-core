@@ -50,7 +50,7 @@ class CreateOrder extends FluxAction
         $this->data['agent_id'] = $this->data['agent_id'] ?? $contact->agent_id;
         $this->data['approval_user_id'] = $this->data['approval_user_id'] ?? $contact->approval_user_id;
         $this->data['bank_connection_id'] = $this->data['bank_connection_id']
-            ?? $contact->bankConnections()->first()?->id;
+            ?? $contact->contactBankConnections()->first()?->id;
         $this->data['payment_target'] = $this->data['payment_target'] ?? $contact->payment_target_days;
         $this->data['payment_discount_target'] = $this->data['payment_discount_target'] ?? $contact->discount_days;
         $this->data['payment_discount_percent'] = $this->data['payment_discount_percent'] ?? $contact->discount_percent;

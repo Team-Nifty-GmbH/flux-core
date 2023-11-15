@@ -3,7 +3,6 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Models\Account;
 use FluxErp\Models\Address;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
@@ -54,10 +53,7 @@ class TransactionTest extends BaseSetup
             'client_id' => $this->dbClient->id,
         ]);
 
-        $bankConnections = BankConnection::factory(3)->create();
-
-        $accounts = Account::factory(3)->create([
-            'bank_connection_id' => $bankConnections->random()->id,
+        $bankConnections = BankConnection::factory(3)->create([
             'currency_id' => $currencies->random()->id,
         ]);
 
@@ -74,7 +70,7 @@ class TransactionTest extends BaseSetup
         ]);
 
         Transaction::factory(50)->create([
-            'account_id' => $accounts->random()->id,
+            'bank_connection_id' => $bankConnections->random()->id,
             'currency_id' => $currencies->random()->id,
             'order_id' => $orders->random()->id,
         ]);

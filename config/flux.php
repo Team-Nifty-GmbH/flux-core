@@ -23,7 +23,7 @@ return [
         'additional_column' => \FluxErp\Models\AdditionalColumn::class,
         'address' => \FluxErp\Models\Address::class,
         'address_type' => \FluxErp\Models\AddressType::class,
-        'bank_connection' => \FluxErp\Models\BankConnection::class,
+        'bank_connection' => \FluxErp\Models\ContactBankConnection::class,
         'calendar' => \FluxErp\Models\Calendar::class,
         'calendar_event' => \FluxErp\Models\CalendarEvent::class,
         'category' => \FluxErp\Models\Category::class,

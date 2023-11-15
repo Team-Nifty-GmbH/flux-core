@@ -12,6 +12,7 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\MediaLibrary\HasMedia;
 
@@ -55,6 +56,11 @@ class Client extends Model implements HasMedia
         return Attribute::get(
             fn () => $this->getFirstMediaUrl('logo_small')
         );
+    }
+
+    public function bankConnections(): BelongsToMany
+    {
+        return $this->belongsToMany(BankConnection::class);
     }
 
     public function country(): BelongsTo

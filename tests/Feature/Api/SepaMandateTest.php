@@ -3,9 +3,9 @@
 namespace FluxErp\Tests\Feature\Api;
 
 use Carbon\Carbon;
-use FluxErp\Models\BankConnection;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\SepaMandate;
@@ -21,7 +21,7 @@ class SepaMandateTest extends BaseSetup
 
     private Collection $contacts;
 
-    private Collection $bankConnections;
+    private Collection $contactBankConnections;
 
     private Collection $sepaMandates;
 
@@ -45,22 +45,22 @@ class SepaMandateTest extends BaseSetup
             'client_id' => $dbClients[1]->id,
         ]);
 
-        $this->bankConnections = BankConnection::factory()->count(2)->create([
+        $this->contactBankConnections = ContactBankConnection::factory()->count(2)->create([
             'contact_id' => $this->contacts[0]->id,
         ]);
-        $this->bankConnections[] = BankConnection::factory()->create([
+        $this->contactBankConnections[] = ContactBankConnection::factory()->create([
             'contact_id' => $this->contacts[2]->id,
         ]);
 
         $this->sepaMandates = SepaMandate::factory()->count(2)->create([
             'client_id' => $dbClients[0]->id,
             'contact_id' => $this->contacts[0]->id,
-            'bank_connection_id' => $this->bankConnections[0]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[0]->id,
         ]);
         $this->sepaMandates[] = SepaMandate::factory()->create([
             'client_id' => $dbClients[1]->id,
             'contact_id' => $this->contacts[2]->id,
-            'bank_connection_id' => $this->bankConnections[2]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
         ]);
 
         $this->permissions = [
@@ -88,8 +88,8 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($this->sepaMandates[0]->id, $jsonSepaMandate->id);
         $this->assertEquals($this->sepaMandates[0]->client_id, $jsonSepaMandate->client_id);
         $this->assertEquals($this->sepaMandates[0]->contact_id, $jsonSepaMandate->contact_id);
-        $this->assertEquals($this->sepaMandates[0]->bank_connection_id,
-            $jsonSepaMandate->bank_connection_id);
+        $this->assertEquals($this->sepaMandates[0]->contact_bank_connection_id,
+            $jsonSepaMandate->contact_bank_connection_id);
         $this->assertEquals($this->sepaMandates[0]->signed_date, $jsonSepaMandate->signed_date);
         $this->assertEquals(Carbon::parse($this->sepaMandates[0]->created_at),
             Carbon::parse($jsonSepaMandate->created_at));
@@ -126,7 +126,7 @@ class SepaMandateTest extends BaseSetup
                 return $jsonSepaMandate->id === $sepaMandate->id &&
                     $jsonSepaMandate->client_id === $sepaMandate->client_id &&
                     $jsonSepaMandate->contact_id === $sepaMandate->contact_id &&
-                    $jsonSepaMandate->bank_connection_id === $sepaMandate->bank_connection_id &&
+                    $jsonSepaMandate->contact_bank_connection_id === $sepaMandate->contact_bank_connection_id &&
                     $jsonSepaMandate->signed_date === $sepaMandate->signed_date &&
                     Carbon::parse($jsonSepaMandate->created_at) === Carbon::parse($sepaMandate->created_at) &&
                     Carbon::parse($jsonSepaMandate->updated_at) === Carbon::parse($sepaMandate->updated_at);
@@ -139,7 +139,7 @@ class SepaMandateTest extends BaseSetup
         $sepaMandate = [
             'client_id' => $this->sepaMandates[0]->client_id,
             'contact_id' => $this->contacts[0]->id,
-            'bank_connection_id' => $this->bankConnections[1]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -156,7 +156,7 @@ class SepaMandateTest extends BaseSetup
         $this->assertNotEmpty($dbSepaMandate);
         $this->assertEquals($sepaMandate['client_id'], $dbSepaMandate->client_id);
         $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
-        $this->assertEquals($sepaMandate['bank_connection_id'], $dbSepaMandate->bank_connection_id);
+        $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
         $this->assertNull($dbSepaMandate->signed_date);
         $this->assertEquals($this->user->id, $dbSepaMandate->created_by->id);
         $this->assertEquals($this->user->id, $dbSepaMandate->updated_by->id);
@@ -167,7 +167,7 @@ class SepaMandateTest extends BaseSetup
         $sepaMandate = [
             'client_id' => $this->sepaMandates[0]->client_id,
             'contact_id' => $this->contacts[0]->id,
-            'bank_connection_id' => $this->bankConnections[1]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
             'signed_date' => date('Y-m-d'),
         ];
 
@@ -185,7 +185,7 @@ class SepaMandateTest extends BaseSetup
         $this->assertNotEmpty($dbSepaMandate);
         $this->assertEquals($sepaMandate['client_id'], $dbSepaMandate->client_id);
         $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
-        $this->assertEquals($sepaMandate['bank_connection_id'], $dbSepaMandate->bank_connection_id);
+        $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
         $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date);
         $this->assertEquals($this->user->id, $dbSepaMandate->created_by->id);
         $this->assertEquals($this->user->id, $dbSepaMandate->updated_by->id);
@@ -196,7 +196,7 @@ class SepaMandateTest extends BaseSetup
         $sepaMandate = [
             'client_id' => $this->sepaMandates[0]->client_id,
             'contact_id' => 0,
-            'bank_connection_id' => 0,
+            'contact_bank_connection_id' => 0,
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -211,7 +211,7 @@ class SepaMandateTest extends BaseSetup
         $sepaMandate = [
             'client_id' => $this->sepaMandates[0]->client_id,
             'contact_id' => $this->contacts[2]->id,
-            'bank_connection_id' => $this->bankConnections[1]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
             'signed_date' => date('Y-m-d'),
         ];
 
@@ -227,7 +227,7 @@ class SepaMandateTest extends BaseSetup
         $sepaMandate = [
             'client_id' => $this->sepaMandates[0]->client_id,
             'contact_id' => $this->contacts[0]->id,
-            'bank_connection_id' => $this->bankConnections[2]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
             'signed_date' => date('Y-m-d'),
         ];
 
@@ -268,7 +268,7 @@ class SepaMandateTest extends BaseSetup
             'id' => $this->sepaMandates[0]->id,
             'client_id' => $this->sepaMandates[2]->client_id,
             'contact_id' => $this->contacts[2]->id,
-            'bank_connection_id' => $this->bankConnections[2]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
             'signed_date' => date('Y-m-d'),
         ];
 
@@ -287,7 +287,7 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($sepaMandate['id'], $dbSepaMandate->id);
         $this->assertEquals($sepaMandate['client_id'], $dbSepaMandate->client_id);
         $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
-        $this->assertEquals($sepaMandate['bank_connection_id'], $dbSepaMandate->bank_connection_id);
+        $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
         $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date);
         $this->assertEquals($this->user->id, $dbSepaMandate->updated_by->id);
     }
@@ -328,12 +328,12 @@ class SepaMandateTest extends BaseSetup
             ],
             [
                 'id' => $this->sepaMandates[2]->id,
-                'bank_connection_id' => $this->bankConnections[0]->id,
+                'contact_bank_connection_id' => $this->contactBankConnections[0]->id,
             ],
             [
                 'id' => $this->sepaMandates[1]->id,
                 'contact_id' => $this->contacts[2]->id,
-                'bank_connection_id' => $this->bankConnections[1]->id,
+                'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
             ],
         ];
 
@@ -350,16 +350,16 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($sepaMandates[1]['id'], $responses[1]->id);
         $this->assertEquals(422, $responses[1]->status);
         $this->assertTrue(property_exists($responses[1]->errors, 'contact_id'));
-        $this->assertTrue(property_exists($responses[1]->errors, 'bank_connection_id'));
+        $this->assertTrue(property_exists($responses[1]->errors, 'contact_bank_connection_id'));
         $this->assertEquals($sepaMandates[2]['id'], $responses[2]->id);
         $this->assertEquals(422, $responses[2]->status);
         $this->assertTrue(property_exists($responses[2]->errors, 'contact_id'));
         $this->assertEquals($sepaMandates[3]['id'], $responses[3]->id);
         $this->assertEquals(422, $responses[3]->status);
-        $this->assertTrue(property_exists($responses[3]->errors, 'bank_connection_id'));
+        $this->assertTrue(property_exists($responses[3]->errors, 'contact_bank_connection_id'));
         $this->assertEquals($sepaMandates[4]['id'], $responses[4]->id);
         $this->assertEquals(422, $responses[4]->status);
-        $this->assertTrue(property_exists($responses[4]->errors, 'bank_connection_id'));
+        $this->assertTrue(property_exists($responses[4]->errors, 'contact_bank_connection_id'));
     }
 
     public function test_delete_sepa_mandate()

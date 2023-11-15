@@ -63,36 +63,14 @@
                                  placeholder="{{ __('Website') }}"
                                  wire:model="client.website"/>
                     </div>
-                    <div class="">
-                        <x-input label="{{ __('Bank Name') }}"
-                                 placeholder="{{ __('Bank Name') }}"
-                                 wire:model="client.bank_name"/>
-                    </div>
-                    <div class="">
-                        <x-input label="{{ __('Bank Code') }}"
-                                 placeholder="{{ __('Bank Code') }}"
-                                 wire:model="client.bank_code"/>
-                    </div>
-                    <div class="">
-                        <x-input label="{{ __('Bank Account') }}"
-                                 placeholder="{{ __('Bank Account') }}"
-                                 wire:model="client.bank_account"/>
-                    </div>
-                    <div class="">
-                        <x-input label="{{ __('Bank Iban') }}"
-                                 placeholder="{{ __('Bank Iban') }}"
-                                 wire:model="client.bank_iban"/>
-                    </div>
-                    <div class="">
-                        <x-input label="{{ __('Bank Swift') }}"
-                                 placeholder="{{ __('Bank Swift') }}"
-                                 wire:model="client.bank_swift"/>
-                    </div>
-                    <div class="">
-                        <x-input label="{{ __('Bank BIC') }}"
-                                 placeholder="{{ __('Bank BIC') }}"
-                                 wire:model="client.bank_bic"/>
-                    </div>
+                    <x-select
+                        :label="__('Bank Connections')"
+                        multiselect
+                        wire:model="client.bank_connections"
+                        :options="$bankConnections"
+                        option-label="name"
+                        option-value="id"
+                    />
                     <div class="mt-8">
                         <x-checkbox :label="__('Active')" wire:model="client.is_active"/>
                     </div>

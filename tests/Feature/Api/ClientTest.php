@@ -54,12 +54,6 @@ class ClientTest extends BaseSetup
         $this->assertEquals($this->clients[0]->fax, $client->fax);
         $this->assertEquals($this->clients[0]->email, $client->email);
         $this->assertEquals($this->clients[0]->website, $client->website);
-        $this->assertEquals($this->clients[0]->bank_name, $client->bank_name);
-        $this->assertEquals($this->clients[0]->bank_code, $client->bank_code);
-        $this->assertEquals($this->clients[0]->bank_account, $client->bank_account);
-        $this->assertEquals($this->clients[0]->bank_iban, $client->bank_iban);
-        $this->assertEquals($this->clients[0]->bank_swift, $client->bank_swift);
-        $this->assertEquals($this->clients[0]->bank_bic, $client->bank_bic);
         $this->assertEquals($this->clients[0]->is_active, $client->is_active);
     }
 
@@ -102,11 +96,6 @@ class ClientTest extends BaseSetup
                     $jsonClient->fax === $client->fax &&
                     $jsonClient->email === $client->email &&
                     $jsonClient->website === $client->website &&
-                    $jsonClient->bank_name === $client->bank_name &&
-                    $jsonClient->bank_code === $client->bank_code &&
-                    $jsonClient->bank_iban === $client->bank_iban &&
-                    $jsonClient->bank_swift === $client->bank_swift &&
-                    $jsonClient->bank_bic === $client->bank_bic &&
                     $jsonClient->is_active === $client->is_active &&
 
                     Carbon::parse($jsonClient->created_at) === Carbon::parse($client->created_at) &&

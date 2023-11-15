@@ -15,11 +15,15 @@ class CreateBankConnectionRequest extends BaseFormRequest
     {
         return [
             'uuid' => 'string|uuid|unique:bank_connections,uuid',
-            'contact_id' => 'integer|nullable|exists:contacts,id,deleted_at,NULL',
-            'iban' => ['required', 'string', new Iban()],
+            'currency_id' => 'integer|nullable|exists:currencies,id,deleted_at,NULL',
+            'ledger_account_id' => 'integer|nullable|exists:ledger_accounts,id',
+            'name' => 'required|string|max:255',
             'account_holder' => 'sometimes|string|nullable',
             'bank_name' => 'sometimes|string|nullable',
+            'iban' => ['nullable', 'string', new Iban(), 'unique:bank_connections,iban'],
             'bic' => 'sometimes|string|nullable',
+            'credit_limit' => 'sometimes|numeric|nullable|min:0',
+            'is_active' => 'boolean',
         ];
     }
 }
