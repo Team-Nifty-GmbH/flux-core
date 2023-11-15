@@ -14,7 +14,6 @@ class FormBuilderFieldFactory extends Factory
         return [
             'name' => $this->faker->name(),
             'description' => $this->faker->text(),
-            'ordering' => $this->faker->randomNumber(),
             'options' => $this->faker->words(),
         ];
     }

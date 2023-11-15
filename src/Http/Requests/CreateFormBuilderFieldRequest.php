@@ -17,7 +17,6 @@ class CreateFormBuilderFieldRequest extends BaseFormRequest
                 'required',
                 Rule::in(FormBuilderTypeEnum::values()),
             ],
-            'ordering' => 'nullable|integer|min:0',
             'options' => 'nullable|array',
         ];
     }

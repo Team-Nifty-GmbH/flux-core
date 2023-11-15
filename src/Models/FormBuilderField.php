@@ -5,13 +5,16 @@ namespace FluxErp\Models;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 
-class FormBuilderField extends Model
+class FormBuilderField extends Model implements Sortable
 {
-    use HasPackageFactory, HasUuid, SoftDeletes;
+    use HasPackageFactory, HasUuid, SoftDeletes, SortableTrait;
 
     protected $guarded = [
         'id',
@@ -28,6 +31,11 @@ class FormBuilderField extends Model
                 $item->delete();
             });
         });
+    }
+
+    public function buildSortQuery(): Builder
+    {
+        return static::query()->where('section_id', $this->section_id);
     }
 
     public function fieldResponses(): HasMany

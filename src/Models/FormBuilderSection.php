@@ -8,10 +8,12 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\EloquentSortable\Sortable;
+use Spatie\EloquentSortable\SortableTrait;
 
-class FormBuilderSection extends Model
+class FormBuilderSection extends Model implements Sortable
 {
-    use HasPackageFactory, HasUuid, SoftDeletes;
+    use HasPackageFactory, HasUuid, SoftDeletes, SortableTrait;
 
     protected $guarded = [
         'id',
@@ -24,6 +26,11 @@ class FormBuilderSection extends Model
                 $item->delete();
             });
         });
+    }
+
+    public function buildSortQuery()
+    {
+        return static::query()->where('form_id', $this->form_id);
     }
 
     public function fields(): HasMany
