@@ -5,7 +5,6 @@ namespace FluxErp\Actions\BankConnection;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateBankConnectionRequest;
 use FluxErp\Models\BankConnection;
-use FluxErp\Models\ContactBankConnection;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateBankConnection extends FluxAction
@@ -18,18 +17,18 @@ class UpdateBankConnection extends FluxAction
 
     public static function models(): array
     {
-        return [ContactBankConnection::class];
+        return [BankConnection::class];
     }
 
     public function performAction(): Model
     {
-        $contactBankConnection = BankConnection::query()
+        $bankConnection = BankConnection::query()
             ->whereKey($this->data['id'])
             ->first();
 
-        $contactBankConnection->fill($this->data);
-        $contactBankConnection->save();
+        $bankConnection->fill($this->data);
+        $bankConnection->save();
 
-        return $contactBankConnection->withoutRelations()->fresh();
+        return $bankConnection->withoutRelations()->fresh();
     }
 }

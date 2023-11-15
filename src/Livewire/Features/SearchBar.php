@@ -39,8 +39,7 @@ class SearchBar extends Component
     public function mount(): void
     {
         if ($this->searchModel === '') {
-            $this->searchModel = ModelInfo::forAllModels()
-                ->merge(ModelInfo::forAllModels(flux_path('src/Models'), flux_path('src'), 'FluxErp'))
+            $this->searchModel = model_info_all()
                 ->filter(fn ($model) => in_array(Searchable::class, $model->traits->toArray()))
                 ->map(fn ($model) => $model->class)
                 ->toArray();

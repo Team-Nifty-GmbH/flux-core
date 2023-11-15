@@ -34,9 +34,11 @@ class UpdateClient extends FluxAction
         $client->fill($this->data);
         $client->save();
 
-        $client->contactBankConnections()->sync($bankConnections);
+        if (! is_null($bankConnections)) {
+            $client->bankConnections()->sync($bankConnections);
+        }
 
-        return $client->withoutRelations()->fresh();
+        return $client->withoutRelations()->refresh();
     }
 
     public function validateData(): void

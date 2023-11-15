@@ -27,8 +27,8 @@ class ContactBankConnectionService
             try {
                 $responses[] = ResponseHelper::createArrayResponse(
                     statusCode: 200,
-                    data: $bankConnection = UpdateContactBankConnection::make($item)->validate()->execute(),
-                    additions: ['id' => $bankConnection->id]
+                    data: $contactBankConnection = UpdateContactBankConnection::make($item)->validate()->execute(),
+                    additions: ['id' => $contactBankConnection->id]
                 );
             } catch (ValidationException $e) {
                 $responses[] = ResponseHelper::createArrayResponse(

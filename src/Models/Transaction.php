@@ -30,11 +30,9 @@ class Transaction extends Model implements InteractsWithDataTables
         'id',
     ];
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
-        self::saving(function (Transaction $transaction) {
+        static::saving(function (Transaction $transaction) {
             $transaction->currency_id = $transaction->currency_id ?:
                 (
                     Auth::user()->currency_id ?:
@@ -45,7 +43,7 @@ class Transaction extends Model implements InteractsWithDataTables
                 );
         });
 
-        self::saved(function (Transaction $transaction) {
+        static::saved(function (Transaction $transaction) {
             $originalOrderId = $transaction->getRawOriginal('order_id');
             if ($originalOrderId) {
                 Order::query()
@@ -60,7 +58,7 @@ class Transaction extends Model implements InteractsWithDataTables
             }
         });
 
-        self::deleted(function (Transaction $transaction) {
+        static::deleted(function (Transaction $transaction) {
             if ($transaction->order_id) {
                 $transaction->order->calculatePaymentState()->save();
             }

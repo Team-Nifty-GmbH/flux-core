@@ -9,17 +9,14 @@ use Illuminate\Database\Seeder;
 
 class SepaMandateTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $clients = Client::all();
-        $bankConnections = ContactBankConnection::all();
-        foreach ($bankConnections as $bankConnection) {
+        $contactBankConnections = ContactBankConnection::all();
+        foreach ($contactBankConnections as $contactBankConnection) {
             SepaMandate::factory()->count(rand(0, 3))->create([
-                'bank_connection_id' => $bankConnection->id,
-                'contact_id' => $bankConnection->contact_id,
+                'contact_bank_connection_id' => $contactBankConnection->id,
+                'contact_id' => $contactBankConnection->contact_id,
                 'client_id' => $clients->random()->first()->id,
             ]);
         }

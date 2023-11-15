@@ -8,9 +8,6 @@ use Illuminate\Database\Seeder;
 
 class ContactBankConnectionTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $contacts = Contact::all();

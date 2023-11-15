@@ -15,7 +15,7 @@ class ContactBankConnection extends Model
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::saving(function (ContactBankConnection $model) {
             if ($model->isDirty('iban')) {

@@ -22,8 +22,7 @@ class Categories extends CategoryList
     public function getViewData(): array
     {
         return array_merge(parent::getViewData(), [
-            'models' => ModelInfo::forAllModels()
-                ->merge(ModelInfo::forAllModels(flux_path('src/Models'), flux_path('src'), 'FluxErp'))
+            'models' => model_info_all()
                 ->filter(fn ($model) => in_array(Categorizable::class, $model->traits->toArray()))
                 ->map(fn ($model) => $model->class)
                 ->toArray(),
