@@ -31,7 +31,7 @@ class MailMessage extends Model implements HasMedia
         'is_seen' => 'boolean',
     ];
 
-    public static function booted()
+    public static function booted(): void
     {
         static::saving(function (MailMessage $message) {
             if ($message->isDirty('text_body')) {
@@ -52,14 +52,14 @@ class MailMessage extends Model implements HasMedia
         return $this->morphedByMany(Address::class, 'mailable');
     }
 
-    public function mailFolder(): BelongsTo
-    {
-        return $this->belongsTo(MailFolder::class);
-    }
-
     public function mailAccount(): BelongsTo
     {
         return $this->belongsTo(MailAccount::class);
+    }
+
+    public function mailFolder(): BelongsTo
+    {
+        return $this->belongsTo(MailFolder::class);
     }
 
     public function orders(): MorphToMany

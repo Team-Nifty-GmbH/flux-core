@@ -38,7 +38,7 @@
                                 <x-select.option value="pop3">{{ __('POP3') }}</x-select.option>
                                 <x-select.option value="nntp">{{ __('NNTP') }}</x-select.option>
                             </x-select>
-                            <x-input wire:model="mailAccount.email" :label="__('Email')" />
+                            <x-input x-bind:disabled="$wire.mailAccount.id" wire:model="mailAccount.email" :label="__('Email')" />
                             <x-inputs.password wire:model="mailAccount.password" :label="__('Password')" />
                             <x-input wire:model="mailAccount.host" :label="__('Host')" />
                             <x-inputs.number wire:model="mailAccount.port" :label="__('Port')" />

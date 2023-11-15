@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('mail_folders', function (Blueprint $table) {
             $table->id();
             $table->uuid();
-            $table->foreignId('mail_account_id')->constrained('mail_accounts')->onDelete('cascade');
-            $table->foreignId('parent_id')->nullable()->constrained('mail_folders')->onDelete('cascade');
+            $table->foreignId('mail_account_id')->constrained('mail_accounts')->cascadeOnDelete();
+            $table->foreignId('parent_id')->nullable()->constrained('mail_folders')->cascadeOnDelete();
             $table->string('name');
             $table->string('slug');
             $table->timestamps();

@@ -13,7 +13,7 @@ use Webklex\PHPIMAP\Exceptions\ImapServerErrorException;
 use Webklex\PHPIMAP\Exceptions\ResponseException;
 use Webklex\PHPIMAP\Exceptions\RuntimeException;
 
-class MailAccount extends Form
+class MailAccountForm extends Form
 {
     public ?int $id = null;
 
@@ -29,10 +29,6 @@ class MailAccount extends Form
 
     public string $encryption = 'ssl';
 
-    public bool $is_o_auth = false;
-
-    public bool $has_valid_certificate = true;
-
     public ?string $smtp_email = null;
 
     public ?string $smtp_password = null;
@@ -42,6 +38,10 @@ class MailAccount extends Form
     public int $smtp_port = 587;
 
     public ?string $smtp_encryption = null;
+
+    public bool $is_o_auth = false;
+
+    public bool $has_valid_certificate = true;
 
     public function save(): void
     {

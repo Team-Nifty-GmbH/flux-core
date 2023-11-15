@@ -31,7 +31,7 @@ class UpdateUserRequest extends BaseFormRequest
             'password' => ['sometimes', 'required', Password::min(8)->mixedCase()->numbers()],
             'user_code' => 'sometimes|required|string|unique:users,user_code',
             'is_active' => 'sometimes|required|boolean',
-            'mail_accounts' => 'sometimes|required|array',
+            'mail_accounts' => 'array',
             'mail_accounts.*' => 'integer|exists:mail_accounts,id',
         ];
     }

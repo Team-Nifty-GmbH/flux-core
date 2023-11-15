@@ -1,28 +1,28 @@
 <?php
 
-namespace FluxErp\Actions\MailMessage;
+namespace FluxErp\Actions\MailFolder;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\MailMessage;
+use FluxErp\Models\MailFolder;
 
-class DeleteMailMessage extends FluxAction
+class DeleteMailFolder extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
         $this->rules = [
-            'id' => 'required|integer|exists:mail_messages,id',
+            'id' => 'required|integer|exists:mail_folders,id',
         ];
     }
 
     public static function models(): array
     {
-        return [MailMessage::class];
+        return [MailFolder::class];
     }
 
     public function performAction(): mixed
     {
-        return MailMessage::query()
+        return MailFolder::query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

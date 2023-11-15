@@ -5,7 +5,7 @@ namespace FluxErp\Traits;
 use FluxErp\Models\MailMessage;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-trait HasMailMessages
+trait Mailable
 {
     public function mailMessages(): MorphToMany
     {

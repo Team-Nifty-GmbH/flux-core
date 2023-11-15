@@ -110,6 +110,7 @@ class Mail extends MailMessageList
         $mailAccounts = MailAccount::query()
             ->whereIntegerInRaw('id', array_column($this->mailAccounts, 'id'))
             ->get();
+
         foreach ($mailAccounts as $mailAccount) {
             SyncMailAccountJob::dispatch($mailAccount);
         }
@@ -117,7 +118,8 @@ class Mail extends MailMessageList
 
     public function getBuilder(Builder $builder): Builder
     {
-        return $builder->whereIntegerInRaw('mail_account_id', array_column($this->mailAccounts, 'id'))
+        return $builder
+            ->whereIntegerInRaw('mail_account_id', array_column($this->mailAccounts, 'id'))
             ->when($this->folderId, function (Builder $builder) {
                 $builder->whereIntegerInRaw('mail_folder_id', $this->selectedFolderIds);
             });

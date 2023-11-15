@@ -16,14 +16,14 @@ class MailFolder extends Model
         'id',
     ];
 
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(MailFolder::class, 'parent_id');
-    }
-
     public function children(): HasMany
     {
         return $this->hasMany(MailFolder::class, 'parent_id');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(MailFolder::class, 'parent_id');
     }
 
     public function mailAccount(): BelongsTo

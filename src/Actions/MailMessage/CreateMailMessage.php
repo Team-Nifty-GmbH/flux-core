@@ -27,13 +27,15 @@ class CreateMailMessage extends FluxAction
 
     public function performAction(): mixed
     {
-        $tags = Arr::pull($this->data, 'tags', []);
+        $tags = Arr::pull($this->data, 'tags');
         $attachments = Arr::pull($this->data, 'attachments', []);
 
         $mailMessage = new MailMessage($this->data);
         $mailMessage->save();
 
-        $mailMessage->syncTags($tags);
+        if ($tags) {
+            $mailMessage->syncTags($tags);
+        }
 
         foreach ($attachments as $attachment) {
             $attachment['model_id'] = $mailMessage->id;

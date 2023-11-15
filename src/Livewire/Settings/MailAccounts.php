@@ -6,7 +6,7 @@ use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
 use FluxErp\Livewire\DataTables\MailAccountList;
-use FluxErp\Livewire\Forms\MailAccount as MailAccountForm;
+use FluxErp\Livewire\Forms\MailAccountForm as MailAccountForm;
 use FluxErp\Models\MailAccount;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;

@@ -22,9 +22,9 @@ class MailMessageList extends DataTable
     public function getFormatters(): array
     {
         return array_merge(parent::getFormatters(), [
-            'text_body' => 'string',
+            'from' => 'email',
             'subject' => 'string',
-            'email' => 'email',
+            'text_body' => 'string',
         ]);
     }
 

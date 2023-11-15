@@ -2,12 +2,16 @@
 
 namespace FluxErp\Jobs;
 
+use FluxErp\Actions\MailFolder\CreateMailFolder;
+use FluxErp\Actions\MailFolder\DeleteMailFolder;
+use FluxErp\Actions\MailFolder\UpdateMailFolder;
 use FluxErp\Actions\MailMessage\CreateMailMessage;
 use FluxErp\Actions\MailMessage\UpdateMailMessage;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\MailMessage;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -17,22 +21,21 @@ use Webklex\PHPIMAP\Exceptions\ResponseException;
 use Webklex\PHPIMAP\Folder;
 use Webklex\PHPIMAP\Message;
 
-class SyncMailAccountJob implements ShouldQueue
+class SyncMailAccountJob implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private array $folderIds = [];
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(private readonly MailAccount $mailAccount)
     {
     }
 
-    /**
-     * Execute the job.
-     */
+    public function uniqueId(): string
+    {
+        return $this->mailAccount->uuid;
+    }
+
     public function handle(): void
     {
         $client = $this->mailAccount->connect();
@@ -45,7 +48,8 @@ class SyncMailAccountJob implements ShouldQueue
         MailFolder::query()
             ->where('mail_account_id', $this->mailAccount->id)
             ->whereIntegerNotInRaw('id', array_values($this->folderIds))
-            ->delete();
+            ->get('id')
+            ->each(fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->id])->validate()->execute());
 
         foreach ($folders as $folder) {
             $this->getNewMessages($folder);
@@ -59,16 +63,20 @@ class SyncMailAccountJob implements ShouldQueue
         $mailFolder = MailFolder::query()
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('slug', $folder->path)
-            ->firstOrNew();
+            ->first();
 
-        $mailFolder->fill([
-            'mail_account_id' => $this->mailAccount->id,
-            'parent_id' => $parentId,
-            'name' => $folder->name,
-            'slug' => $folder->path,
-        ]);
+        $action = $mailFolder?->id ? UpdateMailFolder::class : CreateMailFolder::class;
 
-        $mailFolder->save();
+        $mailFolder = $action::make(
+            [
+                'id' => $mailFolder?->id,
+                'mail_account_id' => $this->mailAccount->id,
+                'parent_id' => $parentId,
+                'name' => $folder->name,
+                'slug' => $folder->path,
+            ]
+        )->validate()->execute();
+
         $folderIds[$folder->path] = $mailFolder->id;
 
         if ($folder->hasChildren()) {
@@ -104,7 +112,8 @@ class SyncMailAccountJob implements ShouldQueue
             return;
         }
 
-        for ($page = 1; true; $page++) {
+        $page = 1;
+        while (true) {
             $messages = $query->paginate(100, $page);
 
             foreach ($messages as $message) {
@@ -114,6 +123,8 @@ class SyncMailAccountJob implements ShouldQueue
             if ($messages->lastPage() === $page) {
                 break;
             }
+
+            $page++;
         }
     }
 
@@ -130,13 +141,16 @@ class SyncMailAccountJob implements ShouldQueue
         }
 
         $unreadUids = [];
-        for ($page = 1; true; $page++) {
+        $page = 1;
+        while (true) {
             $messages = $query->paginate(100, $page);
             $unreadUids[] = $messages->map(fn (Message $message) => $message->getUid())->toArray();
 
             if ($messages->lastPage() === $page) {
                 break;
             }
+
+            $page++;
         }
 
         MailMessage::query()
@@ -144,7 +158,10 @@ class SyncMailAccountJob implements ShouldQueue
             ->where('mail_folder_id', $this->folderIds[$folder->path])
             ->where('is_seen', false)
             ->whereIntegerNotInRaw('message_uid', $unreadUids)
-            ->each(fn (MailMessage $message) => UpdateMailMessage::make(['id' => $message->id, 'is_seen' => true])->validate()->execute()
+            ->each(
+                fn (MailMessage $message) => UpdateMailMessage::make(['id' => $message->id, 'is_seen' => true])
+                    ->validate()
+                    ->execute()
             );
 
         MailMessage::query()
@@ -152,7 +169,10 @@ class SyncMailAccountJob implements ShouldQueue
             ->where('mail_folder_id', $this->folderIds[$folder->path])
             ->where('is_seen', true)
             ->whereIntegerInRaw('message_uid', $unreadUids)
-            ->each(fn (MailMessage $message) => UpdateMailMessage::make(['id' => $message->id, 'is_seen' => false])->validate()->execute()
+            ->each(
+                fn (MailMessage $message) => UpdateMailMessage::make(['id' => $message->id, 'is_seen' => false])
+                    ->validate()
+                    ->execute()
             );
     }
 

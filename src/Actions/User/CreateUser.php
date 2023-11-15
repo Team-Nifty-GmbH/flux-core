@@ -23,7 +23,7 @@ class CreateUser extends FluxAction
 
     public function performAction(): User
     {
-        $mailAccounts = Arr::pull($this->data, 'mail_accounts', []);
+        $mailAccounts = Arr::pull($this->data, 'mail_accounts');
 
         $this->data['is_active'] = $this->data['is_active'] ?? true;
         $this->data['language_id'] = array_key_exists('language_id', $this->data) ?
@@ -33,7 +33,9 @@ class CreateUser extends FluxAction
         $user = new User($this->data);
         $user->save();
 
-        $user->mailAccounts()->sync($mailAccounts);
+        if ($mailAccounts) {
+            $user->mailAccounts()->attach($mailAccounts);
+        }
 
         return $user->refresh();
     }

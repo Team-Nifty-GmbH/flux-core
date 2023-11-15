@@ -22,7 +22,7 @@ class MailAccountController extends BaseController
 
     public function create(CreateMailAccountRequest $request): JsonResponse
     {
-        $mailAccount = CreateMailAccount::make($request->all())
+        $mailAccount = CreateMailAccount::make($request->validated())
             ->execute();
 
         return ResponseHelper::createResponseFromBase(
@@ -79,7 +79,7 @@ class MailAccountController extends BaseController
             );
         } catch (ValidationException $e) {
             $response = ResponseHelper::createArrayResponse(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                statusCode: 404,
                 data: $e->errors()
             );
         }

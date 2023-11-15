@@ -32,7 +32,7 @@ class UpdateUser extends FluxAction
 
     public function performAction(): Model
     {
-        $mailAccounts = Arr::pull($this->data, 'mail_accounts', []);
+        $mailAccounts = Arr::pull($this->data, 'mail_accounts');
 
         $user = User::query()
             ->whereKey($this->data['id'])
@@ -41,7 +41,9 @@ class UpdateUser extends FluxAction
         $user->fill($this->data);
         $user->save();
 
-        $user->mailAccounts()->sync($mailAccounts);
+        if (! is_null($mailAccounts)) {
+            $user->mailAccounts()->sync($mailAccounts);
+        }
 
         // Delete all tokens of the user if the user is set to is_active = false
         if (! ($this->data['is_active'] ?? true)) {

@@ -11,19 +11,19 @@ return new class extends Migration
         Schema::create('mail_messages', function (Blueprint $table) {
             $table->id();
             $table->uuid();
-            $table->foreignId('mail_account_id')->constrained()->onDelete('cascade');
-            $table->foreignId('mail_folder_id')->constrained()->onDelete('cascade');
-            $table->string('message_id')->nullable()->index(); // $msg->getMessageId()->toArray()
-            $table->integer('message_uid')->nullable()->index(); // $msg->getMessageNo()
-            $table->json('from')->nullable(); // $msg->getFrom()->toArray()
-            $table->json('to')->nullable(); // $msg->getTo()->toArray()
-            $table->json('cc')->nullable(); // $msg->getCc()->toArray()
-            $table->json('bcc')->nullable(); // $msg->getBcc()->toArray()
-            $table->timestamp('date')->nullable(); // $msg->getDate()->toDate()
-            $table->string('subject')->nullable(); // $msg->getSubject()->toString()
-            $table->longText('text_body')->nullable(); // $msg->getTextBody();
-            $table->longText('html_body')->nullable(); // $msg->getHtmlBody();
-            $table->boolean('is_seen')->default(false); // $msg->isSeen()
+            $table->foreignId('mail_account_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('mail_folder_id')->constrained()->cascadeOnDelete();
+            $table->string('message_id')->nullable()->index();
+            $table->integer('message_uid')->nullable()->index();
+            $table->json('from')->nullable();
+            $table->json('to')->nullable();
+            $table->json('cc')->nullable();
+            $table->json('bcc')->nullable();
+            $table->dateTime('date')->nullable();
+            $table->string('subject')->nullable();
+            $table->longText('text_body')->nullable();
+            $table->longText('html_body')->nullable();
+            $table->boolean('is_seen')->default(false);
             $table->timestamps();
         });
     }
