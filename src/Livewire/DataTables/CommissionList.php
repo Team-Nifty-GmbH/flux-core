@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Commission;
 use TeamNiftyGmbH\DataTable\DataTable;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class CommissionList extends DataTable
 {
@@ -47,5 +48,28 @@ class CommissionList extends DataTable
         $item->commission_rate = $item->commission_rate['commission_rate'];
 
         return parent::itemToArray($item);
+    }
+
+    public function getReturnKeys(): array
+    {
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'order_id',
+            ]
+        );
+    }
+
+    public function getRowActions(): array
+    {
+        return [
+            DataTableButton::make(label: __('View Order'))
+                ->color('primary')
+                ->icon('eye')
+                ->href('#')
+                ->attributes([
+                    'x-bind:href' => '\'/orders/\' + record.order_id',
+                ]),
+        ];
     }
 }

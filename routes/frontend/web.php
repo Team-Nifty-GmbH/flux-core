@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Http\Controllers\LoginLinkController;
 use FluxErp\Http\Controllers\PushSubscriptionController;
 use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contacts\Contact;
@@ -55,6 +56,8 @@ use TeamNiftyGmbH\DataTable\Controllers\SearchController;
 Route::get('/icons/{name}/{variant?}', IconController::class)
     ->where('variant', '(outline|solid)')
     ->name('icons');
+
+Route::get('/login-link', LoginLinkController::class)->name('login-link');
 
 Route::middleware(['auth:web', 'permission'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);

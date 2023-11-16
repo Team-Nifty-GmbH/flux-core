@@ -97,7 +97,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
 
         self::saving(function (Order $order) {
             if ($order->isDirty('address_invoice_id')) {
-                $addressInvoice = $order->addressInvoice()->first()->append('name');
+                $addressInvoice = $order->addressInvoice()->first();
                 $order->address_invoice = $addressInvoice;
 
                 // Get additional attributes from address if not explicitly changed
@@ -124,7 +124,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
                 && $order->address_delivery_id
                 && ! $order->isDirty('address_delivery')
             ) {
-                $order->address_delivery = $order->addressDelivery()->first()->append('name');
+                $order->address_delivery = $order->addressDelivery()->first();
             }
 
             // reset to original

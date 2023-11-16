@@ -65,8 +65,7 @@ class UserEdit extends Component
             ->toArray();
 
         $this->users = User::query()
-            ->get(['id', 'firstname', 'lastname', 'email'])
-            ->append('name')
+            ->get(['id', 'email', 'firstname', 'lastname', 'name'])
             ->toArray();
     }
 

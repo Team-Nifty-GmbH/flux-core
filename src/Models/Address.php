@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
@@ -22,7 +23,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 use Spatie\Permission\Traits\HasRoles;
@@ -56,6 +61,20 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public static string $iconName = 'user';
 
+    protected static function booted(): void
+    {
+        static::saving(function (Address $address) {
+            if ($address->isDirty('lastname') || $address->isDirty('firstname') || $address->isDirty('company')) {
+                $name = [
+                    $address->company,
+                    trim($address->firstname . ' ' . $address->lastname),
+                ];
+
+                $address->name = implode(', ', array_filter($name)) ?: null;
+            }
+        });
+    }
+
     public function getAuthPassword()
     {
         return $this->login_password;
@@ -76,13 +95,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
                 ->orderBy('is_primary', 'desc')
                 ->first()
                 ->value ?? null
-        );
-    }
-
-    protected function name(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->getLabel()
         );
     }
 
@@ -121,6 +133,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     public function contactOptions(): HasMany
     {
         return $this->hasMany(ContactOption::class);
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
     }
 
     public function language(): BelongsTo
@@ -177,19 +194,13 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public function getLabel(): ?string
     {
-        return trim(
-            ($this->company ?? '') . ' ' .
-            ($this->firstname ?? '') . ' ' .
-            ($this->lastname ?? '')
-        );
+        return $this->name;
     }
 
     public function getDescription(): ?string
     {
         return trim(
-            ($this->company ?? '') . ' ' .
-            ($this->firstname ?? '') . ' ' .
-            ($this->lastname ?? '') . ' ' .
+            $this->name . ' ' .
             ($this->street ?? '') . ' ' .
             ($this->zip ?? '') . ' ' .
             ($this->city ?? '') . ' ' .
@@ -208,5 +219,21 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     public function getAvatarUrl(): ?string
     {
         return $this->contact?->getFirstMediaUrl('avatar') ?: self::icon()->getUrl();
+    }
+
+    public function sendLoginLink(): void
+    {
+        $plaintext = Str::uuid()->toString();
+        $expires = now()->addMinutes(15);
+        Cache::put('login_token_' . $plaintext,
+            [
+                'user' => $this,
+                'guard' => 'address',
+                'intended_url' => Session::get('url.intended', route('portal.dashboard')),
+            ],
+            $expires
+        );
+
+        Mail::to($this->login_name)->queue(new MagicLoginLink($plaintext, $expires));
     }
 }

@@ -186,7 +186,6 @@ class Address extends Component
 
         $this->addressOriginal = $model->toArray();
         $this->skipRender();
-        $model->append('name');
 
         return $model->toArray();
     }
