@@ -49,7 +49,9 @@ class SyncMailAccountJob implements ShouldBeUnique, ShouldQueue
             ->where('mail_account_id', $this->mailAccount->id)
             ->whereIntegerNotInRaw('id', array_values($this->folderIds))
             ->get('id')
-            ->each(fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->id])->validate()->execute());
+            ->each(
+                fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->id])->validate()->execute()
+            );
 
         foreach ($folders as $folder) {
             $this->getNewMessages($folder);
@@ -112,23 +114,18 @@ class SyncMailAccountJob implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        $page = 1;
-        while (true) {
+        $page = 0;
+        do {
+            $page++;
             $messages = $query->paginate(100, $page);
 
             foreach ($messages as $message) {
                 $this->storeMessage($message, $this->folderIds[$folder->path]);
             }
-
-            if ($messages->lastPage() === $page) {
-                break;
-            }
-
-            $page++;
-        }
+        } while ($page !== $messages->lastPage());
     }
 
-    public function getUnseenMessages(Folder $folder)
+    public function getUnseenMessages(Folder $folder): void
     {
         try {
             $query = $folder->messages()
@@ -141,17 +138,13 @@ class SyncMailAccountJob implements ShouldBeUnique, ShouldQueue
         }
 
         $unreadUids = [];
-        $page = 1;
-        while (true) {
+
+        $page = 0;
+        do {
+            $page++;
             $messages = $query->paginate(100, $page);
             $unreadUids[] = $messages->map(fn (Message $message) => $message->getUid())->toArray();
-
-            if ($messages->lastPage() === $page) {
-                break;
-            }
-
-            $page++;
-        }
+        } while ($page !== $messages->lastPage());
 
         MailMessage::query()
             ->where('mail_account_id', $this->mailAccount->id)

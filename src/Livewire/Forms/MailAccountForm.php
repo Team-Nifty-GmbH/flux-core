@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
+use FluxErp\Models\MailAccount;
 use Livewire\Form;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Webklex\PHPIMAP\Exceptions\AuthFailedException;
@@ -63,7 +64,7 @@ class MailAccountForm extends Form
      */
     public function testImapConnection(): void
     {
-        (new \FluxErp\Models\MailAccount())->fill($this->toArray())->connect();
+        (new MailAccount())->fill($this->toArray())->connect();
     }
 
     /**

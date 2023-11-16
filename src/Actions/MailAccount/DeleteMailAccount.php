@@ -20,7 +20,7 @@ class DeleteMailAccount extends FluxAction
         return [MailAccount::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): ?bool
     {
         return MailAccount::query()
             ->whereKey($this->data['id'])

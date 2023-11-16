@@ -20,7 +20,7 @@ class DeleteMailMessage extends FluxAction
         return [MailMessage::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): ?bool
     {
         return MailMessage::query()
             ->whereKey($this->data['id'])

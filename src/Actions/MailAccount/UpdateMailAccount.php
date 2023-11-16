@@ -5,6 +5,7 @@ namespace FluxErp\Actions\MailAccount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateMailAccountRequest;
 use FluxErp\Models\MailAccount;
+use Illuminate\Database\Eloquent\Model;
 
 class UpdateMailAccount extends FluxAction
 {
@@ -19,7 +20,7 @@ class UpdateMailAccount extends FluxAction
         return [MailAccount::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): Model
     {
         $mailAccount = MailAccount::query()
             ->whereKey($this->data['id'])

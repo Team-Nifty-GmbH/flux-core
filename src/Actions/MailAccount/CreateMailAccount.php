@@ -19,11 +19,11 @@ class CreateMailAccount extends FluxAction
         return [MailAccount::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): MailAccount
     {
         $mailAccount = new MailAccount($this->data);
         $mailAccount->save();
 
-        return $mailAccount->withoutRelations()->refresh();
+        return $mailAccount->refresh();
     }
 }

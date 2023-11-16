@@ -5,9 +5,12 @@ namespace FluxErp\Actions\MailFolder;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateMailFolderRequest;
 use FluxErp\Models\MailFolder;
+use Illuminate\Database\Eloquent\Model;
 
 class UpdateMailFolder extends FluxAction
 {
+    protected static bool $hasPermission = false;
+
     protected function boot(array $data): void
     {
         parent::boot($data);
@@ -19,7 +22,7 @@ class UpdateMailFolder extends FluxAction
         return [MailFolder::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): Model
     {
         $mailFolder = MailFolder::query()
             ->whereKey($this->data['id'])

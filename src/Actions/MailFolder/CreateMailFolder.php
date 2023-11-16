@@ -21,11 +21,11 @@ class CreateMailFolder extends FluxAction
         return [MailFolder::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): MailFolder
     {
         $mailFolder = new MailFolder($this->data);
         $mailFolder->save();
 
-        return $mailFolder->withoutRelations()->refresh();
+        return $mailFolder->refresh();
     }
 }

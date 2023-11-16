@@ -5,6 +5,7 @@ namespace FluxErp\Actions\MailMessage;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateMailMessageRequest;
 use FluxErp\Models\MailMessage;
+use Illuminate\Database\Eloquent\Model;
 
 class UpdateMailMessage extends FluxAction
 {
@@ -19,7 +20,7 @@ class UpdateMailMessage extends FluxAction
         return [MailMessage::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): Model
     {
         $mailMessage = MailMessage::query()
             ->whereKey($this->data['id'])

@@ -7,6 +7,8 @@ use FluxErp\Models\MailFolder;
 
 class DeleteMailFolder extends FluxAction
 {
+    protected static bool $hasPermission = false;
+
     protected function boot(array $data): void
     {
         parent::boot($data);
@@ -20,7 +22,7 @@ class DeleteMailFolder extends FluxAction
         return [MailFolder::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): ?bool
     {
         return MailFolder::query()
             ->whereKey($this->data['id'])
