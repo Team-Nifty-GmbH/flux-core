@@ -40,11 +40,6 @@ jobs:
         ports:
           - 7700/tcp
         options: --health-cmd="wget --no-verbose --spider http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
-      gotenberg:
-        image: 'gotenberg/gotenberg:7'
-        ports:
-          - 3000/tcp
-        options: --health-cmd="curl -f http://localhost:3000/health" --health-interval=10s --health-timeout=5s --health-retries=3
     strategy:
       fail-fast: false
       matrix:
@@ -70,8 +65,15 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
+      - name: Run Feature Tests
+        run: composer test-feature
+        env:
+          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
+          GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
       - name: Install npm dependencies
-        run: npm ci
+        run: npm i
 
       - name: Run npm build
         run: npm run build
@@ -84,14 +86,6 @@ jobs:
 
       - name: Install ChromeDriver
         run: composer dusk:install-chromedriver
-
-      - name: Run Feature Tests
-        run: composer test-feature
-        env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
-          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-          GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
       - name: Run Livewire Tests
         run: composer test-livewire
