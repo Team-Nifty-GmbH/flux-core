@@ -24,6 +24,7 @@
         <x-checkbox :label="__('Active')" wire:model="user.is_active"/>
         <x-inputs.password :label="__('New password')" wire:model="user.password"/>
         <x-inputs.password :label="__('Repeat password')" wire:model="user.password_confirmation"/>
+        <x-select :options="$mailAccounts" option-label="email" option-value="id" multiselect :label="__('Mail Accounts')" wire:model="user.mail_accounts" />
     </form>
     <div class="border-b border-gray-200" x-data="{active: 'roles', user: $wire.entangle('user')}">
         <nav class="mt-2 -mb-px flex space-x-8 pb-5" aria-label="Tabs">

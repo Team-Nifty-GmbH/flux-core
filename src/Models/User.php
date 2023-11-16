@@ -102,6 +102,11 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
         return $this->morphMany(Lock::class, 'authenticatable');
     }
 
+    public function mailAccounts(): BelongsToMany
+    {
+        return $this->belongsToMany(MailAccount::class, 'mail_account_user');
+    }
+
     public function parent(): BelongsTo
     {
         return $this->belongsTo(User::class, 'parent_id');

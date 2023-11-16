@@ -2,6 +2,7 @@
 
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\MailMessage;
 use FluxErp\Models\Order;
 use FluxErp\Models\Project;
 use FluxErp\Models\ProjectTask;
@@ -37,6 +38,14 @@ Broadcast::channel('FluxErp.Models.Log.{log}', function ($user) {
 
 Broadcast::channel('FluxErp.Models.Log', function ($user) {
     return $user->can(channel_to_permission((new \FluxErp\Models\Log())->broadcastChannelRoute()));
+});
+
+Broadcast::channel('FluxErp.Models.MailMessage.{message}', function ($user) {
+    return $user->can(channel_to_permission((new MailMessage())->broadcastChannelRoute()));
+});
+
+Broadcast::channel('FluxErp.Models.MailMessage', function ($user) {
+    return $user->can(channel_to_permission((new MailMessage())->broadcastChannelRoute()));
 });
 
 Broadcast::channel('FluxErp.Models.Order.{order}', function ($user) {
