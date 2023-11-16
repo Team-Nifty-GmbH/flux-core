@@ -38,7 +38,7 @@ class CreateOrder extends FluxAction
         $addresses = Arr::pull($this->data, 'addresses', []);
         $addressInvoice = Address::query()->whereKey($this->data['address_invoice_id'])->first();
 
-        if (! ($this->data['address_delivery']['id'] ?? false) && ($this->data['address_delivery_id'] ?? false)) {
+        if (! ($this->data['address_delivery']['id'] ?? false) && ! ($this->data['address_delivery_id'] ?? false)) {
             $this->data['address_delivery_id'] = null;
         } elseif ($this->data['address_delivery']['id'] ?? false) {
             $this->data['address_delivery_id'] = $this->data['address_delivery']['id'];
@@ -60,6 +60,8 @@ class CreateOrder extends FluxAction
             ?? $contact->payment_reminder_days_2;
         $this->data['payment_reminder_days_3'] = $this->data['payment_reminder_days_3']
             ?? $contact->payment_reminder_days_3;
+
+        $this->data['order_date'] = $this->data['order_date'] ?? now();
 
         $this->data['contact_id'] = $contactId;
 
