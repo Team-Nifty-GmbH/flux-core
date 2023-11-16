@@ -69,6 +69,8 @@ class OrdersTest extends PortalSetup
 
     public function test_portal_orders_without_permission()
     {
+        Permission::findOrCreate('orders.get', 'address');
+
         $this->actingAs($this->user, 'address')->get(route('portal.orders'))
             ->assertStatus(403);
     }
@@ -90,6 +92,8 @@ class OrdersTest extends PortalSetup
 
     public function test_portal_orders_id_without_permission()
     {
+        Permission::findOrCreate('orders.{id}.get', 'address');
+
         $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
             ->assertStatus(403);
     }

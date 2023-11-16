@@ -27,6 +27,8 @@ class SettingsPermissionsTest extends BaseSetup
 
     public function test_settings_permissions_without_permission()
     {
+        Permission::findOrCreate('settings.permissions.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/settings/permissions')
             ->assertStatus(403);
     }

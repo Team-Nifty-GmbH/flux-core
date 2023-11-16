@@ -27,6 +27,8 @@ class ProductsTest extends BaseSetup
             'model_type' => Product::class,
         ]);
 
+        Currency::factory()->create(['is_default' => true]);
+
         $this->product->categories()->attach($category->id);
     }
 
@@ -48,6 +50,8 @@ class ProductsTest extends BaseSetup
 
     public function test_products_without_permission()
     {
+        Permission::findOrCreate('products.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/products')
             ->assertStatus(403);
     }
@@ -69,6 +73,8 @@ class ProductsTest extends BaseSetup
 
     public function test_products_list_without_permission()
     {
+        Permission::findOrCreate('products.list.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/products/list')
             ->assertStatus(403);
     }
@@ -92,6 +98,8 @@ class ProductsTest extends BaseSetup
 
     public function test_products_id_without_permission()
     {
+        Permission::findOrCreate('products.{id}.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/products/' . $this->product->id)
             ->assertStatus(403);
     }

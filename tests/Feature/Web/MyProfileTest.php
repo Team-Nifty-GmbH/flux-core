@@ -27,6 +27,8 @@ class MyProfileTest extends BaseSetup
 
     public function test_my_profile_without_permission()
     {
+        Permission::findOrCreate('my-profile.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/my-profile')
             ->assertStatus(403);
     }

@@ -29,6 +29,8 @@ class SettingsCategoriesTest extends BaseSetup
 
     public function test_settings_categories_without_permission()
     {
+        Permission::findOrCreate('settings.categories.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/settings/categories')
             ->assertStatus(403);
     }

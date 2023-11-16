@@ -53,6 +53,8 @@ class TicketsTest extends BaseSetup
 
     public function test_tickets_without_permission()
     {
+        Permission::findOrCreate('tickets.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/tickets')
             ->assertStatus(403);
     }
@@ -74,6 +76,8 @@ class TicketsTest extends BaseSetup
 
     public function test_tickets_id_without_permission()
     {
+        Permission::findOrCreate('tickets.{id}.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
             ->assertStatus(403);
     }

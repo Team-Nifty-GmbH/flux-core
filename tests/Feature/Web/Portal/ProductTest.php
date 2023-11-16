@@ -44,6 +44,8 @@ class ProductTest extends PortalSetup
 
     public function test_portal_product_without_permission()
     {
+        Permission::findOrCreate('product.{id}.get', 'address');
+
         $this->actingAs($this->user, 'address')->get(route('portal.product', ['id' => $this->serialNumber->id]))
             ->assertStatus(403);
     }

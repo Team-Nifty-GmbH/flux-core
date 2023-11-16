@@ -27,6 +27,8 @@ class SettingsTranslationsTest extends BaseSetup
 
     public function test_settings_translations_without_permission()
     {
+        Permission::findOrCreate('settings.translations.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/settings/translations')
             ->assertStatus(403);
     }

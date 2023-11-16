@@ -26,6 +26,8 @@ class SerialNumbersTest extends PortalSetup
 
     public function test_portal_serial_numbers_without_permission()
     {
+        Permission::findOrCreate('serial-numbers.get', 'address');
+
         $this->actingAs($this->user, 'address')->get(route('portal.serial-numbers'))
             ->assertStatus(403);
     }

@@ -40,6 +40,8 @@ class TicketsTest extends PortalSetup
 
     public function test_portal_tickets_without_permission()
     {
+        Permission::findOrCreate('tickets.get', 'address');
+
         $this->actingAs($this->user, 'address')->get(route('portal.tickets'))
             ->assertStatus(403);
     }
@@ -61,6 +63,8 @@ class TicketsTest extends PortalSetup
 
     public function test_portal_tickets_id_without_permission()
     {
+        Permission::findOrCreate('tickets.{id}.get', 'address');
+
         $this->actingAs($this->user, 'address')->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
             ->assertStatus(403);
     }

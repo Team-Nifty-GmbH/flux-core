@@ -52,6 +52,8 @@ class ContactsTest extends BaseSetup
 
     public function test_contacts_without_permission()
     {
+        Permission::findOrCreate('contacts.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/contacts')
             ->assertStatus(403);
     }
@@ -81,6 +83,8 @@ class ContactsTest extends BaseSetup
 
     public function test_contacts_id_without_permission()
     {
+        Permission::findOrCreate('contacts.{id?}.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
             ->assertStatus(403);
     }

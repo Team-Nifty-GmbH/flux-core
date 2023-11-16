@@ -20,7 +20,7 @@
             @endif
         </style>
     @endif
-    <div  x-data="{
+    <div id="main-navigation" x-data="{
             init() {
                 document.addEventListener('livewire:navigating', () => {
                     this.closeMenu(true);

@@ -53,6 +53,7 @@ class InitPermissions extends Command
         $this->registerTabPermissions();
 
         Permission::query()->whereIntegerInRaw('id', array_keys($this->currentPermissions))->delete();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 
     private function registerRoutePermissions(): void

@@ -26,6 +26,8 @@ class MyProfileTest extends PortalSetup
 
     public function test_portal_my_profile_without_permission()
     {
+        Permission::findOrCreate('my-profile.get', 'address');
+
         $this->actingAs($this->user, 'address')->get(route('portal.my-profile'))
             ->assertStatus(403);
     }
