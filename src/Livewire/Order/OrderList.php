@@ -61,7 +61,9 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
     public function updatedOrderContactId(): void
     {
-        $contact = Contact::query()->whereKey($this->order->contact_id)->first();
+        $contact = Contact::query()
+            ->whereKey($this->order->contact_id)
+            ->first();
 
         $this->order->client_id = $contact->client_id ?: $this->order->client_id;
         $this->order->agent_id = $contact->agent_id ?: $this->order->agent_id;
@@ -71,7 +73,9 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->order->price_list_id = $contact->price_list_id ?: $this->order->price_list_id;
         $this->order->payment_type_id = $contact->payment_type_id ?: $this->order->payment_type_id;
 
-        $paymentType = PaymentType::query()->whereKey($this->order->payment_type_id)->first();
+        $paymentType = PaymentType::query()
+            ->whereKey($this->order->payment_type_id)
+            ->first();
 
         $this->order->payment_reminder_days_1 = $contact->payment_reminder_days_1
             ?: $paymentType->payment_reminder_days_1

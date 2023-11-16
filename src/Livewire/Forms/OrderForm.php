@@ -39,6 +39,7 @@ class OrderForm extends Form
     public int $payment_reminder_days_3 = 0;
 
     public ?int $payment_discount_percent = null;
+
     public ?array $payment_texts = [];
 
     public function save(): void

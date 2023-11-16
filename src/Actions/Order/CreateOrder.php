@@ -38,12 +38,7 @@ class CreateOrder extends FluxAction
         $addresses = Arr::pull($this->data, 'addresses', []);
         $addressInvoice = Address::query()->whereKey($this->data['address_invoice_id'])->first();
 
-        if (data_get($this->data, 'address_delivery')
-            && ! data_get($this->data, 'address_delivery.id')
-            && data_get($this->data, 'address_delivery_id')
-        ) {
-            $this->data['address_delivery_id'] = null;
-        } elseif (data_get($this->data, 'address_delivery.id')) {
+        if (! $this->data['address_delivery_id'] ?? false) {
             $this->data['address_delivery_id'] = data_get($this->data, 'address_delivery.id');
         }
 
