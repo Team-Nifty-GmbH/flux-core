@@ -111,7 +111,7 @@ class InitPermissions extends Command
     {
         $this->info('Registering action permissions');
         foreach (Action::all() as $action) {
-            if ($action::$hasPermission) {
+            if ($action['class']::hasPermission()) {
                 $permission = Permission::findOrCreate('action.' . $action['name'], 'web');
                 unset($this->currentPermissions[$permission->id]);
             }

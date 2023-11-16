@@ -89,6 +89,11 @@ abstract class FluxAction
         return $this;
     }
 
+    public static function hasPermission(): bool
+    {
+        return static::$hasPermission;
+    }
+
     public static function name(): string
     {
         $exploded = explode('-', Str::kebab(class_basename(static::class)));

@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Http\Controllers\LoginLinkController;
 use FluxErp\Http\Controllers\PresentationController;
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\PrintDataController;
@@ -28,3 +29,5 @@ Route::get('/pwa-service-worker', function () {
     return response(Vite::content('resources/js/sw.js', 'flux/build'))
         ->header('Content-Type', 'application/javascript');
 })->name('pwa-service-worker');
+
+Route::get('/login-link', LoginLinkController::class)->name('login-link');
