@@ -113,8 +113,6 @@ abstract class DuskTestCase extends TestCase
     {
         $language = Language::factory()->create();
 
-        $this->password = '#Password123';
-
         $this->user = new User();
         $this->user->language_id = $language->id;
         $this->user->email = 'testuser@test.de';

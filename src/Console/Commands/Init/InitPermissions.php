@@ -52,7 +52,6 @@ class InitPermissions extends Command
         $this->registerWidgetPermissions();
         $this->registerTabPermissions();
 
-
         Permission::query()->whereIntegerInRaw('id', array_keys($this->currentPermissions))->delete();
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
