@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Order;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class OrderList extends DataTable
 {
@@ -33,21 +32,6 @@ class OrderList extends DataTable
     public array $availableCols = ['*'];
 
     public bool $showModal = false;
-
-    public function getTableActions(): array
-    {
-        $this->getIncludedRelations();
-
-        return [
-            DataTableButton::make()
-                ->color('primary')
-                ->label(__('New order'))
-                ->icon('plus')
-                ->attributes([
-                    'x-on:click' => "\$dispatch('create-order')",
-                ]),
-        ];
-    }
 
     public function getFormatters(): array
     {

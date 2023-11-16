@@ -26,7 +26,7 @@ class CreateOrderRequest extends BaseFormRequest
                 'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'parent_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
-                'agent_id' => 'integer|nullable|exists:users,id,deleted_at,Null',
+                'agent_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'contact_id' => [
                     'integer',
                     'nullable',

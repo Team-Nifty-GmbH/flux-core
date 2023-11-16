@@ -18,7 +18,6 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
-use Livewire\Features\SupportRedirects\Redirector;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
 use ZipArchive;
@@ -179,7 +178,7 @@ class Order extends Component
         }
     }
 
-    public function delete(): false|Redirector
+    public function delete(): void
     {
         $this->skipRender();
 
@@ -189,12 +188,10 @@ class Order extends Component
                 ->validate()
                 ->execute();
 
-            return redirect()->route('orders');
+            $this->redirect(route('orders.orders'), true);
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
         }
-
-        return false;
     }
 
     public function downloadDocuments()
