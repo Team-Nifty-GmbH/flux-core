@@ -12,37 +12,38 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
+use Illuminate\Support\Collection;
 use Laravel\Dusk\Browser;
 
 class OrdersTest extends PortalDuskTestCase
 {
     use DatabaseTruncation;
 
+    public Collection $orders;
+
     public function setUp(): void
     {
         parent::setUp();
-
-        $this->priceLists = PriceList::factory()->count(2)->create();
 
         $contacts = Contact::factory()->count(2)->create([
             'client_id' => $this->dbClient->id,
         ]);
 
-        $currencies = Currency::factory()->count(2)->create();
+        $currency = Currency::factory()->create();
         Currency::query()->first()->update(['is_default' => true]);
 
-        $this->languages = Language::factory()->count(2)->create();
+        $language = Language::factory()->create();
 
-        $this->orderTypes = OrderType::factory()->count(2)->create([
+        $orderType = OrderType::factory()->create([
             'client_id' => $this->dbClient->id,
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 
-        $this->paymentTypes = PaymentType::factory()->count(2)->create([
+        $paymentType = PaymentType::factory()->create([
             'client_id' => $this->dbClient->id,
         ]);
 
-        $priceLists = PriceList::factory()->count(2)->create();
+        $priceList = PriceList::factory()->create();
 
         $addresses = Address::factory()->count(2)->create([
             'client_id' => $this->dbClient->id,
@@ -51,11 +52,11 @@ class OrdersTest extends PortalDuskTestCase
 
         Order::factory()->count(3)->create([
             'client_id' => $this->dbClient->id,
-            'language_id' => $this->languages[0]->id,
-            'order_type_id' => $this->orderTypes[0]->id,
-            'payment_type_id' => $this->paymentTypes[0]->id,
-            'price_list_id' => $priceLists[0]->id,
-            'currency_id' => $currencies[0]->id,
+            'language_id' => $language->id,
+            'order_type_id' => $orderType->id,
+            'payment_type_id' => $paymentType->id,
+            'price_list_id' => $priceList->id,
+            'currency_id' => $currency->id,
             'contact_id' => $contacts->random()->id,
             'address_invoice_id' => $addresses->random()->id,
             'address_delivery_id' => $addresses->random()->id,
@@ -64,11 +65,11 @@ class OrdersTest extends PortalDuskTestCase
 
         $this->orders = Order::factory()->count(3)->create([
             'client_id' => $this->dbClient->id,
-            'language_id' => $this->languages[0]->id,
-            'order_type_id' => $this->orderTypes[0]->id,
-            'payment_type_id' => $this->paymentTypes[0]->id,
-            'price_list_id' => $priceLists[0]->id,
-            'currency_id' => $currencies[0]->id,
+            'language_id' => $language->id,
+            'order_type_id' => $orderType->id,
+            'payment_type_id' => $paymentType->id,
+            'price_list_id' => $priceList->id,
+            'currency_id' => $currency->id,
             'contact_id' => $this->user->contact_id,
             'address_invoice_id' => $this->user->id,
             'address_delivery_id' => $this->user->id,

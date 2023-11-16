@@ -11,7 +11,7 @@ class LoginTest extends PortalDuskTestCase
         $this->createLoginUser();
     }
 
-    public function test_login_wrong_credentials(): void
+    public function test_login_wrong_credentials()
     {
         $this->browse(function (Browser $browser) {
             $browser
