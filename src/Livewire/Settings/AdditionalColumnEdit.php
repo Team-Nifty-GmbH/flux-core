@@ -14,7 +14,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use WireUi\Traits\Actions;
 
 class AdditionalColumnEdit extends Component

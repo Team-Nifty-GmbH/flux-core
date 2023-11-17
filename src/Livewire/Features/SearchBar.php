@@ -13,7 +13,6 @@ use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Livewire\Component;
 use Livewire\WithPagination;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use WireUi\Traits\Actions;
 
 class SearchBar extends Component

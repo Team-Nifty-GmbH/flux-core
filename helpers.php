@@ -1,7 +1,7 @@
 <?php
 
 if (! function_exists('all_models')) {
-    function all_models(): \Illuminate\Support\Collection
+    function all_models(): Illuminate\Support\Collection
     {
         return \TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all()
             ->merge(
@@ -15,7 +15,7 @@ if (! function_exists('all_models')) {
 }
 
 if (! function_exists('model_info_all')) {
-    function model_info_all(): \Illuminate\Support\Collection
+    function model_info_all(): Illuminate\Support\Collection
     {
         return \TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels()
             ->merge(

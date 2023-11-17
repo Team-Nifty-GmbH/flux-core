@@ -7,7 +7,6 @@ use FluxErp\Livewire\Forms\Category;
 use FluxErp\Traits\Categorizable;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
 
