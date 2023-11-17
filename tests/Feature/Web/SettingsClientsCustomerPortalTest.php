@@ -31,6 +31,8 @@ class SettingsClientsCustomerPortalTest extends BaseSetup
 
     public function test_settings_clients_customer_portal_without_permission()
     {
+        Permission::findOrCreate('settings.clients.{client}.customer-portal.get', 'web');
+
         $this->actingAs($this->user, 'web')->get(
             '/settings/clients/' . $this->dbClient->id . '/customer-portal'
         )

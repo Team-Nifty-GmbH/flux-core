@@ -26,6 +26,8 @@ class CalendarTest extends PortalSetup
 
     public function test_portal_calendar_without_permission()
     {
+        Permission::findOrCreate('calendar.get', 'address');
+
         $this->actingAs($this->user, 'address')->get(route('portal.calendar'))
             ->assertStatus(403);
     }

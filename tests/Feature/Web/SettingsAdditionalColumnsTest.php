@@ -29,6 +29,8 @@ class SettingsAdditionalColumnsTest extends BaseSetup
 
     public function test_settings_additional_columns_without_permission()
     {
+        Permission::findOrCreate('settings.additional-columns.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/settings/additional-columns')
             ->assertStatus(403);
     }

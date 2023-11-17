@@ -37,6 +37,8 @@ class ProductsSerialNumbersTest extends BaseSetup
 
     public function test_products_serial_numbers_without_permission()
     {
+        Permission::findOrCreate('products.serial-numbers.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/products/serial-numbers')
             ->assertStatus(403);
     }
@@ -70,6 +72,8 @@ class ProductsSerialNumbersTest extends BaseSetup
 
     public function test_products_id_serial_numbers_without_permission()
     {
+        Permission::findOrCreate('products.serial-numbers.{id?}.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/products/serial-numbers/' . $this->serialNumber->id)
             ->assertStatus(403);
     }

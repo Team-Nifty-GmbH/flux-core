@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ContactOption extends Model
@@ -24,5 +25,10 @@ class ContactOption extends Model
         return $this->hasMany(self::class, 'address_id', 'address_id')
             ->where('type', $this->type)
             ->where('id', '!=', $this->id);
+    }
+
+    public function address(): BelongsTo
+    {
+        return $this->belongsTo(Address::class);
     }
 }

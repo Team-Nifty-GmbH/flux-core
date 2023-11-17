@@ -53,6 +53,7 @@ class InitPermissions extends Command
         $this->registerTabPermissions();
 
         Permission::query()->whereIntegerInRaw('id', array_keys($this->currentPermissions))->delete();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 
     private function registerRoutePermissions(): void
@@ -110,8 +111,10 @@ class InitPermissions extends Command
     {
         $this->info('Registering action permissions');
         foreach (Action::all() as $action) {
-            $permission = Permission::findOrCreate('action.' . $action['name'], 'web');
-            unset($this->currentPermissions[$permission->id]);
+            if ($action::$hasPermission) {
+                $permission = Permission::findOrCreate('action.' . $action['name'], 'web');
+                unset($this->currentPermissions[$permission->id]);
+            }
         }
     }
 

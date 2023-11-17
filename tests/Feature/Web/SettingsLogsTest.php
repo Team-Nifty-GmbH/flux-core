@@ -27,6 +27,8 @@ class SettingsLogsTest extends BaseSetup
 
     public function test_settings_logs_without_permission()
     {
+        Permission::findOrCreate('settings.logs.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/settings/logs')
             ->assertStatus(403);
     }

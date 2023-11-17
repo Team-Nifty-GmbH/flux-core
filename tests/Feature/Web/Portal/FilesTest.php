@@ -26,6 +26,8 @@ class FilesTest extends PortalSetup
 
     public function test_portal_files_without_permission()
     {
+        Permission::findOrCreate('files.get', 'address');
+
         $this->actingAs($this->user, 'address')->get(route('portal.files'))
             ->assertStatus(403);
     }

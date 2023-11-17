@@ -20,6 +20,7 @@ use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\Mailable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Builder;
@@ -37,8 +38,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Order extends Model implements HasMedia, InteractsWithDataTables
 {
     use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes, HasPackageFactory,
-        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
-        SoftDeletes, Trackable;
+        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia,
+        Mailable, Searchable, SoftDeletes, Trackable;
 
     protected $with = [
         'currency',

@@ -27,6 +27,8 @@ class SettingsCountriesTest extends BaseSetup
 
     public function test_settings_countries_without_permission()
     {
+        Permission::findOrCreate('settings.countries.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/settings/countries')
             ->assertStatus(403);
     }

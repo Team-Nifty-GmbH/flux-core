@@ -27,6 +27,8 @@ class SettingsLanguagesTest extends BaseSetup
 
     public function test_settings_languages_without_permission()
     {
+        Permission::findOrCreate('settings.languages.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/settings/languages')
             ->assertStatus(403);
     }

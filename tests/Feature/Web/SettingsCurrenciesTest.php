@@ -27,6 +27,8 @@ class SettingsCurrenciesTest extends BaseSetup
 
     public function test_settings_currencies_without_permission()
     {
+        Permission::findOrCreate('settings.currencies.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/settings/currencies')
             ->assertStatus(403);
     }

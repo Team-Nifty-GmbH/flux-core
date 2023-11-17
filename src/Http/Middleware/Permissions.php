@@ -5,6 +5,7 @@ namespace FluxErp\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -30,7 +31,13 @@ class Permissions
 
         $permission = route_to_permission(checkPermission: false);
 
-        if ($permission && ! Auth::user()?->checkPermissionTo($permission)) {
+        try {
+            $hasPermission = Auth::user()?->hasPermissionTo($permission);
+        } catch (PermissionDoesNotExist $e) {
+            $hasPermission = true;
+        }
+
+        if ($permission && ! $hasPermission) {
             throw UnauthorizedException::forPermissions([$permission]);
         }
 
