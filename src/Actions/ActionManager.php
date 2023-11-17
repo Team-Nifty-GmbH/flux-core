@@ -33,6 +33,7 @@ class ActionManager
             'name' => $action::name(),
             'description' => $action::description(),
             'models' => $action::models(),
+            'class' => $action,
         ];
     }
 
