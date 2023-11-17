@@ -54,7 +54,7 @@ class TransactionTest extends BaseSetup
         ]);
 
         $bankConnections = BankConnection::factory()->count(3)->create([
-            'currency_id' => $currency->random()->id,
+            'currency_id' => $currencies->random()->id,
         ]);
 
         $orders = Order::factory()->count(5)->create([
