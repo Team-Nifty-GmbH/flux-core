@@ -60,7 +60,7 @@ class Client extends Model implements HasMedia
 
     public function bankConnections(): BelongsToMany
     {
-        return $this->belongsToMany(BankConnection::class);
+        return $this->belongsToMany(BankConnection::class, 'bank_connection_client');
     }
 
     public function country(): BelongsTo

@@ -53,11 +53,11 @@ class TransactionTest extends BaseSetup
             'client_id' => $this->dbClient->id,
         ]);
 
-        $bankConnections = BankConnection::factory(3)->create([
-            'currency_id' => $currencies->random()->id,
+        $bankConnections = BankConnection::factory()->count(3)->create([
+            'currency_id' => $currency->random()->id,
         ]);
 
-        $orders = Order::factory(10)->create([
+        $orders = Order::factory()->count(5)->create([
             'client_id' => $this->dbClient->id,
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
@@ -69,11 +69,13 @@ class TransactionTest extends BaseSetup
             'is_locked' => false,
         ]);
 
-        Transaction::factory(50)->create([
-            'bank_connection_id' => $bankConnections->random()->id,
-            'currency_id' => $currencies->random()->id,
-            'order_id' => $orders->random()->id,
-        ]);
+        foreach ($orders as $order) {
+            Transaction::factory()->count(3)->create([
+                'bank_connection_id' => $bankConnections->random()->id,
+                'currency_id' => $currencies->random()->id,
+                'order_id' => $order->id,
+            ]);
+        }
     }
 
     public function test_transactions_page()
@@ -93,6 +95,8 @@ class TransactionTest extends BaseSetup
 
     public function test_transactions_without_permission()
     {
+        Permission::findOrCreate('accounting.transactions.get', 'web');
+
         $this->actingAs($this->user, 'web')->get('/accounting/transactions')
             ->assertStatus(403);
     }

@@ -11,12 +11,12 @@ class TransactionTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $accounts = BankConnection::all();
-        $orders = Order::all();
-        foreach ($accounts as $account) {
+        $bankConnections = BankConnection::all(['id', 'currency_id']);
+        $orders = Order::all(['id']);
+        foreach ($bankConnections as $bankConnection) {
             Transaction::factory(20)->create([
-                'account_id' => $accounts->id,
-                'currency_id' => $account->currency_id,
+                'bank_connection_id' => $bankConnections->id,
+                'currency_id' => $bankConnection->currency_id,
                 'order_id' => rand(0, 1) ? $orders->random()->id : null,
             ]);
         }

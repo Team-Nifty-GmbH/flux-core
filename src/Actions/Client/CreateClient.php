@@ -27,7 +27,7 @@ class CreateClient extends FluxAction
         $client = new Client($this->data);
         $client->save();
 
-        if (! is_null($bankConnections)) {
+        if ($bankConnections) {
             $client->bankConnections()->sync($bankConnections);
         }
 

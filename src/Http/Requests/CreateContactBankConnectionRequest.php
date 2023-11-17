@@ -12,9 +12,9 @@ class CreateContactBankConnectionRequest extends BaseFormRequest
             'uuid' => 'string|uuid|unique:bank_connections,uuid',
             'contact_id' => 'integer|nullable|exists:contacts,id,deleted_at,NULL',
             'iban' => ['required', 'string', new Iban()],
-            'account_holder' => 'sometimes|string|nullable',
-            'bank_name' => 'sometimes|string|nullable',
-            'bic' => 'sometimes|string|nullable',
+            'account_holder' => 'string|nullable',
+            'bank_name' => 'string|nullable',
+            'bic' => 'string|nullable',
         ];
     }
 }

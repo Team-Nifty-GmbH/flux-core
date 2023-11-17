@@ -33,6 +33,6 @@ class BankConnection extends Model
 
     public function clients(): BelongsToMany
     {
-        return $this->belongsToMany(Client::class);
+        return $this->belongsToMany(Client::class, 'bank_connection_client');
     }
 }

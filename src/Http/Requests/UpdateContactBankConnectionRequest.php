@@ -11,10 +11,10 @@ class UpdateContactBankConnectionRequest extends BaseFormRequest
         return [
             'id' => 'required|integer|exists:contact_bank_connections,id,deleted_at,NULL',
             'contact_id' => 'integer|nullable|exists:contacts,id,deleted_at,NULL',
-            'iban' => ['sometimes', 'string', new Iban()],
-            'account_holder' => 'sometimes|string|nullable',
-            'bank_name' => 'sometimes|string|nullable',
-            'bic' => 'sometimes|string|nullable',
+            'iban' => ['string', new Iban()],
+            'account_holder' => 'string|nullable',
+            'bank_name' => 'string|nullable',
+            'bic' => 'string|nullable',
         ];
     }
 }

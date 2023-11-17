@@ -4,11 +4,13 @@ if (! function_exists('all_models')) {
     function all_models(): \Illuminate\Support\Collection
     {
         return \TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all()
-            ->merge(\TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all(
-                flux_path('src/Models'),
-                flux_path('src'),
-                'FluxErp'
-            ));
+            ->merge(
+                \TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all(
+                    flux_path('src/Models'),
+                    flux_path('src'),
+                    'FluxErp'
+                )
+            );
     }
 }
 
@@ -18,8 +20,8 @@ if (! function_exists('model_info_all')) {
         return \TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels()
             ->merge(
                 \TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels(
-                    flux_path('src/Models'), flux_path
-                    ('src'),
+                    flux_path('src/Models'),
+                    flux_path('src'),
                     'FluxErp')
             );
     }

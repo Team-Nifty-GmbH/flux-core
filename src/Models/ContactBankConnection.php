@@ -15,6 +15,14 @@ class ContactBankConnection extends Model
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
+    protected $casts = [
+        'uuid' => 'string',
+    ];
+
+    protected $guarded = [
+        'id',
+    ];
+
     protected static function booted(): void
     {
         static::saving(function (ContactBankConnection $model) {
@@ -23,14 +31,6 @@ class ContactBankConnection extends Model
             }
         });
     }
-
-    protected $casts = [
-        'uuid' => 'string',
-    ];
-
-    protected $guarded = [
-        'id',
-    ];
 
     public function contact(): BelongsTo
     {

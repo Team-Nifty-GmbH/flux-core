@@ -8,9 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('accounts', function (Blueprint $table) {
-            $table->rename('bank_connections');
-        });
+        Schema::rename('accounts', 'bank_connections');
 
         Schema::table('bank_connections', function (Blueprint $table) {
             $table->dropForeign('accounts_bank_connection_id_foreign');
@@ -19,9 +17,8 @@ return new class extends Migration
                 ->after('currency_id')
                 ->nullable()
                 ->constrained('ledger_accounts')
-                ->onDelete('SET NULL');
+                ->nullOnDelete();
             $table->string('iban')->unique()->nullable()->change();
-            $table->string('account_number')->nullable()->change();
             $table->string('bank_name')->nullable()->after('account_holder');
             $table->string('bic')->nullable()->after('iban');
             $table->integer('credit_limit')->nullable()->after('bic');
@@ -31,9 +28,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('bank_connections', function (Blueprint $table) {
-            $table->rename('accounts');
-        });
+        Schema::rename('bank_connections', 'accounts');
 
         Schema::table('accounts', function (Blueprint $table) {
             $table->dropForeign('bank_connections_ledger_account_id_foreign');

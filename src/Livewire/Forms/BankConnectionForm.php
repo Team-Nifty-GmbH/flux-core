@@ -16,11 +16,11 @@ class BankConnectionForm extends Form
 
     public ?string $name = null;
 
-    public ?string $iban = null;
-
     public ?string $account_holder = null;
 
     public ?string $bank_name = null;
+
+    public ?string $iban = null;
 
     public ?string $bic = null;
 

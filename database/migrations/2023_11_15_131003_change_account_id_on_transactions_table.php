@@ -10,9 +10,6 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             $table->renameColumn('account_id', 'bank_connection_id');
-            $table->foreign('bank_connection_id')
-                ->references('id')
-                ->on('bank_connections');
         });
     }
 

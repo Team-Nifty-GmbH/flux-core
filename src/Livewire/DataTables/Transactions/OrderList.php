@@ -36,7 +36,7 @@ class OrderList extends BaseOrderList
         ];
     }
 
-    public function showOrder(Order $order)
+    public function showOrder(Order $order): ?string
     {
         return $order->getUrl();
     }

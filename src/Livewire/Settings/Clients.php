@@ -67,6 +67,7 @@ class Clients extends ClientList
         $record->load('bankConnections:id');
         $client = $record->toArray();
         $client['bank_connections'] = array_column($client['bank_connections'], 'id');
+
         $this->dispatch('show', $client)->to('settings.client-edit');
 
         $this->create = ! $record->exists;

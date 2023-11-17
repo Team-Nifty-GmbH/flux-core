@@ -12,7 +12,7 @@ class ContactBankConnectionFactory extends Factory
     public function definition(): array
     {
         return [
-            'iban' => $this->faker->bothify('??####################'),
+            'iban' => $this->faker->iban(),
             'account_holder' => $this->faker->name,
             'bank_name' => $this->faker->name,
             'bic' => $this->faker->bothify('##????##?#?'),

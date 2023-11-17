@@ -18,11 +18,11 @@ class CreateBankConnectionRequest extends BaseFormRequest
             'currency_id' => 'integer|nullable|exists:currencies,id,deleted_at,NULL',
             'ledger_account_id' => 'integer|nullable|exists:ledger_accounts,id',
             'name' => 'required|string|max:255',
-            'account_holder' => 'sometimes|string|nullable',
-            'bank_name' => 'sometimes|string|nullable',
+            'account_holder' => 'string|nullable',
+            'bank_name' => 'string|nullable',
             'iban' => ['nullable', 'string', new Iban(), 'unique:bank_connections,iban'],
-            'bic' => 'sometimes|string|nullable',
-            'credit_limit' => 'sometimes|numeric|nullable|min:0',
+            'bic' => 'string|nullable',
+            'credit_limit' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
         ];
     }

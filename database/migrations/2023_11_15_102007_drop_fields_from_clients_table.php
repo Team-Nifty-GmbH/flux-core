@@ -23,12 +23,12 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->string('bank_name')->nullable();
-            $table->string('bank_code')->nullable();
-            $table->string('bank_account')->nullable();
-            $table->string('bank_iban')->nullable();
-            $table->string('bank_swift')->nullable();
-            $table->string('bank_bic')->nullable();
+            $table->string('bank_name')->nullable()->after('website');
+            $table->string('bank_code')->nullable()->after('bank_name');
+            $table->string('bank_account')->nullable()->after('bank_code');
+            $table->string('bank_iban')->nullable()->after('bank_account');
+            $table->string('bank_swift')->nullable()->after('bank_iban');
+            $table->string('bank_bic')->nullable()->after('bank_swift');
         });
     }
 };
