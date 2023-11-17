@@ -2,8 +2,6 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\Iban;
-
 class CreateClientRequest extends BaseFormRequest
 {
     /**
@@ -26,18 +24,10 @@ class CreateClientRequest extends BaseFormRequest
             'fax' => 'string|nullable',
             'email' => 'email|nullable',
             'website' => 'string|nullable',
-            'bank_name' => 'string|nullable',
-            'bank_code' => 'string|nullable',
-            'bank_account' => 'string|nullable',
-            'bank_iban' => [
-                'string',
-                'nullable',
-                new Iban(),
-            ],
-            'bank_swift' => 'string|nullable',
-            'bank_bic' => 'string|nullable',
             'opening_hours' => 'array|nullable',
             'is_active' => 'boolean',
+            'bank_connections' => 'array|nullable',
+            'bank_connections.*' => 'integer|exists:bank_connections,id',
         ];
     }
 }

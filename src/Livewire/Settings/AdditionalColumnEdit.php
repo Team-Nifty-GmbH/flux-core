@@ -75,8 +75,7 @@ class AdditionalColumnEdit extends Component
         $this->additionalColumn['values'] = [];
         $this->additionalColumn['is_customer_editable'] = false;
 
-        $this->models = ModelInfo::forAllModels()
-            ->merge(ModelInfo::forAllModels(flux_path('src/Models'), flux_path('src'), 'FluxErp'))
+        $this->models = model_info_all()
             ->filter(fn ($model) => in_array(HasAdditionalColumns::class, $model->traits->toArray()))
             ->map(fn ($model) => $model->class)
             ->sort()

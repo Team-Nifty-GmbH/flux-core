@@ -89,9 +89,9 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
             ->using(ContactDiscountGroup::class);
     }
 
-    public function bankConnections(): HasMany
+    public function contactBankConnections(): HasMany
     {
-        return $this->hasMany(BankConnection::class);
+        return $this->hasMany(ContactBankConnection::class);
     }
 
     public function ledgerAccount(): BelongsTo

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
@@ -10,14 +11,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Scout\Searchable;
 use TeamNiftyGmbH\DataTable\Casts\Money;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Transaction extends Model
+class Transaction extends Model implements InteractsWithDataTables
 {
-    use HasFrontendAttributes, HasUserModification, HasUuid, Searchable;
+    use HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, Searchable;
 
     protected $casts = [
         'uuid' => 'string',
+        'value_date' => 'date',
+        'booking_date' => 'date',
         'amount' => Money::class,
         'created_at' => 'datetime',
     ];
@@ -26,11 +30,9 @@ class Transaction extends Model
         'id',
     ];
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
-        self::saving(function (Transaction $transaction) {
+        static::saving(function (Transaction $transaction) {
             $transaction->currency_id = $transaction->currency_id ?:
                 (
                     Auth::user()->currency_id ?:
@@ -41,7 +43,7 @@ class Transaction extends Model
                 );
         });
 
-        self::saved(function (Transaction $transaction) {
+        static::saved(function (Transaction $transaction) {
             $originalOrderId = $transaction->getRawOriginal('order_id');
             if ($originalOrderId) {
                 Order::query()
@@ -56,16 +58,16 @@ class Transaction extends Model
             }
         });
 
-        self::deleted(function (Transaction $transaction) {
+        static::deleted(function (Transaction $transaction) {
             if ($transaction->order_id) {
                 $transaction->order->calculatePaymentState()->save();
             }
         });
     }
 
-    public function account(): BelongsTo
+    public function bankConnection(): BelongsTo
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(BankConnection::class);
     }
 
     public function children(): HasMany
@@ -81,5 +83,25 @@ class Transaction extends Model
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Transaction::class, 'parent_id');
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->counterpart_name;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->purpose;
+    }
+
+    public function getUrl(): ?string
+    {
+        return null;
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return null;
     }
 }

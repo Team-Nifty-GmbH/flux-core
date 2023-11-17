@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateClientRequest;
 use FluxErp\Models\Client;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
 class UpdateClient extends FluxAction
@@ -25,6 +26,7 @@ class UpdateClient extends FluxAction
 
     public function performAction(): Model
     {
+        $bankConnections = Arr::pull($this->data, 'bank_connections');
         $client = Client::query()
             ->whereKey($this->data['id'])
             ->first();
@@ -32,7 +34,11 @@ class UpdateClient extends FluxAction
         $client->fill($this->data);
         $client->save();
 
-        return $client->withoutRelations()->fresh();
+        if (! is_null($bankConnections)) {
+            $client->bankConnections()->sync($bankConnections);
+        }
+
+        return $client->withoutRelations()->refresh();
     }
 
     public function validateData(): void

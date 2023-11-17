@@ -11,6 +11,7 @@ use FluxErp\Http\Controllers\CalendarEventController;
 use FluxErp\Http\Controllers\CategoryController;
 use FluxErp\Http\Controllers\ClientController;
 use FluxErp\Http\Controllers\CommentController;
+use FluxErp\Http\Controllers\ContactBankConnectionController;
 use FluxErp\Http\Controllers\ContactController;
 use FluxErp\Http\Controllers\ContactOptionController;
 use FluxErp\Http\Controllers\CountryController;
@@ -109,6 +110,13 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::put('/address-types', [AddressTypeController::class, 'update']);
         Route::delete('/address-types/{id}', [AddressTypeController::class, 'delete']);
 
+        //BankConnections
+        Route::get('/bank-connections/{id}', [BankConnectionController::class, 'show']);
+        Route::get('/bank-connections', [BankConnectionController::class, 'index']);
+        Route::post('/bank-connections', [BankConnectionController::class, 'create']);
+        Route::put('/bank-connections', [BankConnectionController::class, 'update']);
+        Route::delete('/bank-connections/{id}', [BankConnectionController::class, 'delete']);
+
         //Calendars
         Route::get('/calendars/{id}', [CalendarController::class, 'show']);
         Route::get('/calendars', [CalendarController::class, 'index']);
@@ -141,11 +149,11 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::delete('/comments/{id}', [CommentController::class, 'delete']);
 
         //ContactBankConnections
-        Route::get('/bank-connections/{id}', [BankConnectionController::class, 'show']);
-        Route::get('/bank-connections', [BankConnectionController::class, 'index']);
-        Route::post('/bank-connections', [BankConnectionController::class, 'create']);
-        Route::put('/bank-connections', [BankConnectionController::class, 'update']);
-        Route::delete('/bank-connections/{id}', [BankConnectionController::class, 'delete']);
+        Route::get('/contact-bank-connections/{id}', [ContactBankConnectionController::class, 'show']);
+        Route::get('/contact-bank-connections', [ContactBankConnectionController::class, 'index']);
+        Route::post('/contact-bank-connections', [ContactBankConnectionController::class, 'create']);
+        Route::put('/contact-bank-connections', [ContactBankConnectionController::class, 'update']);
+        Route::delete('/contact-bank-connections/{id}', [ContactBankConnectionController::class, 'delete']);
 
         //ContactOptions
         Route::get('/contact-options/{id}', [ContactOptionController::class, 'index']);

@@ -61,7 +61,7 @@ class Order extends Component
                 'addresses',
                 'client:id,name',
                 'contact.media',
-                'contact.bankConnections:id,contact_id,iban',
+                'contact.contactBankConnections:id,contact_id,iban',
                 'currency:id,iso,name,symbol',
                 'orderType:id,name,print_layouts,order_type_enum',
             ])

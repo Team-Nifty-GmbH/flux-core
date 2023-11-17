@@ -4,8 +4,8 @@ namespace FluxErp\Actions\SepaMandate;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateSepaMandateRequest;
-use FluxErp\Models\BankConnection;
 use FluxErp\Models\Contact;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\SepaMandate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
@@ -45,16 +45,16 @@ class UpdateSepaMandate extends FluxAction
 
         $this->data['contact_id'] = $this->data['contact_id'] ?? $sepaMandate->contact_id;
         $this->data['client_id'] = $this->data['client_id'] ?? $sepaMandate->client_id;
-        $this->data['bank_connection_id'] = $this->data['bank_connection_id'] ??
-            $sepaMandate->bank_connection_id;
+        $this->data['contact_bank_connection_id'] = $this->data['contact_bank_connection_id'] ??
+            $sepaMandate->contact_bank_connection_id;
 
         $clientContactExists = Contact::query()
             ->whereKey($this->data['contact_id'])
             ->where('client_id', $this->data['client_id'])
             ->exists();
 
-        $contactBankConnectionExists = BankConnection::query()
-            ->whereKey($this->data['bank_connection_id'])
+        $contactBankConnectionExists = ContactBankConnection::query()
+            ->whereKey($this->data['contact_bank_connection_id'])
             ->where('contact_id', $this->data['contact_id'])
             ->exists();
 
@@ -69,8 +69,8 @@ class UpdateSepaMandate extends FluxAction
 
         if (! $contactBankConnectionExists) {
             $errors += [
-                'bank_connection_id' => ['bank connection with id: \'' .
-                    $this->data['bank_connection_id'] . '\' doesnt match contact id:' . $this->data['contact_id'] . '\'',
+                'contact_bank_connection_id' => ['contact bank connection with id: \'' .
+                    $this->data['contact_bank_connection_id'] . '\' doesnt match contact id:' . $this->data['contact_id'] . '\'',
                 ],
             ];
         }

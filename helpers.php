@@ -1,5 +1,32 @@
 <?php
 
+if (! function_exists('all_models')) {
+    function all_models(): \Illuminate\Support\Collection
+    {
+        return \TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all()
+            ->merge(
+                \TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all(
+                    flux_path('src/Models'),
+                    flux_path('src'),
+                    'FluxErp'
+                )
+            );
+    }
+}
+
+if (! function_exists('model_info_all')) {
+    function model_info_all(): \Illuminate\Support\Collection
+    {
+        return \TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels()
+            ->merge(
+                \TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels(
+                    flux_path('src/Models'),
+                    flux_path('src'),
+                    'FluxErp')
+            );
+    }
+}
+
 if (! function_exists('route_to_permission')) {
     function route_to_permission(Illuminate\Routing\Route $route = null, bool $checkPermission = true): ?string
     {
@@ -108,9 +135,7 @@ if (! function_exists('qualify_model')) {
         $model = ltrim($model, '\\/');
 
         $model = str_replace('/', '\\', $model);
-        $fluxModels = array_values(config('flux.models'));
-        $models = \TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all();
-        $models = $models->merge($fluxModels);
+        $models = all_models();
 
         return $models->filter(fn ($item) => str_ends_with(strtolower($item), '\\' . strtolower($model)))->first()
             ?: $model;
@@ -203,11 +228,11 @@ if (! function_exists('eloquent_model_event')) {
     {
         $event = strtolower(str_starts_with($event, 'eloquent.') ? substr($event, 9) : $event);
 
-        $modelClass = \TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all()->merge(config('flux.models'))->filter(
-            function ($item) use ($model) {
+        $modelClass = all_models()
+            ->filter(function ($item) use ($model) {
                 return str_ends_with(strtolower($item), strtolower($model));
-            }
-        )->first();
+            })
+            ->first();
 
         if (! $modelClass) {
             throw new InvalidArgumentException('Invalid model: ' . $model);

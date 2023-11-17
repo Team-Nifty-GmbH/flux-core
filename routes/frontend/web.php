@@ -12,6 +12,7 @@ use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\DataTables\ProjectTasksList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
 use FluxErp\Livewire\DataTables\TicketList;
+use FluxErp\Livewire\DataTables\TransactionList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
@@ -20,6 +21,7 @@ use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
 use FluxErp\Livewire\Project\Project;
 use FluxErp\Livewire\Project\ProjectList;
 use FluxErp\Livewire\Settings\AdditionalColumns;
+use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\Clients;
 use FluxErp\Livewire\Settings\Countries;
@@ -100,8 +102,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
 
     Route::name('accounting.')->prefix('accounting')
         ->group(function () {
-            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'square-3-stack-3d');
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'banknotes');
             Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
+            Route::get('/transactions', TransactionList::class)->name('transactions')->registersMenuItem();
         });
 
     Route::get('/my-profile', Profile::class)->name('my-profile');
@@ -121,6 +124,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 ->registersMenuItem();
             Route::get('/clients', Clients::class)
                 ->name('clients')
+                ->registersMenuItem();
+            Route::get('/bank-connections', BankConnections::class)
+                ->name('bank-connections')
                 ->registersMenuItem();
             Route::get('/clients/{client}/customer-portal', CustomerPortal::class)
                 ->name('customer-portal');
