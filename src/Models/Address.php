@@ -234,6 +234,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             $expires
         );
 
-        Mail::to($this->login_name)->queue(new MagicLoginLink($plaintext, $expires));
+        // dont queue mail as the address isnt used as auth in the regular app url
+        Mail::to($this->login_name)->send(new MagicLoginLink($plaintext, $expires));
     }
 }

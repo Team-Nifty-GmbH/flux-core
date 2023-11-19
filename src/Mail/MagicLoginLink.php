@@ -45,9 +45,13 @@ class MagicLoginLink extends Mailable
         return new Content(
             markdown: 'flux::emails.magic-login-link',
             with: [
-                'url' => URL::temporarySignedRoute('login-link', $this->expiresAt, [
-                    'token' => $this->plaintextToken,
-                ]),
+                'url' => URL::temporarySignedRoute(
+                    'login-link',
+                    $this->expiresAt,
+                    [
+                        'token' => $this->plaintextToken,
+                    ]
+                ),
             ],
         );
     }
