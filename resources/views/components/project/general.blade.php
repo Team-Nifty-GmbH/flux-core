@@ -6,7 +6,7 @@
     <div id="project-task-modal">
         <x-modal max-width="4xl">
             <x-card>
-                <livewire:project-task.project-task :project-id="$this->project['id'] ?? null" />
+                <livewire:project-task.project-task :project-id="$this->project->id ?? null" />
             </x-card>
         </x-modal>
     </div>
@@ -49,7 +49,7 @@
             [
                 'project_id',
                 '=',
-                $this->project['id'],
+                $this->project->id,
             ],
         ]"
     />

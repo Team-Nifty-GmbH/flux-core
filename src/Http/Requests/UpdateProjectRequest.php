@@ -20,20 +20,27 @@ class UpdateProjectRequest extends BaseFormRequest
             (new Project())->hasAdditionalColumnsValidationRules(),
             [
                 'id' => 'required|integer|exists:projects,id,deleted_at,NULL',
-                'category_id' => [
+                'contact_id' => [
                     'integer',
-                    new ExistsWithIgnore('categories', 'id'),
+                    'nullable',
+                    (new ExistsWithIgnore('contacts', 'id'))->whereNull('deleted_at'),
                 ],
-                'project_name' => 'sometimes|string',
-                'display_name' => 'sometimes|string|nullable',
-                'release_date' => 'sometimes|date_format:Y-m-d',
-                'deadline' => 'sometimes|date_format:Y-m-d|nullable',
+                'order_id' => [
+                    'integer',
+                    'nullable',
+                    (new ExistsWithIgnore('orders', 'id'))->whereNull('deleted_at'),
+                ],
+                'name' => 'sometimes|string',
+                'start_date' => 'sometimes|date_format:Y-m-d|nullable',
+                'end_date' => 'sometimes|date_format:Y-m-d|nullable',
                 'description' => 'sometimes|string|nullable',
                 'state' => [
                     'string',
                     ValidStateRule::make(ProjectState::class),
                 ],
-                'categories' => 'sometimes|required|array',
+                'progress' => 'sometimes|integer|nullable|min:0|max:100',
+                'time_budget_hours' => 'sometimes|numeric|nullable',
+                'budget' => 'sometimes|numeric|nullable',
             ],
         );
     }

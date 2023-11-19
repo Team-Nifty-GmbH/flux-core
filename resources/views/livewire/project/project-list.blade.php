@@ -19,7 +19,7 @@
                                 if (project) {
                                     close();
                                     let baseRoute = '{{ route('projects.id', ['id' => ':id']) }}';
-                                    window.location.href = baseRoute.replace(':id', project.id);
+                                    window.location.href = baseRoute.replace(':id', $wire.project.id);
                                 }
                             });"
                         />
@@ -28,5 +28,5 @@
             </x-card>
         </x-modal>
     </div>
-    <livewire:data-tables.project-list cache-key="project.project-list"/>
+    @include('tall-datatables::livewire.data-table')
 </div>

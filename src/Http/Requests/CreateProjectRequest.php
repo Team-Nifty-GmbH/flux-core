@@ -19,18 +19,19 @@ class CreateProjectRequest extends BaseFormRequest
             (new Project())->hasAdditionalColumnsValidationRules(),
             [
                 'uuid' => 'string|uuid|unique:projects,uuid',
+                'contact_id' => 'integer|nullable|exists:contacts,id,deleted_at,NULL',
+                'order_id' => 'integer|nullable|exists:contacts,id,deleted_at,NULL',
                 'parent_id' => 'integer|nullable|exists:projects,id,deleted_at,NULL',
-                'category_id' => 'required|integer|exists:categories,id',
-                'project_name' => 'required|string',
-                'display_name' => 'string|nullable',
-                'release_date' => 'required|date_format:Y-m-d',
-                'deadline' => 'date_format:Y-m-d|nullable',
+                'name' => 'required|string',
+                'start_date' => 'date_format:Y-m-d|nullable',
+                'end_date' => 'date_format:Y-m-d|nullable',
                 'description' => 'string|nullable',
                 'state' => [
                     'string',
                     ValidStateRule::make(ProjectState::class),
                 ],
-                'categories' => 'required|array',
+                'time_budget_hours' => 'numeric|nullable',
+                'budget' => 'numeric|nullable',
             ],
         );
     }

@@ -6,7 +6,6 @@ use FluxErp\Actions\ProjectTask\CreateProjectTask;
 use FluxErp\Actions\ProjectTask\DeleteProjectTask;
 use FluxErp\Actions\ProjectTask\UpdateProjectTask;
 use FluxErp\Htmlables\TabButton;
-use FluxErp\Models\Project;
 use FluxErp\Traits\Livewire\HasAdditionalColumns;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
@@ -79,31 +78,6 @@ class ProjectTask extends Component
             ->whereKey($projectTask)
             ->with(['categories:id,parent_id', 'project'])
             ->firstOrNew();
-        $project = $projectTask->project ?: Project::query()->whereKey($this->projectId)->firstOrFail();
-        $projectCategories = $project
-            ?->categories()
-            ->get()
-            ->toArray();
-
-        $categories = to_flat_tree($project
-            ->category
-            ?->children()
-            ->with('children:id,parent_id,name')
-            ->get()
-            ->toArray() ?: []
-        );
-        $primaryCategory = $project
-            ->category
-            ?->toArray();
-        $this->categories = array_values(
-            array_filter(
-                $categories,
-                fn ($category) => in_array($category['id'], array_column($projectCategories, 'id'))
-            )
-        );
-        $this->categories[] = $primaryCategory;
-        $this->categories = to_tree($this->categories);
-        $this->categories = $this->categories[0]['children'] ?? [];
 
         $this->availableStates = \FluxErp\Models\ProjectTask::getStatesFor('state')->map(function (string $state) {
             return [
@@ -138,6 +112,7 @@ class ProjectTask extends Component
                 ->validate()
                 ->execute();
         } catch (\Exception $e) {
+            throw $e;
             exception_to_notifications($e, $this);
 
             return false;

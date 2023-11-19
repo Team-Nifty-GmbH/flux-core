@@ -3,11 +3,11 @@
 namespace FluxErp\Models;
 
 use FluxErp\States\Project\ProjectState;
-use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
@@ -16,14 +16,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\ModelStates\HasStates;
+use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Project extends Model implements InteractsWithDataTables
 {
-    use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasPackageFactory, HasStates, HasUserModification, HasUuid, SoftDeletes, Trackable;
+    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
+        HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, SoftDeletes,
+        Trackable;
 
     protected $guarded = [
         'id',
@@ -35,11 +37,6 @@ class Project extends Model implements InteractsWithDataTables
         'state' => ProjectState::class,
     ];
 
-    public array $translatable = [
-        'project_name',
-        'display_name',
-    ];
-
     public array $filtersExact = [
         'id',
         'project_category_template_id',
@@ -47,11 +44,13 @@ class Project extends Model implements InteractsWithDataTables
 
     public string $detailRouteName = 'projects.id';
 
-    public string $categoryClass = ProjectTask::class;
-
-    public function category(): BelongsTo
+    protected static function booted(): void
     {
-        return $this->belongsTo(Category::class);
+        static::creating(function (Project $project) {
+            if (! $project->project_number) {
+                $project->getSerialNumber('project_number');
+            }
+        });
     }
 
     public function children(): HasMany

@@ -6,6 +6,7 @@ use FluxErp\Actions\Project\CreateProject;
 use FluxErp\Actions\Project\DeleteProject;
 use FluxErp\Actions\Project\UpdateProject;
 use FluxErp\Htmlables\TabButton;
+use FluxErp\Livewire\Forms\ProjectForm;
 use FluxErp\Models\Category;
 use FluxErp\Models\ProjectTask;
 use FluxErp\Traits\Livewire\HasAdditionalColumns;
@@ -13,15 +14,15 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
-use Livewire\Features\SupportRedirects\Redirector;
 use WireUi\Traits\Actions;
 
 class Project extends Component
 {
     use Actions, HasAdditionalColumns, WithTabs;
 
-    public array $project = [];
+    public ProjectForm $project;
 
     public string $tab = 'project.general';
 
@@ -36,20 +37,16 @@ class Project extends Component
     public function mount(int $id): void
     {
         $project = \FluxErp\Models\Project::whereKey($id)
-            ->with('categories:id,parent_id')
             ->withCount('tasks')
             ->firstOrFail();
+        $this->project->fill($project);
+
         $this->availableStates = \FluxErp\Models\Project::getStatesFor('state')->map(function ($state) {
             return [
                 'label' => __(ucfirst(str_replace('_', ' ', $state))),
                 'name' => $state,
             ];
         })->toArray();
-
-        $this->project = $project->toArray();
-        $this->project['categories'] = $project->categories?->pluck('id')->toArray() ?: [];
-
-        $this->openCategories = $project->categories?->pluck('parent_id')->toArray() ?: [];
     }
 
     public function render(): View|Factory|Application
@@ -68,13 +65,8 @@ class Project extends Component
 
     public function save(): array|bool
     {
-        $action = ($this->project['id'] ?? false) ? UpdateProject::class : CreateProject::class;
-
         try {
-            $response = $action::make($this->project)
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->project->save();
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
 
@@ -84,14 +76,10 @@ class Project extends Component
         $this->notification()->success(__('Project task saved'));
         $this->skipRender();
 
-        if ($action === CreateProject::class) {
-            return $response->toArray();
-        }
-
         return true;
     }
 
-    public function delete(): false|Redirector
+    public function delete(): void
     {
         $this->skipRender();
         try {
@@ -100,12 +88,10 @@ class Project extends Component
                 ->validate()
                 ->execute();
 
-            return redirect()->route('projects.projects');
+            $this->redirect(route('projects'));
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
         }
-
-        return false;
     }
 
     public function getAdditionalColumns(): array
@@ -115,27 +101,11 @@ class Project extends Component
             ->toArray();
     }
 
-    public function loadCategories(int $categoryId = null): array
+    #[Computed]
+    public function avatarUrl(): ?string
     {
-        $categories = Category::query()
-            ->whereKey($categoryId)
-            ->with('children:id,name,parent_id')
-            ->get(['id', 'name', 'parent_id'])
-            ->toArray();
-
-        $this->skipRender();
-
-        return $categories[0]['children'] ?? [];
-    }
-
-    public function loadProjectTaskCategories(int $projectId = null): array
-    {
-        $tasks = ProjectTask::query()
-            ->where('project_id', $projectId)
-            ->with('categories:id')
-            ->get()
-            ->pluck('categories');
-
-        return $tasks->flatten()->pluck('id')->toArray();
+        return $this->project->id
+            ? \FluxErp\Models\Project::query()->whereKey($this->project->id)->first()->getAvatarUrl()
+            : null;
     }
 }

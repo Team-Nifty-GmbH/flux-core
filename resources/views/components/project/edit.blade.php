@@ -1,29 +1,6 @@
-<div
-    class="space-y-5"
-    x-data="{
-        init() {
-            loadLevels(project.category_id)
-        },
-        selected: [],
-        ...folderTree(),
-        levels: [],
-        projectTaskCategories: [],
-        openFolders: $wire.$entangle('openCategories', false),
-        selectAttributes(obj) {
-            return `x-bind:disabled='projectTaskCategories.includes(level.id) || ! edit'`;
-        },
-        loadLevels(id = null) {
-            $wire.project.category_id = id;
-            $wire.loadCategories(id).then((result) => this.levels = result);
-            $wire.loadProjectTaskCategories(this.project.id).then((result) => this.projectTaskCategories = result);
-        }
-    }"
-    x-model="project.categories"
-    x-modelable="selected"
->
+<div>
     <x-errors />
-    <x-input x-bind:readonly="!edit" wire:model="project.project_name" label="{{ __('Name') }}" />
-    <x-input x-bind:readonly="!edit" wire:model="project.display_name" label="{{ __('Display name') }}" />
+    <x-input x-bind:readonly="!edit" wire:model="project.name" label="{{ __('Name') }}" />
     <div class="flex justify-between">
         <x-state
             class="w-full"
@@ -33,37 +10,50 @@
             formatters="formatter.state"
             available="availableStates"
         />
-        <x-input type="date" x-bind:readonly="!edit" wire:model="project.deadline" label="{{ __('Deadline') }}" />
-        <x-input type="date" x-bind:readonly="!edit" wire:model="project.release_date" label="{{ __('Release date') }}" />
-    </div>
-    <x-textarea x-bind:readonly="!edit" wire:model="project.description" label="{{ __('Description') }}" />
-    <x-select
-        wire:model="project.category_id"
-        :label="__('Categories')"
-        option-value="id"
-        option-label="label"
-        option-description="description"
-        x-on:selected="loadLevels($event.detail.value)"
-        :disabled="$this->project['tasks_count'] ?? false"
-        :async-data="[
-                'api' => route('search', \FluxErp\Models\Category::class),
-                'method' => 'POST',
+        <x-select
+            :label="__('Contact')"
+            class="pb-4"
+            wire:model="project.contact_id"
+            option-value="contact_id"
+            option-label="label"
+            option-description="description"
+            template="user-option"
+            :async-data="[
+                'api' => route('search', \FluxErp\Models\Address::class),
                 'params' => [
+                    'fields' => [
+                        'contact_id',
+                        'firstname',
+                        'lastname',
+                        'company',
+                        'name',
+                    ],
                     'where' => [
                         [
-                            'model_type',
+                            'is_main_address',
                             '=',
-                            \FluxErp\Models\Project::class,
+                            true,
                         ]
                     ],
-                ],
+                    'with' => 'contact.media',
+                ]
             ]"
-    ></x-select>
-    <div class="pt-1.5">
-        <ul wire:ignore class="flex flex-col gap-1">
-            <template x-for="(level, i) in levels">
-                <li x-html="renderLevel(level, i)"></li>
-            </template>
-        </ul>
+        />
+        <x-select
+            :label="__('Order')"
+            class="pb-4"
+            wire:model="project.order_id"
+            option-value="id"
+            option-label="label"
+            option-description="description"
+            :async-data="[
+                'api' => route('search', \FluxErp\Models\Order::class),
+            ]"
+        />
+        <x-input type="date" x-bind:readonly="!edit" wire:model="project.start_date" label="{{ __('Start Date') }}" />
+        <x-input type="date" x-bind:readonly="!edit" wire:model="project.end_date" label="{{ __('End Date') }}" />
     </div>
+    <x-textarea x-bind:readonly="!edit" wire:model="project.description" label="{{ __('Description') }}" />
+    <x-inputs.number :label="__('Budget')" x-bind:readonly="!edit" wire:model="project.budget" />
+    <x-inputs.number :label="__('Time Budget in hours')" x-bind:readonly="!edit" wire:model="project.time_budget_hours" />
 </div>
