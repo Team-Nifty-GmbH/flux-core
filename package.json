@@ -31,7 +31,7 @@
         "vite": "^4.4.11"
     },
     "dependencies": {
-        "@alpinejs/collapse": "^3.13.1",
+        "@alpinejs/collapse": "^3.13.3",
         "@wireui/alpinejs-hold-directive": "^1.0.1",
         "apexcharts": "^3.42.0",
         "dayjs": "^1.11.10"
