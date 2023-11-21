@@ -13,6 +13,7 @@ class CommissionList extends DataTable
     public array $enabledCols = [
         'user.name',
         'order.order_number',
+        'order.address_invoice.name',
         'order_position.name',
         'total_net_price',
         'commission_rate',
@@ -23,14 +24,6 @@ class CommissionList extends DataTable
         'user.name' => 'Commission Agent',
     ];
 
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
-
     public function mount(): void
     {
         parent::mount();
@@ -39,6 +32,8 @@ class CommissionList extends DataTable
             $this->formatters,
             [
                 'commission_rate' => 'percentage',
+                'commission' => 'coloredMoney',
+                'total_net_price' => 'coloredMoney',
             ]
         );
     }
