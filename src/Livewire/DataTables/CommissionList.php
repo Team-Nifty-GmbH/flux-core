@@ -20,6 +20,8 @@ class CommissionList extends DataTable
         'commission',
     ];
 
+    public bool $hasNoRedirect = true;
+
     public array $columnLabels = [
         'user.name' => 'Commission Agent',
     ];
