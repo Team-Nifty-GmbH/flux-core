@@ -20,4 +20,9 @@ class VatRate extends Model
     protected $guarded = [
         'id',
     ];
+
+    public function getNameAttribute(string $name): string
+    {
+        return $name . ' ' . format_number(bcmul($this->rate_percentage, 100)) . '%';
+    }
 }

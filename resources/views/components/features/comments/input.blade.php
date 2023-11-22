@@ -16,7 +16,7 @@
                 dataTransfer.items.add(fileInput);
             });
             ref.files = dataTransfer.files;
-        }
+        },
      }"
      wire:ignore
 >
@@ -28,21 +28,10 @@
         </div>
         <div class="min-w-0 flex-1">
             <div>
-                <div>
-                    <div>
-                        <div
-                            contenteditable
-                            x-tribute.multiple="[
-                                {values: $wire.get('users'), trigger: '@'},
-                                {values: $wire.get('roles'), trigger: '#'},
-                            ]"
-                            x-ref="textarea"
-                            placeholder="{{ __('Write something…') }}"
-                            class="content-editable-placeholder placeholder-secondary-400 dark:bg-secondary-800 dark:placeholder-secondary-500 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block min-h-[85px] w-full rounded-md border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none dark:text-gray-50 sm:text-sm"
-                            rows="3"></div>
-                    </div>
+                <div x-ref="textarea">
+                    <x-editor class="comment-input" />
                 </div>
-                <div class="flex justify-between mt-3">
+                <div class="flex flex-wrap justify-between mt-3">
                     <div class="flex gap-1.5">
                         <x-button flat icon="paper-clip" :label="__('Add attachment')" x-on:click="$refs.fileUpload.click()"/>
                         <input x-ref="fileUpload" class="hidden" multiple type="file" x-on:change="files = Array.from($el.files)">

@@ -14,14 +14,7 @@
     class="space-y-5"
 >
     <x-card :title="__('Calculation')">
-        <x-native-select x-model="product.vat_rate_id" label="{{ __('VAT rate') }}" x-bind:readonly="!edit">
-            <template x-for="vatRate in vatRates">
-                <option x-bind:valu="vatRate.id">
-                    <span x-text="vatRate.name"></span>
-                    <span x-text="formatters.percentage(vatRate.rate_percentage)" class="text-gray-500"></span>
-                </option>
-            </template>
-        </x-native-select>
+        <x-select :options="$this->vatRates" label="{{ __('VAT rate') }}" wire:model="product.vat_rate_id" option-label="name" option-value="id"/>
     </x-card>
     <template x-for="priceList in priceLists" :key="priceList.id">
         <x-card class="space-y-2.5">
