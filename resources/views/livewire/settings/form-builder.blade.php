@@ -56,38 +56,46 @@
                                          label="{{__('Columns')}}"/>
                             </div>
                             <div class="col-span-1 sm:col-span-1 pt-2">
-                                <x-button icon="chevron-up" wire:click="sectionSortUp({{$sectionIndex}})" />
-                                <x-button icon="chevron-down" wire:click="sectionSortDown({{$sectionIndex}})" />
+                                <x-button icon="chevron-up" wire:click="sectionSortUp({{$sectionIndex}})"/>
+                                <x-button icon="chevron-down" wire:click="sectionSortDown({{$sectionIndex}})"/>
+                                <x-button icon="trash" wire:click="removeFormSection({{$sectionIndex}})"/>
                             </div>
                         </div>
-                    @forelse($section['fields'] as $fieldIndex => $field)
-                        <div class="grid grid-cols-5 gap-4">
-                            <div class="col-span-1 sm:col-span-1">
-                                <x-input wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.name" label="{{__('Name')}}"/>
+
+                        @foreach($section['fields'] as $fieldIndex => $field)
+                            <div class="grid grid-cols-5 gap-4">
+                                <div class="col-span-1 sm:col-span-1">
+                                    <x-input
+                                        wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.name"
+                                        label="{{__('Name')}}"/>
+                                </div>
+                                <div class="col-span-1 sm:col-span-1">
+                                    <x-input
+                                        wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.description"
+                                        label="{{__('Description')}}"/>
+                                </div>
+                                <div class="col-span-1 sm:col-span-1">
+                                    <x-select :options="$fieldTypes" option-label="name" option-value="value"
+                                              wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.type"
+                                              label="{{__('Type')}}"/>
+                                </div>
+                                <div class="col-span-1 sm:col-span-1">
+                                    <x-input
+                                        wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options"
+                                        label="{{__('Options')}}"/>
+                                </div>
+                                <div class="col-span-1 sm:col-span-1 pt-2">
+                                    {{--                                <x-button icon="chevron-up" wire:click="fieldSortUp({{$sectionIndex}}, {{$fieldIndex}})" />--}}
+                                    {{--                                <x-button icon="chevron-down" wire:click="fieldSortDown({{$sectionIndex}}, {{$fieldIndex}})" />--}}
+                                    <x-button icon="trash"
+                                              wire:click="removeFormField({{$sectionIndex}}, {{$fieldIndex}})"/>
+                                </div>
                             </div>
-                            <div class="col-span-1 sm:col-span-1">
-                                <x-input wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.description" label="{{__('Description')}}"/>
-                            </div>
-                            <div class="col-span-1 sm:col-span-1">
-                                <x-select :options="$fieldTypes" option-label="name" option-value="value" wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.type" label="{{__('Type')}}"/>
-                            </div>
-                            <div class="col-span-1 sm:col-span-1">
-                                <x-input wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options" label="{{__('Options')}}"/>
-                            </div>
-                            <div class="col-span-1 sm:col-span-1 pt-2">
-                                <x-button icon="chevron-up" wire:click="fieldSortUp({{$sectionIndex}}, {{$fieldIndex}})" />
-                                <x-button icon="chevron-down" wire:click="fieldSortDown({{$sectionIndex}}, {{$fieldIndex}})" />
-                            </div>
+                        @endforeach
+                        <div class="col-span-1 sm:col-span-2 pt-2 mt-2">
+                            <x-button wire:click="addFormField({{$sectionIndex}})" label="{{ __('Add Field') }}"/>
                         </div>
-                    @empty
-                            <div class="flex justify-center items-center">
-                                <div class="text-gray-400 text-sm">{{ __('No Fields') }}</div>
-                            </div>
-                    @endforelse
                     @endforeach
-                    <div class="col-span-1 sm:col-span-2 pt-2 mt-2">
-                        <x-button wire:click="addFormField({{$sectionIndex}})" label="{{ __('Add Field') }}"/>
-                    </div>
                     <div class="col-span-1 sm:col-span-2 pt-2 mt-2 border-t">
                         <x-button wire:click="addSection" label="{{ __('Add Section') }}"/>
                     </div>

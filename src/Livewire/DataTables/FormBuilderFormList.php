@@ -2,6 +2,9 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\FormBuilderField\DeleteFormBuilderField;
+use FluxErp\Actions\FormBuilderForm\DeleteFormBuilderForm;
+use FluxErp\Actions\FormBuilderSection\DeleteFormBuilderSection;
 use FluxErp\Enums\FormBuilderTypeEnum;
 use FluxErp\Livewire\Forms\FormBuilderForm as FormBuilderFormForm;
 use FluxErp\Models\FormBuilderForm;
@@ -25,11 +28,13 @@ class FormBuilderFormList extends DataTable
         'end_date',
     ];
 
+    public array $options = [
+
+    ];
+
     public bool $showModal = false;
 
     public FormBuilderFormForm $form;
-
-    public array $formData = [];
 
     public array $fieldTypes = [];
 
@@ -50,6 +55,13 @@ class FormBuilderFormList extends DataTable
                     'x-on:click' => '$wire.editItem(record.id)',
                 ]),
             DataTableButton::make()
+                ->label(__('Preview'))
+                ->icon('eye')
+                ->color('positive')
+                ->attributes([
+                    'x-on:click' => '$wire.preview(record.id)',
+                ]),
+            DataTableButton::make()
                 ->label(__('Delete'))
                 ->icon('trash')
                 ->color('negative')
@@ -57,6 +69,7 @@ class FormBuilderFormList extends DataTable
                     'x-on:click' => '$wire.deleteItem(record.id)',
                     'wire:loading.attr' => 'disabled',
                 ]),
+
         ];
     }
 
@@ -68,50 +81,9 @@ class FormBuilderFormList extends DataTable
                 ->icon('plus')
                 ->color('primary')
                 ->attributes([
-                    'x-on:click' => '$wire.editItem(null)',
+                    'x-on:click' => '$wire.newItem()',
                 ]),
         ];
-    }
-
-    public function deleteItem(FormBuilderForm $form): void
-    {
-        //        $this->skipRender();
-        //
-        //        try {
-        //            DeleteFormBuilderForm::make($form->toArray())
-        //                ->checkPermission()
-        //                ->validate()
-        //                ->execute();
-        //        } catch (\Exception $e) {
-        //            exception_to_notifications($e, $this);
-        //
-        //            return;
-        //        }
-        //
-        //        $this->loadData();
-    }
-
-    public function editItem(FormBuilderForm $formBuilderForm)
-    {
-        $this->form->fill($formBuilderForm);
-
-        $this->showModal = true;
-    }
-
-    public function saveItem()
-    {
-        try {
-            $this->form->save();
-
-            $this->form->reset();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-            dd($e);
-
-            return;
-        }
-
-        $this->showModal = false;
     }
 
     public function boot(): void
@@ -119,50 +91,102 @@ class FormBuilderFormList extends DataTable
         // override boot to force rendering
     }
 
-    public function addSection()
+    public function newItem(): void
     {
-        $this->formData[] = [
+        $this->form->fill(new FormBuilderForm());
+        $this->form->sections = [];
+        $this->showModal = true;
+    }
+
+    public function deleteItem(FormBuilderForm $form): void
+    {
+        $this->skipRender();
+
+        try {
+            DeleteFormBuilderForm::make($form->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->loadData();
+    }
+
+    public function editItem(FormBuilderForm $formBuilderForm): void
+    {
+        $this->form->fill($formBuilderForm);
+
+        $this->showModal = true;
+    }
+
+    public function saveItem(): void
+    {
+        try {
+            $this->form->save();
+
+            $this->form->reset();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->showModal = false;
+    }
+
+    public function addSection(): void
+    {
+        $this->form->sections ??= [];
+        $this->form->sections[] = [
             'id' => null,
             'name' => null,
-            'ordering' => null,
-            'columns' => null,
             'description' => null,
-            'icon' => null,
-            'aside' => false,
-            'compact' => false,
+            'columns' => null,
+            'fields' => [],
         ];
     }
 
-    public function deleteSection()
+    public function removeFormSection(int $sectionIndex): void
     {
-
+        $section = $this->form->sections[$sectionIndex];
+        if (! is_null($section['id'])) {
+            DeleteFormBuilderSection::make($section)->execute();
+        }
+        unset($this->form->sections[$sectionIndex]);
     }
 
-    public function addFormField(int $index)
+    public function addFormField(int $index): void
     {
 
-        $this->formData[$index]['fields'][] = [
+        $this->form->sections[$index]['fields'][] = [
             'id' => null,
             'name' => null,
             'description' => null,
             'type' => 'text',
-            'ordering' => null,
-            'options' => true,
+            'options' => null,
         ];
     }
 
-    public function saveFormField()
+    public function closeModal(): void
     {
-
+        $this->showModal = false;
     }
 
-    public function deleteFormField(int $index)
+    public function removeFormField(int $sectionIndex, int $fieldIndex): void
     {
-        unset($this->formData[$index]);
+        $field = $this->form->sections[$sectionIndex]['fields'][$fieldIndex];
+        if (! is_null($field['id'])) {
+            DeleteFormBuilderField::make($field)->execute();
+        }
+        unset($this->form->sections[$sectionIndex]['fields'][$fieldIndex]);
     }
 
-    public function debug()
+    public function debug(): void
     {
-        dd($this->form, $this->formData);
+        dd($this->form->toArray());
     }
 }

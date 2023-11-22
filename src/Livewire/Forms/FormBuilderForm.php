@@ -33,19 +33,19 @@ class FormBuilderForm extends Form
         $action = $this->id ? UpdateFormBuilderForm::make($this->toArray()) : CreateFormBuilderForm::make($this->toArray());
 
         $response = $action->checkPermission()->validate()->execute();
-
         foreach ($this->sections as $section) {
             $section['form_id'] = $response->id;
             $actionSection = $section['id'] ? UpdateFormBuilderSection::make($section) : CreateFormBuilderSection::make($section);
             $responseSection = $actionSection->checkPermission()->validate()->execute();
-
             foreach ($section['fields'] as $field) {
                 $field['section_id'] = $responseSection->id;
+                if (is_string($field['options'])) {
+                    $field['options'] = explode(',', $field['options']);
+                }
                 $actionField = $field['id'] ? UpdateFormBuilderField::make($field) : CreateFormBuilderField::make($field);
-                $responseField = $action->checkPermission()->validate()->execute();
+                $responseField = $actionField->checkPermission()->validate()->execute();
             }
         }
-
         $this->fill($response);
     }
 
