@@ -17,7 +17,6 @@ enum FormBuilderTypeEnum: string
     case Time = 'time';
     case Datetime = 'datetime';
     case Number = 'number';
-    case Email = 'email';
     case Password = 'password';
     case Range = 'range';
 }

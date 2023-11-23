@@ -99,10 +99,6 @@
                     <div class="col-span-1 sm:col-span-2 pt-2 mt-2 border-t">
                         <x-button wire:click="addSection" label="{{ __('Add Section') }}"/>
                     </div>
-                    <div class="pt-2 mt-2 border-t">
-                        <div>Preview</div>
-
-                    </div>
                 @endif
             </div>
         </div>
@@ -117,5 +113,8 @@
                 {{ __('Debug') }}
             </x-button>
         </x-slot>
+    </x-modal.card>
+    <x-modal.card wire:model="showPreviewModal">
+        <livewire:features.form-builder-show :formId="1" />
     </x-modal.card>
 </div>

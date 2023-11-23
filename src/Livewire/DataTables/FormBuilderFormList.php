@@ -34,6 +34,8 @@ class FormBuilderFormList extends DataTable
 
     public bool $showModal = false;
 
+    public bool $showPreviewModal = false;
+
     public FormBuilderFormForm $form;
 
     public array $fieldTypes = [];
@@ -59,7 +61,7 @@ class FormBuilderFormList extends DataTable
                 ->icon('eye')
                 ->color('positive')
                 ->attributes([
-                    'x-on:click' => '$wire.preview(record.id)',
+                    'x-on:click' => '$wire.previewForm(record.id)',
                 ]),
             DataTableButton::make()
                 ->label(__('Delete'))
@@ -136,6 +138,11 @@ class FormBuilderFormList extends DataTable
         }
 
         $this->showModal = false;
+    }
+
+    public function previewForm()
+    {
+        $this->showPreviewModal = true;
     }
 
     public function addSection(): void
