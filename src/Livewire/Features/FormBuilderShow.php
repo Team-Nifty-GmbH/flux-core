@@ -28,7 +28,6 @@ class FormBuilderShow extends Component
 
     public function submitForm(): void
     {
-        dd($this->fieldResponses);
-        $this->validate();
+
     }
 }
