@@ -73,6 +73,26 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
         return $this->hasMany(Address::class);
     }
 
+    public function mainAddress(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'main_address_id');
+    }
+
+    public function invoiceAddress(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'invoice_address_id');
+    }
+
+    public function deliveryAddress(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'delivery_address_id');
+    }
+
+    public function agent(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'agent_id');
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);

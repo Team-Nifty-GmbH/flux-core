@@ -40,6 +40,8 @@ class CreateAddressRequest extends BaseFormRequest
                 'login_name' => 'sometimes|string|unique:addresses,login_name|nullable',
                 'login_password' => 'sometimes|string|nullable',
                 'is_main_address' => 'sometimes|boolean',
+                'is_invoice_address' => 'sometimes|boolean',
+                'is_delivery_address' => 'sometimes|boolean',
                 'is_active' => 'sometimes|boolean',
                 'can_login' => 'sometimes|boolean',
                 'address_types' => 'sometimes|array',

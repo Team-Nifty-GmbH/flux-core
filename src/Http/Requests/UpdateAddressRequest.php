@@ -58,6 +58,8 @@ class UpdateAddressRequest extends BaseFormRequest
                 'login_name' => 'string|nullable',
                 'login_password' => 'string|nullable',
                 'is_main_address' => 'sometimes|required|boolean',
+                'is_invoice_address' => 'sometimes|required|boolean',
+                'is_delivery_address' => 'sometimes|required|boolean',
                 'is_active' => 'boolean',
                 'can_login' => 'boolean',
                 'address_types' => 'sometimes|required|array',

@@ -73,6 +73,35 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
                 $address->name = implode(', ', array_filter($name)) ?: null;
             }
         });
+
+        static::saved(function (Address $address) {
+            if ($address->isDirty('is_main_address') && $address->is_main_address) {
+                $address->contact->main_address_id = $address->id;
+                Address::query()
+                    ->where('contact_id', $address->contact_id)
+                    ->where('id', '!=', $address->id)
+                    ->update(['is_main_address' => false]);
+                $address->contact->save();
+            }
+
+            if ($address->isDirty('is_invoice_address') && $address->is_invoice_address) {
+                $address->contact->invoice_address_id = $address->id;
+                Address::query()
+                    ->where('contact_id', $address->contact_id)
+                    ->where('id', '!=', $address->id)
+                    ->update(['is_invoice_address' => false]);
+                $address->contact->save();
+            }
+
+            if ($address->isDirty('is_delivery_address') && $address->is_delivery_address) {
+                $address->contact->delivery_address_id = $address->id;
+                Address::query()
+                    ->where('contact_id', $address->contact_id)
+                    ->where('id', '!=', $address->id)
+                    ->update(['is_delivery_address' => false]);
+                $address->contact->save();
+            }
+        });
     }
 
     public function getAuthPassword()
