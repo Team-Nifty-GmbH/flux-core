@@ -134,7 +134,7 @@ class ProductTest extends BaseSetup
         $this->assertNull($dbProduct->unit_id);
         $this->assertNull($dbProduct->purchase_unit_id);
         $this->assertNull($dbProduct->reference_unit_id);
-        $this->assertNull($dbProduct->product_number);
+        $this->assertNotNull($dbProduct->product_number);
         $this->assertEmpty($dbProduct->description);
         $this->assertEmpty($dbProduct->weight_gram);
         $this->assertEmpty($dbProduct->dimension_length_mm);
