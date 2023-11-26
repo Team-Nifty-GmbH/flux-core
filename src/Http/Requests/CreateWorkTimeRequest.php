@@ -26,6 +26,7 @@ class CreateWorkTimeRequest extends BaseFormRequest
     {
         return [
             'uuid' => 'string|uuid|unique:work_times,uuid',
+            'contact_id' => 'nullable|integer|exists:contacts,id,deleted_at,NULL',
             'user_id' => [
                 'required',
                 'integer',
@@ -46,7 +47,10 @@ class CreateWorkTimeRequest extends BaseFormRequest
             ],
             'started_at' => 'required_with:ended_at|nullable|date_format:Y-m-d H:i:s|before:now',
             'ended_at' => 'nullable|date_format:Y-m-d H:i:s|after:started_at',
+            'name' => 'required|string',
             'description' => 'string|nullable',
+            'is_daily_work_time' => 'boolean',
+            'is_locked' => 'boolean',
             'is_pause' => 'boolean',
         ];
     }

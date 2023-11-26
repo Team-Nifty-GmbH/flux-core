@@ -5,13 +5,14 @@ use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contacts\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\CommissionList;
-use FluxErp\Livewire\DataTables\ContactList;
+use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\DataTables\ProjectTasksList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\TransactionList;
+use FluxErp\Livewire\DataTables\WorkTimeList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
@@ -62,7 +63,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);
     Route::get('/mail', Mail::class)->name('mail')->registersMenuItem(icon: 'envelope');
     Route::get('/calendars', Calendar::class)->name('calendars')->registersMenuItem(icon: 'calendar');
-    Route::get('/contacts', ContactList::class)->name('contacts')->registersMenuItem(icon: 'identification');
+    Route::get('/contacts', AddressList::class)->name('contacts')->registersMenuItem(icon: 'identification');
     Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
     Route::name('projects.')->prefix('projects')
         ->group(function () {
@@ -100,6 +101,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
     Route::name('accounting.')->prefix('accounting')
         ->group(function () {
             Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'banknotes');
+            Route::get('/work-times', WorkTimeList::class)->name('work-times')->registersMenuItem();
             Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
             Route::get('/transactions', TransactionList::class)->name('transactions')->registersMenuItem();
         });

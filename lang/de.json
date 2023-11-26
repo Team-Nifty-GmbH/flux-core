@@ -804,6 +804,7 @@
     "Urgent request?": "Dringend?",
     "User code": "Benutzercode",
     "User saved successful.": "Benutzer erfolgreich abgespeichert.",
+    "User": "Benutzer",
     "Users": "Benutzer",
     "Validate Certificate": "Zertifikat validieren",
     "Validations": "Validierungen",
@@ -833,5 +834,17 @@
     "Your subject": "Betreff",
     "Zip": "PLZ",
     "zip": "PLZ",
-    "Zip / City": "PLZ / Ort"
+    "Zip / City": "PLZ / Ort",
+    "Work Times": "Arbeitszeiten",
+    "Total Time": "Gesamtzeit",
+    "Paused Time": "Pausenzeit",
+    "Started At": "Gestartet am",
+    "Paused At": "Pausiert am",
+    "Record new working hours": "Neue Arbeitszeit erfassen",
+    "End Workday": "Arbeitstag beenden",
+    "Start Workday": "Arbeitstag starten",
+    "Active Work Times": "Aktive Arbeitszeiten",
+    "Work Time Type": "Arbeitszeitart",
+    "Continue": "Fortsetzen",
+    "Record": "Datensatz"
 }

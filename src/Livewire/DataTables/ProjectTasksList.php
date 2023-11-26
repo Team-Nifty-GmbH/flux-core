@@ -25,14 +25,6 @@ class ProjectTasksList extends DataTable
 
     public array $projectTask = [];
 
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
-
     protected $listeners = [
         'refetchRecord',
     ];

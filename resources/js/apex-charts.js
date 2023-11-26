@@ -31,6 +31,22 @@ document.addEventListener('alpine:init', () => {
                     this.chart.updateOptions(this.options);
                 });
             });
+
+            if (this.$wire.__instance.originalEffects.js?.hasOwnProperty('toolTipFormatter')) {
+                this.defaultOptions.tooltip.y.formatter = new Function('val', this.$wire.__instance.originalEffects.js.toolTipFormatter);
+            }
+
+            if (this.$wire.__instance.originalEffects.js?.hasOwnProperty('yAxisFormatter')) {
+                this.defaultOptions.yaxis.labels.formatter = new Function('val', this.$wire.__instance.originalEffects.js.yAxisFormatter);
+            }
+
+            if (this.$wire.__instance.originalEffects.js?.hasOwnProperty('xAxisFormatter')) {
+                this.defaultOptions.xaxis.labels.formatter = new Function('val', this.$wire.__instance.originalEffects.js.xAxisFormatter);
+            }
+
+            if (this.$wire.__instance.originalEffects.js?.hasOwnProperty('dataLabelsFormatter')) {
+                this.defaultOptions.dataLabels.formatter = new Function('val', 'opts', this.$wire.__instance.originalEffects.js.dataLabelsFormatter);
+            }
         },
         updateData() {
             this.$wire.getOptions().then((options) => {
@@ -114,6 +130,18 @@ document.addEventListener('alpine:init', () => {
             },
             chart: {
                 type: null,
+            },
+            dataLabels: {
+                formatter: function(val) {
+                    return val;
+                }
+            },
+            xaxis: {
+                labels: {
+                    formatter: function(val) {
+                        return val;
+                    }
+                }
             },
             yaxis: {
                 labels: {

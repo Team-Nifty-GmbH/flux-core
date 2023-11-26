@@ -8,6 +8,7 @@
 <meta name="pusher-cluster" content="{{ config('broadcasting.connections.pusher.options.cluster', 'mt1') }}">
 <meta name="webpush-key" content="{{ config('webpush.vapid.public_key') }}">
 <meta name="currency-code" content="{{ \FluxErp\Models\Currency::default()?->iso }}">
+<meta http-equiv="refresh" content="{{ config('session.lifetime') * 60 + 1 }}">
 @stack('meta')
 <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
 {!! WireUi::directives()->scripts(absolute: false) !!}

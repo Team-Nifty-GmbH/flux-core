@@ -2,11 +2,13 @@
 
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Log;
 use FluxErp\Models\MailMessage;
 use FluxErp\Models\Order;
 use FluxErp\Models\Project;
 use FluxErp\Models\ProjectTask;
 use FluxErp\Models\Ticket;
+use FluxErp\Models\WorkTime;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -33,11 +35,11 @@ Broadcast::channel('FluxErp.Models.Contact.{contact}', function ($user) {
 });
 
 Broadcast::channel('FluxErp.Models.Log.{log}', function ($user) {
-    return $user->can(channel_to_permission((new \FluxErp\Models\Log())->broadcastChannelRoute()));
+    return $user->can(channel_to_permission((new Log())->broadcastChannelRoute()));
 });
 
 Broadcast::channel('FluxErp.Models.Log', function ($user) {
-    return $user->can(channel_to_permission((new \FluxErp\Models\Log())->broadcastChannelRoute()));
+    return $user->can(channel_to_permission((new Log())->broadcastChannelRoute()));
 });
 
 Broadcast::channel('FluxErp.Models.MailMessage.{message}', function ($user) {
@@ -78,6 +80,14 @@ Broadcast::channel('FluxErp.Models.Ticket.{ticket}', function ($user) {
 
 Broadcast::channel('FluxErp.Models.Ticket', function ($user) {
     return $user->can(channel_to_permission((new Ticket())->broadcastChannelRoute()));
+});
+
+Broadcast::channel('FluxErp.Models.WorkTime.{workTime}', function ($user) {
+    return $user->can(channel_to_permission((new WorkTime())->broadcastChannelRoute()));
+});
+
+Broadcast::channel('FluxErp.Models.WorkTime', function ($user) {
+    return $user->can(channel_to_permission((new WorkTime())->broadcastChannelRoute()));
 });
 
 Broadcast::channel('FluxErp.Models.User.{user}', function ($user, $id) {
