@@ -64,7 +64,10 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     protected static function booted(): void
     {
         static::saving(function (Address $address) {
-            if ($address->isDirty('lastname') || $address->isDirty('firstname') || $address->isDirty('company')) {
+            if ($address->isDirty('lastname')
+                || $address->isDirty('firstname')
+                || $address->isDirty('company')
+            ) {
                 $name = [
                     $address->company,
                     trim($address->firstname . ' ' . $address->lastname),
@@ -75,31 +78,48 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         });
 
         static::saved(function (Address $address) {
+            $contactUpdates = [];
+            $addressesUpdates = [];
+
             if ($address->isDirty('is_main_address') && $address->is_main_address) {
-                $address->contact->main_address_id = $address->id;
-                Address::query()
-                    ->where('contact_id', $address->contact_id)
-                    ->where('id', '!=', $address->id)
-                    ->update(['is_main_address' => false]);
-                $address->contact->save();
+                $contactUpdates += [
+                    'main_address_id' => $address->id,
+                ];
+
+                $addressesUpdates += [
+                    'is_main_address' => false,
+                ];
             }
 
             if ($address->isDirty('is_invoice_address') && $address->is_invoice_address) {
-                $address->contact->invoice_address_id = $address->id;
-                Address::query()
-                    ->where('contact_id', $address->contact_id)
-                    ->where('id', '!=', $address->id)
-                    ->update(['is_invoice_address' => false]);
-                $address->contact->save();
+                $contactUpdates += [
+                    'invoice_address_id' => $address->id,
+                ];
+
+                $addressesUpdates += [
+                    'is_invoice_address' => false,
+                ];
             }
 
             if ($address->isDirty('is_delivery_address') && $address->is_delivery_address) {
-                $address->contact->delivery_address_id = $address->id;
+                $contactUpdates += [
+                    'delivery_address_id' => $address->id,
+                ];
+
+                $addressesUpdates += [
+                    'is_delivery_address' => false,
+                ];
+            }
+
+            if ($contactUpdates) {
+                Contact::query()
+                    ->whereKey($address->contact_id)
+                    ->update($contactUpdates);
+
                 Address::query()
                     ->where('contact_id', $address->contact_id)
                     ->where('id', '!=', $address->id)
-                    ->update(['is_delivery_address' => false]);
-                $address->contact->save();
+                    ->update($addressesUpdates);
             }
         });
     }
