@@ -91,10 +91,8 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
 
     public static string $iconName = 'shopping-bag';
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
         self::saving(function (Order $order) {
             if ($order->isDirty('address_invoice_id')) {
                 $addressInvoice = $order->addressInvoice()->first();

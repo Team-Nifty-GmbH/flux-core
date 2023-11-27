@@ -94,7 +94,7 @@ class UpdateProductRequest extends BaseFormRequest
                 'prices.*.price_list_id' => 'required|integer|exists:price_lists,id,deleted_at,NULL',
                 'prices.*.price' => 'required|numeric',
 
-                'bundle_products' => 'required_if:is_bundle,true|array|exclude_unless:is_bundle,true',
+                'bundle_products' => 'exclude_if:is_bundle,false|required_if:is_bundle,true|array|exclude_unless:is_bundle,true',
                 'bundle_products.*.id' => 'required|integer|exists:products,id,deleted_at,NULL',
                 'bundle_products.*.count' => 'required|numeric|min:0',
 
