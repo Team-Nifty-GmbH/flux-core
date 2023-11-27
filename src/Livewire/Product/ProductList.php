@@ -5,8 +5,6 @@ namespace FluxErp\Livewire\Product;
 use FluxErp\Livewire\DataTables\ProductList as BaseProductList;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Client;
-use FluxErp\Models\Contact;
-use FluxErp\Models\PaymentType;
 use FluxErp\Models\VatRate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportRedirects\Redirector;
