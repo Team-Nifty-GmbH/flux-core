@@ -11,20 +11,20 @@ return new class extends Migration
     {
         Schema::table('contacts', function (Blueprint $table) {
             $table->foreignId('main_address_id')
+                ->nullable()
                 ->after('expense_ledger_account_id')
-                ->nullable()
                 ->constrained('addresses')
-                ->onDelete('set null');
+                ->nullOnDelete();
             $table->foreignId('invoice_address_id')
+                ->nullable()
                 ->after('main_address_id')
-                ->nullable()
                 ->constrained('addresses')
-                ->onDelete('set null');
+                ->nullOnDelete();
             $table->foreignId('delivery_address_id')
-                ->after('invoice_address_id')
                 ->nullable()
+                ->after('invoice_address_id')
                 ->constrained('addresses')
-                ->onDelete('set null');
+                ->nullOnDelete();
         });
 
         DB::statement('UPDATE contacts SET main_address_id = (
