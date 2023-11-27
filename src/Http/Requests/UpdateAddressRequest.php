@@ -57,9 +57,12 @@ class UpdateAddressRequest extends BaseFormRequest
                 'department' => 'string|nullable',
                 'login_name' => 'string|nullable',
                 'login_password' => 'string|nullable',
-                'is_main_address' => 'sometimes|required|boolean',
+                'is_main_address' => 'boolean',
+                'is_invoice_address' => 'boolean',
+                'is_delivery_address' => 'boolean',
                 'is_active' => 'boolean',
                 'can_login' => 'boolean',
+
                 'address_types' => 'sometimes|required|array',
                 'address_types.*' => [
                     'distinct',
@@ -70,13 +73,14 @@ class UpdateAddressRequest extends BaseFormRequest
                         baseTable: 'addresses'
                     ),
                 ],
-                'contact_options' => 'sometimes|array',
+
+                'contact_options' => 'array',
                 'contact_options.*' => 'array',
-                'contact_options.*.id' => 'sometimes|integer|exists:contact_options,id',
+                'contact_options.*.id' => 'integer|exists:contact_options,id',
                 'contact_options.*.type' => 'required|string',
                 'contact_options.*.label' => 'required|string',
                 'contact_options.*.value' => 'required|string',
-                'contact_options.*.is_primary' => 'sometimes|required|boolean',
+                'contact_options.*.is_primary' => 'boolean',
             ],
         );
     }

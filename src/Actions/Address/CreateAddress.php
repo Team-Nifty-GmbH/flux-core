@@ -25,14 +25,31 @@ class CreateAddress extends FluxAction
 
     public function performAction(): Address
     {
-        $mainAddress = UpdateMainAddress::make([
-            'address_id' => null,
-            'contact_id' => $this->data['contact_id'],
-            'is_main_address' => ! ($this->data['is_main_address'] ??= false),
-        ])->execute();
-
-        if (! $this->data['is_main_address'] && ! $mainAddress) {
+        if (! data_get($this->data, 'is_main_address', false)
+            && ! Address::query()
+                ->where('contact_id', $this->data['contact_id'])
+                ->where('is_main_address', true)
+                ->exists()
+        ) {
             $this->data['is_main_address'] = true;
+        }
+
+        if (! data_get($this->data, 'is_invoice_address', false)
+            && ! Address::query()
+                ->where('contact_id', $this->data['contact_id'])
+                ->where('is_invoice_address', true)
+                ->exists()
+        ) {
+            $this->data['is_invoice_address'] = true;
+        }
+
+        if (! data_get($this->data, 'is_delivery_address', false)
+            && ! Address::query()
+                ->where('contact_id', $this->data['contact_id'])
+                ->where('is_delivery_address', true)
+                ->exists()
+        ) {
+            $this->data['is_delivery_address'] = true;
         }
 
         $contactOptions = Arr::pull($this->data, 'contact_options', []);
