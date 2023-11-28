@@ -20,4 +20,8 @@ class ProjectList extends DataTable
         'end_date',
         'progress',
     ];
+
+    public array $formatters = [
+        'progress' => 'percentage',
+    ];
 }

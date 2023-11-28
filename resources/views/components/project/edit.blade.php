@@ -1,5 +1,4 @@
 <div>
-    <x-errors />
     <x-input x-bind:readonly="!edit" wire:model="project.name" label="{{ __('Name') }}" />
     <div class="flex justify-between">
         <x-state
@@ -56,4 +55,5 @@
     <x-textarea x-bind:readonly="!edit" wire:model="project.description" label="{{ __('Description') }}" />
     <x-inputs.number :label="__('Budget')" x-bind:readonly="!edit" wire:model="project.budget" />
     <x-inputs.number :label="__('Time Budget in hours')" x-bind:readonly="!edit" wire:model="project.time_budget_hours" />
+    <x-errors />
 </div>

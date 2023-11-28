@@ -27,7 +27,7 @@ use FluxErp\Models\Category;
 use FluxErp\Models\Order;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
-use FluxErp\Models\ProjectTask;
+use FluxErp\Models\Task;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
@@ -287,7 +287,7 @@ class FluxServiceProvider extends ServiceProvider
                     ],
                     'sortableAttributes' => ['*'],
                 ],
-                ProjectTask::class => [
+                Task::class => [
                     'filterableAttributes' => [
                         'project_id',
                         'state',

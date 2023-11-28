@@ -2,7 +2,7 @@
 
 namespace FluxErp\Tests\Livewire\ProjectTask;
 
-use FluxErp\Livewire\ProjectTask\ProjectTask;
+use FluxErp\Livewire\Task\Task;
 use FluxErp\Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
@@ -13,7 +13,7 @@ class ProjectTaskTest extends TestCase
 
     public function test_renders_successfully()
     {
-        Livewire::test(ProjectTask::class)
+        Livewire::test(Task::class)
             ->assertStatus(200);
     }
 }

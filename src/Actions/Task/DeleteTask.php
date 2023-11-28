@@ -1,28 +1,28 @@
 <?php
 
-namespace FluxErp\Actions\ProjectTask;
+namespace FluxErp\Actions\Task;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\ProjectTask;
+use FluxErp\Models\Task;
 
-class DeleteProjectTask extends FluxAction
+class DeleteTask extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
         $this->rules = [
-            'id' => 'required|integer|exists:project_tasks,id,deleted_at,NULL',
+            'id' => 'required|integer|exists:tasks,id,deleted_at,NULL',
         ];
     }
 
     public static function models(): array
     {
-        return [ProjectTask::class];
+        return [Task::class];
     }
 
     public function performAction(): ?bool
     {
-        return ProjectTask::query()
+        return Task::query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

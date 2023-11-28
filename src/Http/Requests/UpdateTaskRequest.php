@@ -2,12 +2,12 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Models\ProjectTask;
+use FluxErp\Models\Task;
 use FluxErp\Rules\ExistsWithIgnore;
-use FluxErp\States\ProjectTask\ProjectTaskState;
+use FluxErp\States\Task\TaskState;
 use Spatie\ModelStates\Validation\ValidStateRule;
 
-class UpdateProjectTaskRequest extends BaseFormRequest
+class UpdateTaskRequest extends BaseFormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -17,9 +17,9 @@ class UpdateProjectTaskRequest extends BaseFormRequest
     public function rules(): array
     {
         return array_merge(
-            (new ProjectTask())->hasAdditionalColumnsValidationRules(),
+            (new Task())->hasAdditionalColumnsValidationRules(),
             [
-                'id' => 'required|integer|exists:project_tasks,id,deleted_at,NULL',
+                'id' => 'required|integer|exists:tasks,id,deleted_at,NULL',
                 'project_id' => [
                     'integer',
                     (new ExistsWithIgnore('projects', 'id'))->whereNull('deleted_at'),
@@ -35,12 +35,12 @@ class UpdateProjectTaskRequest extends BaseFormRequest
                 'name' => 'sometimes|string',
                 'state' => [
                     'string',
-                    ValidStateRule::make(ProjectTaskState::class),
+                    ValidStateRule::make(TaskState::class),
                 ],
                 'is_done' => 'sometimes|boolean',
                 'categories' => 'prohibits:category_id|required_without:category_id|array',
                 'category_id' => 'prohibits:categories|required_without:categories|integer|exists:categories,id,model_type,'
-                    . ProjectTask::class,
+                    . Task::class,
             ],
         );
     }

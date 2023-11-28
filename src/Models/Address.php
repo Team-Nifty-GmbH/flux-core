@@ -163,7 +163,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public function projectTasks(): HasMany
     {
-        return $this->hasMany(ProjectTask::class);
+        return $this->hasMany(Task::class);
     }
 
     /**

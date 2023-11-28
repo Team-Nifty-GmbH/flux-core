@@ -5,7 +5,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\MailMessage;
 use FluxErp\Models\Order;
 use FluxErp\Models\Project;
-use FluxErp\Models\ProjectTask;
+use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -64,12 +64,12 @@ Broadcast::channel('FluxErp.Models.Project', function ($user) {
     return $user->can(channel_to_permission((new Project())->broadcastChannelRoute()));
 });
 
-Broadcast::channel('FluxErp.Models.ProjectTask.{projectTask}', function ($user) {
-    return $user->can(channel_to_permission((new ProjectTask())->broadcastChannelRoute()));
+Broadcast::channel('FluxErp.Models.Task.{task}', function ($user) {
+    return $user->can(channel_to_permission((new Task())->broadcastChannelRoute()));
 });
 
-Broadcast::channel('FluxErp.Models.ProjectTask', function ($user) {
-    return $user->can(channel_to_permission((new ProjectTask())->broadcastChannelRoute()));
+Broadcast::channel('FluxErp.Models.Task', function ($user) {
+    return $user->can(channel_to_permission((new Task())->broadcastChannelRoute()));
 });
 
 Broadcast::channel('FluxErp.Models.Ticket.{ticket}', function ($user) {

@@ -1,12 +1,12 @@
 <?php
 
-namespace FluxErp\States\ProjectTask;
+namespace FluxErp\States\Task;
 
 use FluxErp\States\State;
 use Spatie\ModelStates\StateConfig;
 use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 
-abstract class ProjectTaskState extends State implements HasFrontendFormatter
+abstract class TaskState extends State implements HasFrontendFormatter
 {
     abstract public function color(): string;
 
@@ -16,20 +16,30 @@ abstract class ProjectTaskState extends State implements HasFrontendFormatter
             ->default(Open::class)
             ->allowTransitions([
                 [
+                    [
+                        Open::class,
+                        Done::class,
+                        Canceled::class,
+                    ],
                     InProgress::class,
-                    Open::class,
                 ],
                 [
-                    Open::class,
-                    InProgress::class,
-                ],
-                [
-                    InProgress::class,
+                    [
+                        Open::class,
+                        InProgress::class,
+                    ],
                     Done::class,
                 ],
                 [
-                    Done::class,
+                    [
+                        Open::class,
+                        InProgress::class,
+                    ],
+                    Canceled::class,
+                ],
+                [
                     InProgress::class,
+                    Open::class,
                 ],
             ]);
     }

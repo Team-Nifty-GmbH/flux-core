@@ -2,7 +2,7 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\States\ProjectTask\ProjectTaskState;
+use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -16,6 +16,7 @@ use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
@@ -23,7 +24,7 @@ use Spatie\ModelStates\HasStates;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class ProjectTask extends Model implements HasMedia
+class Task extends Model implements HasMedia
 {
     use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
         HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
@@ -34,23 +35,18 @@ class ProjectTask extends Model implements HasMedia
     ];
 
     protected $casts = [
-        'is_done' => 'boolean',
-        'is_paid' => 'boolean',
-        'state' => ProjectTaskState::class,
+        'state' => TaskState::class,
     ];
-
-    public array $translatable = [
-        'name',
-    ];
-
-    public function address(): BelongsTo
-    {
-        return $this->belongsTo(Address::class);
-    }
 
     public function orderPosition(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class);
+    }
+
+    public function orderPositions(): BelongsToMany
+    {
+        return $this->belongsToMany(OrderPosition::class, 'order_position_task')
+            ->withPivot('amount');
     }
 
     public function project(): BelongsTo
@@ -58,9 +54,14 @@ class ProjectTask extends Model implements HasMedia
         return $this->belongsTo(Project::class);
     }
 
-    public function user(): BelongsTo
+    public function responsibleUser(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'task_user');
     }
 
     /**
@@ -78,9 +79,9 @@ class ProjectTask extends Model implements HasMedia
 
     public function toSearchableArray(): array
     {
-        return $this->with('address:id,company,firstname,lastname,city')
-            ->with('project:id,project_name,display_name')
+        return $this->with('project:id,project_number,name')
             ->whereKey($this->id)
-            ->first()?->toArray() ?? [];
+            ->first()
+            ?->toArray() ?? [];
     }
 }

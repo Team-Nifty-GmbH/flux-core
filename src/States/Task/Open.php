@@ -1,10 +1,10 @@
 <?php
 
-namespace FluxErp\States\ProjectTask;
+namespace FluxErp\States\Task;
 
 use FluxErp\Models\StateSetting;
 
-class Open extends ProjectTaskState
+class Open extends TaskState
 {
     public static $name = 'open';
 

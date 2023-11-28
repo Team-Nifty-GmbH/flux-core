@@ -8,7 +8,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Media;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
-use FluxErp\Models\ProjectTask;
+use FluxErp\Models\Task;
 use FluxErp\Models\Setting;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
@@ -34,15 +34,15 @@ class MediaTest extends BaseSetup
     {
         parent::setUp();
 
-        $projectCategory = Category::factory()->create(['model_type' => ProjectTask::class]);
+        $projectCategory = Category::factory()->create(['model_type' => Task::class]);
 
         $project = Project::factory()->create(['category_id' => $projectCategory->id]);
         $contact = Contact::factory()->create(['client_id' => $this->dbClient->id]);
         $address = Address::factory()->create(['contact_id' => $contact->id, 'client_id' => $contact->client_id]);
 
-        $this->categories = Category::factory()->create(['model_type' => ProjectTask::class]);
+        $this->categories = Category::factory()->create(['model_type' => Task::class]);
 
-        $this->projectTask = ProjectTask::factory()->create([
+        $this->projectTask = Task::factory()->create([
             'project_id' => $project->id,
             'address_id' => $address->id,
             'user_id' => $this->user->id,

@@ -5,7 +5,7 @@ namespace FluxErp\Tests\Livewire\Project;
 use FluxErp\Livewire\Project\Project as ProjectView;
 use FluxErp\Models\Category;
 use FluxErp\Models\Project;
-use FluxErp\Models\ProjectTask;
+use FluxErp\Models\Task;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
@@ -25,7 +25,7 @@ class ProjectTest extends BaseSetup
         ]);
 
         $categories = Category::factory()->count(2)->create([
-            'model_type' => ProjectTask::class,
+            'model_type' => Task::class,
             'parent_id' => $category->id,
         ]);
 

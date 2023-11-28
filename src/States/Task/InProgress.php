@@ -1,10 +1,10 @@
 <?php
 
-namespace FluxErp\States\ProjectTask;
+namespace FluxErp\States\Task;
 
 use FluxErp\Models\StateSetting;
 
-class InProgress extends ProjectTaskState
+class InProgress extends TaskState
 {
     public static $name = 'in_progress';
 

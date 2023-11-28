@@ -17,16 +17,15 @@ class ProjectFactory extends Factory
 
     /**
      * Define the model's default state.
-     *
-     * @return array
      */
-    public function definition()
+    public function definition(): array
     {
         return [
-            'project_name' => $this->faker->jobTitle(),
-            'display_name' => $this->faker->jobTitle(),
-            'release_date' => $this->faker->dateTime(),
+            'name' => $this->faker->jobTitle(),
+            'start_date' => $this->faker->date(),
+            'description' => $this->faker->realText(),
             'state' => ProjectState::all()->random()::$name,
+            'time_budget_hours' => rand(0, 1000),
         ];
     }
 }

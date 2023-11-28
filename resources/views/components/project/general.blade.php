@@ -3,10 +3,10 @@
         formatter: @js(\FluxErp\Models\Project::typeScriptAttributes()),
      }"
 >
-    <div id="project-task-modal">
+    <div id="task-modal">
         <x-modal max-width="4xl">
             <x-card>
-                <livewire:project-task.project-task :project-id="$this->project->id ?? null" />
+                <livewire:task.task :project-id="$this->project->id ?? null" />
             </x-card>
         </x-modal>
     </div>
@@ -42,8 +42,8 @@
             @endforeach
         </x-card>
     @endif
-    <livewire:data-tables.project-tasks-list
-        cache-key="project.general.project-tasks-list"
+    <livewire:data-tables.task-list
+        cache-key="project.general.task-list"
         :headline="__('Tasks')"
         :filters="[
             [

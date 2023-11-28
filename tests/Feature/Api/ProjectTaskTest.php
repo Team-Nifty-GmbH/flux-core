@@ -10,7 +10,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
-use FluxErp\Models\ProjectTask;
+use FluxErp\Models\Task;
 use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
@@ -42,13 +42,13 @@ class ProjectTaskTest extends BaseSetup
         $this->projectCategories = Category::factory()
             ->count(3)
             ->create([
-                'model_type' => ProjectTask::class,
+                'model_type' => Task::class,
                 'parent_id' => $category->id,
             ]);
 
         $contact = Contact::factory()->create(['client_id' => $this->dbClient->id]);
         $this->address = Address::factory()->create(['contact_id' => $contact->id, 'client_id' => $contact->client_id]);
-        $this->projectTask = ProjectTask::factory()->count(3)->create([
+        $this->projectTask = Task::factory()->count(3)->create([
             'project_id' => $this->project->id,
             'address_id' => $this->address->id,
             'user_id' => $this->user->id,
@@ -57,7 +57,7 @@ class ProjectTaskTest extends BaseSetup
         $this->project->categories()->attach($this->projectCategories->pluck('id')->toArray());
 
         $this->additionalColumns = AdditionalColumn::query()
-            ->where('model_type', ProjectTask::class)
+            ->where('model_type', Task::class)
             ->get();
 
         $this->permissions = [
@@ -116,7 +116,7 @@ class ProjectTaskTest extends BaseSetup
         $json = json_decode($response->getContent());
         $this->assertFalse(property_exists($json, 'templates'));
         $tasks = $json->data->data;
-        $referenceTask = ProjectTask::query()->first();
+        $referenceTask = Task::query()->first();
         $this->assertNotEmpty($tasks);
         $this->assertEquals($referenceTask->id, $tasks[0]->id);
         $this->assertEquals($referenceTask->project_id, $tasks[0]->project_id);
@@ -155,7 +155,7 @@ class ProjectTaskTest extends BaseSetup
         $response->assertStatus(201);
 
         $task = json_decode($response->getContent())->data;
-        $dbTask = ProjectTask::query()
+        $dbTask = Task::query()
             ->whereKey($task->id)
             ->first();
         $this->assertNotEmpty($dbTask);
@@ -204,7 +204,7 @@ class ProjectTaskTest extends BaseSetup
         $response->assertStatus(201);
 
         $task = json_decode($response->getContent())->data;
-        $dbTask = ProjectTask::query()
+        $dbTask = Task::query()
             ->whereKey($task->id)
             ->first();
         $this->assertNotEmpty($dbTask);
@@ -363,7 +363,7 @@ class ProjectTaskTest extends BaseSetup
         $response->assertStatus(200);
 
         $task = json_decode($response->getContent())->data;
-        $dbTask = ProjectTask::query()
+        $dbTask = Task::query()
             ->whereKey($task->id)
             ->first();
         $this->assertNotEmpty($dbTask);
@@ -411,7 +411,7 @@ class ProjectTaskTest extends BaseSetup
         $response->assertStatus(200);
 
         $tasks = json_decode($response->getContent())->data;
-        $dbTask = ProjectTask::query()
+        $dbTask = Task::query()
             ->whereKey($tasks->id)
             ->first();
         $this->assertNotEmpty($dbTask);
@@ -481,7 +481,7 @@ class ProjectTaskTest extends BaseSetup
         $tasks = collect(json_decode($response->getContent())->responses);
         $this->assertEquals(2, count($tasks));
 
-        $dbTasks = ProjectTask::query()
+        $dbTasks = Task::query()
             ->whereIn('id', $tasks->pluck('id')->toArray())
             ->get();
         $this->assertEquals(2, count($dbTasks));
@@ -518,10 +518,10 @@ class ProjectTaskTest extends BaseSetup
     {
         $user = User::factory()->create(['language_id' => $this->user->language_id]);
         $additionalColumns[] = AdditionalColumn::factory()->create([
-            'model_type' => ProjectTask::class,
+            'model_type' => Task::class,
         ]);
         $additionalColumns[] = AdditionalColumn::factory()->create([
-            'model_type' => ProjectTask::class,
+            'model_type' => Task::class,
             'values' => ['a', 'b', 'c'],
         ]);
 
@@ -543,7 +543,7 @@ class ProjectTaskTest extends BaseSetup
         ];
 
         $this->additionalColumns = AdditionalColumn::query()
-            ->where('model_type', ProjectTask::class)
+            ->where('model_type', Task::class)
             ->get();
 
         foreach ($projectTasks as $key => $projectTask) {
@@ -563,7 +563,7 @@ class ProjectTaskTest extends BaseSetup
         $tasks = collect(json_decode($response->getContent())->responses);
         $this->assertEquals(2, count($tasks));
 
-        $dbTasks = ProjectTask::query()
+        $dbTasks = Task::query()
             ->whereIn('id', $tasks->pluck('id')->toArray())
             ->get();
         $this->assertEquals(2, count($dbTasks));
@@ -771,7 +771,7 @@ class ProjectTaskTest extends BaseSetup
         $response->assertStatus(200);
 
         $task = json_decode($response->getContent())->data;
-        $dbTask = ProjectTask::query()
+        $dbTask = Task::query()
             ->whereKey($task->id)
             ->first();
 
@@ -793,7 +793,7 @@ class ProjectTaskTest extends BaseSetup
     public function test_delete_project_task()
     {
         AdditionalColumn::factory()->create([
-            'model_type' => ProjectTask::class,
+            'model_type' => Task::class,
         ]);
 
         $this->user->givePermissionTo($this->permissions['delete']);
@@ -819,7 +819,7 @@ class ProjectTaskTest extends BaseSetup
     public function test_finish_project_task()
     {
         AdditionalColumn::factory()->create([
-            'model_type' => ProjectTask::class,
+            'model_type' => Task::class,
         ]);
 
         $projectTask = [
@@ -834,7 +834,7 @@ class ProjectTaskTest extends BaseSetup
         $response->assertStatus(200);
 
         $task = json_decode($response->getContent())->data;
-        $dbTask = ProjectTask::query()
+        $dbTask = Task::query()
             ->whereKey($task->id)
             ->first();
         $this->assertNotEmpty($dbTask);

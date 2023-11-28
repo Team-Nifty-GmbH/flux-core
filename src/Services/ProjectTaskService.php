@@ -2,10 +2,10 @@
 
 namespace FluxErp\Services;
 
-use FluxErp\Actions\ProjectTask\CreateProjectTask;
-use FluxErp\Actions\ProjectTask\DeleteProjectTask;
-use FluxErp\Actions\ProjectTask\FinishProjectTask;
-use FluxErp\Actions\ProjectTask\UpdateProjectTask;
+use FluxErp\Actions\Task\CreateTask;
+use FluxErp\Actions\Task\DeleteTask;
+use FluxErp\Actions\Task\FinishTask;
+use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Helpers\ResponseHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
@@ -15,7 +15,7 @@ class ProjectTaskService
     public function create(array $data): array
     {
         try {
-            $task = CreateProjectTask::make($data)->validate()->execute();
+            $task = CreateTask::make($data)->validate()->execute();
         } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 422,
@@ -41,7 +41,7 @@ class ProjectTaskService
             try {
                 $responses[] = ResponseHelper::createArrayResponse(
                     statusCode: 200,
-                    data: $task = UpdateProjectTask::make($item)->validate()->execute(),
+                    data: $task = UpdateTask::make($item)->validate()->execute(),
                     additions: ['id' => $task->id]
                 );
             } catch (ValidationException $e) {
@@ -70,7 +70,7 @@ class ProjectTaskService
     public function delete(string $id): array
     {
         try {
-            DeleteProjectTask::make(['id' => $id])->validate()->execute();
+            DeleteTask::make(['id' => $id])->validate()->execute();
         } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
@@ -86,6 +86,6 @@ class ProjectTaskService
 
     public function finish(array $data): Model
     {
-        return FinishProjectTask::make($data)->execute();
+        return FinishTask::make($data)->execute();
     }
 }

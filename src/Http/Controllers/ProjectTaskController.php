@@ -3,9 +3,9 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateProjectTaskRequest;
-use FluxErp\Http\Requests\FinishProjectTaskRequest;
-use FluxErp\Models\ProjectTask;
+use FluxErp\Http\Requests\CreateTaskRequest;
+use FluxErp\Http\Requests\FinishTaskRequest;
+use FluxErp\Models\Task;
 use FluxErp\Services\ProjectTaskService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +16,7 @@ class ProjectTaskController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new ProjectTask();
+        $this->model = new Task();
     }
 
     /**
@@ -24,7 +24,7 @@ class ProjectTaskController extends BaseController
      */
     public function create(Request $request, ProjectTaskService $projectTaskService): JsonResponse
     {
-        $validator = Validator::make($request->all(), (new CreateProjectTaskRequest())->rules());
+        $validator = Validator::make($request->all(), (new CreateTaskRequest())->rules());
         $validator->addModel($this->model);
 
         if ($validator->fails()) {
@@ -53,7 +53,7 @@ class ProjectTaskController extends BaseController
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function finish(FinishProjectTaskRequest $request, ProjectTaskService $projectTaskService): JsonResponse
+    public function finish(FinishTaskRequest $request, ProjectTaskService $projectTaskService): JsonResponse
     {
         $projectTask = $projectTaskService->finish($request->validated());
 

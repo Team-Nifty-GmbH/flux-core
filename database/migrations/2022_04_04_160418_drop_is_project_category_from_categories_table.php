@@ -1,6 +1,5 @@
 <?php
 
-use FluxErp\Models\ProjectTask;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -40,13 +39,13 @@ return new class extends Migration
     {
         DB::table('categories')
             ->where('is_project_category', true)
-            ->update(['model' => ProjectTask::class]);
+            ->update(['model' => 'FluxErp\\Models\\ProjectTask']);
     }
 
     private function rollbackProjectCategories()
     {
         DB::table('categories')
-            ->where('model', ProjectTask::class)
+            ->where('model', 'FluxErp\\Models\\ProjectTask')
             ->update(['is_project_category' => true]);
     }
 };

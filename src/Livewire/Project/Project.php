@@ -8,7 +8,7 @@ use FluxErp\Actions\Project\UpdateProject;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProjectForm;
 use FluxErp\Models\Category;
-use FluxErp\Models\ProjectTask;
+use FluxErp\Models\Task;
 use FluxErp\Traits\Livewire\HasAdditionalColumns;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;

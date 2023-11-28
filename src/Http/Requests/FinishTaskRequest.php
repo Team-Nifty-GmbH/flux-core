@@ -2,7 +2,7 @@
 
 namespace FluxErp\Http\Requests;
 
-class FinishProjectTaskRequest extends BaseFormRequest
+class FinishTaskRequest extends BaseFormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -12,7 +12,7 @@ class FinishProjectTaskRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:project_tasks,id,deleted_at,NULL',
+            'id' => 'required|integer|exists:tasks,id,deleted_at,NULL',
             'finish' => 'required|boolean',
         ];
     }

@@ -9,7 +9,6 @@ use FluxErp\Livewire\DataTables\CommissionList;
 use FluxErp\Livewire\DataTables\ContactList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\ProductList;
-use FluxErp\Livewire\DataTables\ProjectTasksList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\Order\Order;
@@ -18,6 +17,7 @@ use FluxErp\Livewire\Product\Product;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
 use FluxErp\Livewire\Project\Project;
 use FluxErp\Livewire\Project\ProjectList;
+use FluxErp\Livewire\Project\ProjectTaskList;
 use FluxErp\Livewire\Settings\AdditionalColumns;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\Clients;
@@ -35,6 +35,7 @@ use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Translations;
 use FluxErp\Livewire\Settings\Users;
+use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -66,7 +67,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
         ->group(function () {
             Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'briefcase');
             Route::get('/list', ProjectList::class)->name('projects')->registersMenuItem();
-            Route::get('/project-tasks', ProjectTasksList::class)
+            Route::get('/project-tasks', ProjectTaskList::class)
                 ->name('project-tasks')
                 ->registersMenuItem(icon: 'briefcase');
             Route::get('/{id}', Project::class)->name('id');
@@ -83,7 +84,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
             Route::get('/{id}', Order::class)->name('id');
         });
 
-    Route::get('/tasks', ProjectTasksList::class)->name('tasks')->registersMenuItem(icon: 'clipboard-document-list');
+    Route::get('/tasks', TaskList::class)->name('tasks')->registersMenuItem(icon: 'clipboard-document-list');
     Route::get('/tickets', TicketList::class)->name('tickets')->registersMenuItem(icon: 'wrench-screwdriver');
     Route::get('/tickets/{id}', Ticket::class)->name('tickets.id');
     Route::get('/projects', ProjectList::class)->name('projects')->registersMenuItem(icon: 'briefcase');

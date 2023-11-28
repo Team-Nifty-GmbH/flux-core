@@ -1,10 +1,10 @@
 <?php
 
-namespace FluxErp\Livewire\ProjectTask;
+namespace FluxErp\Livewire\Task;
 
-use FluxErp\Actions\ProjectTask\CreateProjectTask;
-use FluxErp\Actions\ProjectTask\DeleteProjectTask;
-use FluxErp\Actions\ProjectTask\UpdateProjectTask;
+use FluxErp\Actions\Task\CreateTask;
+use FluxErp\Actions\Task\DeleteTask;
+use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Traits\Livewire\HasAdditionalColumns;
 use FluxErp\Traits\Livewire\WithTabs;
@@ -14,15 +14,15 @@ use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
-class ProjectTask extends Component
+class Task extends Component
 {
     use Actions, HasAdditionalColumns, WithTabs;
 
-    public array $projectTask = [];
+    public array $task = [];
 
     public ?int $projectId = null;
 
-    public string $projectTaskTab = 'project-task.general';
+    public string $taskTab = 'task.general';
 
     public array $availableStates = [];
 
@@ -35,9 +35,9 @@ class ProjectTask extends Component
         $this->projectId = $projectId;
 
         if ($id) {
-            $this->showProjectTask($id);
+            $this->showTask($id);
         } else {
-            $this->projectTask = [
+            $this->task = [
                 'id' => 0,
                 'address_id' => null,
                 'project_id' => $projectId,
@@ -50,69 +50,68 @@ class ProjectTask extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.project-task.project-task');
+        return view('flux::livewire.task.task');
     }
 
     public function getTabs(): array
     {
         return [
-            TabButton::make('project-task.general')->label(__('General')),
-            TabButton::make('project-task.comments')->label(__('Comments'))
+            TabButton::make('task.general')->label(__('General')),
+            TabButton::make('task.comments')->label(__('Comments'))
                 ->attributes([
-                    'x-bind:disabled' => '! $wire.projectTask.id',
+                    'x-bind:disabled' => '! $wire.task.id',
                 ]),
-            TabButton::make('project-task.media')->label(__('Media'))
+            TabButton::make('task.media')->label(__('Media'))
                 ->attributes([
-                    'x-bind:disabled' => '! $wire.projectTask.id',
+                    'x-bind:disabled' => '! $wire.task.id',
                 ]),
         ];
     }
 
-    public function showProjectTask(?int $projectTask): void
+    public function showTask(?int $task): void
     {
         $this->resetErrorBag();
 
-        $this->reset('projectTaskTab');
+        $this->reset('taskTab');
 
-        $projectTask = \FluxErp\Models\ProjectTask::query()
-            ->whereKey($projectTask)
+        $task = \FluxErp\Models\Task::query()
+            ->whereKey($task)
             ->with(['categories:id,parent_id', 'project'])
             ->firstOrNew();
 
-        $this->availableStates = \FluxErp\Models\ProjectTask::getStatesFor('state')->map(function (string $state) {
+        $this->availableStates = \FluxErp\Models\Task::getStatesFor('state')->map(function (string $state) {
             return [
                 'label' => __(ucfirst(str_replace('_', ' ', $state))),
                 'name' => $state,
             ];
         })->toArray();
 
-        $this->projectTask = $projectTask->toArray();
-        $this->openCategories = $projectTask->categories?->pluck('parent_id')->toArray() ?: [];
+        $this->task = $task->toArray();
+        $this->openCategories = $task->categories?->pluck('parent_id')->toArray() ?: [];
 
-        $this->projectTask['categories'] = $projectTask->categories?->pluck('id')->first();
-        $this->projectTask['user_id'] = $projectTask->user_id ?: auth()->id();
-        $this->projectTask['address_id'] = $projectTask->address_id;
-        unset($this->projectTask['project']);
+        $this->task['categories'] = $task->categories?->pluck('id')->first();
+        $this->task['user_id'] = $task->user_id ?: auth()->id();
+        $this->task['address_id'] = $task->address_id;
+        unset($this->task['project']);
 
-        if (! $projectTask->exists && $this->projectId) {
-            $this->projectTask['project_id'] = $this->projectId;
+        if (! $task->exists && $this->projectId) {
+            $this->task['project_id'] = $this->projectId;
         }
     }
 
     public function save(): false|array
     {
-        $projectTask = $this->projectTask;
-        $projectTask['categories'] = array_map('intval', [$this->projectTask['categories']]);
-        unset($projectTask['category_id']);
-        $action = ($this->projectTask['id'] ?? false) ? UpdateProjectTask::class : CreateProjectTask::class;
+        $task = $this->task;
+        $task['categories'] = array_map('intval', [$this->task['categories']]);
+        unset($task['category_id']);
+        $action = ($this->task['id'] ?? false) ? UpdateTask::class : CreateTask::class;
 
         try {
-            $response = $action::make($projectTask)
+            $response = $action::make($task)
                 ->checkPermission()
                 ->validate()
                 ->execute();
         } catch (\Exception $e) {
-            throw $e;
             exception_to_notifications($e, $this);
 
             return false;
@@ -127,7 +126,7 @@ class ProjectTask extends Component
     public function delete(): bool
     {
         try {
-            DeleteProjectTask::make($this->projectTask)
+            DeleteTask::make($this->task)
                 ->checkPermission()
                 ->validate()
                 ->execute();
@@ -143,7 +142,7 @@ class ProjectTask extends Component
 
     public function getAdditionalColumns(): array
     {
-        return (new \FluxErp\Models\ProjectTask)
+        return (new \FluxErp\Models\Task)
             ->getAdditionalColumns()
             ->toArray();
     }
