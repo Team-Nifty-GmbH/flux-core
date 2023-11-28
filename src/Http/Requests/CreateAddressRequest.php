@@ -73,6 +73,8 @@ class CreateAddressRequest extends BaseFormRequest
             'lastname' => 'string|nullable',
             'addition' => 'string|nullable',
             'mailbox' => 'string|nullable',
+            'mailbox_city' => 'string|nullable',
+            'mailbox_zip' => 'string|nullable',
             'latitude' => [
                 'nullable',
                 'regex:/^[-]?(([0-8]?[0-9](\.\d+)?)|(90(\.0+)?))$/',
@@ -84,7 +86,10 @@ class CreateAddressRequest extends BaseFormRequest
             'zip' => 'string|nullable',
             'city' => 'string|nullable',
             'street' => 'string|nullable',
+
             'url' => 'string|nullable',
+            'email' => 'string|nullable|email',
+            'phone' => 'string|nullable',
         ];
     }
 }

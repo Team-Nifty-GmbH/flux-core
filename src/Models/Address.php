@@ -136,39 +136,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         );
     }
 
-    protected function email(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->contactOptions()
-                ->where('type', 'email')
-                ->orderBy('is_primary', 'desc')
-                ->first()
-                ->value ?? null
-        );
-    }
-
-    protected function phone(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->contactOptions()
-                ->where('type', 'phone')
-                ->orderBy('is_primary', 'desc')
-                ->first()
-                ->value ?? null
-        );
-    }
-
-    protected function website(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->contactOptions()
-                ->where('type', 'website')
-                ->orderBy('is_primary', 'desc')
-                ->first()
-                ->value ?? null
-        );
-    }
-
     public function addressTypes(): BelongsToMany
     {
         return $this->belongsToMany(AddressType::class);

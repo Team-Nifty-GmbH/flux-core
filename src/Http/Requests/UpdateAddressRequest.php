@@ -44,6 +44,8 @@ class UpdateAddressRequest extends BaseFormRequest
                 'lastname' => 'string|nullable',
                 'addition' => 'string|nullable',
                 'mailbox' => 'string|nullable',
+                'mailbox_city' => 'string|nullable',
+                'mailbox_zip' => 'string|nullable',
                 'latitude' => ['nullable', 'regex:/^[-]?(([0-8]?[0-9](\.\d+)?)|(90(\.0+)?))$/'],
                 'longitude' => [
                     'nullable',
@@ -53,6 +55,8 @@ class UpdateAddressRequest extends BaseFormRequest
                 'city' => 'string|nullable',
                 'street' => 'string|nullable',
                 'url' => 'string|nullable',
+                'email' => 'email|nullable',
+                'phone' => 'string|nullable',
                 'date_of_birth' => 'date|nullable',
                 'department' => 'string|nullable',
                 'login_name' => 'string|nullable',
