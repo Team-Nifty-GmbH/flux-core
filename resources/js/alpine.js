@@ -1,8 +1,10 @@
 import folderTree from './components/folder-tree';
 import '../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
 import '../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables';
+import setupEditor from './components/tiptap';
 
 window.folderTree = folderTree;
+window.setupEditor = setupEditor;
 
 if (typeof window.Livewire === 'undefined') {
     throw 'Livewire Sortable.js Plugin: window.Livewire is undefined. Make sure @livewireScripts is placed above this script include';

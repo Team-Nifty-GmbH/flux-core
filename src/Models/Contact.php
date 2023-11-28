@@ -46,10 +46,8 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
 
     public static string $iconName = 'users';
 
-    public static function boot(): void
+    public static function booted(): void
     {
-        parent::boot();
-
         static::saving(function (Contact $contact) {
             // reset to original
             if ($contact->wasChanged(['customer_number', 'creditor_number', 'debtor_number'])) {
@@ -73,14 +71,24 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
         return $this->hasMany(Address::class);
     }
 
+    public function agent(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'agent_id');
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
     }
 
-    public function discounts(): BelongsToMany
+    public function contactBankConnections(): HasMany
     {
-        return $this->belongsToMany(Discount::class, 'contact_discount')->using(ContactDiscount::class);
+        return $this->hasMany(ContactBankConnection::class);
+    }
+
+    public function deliveryAddress(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'delivery_address_id');
     }
 
     public function discountGroups(): BelongsToMany
@@ -89,14 +97,24 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
             ->using(ContactDiscountGroup::class);
     }
 
-    public function contactBankConnections(): HasMany
+    public function discounts(): BelongsToMany
     {
-        return $this->hasMany(ContactBankConnection::class);
+        return $this->belongsToMany(Discount::class, 'contact_discount')->using(ContactDiscount::class);
+    }
+
+    public function invoiceAddress(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'invoice_address_id');
     }
 
     public function ledgerAccount(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class);
+    }
+
+    public function mainAddress(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'main_address_id');
     }
 
     public function orders(): HasMany
