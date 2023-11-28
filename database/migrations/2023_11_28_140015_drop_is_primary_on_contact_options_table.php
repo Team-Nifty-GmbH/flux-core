@@ -15,6 +15,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        //
+        Schema::table('contact_options', function (Blueprint $table) {
+            $table->boolean('is_primary')->default(false)->after('value');
+        });
     }
 };
