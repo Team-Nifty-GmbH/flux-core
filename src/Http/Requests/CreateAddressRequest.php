@@ -88,7 +88,7 @@ class CreateAddressRequest extends BaseFormRequest
             'street' => 'string|nullable',
 
             'url' => 'string|nullable',
-            'email' => 'string|nullable|email',
+            'email' => 'email|nullable',
             'phone' => 'string|nullable',
         ];
     }
