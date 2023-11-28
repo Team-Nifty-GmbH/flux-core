@@ -4,25 +4,28 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\WorkTime;
 use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class WorkTimeList extends DataTable
 {
+    use HasEloquentListeners;
+
     protected string $model = WorkTime::class;
 
     public array $enabledCols = [
         'user.name',
         'name',
-        'total_time',
-        'paused_time',
+        'total_time_ms',
+        'paused_time_ms',
         'started_at',
         'ended_at',
         'is_locked',
+        'is_daily_work_time',
     ];
 
     public array $formatters = [
-        'total_time' => 'time',
-        'paused_time' => 'time',
+        'total_time_ms' => 'time',
+        'paused_time_ms' => 'time',
     ];
 
     public bool $isSelectable = true;
@@ -30,8 +33,6 @@ class WorkTimeList extends DataTable
     public function itemToArray($item): array
     {
         $item = parent::itemToArray($item);
-        $item['total_time'] = ($item['total_time'] ?? 0) * 1000;
-        $item['paused_time'] = ($item['paused_time'] ?? 0) * 1000;
         $item['name'] = __($item['name']);
 
         return $item;

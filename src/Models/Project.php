@@ -11,7 +11,6 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
-use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -23,7 +22,7 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 class Project extends Model implements InteractsWithDataTables
 {
     use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasPackageFactory, HasStates, HasUserModification, HasUuid, SoftDeletes, Trackable;
+        HasPackageFactory, HasStates, HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',

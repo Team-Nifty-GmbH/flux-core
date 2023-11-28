@@ -29,18 +29,20 @@ class UpdateWorkTime extends FluxAction
         if (($workTime->ended_at && is_null($this->data['ended_at']))
             || $workTime->ended_at && $this->data['ended_at'] && $this->data['is_locked']
         ) {
-            $this->data['paused_time'] = $workTime->paused_time + $workTime->ended_at->diffInSeconds(now());
+            $this->data['paused_time_ms'] = $workTime->paused_time + $workTime->ended_at->diffInSeconds(now()) * 1000;
         }
 
         $workTime->fill($this->data);
 
         if ($this->data['is_locked']) {
-            $workTime->total_time = $workTime->total_time + $workTime->ended_at->diffInSeconds($workTime->started_at) - $workTime->paused_time;
+            $workTime->total_time_ms = $workTime->total_time_ms +
+                $workTime->ended_at->diffInSeconds($workTime->started_at) * 1000 -
+                $workTime->paused_time_ms;
         }
 
         $workTime->save();
 
-        if ($workTime->is_daily_work_time && $workTime->is_locked) {
+        if ($workTime->is_daily_work_time && $workTime->is_locked && ! $workTime->is_pause) {
             // end all active work times for this user
             WorkTime::query()
                 ->where('user_id', $workTime->user_id)

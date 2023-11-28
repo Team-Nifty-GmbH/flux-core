@@ -19,6 +19,9 @@ class WorkTimeForm extends Form
     #[Locked]
     public ?int $order_position_id = null;
 
+    #[Locked]
+    public ?int $parent_id = null;
+
     public ?int $work_time_type_id = null;
 
     public ?string $trackable_type = null;
@@ -32,7 +35,7 @@ class WorkTimeForm extends Form
     public ?string $ended_at = null;
 
     #[Locked]
-    public ?int $paused_time = null;
+    public ?int $paused_time_ms = null;
 
     public ?string $name = null;
 

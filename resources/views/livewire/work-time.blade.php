@@ -8,6 +8,12 @@
             if (! workTime.interval) {
                 this.startTimer(workTime);
             }
+            this.time = this.activeWorkTimes.reduce((acc, workTime) => {
+                if (! workTime.interval) {
+                    this.startTimer(workTime);
+                }
+                return this.calculateTime(workTime) + acc;
+            }, 0);
         });
 
         this.$watch('activeWorkTimes', (value) => {
@@ -15,13 +21,15 @@
                 if (! workTime.interval) {
                     this.startTimer(workTime);
                 }
+
                 return this.calculateTime(workTime) + acc;
             }, 0);
         });
     },
     calculateTime(workTime) {
-        let diff = new Date() - new Date(workTime.started_at);
-        return diff - workTime.paused_time * 1000;
+        let diff = (workTime.ended_at ? new Date(workTime.ended_at) : new Date()) - new Date(workTime.started_at);
+
+        return diff - workTime.paused_time_ms;
     },
     startTimer(workTime) {
         if (workTime.ended_at) {
@@ -46,6 +54,13 @@
 
         return `${hours}:${minutes}:${seconds}`;
     },
+    stopWorkDay() {
+        this.activeWorkTimes.forEach((workTime) => {
+            clearInterval(workTime.interval);
+        });
+        $wire.toggleWorkDay(false);
+        this.time = 0;
+    },
     stopWorkTime(workTime) {
         clearInterval(workTime.interval);
         $wire.stop(workTime.id).then((response) => {
@@ -56,11 +71,7 @@
     },
     pauseWorkTime(workTime) {
         clearInterval(workTime.interval);
-        $wire.pause(workTime.id).then((response) => {
-            if(response) {
-                this.time = Math.max(this.time - workTime.time, 0);
-            }
-        });
+        $wire.pause(workTime.id);
     },
     continueWorkTime(workTime) {
         $wire.continue(workTime.id).then((response) => {
@@ -147,7 +158,7 @@
         <x-card id="active-work-times" class="flex flex-col gap-4" :title="__('Active Work Times')">
             <div class="flex w-full gap-1.5">
                 <x-button class="w-full" x-show="! $wire.dailyWorkTime.id" positive :label="__('Start Workday')" x-on:click="$wire.toggleWorkDay(true)" />
-                <x-button class="w-1/2" x-show="$wire.dailyWorkTime.id" negative :label="__('End Workday')" x-on:click="$wire.toggleWorkDay(false)" />
+                <x-button class="w-1/2" x-show="$wire.dailyWorkTime.id" negative :label="__('End Workday')" x-on:click="stopWorkDay()" />
                 <x-button class="w-1/2" x-show="$wire.dailyWorkTime.id && ! $wire.dailyWorkTimePause.id" warning :label="__('Pause')" x-on:click="$wire.togglePauseWorkDay(true)" />
                 <x-button class="w-1/2" x-show="$wire.dailyWorkTime.id && $wire.dailyWorkTimePause.id" positive :label="__('Continue')" x-on:click="$wire.togglePauseWorkDay(false)" />
             </div>

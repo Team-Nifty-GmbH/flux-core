@@ -13,13 +13,20 @@ return new class extends Migration
                 ->after('uuid')
                 ->nullable()
                 ->constrained()
-                ->onDelete('cascade');
-            $table->string('name')->after('ended_at');
-            $table->integer('paused_time')
+                ->cascadeOnDelete();
+            $table->foreignId('parent_id')
+                ->after('order_position_id')
+                ->nullable()
+                ->constrained('work_times')
+                ->cascadeOnDelete();
+            $table->string('name')
+                ->after('ended_at')
+                ->nullable();
+            $table->integer('paused_time_ms')
                 ->after('ended_at')
                 ->default(0);
-            $table->integer('total_time')
-                ->after('paused_time')
+            $table->integer('total_time_ms')
+                ->after('paused_time_ms')
                 ->default(0);
             $table->boolean('is_daily_work_time')
                 ->after('description')
@@ -34,7 +41,8 @@ return new class extends Migration
     {
         Schema::table('work_times', function (Blueprint $table) {
             $table->dropConstrainedForeignId('contact_id');
-            $table->dropColumn(['name', 'paused_time', 'is_daily_work_time', 'is_locked', 'total_time']);
+            $table->dropConstrainedForeignId('parent_id');
+            $table->dropColumn(['name', 'paused_time_ms', 'is_daily_work_time', 'is_locked', 'total_time_ms']);
         });
     }
 };

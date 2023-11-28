@@ -34,6 +34,13 @@ class CreateWorkTimeRequest extends BaseFormRequest
                     ->where('is_active', true)
                     ->whereNull('deleted_at'),
             ],
+            'parent_id' => [
+                'required_if:is_pause,true',
+                'required_if:is_daily_work_time,false',
+                'nullable',
+                'integer',
+                'exists:work_times,id,deleted_at,NULL',
+            ],
             'work_time_type_id' => 'nullable|integer|exists:work_time_types,id,deleted_at,NULL',
             'trackable_type' => [
                 'required_with:trackable_id',
@@ -47,7 +54,7 @@ class CreateWorkTimeRequest extends BaseFormRequest
             ],
             'started_at' => 'required_with:ended_at|nullable|date_format:Y-m-d H:i:s|before:now',
             'ended_at' => 'nullable|date_format:Y-m-d H:i:s|after:started_at',
-            'name' => 'required|string',
+            'name' => 'required_unless:is_daily_work_time,true|nullable|sometimes|string',
             'description' => 'string|nullable',
             'is_daily_work_time' => 'boolean',
             'is_locked' => 'boolean',

@@ -41,6 +41,13 @@ class WorkTime extends Component
         $this->dailyWorkTime->fill(\FluxErp\Models\WorkTime::query()
             ->where('user_id', auth()->id())
             ->where('is_daily_work_time', true)
+            ->where('is_pause', false)
+            ->where('is_locked', false)
+            ->first() ?? []);
+        $this->dailyWorkTimePause->fill(\FluxErp\Models\WorkTime::query()
+            ->where('user_id', auth()->id())
+            ->where('is_daily_work_time', true)
+            ->where('is_pause', true)
             ->where('is_locked', false)
             ->first() ?? []);
     }
@@ -64,6 +71,10 @@ class WorkTime extends Component
     {
         $isNew = is_null($this->workTime->id);
         try {
+            if (! $this->workTime->is_daily_work_time) {
+                $this->workTime->parent_id = $this->dailyWorkTime->id;
+            }
+
             $this->workTime->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
@@ -86,8 +97,8 @@ class WorkTime extends Component
             $this->dailyWorkTime->fill([
                 'user_id' => auth()->id(),
                 'started_at' => now()->toDateTimeString(),
-                'name' => 'Workday',
                 'is_daily_work_time' => true,
+                'is_pause' => false,
             ]);
         } else {
             $this->dailyWorkTime->ended_at = now()->toDateTimeString();
@@ -97,7 +108,11 @@ class WorkTime extends Component
             $this->dailyWorkTimePause->reset();
         }
 
-        $this->dailyWorkTime->save();
+        try {
+            $this->dailyWorkTime->save();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+        }
 
         if (! $start) {
             $this->dailyWorkTime->reset();
@@ -110,8 +125,8 @@ class WorkTime extends Component
         if ($start) {
             $this->dailyWorkTimePause->fill([
                 'user_id' => auth()->id(),
+                'parent_id' => $this->dailyWorkTime->id,
                 'started_at' => now()->toDateTimeString(),
-                'name' => 'Pause',
                 'is_daily_work_time' => true,
                 'is_pause' => true,
             ]);
@@ -138,6 +153,7 @@ class WorkTime extends Component
             $this->activeWorkTimes = Arr::keyBy($this->activeWorkTimes, 'id');
             unset($this->activeWorkTimes[$workTime->id]);
             $this->activeWorkTimes = array_values($this->activeWorkTimes);
+            $this->workTime->reset();
         }
 
         return $save;
@@ -153,6 +169,7 @@ class WorkTime extends Component
             $this->activeWorkTimes = Arr::keyBy($this->activeWorkTimes, 'id');
             $this->activeWorkTimes[$workTime->id] = $this->workTime->toArray();
             $this->activeWorkTimes = array_values($this->activeWorkTimes);
+            $this->workTime->reset();
 
             return true;
         }
@@ -170,15 +187,11 @@ class WorkTime extends Component
             $this->activeWorkTimes = Arr::keyBy($this->activeWorkTimes, 'id');
             $this->activeWorkTimes[$workTime->id] = $this->workTime->toArray();
             $this->activeWorkTimes = array_values($this->activeWorkTimes);
+            $this->workTime->reset();
 
             return true;
         }
 
         return false;
-    }
-
-    public function lala(array $payload)
-    {
-        $this->workTime->fill($payload['model']);
     }
 }

@@ -19,6 +19,8 @@ enum TimeFrameEnum: string
     case ThisYear = 'This Year';
     case AllTime = 'All Time';
 
+    case Custom = 'Custom';
+
     public function dateQueryParameters(string $dateField): array
     {
         return match ($this) {
@@ -61,7 +63,7 @@ enum TimeFrameEnum: string
                     Carbon::now()->endOfYear(),
                 ],
             ],
-            self::AllTime => [],
+            self::AllTime, self::Custom => [],
             default => throw new \InvalidArgumentException('Invalid time frame'),
         };
     }

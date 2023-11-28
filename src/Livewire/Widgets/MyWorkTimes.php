@@ -2,11 +2,14 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use Carbon\Carbon;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Charts\BarChart;
 use FluxErp\Models\WorkTime;
 use FluxErp\Traits\Widgetable;
 use Livewire\Attributes\Js;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 
 class MyWorkTimes extends BarChart
 {
@@ -31,11 +34,21 @@ class MyWorkTimes extends BarChart
         'enabled' => true,
     ];
 
+    #[Locked]
+    public ?int $userId = null;
+
+    public function mount(): void
+    {
+        $this->userId = $this->userId ?? auth()->id();
+
+        parent::mount();
+    }
+
     #[Js]
     public function toolTipFormatter(): string
     {
         return <<<'JS'
-            let hours = val / 60;
+            let hours = val / 60000;
             return hours.toFixed(2) + 'h';
         JS;
     }
@@ -44,11 +57,12 @@ class MyWorkTimes extends BarChart
     public function dataLabelsFormatter(): string
     {
         return <<<'JS'
-            if (val > 60) {
-                let hours = val / 60;
+            if (val > 60000) {
+                let hours = val / 6000;
                 return hours.toFixed(2) + 'h';
             } else {
-                return val + ' min.';
+                let minutes = val / 1000;
+                return minutes.toFixed(0) + 'm';
             }
         JS;
     }
@@ -57,7 +71,13 @@ class MyWorkTimes extends BarChart
     public function yAxisFormatter(): string
     {
         return <<<'JS'
-            return new Date(val).toLocaleDateString(document.documentElement.lang);
+            let name;
+            if (typeof val === 'string' && val.includes('->')) {
+                name = val.split('->')[1];
+                val = val.split('->')[0];
+            }
+
+            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
         JS;
     }
 
@@ -67,32 +87,59 @@ class MyWorkTimes extends BarChart
         return $this->toolTipFormatter();
     }
 
+    public function updatedTimeFrame(): void
+    {
+        $this->xaxis = null;
+        $this->series = null;
+
+        parent::updatedTimeFrame();
+    }
+
+    public function updatedStart(): void
+    {
+        $this->calculateChart();
+        $this->updateData();
+    }
+
+    public function updatedEnd(): void
+    {
+        $this->calculateChart();
+        $this->updateData();
+    }
+
     public function calculateChart(): void
     {
-        $baseQuery = WorkTime::query()
-            ->where('user_id', auth()->id())
-            ->where('is_locked', true);
-
+        $this->xaxis = null;
         $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
-        $parameters = $timeFrame->dateQueryParameters('started_at');
 
-        if ($parameters && count($parameters) > 0) {
-            if ($parameters['operator'] === 'between') {
-                $baseQuery->whereBetween($parameters['column'], $parameters['value']);
-            } else {
-                $baseQuery->where(...array_values($parameters));
+        $baseQuery = WorkTime::query()
+            ->where('user_id', $this->userId)
+            ->where('is_locked', true)
+            ->when($timeFrame === TimeFrameEnum::Custom && $this->start, function ($query) {
+                $query->where('started_at', '>=', Carbon::parse($this->start));
+            })
+            ->when($timeFrame === TimeFrameEnum::Custom && $this->end, function ($query) {
+                $query->where('started_at', '<=', Carbon::parse($this->end)->endOfDay());
+            });
+
+        if ($timeFrame !== TimeFrameEnum::Custom) {
+            $parameters = $timeFrame->dateQueryParameters('started_at');
+
+            if ($parameters && count($parameters) > 0) {
+                if ($parameters['operator'] === 'between') {
+                    $baseQuery->whereBetween($parameters['column'], $parameters['value']);
+                } else {
+                    $baseQuery->where(...array_values($parameters));
+                }
             }
         }
 
-        $this->xaxis['categories'] = $baseQuery
+        $workDays = $baseQuery
             ->clone()
             ->where('is_daily_work_time', true)
             ->where('is_pause', false)
             ->orderBy('started_at', 'desc')
-            ->get()
-            ->pluck('started_at')
-            ->map(fn ($value) => $value->format('Y-m-d'))
-            ->toArray();
+            ->get();
 
         $data = [
             'work_time' => [
@@ -124,26 +171,26 @@ class MyWorkTimes extends BarChart
             'teal-400',
         ];
 
-        foreach ($this->xaxis['categories'] as $day) {
+        foreach ($workDays as $day) {
             $pause = $baseQuery->clone()
                 ->where('is_daily_work_time', true)
                 ->where('is_pause', true)
-                ->where('started_at', 'like', $day . '%')
-                ->sum('total_time');
-            $workTime = $baseQuery->clone()
-                ->where('is_daily_work_time', true)
-                ->where('is_pause', false)
-                ->where('started_at', 'like', $day . '%')
-                ->sum('total_time');
-            $data['work_time']['data'][] = ceil(($workTime - $pause) / 60);
+                ->where('parent_id', $day->id)
+                ->sum('total_time_ms');
+            $workTime = WorkTime::query()
+                ->whereKey($day->id)
+                ->first();
+            $data['work_time']['data'][] = ceil(($workTime->total_time_ms - $pause) / 60);
             $data['pause_time']['data'][] = ceil($pause / 60);
             $taskTime = $baseQuery->clone()
                 ->where('is_daily_work_time', false)
-                ->where('is_pause', false)
-                ->where('started_at', 'like', $day . '%')
+                ->where('parent_id', $day->id)
                 ->groupBy('work_time_type_id')
-                ->selectRaw('ROUND(SUM(total_time), 2) as total, work_time_type_id')
+                ->selectRaw('ROUND(SUM(total_time_ms), 2) as total, work_time_type_id')
                 ->get();
+
+            $this->xaxis['categories'][] = $day->started_at->format('Y-m-d')
+               . (auth()->id() === $day->user_id ? '' :  '->' . $day->user->name);
 
             foreach ($taskTime as $item) {
                 $data['task_time_' . $item->work_time_type_id] = [
