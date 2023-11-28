@@ -1,1 +1,0 @@
-self.addEventListener("push",function(i){if(self.Notification&&self.Notification.permission==="granted"&&i.data){let t=i.data.json();i.waitUntil(self.registration.showNotification(t.title,t))}});self.addEventListener("notificationclick",function(i){i.notification.close(),i.notification.data.url&&clients.openWindow(i.notification.data.url)});

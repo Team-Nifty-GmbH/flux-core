@@ -7,7 +7,6 @@ use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Charts\CircleChart;
 use FluxErp\Models\Order;
 use FluxErp\Traits\Widgetable;
-use Livewire\Attributes\Js;
 
 class RevenueBySalesRepresentative extends CircleChart
 {

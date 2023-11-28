@@ -9,7 +9,6 @@ use FluxErp\Models\WorkTime;
 use FluxErp\Traits\Widgetable;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Renderless;
 
 class MyWorkTimes extends BarChart
 {
@@ -190,7 +189,7 @@ class MyWorkTimes extends BarChart
                 ->get();
 
             $this->xaxis['categories'][] = $day->started_at->format('Y-m-d')
-               . (auth()->id() === $day->user_id ? '' :  '->' . $day->user->name);
+               . (auth()->id() === $day->user_id ? '' : '->' . $day->user->name);
 
             foreach ($taskTime as $item) {
                 $data['task_time_' . $item->work_time_type_id] = [
