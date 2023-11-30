@@ -12,7 +12,7 @@ trait WithTabs
 
     public function renderingWithTabs(View $view): void
     {
-        $this->_tabs = $this->getTabs();
+        $this->setTabsToRender($this->getTabs());
 
         event('tabs.rendering: ' . get_class($this), $this);
 

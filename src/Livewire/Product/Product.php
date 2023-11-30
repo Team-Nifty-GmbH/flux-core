@@ -97,7 +97,7 @@ class Product extends Component
         return [
             TabButton::make('product.general')->label(__('General')),
             TabButton::make('product.variants')->label(__('Variants'))
-                ->when($this->product['children_count']),
+                ->when($this->product['children_count'] ?? false),
             TabButton::make('product.prices')->label(__('Prices')),
             TabButton::make('product.stock')->label(__('Stock')),
             TabButton::make('product.media')->label(__('Media')),
