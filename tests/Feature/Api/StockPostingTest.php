@@ -116,13 +116,6 @@ class StockPostingTest extends BaseSetup
             'description' => Str::random(),
         ];
 
-        $stock = StockPosting::query()
-            ->where('warehouse_id', $stockPosting['warehouse_id'])
-            ->where('product_id', $stockPosting['product_id'])
-            ->latest()
-            ->get()
-            ->last()
-                ->stock + $stockPosting['posting'];
 
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
@@ -135,6 +128,14 @@ class StockPostingTest extends BaseSetup
         $dbStockPosting = StockPosting::query()
             ->whereKey($responseStockPosting->id)
             ->first();
+        $stock = StockPosting::query()
+            ->where('warehouse_id', $stockPosting['warehouse_id'])
+            ->where('product_id', $stockPosting['product_id'])
+            ->where('id', '<', $dbStockPosting->id)
+            ->latest()
+            ->get()
+                ->last()
+                ->stock + $stockPosting['posting'];
 
         $this->assertEquals($stockPosting['warehouse_id'], $dbStockPosting->warehouse_id);
         $this->assertEquals($stockPosting['product_id'], $dbStockPosting->product_id);
