@@ -14,6 +14,10 @@ class FormBuilderForm extends Form
 {
     public ?int $id = null;
 
+    public ?string $model_type = null;
+
+    public ?int $model_id = null;
+
     public ?string $name = null;
 
     public ?string $description = null;

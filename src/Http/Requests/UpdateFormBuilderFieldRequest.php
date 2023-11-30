@@ -19,6 +19,7 @@ class UpdateFormBuilderFieldRequest extends BaseFormRequest
                 Rule::in(FormBuilderTypeEnum::values()),
             ],
             'options' => 'nullable|array',
+            'option_values' => 'nullable|array',
         ];
     }
 }

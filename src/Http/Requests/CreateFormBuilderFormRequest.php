@@ -12,11 +12,13 @@ class CreateFormBuilderFormRequest extends BaseFormRequest
     {
         return [
             'model_type' => [
+                'nullable',
                 'required_with:model_id',
                 'string',
                 new ClassExists(instanceOf: Model::class),
             ],
             'model_id' => [
+                'nullable',
                 'required_with:model_type',
                 'integer',
                 new MorphExists(),

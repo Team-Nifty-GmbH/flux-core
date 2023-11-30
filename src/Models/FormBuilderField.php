@@ -22,6 +22,7 @@ class FormBuilderField extends Model implements Sortable
 
     protected $casts = [
         'options' => 'array',
+        'option_values' => 'array',
     ];
 
     protected static function booted(): void
@@ -46,6 +47,11 @@ class FormBuilderField extends Model implements Sortable
     public function form(): BelongsTo
     {
         return $this->belongsTo(FormBuilderForm::class, 'form_id');
+    }
+
+    public function getOptionValuesAttribute($value): array
+    {
+        return $value === null ? [] : json_decode($value, true);
     }
 
     public function section(): BelongsTo

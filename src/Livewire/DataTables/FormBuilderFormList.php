@@ -11,6 +11,7 @@ use FluxErp\Models\FormBuilderForm;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\DataTable;
+use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class FormBuilderFormList extends DataTable
@@ -28,8 +29,54 @@ class FormBuilderFormList extends DataTable
         'end_date',
     ];
 
-    public array $options = [
+    public array $models;
 
+    public array $options = [
+        'text' => [
+            'required' => 'Required',
+            'expandable' => 'Expandable',
+        ],
+        'textarea' => [
+            'required' => 'Required',
+            'expandable' => 'Expandable',
+        ],
+        'select' => [
+            'required' => 'Required',
+            'multiple' => 'Multiple',
+        ],
+        'checkbox' => [
+            'required' => 'Required',
+        ],
+        'radio' => [
+            'required' => 'Required',
+        ],
+        'date' => [
+            'required' => 'Required',
+            'min' => 'Min',
+        ],
+        'time' => [
+            'required' => 'Required',
+            'min' => 'Min',
+            'max' => 'Max',
+        ],
+        'datetime' => [
+            'required' => 'Required',
+            'min' => 'Min',
+            'max' => 'Max',
+        ],
+        'number' => [
+            'required' => 'Required',
+            'min' => 'Min',
+            'max' => 'Max',
+        ],
+        'range' => [
+            'required' => 'Required',
+            'min' => 'Min',
+            'max' => 'Max',
+        ],
+        'password' => [
+            'required' => 'Required',
+        ],
     ];
 
     public bool $showModal = false;
@@ -44,6 +91,12 @@ class FormBuilderFormList extends DataTable
     {
         parent::mount();
         $this->fieldTypes = FormBuilderTypeEnum::cases();
+
+        $this->models = ModelInfo::forAllModels()
+            ->merge(ModelInfo::forAllModels(flux_path('src/Models'), flux_path('src'), 'FluxErp'))
+            ->map(fn ($model) => $model->class)
+            ->sort()
+            ->toArray();
     }
 
     public function getRowActions(): array
@@ -121,7 +174,6 @@ class FormBuilderFormList extends DataTable
     public function editItem(FormBuilderForm $formBuilderForm): void
     {
         $this->form->fill($formBuilderForm);
-
         $this->showModal = true;
     }
 
@@ -175,12 +227,24 @@ class FormBuilderFormList extends DataTable
             'description' => null,
             'type' => 'text',
             'options' => null,
+            'option_values' => [],
         ];
     }
 
     public function closeModal(): void
     {
         $this->showModal = false;
+    }
+
+    public function addSelectOption(int $sectionIndex, int $fieldIndex): void
+    {
+
+        $this->form->sections[$sectionIndex]['fields'][$fieldIndex]['option_values'][] = 'test';
+    }
+
+    public function removeSelectOption(int $sectionIndex, int $fieldIndex, int $optionIndex): void
+    {
+        unset($this->form->sections[$sectionIndex]['fields'][$fieldIndex]['option_values'][$optionIndex]);
     }
 
     public function removeFormField(int $sectionIndex, int $fieldIndex): void
