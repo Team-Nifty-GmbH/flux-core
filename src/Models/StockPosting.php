@@ -22,7 +22,7 @@ class StockPosting extends Model
         'id',
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::creating(function (StockPosting $stockPosting) {
             Cache::lock('stock-posting-' . $stockPosting->warehouse_id . '-' . $stockPosting->product_id, 10)
