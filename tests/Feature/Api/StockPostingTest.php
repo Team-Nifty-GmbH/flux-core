@@ -132,7 +132,7 @@ class StockPostingTest extends BaseSetup
             ->where('warehouse_id', $stockPosting['warehouse_id'])
             ->where('product_id', $stockPosting['product_id'])
             ->where('id', '<', $dbStockPosting->id)
-            ->latest()
+            ->latest('id')
             ->first()
             ->stock + $stockPosting['posting'];
 
