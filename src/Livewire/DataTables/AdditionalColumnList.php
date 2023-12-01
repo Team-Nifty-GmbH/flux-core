@@ -17,12 +17,4 @@ class AdditionalColumnList extends DataTable
         'validations',
         'values',
     ];
-
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
 }

@@ -22,14 +22,6 @@ class CountryList extends DataTable
         'is_eu_country',
     ];
 
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
-
     public function getBuilder(Builder $builder): Builder
     {
         return $builder->with([

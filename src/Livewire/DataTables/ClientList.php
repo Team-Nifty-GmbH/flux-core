@@ -17,12 +17,4 @@ class ClientList extends DataTable
         'city',
         'phone',
     ];
-
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
 }

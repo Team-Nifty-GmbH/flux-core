@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use Carbon\Carbon;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Charts\CircleChart;
 use FluxErp\Models\Order;
@@ -14,6 +15,8 @@ class RevenueBySalesRepresentative extends CircleChart
     public ?array $chart = [
         'type' => 'donut',
     ];
+
+    public bool $showTotals = false;
 
     public function getPlotOptions(): array
     {
@@ -32,22 +35,30 @@ class RevenueBySalesRepresentative extends CircleChart
         ];
     }
 
-    public bool $showTotals = false;
-
     public function calculateChart(): void
     {
+        $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
+
         $baseQuery = Order::query()
             ->whereNotNull('invoice_date')
             ->whereNotNull('invoice_number')
-            ->whereNotNull('agent_id');
+            ->whereNotNull('agent_id')
+            ->when($timeFrame === TimeFrameEnum::Custom && $this->start, function ($query) {
+                $query->where('invoice_date', '>=', Carbon::parse($this->start));
+            })
+            ->when($timeFrame === TimeFrameEnum::Custom && $this->end, function ($query) {
+                $query->where('invoice_date', '<=', Carbon::parse($this->end));
+            });
 
-        $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
-        $parameters = $timeFrame->dateQueryParameters('invoice_date');
-        if ($parameters && count($parameters) > 0) {
-            if ($parameters['operator'] === 'between') {
-                $baseQuery->whereBetween($parameters['column'], $parameters['value']);
-            } else {
-                $baseQuery->where(...array_values($parameters));
+        if ($timeFrame !== TimeFrameEnum::Custom) {
+            $parameters = $timeFrame->dateQueryParameters('invoice_date');
+
+            if ($parameters && count($parameters) > 0) {
+                if ($parameters['operator'] === 'between') {
+                    $baseQuery->whereBetween($parameters['column'], $parameters['value']);
+                } else {
+                    $baseQuery->where(...array_values($parameters));
+                }
             }
         }
 
