@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('work_times', function (Blueprint $table) {
             $table->foreignId('contact_id')
-                ->after('uuid')
+                ->after('user_id')
                 ->nullable()
                 ->constrained()
                 ->cascadeOnDelete();
@@ -22,10 +22,10 @@ return new class extends Migration
             $table->string('name')
                 ->after('ended_at')
                 ->nullable();
-            $table->integer('paused_time_ms')
+            $table->unsignedBigInteger('paused_time_ms')
                 ->after('ended_at')
                 ->default(0);
-            $table->integer('total_time_ms')
+            $table->unsignedBigInteger('total_time_ms')
                 ->after('paused_time_ms')
                 ->default(0);
             $table->boolean('is_daily_work_time')

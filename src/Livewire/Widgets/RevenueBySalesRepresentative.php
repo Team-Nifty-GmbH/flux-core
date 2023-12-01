@@ -47,7 +47,7 @@ class RevenueBySalesRepresentative extends CircleChart
                 $query->where('invoice_date', '>=', Carbon::parse($this->start));
             })
             ->when($timeFrame === TimeFrameEnum::Custom && $this->end, function ($query) {
-                $query->where('invoice_date', '<=', Carbon::parse($this->end)->endOfDay());
+                $query->where('invoice_date', '<=', Carbon::parse($this->end));
             });
 
         if ($timeFrame !== TimeFrameEnum::Custom) {

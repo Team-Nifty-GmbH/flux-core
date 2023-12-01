@@ -45,7 +45,7 @@ class UpdateWorkTimeRequest extends BaseFormRequest
                 new MorphExists('trackable_type'),
             ],
             'ended_at' => 'nullable|date_format:Y-m-d H:i:s',
-            'name' => 'exclude_if:is_daily_work_time,true|sometimes|string',
+            'name' => 'exclude_if:is_daily_work_time,true|string|nullable',
             'description' => 'string|nullable',
             'is_locked' => 'boolean',
         ];

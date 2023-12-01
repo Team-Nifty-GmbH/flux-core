@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire;
 
 use FluxErp\Livewire\Forms\WorkTimeForm;
+use FluxErp\Models\WorkTime as WorkTimeModel;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\Trackable;
 use Illuminate\Contracts\View\Factory;
@@ -30,7 +31,7 @@ class WorkTime extends Component
 
     public function mount(): void
     {
-        $this->activeWorkTimes = \FluxErp\Models\WorkTime::query()
+        $this->activeWorkTimes = WorkTimeModel::query()
             ->with('workTimeType:id,name')
             ->where('user_id', auth()->id())
             ->where('is_daily_work_time', false)
@@ -38,13 +39,14 @@ class WorkTime extends Component
             ->get()
             ->toArray();
 
-        $this->dailyWorkTime->fill(\FluxErp\Models\WorkTime::query()
+        $this->dailyWorkTime->fill(WorkTimeModel::query()
             ->where('user_id', auth()->id())
             ->where('is_daily_work_time', true)
             ->where('is_pause', false)
             ->where('is_locked', false)
             ->first() ?? []);
-        $this->dailyWorkTimePause->fill(\FluxErp\Models\WorkTime::query()
+
+        $this->dailyWorkTimePause->fill(WorkTimeModel::query()
             ->where('user_id', auth()->id())
             ->where('is_daily_work_time', true)
             ->where('is_pause', true)
@@ -143,7 +145,7 @@ class WorkTime extends Component
     }
 
     #[Renderless]
-    public function stop(\FluxErp\Models\WorkTime $workTime): bool
+    public function stop(WorkTimeModel $workTime): bool
     {
         $this->workTime->fill($workTime);
         $this->workTime->ended_at = now()->toDateTimeString();
@@ -160,7 +162,7 @@ class WorkTime extends Component
     }
 
     #[Renderless]
-    public function pause(\FluxErp\Models\WorkTime $workTime): bool
+    public function pause(WorkTimeModel $workTime): bool
     {
         $this->workTime->fill($workTime);
         $this->workTime->ended_at = now()->toDateTimeString();
@@ -178,7 +180,7 @@ class WorkTime extends Component
     }
 
     #[Renderless]
-    public function continue(\FluxErp\Models\WorkTime $workTime): bool
+    public function continue(WorkTimeModel $workTime): bool
     {
         $this->workTime->fill($workTime);
         $this->workTime->ended_at = null;

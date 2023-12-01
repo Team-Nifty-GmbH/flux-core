@@ -26,6 +26,8 @@ class WorkTimeList extends DataTable
     public array $formatters = [
         'total_time_ms' => 'time',
         'paused_time_ms' => 'time',
+        'started_at' => 'datetime',
+        'ended_at' => 'datetime',
     ];
 
     public bool $isSelectable = true;
@@ -36,5 +38,10 @@ class WorkTimeList extends DataTable
         $item['name'] = __($item['name']);
 
         return $item;
+    }
+
+    public function getAggregatable(): array
+    {
+        return array_merge(parent::getAggregatable(), ['paused_time_ms', 'total_time_ms']);
     }
 }

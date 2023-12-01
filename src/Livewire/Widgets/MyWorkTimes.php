@@ -57,7 +57,7 @@ class MyWorkTimes extends BarChart
     {
         return <<<'JS'
             if (val > 60000) {
-                let hours = val / 6000;
+                let hours = val / 60000;
                 return hours.toFixed(2) + 'h';
             } else {
                 let minutes = val / 1000;
@@ -176,9 +176,11 @@ class MyWorkTimes extends BarChart
                 ->where('is_pause', true)
                 ->where('parent_id', $day->id)
                 ->sum('total_time_ms');
+
             $workTime = WorkTime::query()
                 ->whereKey($day->id)
                 ->first();
+
             $data['work_time']['data'][] = ceil(($workTime->total_time_ms - $pause) / 60);
             $data['pause_time']['data'][] = ceil($pause / 60);
             $taskTime = $baseQuery->clone()
@@ -196,7 +198,10 @@ class MyWorkTimes extends BarChart
                     'name' => $item->workTimeType?->name ?? __('Unknown'),
                     'group' => 'tasktime',
                     'color' => $colors[$item->work_time_type_id ?? 0],
-                    'data' => array_merge(data_get($data, 'task_time_' . $item->work_time_type_id . '.data', []), [ceil($item->total / 60)]),
+                    'data' => array_merge(
+                        data_get($data, 'task_time_' . $item->work_time_type_id . '.data', []),
+                        [ceil($item->total / 60)]
+                    ),
                 ];
             }
         }

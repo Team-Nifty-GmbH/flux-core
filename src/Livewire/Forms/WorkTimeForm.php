@@ -71,7 +71,7 @@ class WorkTimeForm extends Form
         $this->fill($response);
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->id;
     }

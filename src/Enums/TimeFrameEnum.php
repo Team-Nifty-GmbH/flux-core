@@ -18,7 +18,6 @@ enum TimeFrameEnum: string
     case ThisMonth = 'This Month';
     case ThisYear = 'This Year';
     case AllTime = 'All Time';
-
     case Custom = 'Custom';
 
     public function dateQueryParameters(string $dateField): array
