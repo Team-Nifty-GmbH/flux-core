@@ -3,13 +3,6 @@
         formatter: @js(\FluxErp\Models\Project::typeScriptAttributes()),
      }"
 >
-    <div id="task-modal">
-        <x-modal max-width="4xl">
-            <x-card>
-                <livewire:task.task :project-id="$this->project->id ?? null" />
-            </x-card>
-        </x-modal>
-    </div>
     <x-card
         class="space-y-2.5"
         :title="__('General')">
@@ -42,15 +35,42 @@
             @endforeach
         </x-card>
     @endif
-    <livewire:data-tables.task-list
-        cache-key="project.general.task-list"
-        :headline="__('Tasks')"
-        :filters="[
+    <div>
+        <livewire:data-tables.task-list
+            cache-key="project.general.task-list"
+            :headline="__('Tasks')"
+            :filters="[
             [
                 'project_id',
                 '=',
                 $this->project->id,
             ],
         ]"
-    />
+        />
+        <x-modal x-on:new-task="open()" max-width="4xl">
+            <x-card>
+                <livewire:task.task :project-id="$this->project->id ?? null" />
+                <x-slot:footer>
+                    <div class="flex justify-end">
+                        <x-button
+                            flat
+                            :label="__('Cancel')"
+                            x-on:click="close()"
+                        />
+                        <x-button
+                            primary
+                            :label="__('Save')"
+                            x-on:click="$wire.save().then((project) => {
+                            if (project) {
+                                close();
+                                let baseRoute = '{{ route('projects.id', ['id' => ':id']) }}';
+                                window.location.href = baseRoute.replace(':id', $wire.project.id);
+                            }
+                        });"
+                        />
+                    </div>
+                </x-slot:footer>
+            </x-card>
+        </x-modal>
+    </div>
 </div>

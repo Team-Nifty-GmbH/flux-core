@@ -30,8 +30,8 @@ class CreateProjectRequest extends BaseFormRequest
                     'string',
                     ValidStateRule::make(ProjectState::class),
                 ],
-                'time_budget_hours' => 'numeric|nullable',
-                'budget' => 'numeric|nullable',
+                'time_budget_hours' => 'numeric|nullable|min:0',
+                'budget' => 'numeric|nullable|min:0',
             ],
         );
     }
