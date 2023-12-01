@@ -33,7 +33,7 @@ class UpdateWorkTime extends FluxAction
             && array_key_exists('ended_at', $this->data)
             && Carbon::parse($this->data['ended_at'])->notEqualTo($workTime->ended_at)
         ) {
-            $endedAt = match(true) {
+            $endedAt = match (true) {
                 is_null($this->data['ended_at']) => $workTime->ended_at,
                 default => Carbon::parse($this->data['ended_at'])
             };
