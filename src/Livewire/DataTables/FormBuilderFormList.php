@@ -31,54 +31,6 @@ class FormBuilderFormList extends DataTable
 
     public array $models;
 
-    public array $options = [
-        'text' => [
-            'required' => 'Required',
-            'expandable' => 'Expandable',
-        ],
-        'textarea' => [
-            'required' => 'Required',
-            'expandable' => 'Expandable',
-        ],
-        'select' => [
-            'required' => 'Required',
-            'multiple' => 'Multiple',
-        ],
-        'checkbox' => [
-            'required' => 'Required',
-        ],
-        'radio' => [
-            'required' => 'Required',
-        ],
-        'date' => [
-            'required' => 'Required',
-            'min' => 'Min',
-        ],
-        'time' => [
-            'required' => 'Required',
-            'min' => 'Min',
-            'max' => 'Max',
-        ],
-        'datetime' => [
-            'required' => 'Required',
-            'min' => 'Min',
-            'max' => 'Max',
-        ],
-        'number' => [
-            'required' => 'Required',
-            'min' => 'Min',
-            'max' => 'Max',
-        ],
-        'range' => [
-            'required' => 'Required',
-            'min' => 'Min',
-            'max' => 'Max',
-        ],
-        'password' => [
-            'required' => 'Required',
-        ],
-    ];
-
     public bool $showModal = false;
 
     public bool $showPreviewModal = false;
@@ -109,13 +61,13 @@ class FormBuilderFormList extends DataTable
                 ->attributes([
                     'x-on:click' => '$wire.editItem(record.id)',
                 ]),
-            DataTableButton::make()
-                ->label(__('Preview'))
-                ->icon('eye')
-                ->color('positive')
-                ->attributes([
-                    'x-on:click' => '$wire.previewForm(record.id)',
-                ]),
+//            DataTableButton::make()
+//                ->label(__('Preview'))
+//                ->icon('eye')
+//                ->color('positive')
+//                ->attributes([
+//                    'x-on:click' => '$wire.previewForm(record.id)',
+//                ]),
             DataTableButton::make()
                 ->label(__('Delete'))
                 ->icon('trash')
@@ -259,5 +211,14 @@ class FormBuilderFormList extends DataTable
     public function debug(): void
     {
         dd($this->form->toArray());
+    }
+
+    public function getFieldOptions($type): array
+    {
+        if (! $type) {
+            return [];
+        }
+
+        return FormBuilderTypeEnum::from($type)->getOptionsForType();
     }
 }

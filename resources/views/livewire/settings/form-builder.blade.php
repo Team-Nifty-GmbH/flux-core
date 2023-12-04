@@ -71,7 +71,11 @@
 
                         @foreach($section['fields'] as $fieldIndex => $field)
                             <div class="grid grid-cols-5 gap-4 mt-2"
-                                 x-data="{field: @entangle( 'form.sections.' . $sectionIndex . '.fields.' . $fieldIndex)}">
+                                 x-data="{
+                                 field: @entangle( 'form.sections.' . $sectionIndex . '.fields.' . $fieldIndex),
+                                 fieldOptions: [],
+
+                                 }">
                                 <div class="col-span-1 sm:col-span-1">
                                     <x-input
                                         wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.name"
@@ -83,162 +87,18 @@
                                         label="{{__('Description')}}"/>
                                 </div>
                                 <div class="col-span-1 sm:col-span-1">
-                                    <x-select :options="$fieldTypes" option-label="name" option-value="value"
+                                    <x-select x-on:selected="$wire.getFieldOptions($event.target.value).then((response) => {
+            fieldOptions = response;
+        });" :options="$fieldTypes" option-label="name" option-value="value"
                                               wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.type"
                                               x-model="field.type"
                                               label="{{__('Type')}}"/>
                                 </div>
                                 <div class="col-span-1 sm:col-span-1">
-                                    <template x-if="field.type === 'text'">
-                                        <div>
-                                            <x-select
-                                                label="{{ __('Options') }}"
-                                                placeholder="{{ __('Options') }}"
-                                                multiselect
-                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options"
-                                                :options="$options['text']"
-                                            />
-                                        </div>
-                                    </template>
-                                    <template x-if="field.type === 'textarea'">
-                                        <div>
-                                            <x-select
-                                                label="{{ __('Options') }}"
-                                                placeholder="{{ __('Options') }}"
-                                                multiselect
-                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options"
-                                                :options="$options['textarea']"
-                                            />
-                                        </div>
-                                    </template>
-                                    <template x-if="field.type === 'checkbox'">
-                                        <div>
-                                            <x-select
-                                                label="{{ __('Options') }}"
-                                                placeholder="{{ __('Options') }}"
-                                                multiselect
-                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options"
-                                                :options="$options['checkbox']"
-                                            />
-                                        </div>
-                                    </template>
-                                    <template x-if="field.type === 'radio'">
-                                        <div>
-                                            <x-select
-                                                label="{{ __('Options') }}"
-                                                placeholder="{{ __('Options') }}"
-                                                multiselect
-                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options"
-                                                :options="$options['radio']"
-                                            />
-                                        </div>
-                                    </template>
-                                    <template x-if="field.type === 'date'">
-                                        <div>
-                                            <x-select
-                                                label="{{ __('Options') }}"
-                                                placeholder="{{ __('Options') }}"
-                                                multiselect
-                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options"
-                                                :options="$options['date']"
-                                            />
-                                        </div>
-                                    </template>
-                                    <template x-if="field.type === 'datetime'">
-                                        <div>
-                                            <x-select
-                                                label="{{ __('Options') }}"
-                                                placeholder="{{ __('Options') }}"
-                                                multiselect
-                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options"
-                                                :options="$options['datetime']"
-                                            />
-                                        </div>
-                                    </template>
-                                    <template x-if="field.type === 'time'">
-                                        <div>
-                                            <x-select
-                                                label="{{ __('Options') }}"
-                                                placeholder="{{ __('Options') }}"
-                                                multiselect
-                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options"
-                                                :options="$options['time']"
-                                            />
-                                        </div>
-                                    </template>
-                                    <template x-if="field.type === 'select'">
-                                        <div>
-                                            <x-select
-                                                label="{{ __('Options') }}"
-                                                placeholder="{{ __('Options') }}"
-                                                multiselect
-                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options"
-                                                :options="$options['select']"
-                                            />
-                                            <x-button icon="plus"
-                                                      wire:click="addSelectOption({{$sectionIndex}}, {{$fieldIndex}})"/>
-                                            @foreach($form->sections[$sectionIndex]['fields'][$fieldIndex]['option_values'] as $optionIndex => $option)
-                                                <div class="col-span-1 sm:col-span-1">
-                                                    <x-input
-                                                        wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.option_values.{{$optionIndex}}"
-                                                        label="{{__('Value')}}"
-                                                    />
-                                                    <x-button icon="trash"
-                                                              wire:click="removeSelectOption({{$sectionIndex}}, {{$fieldIndex}}, {{$optionIndex}})"
-                                                    />
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </template>
-                                    <template x-if="field.type === 'number'">
-                                        <div>
-                                            <x-select
-                                                label="{{ __('Options') }}"
-                                                placeholder="{{ __('Options') }}"
-                                                multiselect
-                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options"
-                                                :options="$options['number']"
-                                            />
-                                            <x-inputs.number
-                                                {{--                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.option_values.min"--}}
-                                                label="{{__('Min')}}"/>
-                                            <x-inputs.number
-                                                {{--                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.option_values.max"--}}
-                                                label="{{__('Max')}}"/>
-                                        </div>
-                                    </template>
-                                    <template x-if="field.type === 'range'">
-                                        <div>
-                                            <x-select
-                                                label="{{ __('Options') }}"
-                                                placeholder="{{ __('Options') }}"
-                                                multiselect
-                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options"
-                                                :options="$options['range']"
-                                            />
-                                            <template x-if="field.options.indexOf('min')">
-                                                <x-inputs.number
-                                                    {{--                                                wire:model.debounce="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.option_values.min"--}}
-                                                    label="{{__('Min')}}"
-                                                />
-                                            </template>
-                                            <template>
-                                                <x-inputs.number
-                                                    {{--                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.option_values.max"--}}
-                                                    label="{{__('Max')}}"
-                                                />
-                                            </template>
-                                        </div>
-                                    </template>
-                                    <template x-if="field.type === 'password'">
-                                        <div>
-                                            <x-select
-                                                label="{{ __('Options') }}"
-                                                placeholder="{{ __('Options') }}"
-                                                multiselect
-                                                wire:model="form.sections.{{$sectionIndex}}.fields.{{$fieldIndex}}.options"
-                                                :options="$options['password']"
-                                            />
+                                    <template x-for="(fieldOption, name) in fieldOptions">
+                                        <div class="flex">
+                                            <span x-text="name"></span>
+                                            <x-input x-value="fieldOption"/>
                                         </div>
                                     </template>
                                 </div>
@@ -272,7 +132,7 @@
             </x-button>
         </x-slot>
     </x-modal.card>
-    <x-modal.card wire:model="showPreviewModal">
-        <livewire:features.form-builder-show :formId="1"/>
-    </x-modal.card>
+{{--    <x-modal.card wire:model="showPreviewModal">--}}
+{{--        <livewire:features.form-builder-show :formId="1"/>--}}
+{{--    </x-modal.card>--}}
 </div>
