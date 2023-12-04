@@ -1,0 +1,15 @@
+<?php
+
+namespace {{ namespace }};
+
+use FluxErp\Http\Requests\BaseFormRequest;
+
+class {{ class }} extends BaseFormRequest
+{
+    public function rules(): array
+    {
+        return [
+            //
+        ];
+    }
+}
