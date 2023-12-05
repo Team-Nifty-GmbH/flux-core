@@ -2,31 +2,31 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use FluxErp\Actions\Project\CreateProject;
-use FluxErp\Actions\Project\UpdateProject;
+use FluxErp\Actions\Task\CreateTask;
+use FluxErp\Actions\Task\UpdateTask;
+use FluxErp\Models\AdditionalColumn;
+use FluxErp\Models\Task;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
+use Livewire\Component;
 use Livewire\Form;
 
-class ProjectForm extends Form
+class TaskForm extends Form
 {
     public ?int $id = null;
 
-    public ?int $contact_id = null;
-
-    public ?int $order_id = null;
+    public ?int $project_id = null;
 
     public ?int $responsible_user_id = null;
 
-    public ?int $parent_id = null;
-
     public ?string $name = null;
 
-    public ?Carbon $start_date = null;
-
-    public ?Carbon $end_date = null;
-
     public ?string $description = null;
+
+    public ?string $start_date = null;
+
+    public ?string $due_date = null;
+
+    public ?int $priority = 0;
 
     public string $state = 'open';
 
@@ -34,18 +34,20 @@ class ProjectForm extends Form
 
     public ?string $budget = null;
 
+    public array $users = [];
+
     public array $additionalColumns = [];
 
     public function save(): void
     {
-        if (! is_null($this->time_budget) && preg_match('/[0-9]*/', $this->time_budget)) {
+        if (!is_null($this->time_budget) && preg_match('/[0-9]*/', $this->time_budget)) {
             $this->time_budget = $this->time_budget . ':00';
         }
 
         $data = $this->toArray();
         $data = array_merge(Arr::pull($data, 'additionalColumns', []), $data);
 
-        $action = $this->id ? UpdateProject::make($data) : CreateProject::make($data);
+        $action = $this->id ? UpdateTask::make($data) : CreateTask::make($data);
 
         $response = $action->validate()->execute();
 

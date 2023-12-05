@@ -2,29 +2,29 @@
 
 namespace FluxErp\Http\Controllers;
 
-use FluxErp\Actions\Project\CreateProject;
-use FluxErp\Actions\Project\DeleteProject;
-use FluxErp\Actions\Project\FinishProject;
-use FluxErp\Actions\Project\UpdateProject;
+use FluxErp\Actions\Task\CreateTask;
+use FluxErp\Actions\Task\DeleteTask;
+use FluxErp\Actions\Task\FinishTask;
+use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\FinishProjectRequest;
-use FluxErp\Models\Project;
+use FluxErp\Http\Requests\FinishTaskRequest;
+use FluxErp\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-class ProjectController extends BaseController
+class TaskController extends BaseController
 {
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Project();
+        $this->model = new Task();
     }
 
     public function create(Request $request): JsonResponse
     {
         try {
-            $project = CreateProject::make($request->all())->validate()->execute();
+            $task = CreateTask::make($request->all())->validate()->execute();
         } catch (ValidationException $e) {
             return ResponseHelper::createResponseFromBase(
                 statusCode: 422,
@@ -34,8 +34,8 @@ class ProjectController extends BaseController
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
-            data: $project,
-            statusMessage: __('project created')
+            data: $task,
+            statusMessage: __('task created')
         );
     }
 
@@ -51,8 +51,8 @@ class ProjectController extends BaseController
             try {
                 $responses[] = ResponseHelper::createArrayResponse(
                     statusCode: 200,
-                    data: $project = UpdateProject::make($item)->validate()->execute(),
-                    additions: ['id' => $project->id]
+                    data: $task = UpdateTask::make($item)->validate()->execute(),
+                    additions: ['id' => $task->id]
                 );
             } catch (ValidationException $e) {
                 $responses[] = ResponseHelper::createArrayResponse(
@@ -75,13 +75,13 @@ class ProjectController extends BaseController
             ResponseHelper::createResponseFromArrayResponse(
                 array_merge(
                     array_shift($responses),
-                    ['statusMessage' => __('project updated')]
+                    ['statusMessage' => __('task updated')]
                 )
             ) :
             ResponseHelper::createResponseFromBase(
                 statusCode: $statusCode,
                 data: $responses,
-                statusMessage: $statusCode === 422 ? null : __('project(s) updated'),
+                statusMessage: $statusCode === 422 ? null : __('task(s) updated'),
                 bulk: true
             );
     }
@@ -89,7 +89,7 @@ class ProjectController extends BaseController
     public function delete(string $id): JsonResponse
     {
         try {
-            DeleteProject::make(['id' => $id])->validate()->execute();
+            DeleteTask::make(['id' => $id])->validate()->execute();
         } catch (ValidationException $e) {
             return ResponseHelper::createResponseFromBase(
                 statusCode: 404,
@@ -99,16 +99,16 @@ class ProjectController extends BaseController
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 204,
-            statusMessage: __('project deleted')
+            statusMessage: __('task deleted')
         );
     }
 
-    public function finish(FinishProjectRequest $request): JsonResponse
+    public function finish(FinishTaskRequest $request): JsonResponse
     {
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
-            data: FinishProject::make($request->validated())->execute(),
-            statusMessage: 'project ' . ($request->validated()['finish'] ? 'finished' : 'reopened')
+            data: FinishTask::make($request->validated())->execute(),
+            statusMessage: 'task ' . $request->validated()['finish'] ? 'finished' : 'reopened'
         );
     }
 }

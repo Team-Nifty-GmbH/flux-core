@@ -2,10 +2,10 @@
 
 namespace FluxErp\Livewire\Task;
 
-use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\DeleteTask;
-use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Htmlables\TabButton;
+use FluxErp\Livewire\Forms\TaskForm;
+use FluxErp\Models\Task as TaskModel;
 use FluxErp\Traits\Livewire\HasAdditionalColumns;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
@@ -16,36 +16,36 @@ use WireUi\Traits\Actions;
 
 class Task extends Component
 {
-    use Actions, HasAdditionalColumns, WithTabs;
+    use Actions, WithTabs;
 
-    public array $task = [];
-
-    public ?int $projectId = null;
+    public TaskForm $task;
 
     public string $taskTab = 'task.general';
 
     public array $availableStates = [];
 
-    public array $categories = [];
-
-    public array $openCategories = [];
-
-    public function mount(int $id = null, int $projectId = null): void
+    public function mount(string $id): void
     {
-        $this->projectId = $projectId;
+        $task = TaskModel::query()
+            ->whereKey($id)
+            ->firstOrFail();
 
-        if ($id) {
-            $this->showTask($id);
-        } else {
-            $this->task = [
-                'id' => 0,
-                'address_id' => null,
-                'project_id' => $projectId,
-                'user_id' => auth()->id(),
-                'state' => 'open',
-                'categories' => [],
+        $this->task->fill($task);
+        $this->task->users = $task->users()->pluck('users.id')->toArray();
+        $this->task->additionalColumns = array_intersect_key(
+            $task->toArray(),
+            array_fill_keys(
+                $task->additionalColumns()->pluck('name')?->toArray() ?? [],
+                null
+            )
+        );
+
+        $this->availableStates = TaskModel::getStatesFor('state')->map(function ($state) {
+            return [
+                'label' => __(ucfirst(str_replace('_', ' ', $state))),
+                'name' => $state,
             ];
-        }
+        })->toArray();
     }
 
     public function render(): View|Factory|Application
@@ -68,82 +68,52 @@ class Task extends Component
         ];
     }
 
-    public function showTask(?int $task): void
+    public function save(): array|bool
     {
-        $this->resetErrorBag();
-
-        $this->reset('taskTab');
-
-        $task = \FluxErp\Models\Task::query()
-            ->whereKey($task)
-            ->with(['categories:id,parent_id', 'project'])
-            ->firstOrNew();
-
-        $this->availableStates = \FluxErp\Models\Task::getStatesFor('state')->map(function (string $state) {
-            return [
-                'label' => __(ucfirst(str_replace('_', ' ', $state))),
-                'name' => $state,
-            ];
-        })->toArray();
-
-        $this->task = $task->toArray();
-        $this->openCategories = $task->categories?->pluck('parent_id')->toArray() ?: [];
-
-        $this->task['categories'] = $task->categories?->pluck('id')->first();
-        $this->task['user_id'] = $task->user_id ?: auth()->id();
-        $this->task['address_id'] = $task->address_id;
-        unset($this->task['project']);
-
-        if (! $task->exists && $this->projectId) {
-            $this->task['project_id'] = $this->projectId;
-        }
-    }
-
-    public function save(): false|array
-    {
-        $task = $this->task;
-        $task['categories'] = array_map('intval', [$this->task['categories']]);
-        unset($task['category_id']);
-        $action = ($this->task['id'] ?? false) ? UpdateTask::class : CreateTask::class;
-
         try {
-            $response = $action::make($task)
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->task->save();
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;
         }
 
-        $this->notification()->success(__('Project task saved'));
+        $this->notification()->success(__('Task saved'));
         $this->skipRender();
 
-        return $response->toArray();
+        return true;
     }
 
-    public function delete(): bool
+    public function resetForm(): void
     {
+        $task = TaskModel::query()
+            ->whereKey($this->task->id)
+            ->firstOrFail();
+
+        $this->task->reset();
+        $this->task->fill($task);
+        $this->task->users = $task->users()->pluck('users.id')->toArray();
+        $this->task->additionalColumns = array_intersect_key(
+            $task->toArray(),
+            array_fill_keys(
+                $task->additionalColumns()->pluck('name')?->toArray() ?? [],
+                null
+            )
+        );
+    }
+
+    public function delete(): void
+    {
+        $this->skipRender();
         try {
             DeleteTask::make($this->task)
                 ->checkPermission()
                 ->validate()
                 ->execute();
 
+            $this->redirect(route('tasks'));
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
-
-            return false;
         }
-
-        return true;
-    }
-
-    public function getAdditionalColumns(): array
-    {
-        return (new \FluxErp\Models\Task)
-            ->getAdditionalColumns()
-            ->toArray();
     }
 }

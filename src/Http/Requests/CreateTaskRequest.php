@@ -18,20 +18,18 @@ class CreateTaskRequest extends BaseFormRequest
             (new Task())->hasAdditionalColumnsValidationRules(),
             [
                 'uuid' => 'string|uuid|unique:tasks,uuid',
-                'project_id' => 'sometimes|required|integer|exists:projects,id,deleted_at,NULL',
+                'project_id' => 'integer|nullable|exists:projects,id,deleted_at,NULL',
                 'responsible_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'name' => 'required|string',
                 'description' => 'string|nullable',
                 'start_date' => 'date_format:Y-m-d|nullable',
-                'end_date' => 'date_format:Y-m-d|nullable|gte:start_date',
-                'started_at' => 'date|nullable',
-                'ended_at' => 'date|nullable|gte:started_at',
+                'due_date' => 'date_format:Y-m-d|nullable|gte:start_date',
                 'priority' => 'integer|nullable|min:0',
                 'state' => [
                     'string',
                     ValidStateRule::make(TaskState::class),
                 ],
-                'time_budget_hours' => 'numeric|nullable|min:0',
+                'time_budget' => 'nullable|regex:/[0-9]*:[0-5][0-9]/',
                 'budget' => 'numeric|nullable|min:0',
 
                 'users' => 'array',

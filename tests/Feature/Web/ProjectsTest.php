@@ -20,50 +20,26 @@ class ProjectsTest extends BaseSetup
         $this->project = Project::factory()->create();
     }
 
-    public function test_projects_no_user()
+    public function test_projects_list_page()
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('projects.get', 'web'));
+
+        $this->actingAs($this->user, 'web')->get('/projects')
+            ->assertStatus(200);
+    }
+
+    public function test_projects_list_no_user()
     {
         $this->get('/projects')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_projects_redirect_dashboard()
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('projects.get', 'web'));
-
-        $this->actingAs($this->user, guard: 'web')->get('/projects')
-            ->assertStatus(301)
-            ->assertRedirect(route('dashboard'));
-    }
-
-    public function test_projects_without_permission()
+    public function test_projects_list_without_permission()
     {
         Permission::findOrCreate('projects.get', 'web');
 
         $this->actingAs($this->user, 'web')->get('/projects')
-            ->assertStatus(403);
-    }
-
-    public function test_projects_list_page()
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('projects.list.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/projects/list')
-            ->assertStatus(200);
-    }
-
-    public function test_projects_list_no_user()
-    {
-        $this->get('/projects/list')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_projects_list_without_permission()
-    {
-        Permission::findOrCreate('projects.list.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/projects/list')
             ->assertStatus(403);
     }
 

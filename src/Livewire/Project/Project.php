@@ -2,14 +2,10 @@
 
 namespace FluxErp\Livewire\Project;
 
-use FluxErp\Actions\Project\CreateProject;
 use FluxErp\Actions\Project\DeleteProject;
-use FluxErp\Actions\Project\UpdateProject;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProjectForm;
-use FluxErp\Models\Category;
-use FluxErp\Models\Task;
-use FluxErp\Traits\Livewire\HasAdditionalColumns;
+use FluxErp\Models\Project as ProjectModel;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -20,7 +16,7 @@ use WireUi\Traits\Actions;
 
 class Project extends Component
 {
-    use Actions, HasAdditionalColumns, WithTabs;
+    use Actions, WithTabs;
 
     public ProjectForm $project;
 
@@ -34,14 +30,21 @@ class Project extends Component
         'tab' => ['except' => 'general'],
     ];
 
-    public function mount(int $id): void
+    public function mount(string $id): void
     {
-        $project = \FluxErp\Models\Project::whereKey($id)
+        $project = ProjectModel::whereKey($id)
             ->withCount('tasks')
             ->firstOrFail();
         $this->project->fill($project);
+        $this->project->additionalColumns = array_intersect_key(
+            $project->toArray(),
+            array_fill_keys(
+                $project->additionalColumns()->pluck('name')?->toArray() ?? [],
+                null
+            )
+        );
 
-        $this->availableStates = \FluxErp\Models\Project::getStatesFor('state')->map(function ($state) {
+        $this->availableStates = ProjectModel::getStatesFor('state')->map(function ($state) {
             return [
                 'label' => __(ucfirst(str_replace('_', ' ', $state))),
                 'name' => $state,
@@ -73,10 +76,27 @@ class Project extends Component
             return false;
         }
 
-        $this->notification()->success(__('Project task saved'));
+        $this->notification()->success(__('Project saved'));
         $this->skipRender();
 
         return true;
+    }
+
+    public function resetForm(): void
+    {
+        $project = ProjectModel::query()
+            ->whereKey($this->project->id)
+            ->firstOrFail();
+
+        $this->project->reset();
+        $this->project->fill($project);
+        $this->project->additionalColumns = array_intersect_key(
+            $project->toArray(),
+            array_fill_keys(
+                $project->additionalColumns()->pluck('name')?->toArray() ?? [],
+                null
+            )
+        );
     }
 
     public function delete(): void
@@ -94,18 +114,11 @@ class Project extends Component
         }
     }
 
-    public function getAdditionalColumns(): array
-    {
-        return (new \FluxErp\Models\Project)
-            ->getAdditionalColumns()
-            ->toArray();
-    }
-
     #[Computed]
     public function avatarUrl(): ?string
     {
         return $this->project->id
-            ? \FluxErp\Models\Project::query()->whereKey($this->project->id)->first()->getAvatarUrl()
+            ? ProjectModel::query()->whereKey($this->project->id)->first()->getAvatarUrl()
             : null;
     }
 }

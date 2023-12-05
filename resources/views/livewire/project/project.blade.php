@@ -30,16 +30,13 @@
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
         <div class="flex items-center space-x-5">
-            <x-avatar xl :src="$this->avatarUrl"></x-avatar>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
-                        <x-heroicons x-show="project.is_locked" variant="solid" name="lock-closed" />
-                        <x-heroicons x-show="! project.is_locked" variant="solid" name="lock-open" />
                         <div class="pl-2">
-                            <span x-text="project.name">
+                            <span x-text="project.project_number">
                             </span>
-                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="project.display_name">
+                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="project.name">
                             </span>
                         </div>
                     </div>
@@ -79,7 +76,7 @@
                 spinner
                 x-show="edit"
                 class="w-full"
-                x-on:click="edit = false"
+                x-on:click="edit = false; $wire.resetForm();"
                 :label="__('Cancel')"
             />
         </div>

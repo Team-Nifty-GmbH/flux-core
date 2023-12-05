@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\TimeDuration;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
@@ -36,7 +37,21 @@ class Task extends Model implements HasMedia
 
     protected $casts = [
         'state' => TaskState::class,
+        'time_budget' => TimeDuration::class,
     ];
+
+    public static function booted(): void
+    {
+        static::saving(function (Task $task) {
+            if ($task->state::$isEndState) {
+                $task->progress = 1;
+            }
+        });
+
+        static::saved(function (Task $task) {
+            $task->project?->calculateProgress();
+        });
+    }
 
     public function orderPosition(): BelongsTo
     {
@@ -56,7 +71,7 @@ class Task extends Model implements HasMedia
 
     public function responsibleUser(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'responsible_user_id');
     }
 
     public function users(): BelongsToMany

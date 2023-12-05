@@ -1,10 +1,16 @@
-<div>
-    <div id="new-project-modal">
-        <x-modal x-on:create-project.window="$wire.resetForm(); open();">
+<div x-data="{
+    task: $wire.$entangle('task', false),
+    edit: true,
+}">
+    <div id="new-task-modal">
+        <x-modal x-on:new-task.window="$wire.resetForm(); open()"
+                 x-on:data-table-row-clicked.window="$wire.fillForm($event.detail.id); open()"
+        >
             <x-card>
-                <div x-data="{edit: true, project: $wire.$entangle('project', false), formatter: @js(\FluxErp\Models\Project::typeScriptAttributes()),}">
-                    <x-project.edit />
-                </div>
+                <x-tabs
+                    wire:model.live="taskTab"
+                    :$tabs
+                />
                 <x-slot:footer>
                     <div class="flex justify-end">
                         <x-button
@@ -15,11 +21,9 @@
                         <x-button
                             primary
                             :label="__('Save')"
-                            x-on:click="$wire.save().then((project) => {
-                                if (project) {
+                            x-on:click="$wire.save().then((task) => {
+                                if (task) {
                                     close();
-                                    let baseRoute = '{{ route('projects.id', ['id' => ':id']) }}';
-                                    window.location.href = baseRoute.replace(':id', $wire.project.id);
                                 }
                             });"
                         />

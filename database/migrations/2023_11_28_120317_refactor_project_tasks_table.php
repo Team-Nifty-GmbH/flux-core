@@ -31,17 +31,16 @@ return new class extends Migration
 
             $table->date('start_date')->nullable()->after('description');
             $table->date('due_date')->nullable()->after('start_date');
-            $table->dateTime('started_at')->nullable()->after('due_date');
-            $table->dateTime('ended_at')->nullable()->after('started_at');
             $table->decimal('progress', 11, 10, true)
                 ->after('state')
                 ->default(0);
-            $table->decimal('time_budget_hours', 12, 2, true)
+            $table->unsignedBigInteger('time_budget')
                 ->nullable()
+                ->comment('Time budget in minutes.')
                 ->after('progress');
             $table->decimal('budget', 40, 10, true)
                 ->nullable()
-                ->after('time_budget_hours');
+                ->after('time_budget');
         });
 
         Schema::rename('project_tasks', 'tasks');
@@ -60,6 +59,12 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropForeign('tasks_order_position_id_foreign');
+            $table->dropForeign('tasks_project_id_foreign');
+            $table->dropForeign('tasks_responsible_user_id_foreign');
+        });
+
         Schema::rename('tasks', 'project_tasks');
 
         DB::statement(
@@ -74,17 +79,26 @@ return new class extends Migration
             $table->dropColumn([
                 'description',
                 'start_date',
-                'end_date',
-                'started_at',
-                'ended_at',
+                'due_date',
                 'priority',
                 'progress',
-                'time_budget_hours',
+                'time_budget',
                 'budget',
             ]);
 
-            $table->foreignId('address_id')->nullable()->references('id')->on('addresses')->nullOnDelete();
+            $table->foreignId('address_id')
+                ->nullable()
+                ->after('project_id')
+                ->references('id')
+                ->on('addresses')
+                ->nullOnDelete();
             $table->json('name')->change();
+            $table->boolean('is_paid')->default(false)->after('name');
+            $table->boolean('is_done')->default(false)->after('is_paid');
+
+            $table->foreign('order_position_id')->references('id')->on('order_positions')->nullOnDelete();
+            $table->foreign('project_id')->references('id')->on('projects')->nullOnDelete();
+            $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
         });
     }
 };

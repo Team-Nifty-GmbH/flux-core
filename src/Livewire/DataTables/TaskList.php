@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Task;
+use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
@@ -18,20 +19,14 @@ class TaskList extends DataTable
     public array $enabledCols = [
         'due_date',
         'name',
-        'responsibleUser.name',
+        'responsible_user.name',
         'priority',
         'state',
     ];
 
-    public function getTableActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('New'))
-                ->color('primary')
-                ->attributes([
-                    'x-on:click' => "\$dispatch('new-task')",
-                ]),
-        ];
-    }
+    public array $formatters = [
+        'start_date' => 'date',
+        'due_date' => 'date',
+        'progress' => 'percentage',
+    ];
 }

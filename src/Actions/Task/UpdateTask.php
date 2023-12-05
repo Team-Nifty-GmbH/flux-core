@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateTaskRequest;
 use FluxErp\Models\Task;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
 class UpdateTask extends FluxAction
@@ -27,8 +28,24 @@ class UpdateTask extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
+        $users = Arr::pull($this->data, 'users');
+        $orderPositions = Arr::pull($this->data, 'order_positions');
+
         $task->fill($this->data);
         $task->save();
+
+        if (! is_null($users)) {
+            $task->users()->sync($users);
+        }
+
+        if (! is_null($orderPositions)) {
+            $task->orderPositions()->sync(
+                Arr::mapWithKeys(
+                    $orderPositions,
+                    fn ($item, $key) => [$item['id'] => ['amount' => $item['amount']]]
+                )
+            );
+        }
 
         return $task->withoutRelations()->fresh();
     }
@@ -38,6 +55,6 @@ class UpdateTask extends FluxAction
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Task());
 
-        $this->data = $validator->validate();
+        $this->data = $validator->validated();
     }
 }

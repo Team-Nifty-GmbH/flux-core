@@ -18,7 +18,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
 
-class ProjectTaskTest extends BaseSetup
+class TaskTest extends BaseSetup
 {
     use DatabaseTransactions;
 
@@ -61,13 +61,13 @@ class ProjectTaskTest extends BaseSetup
             ->get();
 
         $this->permissions = [
-            'show' => Permission::findOrCreate('api.projects.tasks.{id}.get'),
-            'index' => Permission::findOrCreate('api.projects.tasks.get'),
-            'create' => Permission::findOrCreate('api.projects.tasks.post'),
-            'update' => Permission::findOrCreate('api.projects.tasks.put'),
-            'delete' => Permission::findOrCreate('api.projects.tasks.{id}.delete'),
-            'finish' => Permission::findOrCreate('api.projects.tasks.finish.post'),
-            'import' => Permission::findOrCreate('api.projects.tasks.import.post'),
+            'show' => Permission::findOrCreate('api.tasks.{id}.get'),
+            'index' => Permission::findOrCreate('api.tasks.get'),
+            'create' => Permission::findOrCreate('api.tasks.post'),
+            'update' => Permission::findOrCreate('api.tasks.put'),
+            'delete' => Permission::findOrCreate('api.tasks.{id}.delete'),
+            'finish' => Permission::findOrCreate('api.tasks.finish.post'),
+            'import' => Permission::findOrCreate('api.tasks.import.post'),
         ];
     }
 
@@ -76,7 +76,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/projects/tasks/' . $this->projectTask[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/tasks/' . $this->projectTask[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -101,7 +101,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/projects/tasks/' . ++$this->projectTask[2]->id);
+        $response = $this->actingAs($this->user)->get('/api/tasks/' . ++$this->projectTask[2]->id);
         $response->assertStatus(404);
     }
 
@@ -110,7 +110,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['index']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/projects/tasks');
+        $response = $this->actingAs($this->user)->get('/api/tasks');
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -151,7 +151,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
         $response->assertStatus(201);
 
         $task = json_decode($response->getContent())->data;
@@ -200,7 +200,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
         $response->assertStatus(201);
 
         $task = json_decode($response->getContent())->data;
@@ -241,7 +241,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
         $response->assertStatus(422);
     }
 
@@ -264,7 +264,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
         $response->assertStatus(422);
     }
 
@@ -289,7 +289,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
         $response->assertStatus(422);
     }
 
@@ -312,7 +312,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
         $response->assertStatus(422);
     }
 
@@ -335,7 +335,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
         $response->assertStatus(422);
     }
 
@@ -359,7 +359,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
         $response->assertStatus(200);
 
         $task = json_decode($response->getContent())->data;
@@ -407,7 +407,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
         $response->assertStatus(200);
 
         $tasks = json_decode($response->getContent())->data;
@@ -475,7 +475,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTasks);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTasks);
         $response->assertStatus(200);
 
         $tasks = collect(json_decode($response->getContent())->responses);
@@ -557,7 +557,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTasks);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTasks);
         $response->assertStatus(200);
 
         $tasks = collect(json_decode($response->getContent())->responses);
@@ -600,7 +600,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
         $response->assertStatus(422);
     }
 
@@ -646,7 +646,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTasks);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTasks);
         $response->assertStatus(207);
         $this->assertEquals(422, json_decode($response->getContent())->responses[1]->status);
     }
@@ -670,7 +670,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
         $response->assertStatus(422);
     }
 
@@ -695,7 +695,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
         $response->assertStatus(422);
     }
 
@@ -718,7 +718,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
         $response->assertStatus(422);
     }
 
@@ -741,7 +741,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
         $response->assertStatus(422);
     }
 
@@ -767,7 +767,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/projects/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
         $response->assertStatus(200);
 
         $task = json_decode($response->getContent())->data;
@@ -799,7 +799,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/projects/tasks/' . $this->projectTask[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/tasks/' . $this->projectTask[1]->id);
         $response->assertStatus(204);
 
         $projectTask = $this->projectTask[1]->fresh();
@@ -812,7 +812,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/projects/tasks/' . ++$this->projectTask[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/tasks/' . ++$this->projectTask[2]->id);
         $response->assertStatus(404);
     }
 
@@ -830,7 +830,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['finish']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects/tasks/finish', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks/finish', $projectTask);
         $response->assertStatus(200);
 
         $task = json_decode($response->getContent())->data;
@@ -851,7 +851,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['finish']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects/tasks/finish', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks/finish', $projectTask);
         $response->assertStatus(422);
     }
 
@@ -865,7 +865,7 @@ class ProjectTaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['finish']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects/tasks/finish', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks/finish', $projectTask);
         $response->assertStatus(422);
     }
 }

@@ -39,7 +39,7 @@ class UpdateProjectRequest extends BaseFormRequest
                     ValidStateRule::make(ProjectState::class),
                 ],
                 'progress' => 'integer|nullable|min:0|max:100',
-                'time_budget_hours' => 'numeric|nullable|min:0',
+                'time_budget' => 'nullable|regex:/[0-9]*:[0-5][0-9]/',
                 'budget' => 'numeric|nullable|min:0',
             ],
         );

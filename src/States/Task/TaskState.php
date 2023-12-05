@@ -8,6 +8,8 @@ use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 
 abstract class TaskState extends State implements HasFrontendFormatter
 {
+    public static bool $isEndState;
+
     abstract public function color(): string;
 
     public static function config(): StateConfig

@@ -33,12 +33,13 @@ return new class extends Migration
             $table->decimal('progress', 11, 10, true)
                 ->after('state')
                 ->default(0);
-            $table->decimal('time_budget_hours', 12, 2, true)
+            $table->unsignedBigInteger('time_budget')
                 ->nullable()
+                ->comment('Time budget in minutes.')
                 ->after('progress');
             $table->decimal('budget', 40, 10, true)
                 ->nullable()
-                ->after('time_budget_hours');
+                ->after('time_budget');
 
             $table->renameColumn('project_name', 'name');
             $table->renameColumn('release_date', 'start_date');
@@ -69,7 +70,7 @@ return new class extends Migration
                 'responsible_user_id',
                 'project_number',
                 'progress',
-                'time_budget_hours',
+                'time_budget',
                 'budget',
             ]);
             $table->foreignId('category_id')

@@ -2,19 +2,7 @@
     id="task-details"
     x-data="{
         task: $wire.entangle('task'),
-        showModal(id) {
-            $wire.showTask(id).then(() => {
-                Alpine.$data(document.getElementById('task-modal').querySelector('[wireui-modal]')).open()
-            })
-        },
-        save() {
-            $wire.save().then((task) => {
-                if (task) {
-                    $wire.dispatchTo('data-tables.tasks-list', 'fetchRecord', {record: task, event: task.hasOwnProperty('id') ? 'updated' : 'created'});
-                    close();
-                }
-            });
-        },
+        edit: false,
         delete() {
             window.$wireui.confirmDialog(
                 {
@@ -26,7 +14,7 @@
                         execute: () => {
                             $wire.delete().then((success) => {
                                 if (success) {
-                                    $wire.dispatchTo('data-tables.tasks-list', 'fetchRecord', {record: this.task, event: 'deleted'});
+                                    window.location.href = '{{ route('tasks') }}';
                                     close();
                                 }
                             });
@@ -40,31 +28,56 @@
             );
         }
     }"
-    x-on:data-table-row-clicked.window="showModal($event.detail.id);"
-    x-on:new-project-task.window="showModal();"
 >
+    <div
+        class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
+        <div class="flex items-center space-x-5">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
+                    <div class="flex">
+                        <div class="pl-2">
+                            <span x-text="task.name">
+                            </span>
+                        </div>
+                    </div>
+                </h1>
+            </div>
+        </div>
+        <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
+            @if(user_can('action.task.delete'))
+                <x-button negative label="{{ __('Delete') }}" x-on:click="deleteTask()"/>
+            @endif
+            <x-button
+                primary
+                x-show="!edit"
+                class="w-full"
+                x-on:click="edit = true"
+                :label="__('Edit')"
+            />
+            <x-button
+                x-cloak
+                primary
+                spinner
+                x-show="edit"
+                class="w-full"
+                x-on:click="$wire.save().then((success) => {
+                    edit = false;
+                });"
+                :label="__('Save')"
+            />
+            <x-button
+                x-cloak
+                primary
+                spinner
+                x-show="edit"
+                class="w-full"
+                x-on:click="edit = false; $wire.resetForm();"
+                :label="__('Cancel')"
+            />
+        </div>
+    </div>
     <x-tabs
         wire:model.live="taskTab"
         :$tabs
-        x-bind:disabled="! task.id"
     />
-    <x-slot:footer>
-        <div class="flex justify-between gap-x-4"
-             x-data="{task: {id: null}}"
-             x-on:data-table-row-clicked.window="task.id = $event.detail.id"
-        >
-            <div x-show="projectTask.id">
-                <x-button
-                    flat
-                    negative
-                    :label="__('Delete')"
-                    x-on:click="Alpine.$data(document.getElementById('task-details')).delete()"
-                />
-            </div>
-            <div class="flex w-full justify-end">
-                <x-button flat :label="__('Cancel')" x-on:click="close" />
-                <x-button primary :label="__('Save')" x-on:click="Alpine.$data(document.getElementById('task-details')).save()" />
-            </div>
-        </div>
-    </x-slot:footer>
 </div>

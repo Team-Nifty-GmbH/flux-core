@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Project;
 use FluxErp\Actions\Project\CreateProject;
 use FluxErp\Livewire\DataTables\ProjectList as BaseProjectList;
 use FluxErp\Livewire\Forms\ProjectForm;
+use FluxErp\Models\Project;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -21,7 +22,12 @@ class ProjectList extends BaseProjectList
     {
         parent::mount();
 
-        $this->availableStates = \FluxErp\Models\Project::getStatesFor('state')->map(function ($state) {
+        $this->project->additionalColumns = array_fill_keys(
+            Project::additionalColumnsQuery()->pluck('name')?->toArray() ?? [],
+            null
+        );
+
+        $this->availableStates = Project::getStatesFor('state')->map(function ($state) {
             return [
                 'label' => __(ucfirst(str_replace('_', ' ', $state))),
                 'name' => $state,
@@ -56,5 +62,16 @@ class ProjectList extends BaseProjectList
         $this->loadData();
 
         return true;
+    }
+
+    public function resetForm(): void
+    {
+        $this->project->reset();
+        $this->project->additionalColumns = array_fill_keys(
+            Project::additionalColumnsQuery()->pluck('name')?->toArray() ?? [],
+            null
+        );
+
+        $this->skipRender();
     }
 }

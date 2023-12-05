@@ -23,6 +23,7 @@ class UpdateTaskRequest extends BaseFormRequest
                 'id' => 'required|integer|exists:tasks,id,deleted_at,NULL',
                 'project_id' => [
                     'integer',
+                    'nullable',
                     (new ExistsWithIgnore('projects', 'id'))->whereNull('deleted_at'),
                 ],
                 'responsible_user_id' => [
@@ -33,15 +34,13 @@ class UpdateTaskRequest extends BaseFormRequest
                 'name' => 'sometimes|required|string',
                 'description' => 'string|nullable',
                 'start_date' => 'present|date_format:Y-m-d|nullable',
-                'end_date' => 'present|date_format:Y-m-d|nullable|gte:start_date',
-                'started_at' => 'date|nullable',
-                'ended_at' => 'date|nullable|gte:started_at',
+                'due_date' => 'present|date_format:Y-m-d|nullable|gte:start_date',
                 'priority' => 'integer|nullable|min:0',
                 'state' => [
                     'string',
                     ValidStateRule::make(TaskState::class),
                 ],
-                'time_budget_hours' => 'numeric|nullable|min:0',
+                'time_budget' => 'nullable|regex:/[0-9]*:[0-5][0-9]/',
                 'budget' => 'numeric|nullable|min:0',
 
                 'users' => 'array',

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\TimeDuration;
 use FluxErp\States\Project\ProjectState;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -15,6 +16,7 @@ use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Scout\Searchable;
 use Spatie\ModelStates\HasStates;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -24,7 +26,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 class Project extends Model implements InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, SoftDeletes;
+        HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, Searchable,
+        SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -33,6 +36,7 @@ class Project extends Model implements InteractsWithDataTables
     protected $casts = [
         'uuid' => 'string',
         'state' => ProjectState::class,
+        'time_budget' => TimeDuration::class,
     ];
 
     public string $detailRouteName = 'projects.id';
@@ -94,5 +98,13 @@ class Project extends Model implements InteractsWithDataTables
     public function getAvatarUrl(): ?string
     {
         return null;
+    }
+
+    public function calculateProgress(): void
+    {
+        $taskProgress = $this->tasks()->pluck('tasks.progress')->toArray();
+
+        $this->progress = bcdiv(array_sum($taskProgress), count($taskProgress));
+        $this->save();
     }
 }
