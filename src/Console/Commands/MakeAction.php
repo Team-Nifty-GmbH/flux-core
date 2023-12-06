@@ -3,6 +3,7 @@
 namespace FluxErp\Console\Commands;
 
 use Illuminate\Console\GeneratorCommand;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -16,7 +17,9 @@ class MakeAction extends GeneratorCommand
     protected $signature = 'make:action
             {name : The name of the action}
             {--customName= : Custom action name}
-            {--description= : Custom action description}';
+            {--description= : Custom action description}
+            {--model= : Model name}
+            {--rule= : Rule name}';
 
     /**
      * The console command description.
@@ -39,21 +42,75 @@ class MakeAction extends GeneratorCommand
         $stub = $this->files->get($this->getStub());
 
         return $this->replaceNamespace($stub, $name)
-            ->replaceNameAndDescription($stub, $this->option('customName'), $this->option('description'))
+            ->replacePlaceholders(
+                $stub,
+                $name,
+                $this->option('customName'),
+                $this->option('description'),
+                $this->option('model'),
+                $this->option('rule'),
+            )
             ->replaceClass($stub, $name);
     }
 
-    protected function replaceNameAndDescription(string &$stub, string $name = null, string $description = null): static
-    {
+    protected function replacePlaceholders(
+        string &$stub,
+        string $name,
+        string $customName = null,
+        string $description = null,
+        string $model = null,
+        string $rule = null
+    ): static {
         $searches = [
-            ['{{ name }}', '{{ description }}'],
+            ['{{ name }}', '{{ description }}', '{{ return }}', '{{ model }}', '{{ uses }}', '{{ rule }}'],
             ['{{name}}', '{{description}}'],
         ];
+
+        $return = null;
+        if (str_contains(strtolower($name), 'delete')) {
+            $return = '?bool';
+            if ($model) {
+                $rule = '[\'id\' => \'required|integer|exists:' .
+                    (new $model())->getTable() . ',id' .
+                    (in_array(SoftDeletes::class, class_uses_recursive($model)) ? ',deleted_at,NULL' : '')
+                . '\']';
+            }
+        }
+
+        $uses[] = 'use FluxErp\Actions\FluxAction;';
+        if ($model) {
+            $uses[] = "use $model;";
+        }
+
+        if ($rule && class_exists($rule)) {
+            $uses[] = "use $rule;";
+        }
+
+        sort($uses);
+        $uses = implode("\r\n", $uses);
+
+        $ruleLine = null;
+        if ($rule) {
+            $ruleLine = '$this->rules = ';
+
+            if (class_exists($rule)) {
+                $ruleLine .= '(new ' . class_basename($rule) . '())->rules();';
+            } else {
+                $ruleLine .= $rule . ';';
+            }
+        }
 
         foreach ($searches as $search) {
             $stub = str_replace(
                 $search,
-                [$name, $description],
+                [
+                    $customName,
+                    $description,
+                    $return ?? ($model ? class_basename($model) : 'mixed'),
+                    $model ? class_basename($model) . '::class' : '',
+                    $uses,
+                    $ruleLine,
+                ],
                 $stub
             );
         }

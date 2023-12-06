@@ -1,0 +1,32 @@
+<?php
+
+namespace {{ namespace }};
+
+use FluxErp\Http\Controllers\BaseController;
+use {{ namespacedModel }};
+use {{ rootNamespace }}Http\Controllers\Controller;
+use {{ namespacedRequests }}
+
+class {{ class }} extends BaseController
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->model = new {{ model }}();
+    }
+
+    public function create({{ storeRequest }} $request): JsonResponse
+    {
+        //
+    }
+
+    public function update({{ updateRequest }} $request, {{ model }} ${{ modelVariable }}): JsonResponse
+    {
+        //
+    }
+
+    public function delete(string $id): JsonResponse
+    {
+        //
+    }
+}

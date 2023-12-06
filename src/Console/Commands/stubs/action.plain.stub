@@ -2,16 +2,22 @@
 
 namespace {{ namespace }};
 
-use FluxErp\Actions\FluxAction;
+{{ uses }}
 
 class {{ class }} extends FluxAction
 {
-    public static function models(): array
+    protected function boot(array $data): void
     {
-        return [];
+        parent::boot($data);
+        {{ rule }}
     }
 
-    public function performAction(): mixed
+    public static function models(): array
+    {
+        return [{{ model }}];
+    }
+
+    public function performAction(): {{ return }}
     {
         //
     }
