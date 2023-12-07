@@ -36,7 +36,7 @@ class MorphExists implements DataAwareRule, ValidationRule
             return;
         }
 
-        if (! $model::query()->where((new $model())->getKeyName(), $value)->exists()) {
+        if (! $model::query()->whereKey($value)->exists()) {
             $fail(sprintf('Record with id %s doesnt exist in %s.', $value, $model))->translate();
         }
     }

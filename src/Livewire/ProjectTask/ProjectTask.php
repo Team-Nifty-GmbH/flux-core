@@ -31,7 +31,7 @@ class ProjectTask extends Component
 
     public array $openCategories = [];
 
-    public function mount(int $id = null, int $projectId = null): void
+    public function mount(?int $id = null, ?int $projectId = null): void
     {
         $this->projectId = $projectId;
 

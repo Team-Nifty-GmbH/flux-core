@@ -36,7 +36,7 @@ trait HasRelatedModel
         static::registerModelEvent('relatedModelsChanged', $callback);
     }
 
-    public function relatedModel(string $model = null): MorphToMorph
+    public function relatedModel(?string $model = null): MorphToMorph
     {
         if (is_null($model)) {
             $model = Cache::get($this->getMorphClass() . '.' . $this->getKey() . '.related.models');
@@ -52,7 +52,7 @@ trait HasRelatedModel
         );
     }
 
-    public function relatedBy(string $model = null): MorphToMorph
+    public function relatedBy(?string $model = null): MorphToMorph
     {
         if (is_null($model)) {
             $model = Cache::get($this->getMorphClass() . '.' . $this->getKey() . '.related.by');
@@ -151,8 +151,8 @@ trait HasRelatedModel
      * @return MorphToMorph
      */
     protected function morphToMorph(
-        string $related, string $name, string $relatedMorph, string $table, string $foreignPivotKey = null,
-        string $relatedPivotKey = null, string $parentKey = null, string $relatedKey = null,
+        string $related, string $name, string $relatedMorph, string $table, ?string $foreignPivotKey = null,
+        ?string $relatedPivotKey = null, ?string $parentKey = null, ?string $relatedKey = null,
         bool $inverse = false)
     {
         $caller = $this->guessBelongsToManyRelation();
@@ -184,7 +184,7 @@ trait HasRelatedModel
      */
     protected function newMorphToMorph(
         Builder $query, Model $parent, string $name, string $related, string $table, string $foreignPivotKey,
-        string $relatedPivotKey, string $parentKey, string $relatedKey, string $relationName = null,
+        string $relatedPivotKey, string $parentKey, string $relatedKey, ?string $relationName = null,
         bool $inverse = false)
     {
         return new MorphToMorph(
@@ -199,9 +199,9 @@ trait HasRelatedModel
      * @return MorphToMorph
      */
     protected function morphedByMorph(
-        string $related, string $name, string $relatedMorph, string $table = null,
-        string $foreignPivotKey = null, string $relatedPivotKey = null, string $parentKey = null,
-        string $relatedKey = null)
+        string $related, string $name, string $relatedMorph, ?string $table = null,
+        ?string $foreignPivotKey = null, ?string $relatedPivotKey = null, ?string $parentKey = null,
+        ?string $relatedKey = null)
     {
         $foreignPivotKey = $foreignPivotKey ?: $relatedMorph . '_id';
 

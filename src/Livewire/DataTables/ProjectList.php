@@ -55,7 +55,7 @@ class ProjectList extends DataTable
         return $builder->with('category:id,name');
     }
 
-    public function getFilterableColumns(string $name = null): array
+    public function getFilterableColumns(?string $name = null): array
     {
         $filterable = parent::getFilterableColumns($name);
         $filterable[] = 'category.name';

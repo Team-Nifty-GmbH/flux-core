@@ -1,0 +1,35 @@
+<?php
+
+namespace {{ namespace }};
+
+use FluxErp\View\Printing\PrintableView;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
+
+class {{ class }} extends PrintableView
+{
+    public function __construct(public {{ printableClass }} ${{ printableVariable }})
+    {
+        //
+    }
+
+    public function render(): View
+    {
+        return {{ view }};
+    }
+
+    public function getFileName(): string
+    {
+        return $this->getSubject();
+    }
+
+    public function getSubject(): string
+    {
+        // TODO: Implement getSubject() method
+    }
+
+    public function getModel(): ?Model
+    {
+        return $this->{{ printableVariable }};
+    }
+}

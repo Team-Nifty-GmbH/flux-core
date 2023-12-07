@@ -147,7 +147,7 @@ class Address extends Component
         $this->skipRender();
     }
 
-    public function save(int $contactId = null): ?array
+    public function save(?int $contactId = null): ?array
     {
         $function = ($this->address['id'] ?? false)
             ? new UpdateAddress([])
@@ -286,7 +286,7 @@ class Address extends Component
         }
     }
 
-    public function getAddress(int $addressId = null, bool $skipRender = true): void
+    public function getAddress(?int $addressId = null, bool $skipRender = true): void
     {
         if ($addressId) {
             $address = AddressModel::query()

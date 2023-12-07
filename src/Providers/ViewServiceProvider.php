@@ -10,22 +10,7 @@ use Illuminate\View\FileViewFinder;
 
 class ViewServiceProvider extends ServiceProvider
 {
-    /**
-     * Register services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        //
-    }
-
-    /**
-     * Bootstrap services.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
         /** use @extendFlux() at the end of the component, not the beginning */
         Blade::directive('extendFlux', function (string $expression) {
@@ -51,7 +36,6 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         Blade::component(App::class, 'layouts.app');
-        Blade::component(Printing::class, 'layouts.print.index');
         Blade::component(Printing::class, 'layouts.print');
         config([
             'livewire.layout' => 'flux::layouts.app',

@@ -65,11 +65,8 @@ class FluxServiceProvider extends ServiceProvider
             $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         }
 
-        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
-            $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
-            $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
-        }
-
+        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
+        $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
         $this->registerBladeComponents();
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerLivewireComponents();
@@ -151,7 +148,7 @@ class FluxServiceProvider extends ServiceProvider
 
         if (! Collection::hasMacro('paginate')) {
             Collection::macro('paginate',
-                function (int $perPage = 25, int $page = null, array $options = [], string $urlParams = null) {
+                function (int $perPage = 25, ?int $page = null, array $options = [], ?string $urlParams = null) {
                     $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
 
                     return (new LengthAwarePaginator(
@@ -161,7 +158,7 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         \Illuminate\Routing\Route::macro('registersMenuItem',
-            function (string $label = null, string $icon = null, int $order = null) {
+            function (?string $label = null, ?string $icon = null, ?int $order = null) {
                 Menu::register(
                     route: $this,
                     label: $label,
@@ -226,7 +223,6 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerConfig(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
-        $this->mergeConfigFrom(__DIR__ . '/../config/print.php', 'print');
         $this->mergeConfigFrom(__DIR__ . '/../config/fortify.php', 'fortify');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
         $this->mergeConfigFrom(__DIR__ . '/../config/scout.php', 'scout');
@@ -352,7 +348,7 @@ class FluxServiceProvider extends ServiceProvider
         }
     }
 
-    private function getViewClassAliasFromNamespace(string $namespace, string $directoryPath = null): array
+    private function getViewClassAliasFromNamespace(string $namespace, ?string $directoryPath = null): array
     {
         $directoryPath = $directoryPath ?: Str::replace(['\\', 'FluxErp'], ['/', __DIR__], $namespace);
         $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath));

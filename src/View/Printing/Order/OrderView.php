@@ -3,31 +3,27 @@
 namespace FluxErp\View\Printing\Order;
 
 use FluxErp\Models\Order;
+use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\View\Component;
 
-class OrderView extends Component
+class OrderView extends PrintableView
 {
     public Order $model;
 
     public array $summary = [];
 
-    public string $title = '';
-
-    /**
-     * Create a new component instance.
-     *
-     * @return void
-     */
     public function __construct(Order $order)
     {
-        // Set locale to addressInvoice language if it is set
         app()->setLocale($order->addressInvoice?->language?->language_code ?? config('app.locale'));
 
         $this->model = $order;
-
         $this->prepareModel();
+    }
+
+    public function getModel(): Order
+    {
+        return $this->model;
     }
 
     public function prepareModel(): void
@@ -63,7 +59,16 @@ class OrderView extends Component
         return view('print::order.order', [
             'model' => $this->model,
             'summary' => $this->summary,
-            'title' => $this->title,
         ]);
+    }
+
+    public function getFileName(): string
+    {
+        return $this->getSubject();
+    }
+
+    public function getSubject(): string
+    {
+        return __('Order') . ' ' . $this->model->order_number;
     }
 }

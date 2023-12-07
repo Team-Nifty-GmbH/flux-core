@@ -21,7 +21,7 @@ use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class QueryBuilder
 {
-    public static function filterModel(object $model, Request $request = null): LaravelQueryBuilder
+    public static function filterModel(object $model, ?Request $request = null): LaravelQueryBuilder
     {
         $queryBuilder = LaravelQueryBuilder::for($model, $request);
 
@@ -145,7 +145,7 @@ class QueryBuilder
         return $columns;
     }
 
-    private static function calculateFilters(object $model, string $related = null): array
+    private static function calculateFilters(object $model, ?string $related = null): array
     {
         $exactAndScopeColumnTypes = [
             'int',

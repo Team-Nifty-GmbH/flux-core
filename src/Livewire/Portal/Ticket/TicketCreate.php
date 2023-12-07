@@ -40,7 +40,7 @@ class TicketCreate extends Component
         'save',
     ];
 
-    public function mount(string $modelType = null, int $modelId = null): void
+    public function mount(?string $modelType = null, ?int $modelId = null): void
     {
         $this->ticket = [
             'title' => null,

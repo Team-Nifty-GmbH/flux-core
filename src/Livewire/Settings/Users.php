@@ -28,7 +28,7 @@ class Users extends Component
         return view('flux::livewire.settings.users');
     }
 
-    public function show(int $id = null): void
+    public function show(?int $id = null): void
     {
         if ($this->showUserModal) {
             return;

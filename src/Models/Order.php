@@ -2,6 +2,8 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Collections\OrderCollection;
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
@@ -21,8 +23,12 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Mailable;
+use FluxErp\Traits\Printable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
+use FluxErp\View\Printing\Order\Invoice;
+use FluxErp\View\Printing\Order\Offer;
+use FluxErp\View\Printing\Order\Retoure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,11 +41,11 @@ use TeamNiftyGmbH\DataTable\Casts\Money;
 use TeamNiftyGmbH\DataTable\Casts\Percentage;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Order extends Model implements HasMedia, InteractsWithDataTables
+class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes, HasPackageFactory,
         HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia,
-        Mailable, Searchable, SoftDeletes, Trackable;
+        Mailable, Printable, Searchable, SoftDeletes, Trackable;
 
     protected $with = [
         'currency',
@@ -368,5 +374,21 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
     public function getAvatarUrl(): ?string
     {
         return $this->contact?->getAvatarUrl() ?: self::icon()->getUrl();
+    }
+
+    public function newCollection(array $models = []): OrderCollection
+    {
+        return new OrderCollection($models);
+    }
+
+    public function getPrintViews(): array
+    {
+        return $this->orderType?->order_type_enum->isPurchase()
+            ? []
+            : [
+                'invoice' => Invoice::class,
+                'offer' => Offer::class,
+                'retoure' => Retoure::class,
+            ];
     }
 }

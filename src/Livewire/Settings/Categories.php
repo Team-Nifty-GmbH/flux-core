@@ -54,7 +54,7 @@ class Categories extends CategoryList
         ];
     }
 
-    public function edit(array $record = null): void
+    public function edit(?array $record = null): void
     {
         if ($record) {
             $this->category->fill($this->model::query()->whereKey($record['id'])->firstOrFail());

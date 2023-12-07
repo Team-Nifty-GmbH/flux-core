@@ -2,7 +2,6 @@
 
 namespace FluxErp\Tests\Feature\Api;
 
-use FluxErp\Events\Print\PdfCreatingEvent;
 use FluxErp\Models\Comment;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\Permission;
@@ -209,7 +208,7 @@ class EventSubscriptionTest extends BaseSetup
         $subscription = [
             'id' => $this->eventSubscriptions[0]->id,
             'user_id' => $this->user->id,
-            'event' => PdfCreatingEvent::class,
+            'event' => 'eloquent.deleted: FluxErp\Models\Comment',
             'model_type' => Comment::class,
             'model_id' => $this->comments[1]->id,
             'is_broadcast' => true,

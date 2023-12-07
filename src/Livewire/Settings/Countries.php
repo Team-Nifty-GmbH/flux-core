@@ -60,7 +60,7 @@ class Countries extends CountryList
         ];
     }
 
-    public function showEditModal(int $countryId = null): void
+    public function showEditModal(?int $countryId = null): void
     {
         $this->selectedCountry = Country::query()->whereKey($countryId)->first()?->toArray() ?: [
             'language_id' => null,

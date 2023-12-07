@@ -108,7 +108,7 @@ class CommissionRates extends DataTable
         ];
     }
 
-    public function show(int $id = null): void
+    public function show(?int $id = null): void
     {
         if ($id) {
             $this->commissionRate = CommissionRate::query()

@@ -32,7 +32,7 @@ class Profile extends Component
 
     public bool $showUserList = false;
 
-    public function mount(string $id = null): void
+    public function mount(?string $id = null): void
     {
         if ($id === null || ! auth()->user()->can('profiles.{id?}.get')) {
             $user = auth()->user();

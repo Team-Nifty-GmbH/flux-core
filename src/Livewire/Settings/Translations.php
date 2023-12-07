@@ -41,7 +41,7 @@ class Translations extends Component
         return view('flux::livewire.settings.translations');
     }
 
-    public function show(int $index = null): void
+    public function show(?int $index = null): void
     {
         $this->index = is_null($index) ? -1 : $index;
 

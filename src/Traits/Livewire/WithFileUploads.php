@@ -88,7 +88,7 @@ trait WithFileUploads
         $this->skipRender();
     }
 
-    public function prepareForMediaLibrary(string $name, int $modelId = null, string $modelType = null): void
+    public function prepareForMediaLibrary(string $name, ?int $modelId = null, ?string $modelType = null): void
     {
         $this->filesArrayDirty = true;
         $property = $this->getPropertyValue($name);
@@ -113,7 +113,7 @@ trait WithFileUploads
         }
     }
 
-    public function saveFileUploadsToMediaLibrary(string $name, int $modelId = null, string $modelType = null): array
+    public function saveFileUploadsToMediaLibrary(string $name, ?int $modelId = null, ?string $modelType = null): array
     {
         if (! $this->filesArray && ! $this->filesArrayDirty) {
             $this->prepareForMediaLibrary($name, $modelId, $modelType);

@@ -2,14 +2,15 @@
 
 namespace FluxErp\View\Printing\Order;
 
-use FluxErp\Models\Order;
-
 class Offer extends OrderView
 {
-    public function __construct(Order $order)
+    public function getFileName(): string
     {
-        parent::__construct($order);
+        return $this->getSubject();
+    }
 
-        $this->title = __('Offer') . ' ' . $this->model->order_number;
+    public function getSubject(): string
+    {
+        return __('Offer') . ' ' . ($this->model->order_number ?: __('Preview'));
     }
 }

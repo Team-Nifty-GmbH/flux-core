@@ -94,7 +94,7 @@ trait HasTranslations
         return $this;
     }
 
-    public function hasTranslationsValidationRules(array $rules, array $data = null): array
+    public function hasTranslationsValidationRules(array $rules, ?array $data = null): array
     {
         $availableLocales = Language::all()
             ->pluck('language_code')
@@ -136,7 +136,7 @@ trait HasTranslations
     /**
      * @throws \Spatie\Translatable\Exceptions\AttributeIsNotTranslatable
      */
-    public function getTranslations(string $key = null, array $allowedLocales = null): array
+    public function getTranslations(?string $key = null, ?array $allowedLocales = null): array
     {
         if ($key !== null) {
             $this->guardAgainstNonTranslatableAttribute($key);

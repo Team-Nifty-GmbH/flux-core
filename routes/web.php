@@ -1,9 +1,7 @@
 <?php
 
 use FluxErp\Http\Controllers\LoginLinkController;
-use FluxErp\Http\Controllers\PresentationController;
 use FluxErp\Http\Controllers\PrintController;
-use FluxErp\Http\Controllers\PrintDataController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Vite;
 
@@ -18,16 +16,12 @@ use Illuminate\Support\Facades\Vite;
 |
 */
 
-Route::get('print/public/{uuid}', [PrintDataController::class, 'showHtmlPublic'])->name('print.public-html-show');
-Route::get('presentation/public/{uuid}', [PresentationController::class, 'showHtmlPublic'])
-    ->name('presentation.public-html-show');
-Route::any('print/{view}/{model}/{id}/{asPdf?}', [PrintController::class, 'render'])
-    ->where('model', '(.*)')
-    ->name('print.render');
-
 Route::get('/pwa-service-worker', function () {
     return response(Vite::content('resources/js/sw.js', 'flux/build'))
         ->header('Content-Type', 'application/javascript');
 })->name('pwa-service-worker');
 
 Route::get('/login-link', LoginLinkController::class)->name('login-link');
+
+Route::match(['get', 'post'], '/print/render', [PrintController::class, 'render'])->name('print.render');
+Route::match(['get', 'post'], '/print/pdf', [PrintController::class, 'renderPdf']);

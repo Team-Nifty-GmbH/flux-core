@@ -41,13 +41,13 @@ return new class extends Migration
             )"
         );
 
-        DB::statement("DELETE FROM contact_options WHERE value IN (
+        DB::statement('DELETE FROM contact_options WHERE value IN (
                 SELECT email FROM addresses WHERE email IS NOT NULL AND addresses.id = contact_options.address_id
                 UNION
                 SELECT phone FROM addresses WHERE phone IS NOT NULL AND addresses.id = contact_options.address_id
                 UNION
                 SELECT url FROM addresses WHERE url IS NOT NULL AND addresses.id = contact_options.address_id
-            )"
+            )'
         );
     }
 

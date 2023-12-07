@@ -180,7 +180,7 @@ class Comments extends Component
         unset($this->comments['data'][$index]);
     }
 
-    public function loadComments(Model $record = null): void
+    public function loadComments(?Model $record = null): void
     {
         $record = $record ?: $this->modelType::query()
             ->whereKey($this->modelId)

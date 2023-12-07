@@ -36,7 +36,9 @@
                                       placeholder="{{ __('Select a Print Layout') }}"
                                       wire:model="orderType.print_layouts"
                                       multiselect
-                                      :options="$orderTypes"
+                                      option-label="label"
+                                      option-value="value"
+                                      :options="$printViews"
                             />
 
                             <x-checkbox wire:model="orderType.is_active" :label="__('Is Active')"/>

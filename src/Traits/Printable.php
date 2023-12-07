@@ -1,0 +1,46 @@
+<?php
+
+namespace FluxErp\Traits;
+
+trait Printable
+{
+    public static array $registeredPrintViews = [];
+
+    public function print(): \FluxErp\Printing\Printable
+    {
+        return new \FluxErp\Printing\Printable($this);
+    }
+
+    public static function registerPrintView(string $name, \Closure|string $viewClass): void
+    {
+        static::$registeredPrintViews[$name] = $viewClass;
+    }
+
+    public function resolvePrintViews(): array
+    {
+        $printViews = array_merge($this->getPrintViews(), static::$registeredPrintViews);
+
+        foreach ($printViews as $name => $view) {
+            if (is_string($view)) {
+                continue;
+            }
+
+            if ($view instanceof \Closure) {
+                $resolvedClosure = $view($this);
+                $printViews[$name] = $resolvedClosure ?: null;
+            }
+        }
+
+        return array_filter($printViews);
+    }
+
+    public function getAvailableViews(): array
+    {
+        return array_keys(array_merge($this->getPrintViews(), static::$registeredPrintViews));
+    }
+
+    public function getPrintViews(): array
+    {
+        return [];
+    }
+}

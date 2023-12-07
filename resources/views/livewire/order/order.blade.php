@@ -29,8 +29,8 @@
     @section('create-documents-sidebar')
         <x-sidebar x-show="createDocuments">
             @section('create-documents-sidebar.content')
-                @foreach($printLayouts as $key => $printLayout)
-                    <x-checkbox wire:model="selectedPrintLayouts.{{ $key }}" :label="$key" />
+                @foreach($printLayouts as $printLayout)
+                    <x-checkbox wire:model="selectedPrintLayouts.{{ $printLayout }}" :label="__($printLayout)" />
                 @endforeach
             @show
             <x-slot name="footer">
@@ -304,10 +304,10 @@
                                                         {{ __('Preview') }}
                                                     </x-button>
                                                 </x-slot>
-                                                @foreach($printLayouts as $key => $printLayout)
+                                                @foreach($printLayouts as $printLayout)
                                                     <x-dropdown.item
-                                                        x-on:click="const preview = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['id' => $order['id'], 'view' => $key, 'model' => \FluxErp\Models\Order::class, '']) }}'; $openModal(preview)">
-                                                        {{ $key }}
+                                                        x-on:click="const preview = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['model_id' => $order['id'], 'view' => $printLayout, 'model_type' => \FluxErp\Models\Order::class, '']) }}'; $openModal(preview)">
+                                                        {{ __($printLayout) }}
                                                     </x-dropdown.item>
                                                 @endforeach
                                             </x-dropdown>

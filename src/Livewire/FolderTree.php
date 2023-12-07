@@ -64,7 +64,7 @@ class FolderTree extends Component
         }
     }
 
-    public function mount(string $modelType = null, int $modelId = null): void
+    public function mount(?string $modelType = null, ?int $modelId = null): void
     {
         $this->modelType = $modelType;
         $this->modelId = $modelId;
