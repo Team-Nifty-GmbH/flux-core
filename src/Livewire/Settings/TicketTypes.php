@@ -81,7 +81,7 @@ class TicketTypes extends Component
         return view('flux::livewire.settings.ticket-types');
     }
 
-    public function show(int $index = null, bool $newAdditionalColumn = false): void
+    public function show(?int $index = null, bool $newAdditionalColumn = false): void
     {
         if (is_null($index)) {
             $this->ticketTypeIndex = -1;

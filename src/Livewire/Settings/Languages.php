@@ -58,7 +58,7 @@ class Languages extends LanguageList
         ];
     }
 
-    public function showEditModal(int $languageId = null): void
+    public function showEditModal(?int $languageId = null): void
     {
         if (! $languageId) {
             $this->selectedLanguage = [];

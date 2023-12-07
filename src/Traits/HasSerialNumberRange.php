@@ -13,7 +13,7 @@ trait HasSerialNumberRange
     /**
      * @return $this
      */
-    public function getSerialNumber(string|array $types, int $clientId = null): static
+    public function getSerialNumber(string|array $types, ?int $clientId = null): static
     {
         $types = (array) $types;
         $clientId = $clientId ?? ($this->client_id ?? null);

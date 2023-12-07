@@ -8,8 +8,8 @@ class ResponseHelper
 {
     public static function createResponseFromBase(int $statusCode,
         mixed $data = [],
-        string $statusMessage = null,
-        array $additions = null,
+        ?string $statusMessage = null,
+        ?array $additions = null,
         bool $bulk = false): JsonResponse
     {
         $headers = ['Content-Language' => app()->getLocale()];
@@ -100,7 +100,7 @@ class ResponseHelper
     public static function createArrayResponse(int $statusCode,
         mixed $data = null,
         array $additions = [],
-        string $statusMessage = null,
+        ?string $statusMessage = null,
         bool $bulk = false): array
     {
         $response = [
@@ -132,7 +132,7 @@ class ResponseHelper
         return array_merge($additions, $response);
     }
 
-    public static function ok(string $statusMessage, array $data = null): JsonResponse
+    public static function ok(string $statusMessage, ?array $data = null): JsonResponse
     {
         return response()->json(
             data: self::handle(
@@ -142,7 +142,7 @@ class ResponseHelper
         );
     }
 
-    public static function created(string $statusMessage, array $data = null): JsonResponse
+    public static function created(string $statusMessage, ?array $data = null): JsonResponse
     {
         return response()->json(
             data: self::handle(
@@ -169,7 +169,7 @@ class ResponseHelper
         );
     }
 
-    public static function badRequest(string $statusMessage, array $errors = null): JsonResponse
+    public static function badRequest(string $statusMessage, ?array $errors = null): JsonResponse
     {
         return response()->json(
             data: self::handle(
@@ -180,7 +180,7 @@ class ResponseHelper
         );
     }
 
-    public static function notFound(string $statusMessage, array $errors = null): JsonResponse
+    public static function notFound(string $statusMessage, ?array $errors = null): JsonResponse
     {
         return response()->json(
             data: self::handle(
@@ -191,7 +191,7 @@ class ResponseHelper
         );
     }
 
-    public static function methodNotAllowed(string $statusMessage, array $errors = null): JsonResponse
+    public static function methodNotAllowed(string $statusMessage, ?array $errors = null): JsonResponse
     {
         return response()->json(
             data: self::handle(
@@ -202,7 +202,7 @@ class ResponseHelper
         );
     }
 
-    public static function conflict(string $statusMessage, array $errors = null): JsonResponse
+    public static function conflict(string $statusMessage, ?array $errors = null): JsonResponse
     {
         return response()->json(
             data: self::handle(
@@ -213,7 +213,7 @@ class ResponseHelper
         );
     }
 
-    public static function unprocessableEntity(string $statusMessage, array $errors = null): JsonResponse
+    public static function unprocessableEntity(string $statusMessage, ?array $errors = null): JsonResponse
     {
         return response()->json(
             data: self::handle(
@@ -224,7 +224,7 @@ class ResponseHelper
         );
     }
 
-    public static function locked(string $statusMessage, array $errors = null): JsonResponse
+    public static function locked(string $statusMessage, ?array $errors = null): JsonResponse
     {
         return response()->json(
             data: self::handle(
@@ -235,7 +235,7 @@ class ResponseHelper
         );
     }
 
-    public static function failedDependency(string $statusMessage, array $errors = null): JsonResponse
+    public static function failedDependency(string $statusMessage, ?array $errors = null): JsonResponse
     {
         return response()->json(
             data: self::handle(
@@ -250,10 +250,10 @@ class ResponseHelper
      * @param  array|null  $data
      */
     private static function handle(mixed $data = null,
-        array $errors = null,
+        ?array $errors = null,
         int $statusCode = 200,
-        string $statusMessage = null,
-        array $additions = null): array
+        ?string $statusMessage = null,
+        ?array $additions = null): array
     {
         $json = [
             'status' => $statusCode,
@@ -269,8 +269,8 @@ class ResponseHelper
 
     private static function handleMultiStatus(array $responses,
         int $statusCode,
-        string $statusMessage = null,
-        array $additions = null): array
+        ?string $statusMessage = null,
+        ?array $additions = null): array
     {
         $json = [
             'status' => $statusCode,

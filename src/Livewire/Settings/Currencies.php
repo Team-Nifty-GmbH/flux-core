@@ -57,7 +57,7 @@ class Currencies extends CurrencyList
         ];
     }
 
-    public function showEditModal(int $currencyId = null): void
+    public function showEditModal(?int $currencyId = null): void
     {
         if (! $currencyId) {
             $this->selectedCurrency = [];

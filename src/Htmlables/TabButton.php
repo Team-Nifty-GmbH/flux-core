@@ -21,14 +21,14 @@ class TabButton implements Htmlable
         bool $outline = false,
         bool $flat = true,
         bool $full = false,
-        string $color = null,
-        string $size = null,
-        string $label = null,
-        string $icon = null,
-        string $rightIcon = null,
-        string $spinner = null,
-        string $loadingDelay = null,
-        string $href = null,
+        ?string $color = null,
+        ?string $size = null,
+        ?string $label = null,
+        ?string $icon = null,
+        ?string $rightIcon = null,
+        ?string $spinner = null,
+        ?string $loadingDelay = null,
+        ?string $href = null,
         bool $isLivewireComponent = false,
         ?array $attributes = []
     ): static {
@@ -182,28 +182,28 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    public function color(string $color = null): static
+    public function color(?string $color = null): static
     {
         $this->color = $color;
 
         return $this;
     }
 
-    public function size(string $size = null): static
+    public function size(?string $size = null): static
     {
         $this->size = $size;
 
         return $this;
     }
 
-    public function label(string $label = null): static
+    public function label(?string $label = null): static
     {
         $this->label = $label;
 
         return $this;
     }
 
-    public function icon(string $icon = null): static
+    public function icon(?string $icon = null): static
     {
         $this->icon = $icon;
 

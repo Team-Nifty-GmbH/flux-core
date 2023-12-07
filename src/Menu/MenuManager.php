@@ -20,9 +20,9 @@ class MenuManager
      */
     public function register(
         Route $route,
-        string $label = null,
-        string $icon = null,
-        int $order = null): void
+        ?string $label = null,
+        ?string $icon = null,
+        ?int $order = null): void
     {
         $routeName = $route->getName();
 
@@ -68,7 +68,7 @@ class MenuManager
         return $this->sortMultiDimensional($this->menuItems);
     }
 
-    public function forGuard(string $guard, string $group = null, bool $ignorePermissions = false): array
+    public function forGuard(string $guard, ?string $group = null, bool $ignorePermissions = false): array
     {
         $menuItems = $this->sortMultiDimensional(
             $this->menuItems,
@@ -101,7 +101,7 @@ class MenuManager
         return $this->menuItems[$name] ?? null;
     }
 
-    private function sortMultiDimensional(array $array, \Closure $filter = null): array
+    private function sortMultiDimensional(array $array, ?\Closure $filter = null): array
     {
         $array = array_filter($array, $filter);
 

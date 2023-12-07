@@ -59,7 +59,7 @@ class WidgetManager
         return $this->widgets[$name] ?? null;
     }
 
-    public function autoDiscoverWidgets(string $directory = null, string $namespace = null): void
+    public function autoDiscoverWidgets(?string $directory = null, ?string $namespace = null): void
     {
         $componentRegistry = app(ComponentRegistry::class);
         $namespace = $namespace ?: config('livewire.class_namespace') . '\\Widgets';

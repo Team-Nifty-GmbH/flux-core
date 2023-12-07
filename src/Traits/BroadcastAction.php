@@ -20,7 +20,7 @@ trait BroadcastAction
         });
     }
 
-    public function broadcastAction(Channel|HasBroadcastChannel|array $channels = null): ?PendingBroadcast
+    public function broadcastAction(Channel|HasBroadcastChannel|array|null $channels = null): ?PendingBroadcast
     {
         return $this->broadcastIfBroadcastChannelsExists(
             $this->broadcastActionExecuted(), $channels

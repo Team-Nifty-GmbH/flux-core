@@ -44,7 +44,7 @@ class AdditionalColumns extends AdditionalColumnList
         ];
     }
 
-    public function show(AdditionalColumn $record = null): void
+    public function show(?AdditionalColumn $record = null): void
     {
         $this->dispatch('show', $record?->toArray())->to('settings.additional-column-edit');
 

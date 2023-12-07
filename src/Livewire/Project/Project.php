@@ -115,7 +115,7 @@ class Project extends Component
             ->toArray();
     }
 
-    public function loadCategories(int $categoryId = null): array
+    public function loadCategories(?int $categoryId = null): array
     {
         $categories = Category::query()
             ->whereKey($categoryId)
@@ -128,7 +128,7 @@ class Project extends Component
         return $categories[0]['children'] ?? [];
     }
 
-    public function loadProjectTaskCategories(int $projectId = null): array
+    public function loadProjectTaskCategories(?int $projectId = null): array
     {
         $tasks = ProjectTask::query()
             ->where('project_id', $projectId)

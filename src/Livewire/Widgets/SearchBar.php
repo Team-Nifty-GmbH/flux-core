@@ -24,7 +24,7 @@ class SearchBar extends Component
         return view('flux::livewire.widgets.search-bar');
     }
 
-    public function renderSearchBarWidget(string $model = null, int $modelId = null): void
+    public function renderSearchBarWidget(?string $model = null, ?int $modelId = null): void
     {
         if (! is_string($model) || ! is_int($modelId)) {
             $this->skipRender();

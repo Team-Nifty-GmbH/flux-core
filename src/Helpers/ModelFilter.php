@@ -32,12 +32,12 @@ class ModelFilter
     private array $allowedSorts;
 
     public static function filterModel(string $model,
-        array $allowedFilters = null,
-        array $allowedSorts = null,
-        array|string $search = null,
-        array|string $filter = null,
-        array|string $include = null,
-        array|string $sort = null): array
+        ?array $allowedFilters = null,
+        ?array $allowedSorts = null,
+        array|string|null $search = null,
+        array|string|null $filter = null,
+        array|string|null $include = null,
+        array|string|null $sort = null): array
     {
         $modelFilter = ModelFilter::for($model);
 

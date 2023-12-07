@@ -52,7 +52,7 @@ class ActionManager
         return $this->actions->filter(fn ($item) => in_array($model, $item['models']));
     }
 
-    public function autoDiscover(string $directory = null, string $namespace = null): void
+    public function autoDiscover(?string $directory = null, ?string $namespace = null): void
     {
         $namespace = $namespace ?: 'App\\Actions';
         $path = $directory ?: app_path('Actions');

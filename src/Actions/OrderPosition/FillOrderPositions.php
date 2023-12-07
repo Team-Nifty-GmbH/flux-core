@@ -90,7 +90,7 @@ class FillOrderPositions extends FluxAction
         $this->data['order_positions'] = $orderPositions;
     }
 
-    private function validateOrderPosition(array $orderPosition, array $rules, array $parent = null): array
+    private function validateOrderPosition(array $orderPosition, array $rules, ?array $parent = null): array
     {
         $errors = [];
         $validator = Validator::make($orderPosition, $rules);
@@ -334,7 +334,7 @@ class FillOrderPositions extends FluxAction
         return $errors;
     }
 
-    private function fillOrderPosition(array $data, bool $simulate, int $parentId = null): array
+    private function fillOrderPosition(array $data, bool $simulate, ?int $parentId = null): array
     {
         $originalChildren = $data['children'] ?? [];
         unset($data['children']);

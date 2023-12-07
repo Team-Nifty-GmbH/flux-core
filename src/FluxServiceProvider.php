@@ -151,7 +151,7 @@ class FluxServiceProvider extends ServiceProvider
 
         if (! Collection::hasMacro('paginate')) {
             Collection::macro('paginate',
-                function (int $perPage = 25, int $page = null, array $options = [], string $urlParams = null) {
+                function (int $perPage = 25, ?int $page = null, array $options = [], ?string $urlParams = null) {
                     $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
 
                     return (new LengthAwarePaginator(
@@ -161,7 +161,7 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         \Illuminate\Routing\Route::macro('registersMenuItem',
-            function (string $label = null, string $icon = null, int $order = null) {
+            function (?string $label = null, ?string $icon = null, ?int $order = null) {
                 Menu::register(
                     route: $this,
                     label: $label,
@@ -352,7 +352,7 @@ class FluxServiceProvider extends ServiceProvider
         }
     }
 
-    private function getViewClassAliasFromNamespace(string $namespace, string $directoryPath = null): array
+    private function getViewClassAliasFromNamespace(string $namespace, ?string $directoryPath = null): array
     {
         $directoryPath = $directoryPath ?: Str::replace(['\\', 'FluxErp'], ['/', __DIR__], $namespace);
         $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath));

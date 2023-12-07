@@ -71,7 +71,7 @@ trait HasUserModification
         );
     }
 
-    private function activityAttributeQuery(string $event = null): MorphMany
+    private function activityAttributeQuery(?string $event = null): MorphMany
     {
         $query = $this->activities()
             ->where('log_name', 'model_events');

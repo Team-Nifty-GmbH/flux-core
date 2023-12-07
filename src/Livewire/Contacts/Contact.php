@@ -71,7 +71,7 @@ class Contact extends Component
         ]);
     }
 
-    public function mount(int $id = null): void
+    public function mount(?int $id = null): void
     {
         $this->contactId = $id;
         $contact = ContactModel::query()
