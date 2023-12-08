@@ -11,13 +11,9 @@
 @section('first-page-right-block.values')
     @parent
     <div>
-        {{ $model->invoice_date
-        ->locale(app()->getLocale())
-        ->isoFormat('L') }}
+        {{ $model->invoice_date->locale(app()->getLocale())->isoFormat('L') }}
     </div>
     <div>
-        {{ $model->system_delivery_date
-        ->locale(app()->getLocale())
-        ->isoFormat('L') }}
+        {{ $model->system_delivery_date->locale(app()->getLocale())->isoFormat('L') }}
     </div>
 @endsection

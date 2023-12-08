@@ -1,7 +1,6 @@
 # Preparing the class
 
 if you want to make a class printable you have to implement the `OffersPrinting` interface and use the `Printable` trait.
-Add 
 
 ```php
 <?php
@@ -21,7 +20,7 @@ class Order extends Model implements OffersPrinting
     {
         return [
             'my-printable-view' => \App\View\Printing\MyPrintableView::class,
-            'my-other-printable-view' => fn(Order $order => $order->is_locked 
+            'my-other-printable-view' => fn (Order $order => $order->is_locked 
                 ? \App\View\Printing\MyOtherPrintableView::class
                 : null
         ];
@@ -82,7 +81,7 @@ class MyPrintableView extends PrintableView
 Printable views are basically view components that can be rendered as PDFs.
 They should always expect a class that implements the OfferPrinting interface and uses the Printable trait.
 
-The Subject method should return the title of the PDF.
+The `getSubject` method should return the title of the PDF.
 For example the subject for an Invoice would look like this:
 
 ```php
@@ -149,7 +148,7 @@ public function boot()
 }
 ```
 
-if you want to override the default view just use the same name as the default view.
+If you want to override the default view just use the same name as the default view.
 
 ## Conditional views
 
@@ -184,4 +183,4 @@ The blade file will look like this:
 ```
 
 You can use tailwind to design your PDFs.
-Keep in mind that Javascript is not supported PDFs but you can still use it when you want to render your PrintableView as HTML.
+Keep in mind that Javascript is not supported in PDFs, but you can still use it when you want to render your PrintableView as HTML.

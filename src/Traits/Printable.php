@@ -6,14 +6,19 @@ trait Printable
 {
     public static array $registeredPrintViews = [];
 
-    public function print(): \FluxErp\Printing\Printable
-    {
-        return new \FluxErp\Printing\Printable($this);
-    }
-
     public static function registerPrintView(string $name, \Closure|string $viewClass): void
     {
         static::$registeredPrintViews[$name] = $viewClass;
+    }
+
+    public function getPrintViews(): array
+    {
+        return [];
+    }
+
+    public function getAvailableViews(): array
+    {
+        return array_keys(array_merge($this->getPrintViews(), static::$registeredPrintViews));
     }
 
     public function resolvePrintViews(): array
@@ -34,13 +39,8 @@ trait Printable
         return array_filter($printViews);
     }
 
-    public function getAvailableViews(): array
+    public function print(): \FluxErp\Printing\Printable
     {
-        return array_keys(array_merge($this->getPrintViews(), static::$registeredPrintViews));
-    }
-
-    public function getPrintViews(): array
-    {
-        return [];
+        return new \FluxErp\Printing\Printable($this);
     }
 }

@@ -13,9 +13,24 @@ use Illuminate\Http\Response;
 
 class PrintController extends Controller
 {
-    public function __construct()
+    public function getPrintViews(GetPrintViewsRequest $request): JsonResponse
     {
-        parent::__construct();
+        $validated = $request->validated();
+
+        $modelType = $validated['model_type'];
+        if ($validated['model_id'] ?? false) {
+            $views = array_keys(
+                $modelType::query()
+                    ->whereKey($validated['model_id'])
+                    ->first()
+                    ->resolvePrintViews()
+            );
+        } else {
+            $views = (new $modelType())->getAvailableViews();
+        }
+
+        return ResponseHelper::createResponseFromBase(statusCode: 200, data: $views)
+            ->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 
     public function render(PrintingRequest $request): View|Factory|Response
@@ -33,20 +48,5 @@ class PrintController extends Controller
         $data['html'] = false;
 
         return Printing::make($data)->validate()->execute()->streamPDF();
-    }
-
-    public function getPrintViews(GetPrintViewsRequest $request): JsonResponse
-    {
-        $validated = $request->validated();
-
-        $modelType = $validated['model_type'];
-        if ($validated['model_id'] ?? false) {
-            $views = array_keys($modelType::query()->whereKey($validated['model_id'])->first()->resolvePrintViews());
-        } else {
-            $views = (new $modelType())->getAvailableViews();
-        }
-
-        return ResponseHelper::createResponseFromBase(statusCode: 200, data: $views)
-            ->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 }

@@ -30,9 +30,7 @@
                             {{ $model->addressInvoice->contact->customer_number }}
                         </div>
                         <div>
-                            {{ $model->order_date
-                            ->locale(app()->getLocale())
-                            ->isoFormat('L') }}
+                            {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
                         </div>
                         @show
                     </div>
