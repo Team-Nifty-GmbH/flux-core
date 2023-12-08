@@ -28,6 +28,52 @@ class Order extends Model implements OffersPrinting
 }
 ```
 
+## Printable model collections
+
+If you wish to print a list of a specific model you should create a new Collection class for that model.
+
+```php
+<?php
+
+namespace App\Collections;
+
+use FluxErp\Contracts\OffersPrinting;
+use Illuminate\Database\Eloquent\Collection;
+
+class OrderCollection extends Collection implements OffersPrinting
+{
+    use Printable;
+    
+    public function getPrintViews(): array
+    {
+        return [
+            'order-list' => \App\View\Printing\OrderList::class,
+        ];
+    }
+}
+```
+
+You need to tell your model that this class should be used as the collection class.
+
+```php
+
+use App\Collections\OrderCollection;
+
+class Order extends Model implements OffersPrinting
+{
+    use Printable;
+    
+    ...
+    
+    public function newCollection(array $models = []): OrderCollection
+    {
+        return new OrderCollection($models);
+    }
+    
+    ...
+}
+```
+
 # Creating a new Printable View
 
 You can add your own Print views or override the default ones by running the following command:

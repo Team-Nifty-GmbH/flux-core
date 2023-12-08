@@ -10,6 +10,11 @@ use Illuminate\View\FileViewFinder;
 
 class ViewServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        //
+    }
+
     public function boot(): void
     {
         /** use @extendFlux() at the end of the component, not the beginning */

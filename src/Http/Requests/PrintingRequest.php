@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Rules\ClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Traits\Printable;
@@ -13,18 +14,18 @@ class PrintingRequest extends BaseFormRequest
     {
         return [
             'model_type' => [
+                'required',
                 'string',
-                'nullable',
-                new ClassExists(uses: Printable::class, instanceOf: Model::class),
+                new ClassExists(uses: Printable::class, instanceOf: Model::class, implements: OffersPrinting::class),
             ],
             'model_id' => [
-                'required_with:model_type',
+                'required',
                 'integer',
                 new MorphExists(),
             ],
             'view' => 'required|string',
             'html' => 'exclude_if:preview,true|boolean',
-            'preview' => 'exclude_if:html,true|boolean',
+            'preview' => 'boolean',
         ];
     }
 }

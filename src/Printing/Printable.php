@@ -53,7 +53,7 @@ class Printable
         throw new InvalidArgumentException('Method ' . $name . ' doesnt exist');
     }
 
-    public function getViewClass($name)
+    public function getViewClass(string $name): string
     {
         $view = $this->views[$name] ?? null;
 

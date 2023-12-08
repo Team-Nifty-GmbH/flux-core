@@ -39,7 +39,7 @@ class PrintController extends Controller
         $data['html'] = true;
         $data['preview'] = false;
 
-        return Printing::make($data)->validate()->execute();
+        return Printing::make($data)->execute();
     }
 
     public function renderPdf(PrintingRequest $request): Response
@@ -47,6 +47,6 @@ class PrintController extends Controller
         $data = $request->validated();
         $data['html'] = false;
 
-        return Printing::make($data)->validate()->execute()->streamPDF();
+        return Printing::make($data)->execute()->streamPDF();
     }
 }

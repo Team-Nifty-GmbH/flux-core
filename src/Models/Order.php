@@ -2,7 +2,6 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Collections\OrderCollection;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
@@ -374,11 +373,6 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function getAvatarUrl(): ?string
     {
         return $this->contact?->getAvatarUrl() ?: self::icon()->getUrl();
-    }
-
-    public function newCollection(array $models = []): OrderCollection
-    {
-        return new OrderCollection($models);
     }
 
     public function getPrintViews(): array

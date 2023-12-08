@@ -20,7 +20,7 @@ return new class extends Migration
             $table->json('data')->nullable();
             $table->string('view');
             $table->string('template_name')->nullable();
-            $table->string('request_hash')->unique()->index();
+            $table->integer('sort')->nullable();
             $table->boolean('is_public')->default(false);
             $table->boolean('is_template')->default(false);
             $table->timestamps();

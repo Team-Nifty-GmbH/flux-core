@@ -339,8 +339,8 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
 
         //PrintPdf
         Route::post('/print/views', [PrintController::class, 'getPrintViews']);
-        Route::match(['get', 'post'], '/print/render', [PrintController::class, 'render']);
-        Route::match(['get', 'post'], '/print/pdf', [PrintController::class, 'renderPdf']);
+        Route::post('/print/render', [PrintController::class, 'render']);
+        Route::post('/print/pdf', [PrintController::class, 'renderPdf']);
 
         //Products
         Route::get('/products/{id}', [ProductController::class, 'show']);

@@ -23,7 +23,7 @@ class Retoure extends OrderView
         ]);
     }
 
-    public function getFileName(): string
+    public function getSubject(): string
     {
         return __('Retoure') . ' ' . $this->model->order_number;
     }

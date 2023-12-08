@@ -22,27 +22,6 @@
                         {{ $client->phone ?? '' }}
                     </div>
                 </address>
-                <div class="pt-1.5 text-right">
-                    <div class="font-semibold">
-                        {{ $client->bank_name }}
-                    </div>
-                    <div>
-                        {{ $client->bank_iban }}
-                    </div>
-                    <div>
-                        {{ $client->bank_bic }}
-                    </div>
-                    <div>
-                        <a href="mailto:{{ $client->email }}">
-                            {{ $client->email }}
-                        </a>
-                    </div>
-                    <div>
-                        <a href="{{ $client->website }}">
-                            {{ $client->website }}
-                        </a>
-                    </div>
-                </div>
                 <div class="clear-both"></div>
             </div>
         </div>

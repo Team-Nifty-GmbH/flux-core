@@ -24,6 +24,8 @@ abstract class PrintableView extends Component
 {
     public PDF $pdf;
 
+    private ?\Imagick $imagick = null;
+
     abstract public function getModel(): ?Model;
 
     abstract public function getFileName(): string;
@@ -48,37 +50,19 @@ abstract class PrintableView extends Component
 
         $logoCacheKey = 'logo_' . md5(file_get_contents($logo));
         $logoSmallCacheKey = 'logo_' . md5(file_get_contents($logoSmall));
-
         $mimeTypeLogo = File::mimeType($logo);
         $mimeTypeLogoSmall = File::mimeType($logoSmall);
-        $imagick = null;
 
-        if ($mimeTypeLogo === 'image/svg+xml' || $mimeTypeLogoSmall === 'image/svg+xml') {
-            $imagick = new \Imagick();
-            $imagick->setResolution(300, 300);
-
-            if ($mimeTypeLogo === 'image/svg+xml' && ! Cache::driver('file')->has($logoCacheKey)) {
-                $imagick->readImage($logo);
-                $imagick->setImageFormat('png');
-                $imagick->setImageCompressionQuality(100);
-                $logo = $imagick->getImageBlob();
-                Cache::driver('file')->put($logoCacheKey, $logo);
-            } else {
-                $logo = Cache::driver('file')->get($logoCacheKey);
-            }
-
-            if ($mimeTypeLogoSmall === 'image/svg+xml' && ! Cache::driver('file')->has($logoSmallCacheKey)) {
-                $imagick->readImage($logoSmall);
-                $imagick->setImageFormat('png');
-                $imagick->setImageCompressionQuality(100);
-                $logoSmall = $imagick->getImageBlob();
-                Cache::driver('file')->put($logoSmallCacheKey, $logoSmall);
-            } else {
-                $logoSmall = Cache::driver('file')->get($logoSmallCacheKey);
-            }
+        if ($mimeTypeLogo === 'image/svg+xml' && ! Cache::driver('file')->has($logoCacheKey)) {
+            $logo = $this->convertSvg($logo, $logoCacheKey);
         } else {
-            $logo = file_get_contents($logo);
-            $logoSmall = file_get_contents($logoSmall);
+            $logo = Cache::driver('file')->get($logoCacheKey) ?? file_get_contents($logo);
+        }
+
+        if ($mimeTypeLogoSmall === 'image/svg+xml' && ! Cache::driver('file')->has($logoSmallCacheKey)) {
+            $logoSmall = $this->convertSvg($logoSmall, $logoSmallCacheKey);
+        } else {
+            $logoSmall = Cache::driver('file')->get($logoSmallCacheKey) ?? file_get_contents($logoSmall);
         }
 
         $client->logo = 'data:image/' . $mimeTypeLogo . ';base64,' . base64_encode($logo);
@@ -87,14 +71,18 @@ abstract class PrintableView extends Component
         View::share('client', $client);
         View::share('subject', $this->getSubject());
 
-        $imagick?->clear();
-        $imagick?->destroy();
+        $this->imagick?->clear();
+        $this->imagick?->destroy();
     }
 
     public function print(): static
     {
-        $this->beforePrintingEvent();
+        if (method_exists($this, 'beforePrinting')) {
+            $this->beforePrinting();
+        }
+
         $this->hydrateSharedData();
+        File::ensureDirectoryExists(storage_path('fonts'));
 
         $this->pdf = PdfFacade::loadHTML($this->render())
             ->setOption('isFontSubsettingEnabled', true)
@@ -132,9 +120,9 @@ abstract class PrintableView extends Component
             );
         }
 
-        File::ensureDirectoryExists(storage_path('fonts'));
-
-        $this->afterPrintingEvent();
+        if (method_exists($this, 'beforePrinting')) {
+            $this->beforePrinting();
+        }
 
         return $this;
     }
@@ -163,7 +151,9 @@ abstract class PrintableView extends Component
 
     public function attachToModel(): ?Media
     {
-        if (! $this->getModel() instanceof Model || in_array(HasMedia::class, class_uses_recursive($this->getModel()))) {
+        if (! $this->getModel() instanceof Model
+            || in_array(HasMedia::class, class_uses_recursive($this->getModel()))
+        ) {
             return null;
         }
 
@@ -185,17 +175,19 @@ abstract class PrintableView extends Component
             ->execute();
     }
 
-    protected function beforePrintingEvent(): void
+    private function convertSvg(string $path, string $cacheKey): string
     {
-        if (method_exists($this, 'beforePrinting')) {
-            $this->beforePrinting();
+        if (! $this->imagick) {
+            $this->imagick = new \Imagick();
+            $this->imagick->setResolution(300, 300);
         }
-    }
 
-    protected function afterPrintingEvent(): void
-    {
-        if (method_exists($this, 'beforePrinting')) {
-            $this->beforePrinting();
-        }
+        $this->imagick->readImage($path);
+        $this->imagick->setImageFormat('png');
+        $this->imagick->setImageCompressionQuality(100);
+        $logo = $this->imagick->getImageBlob();
+        Cache::driver('file')->put($cacheKey, $logo);
+
+        return $logo;
     }
 }

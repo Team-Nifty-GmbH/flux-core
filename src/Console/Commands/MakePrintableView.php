@@ -53,7 +53,10 @@ class MakePrintableView extends ComponentMakeCommand
         if ($this->option('inline')) {
             return str_replace(
                 ['DummyView', '{{ view }}'],
-                "<<<'blade'\n<x-layouts.print>\n    <div>\n    <!-- " . Inspiring::quotes()->random() . " -->\n</div>\n</x-layouts.print>\nblade",
+                "<<<'blade'\n<x-layouts.print>\n
+    <div>\n    <!-- " . Inspiring::quotes()->random() . " -->\n</div>
+    \n</x-layouts.print>\n
+    blade",
                 parent::buildClass($name)
             );
         }
