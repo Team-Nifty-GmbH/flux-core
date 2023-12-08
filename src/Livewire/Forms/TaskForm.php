@@ -4,10 +4,7 @@ namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\UpdateTask;
-use FluxErp\Models\AdditionalColumn;
-use FluxErp\Models\Task;
 use Illuminate\Support\Arr;
-use Livewire\Component;
 use Livewire\Form;
 
 class TaskForm extends Form
@@ -40,7 +37,7 @@ class TaskForm extends Form
 
     public function save(): void
     {
-        if (!is_null($this->time_budget) && preg_match('/[0-9]*/', $this->time_budget)) {
+        if (! is_null($this->time_budget) && preg_match('/[0-9]*/', $this->time_budget)) {
             $this->time_budget = $this->time_budget . ':00';
         }
 

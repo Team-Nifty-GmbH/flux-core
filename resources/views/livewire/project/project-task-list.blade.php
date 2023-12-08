@@ -3,9 +3,7 @@
     edit: true,
 }">
     <div id="new-task-modal">
-        <x-modal x-on:new-task.window="$wire.resetForm(); open()"
-                 x-on:data-table-row-clicked.window="$wire.fillForm($event.detail.id); open()"
-        >
+        <x-modal name="task-form-modal">
             <x-card>
                 <x-tabs
                     wire:model.live="taskTab"
@@ -32,5 +30,7 @@
             </x-card>
         </x-modal>
     </div>
-    @include('tall-datatables::livewire.data-table')
+    <div wire:ignore x-on:data-table-row-clicked="$wire.fillForm($event.detail.id)">
+        @include('tall-datatables::livewire.data-table')
+    </div>
 </div>

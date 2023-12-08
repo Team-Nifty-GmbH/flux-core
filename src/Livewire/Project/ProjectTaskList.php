@@ -10,11 +10,12 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 use WireUi\Traits\Actions;
 
 class ProjectTaskList extends BaseTaskList
 {
-    use Actions, WithTabs;
+    use Actions, HasEloquentListeners, WithTabs;
 
     protected string $view = 'flux::livewire.project.project-task-list';
 
@@ -26,6 +27,13 @@ class ProjectTaskList extends BaseTaskList
 
     public ?int $projectId;
 
+    public function boot(): void
+    {
+        $this->forceRender = true;
+
+        parent::boot();
+    }
+
     public function mount(): void
     {
         parent::mount();
@@ -36,12 +44,14 @@ class ProjectTaskList extends BaseTaskList
             null
         );
 
-        $this->availableStates = Task::getStatesFor('state')->map(function ($state) {
-            return [
-                'label' => __(ucfirst(str_replace('_', ' ', $state))),
-                'name' => $state,
-            ];
-        })->toArray();
+        $this->availableStates = Task::getStatesFor('state')
+            ->map(function ($state) {
+                return [
+                    'label' => __(ucfirst(str_replace('_', ' ', $state))),
+                    'name' => $state,
+                ];
+            })
+            ->toArray();
     }
 
     public function getTableActions(): array
@@ -51,7 +61,7 @@ class ProjectTaskList extends BaseTaskList
                 ->label(__('New'))
                 ->color('primary')
                 ->attributes([
-                    'x-on:click' => "\$dispatch('new-task')",
+                    'x-on:click' => '$wire.fillForm()',
                 ]),
         ];
     }
@@ -71,16 +81,11 @@ class ProjectTaskList extends BaseTaskList
         ];
     }
 
-    public function resetForm(): void
-    {
-        $this->task->reset();
-        $this->task->project_id = $this->projectId;
-    }
-
     public function fillForm(Task $task): void
     {
+        $task->project_id = $this->projectId;
         $this->task->reset();
-        $this->task->fill($task->toArray());
+        $this->task->fill($task);
         $this->task->users = $task->users()->pluck('users.id')->toArray();
         $this->task->additionalColumns = array_intersect_key(
             $task->toArray(),
@@ -89,6 +94,10 @@ class ProjectTaskList extends BaseTaskList
                 null
             )
         );
+
+        $this->js(<<<'JS'
+            $openModal('task-form-modal');
+        JS);
     }
 
     public function save(): bool

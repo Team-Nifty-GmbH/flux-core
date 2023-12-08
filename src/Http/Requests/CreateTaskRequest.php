@@ -23,7 +23,7 @@ class CreateTaskRequest extends BaseFormRequest
                 'name' => 'required|string',
                 'description' => 'string|nullable',
                 'start_date' => 'date_format:Y-m-d|nullable',
-                'due_date' => 'date_format:Y-m-d|nullable|gte:start_date',
+                'due_date' => 'date_format:Y-m-d|nullable|after_or_equal:start_date',
                 'priority' => 'integer|nullable|min:0',
                 'state' => [
                     'string',
