@@ -2,27 +2,31 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\TimeDuration;
 use FluxErp\States\Project\ProjectState;
-use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Scout\Searchable;
 use Spatie\ModelStates\HasStates;
+use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Project extends Model implements InteractsWithDataTables
 {
-    use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasPackageFactory, HasStates, HasUserModification, HasUuid, SoftDeletes;
+    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
+        HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, Searchable,
+        SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -30,27 +34,19 @@ class Project extends Model implements InteractsWithDataTables
 
     protected $casts = [
         'uuid' => 'string',
-        'is_done' => 'boolean',
         'state' => ProjectState::class,
-    ];
-
-    public array $translatable = [
-        'project_name',
-        'display_name',
-    ];
-
-    public array $filtersExact = [
-        'id',
-        'project_category_template_id',
+        'time_budget' => TimeDuration::class,
     ];
 
     public string $detailRouteName = 'projects.id';
 
-    public string $categoryClass = ProjectTask::class;
-
-    public function category(): BelongsTo
+    protected static function booted(): void
     {
-        return $this->belongsTo(Category::class);
+        static::creating(function (Project $project) {
+            if (! $project->project_number) {
+                $project->getSerialNumber('project_number');
+            }
+        });
     }
 
     public function children(): HasMany
@@ -58,19 +54,34 @@ class Project extends Model implements InteractsWithDataTables
         return $this->hasMany(Project::class, 'parent_id');
     }
 
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class, 'contact_id');
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class, 'order_id');
+    }
+
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'parent_id');
     }
 
+    public function responsibleUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
     public function tasks(): HasMany
     {
-        return $this->hasMany(ProjectTask::class);
+        return $this->hasMany(Task::class);
     }
 
     public function getLabel(): ?string
     {
-        return $this->project_name . ' (' . $this->display_name . ')';
+        return $this->name . ' (' . $this->project_number . ')';
     }
 
     public function getDescription(): ?string
@@ -86,5 +97,13 @@ class Project extends Model implements InteractsWithDataTables
     public function getAvatarUrl(): ?string
     {
         return null;
+    }
+
+    public function calculateProgress(): void
+    {
+        $taskProgress = $this->tasks()->pluck('tasks.progress')->toArray();
+
+        $this->progress = bcdiv(array_sum($taskProgress), count($taskProgress));
+        $this->save();
     }
 }

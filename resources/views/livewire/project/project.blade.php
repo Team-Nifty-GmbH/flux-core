@@ -12,7 +12,7 @@
                     execute: () => {
                         $wire.delete().then((success) => {
                             if (success) {
-                                window.location.href = '{{ route('projects.projects') }}';
+                                window.location.href = '{{ route('projects') }}';
                                 close();
                             }
                         });
@@ -30,16 +30,13 @@
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
         <div class="flex items-center space-x-5">
-            <x-avatar xl :src="$project['avatar_url'] ?? ''"></x-avatar>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
-                        <x-heroicons x-show="project.is_locked" variant="solid" name="lock-closed" />
-                        <x-heroicons x-show="! project.is_locked" variant="solid" name="lock-open" />
                         <div class="pl-2">
-                            <span x-text="project.project_name">
+                            <span x-text="project.project_number">
                             </span>
-                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="project.display_name">
+                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="project.name">
                             </span>
                         </div>
                     </div>
@@ -52,7 +49,7 @@
             </div>
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-            @if(user_can('action.project.delete') && ($project['id'] ?? false))
+            @if(user_can('action.project.delete'))
                 <x-button negative label="{{ __('Delete') }}" x-on:click="deleteProject()"/>
             @endif
             <x-button
@@ -79,7 +76,7 @@
                 spinner
                 x-show="edit"
                 class="w-full"
-                x-on:click="edit = false"
+                x-on:click="edit = false; $wire.resetForm();"
                 :label="__('Cancel')"
             />
         </div>
@@ -87,7 +84,5 @@
     <x-tabs
         wire:model.live="tab"
         :$tabs
-        x-bind:disabled="! project.id"
-        wire:ignore
     />
 </div>

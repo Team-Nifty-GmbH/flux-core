@@ -4,7 +4,6 @@ namespace FluxErp\Actions\Project;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateProjectRequest;
-use FluxErp\Models\Category;
 use FluxErp\Models\Project;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -47,28 +46,6 @@ class CreateProject extends FluxAction
                     'parent_id' => [__('Parent project not found')],
                 ])->errorBag('createProject');
             }
-        }
-
-        $intArray = array_filter($this->data['categories'], function ($value) {
-            return is_int($value) && $value > 0;
-        });
-
-        $categories = Category::query()
-            ->whereKey($this->data['category_id'])
-            ->with('children:id,parent_id')
-            ->first();
-        $categories = array_column(to_flat_tree($categories->children->toArray()), 'id');
-
-        $diff = array_diff($intArray, $categories);
-        if (count($diff) > 0 || count($categories) === 0) {
-            throw ValidationException::withMessages([
-                'categories' => [
-                    __(
-                        'categories \':values\' not found',
-                        ['values' => implode(', ', array_values($diff))]
-                    ),
-                ],
-            ])->errorBag('createProject');
         }
     }
 }

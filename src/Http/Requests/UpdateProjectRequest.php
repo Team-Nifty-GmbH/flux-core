@@ -20,20 +20,33 @@ class UpdateProjectRequest extends BaseFormRequest
             (new Project())->hasAdditionalColumnsValidationRules(),
             [
                 'id' => 'required|integer|exists:projects,id,deleted_at,NULL',
-                'category_id' => [
+                'contact_id' => [
                     'integer',
-                    new ExistsWithIgnore('categories', 'id'),
+                    'nullable',
+                    (new ExistsWithIgnore('contacts', 'id'))->whereNull('deleted_at'),
                 ],
-                'project_name' => 'sometimes|string',
-                'display_name' => 'sometimes|string|nullable',
-                'release_date' => 'sometimes|date_format:Y-m-d',
-                'deadline' => 'sometimes|date_format:Y-m-d|nullable',
-                'description' => 'sometimes|string|nullable',
+                'order_id' => [
+                    'integer',
+                    'nullable',
+                    (new ExistsWithIgnore('orders', 'id'))->whereNull('deleted_at'),
+                ],
+                'responsible_user_id' => [
+                    'integer',
+                    'nullable',
+                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+                ],
+                'project_number' => 'sometimes|required|string',
+                'name' => 'sometimes|required|string',
+                'start_date' => 'date_format:Y-m-d|nullable',
+                'end_date' => 'date_format:Y-m-d|nullable',
+                'description' => 'string|nullable',
                 'state' => [
                     'string',
                     ValidStateRule::make(ProjectState::class),
                 ],
-                'categories' => 'sometimes|required|array',
+                'progress' => 'integer|nullable|min:0|max:100',
+                'time_budget' => 'nullable|regex:/[0-9]*:[0-5][0-9]/',
+                'budget' => 'numeric|nullable|min:0',
             ],
         );
     }
