@@ -5,7 +5,7 @@ namespace FluxErp\Tests\Livewire\Project;
 use FluxErp\Livewire\Project\Project as ProjectView;
 use FluxErp\Models\Category;
 use FluxErp\Models\Project;
-use FluxErp\Models\ProjectTask;
+use FluxErp\Models\Task;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
@@ -20,20 +20,7 @@ class ProjectTest extends BaseSetup
     {
         parent::setUp();
 
-        $category = Category::factory()->create([
-            'model_type' => Project::class,
-        ]);
-
-        $categories = Category::factory()->count(2)->create([
-            'model_type' => ProjectTask::class,
-            'parent_id' => $category->id,
-        ]);
-
-        $this->project = Project::factory()->create([
-            'category_id' => $category->id,
-        ]);
-
-        $this->project->categories()->attach($categories->pluck('id')->toArray());
+        $this->project = Project::factory()->create();
     }
 
     public function test_renders_successfully()

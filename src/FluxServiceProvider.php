@@ -27,7 +27,8 @@ use FluxErp\Models\Category;
 use FluxErp\Models\Order;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
-use FluxErp\Models\ProjectTask;
+use FluxErp\Models\Project;
+use FluxErp\Models\Task;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
@@ -240,33 +241,17 @@ class FluxServiceProvider extends ServiceProvider
         config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
         config([
             'scout.meilisearch.index-settings' => [
-                SerialNumber::class => [
-                    'filterableAttributes' => [
-                        'address_id',
-                    ],
-                ],
-                Permission::class => [
-                    'filterableAttributes' => [
-                        'guard_name',
-                    ],
-                    'sortableAttributes' => [
-                        'name',
-                    ],
-                ],
-                Ticket::class => [
-                    'filterableAttributes' => [
-                        'authenticatable_type',
-                        'authenticatable_id',
-                        'state',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
                 Address::class => [
                     'filterableAttributes' => [
                         'is_main_address',
                         'contact_id',
                     ],
                     'sortableAttributes' => ['*'],
+                ],
+                Category::class => [
+                    'filterableAttributes' => [
+                        'model_type',
+                    ],
                 ],
                 Order::class => [
                     'filterableAttributes' => [
@@ -276,6 +261,14 @@ class FluxServiceProvider extends ServiceProvider
                     ],
                     'sortableAttributes' => ['*'],
                 ],
+                Permission::class => [
+                    'filterableAttributes' => [
+                        'guard_name',
+                    ],
+                    'sortableAttributes' => [
+                        'name',
+                    ],
+                ],
                 Product::class => [
                     'filterableAttributes' => [
                         'is_active',
@@ -283,9 +276,29 @@ class FluxServiceProvider extends ServiceProvider
                     ],
                     'sortableAttributes' => ['*'],
                 ],
-                ProjectTask::class => [
+                Project::class => [
+                    'filterableAttributes' => [
+                        'parent_id',
+                        'state',
+                    ],
+                    'sortableAttributes' => ['*'],
+                ],
+                SerialNumber::class => [
+                    'filterableAttributes' => [
+                        'address_id',
+                    ],
+                ],
+                Task::class => [
                     'filterableAttributes' => [
                         'project_id',
+                        'state',
+                    ],
+                    'sortableAttributes' => ['*'],
+                ],
+                Ticket::class => [
+                    'filterableAttributes' => [
+                        'authenticatable_type',
+                        'authenticatable_id',
                         'state',
                     ],
                     'sortableAttributes' => ['*'],
@@ -295,11 +308,7 @@ class FluxServiceProvider extends ServiceProvider
                         'is_active',
                     ],
                 ],
-                Category::class => [
-                    'filterableAttributes' => [
-                        'model_type',
-                    ],
-                ],
+
             ],
         ]);
 

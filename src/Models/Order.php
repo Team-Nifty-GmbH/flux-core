@@ -43,8 +43,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes, HasPackageFactory,
-        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia,
-        Mailable, Printable, Searchable, SoftDeletes, Trackable;
+        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
+        SoftDeletes, Trackable, Mailable, Printable;
 
     protected $with = [
         'currency',
@@ -98,7 +98,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
     protected static function booted(): void
     {
-        self::saving(function (Order $order) {
+        static::saving(function (Order $order) {
             if ($order->isDirty('address_invoice_id')) {
                 $addressInvoice = $order->addressInvoice()->first();
                 $order->address_invoice = $addressInvoice;

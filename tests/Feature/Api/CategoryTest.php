@@ -9,7 +9,7 @@ use FluxErp\Models\Category;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
-use FluxErp\Models\ProjectTask;
+use FluxErp\Models\Task;
 use FluxErp\Services\CategoryService;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -30,10 +30,10 @@ class CategoryTest extends BaseSetup
     {
         parent::setUp();
 
-        $this->categories[] = Category::factory()->create(['model_type' => ProjectTask::class]);
+        $this->categories[] = Category::factory()->create(['model_type' => Task::class]);
         $this->categories[] = Category::factory()->create([
             'parent_id' => $this->categories[0]->id,
-            'model_type' => ProjectTask::class,
+            'model_type' => Task::class,
         ]);
 
         $this->additionalColumns = AdditionalColumn::query()
@@ -106,7 +106,7 @@ class CategoryTest extends BaseSetup
     {
         $category = [
             'name' => 'Random Category Name',
-            'model_type' => ProjectTask::class,
+            'model_type' => Task::class,
         ];
 
         foreach ($this->additionalColumns as $additionalColumn) {
@@ -136,7 +136,7 @@ class CategoryTest extends BaseSetup
         $category = [
             'parent_id' => $this->categories[0]->id,
             'name' => 'Random Category Name',
-            'model_type' => ProjectTask::class,
+            'model_type' => Task::class,
         ];
 
         foreach ($this->additionalColumns as $additionalColumn) {
@@ -170,7 +170,7 @@ class CategoryTest extends BaseSetup
         $category = [
             'name' => 'Random Category Name',
             $additionalColumn->name => 'Testvalue for this column',
-            'model_type' => ProjectTask::class,
+            'model_type' => Task::class,
         ];
 
         foreach ($this->additionalColumns as $column) {
@@ -209,7 +209,7 @@ class CategoryTest extends BaseSetup
         $category = [
             'name' => 'Random Category Name',
             $additionalColumn->name => $additionalColumn->values[3],
-            'model_type' => ProjectTask::class,
+            'model_type' => Task::class,
         ];
 
         foreach ($this->additionalColumns as $column) {
@@ -314,7 +314,7 @@ class CategoryTest extends BaseSetup
         $category = [
             'parent_id' => ++$this->categories[1]->id,
             'name' => 'Random Category Name',
-            'model_type' => ProjectTask::class,
+            'model_type' => Task::class,
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -539,7 +539,7 @@ class CategoryTest extends BaseSetup
 
     public function test_delete_category_category_belongs_to_project()
     {
-        $category = Category::factory()->create(['model_type' => ProjectTask::class]);
+        $category = Category::factory()->create(['model_type' => Task::class]);
         $project = Project::factory()->create(['category_id' => $category->id]);
         $contact = Contact::factory()->create([
             'client_id' => $this->dbClient->id,
@@ -549,7 +549,7 @@ class CategoryTest extends BaseSetup
             'contact_id' => $contact->id,
             'is_main_address' => false,
         ]);
-        $projectTask = ProjectTask::factory()->create([
+        $projectTask = Task::factory()->create([
             'project_id' => $project->id,
             'address_id' => $address->id,
             'user_id' => $this->user->id,

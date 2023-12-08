@@ -7,7 +7,6 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Livewire\DataTables\CommissionList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
-use FluxErp\Livewire\DataTables\ProjectTasksList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\TransactionList;
@@ -39,6 +38,8 @@ use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Translations;
 use FluxErp\Livewire\Settings\Users;
+use FluxErp\Livewire\Task\Task;
+use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -65,15 +66,6 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
     Route::get('/calendars', Calendar::class)->name('calendars')->registersMenuItem(icon: 'calendar');
     Route::get('/contacts', AddressList::class)->name('contacts')->registersMenuItem(icon: 'identification');
     Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
-    Route::name('projects.')->prefix('projects')
-        ->group(function () {
-            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'briefcase');
-            Route::get('/list', ProjectList::class)->name('projects')->registersMenuItem();
-            Route::get('/project-tasks', ProjectTasksList::class)
-                ->name('project-tasks')
-                ->registersMenuItem(icon: 'briefcase');
-            Route::get('/{id}', Project::class)->name('id');
-        });
 
     Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);
 
@@ -86,8 +78,14 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
             Route::get('/{id}', Order::class)->name('id');
         });
 
+    Route::get('/tasks', TaskList::class)->name('tasks')->registersMenuItem(icon: 'clipboard-document-list');
+    Route::get('/tasks/{id}', Task::class)->name('tasks.id');
     Route::get('/tickets', TicketList::class)->name('tickets')->registersMenuItem(icon: 'wrench-screwdriver');
     Route::get('/tickets/{id}', Ticket::class)->name('tickets.id');
+    Route::get('/projects', ProjectList::class)->name('projects')->registersMenuItem(icon: 'briefcase');
+    Route::get('/projects/{id}', Project::class)->name('projects.id');
+
+    Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);
 
     Route::name('products.')->prefix('products')
         ->group(function () {
@@ -100,7 +98,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
 
     Route::name('accounting.')->prefix('accounting')
         ->group(function () {
-            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'banknotes');
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'square-3-stack-3d');
             Route::get('/work-times', WorkTimeList::class)->name('work-times')->registersMenuItem();
             Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
             Route::get('/transactions', TransactionList::class)->name('transactions')->registersMenuItem();

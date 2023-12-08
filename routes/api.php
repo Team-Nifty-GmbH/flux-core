@@ -46,7 +46,7 @@ use FluxErp\Http\Controllers\ProductOptionController;
 use FluxErp\Http\Controllers\ProductOptionGroupController;
 use FluxErp\Http\Controllers\ProductPropertyController;
 use FluxErp\Http\Controllers\ProjectController;
-use FluxErp\Http\Controllers\ProjectTaskController;
+use FluxErp\Http\Controllers\TaskController;
 use FluxErp\Http\Controllers\RoleController;
 use FluxErp\Http\Controllers\SepaMandateController;
 use FluxErp\Http\Controllers\SerialNumberController;
@@ -254,7 +254,7 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::put('/languages', [LanguageController::class, 'update']);
         Route::delete('/languages/{id}', [LanguageController::class, 'delete']);
 
-        // LedgerAccounts
+        //LedgerAccounts
         Route::get('/ledger-accounts/{id}', [LedgerAccountController::class, 'show']);
         Route::get('/ledger-accounts', [LedgerAccountController::class, 'index']);
         Route::post('/ledger-accounts', [LedgerAccountController::class, 'create']);
@@ -349,7 +349,7 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::put('/products', [ProductController::class, 'update']);
         Route::delete('/products/{id}', [ProductController::class, 'delete']);
 
-        // ProductCrossSellings
+        //ProductCrossSellings
         Route::get('/product-cross-sellings/{id}', [ProductCrossSellingController::class, 'show']);
         Route::get('/product-cross-sellings', [ProductCrossSellingController::class, 'index']);
         Route::post('/product-cross-sellings', [ProductCrossSellingController::class, 'create']);
@@ -376,14 +376,6 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::post('/product-properties/', [ProductPropertyController::class, 'create']);
         Route::put('/product-properties/', [ProductPropertyController::class, 'update']);
         Route::delete('/product-properties/{id}', [ProductPropertyController::class, 'delete']);
-
-        //ProjectTasks
-        Route::get('/projects/tasks/{id}', [ProjectTaskController::class, 'show']);
-        Route::get('/projects/tasks', [ProjectTaskController::class, 'index']);
-        Route::post('/projects/tasks', [ProjectTaskController::class, 'create']);
-        Route::put('/projects/tasks', [ProjectTaskController::class, 'update']);
-        Route::delete('/projects/tasks/{id}', [ProjectTaskController::class, 'delete']);
-        Route::post('/projects/tasks/finish', [ProjectTaskController::class, 'finish']);
 
         //Projects
         Route::get('/projects/{id}', [ProjectController::class, 'show']);
@@ -444,6 +436,14 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::get('/stock-postings', [StockPostingController::class, 'index']);
         Route::post('/stock-postings', [StockPostingController::class, 'create']);
         Route::delete('/stock-postings/{id}', [StockPostingController::class, 'delete']);
+
+        //Tasks
+        Route::get('/tasks/{id}', [TaskController::class, 'show']);
+        Route::get('/tasks', [TaskController::class, 'index']);
+        Route::post('/tasks', [TaskController::class, 'create']);
+        Route::put('/tasks', [TaskController::class, 'update']);
+        Route::delete('/tasks/{id}', [TaskController::class, 'delete']);
+        Route::post('/tasks/finish', [TaskController::class, 'finish']);
 
         //Tickets
         Route::post('/tickets/toggle/', [TicketController::class, 'toggleUserAssignment']);
