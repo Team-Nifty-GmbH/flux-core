@@ -56,6 +56,8 @@ class TaskTest extends BaseSetup
 
     public function test_get_task()
     {
+        $this->tasks[0] = $this->tasks[0]->refresh();
+
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
@@ -71,8 +73,10 @@ class TaskTest extends BaseSetup
         $this->assertEquals($this->tasks[0]->order_position_id, $task->order_position_id);
         $this->assertEquals($this->tasks[0]->name, $task->name);
         $this->assertEquals($this->tasks[0]->description, $task->description);
-        $this->assertEquals($this->tasks[0]->start_date, Carbon::parse($task->start_date)->toDateString());
-        $this->assertEquals($this->tasks[0]->due_date, Carbon::parse($task->due_date)->toDateString());
+        $this->assertEquals($this->tasks[0]->start_date,
+            ! is_null($task->start_date) ? Carbon::parse($task->start_date)->toDateString() : null);
+        $this->assertEquals($this->tasks[0]->due_date,
+            ! is_null($task->due_date) ? Carbon::parse($task->due_date)->toDateString() : null);
         $this->assertEquals($this->tasks[0]->priority, $task->priority);
         $this->assertEquals($this->tasks[0]->state, $task->state);
         $this->assertEquals($this->tasks[0]->progress, $task->progress);
@@ -102,7 +106,6 @@ class TaskTest extends BaseSetup
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
-        $this->assertFalse(property_exists($json, 'templates'));
         $tasks = $json->data->data;
         $referenceTask = Task::query()->first();
         $this->assertNotEmpty($tasks);
@@ -112,8 +115,10 @@ class TaskTest extends BaseSetup
         $this->assertEquals($referenceTask->order_position_id, $tasks[0]->order_position_id);
         $this->assertEquals($referenceTask->name, $tasks[0]->name);
         $this->assertEquals($referenceTask->description, $tasks[0]->description);
-        $this->assertEquals($referenceTask->start_date, Carbon::parse($tasks[0]->start_date)->toDateString());
-        $this->assertEquals($referenceTask->end_date, Carbon::parse($tasks[0]->due_date)->toDateString());
+        $this->assertEquals($referenceTask->start_date,
+            ! is_null($tasks[0]->start_date) ? Carbon::parse($tasks[0]->start_date)->toDateString() : null);
+        $this->assertEquals($referenceTask->due_date,
+            ! is_null($tasks[0]->due_date) ? Carbon::parse($tasks[0]->due_date)->toDateString() : null);
         $this->assertEquals($referenceTask->priority, $tasks[0]->priority);
         $this->assertEquals($referenceTask->state, $tasks[0]->state);
         $this->assertEquals($referenceTask->progress, $tasks[0]->progress);
@@ -156,10 +161,11 @@ class TaskTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/tasks', $task);
         $response->assertStatus(201);
 
-        $task = json_decode($response->getContent())->data;
+        $responseTask = json_decode($response->getContent())->data;
         $dbTask = Task::query()
-            ->whereKey($task->id)
+            ->whereKey($responseTask->id)
             ->first();
+
         $this->assertNotEmpty($dbTask);
         $this->assertEquals($task['project_id'], $dbTask->project_id);
         $this->assertEquals($task['responsible_user_id'], $dbTask->responsible_user_id);
@@ -177,7 +183,7 @@ class TaskTest extends BaseSetup
         $this->assertEquals($task['users'], $dbTask->users()->pluck('users.id')->toArray());
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $this->assertEquals($task[$additionalColumn->name], $task->{$additionalColumn->name});
+            $this->assertEquals($task[$additionalColumn->name], $responseTask->{$additionalColumn->name});
             $this->assertEquals($task[$additionalColumn->name], $dbTask->{$additionalColumn->name});
         }
     }
@@ -265,10 +271,11 @@ class TaskTest extends BaseSetup
         $response = $this->actingAs($this->user)->put('/api/tasks', $task);
         $response->assertStatus(200);
 
-        $task = json_decode($response->getContent())->data;
+        $responseTask = json_decode($response->getContent())->data;
         $dbTask = Task::query()
-            ->whereKey($task->id)
+            ->whereKey($responseTask->id)
             ->first();
+
         $this->assertNotEmpty($dbTask);
         $this->assertEquals($task['id'], $dbTask->id);
         $this->assertEquals($task['project_id'], $dbTask->project_id);
@@ -286,7 +293,7 @@ class TaskTest extends BaseSetup
         $this->assertEquals($task['users'], $dbTask->users()->pluck('users.id')->toArray());
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $this->assertEquals($task[$additionalColumn->name], $task->{$additionalColumn->name});
+            $this->assertEquals($task[$additionalColumn->name], $responseTask->{$additionalColumn->name});
             $this->assertEquals($task[$additionalColumn->name], $dbTask->{$additionalColumn->name});
         }
     }
@@ -338,11 +345,11 @@ class TaskTest extends BaseSetup
         $response = $this->actingAs($this->user)->put('/api/tasks', $tasks);
         $response->assertStatus(200);
 
-        $tasks = collect(json_decode($response->getContent())->responses);
-        $this->assertEquals(2, count($tasks));
+        $responseTasks = collect(json_decode($response->getContent())->responses);
+        $this->assertEquals(2, count($responseTasks));
 
         $dbTasks = Task::query()
-            ->whereIn('id', $tasks->pluck('id')->toArray())
+            ->whereIn('id', $responseTasks->pluck('id')->toArray())
             ->get();
         $this->assertEquals(2, count($dbTasks));
         $this->assertEquals($tasks[0]['id'], $dbTasks[0]->id);
@@ -427,6 +434,7 @@ class TaskTest extends BaseSetup
 
     public function test_update_task_with_project_id()
     {
+        $this->tasks[2] = $this->tasks[2]->refresh();
         $project = Project::factory()->create();
 
         $task = [
@@ -449,9 +457,9 @@ class TaskTest extends BaseSetup
         $response = $this->actingAs($this->user)->put('/api/tasks', $task);
         $response->assertStatus(200);
 
-        $task = json_decode($response->getContent())->data;
+        $responseTask = json_decode($response->getContent())->data;
         $dbTask = Task::query()
-            ->whereKey($task->id)
+            ->whereKey($responseTask->id)
             ->first();
 
         $this->assertNotEmpty($dbTask);
@@ -463,7 +471,7 @@ class TaskTest extends BaseSetup
         $this->assertEquals($task['start_date'], $dbTask->start_date);
         $this->assertEquals($task['due_date'], $dbTask->due_date);
         $this->assertEquals($this->tasks[2]->priority, $dbTask->priority);
-        $this->assertEquals($this->tasks[2]->state, $dbTask->state);
+        $this->assertEquals($this->tasks[2]->state::$name, $dbTask->state::$name);
         $this->assertEquals($this->tasks[2]->progress, $dbTask->progress);
         $this->assertEquals($this->tasks[2]->time_budget, $dbTask->time_budget);
         $this->assertEquals($this->tasks[2]->budget, $dbTask->budget);
@@ -471,7 +479,7 @@ class TaskTest extends BaseSetup
         $this->assertEquals([], $dbTask->users()->pluck('users.id')->toArray());
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $this->assertEquals($task[$additionalColumn->name], $task->{$additionalColumn->name});
+            $this->assertEquals($task[$additionalColumn->name], $responseTask->{$additionalColumn->name});
             $this->assertEquals($task[$additionalColumn->name], $dbTask->{$additionalColumn->name});
         }
     }
@@ -519,10 +527,11 @@ class TaskTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
         $response->assertStatus(200);
 
-        $task = json_decode($response->getContent())->data;
+        $responseTask = json_decode($response->getContent())->data;
         $dbTask = Task::query()
-            ->whereKey($task->id)
+            ->whereKey($responseTask->id)
             ->first();
+
         $this->assertNotEmpty($dbTask);
         $this->assertEquals($task['finish'], $dbTask->is_done);
     }

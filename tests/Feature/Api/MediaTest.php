@@ -26,7 +26,7 @@ class MediaTest extends BaseSetup
 
     private File $file;
 
-    private Model $projectTask;
+    private Model $task;
 
     private array $permissions;
 
@@ -34,18 +34,10 @@ class MediaTest extends BaseSetup
     {
         parent::setUp();
 
-        $projectCategory = Category::factory()->create(['model_type' => Task::class]);
+        $project = Project::factory()->create();
 
-        $project = Project::factory()->create(['category_id' => $projectCategory->id]);
-        $contact = Contact::factory()->create(['client_id' => $this->dbClient->id]);
-        $address = Address::factory()->create(['contact_id' => $contact->id, 'client_id' => $contact->client_id]);
-
-        $this->categories = Category::factory()->create(['model_type' => Task::class]);
-
-        $this->projectTask = Task::factory()->create([
+        $this->task = Task::factory()->create([
             'project_id' => $project->id,
-            'address_id' => $address->id,
-            'user_id' => $this->user->id,
         ]);
         $this->file = UploadedFile::fake()->image('TestFile.png');
 
@@ -58,12 +50,12 @@ class MediaTest extends BaseSetup
         ];
     }
 
-    public function test_upload_media_to_project_task()
+    public function test_upload_media_to_task()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'collection_name' => 'files',
         ];
@@ -74,17 +66,17 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getMedia('files');
+        $uploadedMedia = $this->task->getMedia('files');
         $this->assertNotEmpty($uploadedMedia);
         $this->assertEquals(1, count($uploadedMedia));
     }
 
     public function test_upload_media_public_media()
     {
-        $modelType = 'projectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'collection_name' => 'files',
             'disk' => 'public',
@@ -96,91 +88,18 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getMedia('files');
+        $uploadedMedia = $this->task->getMedia('files');
         $this->assertNotEmpty($uploadedMedia);
         $this->assertEquals(1, count($uploadedMedia));
         $this->assertEquals('public', $uploadedMedia[0]->disk);
     }
 
-    public function test_upload_media_with_custom_property()
-    {
-        Setting::query()
-            ->where(column: 'key', value: 'project_tasks.folders')
-            ->upsert([
-                'uuid' => Uuid::uuid4()->toString(),
-                'key' => 'media_custom_paths',
-                'settings' => json_encode([
-                    (object) [
-                        'model' => 'FluxErp\\Models\\ProjectTask',
-                        'custom_properties' => [
-                            'custom_folder',
-                        ],
-                        'base_path' => 'projects',
-                        'conditional_paths' => [
-                            (object) [
-                                'conditions' => [
-                                    (object) [
-                                        'is_paid' => false,
-                                    ],
-                                ],
-                                'path' => 'project-tasks',
-                            ],
-                            (object) [
-                                'conditions' => [
-                                    (object) [
-                                        'is_paid' => true,
-                                    ],
-                                ],
-                                'path' => 'project-paid-tasks',
-                            ],
-                            (object) [
-                                'conditions' => [
-                                    (object) [
-                                        'custom_folder' => true,
-                                    ],
-                                ],
-                                'path' => 'custom_folder',
-                            ],
-                        ],
-                    ],
-                ]),
-            ], 'key');
-
-        $setting = Setting::query()
-            ->where('key', 'media_custom_paths')
-            ->first();
-
-        $folderName = $setting->settings[0]['custom_properties'][0];
-
-        $media = [
-            'model_type' => class_basename($setting->settings[0]['model']),
-            'model_id' => $this->projectTask->id,
-            'media' => $this->file,
-            'collection_name' => 'files',
-            'custom_properties' => [
-                $folderName => true,
-            ],
-        ];
-
-        $this->user->givePermissionTo($this->permissions['upload']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/media', $media);
-        $response->assertStatus(201);
-
-        $uploadedMedia = $this->projectTask->getMedia('files');
-        $this->assertNotEmpty($uploadedMedia);
-        $this->assertEquals(1, count($uploadedMedia));
-        $customProperties = $uploadedMedia[0]->custom_properties;
-        $this->assertTrue(($customProperties[$folderName] ?? false));
-    }
-
     public function test_upload_media_validation_fails()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'disk' => uniqid(),
         ];
@@ -197,7 +116,7 @@ class MediaTest extends BaseSetup
         $modelType = 'ProjectTak';
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
         ];
 
@@ -213,7 +132,7 @@ class MediaTest extends BaseSetup
         $modelType = 'Media';
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
         ];
 
@@ -226,10 +145,10 @@ class MediaTest extends BaseSetup
 
     public function test_upload_media_file_already_exists()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'is_public' => false,
         ];
@@ -244,12 +163,12 @@ class MediaTest extends BaseSetup
         $reUpload->assertStatus(422);
     }
 
-    public function test_upload_media_project_task_not_found()
+    public function test_upload_media_task_not_found()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => ++$this->projectTask->id,
+            'model_id' => ++$this->task->id,
             'media' => $this->file,
         ];
 
@@ -262,10 +181,10 @@ class MediaTest extends BaseSetup
 
     public function test_upload_media_media_field_missing()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
         ];
 
         $this->user->givePermissionTo($this->permissions['upload']);
@@ -277,10 +196,10 @@ class MediaTest extends BaseSetup
 
     public function test_upload_media_invalid_file()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => ' ',
         ];
 
@@ -293,10 +212,10 @@ class MediaTest extends BaseSetup
 
     public function test_download_media()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'disk' => 'public',
         ];
@@ -308,9 +227,9 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
+        $uploadedMedia = $this->task->getFirstMedia();
 
-        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->projectTask->id;
+        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->id;
         $download = $this->get('/api/media/' . $uploadedMedia->file_name . $queryParams);
         $download->assertStatus(200);
     }
@@ -329,17 +248,17 @@ class MediaTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['download']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $queryParams = '?model_type=notExistingModelType' . Str::random() . '&model_id=' . $this->projectTask->id;
+        $queryParams = '?model_type=notExistingModelType' . Str::random() . '&model_id=' . $this->task->id;
         $response = $this->actingAs($this->user)->get('/api/media/filename' . $queryParams);
         $response->assertStatus(404);
     }
 
     public function test_download_media_thumbnail_not_generated()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
         ];
 
@@ -350,24 +269,24 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
+        $uploadedMedia = $this->task->getFirstMedia();
         Media::query()
             ->whereKey($uploadedMedia->id)
             ->update([
                 'generated_conversions' => [],
             ]);
 
-        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->projectTask->id . '&conversion=thumb';
+        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->id . '&conversion=thumb';
         $download = $this->get('/api/media/' . $uploadedMedia->file_name . $queryParams);
         $download->assertStatus(404);
     }
 
     public function test_download_media_private_media()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
         ];
 
@@ -378,7 +297,7 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
+        $uploadedMedia = $this->task->getFirstMedia();
 
         $download = $this->actingAs($this->user)->get('/api/media/private/' . $uploadedMedia->id);
         $download->assertStatus(200);
@@ -386,10 +305,10 @@ class MediaTest extends BaseSetup
 
     public function test_download_media_file_not_found()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
         ];
 
@@ -400,8 +319,8 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
-        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->projectTask->id;
+        $uploadedMedia = $this->task->getFirstMedia();
+        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->id;
 
         $download = $this->get('/api/media/' . Str::random() . $uploadedMedia->file_name . $queryParams);
         $download->assertStatus(404);
@@ -409,10 +328,10 @@ class MediaTest extends BaseSetup
 
     public function test_download_media_unauthenticated_private_media()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'disk' => 'local',
         ];
@@ -424,8 +343,8 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
-        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->projectTask->id;
+        $uploadedMedia = $this->task->getFirstMedia();
+        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->id;
 
         $download = $this->get('/api/media/' . $uploadedMedia->file_name . $queryParams);
         $download->assertStatus(404);
@@ -433,10 +352,10 @@ class MediaTest extends BaseSetup
 
     public function test_download_private_media_media_not_found()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
         ];
 
@@ -447,7 +366,7 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
+        $uploadedMedia = $this->task->getFirstMedia();
 
         $download = $this->get('/api/media/private/' . ++$uploadedMedia->id);
         $download->assertStatus(404);
@@ -455,10 +374,10 @@ class MediaTest extends BaseSetup
 
     public function test_download_private_media_thumbnail_not_generated()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
         ];
 
@@ -469,7 +388,7 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
+        $uploadedMedia = $this->task->getFirstMedia();
         Media::query()
             ->whereKey($uploadedMedia->id)
             ->update([
@@ -483,14 +402,13 @@ class MediaTest extends BaseSetup
 
     public function test_download_media_with_categories()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'disk' => 'public',
-            'categories' => [
-            ],
+            'categories' => [],
         ];
 
         $this->user->givePermissionTo($this->permissions['upload']);
@@ -500,19 +418,19 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getMedia()[0];
+        $uploadedMedia = $this->task->getMedia()[0];
 
-        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->projectTask->id;
+        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->id;
         $download = $this->get('/api/media/' . $uploadedMedia->file_name . $queryParams);
         $download->assertStatus(200);
     }
 
     public function test_replace_media()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'disk' => 'public',
         ];
@@ -524,7 +442,7 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
+        $uploadedMedia = $this->task->getFirstMedia();
         $file = UploadedFile::fake()->image('NewNotExistingTestFile.png');
 
         $replace = $this->actingAs($this->user)->post('/api/media/' . $uploadedMedia->id, [
@@ -535,10 +453,10 @@ class MediaTest extends BaseSetup
 
     public function test_replace_media_validation_fails()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'disk' => 'public',
         ];
@@ -550,7 +468,7 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
+        $uploadedMedia = $this->task->getFirstMedia();
 
         $replace = $this->actingAs($this->user)->post('/api/media/' . $uploadedMedia->id, [
             'media' => true,
@@ -560,10 +478,10 @@ class MediaTest extends BaseSetup
 
     public function test_replace_media_invalid_file()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'is_public' => true,
         ];
@@ -575,7 +493,7 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getMedia()[0];
+        $uploadedMedia = $this->task->getMedia()[0];
 
         $replace = $this->actingAs($this->user)->post('/api/media/' . $uploadedMedia->id, [
             'media' => false,
@@ -585,10 +503,10 @@ class MediaTest extends BaseSetup
 
     public function test_replace_media_media_not_found()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'disk' => 'public',
         ];
@@ -600,7 +518,7 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
+        $uploadedMedia = $this->task->getFirstMedia();
 
         $replace = $this->actingAs($this->user)->post('/api/media/' . ++$uploadedMedia->id, [
             'media' => $this->file,
@@ -610,10 +528,10 @@ class MediaTest extends BaseSetup
 
     public function test_replace_media_file_name_already_exists()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
         ];
 
@@ -624,7 +542,7 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
+        $uploadedMedia = $this->task->getFirstMedia();
         $file = UploadedFile::fake()->image('Replicate.png');
 
         $replicate = Media::query()->whereKey($uploadedMedia->id)->first()->replicate(['uuid']);
@@ -639,10 +557,10 @@ class MediaTest extends BaseSetup
 
     public function test_update_media()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'is_public' => false,
         ];
@@ -654,7 +572,7 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getMedia()[0];
+        $uploadedMedia = $this->task->getMedia()[0];
 
         $data = [
             'id' => $uploadedMedia->id,
@@ -667,10 +585,10 @@ class MediaTest extends BaseSetup
 
     public function test_update_media_validation_fails()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
             'is_public' => false,
         ];
@@ -682,7 +600,7 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getMedia()[0];
+        $uploadedMedia = $this->task->getMedia()[0];
 
         $data = [
             'id' => ++$uploadedMedia->id,
@@ -694,10 +612,10 @@ class MediaTest extends BaseSetup
 
     public function test_delete_media()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
         ];
 
@@ -710,7 +628,7 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
+        $uploadedMedia = $this->task->getFirstMedia();
 
         $delete = $this->actingAs($this->user)->delete('/api/media/' . $uploadedMedia->id);
         $delete->assertStatus(204);
@@ -727,10 +645,10 @@ class MediaTest extends BaseSetup
 
     public function test_delete_media_media_not_found()
     {
-        $modelType = 'ProjectTask';
+        $modelType = class_basename($this->task);
         $media = [
             'model_type' => $modelType,
-            'model_id' => $this->projectTask->id,
+            'model_id' => $this->task->id,
             'media' => $this->file,
         ];
 
@@ -741,7 +659,7 @@ class MediaTest extends BaseSetup
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(201);
 
-        $uploadedMedia = $this->projectTask->getFirstMedia();
+        $uploadedMedia = $this->task->getFirstMedia();
 
         $delete = $this->actingAs($this->user)->delete('/api/media/' . ++$uploadedMedia->id);
         $delete->assertStatus(404);

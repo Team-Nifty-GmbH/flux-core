@@ -22,9 +22,9 @@ class ProjectForm extends Form
 
     public ?string $name = null;
 
-    public ?Carbon $start_date = null;
+    public ?string $start_date = null;
 
-    public ?Carbon $end_date = null;
+    public ?string $end_date = null;
 
     public ?string $description = null;
 

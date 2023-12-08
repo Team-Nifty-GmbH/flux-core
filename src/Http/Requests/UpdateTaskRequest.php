@@ -34,7 +34,7 @@ class UpdateTaskRequest extends BaseFormRequest
                 'name' => 'sometimes|required|string',
                 'description' => 'string|nullable',
                 'start_date' => 'present|date_format:Y-m-d|nullable',
-                'due_date' => 'present|date_format:Y-m-d|nullable|gte:start_date',
+                'due_date' => 'present|date_format:Y-m-d|nullable|after_or_equal:start_date',
                 'priority' => 'integer|nullable|min:0',
                 'state' => [
                     'string',

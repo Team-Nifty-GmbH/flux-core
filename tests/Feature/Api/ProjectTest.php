@@ -98,6 +98,8 @@ class ProjectTest extends BaseSetup
 
     public function test_get_project()
     {
+        $this->projects[0] = $this->projects[0]->refresh();
+
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
@@ -157,8 +159,8 @@ class ProjectTest extends BaseSetup
         $this->assertEquals($referenceProject->project_number, $projects[0]->project_number);
         $this->assertEquals($referenceProject->name, $projects[0]->name);
         $this->assertEquals(Carbon::parse($referenceProject->start_date)->toDateString(), $projects[0]->start_date);
-        $this->assertEquals($referenceProject->deadline ?
-            Carbon::parse($referenceProject->deadline)->toDateString() : null, $projects[0]->deadline);
+        $this->assertEquals($referenceProject->end_date ?
+            Carbon::parse($referenceProject->end_date)->toDateString() : null, $projects[0]->end_date);
         $this->assertEquals($referenceProject->description, $projects[0]->description);
         $this->assertEquals($referenceProject->state, $projects[0]->state);
         $this->assertEquals($referenceProject->progress, $projects[0]->progress);
@@ -180,7 +182,7 @@ class ProjectTest extends BaseSetup
             'start_date' => date('Y-m-d'),
             'end_date' => date('Y-m-t'),
             'description' => 'New description text for further information',
-            'time_budget' => '06:40',
+            'time_budget' => '6:40',
             'budget' => rand(1, 100000) / 100,
         ];
 
@@ -296,12 +298,11 @@ class ProjectTest extends BaseSetup
             'contact_id' => null,
             'order_id' => null,
             'responsible_user_id' => null,
-            'parent_id' => $this->projects[1]->id,
             'project_number' => Str::random(),
             'name' => Str::random(),
             'start_date' => date('Y-m-d'),
-            'description' => 'New description text for further information',
             'end_date' => null,
+            'description' => 'New description text for further information',
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
@@ -322,8 +323,9 @@ class ProjectTest extends BaseSetup
         $this->assertEquals($project['contact_id'], $dbProject->contact_id);
         $this->assertEquals($project['order_id'], $dbProject->order_id);
         $this->assertEquals($project['responsible_user_id'], $dbProject->responsible_user_id);
-        $this->assertEquals($project['parent_id'], $dbProject->parent_id);
-        $this->assertEquals($project['project_name'], $dbProject->project_name);
+        $this->assertEquals($this->projects[0]->parent_id, $dbProject->parent_id);
+        $this->assertEquals($project['project_number'], $dbProject->project_number);
+        $this->assertEquals($project['name'], $dbProject->name);
         $this->assertEquals($project['start_date'], Carbon::parse($dbProject->start_date)->toDateString());
         $this->assertNull($dbProject->end_date);
         $this->assertEquals($project['description'], $dbProject->description);
@@ -344,12 +346,11 @@ class ProjectTest extends BaseSetup
             'contact_id' => null,
             'order_id' => null,
             'responsible_user_id' => null,
-            'parent_id' => $this->projects[1]->id,
             'project_number' => Str::random(),
             'name' => Str::random(),
             'start_date' => date('Y-m-d'),
-            'description' => 'New description text for further information',
             'end_date' => null,
+            'description' => 'New description text for further information',
             $additionalColumns[0]->name => 'New Value',
             $additionalColumns[1]->name => null,
         ];
@@ -372,8 +373,9 @@ class ProjectTest extends BaseSetup
         $this->assertEquals($project['contact_id'], $dbProject->contact_id);
         $this->assertEquals($project['order_id'], $dbProject->order_id);
         $this->assertEquals($project['responsible_user_id'], $dbProject->responsible_user_id);
-        $this->assertEquals($project['parent_id'], $dbProject->parent_id);
-        $this->assertEquals($project['project_name'], $dbProject->project_name);
+        $this->assertEquals($this->projects[0]->parent_id, $dbProject->parent_id);
+        $this->assertEquals($project['project_number'], $dbProject->project_number);
+        $this->assertEquals($project['name'], $dbProject->name);
         $this->assertEquals($project['start_date'], Carbon::parse($dbProject->start_date)->toDateString());
         $this->assertNull($dbProject->end_date);
         $this->assertEquals($project['description'], $dbProject->description);
@@ -445,21 +447,6 @@ class ProjectTest extends BaseSetup
         $project = [
             'id' => $this->projects[1]->id,
             'responsible_user_id' => ++$this->user->id,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/projects', $project);
-        $response->assertStatus(422);
-    }
-
-    public function test_update_project_parent_project_not_found()
-    {
-        $project = [
-            'id' => $this->projects[1]->id,
-            'parent_id' => ++$this->projects[1]->id,
-            'name' => 'Project Name',
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);

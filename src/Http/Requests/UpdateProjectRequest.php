@@ -30,6 +30,12 @@ class UpdateProjectRequest extends BaseFormRequest
                     'nullable',
                     (new ExistsWithIgnore('orders', 'id'))->whereNull('deleted_at'),
                 ],
+                'responsible_user_id' => [
+                    'integer',
+                    'nullable',
+                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+                ],
+                'project_number' => 'sometimes|required|string',
                 'name' => 'sometimes|required|string',
                 'start_date' => 'date_format:Y-m-d|nullable',
                 'end_date' => 'date_format:Y-m-d|nullable',

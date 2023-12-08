@@ -20,20 +20,7 @@ class ProjectTest extends BaseSetup
     {
         parent::setUp();
 
-        $category = Category::factory()->create([
-            'model_type' => Project::class,
-        ]);
-
-        $categories = Category::factory()->count(2)->create([
-            'model_type' => Task::class,
-            'parent_id' => $category->id,
-        ]);
-
-        $this->project = Project::factory()->create([
-            'category_id' => $category->id,
-        ]);
-
-        $this->project->categories()->attach($categories->pluck('id')->toArray());
+        $this->project = Project::factory()->create();
     }
 
     public function test_renders_successfully()
