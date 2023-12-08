@@ -3,9 +3,7 @@
 namespace FluxErp\Tests\Livewire\Project;
 
 use FluxErp\Livewire\Project\Project as ProjectView;
-use FluxErp\Models\Category;
 use FluxErp\Models\Project;
-use FluxErp\Models\Task;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;

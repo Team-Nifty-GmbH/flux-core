@@ -2,14 +2,10 @@
 
 namespace FluxErp\Tests\Feature\Api;
 
-use FluxErp\Models\Address;
-use FluxErp\Models\Category;
-use FluxErp\Models\Contact;
 use FluxErp\Models\Media;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
 use FluxErp\Models\Task;
-use FluxErp\Models\Setting;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -18,7 +14,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
-use Ramsey\Uuid\Uuid;
 
 class MediaTest extends BaseSetup
 {
