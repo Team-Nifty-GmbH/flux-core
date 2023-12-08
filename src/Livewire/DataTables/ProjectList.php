@@ -22,6 +22,6 @@ class ProjectList extends DataTable
     ];
 
     public array $formatters = [
-        'progress' => 'percentage',
+        'progress' => 'progressPercentage',
     ];
 }

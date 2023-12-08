@@ -6,7 +6,7 @@
     <x-card
         class="space-y-2.5"
         :title="__('General')">
-        <x-project.edit />
+        <x-project.edit :collapsed="true"/>
     </x-card>
     <div>
         <livewire:project.project-task-list

@@ -3,7 +3,7 @@
         <x-modal x-on:create-project.window="$wire.resetForm(); open();">
             <x-card>
                 <div x-data="{edit: true, project: $wire.$entangle('project', false), formatter: @js(\FluxErp\Models\Project::typeScriptAttributes()),}">
-                    <x-project.edit />
+                    <x-project.edit/>
                 </div>
                 <x-slot:footer>
                     <div class="flex justify-end">
@@ -28,5 +28,7 @@
             </x-card>
         </x-modal>
     </div>
-    @include('tall-datatables::livewire.data-table')
+    <div wire:ignore>
+        @include('tall-datatables::livewire.data-table')
+    </div>
 </div>

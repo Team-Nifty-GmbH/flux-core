@@ -8,6 +8,7 @@ use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
@@ -54,6 +55,7 @@ class ProjectTaskList extends BaseTaskList
             ->toArray();
     }
 
+    #[Renderless]
     public function getTableActions(): array
     {
         return [
@@ -66,6 +68,7 @@ class ProjectTaskList extends BaseTaskList
         ];
     }
 
+    #[Renderless]
     public function getTabs(): array
     {
         return [
@@ -83,6 +86,7 @@ class ProjectTaskList extends BaseTaskList
 
     public function fillForm(Task $task): void
     {
+        $this->reset('taskTab');
         $task->project_id = $this->projectId;
         $this->task->reset();
         $this->task->fill($task);
@@ -100,6 +104,7 @@ class ProjectTaskList extends BaseTaskList
         JS);
     }
 
+    #[Renderless]
     public function save(): bool
     {
         try {
