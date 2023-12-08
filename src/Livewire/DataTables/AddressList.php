@@ -13,13 +13,11 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class ContactList extends DataTable
+class AddressList extends DataTable
 {
     protected string $view = 'flux::livewire.contact.contacts';
 
     protected string $model = Address::class;
-
-    public bool $showFilterInputs = true;
 
     public array $enabledCols = [
         'avatar',
@@ -32,14 +30,6 @@ class ContactList extends DataTable
         'zip',
         'city',
     ];
-
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
 
     public array $formatters = [
         'avatar' => 'image',

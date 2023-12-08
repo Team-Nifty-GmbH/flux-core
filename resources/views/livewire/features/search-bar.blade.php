@@ -79,7 +79,8 @@
                 </x-card>
             </div>
         </div>
-        <div class="flex-none" wire:ignore>
+        <div class="flex gap-1.5" wire:ignore>
+            <livewire:work-time />
             <livewire:features.notifications />
         </div>
     </x-card>

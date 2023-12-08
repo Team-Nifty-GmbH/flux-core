@@ -26,12 +26,20 @@ class CreateWorkTimeRequest extends BaseFormRequest
     {
         return [
             'uuid' => 'string|uuid|unique:work_times,uuid',
+            'contact_id' => 'nullable|integer|exists:contacts,id,deleted_at,NULL',
             'user_id' => [
                 'required',
                 'integer',
                 Rule::exists('users', 'id')
                     ->where('is_active', true)
                     ->whereNull('deleted_at'),
+            ],
+            'parent_id' => [
+                'required_if:is_pause,true',
+                'required_if:is_daily_work_time,false',
+                'nullable',
+                'integer',
+                'exists:work_times,id,deleted_at,NULL',
             ],
             'work_time_type_id' => 'nullable|integer|exists:work_time_types,id,deleted_at,NULL',
             'trackable_type' => [
@@ -46,7 +54,10 @@ class CreateWorkTimeRequest extends BaseFormRequest
             ],
             'started_at' => 'required_with:ended_at|nullable|date_format:Y-m-d H:i:s|before:now',
             'ended_at' => 'nullable|date_format:Y-m-d H:i:s|after:started_at',
+            'name' => 'required_unless:is_daily_work_time,true|string|nullable',
             'description' => 'string|nullable',
+            'is_daily_work_time' => 'boolean',
+            'is_locked' => 'boolean',
             'is_pause' => 'boolean',
         ];
     }

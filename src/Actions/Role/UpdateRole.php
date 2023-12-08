@@ -30,7 +30,7 @@ class UpdateRole extends FluxAction
         $role->save();
 
         if ($this->data['permissions'] ?? false) {
-            $role->syncPermissions($this->data['permissions']);
+            $role->syncPermissions(array_map('intval', $this->data['permissions']));
         }
 
         return $role->withoutRelations()->fresh();

@@ -23,14 +23,6 @@ class LogList extends DataTable
 
     public ?bool $isSearchable = true;
 
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
-
     public array $formatters = [
         'message' => 'string',
         'created_at' => 'datetime',

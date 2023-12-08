@@ -10,16 +10,6 @@ class OrderPositionList extends DataTable
 {
     protected string $model = OrderPosition::class;
 
-    public bool $showFilterInputs = true;
-
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
-
     public array $enabledCols = [
         'product_number',
         'order.order_number',

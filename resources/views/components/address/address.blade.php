@@ -1,6 +1,5 @@
 <div class="table w-full table-auto space-y-3 sm:space-y-3" x-ref="address">
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.company') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Company') }}
@@ -11,8 +10,7 @@
                      wire:model="address.company"/>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.salutation') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Salutation') }}
@@ -23,8 +21,7 @@
                      wire:model="address.salutation"></x-input>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.title') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Title') }}
@@ -35,8 +32,7 @@
                      wire:model="address.title"/>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.firstname') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Firstname') }}
@@ -47,8 +43,7 @@
                      wire:model="address.firstname"/>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.lastname') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Lastname') }}
@@ -59,8 +54,7 @@
                      wire:model="address.lastname"/>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.street') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Street') }}
@@ -71,8 +65,7 @@
                      wire:model="address.street"/>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.country_id') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Country') }}
@@ -87,8 +80,7 @@
                       option-value="id"></x-select>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="postal-code"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Zip / City') }}
@@ -106,8 +98,7 @@
             </div>
         </div>
     </div>
-    <div
-            class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.email') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Email') }}
@@ -132,8 +123,7 @@
             </x-input>
         </div>
     </div>
-    <div
-            class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.phone') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Phone') }}
@@ -158,8 +148,7 @@
             </x-input>
         </div>
     </div>
-    <div
-            class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.url') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('URL') }}
@@ -184,8 +173,7 @@
             </x-input>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.language_id') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Language') }}

@@ -8,6 +8,7 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class StockPosting extends Model
 {
@@ -20,4 +21,20 @@ class StockPosting extends Model
     protected $guarded = [
         'id',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (StockPosting $stockPosting) {
+            Cache::lock('stock-posting-' . $stockPosting->warehouse_id . '-' . $stockPosting->product_id, 10)
+                ->block(5, function () use ($stockPosting) {
+                    $latestPosting = StockPosting::query()
+                        ->where('warehouse_id', '=', $stockPosting->warehouse_id)
+                        ->where('product_id', '=', $stockPosting->product_id)
+                        ->latest('id')
+                        ->first();
+
+                    $stockPosting->stock = ($latestPosting->stock ?? 0) + $stockPosting->posting;
+                });
+        });
+    }
 }

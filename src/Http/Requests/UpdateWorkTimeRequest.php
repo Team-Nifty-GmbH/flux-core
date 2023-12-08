@@ -19,6 +19,11 @@ class UpdateWorkTimeRequest extends BaseFormRequest
     {
         return [
             'id' => 'required|integer|exists:work_times,id,deleted_at,NULL',
+            'contact_id' => [
+                'nullable',
+                'integer',
+                (new ExistsWithIgnore('contacts', 'id'))->whereNull('deleted_at'),
+            ],
             'order_position_id' => [
                 'nullable',
                 'integer',
@@ -39,8 +44,10 @@ class UpdateWorkTimeRequest extends BaseFormRequest
                 'integer',
                 new MorphExists('trackable_type'),
             ],
-            'ended_at' => 'sometimes|required|date_format:Y-m-d H:i:s',
+            'ended_at' => 'nullable|date_format:Y-m-d H:i:s',
+            'name' => 'exclude_if:is_daily_work_time,true|string|nullable',
             'description' => 'string|nullable',
+            'is_locked' => 'boolean',
         ];
     }
 }

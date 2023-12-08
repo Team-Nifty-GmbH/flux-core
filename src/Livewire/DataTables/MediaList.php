@@ -16,14 +16,6 @@ class MediaList extends DataTable
         'collection_name',
     ];
 
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
-
     public function itemToArray($item): array
     {
         $item->makeVisible('collection_name');

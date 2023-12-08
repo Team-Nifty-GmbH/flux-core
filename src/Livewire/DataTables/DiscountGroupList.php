@@ -14,14 +14,6 @@ class DiscountGroupList extends DataTable
         'is_active',
     ];
 
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
-
     public function getDiscounts(DiscountGroup $discountGroup): array
     {
         $this->skipRender();
