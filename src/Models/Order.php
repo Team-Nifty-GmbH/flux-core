@@ -43,8 +43,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes, HasPackageFactory,
-        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
-        SoftDeletes, Trackable, Mailable, Printable;
+        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Mailable,
+        Printable, Searchable, SoftDeletes, Trackable;
 
     protected $with = [
         'currency',
