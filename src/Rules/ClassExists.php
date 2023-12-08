@@ -10,7 +10,7 @@ class ClassExists implements InvokableRule
 
     private ?string $instanceOf;
 
-    public function __construct(array|string $uses = [], string $instanceOf = null)
+    public function __construct(array|string $uses = [], ?string $instanceOf = null)
     {
         $this->uses = (array) $uses;
         $this->instanceOf = $instanceOf;

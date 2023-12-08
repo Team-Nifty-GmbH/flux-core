@@ -1,6 +1,5 @@
 <div class="table w-full table-auto space-y-3 sm:space-y-3" x-ref="address">
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.company') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Company') }}
@@ -11,8 +10,7 @@
                      wire:model="address.company"/>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.salutation') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Salutation') }}
@@ -23,8 +21,7 @@
                      wire:model="address.salutation"></x-input>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.title') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Title') }}
@@ -35,8 +32,7 @@
                      wire:model="address.title"/>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.firstname') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Firstname') }}
@@ -47,8 +43,7 @@
                      wire:model="address.firstname"/>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.lastname') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Lastname') }}
@@ -59,8 +54,7 @@
                      wire:model="address.lastname"/>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.street') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Street') }}
@@ -71,8 +65,7 @@
                      wire:model="address.street"/>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.country_id') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Country') }}
@@ -87,8 +80,7 @@
                       option-value="id"></x-select>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="postal-code"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Zip / City') }}
@@ -106,8 +98,82 @@
             </div>
         </div>
     </div>
-    <div
-        class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <label for="{{ md5('address.email') }}"
+               class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
+            {{ __('Email') }}
+        </label>
+        <div class="col-span-2">
+            <x-input x-bind:readonly="!edit"
+                     class="pl-12"
+                     x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
+                     wire:model="address.email">
+                <x-slot:prepend>
+                    <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
+                        <x-button
+                                class="h-full rounded-l-md"
+                                icon="mail"
+                                primary
+                                flat
+                                squared
+                                x-on:click.prevent="window.open('mailto:' + $wire.address.email)"
+                        />
+                    </div>
+                </x-slot:prepend>
+            </x-input>
+        </div>
+    </div>
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <label for="{{ md5('address.phone') }}"
+               class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
+            {{ __('Phone') }}
+        </label>
+        <div class="col-span-2">
+            <x-input x-bind:readonly="!edit"
+                     class="pl-12"
+                     x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
+                     wire:model="address.phone">
+                <x-slot:prepend>
+                    <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
+                        <x-button
+                                class="h-full rounded-l-md"
+                                icon="phone"
+                                primary
+                                flat
+                                squared
+                                x-on:click.prevent="window.open('tel:' + $wire.address.phone)"
+                        />
+                    </div>
+                </x-slot:prepend>
+            </x-input>
+        </div>
+    </div>
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <label for="{{ md5('address.url') }}"
+               class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
+            {{ __('URL') }}
+        </label>
+        <div class="col-span-2">
+            <x-input x-bind:readonly="!edit"
+                     class="pl-12"
+                     x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
+                     wire:model="address.url">
+                <x-slot:prepend>
+                    <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
+                        <x-button
+                                class="h-full rounded-l-md"
+                                icon="globe"
+                                primary
+                                flat
+                                squared
+                                x-on:click.prevent="window.open('//' + $wire.address.url)"
+                        />
+                    </div>
+                </x-slot:prepend>
+            </x-input>
+        </div>
+    </div>
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <label for="{{ md5('address.language_id') }}"
                class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Language') }}
@@ -142,15 +208,6 @@
                             <div class="flex items-center">
                                 <div class="flex items-center pr-1.5 transition-all"  x-bind:class="edit || 'hidden'">
                                     <x-button.circle 2xs negative label="-" x-on:click.prevent="removeContactOption(index, key)"></x-button.circle>
-                                </div>
-                                <div class="pr-1.5">
-                                    <x-checkbox
-                                        x-bind:disabled="!edit"
-                                        x-model="contactOption.is_primary"
-                                        x-on:change="contactOptions = _.each(contactOptions, function (option) {
-                                            option.is_primary = false;
-                                        }); contactOption.is_primary = true"
-                                    />
                                 </div>
                                 <x-input
                                     x-bind:class="! edit && 'border-none bg-transparent shadow-none'"

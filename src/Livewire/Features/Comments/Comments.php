@@ -35,9 +35,6 @@ class Comments extends Component
      */
     public bool $isPublic = false;
 
-    // TODO: refactor to array
-    public Model $record;
-
     public array $stickyComments = [];
 
     public array $comments = [];
@@ -183,7 +180,7 @@ class Comments extends Component
         unset($this->comments['data'][$index]);
     }
 
-    public function loadComments(Model $record = null): void
+    public function loadComments(?Model $record = null): void
     {
         $record = $record ?: $this->modelType::query()
             ->whereKey($this->modelId)
@@ -267,7 +264,7 @@ class Comments extends Component
         }
 
         $this->users = User::query()
-            ->select('id', 'firstname', 'lastname')
+            ->select('id', 'name')
             ->where('is_active', true)
             ->orderBy('firstname')
             ->get()

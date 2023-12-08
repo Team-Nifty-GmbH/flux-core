@@ -64,13 +64,62 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     protected static function booted(): void
     {
         static::saving(function (Address $address) {
-            if ($address->isDirty('lastname') || $address->isDirty('firstname') || $address->isDirty('company')) {
+            if ($address->isDirty('lastname')
+                || $address->isDirty('firstname')
+                || $address->isDirty('company')
+            ) {
                 $name = [
                     $address->company,
                     trim($address->firstname . ' ' . $address->lastname),
                 ];
 
                 $address->name = implode(', ', array_filter($name)) ?: null;
+            }
+        });
+
+        static::saved(function (Address $address) {
+            $contactUpdates = [];
+            $addressesUpdates = [];
+
+            if ($address->isDirty('is_main_address') && $address->is_main_address) {
+                $contactUpdates += [
+                    'main_address_id' => $address->id,
+                ];
+
+                $addressesUpdates += [
+                    'is_main_address' => false,
+                ];
+            }
+
+            if ($address->isDirty('is_invoice_address') && $address->is_invoice_address) {
+                $contactUpdates += [
+                    'invoice_address_id' => $address->id,
+                ];
+
+                $addressesUpdates += [
+                    'is_invoice_address' => false,
+                ];
+            }
+
+            if ($address->isDirty('is_delivery_address') && $address->is_delivery_address) {
+                $contactUpdates += [
+                    'delivery_address_id' => $address->id,
+                ];
+
+                $addressesUpdates += [
+                    'is_delivery_address' => false,
+                ];
+            }
+
+            if ($contactUpdates) {
+                Contact::query()
+                    ->whereKey($address->contact_id)
+                    ->update($contactUpdates);
+
+                Address::query()
+                    ->where('contact_id', $address->contact_id)
+                    ->where('id', '!=', $address->id)
+                    ->update($addressesUpdates);
             }
         });
     }
@@ -84,39 +133,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     {
         return Attribute::set(
             fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
-        );
-    }
-
-    protected function email(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->contactOptions()
-                ->where('type', 'email')
-                ->orderBy('is_primary', 'desc')
-                ->first()
-                ->value ?? null
-        );
-    }
-
-    protected function phone(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->contactOptions()
-                ->where('type', 'phone')
-                ->orderBy('is_primary', 'desc')
-                ->first()
-                ->value ?? null
-        );
-    }
-
-    protected function website(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->contactOptions()
-                ->where('type', 'website')
-                ->orderBy('is_primary', 'desc')
-                ->first()
-                ->value ?? null
         );
     }
 
@@ -234,6 +250,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             $expires
         );
 
-        Mail::to($this->login_name)->queue(new MagicLoginLink($plaintext, $expires));
+        // dont queue mail as the address isnt used as auth in the regular app url
+        Mail::to($this->login_name)->send(new MagicLoginLink($plaintext, $expires));
     }
 }

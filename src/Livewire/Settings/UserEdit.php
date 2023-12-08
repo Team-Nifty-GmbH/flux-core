@@ -91,7 +91,7 @@ class UserEdit extends Component
         return $rules;
     }
 
-    public function show(int $id = null): void
+    public function show(?int $id = null): void
     {
         $user = User::query()
             ->whereKey($id)

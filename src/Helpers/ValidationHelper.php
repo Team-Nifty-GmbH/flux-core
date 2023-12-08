@@ -11,7 +11,7 @@ class ValidationHelper
     public static function validateBulkData(array &$data,
         BaseFormRequest $formRequest,
         $service = null,
-        Model $model = null): array
+        ?Model $model = null): array
     {
         $responses = [];
 

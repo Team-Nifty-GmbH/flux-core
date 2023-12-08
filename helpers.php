@@ -28,7 +28,7 @@ if (! function_exists('model_info_all')) {
 }
 
 if (! function_exists('route_to_permission')) {
-    function route_to_permission(Illuminate\Routing\Route $route = null, bool $checkPermission = true): ?string
+    function route_to_permission(?Illuminate\Routing\Route $route = null, bool $checkPermission = true): ?string
     {
         $route = $route ?: \Illuminate\Support\Facades\Route::current();
 
@@ -122,7 +122,7 @@ if (! function_exists('channel_to_permission')) {
 }
 
 if (! function_exists('qualify_model')) {
-    function qualify_model(string $model = null): ?string
+    function qualify_model(?string $model = null): ?string
     {
         if (
             str_contains($model, '\\')
@@ -185,8 +185,8 @@ if (! function_exists('diff_percentage')) {
 if (! function_exists('event_subscribers')) {
     function event_subscribers(
         string $event,
-        int $modelId = null,
-        string $modelType = null
+        ?int $modelId = null,
+        ?string $modelType = null
     ): Illuminate\Database\Eloquent\Collection {
         if (
             \FluxErp\Models\EventSubscription::query()

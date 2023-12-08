@@ -15,6 +15,10 @@ class LoginLinkController extends Controller
     {
         $login = Cache::pull('login_token_' . $request->token);
 
+        if (! $login) {
+            return view('flux::login-link-failed');
+        }
+
         try {
             Auth::guard($login['guard'])->login($login['user']);
         } catch (\Exception) {

@@ -14,12 +14,4 @@ class CurrencyList extends DataTable
         'iso',
         'symbol',
     ];
-
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
 }

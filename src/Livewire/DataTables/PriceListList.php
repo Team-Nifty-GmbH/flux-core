@@ -15,12 +15,4 @@ class PriceListList extends DataTable
         'is_net',
         'is_default',
     ];
-
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
 }

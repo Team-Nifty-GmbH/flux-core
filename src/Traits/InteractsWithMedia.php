@@ -35,7 +35,7 @@ trait InteractsWithMedia
         return $this->calculateTree($mediaCollections);
     }
 
-    private function calculateTree(array $mediaCollections, string $prefix = null): array
+    private function calculateTree(array $mediaCollections, ?string $prefix = null): array
     {
         $node = [];
         foreach ($mediaCollections as $key => $item) {

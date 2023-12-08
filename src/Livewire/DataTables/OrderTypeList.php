@@ -19,14 +19,6 @@ class OrderTypeList extends DataTable
         'print_layouts',
     ];
 
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
-
     public function getTableActions(): array
     {
         return [

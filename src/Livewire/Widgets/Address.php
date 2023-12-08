@@ -19,8 +19,7 @@ class Address extends Component
                 'contact.media',
                 'contactOptions',
             ])
-            ->first()
-            ->append(['phone', 'email', 'website']);
+            ->first();
 
         $this->address = $address->toArray();
         $this->address['avatar'] = $address->getAvatarUrl();

@@ -146,7 +146,7 @@ class OrderPositions extends OrderPositionList
         );
     }
 
-    public function edit(array $orderPosition, int $index = null): void
+    public function edit(array $orderPosition, ?int $index = null): void
     {
         $this->selectedIndex = $index;
         $this->resetErrorBag();
@@ -242,7 +242,7 @@ class OrderPositions extends OrderPositionList
         return $orderPosition;
     }
 
-    public function updatedProductId(string $id = null): void
+    public function updatedProductId(?string $id = null): void
     {
         if (is_null($id)) {
             return;
@@ -300,7 +300,7 @@ class OrderPositions extends OrderPositionList
         // TODO: Implement addToGroup() method.
     }
 
-    public function remove(array|string $selected = null): void
+    public function remove(array|string|null $selected = null): void
     {
         $ids = $selected ? (array) $selected : $this->selected;
         $this->removeByKey($ids);

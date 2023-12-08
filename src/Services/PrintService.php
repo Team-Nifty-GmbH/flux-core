@@ -17,7 +17,7 @@ class PrintService
     /**
      * Get print layouts and templates for a given path
      */
-    public function getPrintViews(string $namespace = null, string $name = null): array
+    public function getPrintViews(?string $namespace = null, ?string $name = null): array
     {
         $namespace = str_replace('/', '\\', $namespace);
 

@@ -15,6 +15,8 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
 use WireUi\Traits\Actions;
@@ -33,13 +35,8 @@ class Product extends Component
 
     public ?array $currency = null;
 
-    public array $vatRates = [];
-
+    #[Url]
     public string $tab = 'product.general';
-
-    protected $queryString = [
-        'tab' => ['except' => 'product.general'],
-    ];
 
     public function mount(int $id): void
     {
@@ -74,8 +71,6 @@ class Product extends Component
             ];
         });
 
-        $this->vatRates = VatRate::all(['id', 'name', 'rate_percentage'])->toArray();
-
         $this->currency = Currency::query()
             ->where('is_default', true)
             ->first(['id', 'name', 'symbol', 'iso'])
@@ -86,22 +81,23 @@ class Product extends Component
 
     public function render(): View|Factory|Application
     {
-        if ($this->product['children_count']) {
-            // add children tab on third position
-            $tabs = array_merge(
-                array_slice($tabs, 0, 2),
-                ['variants' => __('Variants')],
-                array_slice($tabs, 2)
-            );
-        }
+        return view('flux::livewire.product.product', [
+            'vatRates' => $this->vatRates(),
+        ]);
+    }
 
-        return view('flux::livewire.product.product');
+    #[Computed]
+    public function vatRates(): array
+    {
+        return VatRate::all(['id', 'name', 'rate_percentage'])->toArray();
     }
 
     public function getTabs(): array
     {
         return [
             TabButton::make('product.general')->label(__('General')),
+            TabButton::make('product.variants')->label(__('Variants'))
+                ->when($this->product['children_count'] ?? false),
             TabButton::make('product.prices')->label(__('Prices')),
             TabButton::make('product.stock')->label(__('Stock')),
             TabButton::make('product.media')->label(__('Media')),
@@ -169,9 +165,9 @@ class Product extends Component
                 ->setPriceList($priceList)
                 ->price();
             $priceList->price_net = $price
-                ?->getNet($this->product['vat_rate']['rate_percentage']) ?? null;
+                ?->getNet($this->product['vat_rate']['rate_percentage'] ?? 0);
             $priceList->price_gross = $price
-                ?->getGross($this->product['vat_rate']['rate_percentage']) ?? null;
+                ?->getGross($this->product['vat_rate']['rate_percentage'] ?? 0);
             $priceList->is_editable = is_null($price) || $price?->price_list_id === $priceList->id;
         });
 

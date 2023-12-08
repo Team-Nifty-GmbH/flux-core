@@ -8,14 +8,17 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class WorkTime extends Model
 {
-    use HasPackageFactory, HasUuid, SoftDeletes;
+    use BroadcastsEvents, HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $casts = [
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
+        'is_daily_work_time' => 'boolean',
+        'is_locked' => 'boolean',
         'is_pause' => 'boolean',
     ];
 
@@ -23,9 +26,27 @@ class WorkTime extends Model
         'id',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (WorkTime $workTime) {
+            $workTime->started_at = $workTime->started_at ?? now();
+            $workTime->user_id = $workTime->user_id ?? auth()->id();
+        });
+    }
+
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class);
+    }
+
     public function model(): MorphTo
     {
         return $this->morphTo('trackable');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function workTimeType(): BelongsTo

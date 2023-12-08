@@ -10,19 +10,11 @@ class ProductList extends DataTable
     protected string $model = Product::class;
 
     public array $enabledCols = [
-        'id',
-        'product_image',
-        'product_number',
         'name',
+        'product_number',
+        'is_active',
+        'categories.name',
     ];
-
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
 
     public array $formatters = [
         'product_image' => 'image',
@@ -34,5 +26,14 @@ class ProductList extends DataTable
         $returnArray['product_image'] = $item->getAvatarUrl();
 
         return $returnArray;
+    }
+
+    public function getLeftAppends(): array
+    {
+        return [
+            'name' => [
+                'product_image',
+            ],
+        ];
     }
 }

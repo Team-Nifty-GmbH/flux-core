@@ -56,6 +56,15 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
 
     public static string $iconName = 'square-3-stack-3d';
 
+    protected static function booted(): void
+    {
+        static::creating(function (Product $product) {
+            if (! $product->product_number) {
+                $product->getSerialNumber('product_number');
+            }
+        });
+    }
+
     public function bundleProducts(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'product_bundle_product', 'product_id', 'bundle_product_id')

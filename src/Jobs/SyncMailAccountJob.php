@@ -59,7 +59,7 @@ class SyncMailAccountJob implements ShouldBeUnique, ShouldQueue
         }
     }
 
-    private function createFolder(Folder $folder, int $parentId = null): array
+    private function createFolder(Folder $folder, ?int $parentId = null): array
     {
         $folderIds = [];
         $mailFolder = MailFolder::query()

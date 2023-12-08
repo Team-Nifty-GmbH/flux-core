@@ -14,6 +14,8 @@
                 },
                 uploadCache: null,
                 saveComment: function(content, files, sticky, internal) {
+                    const editor = Alpine.$data(content.querySelector('[x-data]')).editor();
+
                     if (files?.files.length > 0) {
                         this.uploadCache = {
                             content: content,
@@ -37,12 +39,16 @@
                         return;
                     }
 
-                    $wire.saveComment(content.innerHTML, sticky.checked, internal);
+                    $wire.saveComment(editor.getHTML(), sticky.checked, internal);
                     this.uploadCache = null;
-                    content.innerHTML = '';
-                    sticky.checked = false;
-                },
+                    editor.commands.setContent('', false);
 
+                    sticky.checked = false;
+                    $refs.comments.querySelectorAll('.comment-input')
+                        .forEach(function (el) {
+                            el.remove();
+                        });
+                },
                 uploadError: function() {
                     window.$wireui.notify({
                         title: '{{ __('File upload failed') }}',
@@ -54,7 +60,7 @@
         >
             <div class="dark:divide-secondary-700 divide-y divide-gray-200">
                 <template x-ref="textarea">
-                        <x-features.comments.input />
+                    <x-features.comments.input />
                 </template>
                 @if(user_can('action.comment.create') || $this->isPublic === false)
                     <x-features.comments.input />

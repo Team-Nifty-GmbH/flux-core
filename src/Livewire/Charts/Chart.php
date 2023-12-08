@@ -59,6 +59,12 @@ abstract class Chart extends Component
 
     public array $timeFrames;
 
+    public ?string $start = null;
+
+    public ?string $end = null;
+
+    public array $chartTypes = [];
+
     abstract public function calculateChart(): void;
 
     public function mount(): void
@@ -101,11 +107,21 @@ abstract class Chart extends Component
     public function updatedTimeFrame(): void
     {
         $this->calculateChart();
-        $this->js(
-            <<<'JS'
-                Alpine.$data($el.querySelector('[apex_chart]')).updateData();
-            JS
-        );
+        $this->updateData();
+        $this->skipRender();
+    }
+
+    public function updatedStart(): void
+    {
+        $this->calculateChart();
+        $this->updateData();
+        $this->skipRender();
+    }
+
+    public function updatedEnd(): void
+    {
+        $this->calculateChart();
+        $this->updateData();
         $this->skipRender();
     }
 
@@ -117,5 +133,14 @@ abstract class Chart extends Component
             ->get()
             ->pluck('total', 'group_key')
             ->toArray();
+    }
+
+    public function updateData(): void
+    {
+        $this->js(
+            <<<'JS'
+                Alpine.$data($el.querySelector('[apex_chart]')).updateData();
+            JS
+        );
     }
 }

@@ -28,7 +28,7 @@ class PrintDataService
     /**
      * Get print layouts and templates for a given path
      */
-    public function getPrintViews(string $path = null): array
+    public function getPrintViews(?string $path = null): array
     {
         $basePath = resource_path('views/print/' . $path);
 
@@ -497,7 +497,7 @@ class PrintDataService
         );
     }
 
-    private function setSort(Model $printData, bool $sort = true, int $prevSort = null): Model
+    private function setSort(Model $printData, bool $sort = true, ?int $prevSort = null): Model
     {
         if ($printData->model_type === null || $printData->model_id === null) {
             $printData->sort = 1;

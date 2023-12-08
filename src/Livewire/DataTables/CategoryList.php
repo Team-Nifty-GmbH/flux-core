@@ -17,14 +17,6 @@ class CategoryList extends DataTable
         'is_active',
     ];
 
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
-
     public function getBuilder(Builder $builder): Builder
     {
         return $builder->whereNull('parent_id')->with('children');

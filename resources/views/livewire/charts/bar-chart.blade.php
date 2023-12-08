@@ -1,26 +1,28 @@
 @extends('flux::livewire.charts.chart')
 @section('options')
     @parent
-    <x-native-select
-        x-model="chartType"
-        :options="[
-                [
-                    'value' => 'bar',
-                    'label' => __('Bar'),
-                ],
-                [
-                    'value' => 'line',
-                    'label' => __('Line'),
-                ],
-                [
-                    'value' => 'area',
-                    'label' => __('Area'),
-                ],
-            ]"
-        option-value="value"
-        option-label="label"
-    >
-    </x-native-select>
+    @if($chartTypes)
+        <x-native-select
+            x-model="chartType"
+            :options="[
+                    [
+                        'value' => 'bar',
+                        'label' => __('Bar'),
+                    ],
+                    [
+                        'value' => 'line',
+                        'label' => __('Line'),
+                    ],
+                    [
+                        'value' => 'area',
+                        'label' => __('Area'),
+                    ],
+                ]"
+            option-value="value"
+            option-label="label"
+        >
+        </x-native-select>
+    @endif
 @endsection
 @if($showTotals)
     @section('chart')

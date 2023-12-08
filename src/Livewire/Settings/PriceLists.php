@@ -56,7 +56,7 @@ class PriceLists extends Component
             ->toArray();
     }
 
-    public function showEditModal(int $priceListId = null): void
+    public function showEditModal(?int $priceListId = null): void
     {
         $priceList = PriceList::query()
             ->whereKey($priceListId)

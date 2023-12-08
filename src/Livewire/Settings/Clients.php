@@ -62,7 +62,7 @@ class Clients extends ClientList
         ];
     }
 
-    public function show(Client $record = null): void
+    public function show(?Client $record = null): void
     {
         $record->load('bankConnections:id');
         $client = $record->toArray();

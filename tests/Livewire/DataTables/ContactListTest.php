@@ -2,7 +2,7 @@
 
 namespace FluxErp\Tests\Livewire\DataTables;
 
-use FluxErp\Livewire\DataTables\ContactList;
+use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
@@ -13,7 +13,7 @@ class ContactListTest extends BaseSetup
 
     public function test_renders_successfully()
     {
-        Livewire::test(ContactList::class)
+        Livewire::test(AddressList::class)
             ->assertStatus(200);
     }
 }

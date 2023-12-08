@@ -13,12 +13,4 @@ class ProductCrossSellingList extends DataTable
         'name',
         'is_active',
     ];
-
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
 }

@@ -60,7 +60,7 @@ class BankConnections extends BankConnectionList
         ]);
     }
 
-    public function edit(BankConnection $record = null): void
+    public function edit(?BankConnection $record = null): void
     {
         $this->bankConnection->reset();
         $this->bankConnection->fill($record);

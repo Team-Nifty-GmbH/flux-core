@@ -15,14 +15,6 @@ class DiscountList extends DataTable
         'discount',
     ];
 
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
-
     public array $formatters = [
         'discount' => 'percentage',
     ];

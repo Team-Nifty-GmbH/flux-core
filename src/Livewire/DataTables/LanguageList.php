@@ -14,12 +14,4 @@ class LanguageList extends DataTable
         'iso_name',
         'language_code',
     ];
-
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
 }

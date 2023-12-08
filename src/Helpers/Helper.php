@@ -23,7 +23,7 @@ class Helper
     }
 
     public static function classExists(string $classString,
-        string $namespace = null,
+        ?string $namespace = null,
         bool $isModel = false,
         bool $isEvent = false): string|bool
     {

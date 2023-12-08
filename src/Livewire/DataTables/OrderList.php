@@ -9,8 +9,6 @@ class OrderList extends DataTable
 {
     protected string $model = Order::class;
 
-    public bool $showFilterInputs = true;
-
     public array $enabledCols = [
         'order_type.name',
         'order_date',
@@ -22,14 +20,6 @@ class OrderList extends DataTable
         'payment_state',
         'commission',
     ];
-
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
 
     public bool $showModal = false;
 

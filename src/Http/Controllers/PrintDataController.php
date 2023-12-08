@@ -38,7 +38,7 @@ class PrintDataController extends BaseController
         return is_array($response) ? ResponseHelper::createResponseFromArrayResponse($response) : $response;
     }
 
-    public function getPrintViews(string $path = null): JsonResponse
+    public function getPrintViews(?string $path = null): JsonResponse
     {
         $response = $this->printService->getPrintViews($path);
 

@@ -43,7 +43,7 @@ class MakeAction extends GeneratorCommand
             ->replaceClass($stub, $name);
     }
 
-    protected function replaceNameAndDescription(string &$stub, string $name = null, string $description = null): static
+    protected function replaceNameAndDescription(string &$stub, ?string $name = null, ?string $description = null): static
     {
         $searches = [
             ['{{ name }}', '{{ description }}'],

@@ -31,19 +31,7 @@ class TicketList extends DataTable
         'created_at',
     ];
 
-    public bool $showFilterInputs = true;
-
     protected string $model = Ticket::class;
-
-    public bool $isFilterable = true;
-
-    public array $availableRelations = ['*'];
-
-    public array $sortable = ['*'];
-
-    public array $aggregatable = ['*'];
-
-    public array $availableCols = ['*'];
 
     public array $ticket;
 

@@ -6,16 +6,16 @@
         @section('general')
         <x-input x-bind:readonly="!edit" label="{{ __('Product number') }}" wire:model="product.product_number" />
         <x-input x-bind:readonly="!edit" label="{{ __('Name') }}" wire:model="product.name" />
-        <x-textarea x-bind:readonly="!edit" label="{{ __('Description') }}" wire:model="product.description" />
+        <x-editor x-model="edit" wire:model="product.description" :label="__('Description')" />
         @show
     </x-card>
     <x-card class="space-y-2.5" :title="__('Attributes')">
         @section('attributes')
         @section('bools')
-        <x-checkbox x-bind:readonly="!edit" label="{{ __('Is active') }}" wire:model="product.is_active" />
-        <x-checkbox x-bind:readonly="!edit" label="{{ __('Is highlight') }}" wire:model="product.is_highlight" />
-        <x-checkbox x-bind:readonly="!edit" label="{{ __('Is NOS') }}" wire:model="product.is_nos" />
-        <x-checkbox x-bind:readonly="!edit" label="{{ __('Export to Webshop') }}" wire:model="product.is_active_export_to_web_shop" />
+        <x-checkbox x-bind:disabled="!edit" label="{{ __('Is active') }}" wire:model="product.is_active" />
+        <x-checkbox x-bind:disabled="!edit" label="{{ __('Is highlight') }}" wire:model="product.is_highlight" />
+        <x-checkbox x-bind:disabled="!edit" label="{{ __('Is NOS') }}" wire:model="product.is_nos" />
+        <x-checkbox x-bind:disabled="!edit" label="{{ __('Export to Webshop') }}" wire:model="product.is_active_export_to_web_shop" />
         @show
         <x-input x-bind:readonly="!edit" label="{{ __('EAN') }}" wire:model="product.ean" />
         <x-input x-bind:readonly="!edit" label="{{ __('Manufacturer product number') }}" wire:model="product.manufacturer_product_number" />
@@ -24,6 +24,7 @@
     <x-card class="space-y-2.5" :title="__('Assignment')">
         <x-select
             multiselect
+            x-bind:disabled="!edit"
             wire:model="product.categories"
             :label="__('Categories')"
             option-value="id"
@@ -36,6 +37,7 @@
         ></x-select>
         <x-select
             multiselect
+            x-bind:disabled="!edit"
             wire:model="product.tags"
             :label="__('Tags')"
             option-value="description"
@@ -55,7 +57,7 @@
                             x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
                             x-bind:for="additionalColumn.name"
                         />
-                        <x-input x-bind:type="additionalColumn.field_type" x-model="product[additionalColumn.name]" :disabled="true"/>
+                        <x-input x-bind:type="additionalColumn.field_type" x-model="product[additionalColumn.name]" x-bind:readonly="!edit"/>
                     </div>
                 </template>
             </div>
