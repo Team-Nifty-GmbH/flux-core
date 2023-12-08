@@ -4,31 +4,26 @@ namespace FluxErp\Tests\Feature\Api;
 
 use Carbon\Carbon;
 use FluxErp\Models\AdditionalColumn;
-use FluxErp\Models\Address;
-use FluxErp\Models\Category;
-use FluxErp\Models\Contact;
-use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use FluxErp\Models\User;
+use FluxErp\States\Task\Done;
+use FluxErp\States\Task\Open;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class TaskTest extends BaseSetup
 {
     use DatabaseTransactions;
 
-    private Model $address;
-
     private Model $project;
 
-    private Collection $projectCategories;
-
-    private Collection $projectTask;
+    private Collection $tasks;
 
     private Collection $additionalColumns;
 
@@ -37,24 +32,12 @@ class TaskTest extends BaseSetup
     protected function setUp(): void
     {
         parent::setUp();
-        $category = Category::factory()->create(['model_type' => Project::class]);
-        $this->project = Project::factory()->create(['category_id' => $category->id]);
-        $this->projectCategories = Category::factory()
-            ->count(3)
-            ->create([
-                'model_type' => Task::class,
-                'parent_id' => $category->id,
-            ]);
+        $this->project = Project::factory()->create();
 
-        $contact = Contact::factory()->create(['client_id' => $this->dbClient->id]);
-        $this->address = Address::factory()->create(['contact_id' => $contact->id, 'client_id' => $contact->client_id]);
-        $this->projectTask = Task::factory()->count(3)->create([
+        $this->tasks = Task::factory()->count(3)->create([
             'project_id' => $this->project->id,
-            'address_id' => $this->address->id,
-            'user_id' => $this->user->id,
+            'responsible_user_id' => $this->user->id,
         ]);
-
-        $this->project->categories()->attach($this->projectCategories->pluck('id')->toArray());
 
         $this->additionalColumns = AdditionalColumn::query()
             ->where('model_type', Task::class)
@@ -71,41 +54,46 @@ class TaskTest extends BaseSetup
         ];
     }
 
-    public function test_get_project_task()
+    public function test_get_task()
     {
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/tasks/' . $this->projectTask[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/tasks/' . $this->tasks[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
         $task = $json->data;
         $this->assertNotEmpty($task);
-        $this->assertEquals($this->projectTask[0]->id, $task->id);
-        $this->assertEquals($this->projectTask[0]->project_id, $task->project_id);
-        $this->assertEquals($this->projectTask[0]->category_id, $task->category_id);
-        $this->assertEquals($this->projectTask[0]->address_id, $task->address_id);
-        $this->assertEquals($this->projectTask[0]->user_id, $task->user_id);
-        $this->assertEquals($this->projectTask[0]->name, $task->name);
-        $this->assertEquals($this->projectTask[0]->is_paid, $task->is_paid);
-        $this->assertEquals($this->projectTask[0]->is_done, $task->is_done);
-        $this->assertEquals(Carbon::parse($this->projectTask[0]->created_at),
+        $this->assertEquals($this->tasks[0]->id, $task->id);
+        $this->assertEquals($this->tasks[0]->project_id, $task->project_id);
+        $this->assertEquals($this->tasks[0]->responsible_user_id, $task->responsible_user_id);
+        $this->assertEquals($this->tasks[0]->order_position_id, $task->order_position_id);
+        $this->assertEquals($this->tasks[0]->name, $task->name);
+        $this->assertEquals($this->tasks[0]->description, $task->description);
+        $this->assertEquals($this->tasks[0]->start_date, Carbon::parse($task->start_date)->toDateString());
+        $this->assertEquals($this->tasks[0]->due_date, Carbon::parse($task->due_date)->toDateString());
+        $this->assertEquals($this->tasks[0]->priority, $task->priority);
+        $this->assertEquals($this->tasks[0]->state, $task->state);
+        $this->assertEquals($this->tasks[0]->progress, $task->progress);
+        $this->assertEquals($this->tasks[0]->time_budget, $task->time_budget);
+        $this->assertEquals($this->tasks[0]->budget, $task->budget);
+        $this->assertEquals(Carbon::parse($this->tasks[0]->created_at),
             Carbon::parse($task->created_at));
-        $this->assertEquals(Carbon::parse($this->projectTask[0]->updated_at),
+        $this->assertEquals(Carbon::parse($this->tasks[0]->updated_at),
             Carbon::parse($task->updated_at));
     }
 
-    public function test_get_project_task_task_not_found()
+    public function test_get_task_task_not_found()
     {
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/tasks/' . ++$this->projectTask[2]->id);
+        $response = $this->actingAs($this->user)->get('/api/tasks/' . ++$this->tasks[2]->id);
         $response->assertStatus(404);
     }
 
-    public function test_get_project_tasks()
+    public function test_get_tasks()
     {
         $this->user->givePermissionTo($this->permissions['index']);
         Sanctum::actingAs($this->user, ['user']);
@@ -120,30 +108,44 @@ class TaskTest extends BaseSetup
         $this->assertNotEmpty($tasks);
         $this->assertEquals($referenceTask->id, $tasks[0]->id);
         $this->assertEquals($referenceTask->project_id, $tasks[0]->project_id);
-        $this->assertEquals($referenceTask->category_id, $tasks[0]->category_id);
-        $this->assertEquals($referenceTask->address_id, $tasks[0]->address_id);
-        $this->assertEquals($referenceTask->user_id, $tasks[0]->user_id);
+        $this->assertEquals($referenceTask->responsible_user_id, $tasks[0]->responsible_user_id);
+        $this->assertEquals($referenceTask->order_position_id, $tasks[0]->order_position_id);
         $this->assertEquals($referenceTask->name, $tasks[0]->name);
-        $this->assertEquals($referenceTask->is_paid, $tasks[0]->is_paid);
-        $this->assertEquals($referenceTask->is_done, $tasks[0]->is_done);
+        $this->assertEquals($referenceTask->description, $tasks[0]->description);
+        $this->assertEquals($referenceTask->start_date, Carbon::parse($tasks[0]->start_date)->toDateString());
+        $this->assertEquals($referenceTask->end_date, Carbon::parse($tasks[0]->due_date)->toDateString());
+        $this->assertEquals($referenceTask->priority, $tasks[0]->priority);
+        $this->assertEquals($referenceTask->state, $tasks[0]->state);
+        $this->assertEquals($referenceTask->progress, $tasks[0]->progress);
+        $this->assertEquals($referenceTask->time_budget, $tasks[0]->time_budget);
+        $this->assertEquals($referenceTask->budget, $tasks[0]->budget);
         $this->assertEquals(Carbon::parse($referenceTask->created_at),
             Carbon::parse($tasks[0]->created_at));
         $this->assertEquals(Carbon::parse($referenceTask->updated_at),
             Carbon::parse($tasks[0]->updated_at));
     }
 
-    public function test_create_project_task()
+    public function test_create_task()
     {
-        $projectTask = [
+        $users = User::factory()->count(3)->create([
+            'language_id' => $this->user->language_id,
+        ]);
+
+        $task = [
             'project_id' => $this->project->id,
-            'category_id' => $this->projectCategories[0]->id,
-            'address_id' => $this->address->id,
-            'user_id' => $this->user->id,
+            'responsible_user_id' => $this->user->id,
             'name' => 'test',
+            'description' => Str::random(),
+            'start_date' => date('Y-m-d'),
+            'due_date' => date('Y-m-t'),
+            'priority' => rand(0, 5),
+            'time_budget' => '34:56',
+            'budget' => rand(0, 10000) / 100,
+            'users' => $users->pluck('id')->toArray(),
         ];
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
+            $task += [
                 $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
             ];
         }
@@ -151,7 +153,7 @@ class TaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks', $task);
         $response->assertStatus(201);
 
         $task = json_decode($response->getContent())->data;
@@ -159,104 +161,50 @@ class TaskTest extends BaseSetup
             ->whereKey($task->id)
             ->first();
         $this->assertNotEmpty($dbTask);
-        $this->assertEquals($projectTask['project_id'], $dbTask->project_id);
-        $this->assertEquals($projectTask['category_id'], $dbTask->category_id);
-        $this->assertEquals($projectTask['address_id'], $dbTask->address_id);
-        $this->assertEquals($projectTask['user_id'], $dbTask->user_id);
-        $this->assertEquals($projectTask['name'], $dbTask->name);
-        $this->assertFalse($dbTask->is_paid);
+        $this->assertEquals($task['project_id'], $dbTask->project_id);
+        $this->assertEquals($task['responsible_user_id'], $dbTask->responsible_user_id);
+        $this->assertEquals($task['name'], $dbTask->name);
+        $this->assertEquals($task['description'], $dbTask->description);
+        $this->assertEquals($task['start_date'], Carbon::parse($dbTask->start_date)->toDateString());
+        $this->assertEquals($task['due_date'], Carbon::parse($dbTask->due_date)->toDateString());
+        $this->assertEquals($task['priority'], $dbTask->priority);
+        $this->assertEquals(Open::$name, $dbTask->state::$name);
+        $this->assertEquals(0, $dbTask->progress);
+        $this->assertEquals($task['time_budget'], $dbTask->time_budget);
+        $this->assertEquals($task['budget'], $dbTask->budget);
         $this->assertEquals($this->user->id, $dbTask->created_by->id);
         $this->assertEquals($this->user->id, $dbTask->updated_by->id);
+        $this->assertEquals($task['users'], $dbTask->users()->pluck('users.id')->toArray());
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $this->assertEquals($projectTask[$additionalColumn->name], $task->{$additionalColumn->name});
-            $this->assertEquals($projectTask[$additionalColumn->name], $dbTask->{$additionalColumn->name});
+            $this->assertEquals($task[$additionalColumn->name], $task->{$additionalColumn->name});
+            $this->assertEquals($task[$additionalColumn->name], $dbTask->{$additionalColumn->name});
         }
     }
 
-    public function test_create_project_task_with_translation()
+    public function test_create_task_validation_fails()
     {
-        $languageCode = Language::factory()->create(['language_code' => 'te_st'])->language_code;
-
-        $projectTask = [
-            'project_id' => $this->project->id,
-            'category_id' => $this->projectCategories[0]->id,
-            'address_id' => $this->address->id,
-            'user_id' => $this->user->id,
+        $task = [
             'name' => 'test',
-            'locales' => [
-                $languageCode => [
-                    'name' => 'Je parle pas francais',
-                ],
-            ],
-        ];
-
-        foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
-                $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-            ];
-        }
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
-        $response->assertStatus(201);
-
-        $task = json_decode($response->getContent())->data;
-        $dbTask = Task::query()
-            ->whereKey($task->id)
-            ->first();
-        $this->assertNotEmpty($dbTask);
-        $this->assertEquals($projectTask['project_id'], $dbTask->project_id);
-        $this->assertEquals($projectTask['category_id'], $dbTask->category_id);
-        $this->assertEquals($projectTask['address_id'], $dbTask->address_id);
-        $this->assertEquals($projectTask['user_id'], $dbTask->user_id);
-        $this->assertEquals($projectTask['name'], $dbTask->name);
-        $this->assertEquals($projectTask['name'], $dbTask->getTranslation('name', $this->defaultLanguageCode));
-        $this->assertEquals(
-            $projectTask['locales'][$languageCode]['name'],
-            $dbTask->getTranslation('name', $languageCode)
-        );
-        $this->assertFalse($dbTask->is_paid);
-        $this->assertEquals($this->user->id, $dbTask->created_by->id);
-        $this->assertEquals($this->user->id, $dbTask->updated_by->id);
-
-        foreach ($this->additionalColumns as $additionalColumn) {
-            $this->assertEquals($projectTask[$additionalColumn->name], $task->{$additionalColumn->name});
-            $this->assertEquals($projectTask[$additionalColumn->name], $dbTask->{$additionalColumn->name});
-        }
-    }
-
-    public function test_create_project_task_validation_fails()
-    {
-        $projectTask = [
-            'project_id' => $this->project->id,
-            'category_id' => $this->projectCategories[0]->id,
-            'address_id' => '1234S67',
-            'user_id' => $this->user->id,
-            'name' => 'test',
+            'time_budget' => rand(0, 10),
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks', $task);
         $response->assertStatus(422);
     }
 
-    public function test_create_project_task_project_not_found()
+    public function test_create_task_project_not_found()
     {
-        $projectTask = [
+        $task = [
             'project_id' => ++$this->project->id,
-            'category_id' => $this->projectCategories[0]->id,
-            'address_id' => $this->address->id,
-            'user_id' => $this->user->id,
             'name' => 'test',
         ];
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
+            $task += [
                 $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
             ];
         }
@@ -264,24 +212,19 @@ class TaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks', $task);
         $response->assertStatus(422);
     }
 
-    public function test_create_project_task_category_not_found()
+    public function test_create_task_user_not_found()
     {
-        $this->project->categories()->detach($this->projectCategories[1]->id);
-
-        $projectTask = [
-            'project_id' => $this->project->id,
-            'category_id' => $this->projectCategories[1]->id,
-            'address_id' => $this->address->id,
-            'user_id' => $this->user->id,
+        $task = [
+            'responsible_user_id' => ++$this->user->id,
             'name' => 'test',
         ];
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
+            $task += [
                 $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
             ];
         }
@@ -289,69 +232,29 @@ class TaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks', $task);
         $response->assertStatus(422);
     }
 
-    public function test_create_project_task_address_not_found()
+    public function test_update_task()
     {
-        $projectTask = [
-            'project_id' => $this->project->id,
-            'category_id' => $this->projectCategories[0]->id,
-            'address_id' => --$this->address->id,
-            'user_id' => $this->user->id,
-            'name' => 'test',
+        $task = [
+            'id' => $this->tasks[0]->id,
+            'project_id' => null,
+            'responsible_user_id' => null,
+            'name' => Str::random(),
+            'description' => Str::random(),
+            'start_date' => date('Y-m-d'),
+            'due_date' => date('Y-m-t'),
+            'priority' => rand(0, 5),
+            'state' => Done::$name,
+            'time_budget' => '76:54',
+            'budget' => rand(0, 10000) / 100,
+            'users' => [$this->user->id],
         ];
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
-                $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-            ];
-        }
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
-        $response->assertStatus(422);
-    }
-
-    public function test_create_project_task_user_not_found()
-    {
-        $projectTask = [
-            'project_id' => $this->project->id,
-            'category_id' => $this->projectCategories[0]->id,
-            'address_id' => $this->address->id,
-            'user_id' => ++$this->user->id,
-            'name' => 'test',
-        ];
-
-        foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
-                $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-            ];
-        }
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/tasks', $projectTask);
-        $response->assertStatus(422);
-    }
-
-    public function test_update_project_task()
-    {
-        $user = User::factory()->create(['language_id' => $this->user->language_id]);
-        $projectTask = [
-            'id' => $this->projectTask[0]->id,
-            'category_id' => $this->projectCategories[2]->id,
-            'address_id' => $this->address->id,
-            'user_id' => $user->id,
-            'name' => 'test',
-        ];
-
-        foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
+            $task += [
                 $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
             ];
         }
@@ -359,7 +262,7 @@ class TaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $task);
         $response->assertStatus(200);
 
         $task = json_decode($response->getContent())->data;
@@ -367,156 +270,29 @@ class TaskTest extends BaseSetup
             ->whereKey($task->id)
             ->first();
         $this->assertNotEmpty($dbTask);
-        $this->assertEquals($projectTask['id'], $dbTask->id);
-        $this->assertEquals($projectTask['category_id'], $dbTask->category_id);
-        $this->assertEquals($projectTask['address_id'], $dbTask->address_id);
-        $this->assertEquals($projectTask['user_id'], $dbTask->user_id);
-        $this->assertEquals($projectTask['name'], $dbTask->name);
+        $this->assertEquals($task['id'], $dbTask->id);
+        $this->assertEquals($task['project_id'], $dbTask->project_id);
+        $this->assertEquals($task['responsible_user_id'], $dbTask->responsible_user_id);
+        $this->assertEquals($task['name'], $dbTask->name);
+        $this->assertEquals($task['description'], $dbTask->description);
+        $this->assertEquals($task['start_date'], Carbon::parse($dbTask->start_date)->toDateString());
+        $this->assertEquals($task['due_date'], Carbon::parse($dbTask->due_date)->toDateString());
+        $this->assertEquals($task['priority'], $dbTask->priority);
+        $this->assertEquals($task['state'], $dbTask->state::$name);
+        $this->assertEquals(1, $dbTask->progress);
+        $this->assertEquals($task['time_budget'], $dbTask->time_budget);
+        $this->assertEquals($task['budget'], $dbTask->budget);
         $this->assertEquals($this->user->id, $dbTask->updated_by->id);
+        $this->assertEquals($task['users'], $dbTask->users()->pluck('users.id')->toArray());
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $this->assertEquals($projectTask[$additionalColumn->name], $task->{$additionalColumn->name});
-            $this->assertEquals($projectTask[$additionalColumn->name], $dbTask->{$additionalColumn->name});
+            $this->assertEquals($task[$additionalColumn->name], $task->{$additionalColumn->name});
+            $this->assertEquals($task[$additionalColumn->name], $dbTask->{$additionalColumn->name});
         }
     }
 
-    public function test_update_project_task_with_translation()
+    public function test_bulk_update_tasks_with_additional_columns()
     {
-        $user = User::factory()->create(['language_id' => $this->user->language_id]);
-        $languageCode = Language::factory()->create()->language_code;
-
-        $projectTask = [
-            'id' => $this->projectTask[0]->id,
-            'category_id' => $this->projectCategories[2]->id,
-            'address_id' => $this->address->id,
-            'user_id' => $user->id,
-            'name' => 'test',
-            'locales' => [
-                $languageCode => [
-                    'name' => 'Je parle pas francais',
-                ],
-            ],
-        ];
-
-        foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
-                $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-            ];
-        }
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
-        $response->assertStatus(200);
-
-        $tasks = json_decode($response->getContent())->data;
-        $dbTask = Task::query()
-            ->whereKey($tasks->id)
-            ->first();
-        $this->assertNotEmpty($dbTask);
-        $this->assertEquals($projectTask['id'], $dbTask->id);
-        $this->assertEquals($projectTask['category_id'], $dbTask->category_id);
-        $this->assertEquals($projectTask['address_id'], $dbTask->address_id);
-        $this->assertEquals($projectTask['user_id'], $dbTask->user_id);
-        $this->assertEquals($projectTask['name'], $dbTask->name);
-        $this->assertEquals($projectTask['name'], $dbTask->getTranslation('name', $this->defaultLanguageCode));
-        $this->assertEquals(
-            $projectTask['locales'][$languageCode]['name'],
-            $dbTask->getTranslation('name', $languageCode)
-        );
-        $this->assertEquals($this->user->id, $dbTask->updated_by->id);
-
-        foreach ($this->additionalColumns as $additionalColumn) {
-            $this->assertEquals($projectTask[$additionalColumn->name], $dbTask->{$additionalColumn->name});
-        }
-    }
-
-    public function test_bulk_update_project_task_with_translation()
-    {
-        $user = User::factory()->create(['language_id' => $this->user->language_id]);
-        $languageCode = Language::factory()->create()->language_code;
-
-        $projectTasks = [
-            [
-                'id' => $this->projectTask[0]->id,
-                'category_id' => $this->projectCategories[2]->id,
-                'address_id' => $this->address->id,
-                'user_id' => $user->id,
-                'name' => 'test',
-                'locales' => [
-                    $languageCode => [
-                        'name' => 'Je parle pas francais',
-                    ],
-                ],
-            ],
-            [
-                'id' => $this->projectTask[1]->id,
-                'category_id' => $this->projectCategories[1]->id,
-                'address_id' => $this->address->id,
-                'user_id' => $user->id,
-                'name' => 'test',
-                'locales' => [
-                    $languageCode => [
-                        'name' => 'Another cool language',
-                    ],
-                ],
-            ],
-        ];
-
-        foreach ($projectTasks as $key => $projectTask) {
-            foreach ($this->additionalColumns as $additionalColumn) {
-                $projectTasks[$key] += [
-                    $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-                ];
-            }
-        }
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTasks);
-        $response->assertStatus(200);
-
-        $tasks = collect(json_decode($response->getContent())->responses);
-        $this->assertEquals(2, count($tasks));
-
-        $dbTasks = Task::query()
-            ->whereIn('id', $tasks->pluck('id')->toArray())
-            ->get();
-        $this->assertEquals(2, count($dbTasks));
-        $this->assertEquals($projectTasks[0]['id'], $dbTasks[0]->id);
-        $this->assertEquals($projectTasks[0]['category_id'], $dbTasks[0]->category_id);
-        $this->assertEquals($projectTasks[0]['address_id'], $dbTasks[0]->address_id);
-        $this->assertEquals($projectTasks[0]['user_id'], $dbTasks[0]->user_id);
-        $this->assertEquals($projectTasks[0]['name'], $dbTasks[0]->name);
-        $this->assertEquals($projectTasks[0]['name'], $dbTasks[0]->getTranslation('name', $this->defaultLanguageCode));
-        $this->assertEquals(
-            $projectTasks[0]['locales'][$languageCode]['name'],
-            $dbTasks[0]->getTranslation('name', $languageCode)
-        );
-
-        $this->assertEquals($projectTasks[1]['id'], $dbTasks[1]->id);
-        $this->assertEquals($projectTasks[1]['category_id'], $dbTasks[1]->category_id);
-        $this->assertEquals($projectTasks[1]['address_id'], $dbTasks[1]->address_id);
-        $this->assertEquals($projectTasks[1]['user_id'], $dbTasks[1]->user_id);
-        $this->assertEquals($projectTasks[1]['name'], $dbTasks[1]->name);
-        $this->assertEquals($projectTasks[1]['name'], $dbTasks[1]->getTranslation('name', $this->defaultLanguageCode));
-        $this->assertEquals(
-            $projectTasks[1]['locales'][$languageCode]['name'],
-            $dbTasks[1]->getTranslation('name', $languageCode)
-        );
-        $this->assertEquals($this->user->id, $dbTasks[1]->updated_by->id);
-
-        foreach ($this->additionalColumns as $additionalColumn) {
-            $this->assertEquals($projectTasks[0][$additionalColumn->name], $dbTasks[0]->{$additionalColumn->name});
-            $this->assertEquals($projectTasks[1][$additionalColumn->name], $dbTasks[1]->{$additionalColumn->name});
-        }
-    }
-
-    public function test_bulk_update_project_tasks_with_additional_columns()
-    {
-        $user = User::factory()->create(['language_id' => $this->user->language_id]);
         $additionalColumns[] = AdditionalColumn::factory()->create([
             'model_type' => Task::class,
         ]);
@@ -525,20 +301,22 @@ class TaskTest extends BaseSetup
             'values' => ['a', 'b', 'c'],
         ]);
 
-        $projectTasks = [
+        $tasks = [
             [
-                'id' => $this->projectTask[0]->id,
-                'category_id' => $this->projectCategories[2]->id,
-                'address_id' => $this->address->id,
-                'user_id' => $user->id,
+                'id' => $this->tasks[0]->id,
+                'project_id' => null,
                 'name' => 'test',
+                'description' => Str::random(),
+                'start_date' => $this->tasks[0]->start_date,
+                'due_date' => $this->tasks[0]->due_date,
             ],
             [
-                'id' => $this->projectTask[1]->id,
-                'category_id' => $this->projectCategories[1]->id,
-                'address_id' => $this->address->id,
-                'user_id' => $user->id,
+                'id' => $this->tasks[1]->id,
+                'project_id' => null,
                 'name' => 'test',
+                'description' => Str::random(),
+                'start_date' => $this->tasks[1]->start_date,
+                'due_date' => $this->tasks[1]->due_date,
             ],
         ];
 
@@ -546,9 +324,9 @@ class TaskTest extends BaseSetup
             ->where('model_type', Task::class)
             ->get();
 
-        foreach ($projectTasks as $key => $projectTask) {
+        foreach ($tasks as $key => $task) {
             foreach ($this->additionalColumns as $additionalColumn) {
-                $projectTasks[$key] += [
+                $tasks[$key] += [
                     $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
                 ];
             }
@@ -557,7 +335,7 @@ class TaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTasks);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $tasks);
         $response->assertStatus(200);
 
         $tasks = collect(json_decode($response->getContent())->responses);
@@ -567,102 +345,52 @@ class TaskTest extends BaseSetup
             ->whereIn('id', $tasks->pluck('id')->toArray())
             ->get();
         $this->assertEquals(2, count($dbTasks));
-        $this->assertEquals($projectTasks[0]['id'], $dbTasks[0]->id);
-        $this->assertEquals($projectTasks[0]['category_id'], $dbTasks[0]->category_id);
-        $this->assertEquals($projectTasks[0]['address_id'], $dbTasks[0]->address_id);
-        $this->assertEquals($projectTasks[0]['user_id'], $dbTasks[0]->user_id);
-        $this->assertEquals($projectTasks[0]['name'], $dbTasks[0]->name);
+        $this->assertEquals($tasks[0]['id'], $dbTasks[0]->id);
+        $this->assertEquals($tasks[0]['project_id'], $dbTasks[0]->project_id);
+        $this->assertEquals($tasks[0]['name'], $dbTasks[0]->name);
+        $this->assertEquals($tasks[0]['description'], $dbTasks[0]->description);
         $this->assertEquals($this->user->id, $dbTasks[0]->updated_by->id);
 
-        $this->assertEquals($projectTasks[1]['id'], $dbTasks[1]->id);
-        $this->assertEquals($projectTasks[1]['category_id'], $dbTasks[1]->category_id);
-        $this->assertEquals($projectTasks[1]['address_id'], $dbTasks[1]->address_id);
-        $this->assertEquals($projectTasks[1]['user_id'], $dbTasks[1]->user_id);
-        $this->assertEquals($projectTasks[1]['name'], $dbTasks[1]->name);
+        $this->assertEquals($tasks[1]['id'], $dbTasks[1]->id);
+        $this->assertEquals($tasks[1]['project_id'], $dbTasks[1]->project_id);
+        $this->assertEquals($tasks[1]['name'], $dbTasks[1]->name);
+        $this->assertEquals($tasks[1]['description'], $dbTasks[1]->description);
         $this->assertEquals($this->user->id, $dbTasks[1]->updated_by->id);
 
-        $this->assertEquals($projectTasks[0][$additionalColumns[0]->name], $dbTasks[0]->{$additionalColumns[0]->name});
-        $this->assertEquals($projectTasks[0][$additionalColumns[1]->name], $dbTasks[0]->{$additionalColumns[1]->name});
-        $this->assertEquals($projectTasks[1][$additionalColumns[0]->name], $dbTasks[1]->{$additionalColumns[0]->name});
-        $this->assertEquals($projectTasks[1][$additionalColumns[1]->name], $dbTasks[1]->{$additionalColumns[1]->name});
+        $this->assertEquals($tasks[0][$additionalColumns[0]->name], $dbTasks[0]->{$additionalColumns[0]->name});
+        $this->assertEquals($tasks[0][$additionalColumns[1]->name], $dbTasks[0]->{$additionalColumns[1]->name});
+        $this->assertEquals($tasks[1][$additionalColumns[0]->name], $dbTasks[1]->{$additionalColumns[0]->name});
+        $this->assertEquals($tasks[1][$additionalColumns[1]->name], $dbTasks[1]->{$additionalColumns[1]->name});
     }
 
-    public function test_update_project_task_validation_fails()
+    public function test_update_task_validation_fails()
     {
-        $projectTask = [
-            'id' => $this->projectTask[0]->id,
-            'category_id' => $this->projectCategories[2]->id,
-            'address_id' => $this->address->id,
-            'user_id' => '23A859',
+        $task = [
+            'id' => $this->tasks[0]->id,
             'name' => 'test',
+            'state' => Str::random(),
+            'start_date' => null,
+            'due_date' => null,
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $task);
         $response->assertStatus(422);
     }
 
-    public function test_bulk_update_project_task_translation_validation_fails()
+    public function test_update_task_task_not_found()
     {
-        $languageCode = Language::factory()->create()->language_code;
-
-        $projectTasks = [
-            [
-                'id' => $this->projectTask[0]->id,
-                'category_id' => $this->projectCategories[2]->id,
-                'address_id' => $this->address->id,
-                'user_id' => $this->user->id,
-                'name' => 'test',
-                'locales' => [
-                    $languageCode => [
-                        'name' => 'Je parle pas francais',
-                    ],
-                ],
-            ],
-            [
-                'id' => $this->projectTask[1]->id,
-                'category_id' => $this->projectCategories[1]->id,
-                'address_id' => $this->address->id,
-                'user_id' => $this->user->id,
-                'name' => 'test',
-                'locales' => [
-                    $languageCode => [
-                        'name' => 42,
-                    ],
-                ],
-            ],
-        ];
-
-        foreach ($projectTasks as $key => $projectTask) {
-            foreach ($this->additionalColumns as $additionalColumn) {
-                $projectTasks[$key] += [
-                    $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-                ];
-            }
-        }
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTasks);
-        $response->assertStatus(207);
-        $this->assertEquals(422, json_decode($response->getContent())->responses[1]->status);
-    }
-
-    public function test_update_project_task_task_not_found()
-    {
-        $projectTask = [
-            'id' => ++$this->projectTask[2]->id,
-            'category_id' => $this->projectCategories[2]->id,
-            'address_id' => $this->address->id,
-            'user_id' => $this->user->id,
+        $task = [
+            'id' => ++$this->tasks[2]->id,
             'name' => 'test',
+            'start_date' => null,
+            'due_date' => null,
         ];
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
+            $task += [
                 $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
             ];
         }
@@ -670,24 +398,22 @@ class TaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $task);
         $response->assertStatus(422);
     }
 
-    public function test_update_project_task_category_not_found()
+    public function test_update_task_user_not_found()
     {
-        $this->project->categories()->detach($this->projectCategories[1]->id);
-
-        $projectTask = [
-            'id' => $this->projectTask[0]->id,
-            'category_id' => $this->projectCategories[1]->id,
-            'address_id' => $this->address->id,
-            'user_id' => $this->user->id,
+        $task = [
+            'id' => $this->tasks[0]->id,
+            'responsible_user_id' => ++$this->user->id,
             'name' => 'test',
+            'start_date' => null,
+            'due_date' => null,
         ];
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
+            $task += [
                 $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
             ];
         }
@@ -695,22 +421,24 @@ class TaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $task);
         $response->assertStatus(422);
     }
 
-    public function test_update_project_task_address_not_found()
+    public function test_update_task_with_project_id()
     {
-        $projectTask = [
-            'id' => $this->projectTask[0]->id,
-            'category_id' => $this->projectCategories[2]->id,
-            'address_id' => --$this->address->id,
-            'user_id' => $this->user->id,
+        $project = Project::factory()->create();
+
+        $task = [
+            'id' => $this->tasks[2]->id,
+            'project_id' => $project->id,
             'name' => 'test',
+            'start_date' => null,
+            'due_date' => null,
         ];
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
+            $task += [
                 $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
             ];
         }
@@ -718,56 +446,7 @@ class TaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
-        $response->assertStatus(422);
-    }
-
-    public function test_update_project_task_user_not_found()
-    {
-        $projectTask = [
-            'id' => $this->projectTask[0]->id,
-            'category_id' => $this->projectCategories[2]->id,
-            'address_id' => $this->address->id,
-            'user_id' => ++$this->user->id,
-            'name' => 'test',
-        ];
-
-        foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
-                $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-            ];
-        }
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
-        $response->assertStatus(422);
-    }
-
-    public function test_update_project_task_with_project_id()
-    {
-        $user = User::factory()->create(['language_id' => $this->user->language_id]);
-
-        $projectTask = [
-            'id' => $this->projectTask[2]->id,
-            'project_id' => $this->project->id,
-            'category_id' => $this->projectCategories[2]->id,
-            'address_id' => $this->address->id,
-            'user_id' => $user->id,
-            'name' => 'test',
-        ];
-
-        foreach ($this->additionalColumns as $additionalColumn) {
-            $projectTask += [
-                $additionalColumn->name => is_array($additionalColumn->values) ? $additionalColumn->values[0] : 'Value',
-            ];
-        }
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/tasks', $projectTask);
+        $response = $this->actingAs($this->user)->put('/api/tasks', $task);
         $response->assertStatus(200);
 
         $task = json_decode($response->getContent())->data;
@@ -776,21 +455,28 @@ class TaskTest extends BaseSetup
             ->first();
 
         $this->assertNotEmpty($dbTask);
-        $this->assertEquals($projectTask['id'], $dbTask->id);
-        $this->assertEquals($projectTask['project_id'], $dbTask->project_id);
-        $this->assertEquals($projectTask['category_id'], $dbTask->category_id);
-        $this->assertEquals($projectTask['address_id'], $dbTask->address_id);
-        $this->assertEquals($projectTask['user_id'], $dbTask->user_id);
-        $this->assertEquals($projectTask['name'], $dbTask->name);
+        $this->assertEquals($task['id'], $dbTask->id);
+        $this->assertEquals($task['project_id'], $dbTask->project_id);
+        $this->assertEquals($this->tasks[2]->responsible_user_id, $dbTask->responsible_user_id);
+        $this->assertEquals($task['name'], $dbTask->name);
+        $this->assertEquals($this->tasks[2]->description, $dbTask->description);
+        $this->assertEquals($task['start_date'], $dbTask->start_date);
+        $this->assertEquals($task['due_date'], $dbTask->due_date);
+        $this->assertEquals($this->tasks[2]->priority, $dbTask->priority);
+        $this->assertEquals($this->tasks[2]->state, $dbTask->state);
+        $this->assertEquals($this->tasks[2]->progress, $dbTask->progress);
+        $this->assertEquals($this->tasks[2]->time_budget, $dbTask->time_budget);
+        $this->assertEquals($this->tasks[2]->budget, $dbTask->budget);
         $this->assertEquals($this->user->id, $dbTask->updated_by->id);
+        $this->assertEquals([], $dbTask->users()->pluck('users.id')->toArray());
 
         foreach ($this->additionalColumns as $additionalColumn) {
-            $this->assertEquals($projectTask[$additionalColumn->name], $task->{$additionalColumn->name});
-            $this->assertEquals($projectTask[$additionalColumn->name], $dbTask->{$additionalColumn->name});
+            $this->assertEquals($task[$additionalColumn->name], $task->{$additionalColumn->name});
+            $this->assertEquals($task[$additionalColumn->name], $dbTask->{$additionalColumn->name});
         }
     }
 
-    public function test_delete_project_task()
+    public function test_delete_task()
     {
         AdditionalColumn::factory()->create([
             'model_type' => Task::class,
@@ -799,38 +485,38 @@ class TaskTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/tasks/' . $this->projectTask[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/tasks/' . $this->tasks[1]->id);
         $response->assertStatus(204);
 
-        $projectTask = $this->projectTask[1]->fresh();
-        $this->assertNotNull($projectTask->deleted_at);
-        $this->assertEquals($this->user->id, $projectTask->deleted_by->id);
+        $task = $this->tasks[1]->fresh();
+        $this->assertNotNull($task->deleted_at);
+        $this->assertEquals($this->user->id, $task->deleted_by->id);
     }
 
-    public function test_delete_project_task_task_not_found()
+    public function test_delete_task_task_not_found()
     {
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/tasks/' . ++$this->projectTask[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/tasks/' . ++$this->tasks[2]->id);
         $response->assertStatus(404);
     }
 
-    public function test_finish_project_task()
+    public function test_finish_task()
     {
         AdditionalColumn::factory()->create([
             'model_type' => Task::class,
         ]);
 
-        $projectTask = [
-            'id' => $this->projectTask[0]->id,
+        $task = [
+            'id' => $this->tasks[0]->id,
             'finish' => true,
         ];
 
         $this->user->givePermissionTo($this->permissions['finish']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/tasks/finish', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
         $response->assertStatus(200);
 
         $task = json_decode($response->getContent())->data;
@@ -838,34 +524,34 @@ class TaskTest extends BaseSetup
             ->whereKey($task->id)
             ->first();
         $this->assertNotEmpty($dbTask);
-        $this->assertEquals($projectTask['finish'], $dbTask->is_done);
+        $this->assertEquals($task['finish'], $dbTask->is_done);
     }
 
-    public function test_finish_project_task_validation_fails()
+    public function test_finish_task_validation_fails()
     {
-        $projectTask = [
-            'id' => $this->projectTask[0]->id,
+        $task = [
+            'id' => $this->tasks[0]->id,
             'finish' => 'true',
         ];
 
         $this->user->givePermissionTo($this->permissions['finish']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/tasks/finish', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
         $response->assertStatus(422);
     }
 
-    public function test_finish_project_task_task_not_found()
+    public function test_finish_task_task_not_found()
     {
-        $projectTask = [
-            'id' => ++$this->projectTask[2]->id,
+        $task = [
+            'id' => ++$this->tasks[2]->id,
             'finish' => true,
         ];
 
         $this->user->givePermissionTo($this->permissions['finish']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/tasks/finish', $projectTask);
+        $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
         $response->assertStatus(422);
     }
 }

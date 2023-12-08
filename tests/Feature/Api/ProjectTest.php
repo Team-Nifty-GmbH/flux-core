@@ -3,12 +3,18 @@
 namespace FluxErp\Tests\Feature\Api;
 
 use Carbon\Carbon;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
+use FluxErp\Models\Order;
+use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use FluxErp\States\Project\Done;
@@ -25,31 +31,59 @@ class ProjectTest extends BaseSetup
 
     private Collection $projects;
 
-    private Model $category;
+    private Contact $contact;
 
-    private Collection $categories;
+    private Order $order;
 
     private array $permissions;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->category = Category::factory()->create(['model_type' => Project::class]);
-        $this->categories = Category::factory()
-            ->count(2)
-            ->create([
-                'model_type' => Task::class,
-                'parent_id' => $this->category->id,
-            ]);
 
-        $this->projects = Project::factory()->count(2)->create([
-            'category_id' => $this->category->id,
+        $this->contact = Contact::factory()->create([
+            'client_id' => $this->dbClient->id,
         ]);
 
-        $this->projects
-            ->each(
-                fn ($project) => $project->categories()->attach($this->categories->pluck('id')->toArray())
-            );
+        $addresses = Address::factory()->count(2)->create([
+            'client_id' => $this->dbClient->id,
+            'contact_id' => $this->contact->id,
+        ]);
+
+        $priceList = PriceList::factory()->create();
+
+        $currency = Currency::factory()->create([
+            'is_default' => true,
+        ]);
+
+        $language = Language::factory()->create();
+
+        $orderType = OrderType::factory()->create([
+            'client_id' => $this->dbClient->id,
+            'order_type_enum' => OrderTypeEnum::Order,
+        ]);
+
+        $paymentType = PaymentType::factory()->create([
+            'client_id' => $this->dbClient->id,
+        ]);
+
+        $this->order = Order::factory()->create([
+            'client_id' => $this->dbClient->id,
+            'language_id' => $language->id,
+            'order_type_id' => $orderType->id,
+            'payment_type_id' => $paymentType->id,
+            'price_list_id' => $priceList->id,
+            'currency_id' => $currency->id,
+            'address_invoice_id' => $addresses[0]->id,
+            'address_delivery_id' => $addresses[1]->id,
+            'is_locked' => false,
+        ]);
+
+        $this->projects = Project::factory()->count(2)->create([
+            'contact_id' => $this->contact->id,
+            'order_id' => $this->order->id,
+            'responsible_user_id' => $this->user->id,
+        ]);
 
         $this->permissions = [
             'show' => Permission::findOrCreate('api.projects.{id}.get'),
@@ -74,14 +108,19 @@ class ProjectTest extends BaseSetup
         $project = $json->data;
         $this->assertNotEmpty($project);
         $this->assertEquals($this->projects[0]->id, $project->id);
+        $this->assertEquals($this->projects[0]->contact_id, $project->contact_id);
+        $this->assertEquals($this->projects[0]->order_id, $project->order_id);
+        $this->assertEquals($this->projects[0]->responsible_user_id, $project->responsible_user_id);
         $this->assertEquals($this->projects[0]->parent_id, $project->parent_id);
-        $this->assertEquals($this->projects[0]->category_id, $project->category_id);
-        $this->assertEquals($this->projects[0]->project_name, $project->project_name);
-        $this->assertEquals($this->projects[0]->display_name, $project->display_name);
-        $this->assertEquals(Carbon::parse($this->projects[0]->release_date)->toDateString(), $project->release_date);
-        $this->assertNull($project->deadline);
+        $this->assertEquals($this->projects[0]->project_number, $project->project_number);
+        $this->assertEquals($this->projects[0]->name, $project->name);
+        $this->assertEquals(Carbon::parse($this->projects[0]->start_date)->toDateString(), $project->start_date);
+        $this->assertNull($project->end_date);
         $this->assertEquals($this->projects[0]->description, $project->description);
         $this->assertEquals($this->projects[0]->state, $project->state);
+        $this->assertEquals($this->projects[0]->progress, $project->progress);
+        $this->assertEquals($this->projects[0]->time_budget, $project->time_budget);
+        $this->assertEquals($this->projects[0]->budget, $project->budget);
         $this->assertEquals(Carbon::parse($this->projects[0]->created_at),
             Carbon::parse($project->created_at));
         $this->assertEquals(Carbon::parse($this->projects[0]->updated_at),
@@ -111,15 +150,20 @@ class ProjectTest extends BaseSetup
         $referenceProject = Project::query()->first();
         $this->assertNotEmpty($projects);
         $this->assertEquals($referenceProject->id, $projects[0]->id);
+        $this->assertEquals($referenceProject->contact_id, $projects[0]->contact_id);
+        $this->assertEquals($referenceProject->order_id, $projects[0]->order_id);
+        $this->assertEquals($referenceProject->responsible_user_id, $projects[0]->responsible_user_id);
         $this->assertEquals($referenceProject->parent_id, $projects[0]->parent_id);
-        $this->assertEquals($referenceProject->category_id, $projects[0]->category_id);
-        $this->assertEquals($referenceProject->project_name, $projects[0]->project_name);
-        $this->assertEquals($referenceProject->display_name, $projects[0]->display_name);
-        $this->assertEquals(Carbon::parse($referenceProject->release_date)->toDateString(), $projects[0]->release_date);
+        $this->assertEquals($referenceProject->project_number, $projects[0]->project_number);
+        $this->assertEquals($referenceProject->name, $projects[0]->name);
+        $this->assertEquals(Carbon::parse($referenceProject->start_date)->toDateString(), $projects[0]->start_date);
         $this->assertEquals($referenceProject->deadline ?
             Carbon::parse($referenceProject->deadline)->toDateString() : null, $projects[0]->deadline);
         $this->assertEquals($referenceProject->description, $projects[0]->description);
         $this->assertEquals($referenceProject->state, $projects[0]->state);
+        $this->assertEquals($referenceProject->progress, $projects[0]->progress);
+        $this->assertEquals($referenceProject->time_budget, $projects[0]->time_budget);
+        $this->assertEquals($referenceProject->budget, $projects[0]->budget);
         $this->assertEquals(Carbon::parse($referenceProject->created_at), Carbon::parse($projects[0]->created_at));
         $this->assertEquals(Carbon::parse($referenceProject->updated_at), Carbon::parse($projects[0]->updated_at));
     }
@@ -128,13 +172,16 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'parent_id' => $this->projects[0]->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'display_name' => 'Display Name',
-            'release_date' => date('Y-m-d'),
-            'deadline' => date('Y-m-t'),
+            'contact_id' => $this->contact->id,
+            'order_id' => $this->order->id,
+            'responsible_user_id' => $this->user->id,
+            'project_number' => Str::random(),
+            'name' => Str::random(),
+            'start_date' => date('Y-m-d'),
+            'end_date' => date('Y-m-t'),
             'description' => 'New description text for further information',
-            'categories' => $this->categories->pluck('id')->toArray(),
+            'time_budget' => '06:40',
+            'budget' => rand(1, 100000) / 100,
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -149,63 +196,16 @@ class ProjectTest extends BaseSetup
             ->first();
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['parent_id'], $dbProject->parent_id);
-        $this->assertEquals($project['category_id'], $dbProject->category_id);
-        $this->assertEquals($project['project_name'], $dbProject->project_name);
-        $this->assertEquals($project['display_name'], $dbProject->display_name);
-        $this->assertEquals($project['release_date'], Carbon::parse($dbProject->release_date)->toDateString());
-        $this->assertEquals($project['deadline'], Carbon::parse($dbProject->deadline)->toDateString());
+        $this->assertEquals($project['contact_id'], $dbProject->contact_id);
+        $this->assertEquals($project['order_id'], $dbProject->order_id);
+        $this->assertEquals($project['responsible_user_id'], $dbProject->responsible_user_id);
+        $this->assertEquals($project['project_number'], $dbProject->project_number);
+        $this->assertEquals($project['name'], $dbProject->name);
+        $this->assertEquals($project['start_date'], Carbon::parse($dbProject->start_date)->toDateString());
+        $this->assertEquals($project['end_date'], Carbon::parse($dbProject->end_date)->toDateString());
         $this->assertEquals($project['description'], $dbProject->description);
-        $this->assertEquals($this->user->id, $dbProject->created_by->id);
-        $this->assertEquals($this->user->id, $dbProject->updated_by->id);
-    }
-
-    public function test_create_project_with_translations()
-    {
-        $languageCode = Language::factory()->create()->language_code;
-
-        $project = [
-            'parent_id' => $this->projects[0]->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'display_name' => 'Display Name',
-            'release_date' => date('Y-m-d'),
-            'deadline' => date('Y-m-t'),
-            'description' => 'New description text for further information',
-            'categories' => $this->categories->pluck('id')->toArray(),
-            'locales' => [
-                $languageCode => [
-                    'project_name' => 'Je parle pas francais',
-                    'display_name' => 'Tous le monde',
-                ],
-            ],
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/projects', $project);
-        $response->assertStatus(201);
-
-        $responseProject = json_decode($response->getContent())->data;
-        $dbProject = Project::query()
-            ->whereKey($responseProject->id)
-            ->first();
-        $this->assertNotEmpty($dbProject);
-        $this->assertEquals($project['parent_id'], $dbProject->parent_id);
-        $this->assertEquals($project['category_id'], $dbProject->category_id);
-        $this->assertEquals($project['project_name'], $dbProject->project_name);
-        $this->assertEquals($project['project_name'],
-            $dbProject->getTranslation('project_name', $this->defaultLanguageCode));
-        $this->assertEquals($project['locales'][$languageCode]['project_name'],
-            $dbProject->getTranslation('project_name', $languageCode));
-        $this->assertEquals($project['display_name'], $dbProject->display_name);
-        $this->assertEquals($project['display_name'],
-            $dbProject->getTranslation('display_name', $this->defaultLanguageCode));
-        $this->assertEquals($project['locales'][$languageCode]['display_name'],
-            $dbProject->getTranslation('display_name', $languageCode));
-        $this->assertEquals($project['release_date'], $dbProject->release_date);
-        $this->assertEquals($project['deadline'], $dbProject->deadline);
-        $this->assertEquals($project['description'], $dbProject->description);
+        $this->assertEquals($project['time_budget'], $dbProject->time_budget);
+        $this->assertEquals($project['budget'], $dbProject->budget);
         $this->assertEquals($this->user->id, $dbProject->created_by->id);
         $this->assertEquals($this->user->id, $dbProject->updated_by->id);
     }
@@ -214,13 +214,58 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'parent_id' => $this->projects[0]->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'display_name' => 'Display Name',
-            'release_date' => date('Y-m-D'),
-            'deadline' => date('Y-m-t'),
+            'contact_id' => $this->contact->id,
+            'order_id' => $this->order->id,
+            'responsible_user_id' => $this->user->id,
+            'project_number' => Str::random(),
+            'name' => Str::random(),
+            'start_date' => date('Y-m-d'),
+            'end_date' => date('Y-m-t'),
             'description' => 'New description text for further information',
-            'categories' => [],
+            'time_budget' => 6,
+            'budget' => rand(1, 100000) / 100,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/projects', $project);
+        $response->assertStatus(422);
+    }
+
+    public function test_create_project_contact_not_found()
+    {
+        $project = [
+            'contact_id' => ++$this->contact->id,
+            'name' => 'Project Name',
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/projects', $project);
+        $response->assertStatus(422);
+    }
+
+    public function test_create_project_order_not_found()
+    {
+        $project = [
+            'parent_id' => ++$this->order->id,
+            'name' => 'Project Name',
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/projects', $project);
+        $response->assertStatus(422);
+    }
+
+    public function test_create_project_responsible_user_not_found()
+    {
+        $project = [
+            'parent_id' => ++$this->user->id,
+            'name' => 'Project Name',
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -234,67 +279,7 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'parent_id' => ++$this->projects[1]->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'release_date' => date('Y-m-d'),
-            'categories' => $this->categories->pluck('id')->toArray(),
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/projects', $project);
-        $response->assertStatus(422);
-    }
-
-    public function test_create_project_second_level_project()
-    {
-        $parent = Project::factory()->create([
-            'category_id' => $this->category->id,
-            'parent_id' => $this->projects[0]->id,
-        ]);
-
-        $project = [
-            'parent_id' => $parent->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'release_date' => date('Y-m-d'),
-            'categories' => $this->categories->pluck('id')->toArray(),
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/projects', $project);
-        $response->assertStatus(201);
-    }
-
-    public function test_create_project_category_not_found()
-    {
-        $project = [
-            'parent_id' => $this->projects[1]->id,
-            'category_id' => ++$this->category->id,
-            'project_name' => 'Project Name',
-            'release_date' => date('Y-m-d'),
-            'categories' => $this->categories->pluck('id')->toArray(),
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/projects', $project);
-        $response->assertStatus(422);
-    }
-
-    public function test_create_project_categories_not_found()
-    {
-        $category = Category::factory()->create(['model_type' => Task::class]);
-        $project = [
-            'parent_id' => $this->projects[1]->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'release_date' => date('Y-m-d'),
-            'categories' => array_merge($this->categories->pluck('id')->toArray(), [$category->id]),
+            'name' => 'Project Name',
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -308,13 +293,15 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'id' => $this->projects[0]->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'display_name' => null,
-            'release_date' => date('Y-m-d'),
+            'contact_id' => null,
+            'order_id' => null,
+            'responsible_user_id' => null,
+            'parent_id' => $this->projects[1]->id,
+            'project_number' => Str::random(),
+            'name' => Str::random(),
+            'start_date' => date('Y-m-d'),
             'description' => 'New description text for further information',
-            'deadline' => null,
-            'categories' => $this->categories->pluck('id')->toArray(),
+            'end_date' => null,
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
@@ -332,13 +319,14 @@ class ProjectTest extends BaseSetup
 
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['id'], $dbProject->id);
-        $this->assertEquals($project['category_id'], $dbProject->category_id);
+        $this->assertEquals($project['contact_id'], $dbProject->contact_id);
+        $this->assertEquals($project['order_id'], $dbProject->order_id);
+        $this->assertEquals($project['responsible_user_id'], $dbProject->responsible_user_id);
+        $this->assertEquals($project['parent_id'], $dbProject->parent_id);
         $this->assertEquals($project['project_name'], $dbProject->project_name);
-        $this->assertNull($dbProject->display_name);
-        $this->assertEquals($project['release_date'], Carbon::parse($dbProject->release_date)->toDateString());
-        $this->assertNull($dbProject->deadline);
+        $this->assertEquals($project['start_date'], Carbon::parse($dbProject->start_date)->toDateString());
+        $this->assertNull($dbProject->end_date);
         $this->assertEquals($project['description'], $dbProject->description);
-        $this->assertEquals($this->user->id, $dbProject->updated_by['id']);
     }
 
     public function test_update_project_with_additional_column()
@@ -351,18 +339,19 @@ class ProjectTest extends BaseSetup
         $this->projects[0]->saveMeta($additionalColumns[0]->name, 'Original Value');
         $this->projects[0]->saveMeta($additionalColumns[1]->name, $value);
 
-        $categoryId = $this->projects[0]->category_id;
-
         $project = [
             'id' => $this->projects[0]->id,
-            'project_name' => 'Project Name',
-            'display_name' => null,
-            'release_date' => date('Y-m-d'),
+            'contact_id' => null,
+            'order_id' => null,
+            'responsible_user_id' => null,
+            'parent_id' => $this->projects[1]->id,
+            'project_number' => Str::random(),
+            'name' => Str::random(),
+            'start_date' => date('Y-m-d'),
             'description' => 'New description text for further information',
-            'deadline' => null,
+            'end_date' => null,
             $additionalColumns[0]->name => 'New Value',
             $additionalColumns[1]->name => null,
-            'categories' => $this->categories->pluck('id')->toArray(),
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
@@ -380,11 +369,13 @@ class ProjectTest extends BaseSetup
 
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['id'], $dbProject->id);
-        $this->assertEquals($categoryId, $dbProject->category_id);
+        $this->assertEquals($project['contact_id'], $dbProject->contact_id);
+        $this->assertEquals($project['order_id'], $dbProject->order_id);
+        $this->assertEquals($project['responsible_user_id'], $dbProject->responsible_user_id);
+        $this->assertEquals($project['parent_id'], $dbProject->parent_id);
         $this->assertEquals($project['project_name'], $dbProject->project_name);
-        $this->assertNull($dbProject->display_name);
-        $this->assertEquals($project['release_date'], Carbon::parse($dbProject->release_date)->toDateString());
-        $this->assertNull($dbProject->deadline);
+        $this->assertEquals($project['start_date'], Carbon::parse($dbProject->start_date)->toDateString());
+        $this->assertNull($dbProject->end_date);
         $this->assertEquals($project['description'], $dbProject->description);
         $this->assertEquals($this->user->id, $dbProject->updated_by['id']);
         $this->assertEquals($project[$additionalColumns[0]->name], $responseProject->{$additionalColumns[0]->name});
@@ -393,60 +384,11 @@ class ProjectTest extends BaseSetup
         $this->assertNull($dbProject->{$additionalColumns[1]->name});
     }
 
-    public function test_update_project_with_translations()
-    {
-        $languageCode = Language::factory()->create()->language_code;
-
-        $project = [
-            'id' => $this->projects[0]->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'release_date' => date('Y-m-d'),
-            'description' => 'New description text for further information',
-            'locales' => [
-                $languageCode => [
-                    'project_name' => 'Je parle pas francais',
-                    'display_name' => 'Tous le monde',
-                ],
-            ],
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/projects', $project);
-        $response->assertStatus(200);
-
-        $responseProject = json_decode($response->getContent())->data;
-        $dbProject = Project::query()
-            ->whereKey($responseProject->id)
-            ->first();
-        $this->assertNotEmpty($dbProject);
-        $this->assertEquals($project['id'], $dbProject->id);
-        $this->assertEquals($project['category_id'], $dbProject->category_id);
-        $this->assertEquals($project['project_name'], $dbProject->project_name);
-        $this->assertEquals($project['project_name'],
-            $dbProject->getTranslation('project_name', $this->defaultLanguageCode));
-        $this->assertEquals($project['locales'][$languageCode]['project_name'],
-            $dbProject->getTranslation('project_name', $languageCode));
-        $this->assertEquals($this->projects[0]->display_name, $dbProject->display_name);
-        $this->assertEquals($project['locales'][$languageCode]['display_name'],
-            $dbProject->getTranslation('display_name', $languageCode));
-        $this->assertEquals($project['release_date'], $dbProject->release_date);
-        $this->assertNull($dbProject->deadline);
-        $this->assertEquals($project['description'], $dbProject->description);
-        $this->assertEquals($this->user->id, $dbProject->updated_by->id);
-    }
-
     public function test_update_project_validation_fails()
     {
         $project = [
             'id' => $this->projects[0]->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'release_date' => date('Y-m-d'),
-            'deadline' => date('Y-m-D'),
-            'categories' => [],
+            'state' => Str::random(),
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
@@ -460,10 +402,7 @@ class ProjectTest extends BaseSetup
     {
         $project = [
             'id' => ++$this->projects[1]->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'release_date' => date('Y-m-d'),
-            'categories' => $this->categories->pluck('id')->toArray(),
+            'name' => 'Project Name',
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
@@ -473,14 +412,11 @@ class ProjectTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_update_project_category_not_found()
+    public function test_update_project_contact_not_found()
     {
         $project = [
             'id' => $this->projects[1]->id,
-            'category_id' => ++$this->categories[1]->id,
-            'project_name' => 'Project Name',
-            'release_date' => date('Y-m-d'),
-            'categories' => $this->categories->pluck('id')->toArray(),
+            'contact_id' => ++$this->contact->id,
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
@@ -490,15 +426,11 @@ class ProjectTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_update_project_categories_not_found()
+    public function test_update_project_order_not_found()
     {
-        $category = Category::factory()->create(['model_type' => Task::class]);
         $project = [
             'id' => $this->projects[1]->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'release_date' => date('Y-m-d'),
-            'categories' => array_merge($this->categories->pluck('id')->toArray(), [$category->id]),
+            'order_id' => ++$this->order->id,
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
@@ -506,29 +438,13 @@ class ProjectTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/projects', $project);
         $response->assertStatus(422);
-        $this->assertTrue(
-            property_exists(json_decode($response->getContent())->errors, 'categories')
-        );
     }
 
-    public function test_update_project_project_task_category_differs()
+    public function test_update_project_responsible_user_not_found()
     {
-        $categories = $this->categories->pluck('id')->toArray();
-        $contact = Contact::factory()->create(['client_id' => $this->dbClient->id]);
-        $address = Address::factory()->create(['contact_id' => $contact->id, 'client_id' => $contact->client_id]);
-        $projectTask = Task::factory()->create([
-            'project_id' => $this->projects[1]->id,
-            'address_id' => $address->id,
-            'user_id' => $this->user->id,
-        ]);
-        $projectTask->category()->attach(array_pop($categories));
-
         $project = [
             'id' => $this->projects[1]->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'release_date' => date('Y-m-d'),
-            'categories' => $categories,
+            'responsible_user_id' => ++$this->user->id,
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
@@ -536,22 +452,14 @@ class ProjectTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/projects', $project);
         $response->assertStatus(422);
-        $this->assertTrue(
-            property_exists(json_decode($response->getContent())->errors, 'categories')
-        );
     }
 
-    public function test_update_project_categories_validation_fails()
+    public function test_update_project_parent_project_not_found()
     {
         $project = [
-            'id' => $this->projects[0]->id,
-            'category_id' => $this->category->id,
-            'project_name' => 'Project Name',
-            'display_name' => null,
-            'release_date' => date('Y-m-d'),
-            'description' => 'New description text for further information',
-            'deadline' => null,
-            'categories' => [Str::random()],
+            'id' => $this->projects[1]->id,
+            'parent_id' => ++$this->projects[1]->id,
+            'name' => 'Project Name',
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);

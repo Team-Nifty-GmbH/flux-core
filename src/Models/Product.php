@@ -26,7 +26,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Product extends Model implements HasMedia, InteractsWithDataTables
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
-        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
+        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable, Searchable,
         SoftDeletes;
 
     protected $casts = [

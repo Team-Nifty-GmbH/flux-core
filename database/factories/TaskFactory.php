@@ -25,6 +25,7 @@ class TaskFactory extends Factory
             'due_date' => $this->faker->date(),
             'priority' => rand(0, 5),
             'time_budget' => rand(0, 10000),
+            'budget' => $this->faker->randomFloat(),
         ];
     }
 }

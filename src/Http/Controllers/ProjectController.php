@@ -92,7 +92,7 @@ class ProjectController extends BaseController
             DeleteProject::make(['id' => $id])->validate()->execute();
         } catch (ValidationException $e) {
             return ResponseHelper::createResponseFromBase(
-                statusCode: 404,
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
                 data: $e->errors()
             );
         }
