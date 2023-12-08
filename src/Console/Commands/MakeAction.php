@@ -61,10 +61,9 @@ class MakeAction extends GeneratorCommand
         string $model = null,
         string $rule = null
     ): static {
-        $searches = [
-            ['{{ name }}', '{{ description }}', '{{ return }}', '{{ model }}', '{{ uses }}', '{{ rule }}'],
-            ['{{name}}', '{{description}}'],
-        ];
+        if ($model) {
+            $model = qualify_model($model);
+        }
 
         $return = null;
         if (str_contains(strtolower($name), 'delete')) {
@@ -89,31 +88,38 @@ class MakeAction extends GeneratorCommand
         sort($uses);
         $uses = implode("\r\n", $uses);
 
-        $ruleLine = null;
+        $rules = null;
         if ($rule) {
-            $ruleLine = '$this->rules = ';
+            $rules = "\n\r\t\t" . '$this->rules = ';
 
             if (class_exists($rule)) {
-                $ruleLine .= '(new ' . class_basename($rule) . '())->rules();';
+                $rules .= '(new ' . class_basename($rule) . '())->rules();';
             } else {
-                $ruleLine .= $rule . ';';
+                $rules .= $rule . ';';
             }
         }
 
-        foreach ($searches as $search) {
-            $stub = str_replace(
-                $search,
-                [
-                    $customName,
-                    $description,
-                    $return ?? ($model ? class_basename($model) : 'mixed'),
-                    $model ? class_basename($model) . '::class' : '',
-                    $uses,
-                    $ruleLine,
-                ],
-                $stub
-            );
-        }
+        $search = [
+            '{{ uses }}',
+            '{{ rules }}',
+            '{{ name }}',
+            '{{ description }}',
+            '{{ model }}',
+            '{{ return }}',
+        ];
+
+        $stub = str_replace(
+            $search,
+            [
+                $uses,
+                $rules,
+                $customName,
+                $description,
+                $model ? class_basename($model) . '::class' : '',
+                $return ?? ($model ? class_basename($model) : 'mixed'),
+            ],
+            $stub
+        );
 
         return $this;
     }
@@ -138,6 +144,8 @@ class MakeAction extends GeneratorCommand
 
         $customName = $this->components->ask('What custom name should it have?', 'none');
         $description = $this->components->ask('What custom description should it have?', 'none');
+        $model = $this->components->ask('What model should it affect?', 'none');
+        $rule = $this->components->ask('What rules should be applied?', 'none');
 
         if ($customName && $customName !== 'none') {
             $input->setOption('customName', $customName);
@@ -145,6 +153,14 @@ class MakeAction extends GeneratorCommand
 
         if ($description && $description !== 'none') {
             $input->setOption('description', $description);
+        }
+
+        if ($model && $model !== 'none') {
+            $input->setOption('model', $model);
+        }
+
+        if ($rule && $rule !== 'none') {
+            $input->setOption('rule', $rule);
         }
     }
 }

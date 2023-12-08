@@ -45,7 +45,7 @@ class ModelMakeCommand extends BaseModelMakeCommand
         );
     }
 
-    protected function createController()
+    protected function createController(): void
     {
         $controller = Str::studly(class_basename($this->argument('name')));
 
