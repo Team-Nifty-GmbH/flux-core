@@ -18,16 +18,21 @@ class LockController extends Controller
 
     public function showUserLocks(): JsonResponse
     {
-        return ResponseHelper::createResponseFromBase(statusCode: 200, data: auth()->user()->locks()->get());
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: auth()->user()->locks()->get()
+        );
     }
 
     public function lock(LockRecordRequest $request): JsonResponse
     {
-        $model = $request->get('model_type')::query()
-            ->whereKey($request->get('model_id'))
+        $validated = $request->validated();
+
+        $model = $validated['model_type']::query()
+            ->whereKey($validated['model_id'])
             ->first();
 
-        return CreateLock::make($request->all())->execute()
+        return CreateLock::make($request->validated())->execute()
             ? ResponseHelper::createResponseFromBase(
                 statusCode: 200,
                 data: $model,
@@ -40,16 +45,16 @@ class LockController extends Controller
 
     public function unlock(LockRecordRequest $request): JsonResponse
     {
-        $unlocked = DeleteLock::make($request->all())->execute();
+        $unlocked = DeleteLock::make($request->validated())->execute();
 
         return $unlocked
             ? ResponseHelper::noContent()
             : ResponseHelper::locked('could not unlock record');
     }
 
-    public function forceUnlock(LockRecordRequest $request)
+    public function forceUnlock(LockRecordRequest $request): JsonResponse
     {
-        $forceUnlock = ForceUnlock::make($request->all())->execute();
+        $forceUnlock = ForceUnlock::make($request->validated())->execute();
 
         return $forceUnlock
             ? ResponseHelper::noContent()

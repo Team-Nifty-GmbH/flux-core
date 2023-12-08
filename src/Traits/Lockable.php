@@ -52,7 +52,6 @@ trait Lockable
 
     public function lock(): bool
     {
-
         $lockDuration = config('session.lifetime') * 60;
         $lock = Cache::lock($this->getLockName(), $lockDuration);
 
@@ -97,7 +96,7 @@ trait Lockable
         return Cache::has('cache_' . $this->getLockName());
     }
 
-    public function getLockedByAttribute(): ?Authenticatable
+    public function getLockedByAttribute(): Fluent|Authenticatable|null
     {
         return $this->getLockedBy();
     }

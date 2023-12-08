@@ -71,7 +71,7 @@ jobs:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-          GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
+
       - name: Install npm dependencies
         run: npm i
 
@@ -82,10 +82,6 @@ jobs:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-          GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
-
-      - name: Install ChromeDriver
-        run: composer dusk:install-chromedriver
 
       - name: Run Livewire Tests
         run: composer test-livewire
@@ -93,7 +89,9 @@ jobs:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-          GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
+
+      - name: Install ChromeDriver
+        run: composer dusk:install-chromedriver
 
       - name: Run Browser Tests
         run: composer test-browser
@@ -101,7 +99,6 @@ jobs:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-          GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
