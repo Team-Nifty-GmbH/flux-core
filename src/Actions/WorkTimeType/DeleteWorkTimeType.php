@@ -24,7 +24,7 @@ class DeleteWorkTimeType extends FluxAction
 
     public function performAction(): ?bool
     {
-        return WorkTime::query()
+        return WorkTimeType::query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

@@ -32,12 +32,15 @@ use FluxErp\Livewire\Settings\Logs;
 use FluxErp\Livewire\Settings\MailAccounts;
 use FluxErp\Livewire\Settings\Notifications;
 use FluxErp\Livewire\Settings\OrderTypes;
+use FluxErp\Livewire\Settings\PaymentTypes;
 use FluxErp\Livewire\Settings\Permissions;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Translations;
 use FluxErp\Livewire\Settings\Users;
+use FluxErp\Livewire\Settings\VatRates;
+use FluxErp\Livewire\Settings\WorkTimeTypes;
 use FluxErp\Livewire\Task\Task;
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
@@ -140,6 +143,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
             Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
             Route::get('/users', Users::class)->name('users')->registersMenuItem();
             Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts')->registersMenuItem();
+            Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types')->registersMenuItem();
+            Route::get('/vat-rates', VatRates::class)->name('vat-rates')->registersMenuItem();
+            Route::get('/payment-types', PaymentTypes::class)->name('payment-types')->registersMenuItem();
         });
 });
 
