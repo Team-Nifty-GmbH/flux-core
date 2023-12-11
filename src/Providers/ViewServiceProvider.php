@@ -58,7 +58,7 @@ class ViewServiceProvider extends ServiceProvider
                 'defaultCurrency',
                 Cache::remember('defaultCurrency', 60 * 60 * 24, function () {
                     return Currency::default();
-                })
+                }) ?? new Currency()
             );
         }
     }
