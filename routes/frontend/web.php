@@ -36,6 +36,7 @@ use FluxErp\Livewire\Settings\PaymentTypes;
 use FluxErp\Livewire\Settings\Permissions;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Livewire\Settings\Profile;
+use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Translations;
 use FluxErp\Livewire\Settings\Users;
@@ -146,6 +147,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
             Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types')->registersMenuItem();
             Route::get('/vat-rates', VatRates::class)->name('vat-rates')->registersMenuItem();
             Route::get('/payment-types', PaymentTypes::class)->name('payment-types')->registersMenuItem();
+            Route::get('/serial-number-ranges', SerialNumberRanges::class)
+                ->name('serial-number-ranges')
+                ->registersMenuItem();
         });
 });
 
