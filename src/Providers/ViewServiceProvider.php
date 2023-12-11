@@ -64,6 +64,8 @@ class ViewServiceProvider extends ServiceProvider
                     return Currency::default();
                 }) ?? new Currency()
             );
+        } else {
+            View::share('defaultCurrency', new Currency());
         }
     }
 }
