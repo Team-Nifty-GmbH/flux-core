@@ -21,7 +21,9 @@ class Printing extends FluxAction
         $this->rules = (new PrintingRequest())->rules();
 
         $this->validate();
-        $this->model = $this->data['model_type']::query()->whereKey($this->data['model_id'])->first();
+        $this->model = $this->data['model_type']::query()
+            ->whereKey($this->data['model_id'])
+            ->first();
     }
 
     public static function models(): array

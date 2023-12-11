@@ -80,7 +80,10 @@ class AuthController extends Controller
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
             data: null,
-            additions: ['access_token' => $token->plainTextToken]
+            additions: [
+                'access_token' => $token->plainTextToken,
+                'token' => $token->plainTextToken,
+            ]
         );
     }
 

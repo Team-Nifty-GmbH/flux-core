@@ -38,7 +38,7 @@ class Printable
         return $this;
     }
 
-    public function __call(string $name, $arguments)
+    public function __call(string $name, mixed $arguments)
     {
         if (str_starts_with($name, 'print')) {
             $viewName = strtolower(str_replace('print', '', $name));

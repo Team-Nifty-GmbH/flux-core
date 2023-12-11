@@ -188,7 +188,7 @@ You have to register your view in your service provider.
 You can do this by adding the following code to the `boot` method of your service provider:
 
 ```php
-public function boot()
+public function register(): void
 {
     \FluxErp\Models\Order::registerPrintView('my-printable-view', \App\View\Printing\MyPrintableView::class);
 }
@@ -207,7 +207,7 @@ The first parameter of the closure is always an instance of the class that imple
 For example if you want to make the view only available if the order is locked you can do it like this:
 
 ```php
-public function boot()
+public function register(): void
 {
     \FluxErp\Models\Order::registerPrintView('my-printable-view', \App\View\Printing\MyPrintableView::class, function (\FluxErp\Models\Order $order) {
         return $order->isLocked();

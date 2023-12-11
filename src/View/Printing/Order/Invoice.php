@@ -16,11 +16,6 @@ class Invoice extends OrderView
         ]);
     }
 
-    public function getFileName(): string
-    {
-        return $this->getSubject();
-    }
-
     public function getSubject(): string
     {
         return __('Invoice') . ' ' . ($this->model->invoice_number ?: __('Preview'));

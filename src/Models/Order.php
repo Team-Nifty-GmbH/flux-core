@@ -115,7 +115,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                 $order->price_list_id = ! $contact->price_list_id || $order->isDirty('price_list_id')
                     ? $order->price_list_id
                     : $contact->price_list_id;
-                $order->payment_type_id = ! $contact->payment_type_id || $order->isDirty('payment_tpe_id')
+                $order->payment_type_id = ! $contact->payment_type_id || $order->isDirty('payment_type_id')
                     ? $order->payment_type_id
                     : $contact->payment_type_id;
                 $order->client_id = ! $contact->client_id || $order->isDirty('client_id')
