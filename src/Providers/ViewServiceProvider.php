@@ -5,6 +5,7 @@ namespace FluxErp\Providers;
 use FluxErp\Models\Currency;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
+use Illuminate\Database\Migrations\Migrator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
@@ -53,7 +54,10 @@ class ViewServiceProvider extends ServiceProvider
         $views[] = __DIR__ . '/../../resources/views/printing';
         $this->loadViewsFrom($views, 'print');
 
-        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
+        if (
+            (! $this->app->runningInConsole() || $this->app->runningUnitTests())
+            && app('migrator')->repositoryExists()
+        ) {
             View::share(
                 'defaultCurrency',
                 Cache::remember('defaultCurrency', 60 * 60 * 24, function () {
