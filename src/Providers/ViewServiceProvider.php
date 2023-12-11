@@ -6,6 +6,7 @@ use FluxErp\Models\Currency;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\FileViewFinder;
@@ -52,6 +53,13 @@ class ViewServiceProvider extends ServiceProvider
         $views[] = __DIR__ . '/../../resources/views/printing';
         $this->loadViewsFrom($views, 'print');
 
-        View::share('defaultCurrency', Currency::default());
+        if (! $this->app->runningInConsole()) {
+            View::share(
+                'defaultCurrency',
+                Cache::remember('defaultCurrency', 60 * 60 * 24, function () {
+                    return Currency::default();
+                })
+            );
+        }
     }
 }
