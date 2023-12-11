@@ -37,10 +37,9 @@ use FluxErp\Http\Controllers\OrderPositionController;
 use FluxErp\Http\Controllers\OrderTypeController;
 use FluxErp\Http\Controllers\PaymentTypeController;
 use FluxErp\Http\Controllers\PermissionController;
-use FluxErp\Http\Controllers\PresentationController;
 use FluxErp\Http\Controllers\PriceController;
 use FluxErp\Http\Controllers\PriceListController;
-use FluxErp\Http\Controllers\PrintDataController;
+use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\ProductController;
 use FluxErp\Http\Controllers\ProductCrossSellingController;
 use FluxErp\Http\Controllers\ProductOptionController;
@@ -324,22 +323,6 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::put('/permissions/sync', [PermissionController::class, 'sync']);
         Route::delete('/permissions/{id}', [PermissionController::class, 'delete']);
 
-        //Presentations
-        Route::get('/presentations', [PresentationController::class, 'index'])
-            ->name('presentations.index');
-        Route::get('/presentations/{id}', [PresentationController::class, 'show'])
-            ->name('presentations.show');
-        Route::get('/presentations/{id}/pdf', [PresentationController::class, 'getPdf'])
-            ->name('presentations.get-pdf');
-        Route::get('/presentations/{id}/preview', [PresentationController::class, 'showHtml'])
-            ->name('presentations.get-preview');
-        Route::post('/presentations', [PresentationController::class, 'create'])
-            ->name('presentations.create');
-        Route::put('/presentations', [PresentationController::class, 'update'])
-            ->name('presentations.update');
-        Route::delete('/presentations/{id}', [PresentationController::class, 'delete'])
-            ->name('presentations.delete');
-
         //Prices
         Route::get('/prices/{id}', [PriceController::class, 'show']);
         Route::get('/prices', [PriceController::class, 'index']);
@@ -355,15 +338,9 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::delete('/price-lists/{id}', [PriceListController::class, 'delete']);
 
         //PrintPdf
-        Route::get('/print/views/{model?}', [PrintDataController::class, 'getPrintViews'])
-            ->where('model', '(.*)');
-        Route::get('/print/{id}', [PrintDataController::class, 'show']);
-        Route::get('/print', [PrintDataController::class, 'index']);
-        Route::get('/print/{id}/preview', [PrintDataController::class, 'showHtml'])->name('print.show-html');
-        Route::get('/print/{id}/pdf', [PrintDataController::class, 'getPdf'])->name('print.get-pdf');
-        Route::post('/print', [PrintDataController::class, 'generatePdfFromView']);
-        Route::put('/print', [PrintDataController::class, 'update'])->name('print.update');
-        Route::delete('/print/{id}', [PrintDataController::class, 'delete']);
+        Route::post('/print/views', [PrintController::class, 'getPrintViews']);
+        Route::post('/print/render', [PrintController::class, 'render']);
+        Route::post('/print/pdf', [PrintController::class, 'renderPdf']);
 
         //Products
         Route::get('/products/{id}', [ProductController::class, 'show']);

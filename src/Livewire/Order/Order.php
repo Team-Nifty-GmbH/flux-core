@@ -67,8 +67,10 @@ class Order extends Component
             ])
             ->firstOrFail();
 
-        $this->printLayouts = $order->orderType?->print_layouts ?: [];
-        $this->printLayouts = array_combine(array_map('class_basename', $this->printLayouts), $this->printLayouts);
+        $this->printLayouts = array_intersect(
+            $order->orderType?->print_layouts ?: [],
+            array_keys($order->resolvePrintViews())
+        );
 
         $this->selectedPrintLayouts = array_fill_keys(array_keys($this->printLayouts), false);
 

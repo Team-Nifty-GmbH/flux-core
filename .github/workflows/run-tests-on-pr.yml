@@ -40,11 +40,6 @@ jobs:
         ports:
           - 7700/tcp
         options: --health-cmd="wget --no-verbose --spider http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
-      gotenberg:
-        image: 'gotenberg/gotenberg:7'
-        ports:
-          - 3000/tcp
-        options: --health-cmd="curl -f http://localhost:3000/health" --health-interval=10s --health-timeout=5s --health-retries=3
     strategy:
       fail-fast: false
       matrix:
@@ -80,7 +75,6 @@ jobs:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-          GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
       - name: Install ChromeDriver
         run: composer dusk:install-chromedriver
@@ -91,7 +85,6 @@ jobs:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-          GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
       - name: Run Livewire Tests
         run: composer test-livewire
@@ -99,7 +92,6 @@ jobs:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-          GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
       - name: Run Browser Tests
         run: composer test-browser
@@ -107,7 +99,6 @@ jobs:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-          GOTENBERG_PORT: ${{ job.services.gotenberg.ports['3000'] }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3

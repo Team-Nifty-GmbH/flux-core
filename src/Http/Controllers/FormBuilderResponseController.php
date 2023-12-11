@@ -20,7 +20,7 @@ class FormBuilderResponseController extends BaseController
 
     public function create(CreateFormBuilderResponseRequest $request): JsonResponse
     {
-        return $this->createResponseFromBase(
+        return ResponseHelper::createResponseFromBase(
             statusCode: 201,
             data: CreateFormBuilderResponse::make($request->validated())
                 ->execute()

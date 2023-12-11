@@ -57,7 +57,7 @@ class AuthTest extends TestCase
         ]);
         $response->assertStatus(200);
 
-        $token = json_decode($response->getContent())->token;
+        $token = json_decode($response->getContent())->access_token;
         $this->assertNotEmpty($token);
     }
 
@@ -89,7 +89,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-        $token = json_decode($response->getContent())->token;
+        $token = json_decode($response->getContent())->access_token;
         $this->assertNotEmpty($token);
     }
 

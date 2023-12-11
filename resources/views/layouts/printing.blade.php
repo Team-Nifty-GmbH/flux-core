@@ -1,147 +1,117 @@
-<!DOCTYPE html>
-<HTML class="h-full text-sm" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html class="h-full text-sm">
 <head>
-    <x-layouts.head.head :title="$title ?? null">
-        <meta name="format-detection" content="telephone=no">
-        {{ $head ?? '' }}
-    </x-layouts.head.head>
-    @if(! app('request')->input('preview'))
-        <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
-        <script>
-            class RepeatTableHeadersHandler extends Paged.Handler {
-                constructor(chunker, polisher, caller) {
-                    super(chunker, polisher, caller)
-                    this.splitTablesRefs = []
-                }
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="currency-code" content="{{ \FluxErp\Models\Currency::default()?->iso }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ $title ?? $subject ?? '' }}</title>
+    @vite(['resources/css/app.css'], 'flux/build')
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <style>
+        html {
+            font-family: 'Montserrat';
+        }
 
-                afterPageLayout(pageElement, page, breakToken, chunker) {
-                    this.chunker = chunker
-                    this.splitTablesRefs = []
+        tr>td:first-child, tr>th:first-child {
+            padding-left: 10px;
+        }
 
-                    if (breakToken) {
-                        const node = breakToken.node
-                        const tables = this.findAllAncestors(node, "table")
-                        if (node.tagName === "TABLE") tables.push(node)
+        tr>td:last-child, tr>th:last-child {
+            padding-right: 10px;
+        }
 
-                        if (tables.length > 0) {
-                            this.splitTablesRefs = tables.map(t => t.dataset.ref)
+        .cover-page{
+            margin-top: -90px;
+            background-color: white;
+        }
 
-                            let thead = node.tagName === "THEAD" ? node : this.findFirstAncestor(node, "thead")
-                            if (thead) {
-                                let lastTheadNode = thead.hasChildNodes() ? thead.lastChild : thead
-                                breakToken.node = this.nodeAfter(lastTheadNode, chunker.source)
-                            }
+        .border-black {
+            border-color: black;
+        }
 
-                            this.hideEmptyTables(pageElement, node)
-                        }
-                    }
-                }
+        .line-through {
+            text-decoration: line-through;
+        }
 
-                hideEmptyTables(pageElement, breakTokenNode) {
-                    this.splitTablesRefs.forEach(ref => {
-                        let table = pageElement.querySelector("[data-ref='" + ref + "']")
-                        if (table) {
-                            let sourceBody = table.querySelector("tbody > tr")
-                            if (!sourceBody || this.refEquals(sourceBody.firstElementChild, breakTokenNode)) {
-                                table.style.visibility = "hidden"
-                                table.style.position = "absolute"
-                                let lineSpacer = table.nextSibling
-                                if (lineSpacer) {
-                                    lineSpacer.style.visibility = "hidden"
-                                    lineSpacer.style.position = "absolute"
-                                }
-                            }
-                        }
-                    })
-                }
+        .black-bar {
+            background-color: black;
+            width: 1.75rem;
+            height: 0.25rem;
+        }
 
-                refEquals(a, b) {
-                    return a && a.dataset && b && b.dataset && a.dataset.ref === b.dataset.ref
-                }
+        header {
+            top: -20mm;
+        }
 
-                findFirstAncestor(element, selector) {
-                    while (element.parentNode && element.parentNode.nodeType === 1) {
-                        if (element.parentNode.matches(selector)) return element.parentNode
-                        element = element.parentNode
-                    }
-                    return null
-                }
+        footer {
+            bottom: -30mm;
+            padding-bottom: 10mm;
+        }
 
-                findAllAncestors(element, selector) {
-                    const ancestors = []
-                    while (element.parentNode && element.parentNode.nodeType === 1) {
-                        if (element.parentNode.matches(selector)) ancestors.unshift(element.parentNode)
-                        element = element.parentNode
-                    }
-                    return ancestors
-                }
+        .logo{
+            height:70px;
+        }
 
-                layout(rendered, layout) {
-                    this.splitTablesRefs.forEach(ref => {
-                        const renderedTable = rendered.querySelector("[data-ref='" + ref + "']")
-                        if (renderedTable) {
-                            if (!renderedTable.getAttribute("repeated-headers")) {
-                                const sourceTable = this.chunker.source.querySelector("[data-ref='" + ref + "']")
-                                this.repeatColgroup(sourceTable, renderedTable)
-                                this.repeatTHead(sourceTable, renderedTable)
-                                renderedTable.setAttribute("repeated-headers", true)
-                            }
-                        }
-                    })
-                }
+        .logo-small{
+            height:50px;
+        }
 
-                repeatColgroup(sourceTable, renderedTable) {
-                    let colgroup = sourceTable.querySelectorAll("colgroup")
-                    let firstChild = renderedTable.firstChild
-                    colgroup.forEach((colgroup) => {
-                        let clonedColgroup = colgroup.cloneNode(true)
-                        renderedTable.insertBefore(clonedColgroup, firstChild)
-                    })
-                }
+        .footer-logo {
+            transform: translateY(-50%);
+            background-color: white;
+            padding-left: 3mm;
+            padding-right: 3mm;
+        }
 
-                repeatTHead(sourceTable, renderedTable) {
-                    let thead = sourceTable.querySelector("thead")
-                    if (thead) {
-                        let clonedThead = thead.cloneNode(true)
-                        renderedTable.insertBefore(clonedThead, renderedTable.firstChild)
-                    }
-                }
+        .bg-even-children >:nth-child(even){
+            background: #F2F4F7;
+        }
 
-                nodeAfter(node, limiter) {
-                    if (limiter && node === limiter) return
-                    let significantNode = this.nextSignificantNode(node)
-                    if (significantNode) return significantNode
-                    if (node.parentNode) {
-                        while ((node = node.parentNode)) {
-                            if (limiter && node === limiter) return
-                            significantNode = this.nextSignificantNode(node)
-                            if (significantNode) return significantNode
-                        }
-                    }
-                }
+        .bg-uneven:nth-child(odd){
+            background: #F2F4F7;
+        }
 
-                nextSignificantNode(sib) {
-                    while ((sib = sib.nextSibling)) { if (!this.isIgnorable(sib)) return sib }
-                    return null
-                }
+        .border-semi-black {
+            border-color: #667085;
+        }
 
-                isIgnorable(node) {
-                    return (
-                        (node.nodeType === 8)
-                        || ((node.nodeType === 3) && this.isAllWhitespace(node))
-                    )
-                }
+        @page {
+            size: A4;
+            margin: 32mm 20mm 28mm 18mm;
+            bleed: 6mm;
+        }
 
-                isAllWhitespace(node) {
-                    return !(/[^\t\n\r ]/.test(node.textContent))
-                }
+        .page-count:after {
+            content: "{{ __('Page') }} " counter(page) " {{ __('of') }} DOMPDF_PAGE_COUNT_PLACEHOLDER";
+        }
+
+        @media screen {
+            .cover-page{
+                margin-top: 0;
             }
 
-            Paged.registerHandlers(RepeatTableHeadersHandler)
-        </script>
-    @endif
+            footer {
+                display: none;
+            }
+
+            body {
+                max-width: 80rem;
+                margin: 25mm auto 0;
+                padding: 20mm;
+                background: white;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                border-radius: 10px;
+            }
+
+            html {
+                background: #f5f5f5;
+            }
+        }
+    </style>
 </head>
-<body {{ $attributes }}>
-    {{ $slot ?? '' }}
+<body>
+    <x-print.header />
+    <x-print.footer />
+    {{ $slot }}
 </body>
 </html>

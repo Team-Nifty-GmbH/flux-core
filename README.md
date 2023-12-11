@@ -43,31 +43,6 @@ Alternative you can change your docker-compose.yml file to use the flux-erp dock
    ...
 ```
 
-You should also add gotenberg to your docker-compose.yml file
-```yaml
-    gotenberg:
-        image: 'gotenberg/gotenberg:7'
-        healthcheck:
-            test: [ "CMD", "curl", "-f",  "http://localhost:3000/health" ]
-            retries: 3
-            timeout: 5s
-        ports:
-            - '${FORWARD_GOTENBERG_PORT:-3000}:3000'
-        networks:
-            - sail
-```
-
->**_Note:_** A word on Gotenberg:
-> 
-> 
-> I personally dont really like it but it is the only way to generate pdfs in the browser without using a headless browser.
-> 
-> Its important to have an APP_URL set in your .env file that is reachable from the docker container.
-> e.g. localhost will not work as from the sight of gotenberg localhost is gotenberg iteself.
-> 
-> Also its neccessary to run your sail with nginx as the artisan serve command is not able to handle yours and the 
-> gotenberg request at the same time.
-
 If you already have built the docker images you should rebuild them
 ```bash
 sail build --no-cache

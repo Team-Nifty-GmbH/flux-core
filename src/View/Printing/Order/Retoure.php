@@ -8,29 +8,23 @@ use Illuminate\Contracts\View\View;
 
 class Retoure extends OrderView
 {
-    /**
-     * Create a new component instance.
-     *
-     * @return void
-     */
     public function __construct(Order $order)
     {
-        // Set locale to addressInvoice language if it is set
-        app()->setLocale($order->addressInvoice?->language?->iso_code ?? config('app.locale'));
+        parent::__construct($order);
 
-        $this->model = $order->load(['parent', 'orderType']);
-
-        $this->prepareModel();
+        $this->model->load(['parent', 'orderType']);
     }
 
-    /**
-     * Get the view / contents that represent the component.
-     */
     public function render(): View|Factory
     {
         return view('print::order.retoure', [
             'model' => $this->model,
             'summary' => $this->summary,
         ]);
+    }
+
+    public function getSubject(): string
+    {
+        return __('Retoure') . ' ' . $this->model->order_number;
     }
 }

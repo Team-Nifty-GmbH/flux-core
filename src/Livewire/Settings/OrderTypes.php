@@ -6,6 +6,7 @@ use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Http\Requests\CreateOrderTypeRequest;
 use FluxErp\Http\Requests\UpdateOrderTypeRequest;
 use FluxErp\Models\Client;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Services\OrderTypeService;
 use Illuminate\Contracts\Foundation\Application;
@@ -19,7 +20,7 @@ class OrderTypes extends Component
 {
     use Actions;
 
-    public array $orderTypes;
+    public array $printViews = [];
 
     public array $clients;
 
@@ -64,10 +65,13 @@ class OrderTypes extends Component
 
     public function mount(): void
     {
-        $this->orderTypes = get_subclasses_of(
-            extendingClass: 'FluxErp\View\Printing\Order\OrderView',
-            namespace: 'FluxErp\View\Printing\Order'
-        );
+
+        foreach ((new Order())->getAvailableViews() as $view) {
+            $this->printViews[] = [
+                'value' => $view,
+                'label' => __($view),
+            ];
+        }
 
         $this->clients = Client::query()
             ->get(['id', 'name'])
