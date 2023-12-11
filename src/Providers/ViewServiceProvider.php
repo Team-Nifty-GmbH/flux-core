@@ -53,7 +53,7 @@ class ViewServiceProvider extends ServiceProvider
         $views[] = __DIR__ . '/../../resources/views/printing';
         $this->loadViewsFrom($views, 'print');
 
-        if (! $this->app->runningInConsole()) {
+        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
             View::share(
                 'defaultCurrency',
                 Cache::remember('defaultCurrency', 60 * 60 * 24, function () {
