@@ -2,7 +2,6 @@
 
 namespace FluxErp\Tests\Livewire\Task;
 
-use FluxErp\Livewire\Project\ProjectList;
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;

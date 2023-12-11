@@ -1,1 +1,0 @@
-<div>{{$test_variable}}</div>

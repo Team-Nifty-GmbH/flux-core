@@ -24,7 +24,8 @@ class AuthController extends Controller
     public function authenticate(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string',
+            'email' => 'required_without:username|string',
+            'username' => 'required_without:email|string',
             'password' => 'required|string',
         ]);
 
@@ -35,7 +36,7 @@ class AuthController extends Controller
         $abilities = [];
 
         $user = User::query()
-            ->where('email', $request->email)
+            ->where('email', $request->email ?? $request->username)
             ->where('is_active', true)
             ->first();
 
@@ -79,7 +80,10 @@ class AuthController extends Controller
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
             data: null,
-            additions: ['token' => $token->plainTextToken]
+            additions: [
+                'access_token' => $token->plainTextToken,
+                'token' => $token->plainTextToken,
+            ]
         );
     }
 

@@ -84,6 +84,10 @@ class ReplaceMedia extends FluxAction
         ]);
         $media->save();
 
+        if (strtolower($this->data['media_type']) === 'stream') {
+            fclose($this->data['media']);
+        }
+
         return $media->withoutRelations();
     }
 

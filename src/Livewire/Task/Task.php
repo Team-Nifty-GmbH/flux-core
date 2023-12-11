@@ -6,7 +6,6 @@ use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task as TaskModel;
-use FluxErp\Traits\Livewire\HasAdditionalColumns;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;

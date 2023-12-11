@@ -39,7 +39,7 @@ class CreateTaskRequest extends BaseFormRequest
                 'order_positions.*.id' => 'required|integer|exists:order_positions,id,deleted_at,NULL',
                 'order_positions.*.amount' => [
                     'required',
-                    new Numeric(min: 0)
+                    new Numeric(min: 0),
                 ],
             ]
         );

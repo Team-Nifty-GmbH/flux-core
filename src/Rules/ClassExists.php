@@ -10,10 +10,13 @@ class ClassExists implements InvokableRule
 
     private ?string $instanceOf;
 
-    public function __construct(array|string $uses = [], ?string $instanceOf = null)
+    private ?string $implements;
+
+    public function __construct(array|string $uses = [], ?string $instanceOf = null, ?string $implements = null)
     {
         $this->uses = (array) $uses;
         $this->instanceOf = $instanceOf;
+        $this->implements = $implements;
     }
 
     /**
@@ -31,7 +34,7 @@ class ClassExists implements InvokableRule
             return;
         }
 
-        if ($this->uses || $this->instanceOf) {
+        if ($this->uses || $this->instanceOf || $this->implements) {
             $instance = new $value();
         }
 
@@ -43,6 +46,10 @@ class ClassExists implements InvokableRule
 
         if ($this->instanceOf && ! is_a($instance, $this->instanceOf, true)) {
             $fail(sprintf('%s is not a %s.', $value, $this->instanceOf))->translate();
+        }
+
+        if ($this->implements && ! in_array($this->implements, class_implements($instance))) {
+            $fail(sprintf('%s doesnt implement %s.', $value, $this->implements))->translate();
         }
     }
 }

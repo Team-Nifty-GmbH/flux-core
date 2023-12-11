@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
@@ -20,8 +21,13 @@ use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\Mailable;
+use FluxErp\Traits\Printable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
+use FluxErp\View\Printing\Order\Invoice;
+use FluxErp\View\Printing\Order\Offer;
+use FluxErp\View\Printing\Order\Retoure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,11 +40,11 @@ use TeamNiftyGmbH\DataTable\Casts\Money;
 use TeamNiftyGmbH\DataTable\Casts\Percentage;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Order extends Model implements HasMedia, InteractsWithDataTables
+class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes, HasPackageFactory,
-        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
-        SoftDeletes, Trackable;
+        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Mailable,
+        Printable, Searchable, SoftDeletes, Trackable;
 
     protected $with = [
         'currency',
@@ -109,7 +115,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
                 $order->price_list_id = ! $contact->price_list_id || $order->isDirty('price_list_id')
                     ? $order->price_list_id
                     : $contact->price_list_id;
-                $order->payment_type_id = ! $contact->payment_type_id || $order->isDirty('payment_tpe_id')
+                $order->payment_type_id = ! $contact->payment_type_id || $order->isDirty('payment_type_id')
                     ? $order->payment_type_id
                     : $contact->payment_type_id;
                 $order->client_id = ! $contact->client_id || $order->isDirty('client_id')
@@ -367,5 +373,16 @@ class Order extends Model implements HasMedia, InteractsWithDataTables
     public function getAvatarUrl(): ?string
     {
         return $this->contact?->getAvatarUrl() ?: self::icon()->getUrl();
+    }
+
+    public function getPrintViews(): array
+    {
+        return $this->orderType?->order_type_enum->isPurchase()
+            ? []
+            : [
+                'invoice' => Invoice::class,
+                'offer' => Offer::class,
+                'retoure' => Retoure::class,
+            ];
     }
 }

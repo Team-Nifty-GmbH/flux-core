@@ -26,7 +26,6 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SCOUT_DRIVER" value="collection"/>
         <env name="BROADCAST_DRIVER" value="log"/>
-        <env name="GOTENBERG_HOST" value="http://localhost"/>
     </php>
     <source>
         <include>

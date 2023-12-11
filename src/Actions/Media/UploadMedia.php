@@ -76,6 +76,10 @@ class UploadMedia extends FluxAction
             ->storingConversionsOnDisk(config('flux.media.conversion'))
             ->toMediaCollection(collectionName: $this->data['collection_name'], diskName: $diskName);
 
+        if (strtolower($this->data['media_type']) === 'stream') {
+            fclose($this->data['media']);
+        }
+
         return $media->withoutRelations();
     }
 
