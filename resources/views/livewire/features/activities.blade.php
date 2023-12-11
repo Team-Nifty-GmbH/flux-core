@@ -4,7 +4,6 @@
         init() {
             $wire.loadData();
         },
-        activities: $wire.entangle('activities', true),
         activeActivity: null,
         page: $wire.entangle('page', true),
         total: $wire.entangle('total', true),
@@ -16,7 +15,7 @@
 >
     <x-spinner />
     <ul role="list" class="-mb-1">
-        <template x-for="(activity, index) in activities" :key="activity.id">
+        <template x-for="(activity, index) in $wire.activities" :key="activity.id">
             <li class="p-2">
                 <div class="relative pb-1">
                     <div x-bind:class="activity.id === activeActivity && 'border-gray-200 dark:border-secondary-500 rounded-md border'">
@@ -36,7 +35,7 @@
                                                 <div>
                                                     <span class="font-semibold" x-text="name + ':'"></span>
                                                     <span x-html="activity.properties.old && activity.properties.old[name] ? activity.properties.old[name] + '<span> -></span>' : ''"></span>
-                                                    <span x-text="value"></span>
+                                                    <span x-text="typeof(value) === 'undefined' ? '' : value"></span>
                                                 </div>
                                             </template>
                                         </div>

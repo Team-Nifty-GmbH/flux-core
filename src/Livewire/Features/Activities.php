@@ -39,7 +39,7 @@ class Activities extends Component
             ->whereKey($this->modelId)
             ->firstOrFail()
             ->activities()
-            ->with('causer:id,firstname,lastname')
+            ->with('causer:id,name')
             ->latest()
             ->paginate(perPage: $this->perPage * $this->page);
 
@@ -49,7 +49,6 @@ class Activities extends Component
         $this->activities = $activities
             ->map(function ($item) {
                 $itemArray = $item->toArray();
-
                 $itemArray['causer']['name'] = $item->causer?->getLabel() ?: __('Unknown');
                 $itemArray['causer']['avatar_url'] = $item->causer?->getAvatarUrl() ?: Icon::make('user')->getUrl();
                 $itemArray['event'] = __($item->event);

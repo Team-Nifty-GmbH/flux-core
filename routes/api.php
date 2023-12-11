@@ -47,6 +47,7 @@ use FluxErp\Http\Controllers\ProductOptionController;
 use FluxErp\Http\Controllers\ProductOptionGroupController;
 use FluxErp\Http\Controllers\ProductPropertyController;
 use FluxErp\Http\Controllers\ProjectController;
+use FluxErp\Http\Controllers\TagController;
 use FluxErp\Http\Controllers\TaskController;
 use FluxErp\Http\Controllers\RoleController;
 use FluxErp\Http\Controllers\SepaMandateController;
@@ -459,6 +460,12 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::get('/stock-postings', [StockPostingController::class, 'index']);
         Route::post('/stock-postings', [StockPostingController::class, 'create']);
         Route::delete('/stock-postings/{id}', [StockPostingController::class, 'delete']);
+
+        //Tag
+        Route::get('/tags/{id}', [TagController::class, 'show']);
+        Route::get('/tags', [TagController::class, 'index']);
+        Route::post('/tags', [TagController::class, 'create']);
+        Route::delete('/tags/{id}', [TagController::class, 'delete']);
 
         //Tasks
         Route::get('/tasks/{id}', [TaskController::class, 'show']);

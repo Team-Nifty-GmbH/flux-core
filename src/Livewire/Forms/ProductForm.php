@@ -3,16 +3,24 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Product\CreateProduct;
+use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\UpdateProduct;
+use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 class ProductForm extends Form
 {
+    #[Locked]
     public ?int $id = null;
 
     public ?string $name = null;
 
     public ?int $client_id = null;
+
+    public ?int $cover_media_id = null;
+
+    public ?int $parent_id = null;
 
     public ?int $vat_rate_id = null;
 
@@ -78,6 +86,24 @@ class ProductForm extends Form
 
     public ?bool $is_active_export_to_web_shop = false;
 
+    public array $product_cross_sellings = [];
+
+    public array $categories = [];
+
+    public array $tags = [];
+
+    public array $bundle_products = [];
+
+    public ?array $vat_rate = null;
+
+    public array $prices = [];
+
+    public ?string $avatar_url = null;
+
+    public ?int $children_count = null;
+
+    public ?array $parent = null;
+
     public function save(): void
     {
         $action = $this->id
@@ -90,5 +116,49 @@ class ProductForm extends Form
             ->execute();
 
         $this->fill($response);
+    }
+
+    public function fill($values): void
+    {
+        if ($values instanceof Model) {
+            $values->loadMissing([
+                'categories:id',
+                'tags:id',
+                'bundleProducts:id',
+                'vatRate:id,rate_percentage',
+                'parent',
+                'coverMedia',
+            ]);
+
+            $values->append('avatar_url');
+        }
+
+        parent::fill($values);
+
+        $this->categories = array_column($this->categories, 'id');
+        $this->tags = array_column($this->tags, 'id');
+        $this->parent = $this->parent
+            ? [
+                'label' => $values->parent->getLabel(),
+                'url' => $values->parent->getUrl(),
+            ]
+            : null;
+        $this->bundle_products = array_map(function ($bundleProduct) {
+            return [
+                'count' => $bundleProduct['pivot']['count'] ?? 0,
+                'id' => $bundleProduct['pivot']['product_id'] ?? null,
+            ];
+        }, $this->bundle_products);
+
+    }
+
+    public function delete(): void
+    {
+        DeleteProduct::make($this->toArray())
+            ->checkPermission()
+            ->validate()
+            ->execute();
+
+        $this->reset();
     }
 }

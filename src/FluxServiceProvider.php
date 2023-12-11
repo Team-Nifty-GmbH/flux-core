@@ -19,6 +19,7 @@ use FluxErp\Facades\Menu;
 use FluxErp\Facades\Widget;
 use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\MediaLibraryDownloader;
+use FluxErp\Helpers\PdfImageGenerator;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Menu\MenuManager;
@@ -28,8 +29,8 @@ use FluxErp\Models\Order;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\Project;
-use FluxErp\Models\Task;
 use FluxErp\Models\SerialNumber;
+use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
 use FluxErp\Widgets\WidgetManager;
@@ -320,7 +321,6 @@ class FluxServiceProvider extends ServiceProvider
             config([
                 'tinker.alias' => [
                     'FluxErp\\Models\\',
-                    'FluxErp\\Services\\',
                     'FluxErp\\Actions\\',
                 ],
             ]);

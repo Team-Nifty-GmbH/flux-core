@@ -30,6 +30,7 @@ class TabButton implements Htmlable
         ?string $loadingDelay = null,
         ?string $href = null,
         bool $isLivewireComponent = false,
+        ?string $wireModel = null,
         ?array $attributes = []
     ): static {
         return new static(
@@ -48,6 +49,7 @@ class TabButton implements Htmlable
             loadingDelay: $loadingDelay,
             href: $href,
             isLivewireComponent: $isLivewireComponent,
+            wireModel: $wireModel,
             attributes: $attributes,
         );
     }
@@ -68,6 +70,7 @@ class TabButton implements Htmlable
         public ?string $loadingDelay = null,
         public ?string $href = null,
         public bool $isLivewireComponent = false,
+        public ?string $wireModel = null,
         public ?array $attributes = []
     ) {
     }
@@ -136,6 +139,13 @@ class TabButton implements Htmlable
     public function isLivewireComponent(bool $isLivewireComponent = true): static
     {
         $this->isLivewireComponent = $isLivewireComponent;
+
+        return $this;
+    }
+
+    public function wireModel(string $name): static
+    {
+        $this->wireModel = $name;
 
         return $this;
     }

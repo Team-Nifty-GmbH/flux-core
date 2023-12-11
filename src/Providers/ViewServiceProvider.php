@@ -2,9 +2,11 @@
 
 namespace FluxErp\Providers;
 
+use FluxErp\Models\Currency;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\FileViewFinder;
 
@@ -60,5 +62,7 @@ class ViewServiceProvider extends ServiceProvider
         // Register Printing views as blade components
         $views[] = __DIR__ . '/../../resources/views/printing';
         $this->loadViewsFrom($views, 'print');
+
+        View::share('defaultCurrency', Currency::default());
     }
 }
