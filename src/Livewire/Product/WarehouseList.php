@@ -2,14 +2,12 @@
 
 namespace FluxErp\Livewire\Product;
 
-use FluxErp\Actions\StockPosting\CreateStockPosting;
 use FluxErp\Livewire\DataTables\WarehouseList as BaseWarehouseList;
 use FluxErp\Livewire\Forms\ProductForm;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Modelable;
 use TeamNiftyGmbH\DataTable\Helpers\AggregatableRelationColumn;
-use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class WarehouseList extends BaseWarehouseList
 {

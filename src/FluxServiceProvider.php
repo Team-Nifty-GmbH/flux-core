@@ -19,7 +19,6 @@ use FluxErp\Facades\Menu;
 use FluxErp\Facades\Widget;
 use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\MediaLibraryDownloader;
-use FluxErp\Helpers\PdfImageGenerator;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Menu\MenuManager;

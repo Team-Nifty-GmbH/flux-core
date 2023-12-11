@@ -41,7 +41,6 @@ class ProductOptionGroupList extends DataTable
         ]);
     }
 
-
     public function getCellAttributes(): ComponentAttributeBag
     {
         $selectedText = __('Selected');

@@ -6,7 +6,6 @@ use FluxErp\Livewire\DataTables\StockPostingList as BaseStockPostingList;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Modelable;
-use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class StockPostingList extends BaseStockPostingList
 {
