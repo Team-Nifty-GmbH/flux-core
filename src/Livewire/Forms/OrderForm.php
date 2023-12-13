@@ -4,10 +4,12 @@ namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\UpdateOrder;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 class OrderForm extends Form
 {
+    #[Locked]
     public ?int $id = null;
 
     public ?int $client_id = null;

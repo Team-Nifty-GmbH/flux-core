@@ -4,10 +4,12 @@ namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\UpdateProduct;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 class ProductForm extends Form
 {
+    #[Locked]
     public ?int $id = null;
 
     public ?string $name = null;

@@ -164,6 +164,18 @@ document.addEventListener('livewire:init', function() {
     wireNavigation();
 });
 
+document.addEventListener('livewire:init', () => {
+    Livewire.hook('request', ({ fail }) => {
+        fail(({ status, preventDefault }) => {
+            if (status === 419) {
+                window.location.reload();
+
+                preventDefault()
+            }
+        })
+    })
+})
+
 function wireNavigation() {
     let links = [...document.querySelectorAll('a[href]')].filter(link => {
         let hrefValue = link.getAttribute('href').trim();

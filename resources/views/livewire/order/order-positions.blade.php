@@ -108,7 +108,7 @@
                     <x-button flat :label="__('Cancel')" x-on:click="close" />
                     <x-button
                             primary
-                            x-show="!order.is_locked"
+                            x-show="!$wire.$parent.order.is_locked"
                             x-on:click="$wire.save(livewireSelectedOrderPosition, orderPositions).then((data) => {
                                 syncToOrder();
                                 if(data !== false) {
@@ -127,7 +127,7 @@
         <div class="ml:p-10 relative min-h-full space-y-6">
             <div>
                 @include('tall-datatables::livewire.data-table')
-                <div x-show="! order.is_locked" class="sticky bottom-6 pt-6">
+                <div x-show="! $wire.$parent.order.is_locked" class="sticky bottom-6 pt-6">
                     <x-card class="flex gap-4">
                         <x-button
                                 :label="__('Add position')"

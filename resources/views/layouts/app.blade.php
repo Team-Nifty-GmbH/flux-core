@@ -6,6 +6,13 @@
 <body class="dark:bg-secondary-900 h-full bg-slate-50 transition duration-300">
     <x-notifications z-index="z-50"></x-notifications>
     <x-dialog z-index="z-40" blur="md" align="center"/>
+    @auth()
+        @persist('mail')
+            <div id="mail">
+                <livewire:edit-mail/>
+            </div>
+        @endpersist
+    @endauth
     <div x-data="{ open: false }" @keydown.window.escape="open = false" class="flex h-screen w-full flex-col">
         @if(auth()->check())
             @persist('navigation')

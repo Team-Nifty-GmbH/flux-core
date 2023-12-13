@@ -5,22 +5,29 @@ namespace FluxErp\Livewire\Order;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
+use FluxErp\Actions\Printing;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Language;
+use FluxErp\Models\Media;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Services\PrintService;
 use FluxErp\Traits\Livewire\WithTabs;
+use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
+use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use WireUi\Traits\Actions;
-use ZipArchive;
 
 class Order extends Component
 {
@@ -63,7 +70,7 @@ class Order extends Component
                 'contact.media',
                 'contact.contactBankConnections:id,contact_id,iban',
                 'currency:id,iso,name,symbol',
-                'orderType:id,name,print_layouts,order_type_enum',
+                'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
             ])
             ->firstOrFail();
 
@@ -71,8 +78,6 @@ class Order extends Component
             $order->orderType?->print_layouts ?: [],
             array_keys($order->resolvePrintViews())
         );
-
-        $this->selectedPrintLayouts = array_fill_keys(array_keys($this->printLayouts), false);
 
         $this->order = $order->toArray();
         $this->order['contact']['avatar_url'] = $order->contact?->getAvatarUrl();
@@ -196,44 +201,141 @@ class Order extends Component
         }
     }
 
-    public function downloadDocuments()
+    #[Renderless]
+    public function downloadPreview(string $view): ?StreamedResponse
     {
-        $selected = array_keys(array_filter($this->selectedPrintLayouts, fn ($value) => $value === true));
-        if ($selected) {
-            $printService = new PrintService();
+        try {
+            $pdf = Printing::make([
+                'model_type' => \FluxErp\Models\Order::class,
+                'model_id' => $this->order['id'],
+                'view' => $view,
+                'preview' => true,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
 
-            $pdfs = [];
-            foreach ($selected as $view) {
-                $pdfs[] = [
-                    'file' => $printService->viewToPdf(
-                        $view,
-                        \FluxErp\Models\Order::class,
-                        $this->order['id']
-                    )
-                        ->body(),
-                    'filename' => $view . '_' . $this->order['id'] . '.pdf',
-                ];
+            return null;
+        }
+
+        return response()->streamDownload(
+            fn () => print($pdf->pdf->output()),
+            Str::finish($pdf->getFileName(), '.pdf')
+        );
+    }
+
+    #[Renderless]
+    public function createDocuments(): null|MediaStream|Media
+    {
+        $order = \FluxErp\Models\Order::query()
+            ->whereKey($this->order['id'])
+            ->with('addresses')
+            ->first();
+        $hash = md5(json_encode($order->toArray()) . json_encode($order->orderPositions->toArray()));
+
+        $createDocuments = [];
+        foreach ($this->selectedPrintLayouts as $type => $selectedPrintLayout) {
+            $this->selectedPrintLayouts[$type] = array_filter($selectedPrintLayout);
+            $createDocuments = array_unique(
+                array_merge(
+                    $createDocuments,
+                    array_keys($this->selectedPrintLayouts[$type]))
+            );
+        }
+
+        // create the documents
+        $mediaIds = [];
+        $downloadIds = [];
+        $printIds = [];
+        $mailAttachments = [];
+        foreach ($createDocuments as $createDocument) {
+            $media = $order->getMedia(
+                $createDocument,
+                fn (BaseMedia $media) => $media->getCustomProperty('hash') === $hash
+            )
+                ->last();
+
+            if (! $media || ($this->selectedPrintLayouts['force'][$createDocument] ?? false)) {
+                try {
+                    /** @var PrintableView $file */
+                    $file = Printing::make([
+                        'model_type' => \FluxErp\Models\Order::class,
+                        'model_id' => $this->order['id'],
+                        'view' => $createDocument,
+                    ])->checkPermission()->validate()->execute();
+
+                    $media = $file->attachToModel();
+                    $media->setCustomProperty('hash', $hash)->save();
+                } catch (ValidationException|UnauthorizedException $e) {
+                    exception_to_notifications($e, $this);
+
+                    continue;
+                }
             }
 
-            if (count($pdfs) === 1) {
-                return response()->streamDownload(function () use ($pdfs) {
-                    echo $pdfs[0]['file'];
-                }, $pdfs[0]['filename']);
-            } else {
-                $zip = new ZipArchive();
-                $zip->open('documents.zip', ZipArchive::CREATE);
+            $mediaIds[$createDocument] = $media->id;
 
-                foreach ($pdfs as $pdf) {
-                    $zip->addFromString($pdf['filename'], $pdf['file']);
-                }
+            if ($this->selectedPrintLayouts['download'][$createDocument] ?? false) {
+                $downloadIds[] = $media->id;
+            }
 
-                $zip->close();
+            if ($this->selectedPrintLayouts['print'][$createDocument] ?? false) {
+                // TODO: add to print queue for spooler
+                $printIds[] = $media->id;
+            }
 
-                return response()->download('documents.zip', $zip->filename)->deleteFileAfterSend();
+            if ($this->selectedPrintLayouts['email'][$createDocument] ?? false) {
+                $mailAttachments[] = [
+                    'name' => $media->file_name,
+                    'id' => $media->id,
+                ];
             }
         }
 
-        $this->skipRender();
+        if (($this->selectedPrintLayouts['email'] ?? false) && $mailAttachments) {
+            $to = [];
+
+            $to[] = in_array('invoice', $createDocuments) && $order->contact->invoiceAddress
+                ? $order->contact->invoiceAddress->email
+                : $order->contact->mainAddress->email;
+
+            if (array_keys($this->selectedPrintLayouts['email']) !== ['invoice']
+                && $order->contact->mainAddress->email
+            ) {
+                $to[] = $order->contact->mainAddress->email;
+            }
+
+            $this->dispatch(
+                'create',
+                [
+                    'to' => array_unique($to),
+                    'subject' => Blade::render(
+                        html_entity_decode($this->order['order_type']['mail_subject']),
+                        ['order' => $order]
+                    ) ?: $this->order['order_type']['name'] . ' ' . $this->order['order_number'],
+                    'attachments' => $mailAttachments,
+                    'html_body' => Blade::render(
+                        html_entity_decode($this->order['order_type']['mail_body']),
+                        ['order' => $order]
+                    ),
+                ]
+            )->to('edit-mail');
+        }
+
+        if ($downloadIds) {
+            $files = Media::query()
+                ->whereIntegerInRaw('id', $downloadIds)
+                ->get();
+
+            if ($files->count() === 1) {
+                return $files->first();
+            }
+
+            return MediaStream::create($this->order['order_type']['name'] . '_' . $this->order['order_number'] . '.zip')
+                ->addMedia($files);
+        }
 
         return null;
     }

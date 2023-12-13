@@ -5,10 +5,12 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Project\CreateProject;
 use FluxErp\Actions\Project\UpdateProject;
 use Illuminate\Support\Arr;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 class ProjectForm extends Form
 {
+    #[Locked]
     public ?int $id = null;
 
     public ?int $contact_id = null;

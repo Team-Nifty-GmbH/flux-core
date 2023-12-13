@@ -3,44 +3,50 @@
         init() {
             var meta = document.createElement('meta');
             meta.name = 'currency-code';
-            meta.content = this.order.currency.iso;
+            meta.content = $wire.order.currency.iso;
             document.getElementsByTagName('head')[0].appendChild(meta);
         },
-        order: $wire.entangle('order'),
-        tab: $wire.entangle('tab').live,
-        formatter: @js(\FluxErp\Models\Order::typeScriptAttributes()),
         orderPositions: [],
-        createDocuments: false,
+        preview: null,
+        formatter: @js(\FluxErp\Models\Order::typeScriptAttributes()),
     }"
 >
     @section('modals')
-        <x-modal.card id="preview" :fullscreen="true"  :title="__('Preview')">
+        <x-modal.card id="preview" :fullscreen="true" :title="__('Preview')">
             <iframe id="preview-iframe" src="#" loading="lazy" class="w-full min-h-screen"></iframe>
-            <x-slot name="footer">
+            <x-slot:footer>
                 <div class="flex justify-end gap-x-4">
                     <div class="flex">
-                        <x-button flat label="Cancel" x-on:click="close" />
-                        <x-button primary label="Save" wire:click="save" />
+                        <x-button flat :label="__('Cancel')" x-on:click="close" />
+                        <x-button spinner primary :label="__('Download')" wire:click="downloadPreview(preview)" />
                     </div>
                 </div>
-            </x-slot>
+            </x-slot:footer>
         </x-modal.card>
-    @show
-    @section('create-documents-sidebar')
-        <x-sidebar x-show="createDocuments">
-            @section('create-documents-sidebar.content')
-                @foreach($printLayouts as $printLayout)
-                    <x-checkbox wire:model="selectedPrintLayouts.{{ $printLayout }}" :label="__($printLayout)" />
-                @endforeach
-            @show
-            <x-slot name="footer">
-                @section('create-documents-sidebar.footer')
-                    <x-button spinner primary x-on:click="$wire.downloadDocuments()">
-                        {{ __('Download') }}
-                    </x-button>
-                @show
-            </x-slot>
-        </x-sidebar>
+        <x-modal name="create-documents">
+            <x-card :title="__('Create Documents')">
+                <div class="grid grid-cols-4 gap-1.5">
+                    <div class="font-semibold text-sm">{{ __('Print') }}</div>
+                    <div class="font-semibold text-sm">{{ __('Email') }}</div>
+                    <div class="font-semibold text-sm">{{ __('Download') }}</div>
+                    <div class="font-semibold text-sm">{{ __('Force Create') }}</div>
+                    @foreach($printLayouts as $printLayout)
+                        <x-checkbox wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}" :label="__($printLayout)" />
+                        <x-checkbox wire:model.boolean="selectedPrintLayouts.email.{{ $printLayout }}" :label="__($printLayout)" />
+                        <x-checkbox wire:model.boolean="selectedPrintLayouts.download.{{ $printLayout }}" :label="__($printLayout)" />
+                        <x-checkbox wire:model.boolean="selectedPrintLayouts.force.{{ $printLayout }}" :label="__($printLayout)" />
+                    @endforeach
+                </div>
+                <x-slot:footer>
+                    <div class="flex justify-end gap-x-4">
+                        <div class="flex">
+                            <x-button flat :label="__('Cancel')" x-on:click="close" />
+                            <x-button primary :label="__('Continue')" spinner wire:click="createDocuments().then(() => { close(); });" />
+                        </div>
+                    </div>
+                </x-slot:footer>
+            </x-card>
+        </x-modal>
     @show
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
@@ -49,16 +55,16 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
-                        <x-heroicons x-show="order.is_locked" variant="solid" name="lock-closed" />
-                        <x-heroicons x-show="! order.is_locked" variant="solid" name="lock-open" />
+                        <x-heroicons x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
+                        <x-heroicons x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
                         <div class="pl-2">
-                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="order.order_type.name">
+                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.order_type.name">
                             </span>
-                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="order.invoice_number ? order.invoice_number : (order.order_number || order.id)">
+                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.invoice_number ? $wire.order.invoice_number : ($wire.order.order_number || $wire.order.id)">
                             </span>
                         </div>
                     </div>
-                    <span x-text="order.address_invoice.description"></span>
+                    <span x-text="$wire.order.address_invoice.description"></span>
                 </h1>
             </div>
         </div>
@@ -124,13 +130,13 @@
                             ]"
                             />
                         <div class="text-sm">
-                            <div x-text="order.address_invoice.company">
+                            <div x-text="$wire.order.address_invoice.company">
                             </div>
-                            <div x-text="(order.address_invoice.firstname + ' ' + order.address_invoice.lastname).trim()">
+                            <div x-text="($wire.order.address_invoice.firstname + ' ' + $wire.order.address_invoice.lastname).trim()">
                             </div>
-                            <div x-text="order.address_invoice.street">
+                            <div x-text="$wire.order.address_invoice.street">
                             </div>
-                            <div x-text="(order.address_invoice.zip + ' ' + order.address_invoice.city).trim()">
+                            <div x-text="($wire.order.address_invoice.zip + ' ' + $wire.order.address_invoice.city).trim()">
                             </div>
                         </div>
                     </x-card>
@@ -165,14 +171,14 @@
                                     ],
                                 ]
                             ]" />
-                        <div class="text-sm" x-bind:class="order.address_delivery_id === order.address_invoice_id && 'hidden'">
-                            <div x-text="order.address_delivery?.company">
+                        <div class="text-sm" x-bind:class="$wire.order.address_delivery_id === $wire.order.address_invoice_id && 'hidden'">
+                            <div x-text="$wire.order.address_delivery?.company">
                             </div>
-                            <div x-text="((order.address_delivery?.firstname ?? '') + ' ' + (order.address_delivery?.lastname ?? '')).trim()">
+                            <div x-text="(($wire.order.address_delivery?.firstname ?? '') + ' ' + ($wire.order.address_delivery?.lastname ?? '')).trim()">
                             </div>
-                            <div x-text="order.address_delivery?.street">
+                            <div x-text="$wire.order.address_delivery?.street">
                             </div>
-                            <div x-text="((order.address_delivery?.zip ?? '') + ' ' + (order.address_delivery?.city ?? '')).trim()">
+                            <div x-text="(($wire.order.address_delivery?.zip ?? '') + ' ' + ($wire.order.address_delivery?.city ?? '')).trim()">
                             </div>
                         </div>
                     </x-card>
@@ -216,7 +222,7 @@
                                 :clearable="false"
                                 autocomplete="off"
                                 wire:model.live="order.price_list_id"
-                                x-bind:disabled="order.is_locked"
+                                x-bind:disabled="$wire.order.is_locked"
                             />
                             <x-select
                                 :label="__('Payment method')"
@@ -226,7 +232,7 @@
                                 :clearable="false"
                                 autocomplete="off"
                                 wire:model.live="order.payment_type_id"
-                                x-bind:disabled="order.is_locked"
+                                x-bind:disabled="$wire.order.is_locked"
                             />
                             <x-select
                                 :label="__('Language')"
@@ -236,7 +242,7 @@
                                 :clearable="false"
                                 autocomplete="off"
                                 wire:model="order.language_id"
-                                x-bind:disabled="order.is_locked"
+                                x-bind:disabled="$wire.order.is_locked"
                             />
                         </div>
                     </x-card>
@@ -284,29 +290,20 @@
                                         <x-button
                                             primary
                                             class="w-full"
-                                            x-on:click="createDocuments = true"
-                                            :label="__('Send documents')"
-                                        />
-                                        <x-button
-                                            class="w-full"
-                                            x-on:click="createDocuments = true"
-                                            :label="__('Download documents')"
-                                        />
-                                        <x-button
-                                            class="w-full"
-                                            x-on:click="createDocuments = true"
-                                            :label="__('Print documents')"
+                                            icon="document-text"
+                                            x-on:click="$openModal('create-documents')"
+                                            :label="__('Create Documents')"
                                         />
                                         <div class="dropdown-full-w">
                                             <x-dropdown width="w-full">
                                                 <x-slot name="trigger">
-                                                    <x-button class="w-full">
+                                                    <x-button class="w-full" icon="search">
                                                         {{ __('Preview') }}
                                                     </x-button>
                                                 </x-slot>
                                                 @foreach($printLayouts as $printLayout)
                                                     <x-dropdown.item
-                                                        x-on:click="const preview = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['model_id' => $order['id'], 'view' => $printLayout, 'model_type' => \FluxErp\Models\Order::class, '']) }}'; $openModal(preview)">
+                                                        x-on:click="const previewNode = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['model_id' => $order['id'], 'view' => $printLayout, 'model_type' => \FluxErp\Models\Order::class, '']) }}'; $openModal(previewNode); preview = '{{ $printLayout }}';">
                                                         {{ __($printLayout) }}
                                                     </x-dropdown.item>
                                                 @endforeach
@@ -318,16 +315,16 @@
                         </x-card>
                         <x-card>
                             <div class="text-sm">
-                                <div class="flex justify-between py-2.5" x-model="order">
+                                <div class="flex justify-between py-2.5">
                                     <div>
                                         {{ __('Sum net') }}
                                     </div>
                                     <div>
-                                        <span x-html="formatters.coloredMoney(order.total_net_price)">
+                                        <span x-html="formatters.coloredMoney($wire.order.total_net_price)">
                                         </span>
                                     </div>
                                 </div>
-                                <template x-for="vat in order.total_vats">
+                                <template x-for="vat in $wire.order.total_vats">
                                     <div class="flex justify-between py-2.5">
                                         <div>
                                             <span>{{ __('Plus ') }}</span>
@@ -345,7 +342,7 @@
                                         {{ __('Total gross') }}
                                     </div>
                                     <div>
-                                        <span x-html="formatters.coloredMoney(order.total_gross_price)">
+                                        <span x-html="formatters.coloredMoney($wire.order.total_gross_price)">
                                         </span>
                                     </div>
                                 </div>
@@ -365,11 +362,11 @@
                     <x-card>
                         <div class="grid grid-cols-3 auto-cols-max gap-1">
                             <span class="">{{ __('Created At') }}:</span>
-                            <span x-text="window.formatters.datetime(order.created_at)"></span>
-                            <span x-text="order.created_by?.name"></span>
+                            <span x-text="window.formatters.datetime($wire.order.created_at)"></span>
+                            <span x-text="$wire.order.created_by?.name"></span>
                             <span class="">{{ __('Updated At') }}:</span>
-                            <span x-text="window.formatters.datetime(order.updated_at)"></span>
-                            <span x-text="order.updated_by?.name"></span>
+                            <span x-text="window.formatters.datetime($wire.order.updated_at)"></span>
+                            <span x-text="$wire.order.updated_by?.name"></span>
                         </div>
                     </x-card>
                 </div>
