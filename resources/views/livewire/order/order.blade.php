@@ -12,7 +12,7 @@
     }"
 >
     @section('modals')
-        <x-modal.card id="preview" :fullscreen="true" :title="__('Preview')">
+        <x-modal.card id="preview" max-width="6xl" :title="__('Preview')">
             <iframe id="preview-iframe" src="#" loading="lazy" class="w-full min-h-screen"></iframe>
             <x-slot:footer>
                 <div class="flex justify-end gap-x-4">
