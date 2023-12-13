@@ -36,9 +36,9 @@ class VatRates extends VatRateList
                 ->icon('plus')
                 ->color('primary')
                 ->when(CreateVatRate::canPerformAction(false))
-                ->attributes(
-                    ['wire:click' => 'edit']
-                ),
+                ->attributes([
+                    'wire:click' => 'edit',
+                ]),
         ];
     }
 

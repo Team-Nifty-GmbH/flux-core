@@ -36,9 +36,9 @@ class WorkTimeTypes extends WorkTimeTypeList
                 ->icon('plus')
                 ->color('primary')
                 ->when(CreateWorkTimeType::canPerformAction(false))
-                ->attributes(
-                    ['wire:click' => 'edit']
-                ),
+                ->attributes([
+                    'wire:click' => 'edit',
+                ]),
         ];
     }
 

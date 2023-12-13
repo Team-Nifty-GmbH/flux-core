@@ -2,9 +2,9 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Actions\paymentType\CreatepaymentType;
-use FluxErp\Actions\paymentType\DeletepaymentType;
-use FluxErp\Actions\paymentType\UpdatepaymentType;
+use FluxErp\Actions\paymentType\CreatePaymentType;
+use FluxErp\Actions\paymentType\DeletePaymentType;
+use FluxErp\Actions\paymentType\UpdatePaymentType;
 use FluxErp\Livewire\DataTables\PaymentTypeList;
 use FluxErp\Livewire\Forms\PaymentTypeForm;
 use FluxErp\Models\Client;
@@ -36,10 +36,10 @@ class PaymentTypes extends PaymentTypeList
                 ->label(__('New'))
                 ->icon('plus')
                 ->color('primary')
-                ->when(CreatepaymentType::canPerformAction(false))
-                ->attributes(
-                    ['wire:click' => 'edit']
-                ),
+                ->when(CreatePaymentType::canPerformAction(false))
+                ->attributes([
+                    'wire:click' => 'edit',
+                ]),
         ];
     }
 
@@ -63,7 +63,7 @@ class PaymentTypes extends PaymentTypeList
                 ->label(__('Edit'))
                 ->icon('pencil')
                 ->color('primary')
-                ->when(UpdatepaymentType::canPerformAction(false))
+                ->when(UpdatePaymentType::canPerformAction(false))
                 ->attributes(
                     ['wire:click' => 'edit(record.id)']
                 ),
@@ -98,7 +98,7 @@ class PaymentTypes extends PaymentTypeList
     public function delete(): bool
     {
         try {
-            DeletepaymentType::make($this->paymentType->toArray())
+            DeletePaymentType::make($this->paymentType->toArray())
                 ->checkPermission()
                 ->validate()
                 ->execute();

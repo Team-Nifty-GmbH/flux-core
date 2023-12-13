@@ -35,7 +35,7 @@
                                 :label="__('Delete')"
                                 x-on:click="close"
                                 wire:click="delete().then((success) => { if(success) close()})"
-                                wire:confirm.icon.error="{{ __('Delete serial number range') }}|{{ __('Do you really want to delete this serial number range?') }}|{{ __('Cancel') }}|{{ __('Delete') }}"
+                                wire:confirm.icon.error="{{ trans('wire:confirm.delete', ['model' => __('Serial Number Range')]) }}"
                             />
                         </div>
                     @endif

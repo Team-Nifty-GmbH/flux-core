@@ -2,9 +2,9 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use FluxErp\Actions\SerialNumberRange\CreateSerialNumberRange;
 use FluxErp\Actions\SerialNumberRange\DeleteSerialNumberRange;
 use FluxErp\Actions\SerialNumberRange\UpdateSerialNumberRange;
-use FluxErp\Actions\VatRate\CreateVatRate;
 use FluxErp\Livewire\DataTables\SerialNumberRangeList;
 use FluxErp\Livewire\Forms\SerialNumberRangeForm;
 use FluxErp\Models\Client;
@@ -55,10 +55,10 @@ class SerialNumberRanges extends SerialNumberRangeList
                 ->label(__('New'))
                 ->icon('plus')
                 ->color('primary')
-                ->when(CreateVatRate::canPerformAction(false))
-                ->attributes(
-                    ['wire:click' => 'edit']
-                ),
+                ->when(CreateSerialNumberRange::canPerformAction(false))
+                ->attributes([
+                    'wire:click' => 'edit',
+                ]),
         ];
     }
 

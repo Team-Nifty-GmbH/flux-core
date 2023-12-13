@@ -16,7 +16,7 @@
                                 :label="__('Delete')"
                                 x-on:click="close"
                                 wire:click="delete().then((success) => { if(success) close()})"
-                                wire:confirm.icon.error="{{ __('Delete vat rate') }}|{{ __('Do you really want to delete this vat rate?') }}|{{ __('Cancel') }}|{{ __('Delete') }}"
+                                wire:confirm.icon.error="{{ trans('wire:confirm.delete', ['model' => __('Vat Rate')]) }}"
                             />
                         </div>
                     @endif
