@@ -6,6 +6,7 @@ use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\Forms\ProductForm;
+use FluxErp\Models\Product;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -45,13 +46,12 @@ class VariantList extends ProductList
         ];
 
         $groups = ProductOptionGroup::query()
-            ->select(['id'])
-            ->get()
+            ->get(['id'])
             ->pluck('id')
             ->toArray();
         $this->selectedOptions = array_fill_keys($groups, []);
 
-        \FluxErp\Models\Product::query()
+        Product::query()
             ->whereKey($this->product->id)
             ->with('children:id,parent_id')
             ->first()
@@ -107,7 +107,7 @@ class VariantList extends ProductList
 
         $this->variants = [];
         foreach ($activeProductOptionCombinations as $activeProductOption) {
-            if (! $product = \FluxErp\Models\Product::query()
+            if (! $product = Product::query()
                 ->where('parent_id', $this->product->id)
                 ->whereHas('productOptions', function (Builder $query) use ($activeProductOption) {
                     return $query
@@ -124,7 +124,7 @@ class VariantList extends ProductList
             }
         }
 
-        $this->variants['delete'] = \FluxErp\Models\Product::query()
+        $this->variants['delete'] = Product::query()
             ->select('id')
             ->where('parent_id', $this->product->id)
             ->whereNotIn('id', $this->variants['existing'] ?? [])

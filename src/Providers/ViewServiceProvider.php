@@ -5,7 +5,6 @@ namespace FluxErp\Providers;
 use FluxErp\Models\Currency;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
-use Illuminate\Database\Migrations\Migrator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;

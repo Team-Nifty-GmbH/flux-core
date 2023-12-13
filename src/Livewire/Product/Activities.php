@@ -13,7 +13,7 @@ class Activities extends BaseActivities
 
     public string $modelType = \FluxErp\Models\Product::class;
 
-    public function mount()
+    public function mount(): void
     {
         $this->modelId = $this->product->id;
     }

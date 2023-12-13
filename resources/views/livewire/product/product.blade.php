@@ -21,7 +21,7 @@
                         </div>
                     </div>
                 </h1>
-                <a wire:navigate class="flex gap-1.5 font-semibold opacity-40" x-bind:href="$wire.product.parent?.url" x-cloak x-show="$wire.product.parent?.url">
+                <a wire:navigate class="flex gap-1.5 font-semibold opacity-40 dark:text-gray-200" x-bind:href="$wire.product.parent?.url" x-cloak x-show="$wire.product.parent?.url">
                     <x-heroicons name="link" class="w-4 h-4" />
                     <span x-text="$wire.product.parent?.label">
                     </span>

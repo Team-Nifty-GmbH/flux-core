@@ -22,12 +22,12 @@ class TagController extends BaseController
 
     public function create(CreateTagRequest $request): JsonResponse
     {
-        $Tag = CreateTag::make($request->validated())
+        $tag = CreateTag::make($request->validated())
             ->execute();
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
-            data: $Tag,
+            data: $tag,
             statusMessage: 'tag created'
         );
     }
@@ -44,8 +44,8 @@ class TagController extends BaseController
             try {
                 $responses[] = ResponseHelper::createArrayResponse(
                     statusCode: 200,
-                    data: $Tag = UpdateTag::make($item)->validate()->execute(),
-                    additions: ['id' => $Tag->id]
+                    data: $tag = UpdateTag::make($item)->validate()->execute(),
+                    additions: ['id' => $tag->id]
                 );
             } catch (ValidationException $e) {
                 $responses[] = ResponseHelper::createArrayResponse(

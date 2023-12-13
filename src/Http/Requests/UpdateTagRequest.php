@@ -16,7 +16,7 @@ class UpdateTagRequest extends BaseFormRequest
                 'max:255',
             ],
             'color' => 'nullable|hex_color',
-            'order_column' => 'nullable|integer',
+            'order_column' => 'nullable|integer|min:0',
         ];
     }
 }

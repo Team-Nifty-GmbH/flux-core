@@ -442,6 +442,7 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::get('/tags/{id}', [TagController::class, 'show']);
         Route::get('/tags', [TagController::class, 'index']);
         Route::post('/tags', [TagController::class, 'create']);
+        Route::put('/tags', [TagController::class, 'update']);
         Route::delete('/tags/{id}', [TagController::class, 'delete']);
 
         //Tasks

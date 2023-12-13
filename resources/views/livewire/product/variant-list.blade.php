@@ -71,7 +71,7 @@
                         primary
                         spinner
                         :label="__('Save')"
-                        wire:confirm.icon.error="{{ __('Save Variants') }}|{{ __('Non existing product option combinations will be deleted!') }}\n{{ __('') }}|{{ __('Cancel') }}|{{ __('OK') }}"
+                        wire:confirm.icon.error="{{ __('Save Variants') }}|{{ __('Non existing product option combinations will be deleted!') }}|{{ __('Cancel') }}|{{ __('OK') }}"
                         wire:click="save().then(() => { close(); })"
                     />
                 </div>

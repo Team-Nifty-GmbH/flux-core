@@ -22,7 +22,7 @@
                 <x-button flat squared x-on:click="editor().chain().focus().toggleStrike().run()" class="line-through" label="S"></x-button>
             @endif
             @if($code)
-                <x-button flat squared x-on:click="editor().chain().focus().toggleCode().run()" icon="code" label=" "/>
+                <x-button flat squared x-on:click="editor().chain().focus().toggleCode().run()" icon="code" :label="null"/>
             @endif
             @if($h1)
                 <x-button flat squared x-on:click="editor().chain().focus().toggleHeading({ level: 1 }).run()" label="H1"></x-button>
@@ -56,8 +56,10 @@
                 <x-button flat squared x-on:click="editor().chain().focus().toggleBlockquote().run()" label="„“" />
             @endif
             @if($codeBlock)
-                <x-button flat squared x-on:click="editor().chain().focus().toggleCodeBlock().run()" label=" ">
-                    <x-heroicons name="code-bracket-square" class="w-4 h-4"/>
+                <x-button flat squared x-on:click="editor().chain().focus().toggleCodeBlock().run()">
+                    <x-slot:label>
+                        <x-heroicons name="code-bracket-square" class="w-4 h-4"/>
+                    </x-slot:label>
                 </x-button>
             @endif
         </div>

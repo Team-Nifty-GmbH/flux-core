@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\Product;
 
 use FluxErp\Livewire\DataTables\WarehouseList as BaseWarehouseList;
 use FluxErp\Livewire\Forms\ProductForm;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Modelable;
 use TeamNiftyGmbH\DataTable\Helpers\AggregatableRelationColumn;
@@ -42,9 +41,16 @@ class WarehouseList extends BaseWarehouseList
 
     public function getAggregatableRelationCols(): array
     {
-        return [AggregatableRelationColumn::make(['stockPostings' => function ($query) {
-            $query->where('product_id', $this->product->id);
-        }], 'posting')];
+        return [
+            AggregatableRelationColumn::make(
+                [
+                    'stockPostings' => function ($query) {
+                        $query->where('product_id', $this->product->id);
+                    },
+                ],
+                'posting'
+            ),
+        ];
     }
 
     public function getColLabels(?array $cols = null): array
@@ -58,18 +64,8 @@ class WarehouseList extends BaseWarehouseList
     {
         return new ComponentAttributeBag([
             'x-bind:class' => <<<'JS'
-                    record.id === $wire.warehouseId && 'bg-primary-100'
+                    record.id === $wire.warehouseId && 'bg-primary-100 dark:bg-primary-800'
                 JS,
         ]);
-    }
-
-    public function getBuilder(Builder $builder): Builder
-    {
-        foreach ($this->getAggregatableRelationCols() as $aggregatableRelationCol) {
-            $builder->withAggregate($aggregatableRelationCol->relation, $aggregatableRelationCol->column, $aggregatableRelationCol
-            ->function);
-        }
-
-        return $builder;
     }
 }

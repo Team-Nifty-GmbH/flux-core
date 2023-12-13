@@ -150,6 +150,6 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
     {
         return $this->coverMedia?->getUrl('thumb')
             ?? $this->getFirstMedia('images')?->getUrl('thumb')
-            ?? self::icon()->getUrl();
+            ?? static::icon()->getUrl();
     }
 }
