@@ -46,9 +46,9 @@ class VariantList extends ProductList
         ];
 
         $groups = ProductOptionGroup::query()
-            ->get(['id'])
             ->pluck('id')
             ->toArray();
+
         $this->selectedOptions = array_fill_keys($groups, []);
 
         Product::query()
