@@ -124,7 +124,8 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('images')->useDisk('public');
+        $this->addMediaCollection('images')
+            ->useDisk('public');
     }
 
     public function getLabel(): ?string
@@ -147,6 +148,8 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->coverMedia()->first()?->getUrl() ?: $this->getFirstMediaUrl('images') ?: self::icon()->getUrl();
+        return $this->coverMedia?->getUrl('thumb')
+            ?? $this->getFirstMedia('images')?->getUrl('thumb')
+            ?? static::icon()->getUrl();
     }
 }

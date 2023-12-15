@@ -36,11 +36,11 @@ class DeleteWarehouse extends FluxAction
         if (Warehouse::query()
             ->whereKey($this->data['id'])
             ->first()
-            ->children()
+            ->stockPostings()
             ->count() > 0
         ) {
             throw ValidationException::withMessages([
-                'children' => [__('The given warehouse has children')],
+                'stock_postings' => [__('The given warehouse has stock postings')],
             ])->errorBag('deleteWarehouse');
         }
     }

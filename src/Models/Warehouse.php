@@ -23,7 +23,7 @@ class Warehouse extends Model
         'id',
     ];
 
-    public function children(): HasMany
+    public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class, 'warehouse_id');
     }
