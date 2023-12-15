@@ -22,7 +22,7 @@
                     @endcan
                     <x-dropdown.item :label="__('Delete')"
                          x-bind:disabled="! comment.is_current_user"
-                         wire:click="delete()"
+                         wire:click="delete(comment.id)"
                          wire:confirm.icon.error="{{ __('Delete comment') }}|{{ __('Do you really want to delete this comment?') }}|{{ __('Cancel') }}|{{ __('Delete') }}"
                     />
                 </x-dropdown>

@@ -36,7 +36,7 @@ class ProductOptionGroupList extends DataTable
     {
         return new ComponentAttributeBag([
             'x-bind:class' => <<<'JS'
-                record.id === productOptionGroup?.id && 'bg-primary-100'
+                record.id === productOptionGroup?.id && 'bg-primary-100 dark:bg-primary-800'
             JS,
         ]);
     }
