@@ -2,9 +2,9 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Actions\paymentType\CreatePaymentType;
-use FluxErp\Actions\paymentType\DeletePaymentType;
-use FluxErp\Actions\paymentType\UpdatePaymentType;
+use FluxErp\Actions\PaymentType\CreatePaymentType;
+use FluxErp\Actions\PaymentType\DeletePaymentType;
+use FluxErp\Actions\PaymentType\UpdatePaymentType;
 use FluxErp\Livewire\DataTables\PaymentTypeList;
 use FluxErp\Livewire\Forms\PaymentTypeForm;
 use FluxErp\Models\Client;
@@ -64,9 +64,9 @@ class PaymentTypes extends PaymentTypeList
                 ->icon('pencil')
                 ->color('primary')
                 ->when(UpdatePaymentType::canPerformAction(false))
-                ->attributes(
-                    ['wire:click' => 'edit(record.id)']
-                ),
+                ->attributes([
+                    'wire:click' => 'edit(record.id)',
+                ]),
         ];
     }
 

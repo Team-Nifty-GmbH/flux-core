@@ -50,9 +50,9 @@ class WorkTimeTypes extends WorkTimeTypeList
                 ->icon('pencil')
                 ->color('primary')
                 ->when(UpdateWorkTimeType::canPerformAction(false))
-                ->attributes(
-                    ['wire:click' => 'edit(record.id)']
-                ),
+                ->attributes([
+                    'wire:click' => 'edit(record.id)',
+                ]),
         ];
     }
 

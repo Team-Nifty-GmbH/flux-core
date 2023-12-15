@@ -70,9 +70,9 @@ class SerialNumberRanges extends SerialNumberRangeList
                 ->icon('pencil')
                 ->color('primary')
                 ->when(UpdateSerialNumberRange::canPerformAction(false))
-                ->attributes(
-                    ['wire:click' => 'edit(record.id)']
-                ),
+                ->attributes([
+                    'wire:click' => 'edit(record.id)',
+                ]),
         ];
     }
 

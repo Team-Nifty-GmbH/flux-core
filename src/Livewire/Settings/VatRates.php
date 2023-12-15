@@ -50,9 +50,9 @@ class VatRates extends VatRateList
                 ->icon('pencil')
                 ->color('primary')
                 ->when(UpdateVatRate::canPerformAction(false))
-                ->attributes(
-                    ['wire:click' => 'edit(record.id)']
-                ),
+                ->attributes([
+                    'wire:click' => 'edit(record.id)',
+                ]),
         ];
     }
 

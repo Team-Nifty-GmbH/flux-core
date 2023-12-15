@@ -15,7 +15,7 @@
                                 :label="__('Delete')"
                                 x-on:click="close"
                                 wire:click="delete().then((success) => { if(success) close()})"
-                                wire:confirm.icon.error="{{ trans('wire:confirm.delete', ['model' => __('Work Time Type')]) }}"
+                                wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Work Time Type')]) }}"
                             />
                         </div>
                     @endif
