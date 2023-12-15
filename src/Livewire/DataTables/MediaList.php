@@ -16,12 +16,16 @@ class MediaList extends DataTable
         'collection_name',
     ];
 
+    public array $formatters = [
+        'url' => 'image',
+    ];
+
     public function itemToArray($item): array
     {
         $item->makeVisible('collection_name');
 
         $itemArray = parent::itemToArray($item);
-        $itemArray['url'] = $item->getUrl();
+        $itemArray['url'] = $item->getUrl('thumb');
 
         return $itemArray;
     }
@@ -30,15 +34,36 @@ class MediaList extends DataTable
     {
         return [
             DataTableButton::make(icon: 'save')
+                ->label(__('Download'))
                 ->attributes([
                     'x-on:click' => '$wire.downloadMedia(record.id)',
                 ]),
             DataTableButton::make(icon: 'eye')
+                ->label(__('View'))
                 ->href('record.url')
                 ->attributes([
                     'target' => '_blank',
                     'x-bind:href' => 'record.url',
                 ]),
+            DataTableButton::make(icon: 'trash')
+                ->color('negative')
+                ->label(__('Delete'))
+                ->attributes([
+                    'wire:confirm.icon.error' => __('Delete media') . '|' .
+                        __('Do you really want to delete this media?') . '|' .
+                        __('Cancel') . '|' .
+                        __('Delete'),
+                    'wire:click' => 'deleteMedia(record.id)',
+                ]),
+        ];
+    }
+
+    public function getLeftAppends(): array
+    {
+        return [
+            'name' => [
+                'url',
+            ],
         ];
     }
 

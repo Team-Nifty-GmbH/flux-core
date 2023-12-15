@@ -316,7 +316,6 @@ class FluxServiceProvider extends ServiceProvider
             config([
                 'tinker.alias' => [
                     'FluxErp\\Models\\',
-                    'FluxErp\\Services\\',
                     'FluxErp\\Actions\\',
                 ],
             ]);

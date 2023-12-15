@@ -4,6 +4,8 @@ namespace FluxErp\Traits;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Spatie\Image\Exceptions\InvalidManipulation;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 trait InteractsWithMedia
 {
@@ -69,5 +71,32 @@ trait InteractsWithMedia
         }
 
         return $node;
+    }
+
+    /**
+     * @throws InvalidManipulation
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(100)
+            ->height(100)
+            ->keepOriginalImageFormat()
+            ->quality(80)
+            ->optimize();
+
+        $this->addMediaConversion('thumb_280x280')
+            ->width(280)
+            ->height(280)
+            ->keepOriginalImageFormat()
+            ->quality(80)
+            ->optimize();
+
+        $this->addMediaConversion('thumb_400x400')
+            ->width(400)
+            ->height(400)
+            ->keepOriginalImageFormat()
+            ->quality(80)
+            ->optimize();
     }
 }

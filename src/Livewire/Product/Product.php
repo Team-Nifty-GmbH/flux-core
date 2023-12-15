@@ -2,12 +2,10 @@
 
 namespace FluxErp\Livewire\Product;
 
-use FluxErp\Actions\Product\CreateProduct;
-use FluxErp\Actions\Product\DeleteProduct;
-use FluxErp\Actions\Product\UpdateProduct;
+use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
-use FluxErp\Models\Currency;
+use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\VatRate;
@@ -15,17 +13,20 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
 
 class Product extends Component
 {
     use Actions, WithTabs;
 
-    public array $product;
+    public ProductForm $product;
 
     public ?array $priceLists = null;
 
@@ -54,27 +55,7 @@ class Product extends Component
             ->firstOrFail();
         $product->append('avatar_url');
 
-        $parent = $product->parent;
-        $this->product = $product->toArray();
-
-        $this->product['parent'] = $parent ? [
-            'label' => $parent->getLabel(),
-            'url' => $parent->getUrl(),
-        ] : null;
-
-        $this->product['categories'] = $product->categories->pluck('id')->toArray();
-        $this->product['tags'] = $product->tags->pluck('id')->toArray();
-        $this->product['bundle_products'] = $product->bundleProducts->map(function ($bundleProduct) {
-            return [
-                'count' => $bundleProduct->pivot->count,
-                'id' => $bundleProduct->pivot->product_id,
-            ];
-        });
-
-        $this->currency = Currency::query()
-            ->where('is_default', true)
-            ->first(['id', 'name', 'symbol', 'iso'])
-            ->toArray();
+        $this->product->fill($product);
 
         $this->additionalColumns = $product->getAdditionalColumns()->toArray();
     }
@@ -92,26 +73,56 @@ class Product extends Component
         return VatRate::all(['id', 'name', 'rate_percentage'])->toArray();
     }
 
+    #[Renderless]
+    public function addTag(string $name): void
+    {
+        try {
+            $tag = CreateTag::make([
+                'name' => $name,
+                'type' => \FluxErp\Models\Product::class,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->product->tags[] = $tag->id;
+        $this->js(<<<'JS'
+            edit = true;
+        JS);
+    }
+
     public function getTabs(): array
     {
         return [
             TabButton::make('product.general')->label(__('General')),
-            TabButton::make('product.variants')->label(__('Variants'))
-                ->when($this->product['children_count'] ?? false),
+            TabButton::make('product.variant-list')
+                ->label(__('Variants'))
+                ->isLivewireComponent()
+                ->wireModel('product')
+                ->when(! $this->product->parent_id ?? false),
             TabButton::make('product.prices')->label(__('Prices')),
-            TabButton::make('product.stock')->label(__('Stock')),
+            TabButton::make('product.warehouse-list')
+                ->label(__('Stock'))
+                ->isLivewireComponent()
+                ->wireModel('product'),
             TabButton::make('product.media')->label(__('Media')),
             TabButton::make('product.cross-selling')->label(__('Cross Selling')),
+            TabButton::make('product.activities')
+                ->label(__('Activities'))
+                ->isLivewireComponent()
+                ->wireModel('product'),
         ];
     }
 
     public function save(): bool
     {
-        $this->skipRender();
-        $action = ($this->product['id'] ?? false) ? UpdateProduct::class : CreateProduct::class;
-
         if ($this->priceLists !== null) {
-            $this->product['prices'] = collect($this->priceLists)
+            $this->product->prices = collect($this->priceLists)
                 ->filter(fn ($priceList) => ($priceList['price_net'] !== null || $priceList['price_gross'] !== null)
                     && $priceList['is_editable']
                 )
@@ -125,7 +136,7 @@ class Product extends Component
         }
 
         if ($this->productCrossSellings !== null) {
-            $this->product['product_cross_sellings'] = array_map(function (array $productCrossSelling) {
+            $this->product->product_cross_sellings = array_map(function (array $productCrossSelling) {
                 $productCrossSelling['products'] = array_map(
                     fn (array $product) => $product['id'],
                     $productCrossSelling['products']
@@ -136,28 +147,25 @@ class Product extends Component
         }
 
         try {
-            $product = $action::make($this->product)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
+            $this->product->save();
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return false;
         }
 
-        $this->product['id'] = $product->id;
         $this->notification()->success(__('Product saved successfully.'));
 
         return true;
     }
 
+    #[Renderless]
     public function getPriceLists(): void
     {
         $priceLists = PriceList::query()
             ->with('parent')
             ->get(['id', 'parent_id', 'name', 'price_list_code', 'is_net', 'is_default']);
-        $product = \FluxErp\Models\Product::query()->whereKey($this->product['id'])->first();
+        $product = \FluxErp\Models\Product::query()->whereKey($this->product->id)->first();
         $priceListHelper = PriceHelper::make($product)->useDefault(false);
 
         $priceLists->map(function (PriceList $priceList) use ($priceListHelper) {
@@ -165,37 +173,34 @@ class Product extends Component
                 ->setPriceList($priceList)
                 ->price();
             $priceList->price_net = $price
-                ?->getNet($this->product['vat_rate']['rate_percentage'] ?? 0);
+                ?->getNet($this->product->vat_rate['rate_percentage'] ?? 0);
             $priceList->price_gross = $price
-                ?->getGross($this->product['vat_rate']['rate_percentage'] ?? 0);
+                ?->getGross($this->product->vat_rate['rate_percentage'] ?? 0);
             $priceList->is_editable = is_null($price) || $price?->price_list_id === $priceList->id;
         });
 
         $this->priceLists = $priceLists->toArray();
-
-        $this->skipRender();
     }
 
+    #[Renderless]
     public function getProductCrossSellings(): void
     {
         $this->productCrossSellings = ProductCrossSelling::query()
-            ->where('product_id', $this->product['id'])
+            ->where('product_id', $this->product->id)
             ->with('products:id,name,product_number')
             ->get()
+            ->each(function (ProductCrossSelling $productCrossSelling) {
+                $productCrossSelling->products
+                    ->each(fn ($product) => $product->append('avatar_url'));
+            })
             ->toArray();
-
-        $this->skipRender();
     }
 
+    #[Renderless]
     public function delete(): false|Redirector
     {
-        $this->skipRender();
-
         try {
-            DeleteProduct::make($this->product)
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->product->delete();
 
             return redirect()->route('products.products');
         } catch (\Exception $e) {
