@@ -191,5 +191,6 @@
     "settings.translations.get": "View translation settings",
     "settings.users.get": "View user settings",
     "tickets.get": "View tickets",
-    "tickets.{id}.get": "View ticket details"
+    "tickets.{id}.get": "View ticket details",
+    "wire:confirm.delete": "Delete :model|Do you really want to delete this :model?|Cancel|Delete"
 }

@@ -22,21 +22,8 @@
                     @endcan
                     <x-dropdown.item :label="__('Delete')"
                          x-bind:disabled="! comment.is_current_user"
-                         x-on:click="
-                                  window.$wireui.confirmDialog({
-                                  title: '{{ __('Delete comment') }}',
-                                    description: '{{ __('Do you really want to delete this comment?') }}',
-                                    icon: 'error',
-                                    accept: {
-                                        label: '{{ __('Delete') }}',
-                                        method: 'delete',
-                                        params: comment.id
-                                    },
-                                    reject: {
-                                        label: '{{ __('Cancel') }}',
-                                    }
-                                    }, $wire.__instance.id)
-                        "
+                         wire:click="delete(comment.id)"
+                         wire:confirm.icon.error="{{ __('Delete comment') }}|{{ __('Do you really want to delete this comment?') }}|{{ __('Cancel') }}|{{ __('Delete') }}"
                     />
                 </x-dropdown>
             </div>

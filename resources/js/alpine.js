@@ -186,3 +186,45 @@ function wireNavigation() {
         link.setAttribute('wire:navigate', 'true')
     });
 }
+
+Livewire.directive('confirm', ({ el, directive }) => {
+    let icon = directive.modifiers.includes('icon')
+        ? directive.modifiers[directive.modifiers.indexOf('icon') + 1]
+        : 'question'
+
+    let id = directive.modifiers.includes('prompt')
+        ? 'prompt'
+        : null
+
+    // Convert sanitized linebreaks ("\n") to real line breaks...
+    let message = directive.expression.replaceAll('\\n', '\n').split('|');
+    let title = message.shift()
+    let description = message[0]
+    let cancelLabel = message[1] ?? 'Cancel'
+    let confirmLabel = message[2] ?? 'Confirm'
+
+    if (message === '') message = 'Are you sure?'
+
+    el.__livewire_confirm = (action) => {
+        window.$wireui.confirmDialog({
+            id: id,
+            title: title,
+            description: description,
+            icon: icon,
+            accept: {
+                label: confirmLabel,
+                execute: () => {
+                    action();
+                }
+            },
+            reject: {
+                label: cancelLabel,
+                method: 'cancel'
+            }
+        });
+    }
+})
+
+window.$promptValue = () => {
+    return document.getElementById('prompt-value').value
+}

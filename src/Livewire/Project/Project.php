@@ -103,7 +103,7 @@ class Project extends Component
     {
         $this->skipRender();
         try {
-            DeleteProject::make($this->project)
+            DeleteProject::make($this->project->toArray())
                 ->checkPermission()
                 ->validate()
                 ->execute();

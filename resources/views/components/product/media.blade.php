@@ -3,14 +3,14 @@
         <x-slot:title>
             {{ __('Images') }}
         </x-slot:title>
-        <livewire:data-tables.media-grid
-            cache-key="product.media.media-grid"
+        <livewire:data-tables.products.media-grid
             :is-searchable="false"
+            wire:model="product"
             :filters="[
                 [
                     'model_id',
                     '=',
-                    $this->product['id'],
+                    $this->product->id,
                 ],
                 [
                     'model_type',
@@ -31,7 +31,7 @@
             [
                 'model_id',
                 '=',
-                $this->product['id'],
+                $this->product->id,
             ],
             [
                 'model_type',

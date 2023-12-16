@@ -52,6 +52,7 @@ use FluxErp\Http\Controllers\SerialNumberController;
 use FluxErp\Http\Controllers\SerialNumberRangeController;
 use FluxErp\Http\Controllers\SettingController;
 use FluxErp\Http\Controllers\StockPostingController;
+use FluxErp\Http\Controllers\TagController;
 use FluxErp\Http\Controllers\TaskController;
 use FluxErp\Http\Controllers\TicketController;
 use FluxErp\Http\Controllers\TicketTypeController;
@@ -436,6 +437,13 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::get('/stock-postings', [StockPostingController::class, 'index']);
         Route::post('/stock-postings', [StockPostingController::class, 'create']);
         Route::delete('/stock-postings/{id}', [StockPostingController::class, 'delete']);
+
+        //Tag
+        Route::get('/tags/{id}', [TagController::class, 'show']);
+        Route::get('/tags', [TagController::class, 'index']);
+        Route::post('/tags', [TagController::class, 'create']);
+        Route::put('/tags', [TagController::class, 'update']);
+        Route::delete('/tags/{id}', [TagController::class, 'delete']);
 
         //Tasks
         Route::get('/tasks/{id}', [TaskController::class, 'show']);

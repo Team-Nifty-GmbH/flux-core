@@ -45,8 +45,8 @@ abstract class PrintableView extends Component
     {
         $client = $this->getModel()?->client ?? Client::query()->first();
 
-        $logo = $client->getFirstMedia('logo')->getPath();
-        $logoSmall = $client->getFirstMedia('logo_small')->getPath();
+        $logo = $client->getFirstMedia('logo')?->getPath();
+        $logoSmall = $client->getFirstMedia('logo_small')?->getPath();
 
         $logoCacheKey = 'logo_' . md5(file_get_contents($logo));
         $logoSmallCacheKey = 'logo_' . md5(file_get_contents($logoSmall));

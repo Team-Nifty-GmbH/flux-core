@@ -79,7 +79,7 @@
         {{ __('Order details') }}
     </h2>
     <h1 class="py-5 text-5xl font-semibold">
-        {{ trans(':order_type :order_number dated :order_date', [
+        {{ __(':order_type :order_number dated :order_date', [
             'order_type' => $order['order_type']['name'],
             'order_number' => $order['order_number'],
             'order_date' => \Illuminate\Support\Carbon::parse($order['order_date'])->isoFormat('L')

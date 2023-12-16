@@ -6,6 +6,9 @@
 <body class="dark:bg-secondary-900 h-full bg-slate-50 transition duration-300">
     <x-notifications z-index="z-50"></x-notifications>
     <x-dialog z-index="z-40" blur="md" align="center"/>
+    <x-dialog z-index="z-40" blur="md" align="center" id="prompt">
+        <x-input id="prompt-value" />
+    </x-dialog>
     @if(auth('web')->check())
         @persist('mail')
             <div id="mail">

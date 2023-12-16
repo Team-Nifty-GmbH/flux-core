@@ -21,6 +21,8 @@ class ProjectForm extends Form
 
     public ?int $parent_id = null;
 
+    public ?string $project_number = null;
+
     public ?string $name = null;
 
     public ?string $start_date = null;
