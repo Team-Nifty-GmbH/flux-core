@@ -10,6 +10,7 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Arr;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
@@ -39,6 +40,11 @@ class SerialNumberRange extends Model
         });
     }
 
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     public function model(): MorphTo
     {
         return $this->morphTo('model');
@@ -46,7 +52,7 @@ class SerialNumberRange extends Model
 
     public function getCurrentStyled(): array|string|Translator|Application|null
     {
-        return trans(
+        return __(
             $this->prefix .
             str_pad((string) $this->current_number, $this->length ?? 0, '0', STR_PAD_LEFT) .
             $this->suffix,
