@@ -20,19 +20,11 @@ class CreateOrderPosition extends FluxAction
         $this->rules = array_merge(
             (new CreateOrderPositionRequest())->rules(),
             [
-                'price_id' => [
-                    Rule::requiredIf(
-                        ($this->data['is_free_text'] ?? false) === false &&
-                        (($this->data['product_id'] ?? false) && (! ($this->data['price_list_id'] ?? false)))
-                    ),
-                    'integer',
-                    'nullable',
-                    'exists:prices,id,deleted_at,NULL',
-                    'exclude_if:is_free_text,true',
-                ],
                 'price_list_id' => [
                     Rule::requiredIf(
-                        ($this->data['is_free_text'] ?? false) === false && ! ($this->data['price_id'] ?? false)
+                        ! data_get($this->data, 'is_free_text', false)
+                        && ! data_get($this->data, 'is_bundle_position', false)
+                        && ! data_get($this->data, 'price_id', false)
                     ),
                     'integer',
                     'exists:price_lists,id,deleted_at,NULL',
@@ -40,34 +32,26 @@ class CreateOrderPosition extends FluxAction
                 ],
                 'purchase_price' => [
                     Rule::requiredIf(
-                        ($this->data['is_free_text'] ?? false) === false && ($this->data['product_id'] ?? false)
-                    ),
-                    'numeric',
-                    'exclude_if:is_free_text,true',
-                ],
-                'unit_price' => [
-                    Rule::requiredIf(
-                        ($this->data['is_free_text'] ?? false) === false && ($this->data['price_id'] ?? false)
+                        ! data_get($this->data, 'is_free_text', false)
+                        && ! data_get($this->data, 'is_bundle_position', false)
+                        && data_get($this->data, 'product_id', false)
+                        && ! data_get($this->data, 'price_id', false)
                     ),
                     'numeric',
                     'exclude_if:is_free_text,true',
                 ],
                 'vat_rate_percentage' => [
-                    Rule::requiredIf(
-                        ($this->data['is_free_text'] ?? false) === false && ! ($this->data['vat_rate_id'] ?? false)
-                    ),
                     Rule::excludeIf(
-                        ($this->data['is_free_text'] ?? false) === false && ($this->data['vat_rate_id'] ?? false)
+                        data_get($this->data, 'is_free_text', false)
+                        || data_get($this->data, 'is_bundle_position', false)
+                        || data_get($this->data, 'vat_rate_id', false)
+                    ),
+                    Rule::requiredIf(
+                        ! data_get($this->data, 'is_free_text', false)
+                        && ! data_get($this->data, 'is_bundle_position', false)
+                        && ! data_get($this->data, 'vat_rate_id', false)
                     ),
                     'numeric',
-                ],
-                'product_number' => [
-                    Rule::requiredIf(
-                        ($this->data['is_free_text'] ?? false) === false && ($this->data['product_id'] ?? false)
-                    ),
-                    'string',
-                    'nullable',
-                    'exclude_if:is_free_text,true',
                 ],
             ]
         );
@@ -80,12 +64,17 @@ class CreateOrderPosition extends FluxAction
 
     public function performAction(): OrderPosition
     {
+        $this->data['amount'] = $this->data['amount'] ?? 1;
+
         $tags = Arr::pull($this->data, 'tags', []);
         $order = Order::query()
             ->with('orderType:id,order_type_enum')
             ->whereKey($this->data['order_id'])
             ->first();
         $orderPosition = new OrderPosition();
+
+        $this->data['client_id'] = data_get($this->data, 'client_id', $order->client_id);
+        $this->data['price_list_id'] = data_get($this->data, 'price_list_id', $order->price_list_id);
 
         if (is_int($this->data['sort_number'] ?? false)) {
             $currentHighestSortNumber = OrderPosition::query()
@@ -103,6 +92,23 @@ class CreateOrderPosition extends FluxAction
             $this->data['ledger_account_id'] = $order->contact->expense_ledger_account_id;
         }
 
+        $product = null;
+        if (data_get($this->data, 'product_id', false)) {
+            $product = Product::query()
+                ->with([
+                    'bundleProducts:id,name',
+                ])
+                ->whereKey($this->data['product_id'])
+                ->first();
+
+            data_set($this->data, 'vat_rate_id', $product->vat_rate_id, false);
+            data_set($this->data, 'name', $product->name, false);
+            data_set($this->data, 'description', $product->description, false);
+            data_set($this->data, 'product_number', $product->product_number, false);
+            data_set($this->data, 'ean_code', $product->ean, false);
+            data_set($this->data, 'unit_gram_weight', $product->weight_gram, false);
+        }
+
         $orderPosition->fill($this->data);
 
         PriceCalculation::fill($orderPosition, $this->data);
@@ -110,7 +116,7 @@ class CreateOrderPosition extends FluxAction
 
         $orderPosition->save();
 
-        if ($this->data['product_id'] ?? false) {
+        if ($product?->bundlePositions?->isNotEmpty()) {
             $product = $orderPosition->product()->with('bundleProducts')->first();
             $sortNumber = $orderPosition->sort_number;
             $product->bundleProducts

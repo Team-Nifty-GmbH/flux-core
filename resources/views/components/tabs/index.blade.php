@@ -17,15 +17,20 @@
         </div>
     </div>
 </div>
-<div class="relative pt-6">
+<div {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6']) }}>
+    {{ $prepend ?? '' }}
     @if($attributes->has('wire:loading'))
         <x-spinner {{ $attributes->thatStartWith('wire:loading') }} />
     @endif
-    @if($slot->isNotEmpty())
-        {{ $slot }}
-    @elseif($tabs[$this->{$attributes->wire('model')->value()}]?->isLivewireComponent)
-        <livewire:dynamic-component :is="$this->{$attributes->wire('model')->value()}" wire:key="{{ uniqid() }}"/>
-    @else
-        <x-dynamic-component :component="$this->{$attributes->wire('model')->value()}" />
-    @endif
+    <div class="w-full">
+        @if($slot->isNotEmpty())
+            {{ $slot }}
+        @elseif($tabs[$this->{$attributes->wire('model')->value()}]?->isLivewireComponent)
+            <livewire:dynamic-component wire:model="{{ $tabs[$this->{$attributes->wire('model')->value()}]?->wireModel }}" :is="$this->{$attributes->wire('model')->value()}" wire:key="{{ uniqid() }}"/>
+        @else
+            <x-dynamic-component :component="$this->{$attributes->wire('model')->value()}" />
+        @endif
+    </div>
+    {{ $append ?? '' }}
 </div>
+

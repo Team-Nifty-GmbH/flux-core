@@ -2,29 +2,23 @@
 
 namespace FluxErp\Actions\OrderPosition;
 
+use FluxErp\Helpers\PriceHelper;
+use FluxErp\Livewire\Forms\OrderPositionForm;
+use FluxErp\Models\Contact;
+use FluxErp\Models\Order;
 use FluxErp\Models\Price;
+use FluxErp\Models\PriceList;
+use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Eloquent\Model;
 
 class PriceCalculation
 {
-    public static function fill(Model $orderPosition, array $data): void
+    public static function fill(Model|OrderPositionForm $orderPosition, array $data): void
     {
         // Return if no price could be calculated
-        $price = $data['unit_price'] ?? null;
-        $price = is_null($price) ? $orderPosition->price?->price : $price;
-        $price = is_null($price)
-            ? Price::query()
-                ->where('product_id', $orderPosition->product_id)
-                ->where('price_list_id', $orderPosition->price_list_id)
-                ->first()
-                ?->price
-            : $price;
-
-        if (is_null($price)) {
-            return;
-        }
+        $price = $data['unit_price'] ?? $orderPosition->unit_price ?? null;
 
         // A subproduct, aka part of a bundle does not have its own prices.
         if ($orderPosition->is_bundle_position) {
@@ -44,22 +38,51 @@ class PriceCalculation
             return;
         }
 
+        $product = $orderPosition instanceof Model
+            ? $orderPosition->product
+            : Product::query()
+                ->whereKey($orderPosition->product_id)
+                ->first();
+        $order = $orderPosition instanceof Model
+            ? $orderPosition->order
+            : Order::query()
+                ->whereKey($orderPosition->order_id)
+                ->first();
+
+        if (! $price && $product) {
+            $priceHelper = PriceHelper::make($product);
+
+            if ($contactId = data_get($data, 'contact_id')) {
+                $priceHelper->setContact(Contact::query()->whereKey($contactId)->first());
+            }
+
+            if ($priceListId = data_get(
+                $data,
+                'price_list_id',
+                $orderPosition->price_list_id ?? $order->price_list_id
+            )) {
+                $priceHelper->setPriceList(PriceList::query()->whereKey($priceListId)->first());
+            }
+
+            $productPrice = $priceHelper->price();
+
+            $price = $orderPosition->is_net
+                ? $productPrice->getNet($product->vatRate->rate_percentage)
+                : $productPrice->getGross($product->vatRate->rate_percentage);
+        }
+
+        if (is_null($price)) {
+            return;
+        }
+
+        $orderPosition->unit_price = $price;
+
         // Collect & set missing data
         $orderPosition->vat_rate_percentage = ($data['vat_rate_percentage'] ?? false)
             ?: VatRate::query()
                 ->whereKey($orderPosition->vat_rate_id)
                 ->first()
                 ?->rate_percentage;
-
-        $product = $orderPosition->product;
-
-        if (! $orderPosition->price && $product) {
-            $orderPosition->price_id = Price::query()
-                ->where('product_id', $product->id)
-                ->where('price_list_id', $orderPosition->price_list_id)
-                ->first()
-                ?->id;
-        }
 
         if ($product) {
             $orderPosition->product_prices = $product->prices()
@@ -139,7 +162,7 @@ class PriceCalculation
         $totalDiscountPercentage = diff_percentage($preDiscountedPrice, $discountedPrice);
         $margin = bcsub($discountedNetPrice, bcmul($orderPosition->purchase_price, $orderPosition->amount));
 
-        $multiplier = $orderPosition->order->orderType->order_type_enum->multiplier();
+        $multiplier = $order->orderType->order_type_enum->multiplier();
         $orderPosition->margin = bcmul($margin, $multiplier);
         $orderPosition->discount_percentage = $totalDiscountPercentage == 0
             ? null

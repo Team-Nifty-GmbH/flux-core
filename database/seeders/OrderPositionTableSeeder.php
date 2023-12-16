@@ -10,17 +10,11 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
-use FluxErp\Services\OrderPositionService;
 use Illuminate\Database\Seeder;
 
 class OrderPositionTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $orders = Order::query()->with('orderType')->get();
         $products = Product::query()
@@ -31,7 +25,6 @@ class OrderPositionTableSeeder extends Seeder
         $vatRates = VatRate::all();
         $clientId = Client::query()->first();
 
-        $orderPositionService = new OrderPositionService();
         foreach ($orders as $order) {
             $multiplier = $order->orderType->order_type_enum->multiplier();
             $orderPositions = OrderPosition::query()->where('order_id', $order->id)->get();

@@ -5,6 +5,7 @@ namespace FluxErp\Actions\OrderPosition;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Http\Requests\FillOrderPositionRequest;
+use FluxErp\Http\Requests\UpdateOrderPositionRequest;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
@@ -70,15 +71,22 @@ class FillOrderPositions extends FluxAction
         parent::validateData();
 
         // Validate Data
-        $rules = (new CreateOrderPositionRequest())->rules();
-        $rules['order_id'] = 'required|integer|size:' . $this->data['order_id'];
-        $rules['children'] = 'array';
-        unset($rules['parent_id']);
+        $rules = [
+            'children' => 'array',
+            'order_id' => 'required|integer|size:' . $this->data['order_id'],
+        ];
+
+        $createRules = array_merge((new CreateOrderPositionRequest())->rules(), $rules);
+        $updateRules = array_merge((new UpdateOrderPositionRequest())->rules(), $rules);
+        unset($createRules['parent_id'], $updateRules['parent_id']);
 
         $errors = [];
         $orderPositions = [];
         foreach ($this->data['order_positions'] as $key => $orderPosition) {
-            $validatedOrderPosition = $this->validateOrderPosition($orderPosition, $rules);
+            $validatedOrderPosition = $this->validateOrderPosition(
+                $orderPosition,
+                ($orderPosition['id'] ?? false) ? $updateRules : $createRules
+            );
             $errors[$orderPosition['id'] ?? $key] = $validatedOrderPosition['errors'];
             $orderPositions[$key] = $validatedOrderPosition['validated'];
         }
@@ -125,7 +133,7 @@ class FillOrderPositions extends FluxAction
         }
 
         // If is_free_text = true, there should be no price on this order position
-        if ($validated['is_free_text'] ?? false) {
+        if (($validated['is_free_text'] ?? false) || ($orderPosition['is_bundle_position'] ?? false)) {
             $validated = array_merge(
                 $validated,
                 [
@@ -150,7 +158,7 @@ class FillOrderPositions extends FluxAction
         }
 
         // Merge prices in validated array if is_free_text = false
-        if (($validated['is_free_text'] ?? null) === false) {
+        if (! ($validated['is_free_text'] ?? false) && ! ($orderPosition['is_bundle_position'] ?? false)) {
             $priceFields = [
                 'unit_gross_price',
                 'unit_net_price',

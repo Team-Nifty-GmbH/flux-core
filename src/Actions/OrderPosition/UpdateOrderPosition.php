@@ -5,8 +5,10 @@ namespace FluxErp\Actions\OrderPosition;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateOrderPositionRequest;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
+use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -33,6 +35,14 @@ class UpdateOrderPosition extends FluxAction
             ->whereKey($this->data['id'] ?? null)
             ->firstOrNew();
 
+        $order = Order::query()
+            ->with('orderType:id,order_type_enum')
+            ->whereKey(data_get($this->data, 'order_id', $orderPosition->order_id))
+            ->first();
+
+        $this->data['client_id'] = data_get($this->data, 'client_id', $order->client_id);
+        $this->data['price_list_id'] = data_get($this->data, 'price_list_id', $order->price_list_id);
+
         if (is_int($this->data['sort_number'] ?? false)
             && $orderPosition->sort_number !== $this->data['sort_number']
         ) {
@@ -46,10 +56,63 @@ class UpdateOrderPosition extends FluxAction
                 ->increment('sort_number');
         }
 
+        $product = null;
+        if (data_get($this->data, 'product_id', false)) {
+            $product = Product::query()
+                ->with([
+                    'bundleProducts:id,name',
+                ])
+                ->whereKey($this->data['product_id'])
+                ->first();
+
+            data_set($this->data, 'vat_rate_id', $product->vat_rate_id, false);
+            data_set($this->data, 'name', $product->name, false);
+            data_set($this->data, 'description', $product->description, false);
+            data_set($this->data, 'product_number', $product->product_number, false);
+            data_set($this->data, 'ean_code', $product->ean, false);
+            data_set($this->data, 'unit_gram_weight', $product->weight_gram, false);
+        }
+
         $orderPosition->fill($this->data);
         PriceCalculation::fill($orderPosition, $this->data);
         unset($orderPosition->discounts);
         $orderPosition->save();
+
+        if ($product?->bundlePositions?->isNotEmpty()) {
+            $product = $orderPosition->product()->with('bundleProducts')->first();
+            $sortNumber = $orderPosition->sort_number;
+            $product->bundleProducts
+                ->map(function (Product $bundleProduct) use ($orderPosition, &$sortNumber) {
+                    $sortNumber++;
+
+                    return [
+                        'client_id' => $orderPosition->client_id,
+                        'order_id' => $orderPosition->order_id,
+                        'parent_id' => $orderPosition->id,
+                        'product_id' => $bundleProduct->id,
+                        'vat_rate_id' => $bundleProduct->vat_rate_id,
+                        'warehouse_id' => $orderPosition->warehouse_id,
+                        'amount' => bcmul($bundleProduct->pivot->count, $orderPosition->amount),
+                        'amount_bundle' => $bundleProduct->pivot->count,
+                        'name' => $bundleProduct->name,
+                        'product_number' => $bundleProduct->product_number,
+                        'sort_number' => $sortNumber,
+                        'purchase_price' => 0,
+                        'vat_rate_percentage' => 0,
+                        'is_net' => $orderPosition->is_net,
+                        'is_free_text' => false,
+                        'is_bundle_position' => true,
+                    ];
+                })
+                ->each(function (array $bundleProduct) {
+                    try {
+                        CreateOrderPosition::make($bundleProduct)
+                            ->validate()
+                            ->execute();
+                    } catch (ValidationException) {
+                    }
+                });
+        }
 
         $orderPosition->syncTags($tags);
 

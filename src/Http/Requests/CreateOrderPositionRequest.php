@@ -20,19 +20,22 @@ class CreateOrderPositionRequest extends BaseFormRequest
             (new OrderPosition())->hasAdditionalColumnsValidationRules(),
             [
                 'uuid' => 'string|uuid|unique:order_positions,uuid',
-                'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
+                'client_id' => 'required_without:order_id|integer|exists:clients,id,deleted_at,NULL',
                 'ledger_account_id' => 'integer|nullable|exists:ledger_accounts,id',
                 'order_id' => 'required|integer|exists:orders,id,deleted_at,NULL',
                 'origin_position_id' => 'integer|nullable|exists:order_positions,id,deleted_at,NULL',
                 'parent_id' => 'sometimes|integer|nullable|exists:order_positions,id,deleted_at,NULL',
                 'price_id' => [
                     'exclude_if:is_free_text,true',
+                    'exclude_if:is_bundle_position,true',
+                    'exclude_without:product_id',
                     'integer',
                     'nullable',
                     'exists:prices,id,deleted_at,NULL',
                 ],
                 'price_list_id' => [
                     'exclude_if:is_free_text,true',
+                    'exclude_if:is_bundle_position,true',
                     'integer',
                     'nullable',
                     'exists:price_lists,id,deleted_at,NULL',
@@ -50,7 +53,9 @@ class CreateOrderPositionRequest extends BaseFormRequest
                 'supplier_contact_id' => 'integer|nullable|exists:contacts,id,deleted_at,NULL',
                 'vat_rate_id' => [
                     'exclude_if:is_free_text,true',
+                    'exclude_if:is_bundle_position,true',
                     'required_if:is_free_text,false',
+                    'required_if:is_bundle_position,false',
                     'integer',
                     'nullable',
                     'exists:vat_rates,id,deleted_at,NULL',
@@ -65,7 +70,6 @@ class CreateOrderPositionRequest extends BaseFormRequest
 
                 'amount' => [
                     'exclude_if:is_free_text,true',
-                    'required_if:is_free_text,false',
                     new Numeric(),
                     'nullable',
                 ],
@@ -84,6 +88,8 @@ class CreateOrderPositionRequest extends BaseFormRequest
                 ],
                 'unit_price' => [
                     'exclude_if:is_free_text,true',
+                    'exclude_if:is_bundle_position,true',
+                    'required_without_all:product_id,price_list_id,price_id',
                     new Numeric(),
                     'nullable',
                 ],
@@ -101,17 +107,23 @@ class CreateOrderPositionRequest extends BaseFormRequest
                 ],
 
                 'description' => 'string|nullable',
-                'name' => 'required|string',
+                'name' => 'required_without:product_id|string',
                 'product_number' => [
                     'exclude_if:is_free_text,true',
-                    'string',
+                    'exclude_with:product_id',
                     'nullable',
+                    'string',
                 ],
-                'sort_number' => 'integer|min:0',
+                'sort_number' => 'nullable|integer|min:0',
 
                 'is_alternative' => 'boolean',
-                'is_net' => 'required_if:is_free_text,false|boolean',
-                'is_free_text' => 'required|boolean',
+                'is_net' => [
+                    'exclude_if:is_free_text,true',
+                    'exclude_if:is_bundle_position,true',
+                    'required_if:is_free_text,false',
+                    'required_if:is_bundle_position,false',
+                ],
+                'is_free_text' => 'boolean',
                 'is_bundle_position' => 'exclude_without:parent_id|boolean',
 
                 'discounts' => 'array',
