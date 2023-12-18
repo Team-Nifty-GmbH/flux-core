@@ -65,8 +65,12 @@ class Navigation extends Component
             ->delete();
     }
 
-    protected function getVisits(): array
+    protected function getVisits(): ?array
     {
+        if (method_exists(auth()->user(), 'activities')) {
+            return null;
+        }
+
         return auth()->user()
             ->activities()
             ->selectRaw('count(*) as count, description')
@@ -92,8 +96,12 @@ class Navigation extends Component
         return collect($navigations);
     }
 
-    protected function getFavorites(): array
+    protected function getFavorites(): ?array
     {
+        if (method_exists(auth()->user(), 'favorites')) {
+            return null;
+        }
+
         return auth()->user()
             ->favorites()
             ->select(['id', 'name', 'url'])
