@@ -628,6 +628,7 @@
     "Order type": "Auftragsart",
     "Order Type Name": "Name",
     "Order Types": "Auftragsarten",
+    "order-confirmation": "Auftragsbestätigung",
     "Orders": "Aufträge",
     "orders.get": "Bestellungen anzeigen",
     "orders.{id}.get": "Bestelldetails anzeigen",
