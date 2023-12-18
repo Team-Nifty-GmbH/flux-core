@@ -1,4 +1,4 @@
-<div wire:ignore x-on:data-table-record-selected="$wire.selectedOrderPositions.push($event.detail.index)">
+<div wire:ignore>
     <x-modal max-width="6xl" name="edit-order-position" x-on:close="$wire.resetOrderPosition()">
         <x-card>
             <div class="relative">
@@ -63,7 +63,7 @@
             <x-slot:footer>
                 <div class="flex justify-between gap-x-4">
                     <div x-show="$wire.orderPosition.id">
-                        <x-button flat negative :label="__('Delete')" x-on:click="close; $wire.remove(orderPosition.id).then(() => {syncToOrder();});" />
+                        <x-button flat negative :label="__('Delete')" x-on:click="$wire.deleteOrderPosition(); close();" />
                     </div>
                     <div class="flex w-full justify-end">
                         <x-button flat :label="__('Cancel')" x-on:click="close" />
@@ -83,7 +83,7 @@
         <div class="ml:p-10 relative min-h-full space-y-6">
             <div>
                 @include('tall-datatables::livewire.data-table')
-                <div x-show="! $wire.order.is_locked" class="sticky bottom-6 pt-6">
+                <div x-show="! $wire.order.is_locked" x-cloak class="sticky bottom-6 pt-6">
                     <x-card class="flex gap-4">
                         <div class="flex gap-4 max-w-md w-full">
                             <x-select

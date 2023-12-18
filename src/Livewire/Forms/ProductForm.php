@@ -5,8 +5,8 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\UpdateProduct;
-use Livewire\Attributes\Locked;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 class ProductForm extends Form

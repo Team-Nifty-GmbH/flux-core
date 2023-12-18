@@ -71,7 +71,7 @@
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
             @if(\FluxErp\Actions\Order\DeleteOrder::canPerformAction(false) && $order->id && ! $order->is_locked)
                 <x-button
-                    wire:confirm.icon.error="{{ trans('wire:confirm.delete', ['model' => __('Serial Number Range')]) }}"
+                    wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order')]) }}"
                     negative
                     label="{{ __('Delete') }}"
                     wire:click="delete"

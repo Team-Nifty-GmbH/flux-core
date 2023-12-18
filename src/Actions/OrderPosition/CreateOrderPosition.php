@@ -112,7 +112,7 @@ class CreateOrderPosition extends FluxAction
         $orderPosition->fill($this->data);
 
         PriceCalculation::fill($orderPosition, $this->data);
-        unset($orderPosition->discounts);
+        unset($orderPosition->discounts, $orderPosition->unit_price);
 
         $orderPosition->save();
 

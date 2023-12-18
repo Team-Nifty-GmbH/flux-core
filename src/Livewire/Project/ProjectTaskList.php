@@ -28,13 +28,6 @@ class ProjectTaskList extends BaseTaskList
 
     public ?int $projectId;
 
-    public function boot(): void
-    {
-        $this->forceRender = true;
-
-        parent::boot();
-    }
-
     public function mount(): void
     {
         parent::mount();

@@ -228,3 +228,18 @@ Livewire.directive('confirm', ({ el, directive }) => {
 window.$promptValue = () => {
     return document.getElementById('prompt-value').value
 }
+
+document.addEventListener('livewire:navigating', () => {
+    let elements = document.querySelectorAll('main template[x-for]');
+    elements.forEach(el => {
+        Object.values(el._x_lookup ?? {}).forEach(element => {
+            // Remove the element from the DOM
+            element.remove();
+        });
+    });
+
+    let xIfElements = document.querySelectorAll('main template[x-if]');
+    xIfElements.forEach(el => {
+        el.nextElementSibling?.remove();
+    });
+});

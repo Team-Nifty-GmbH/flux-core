@@ -75,7 +75,7 @@ class UpdateOrderPosition extends FluxAction
 
         $orderPosition->fill($this->data);
         PriceCalculation::fill($orderPosition, $this->data);
-        unset($orderPosition->discounts);
+        unset($orderPosition->discounts, $orderPosition->unit_price);
         $orderPosition->save();
 
         if ($product?->bundlePositions?->isNotEmpty()) {

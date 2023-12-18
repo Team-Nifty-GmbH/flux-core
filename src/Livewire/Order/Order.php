@@ -62,6 +62,8 @@ class Order extends OrderPositionList
 
     public bool $isSelectable = true;
 
+    public bool $isDirtyData = false;
+
     public array $enabledCols = [
         'slug_position',
         'name',
@@ -151,9 +153,10 @@ class Order extends OrderPositionList
                     'wire:click' => <<<'JS'
                             editOrderPosition(index).then(() =>$openModal('edit-order-position'));
                         JS,
-                    'x-show' => '! record.is_bundle_position && ! record.is_locked',
+                    'x-show' => '! record.is_bundle_position',
                     'x-cloak' => true,
-                ]),
+                ])
+                ->when(! $this->order->is_locked),
             DataTableButton::make()
                 ->icon('eye')
                 ->attributes([
@@ -171,7 +174,7 @@ class Order extends OrderPositionList
                 ->label(__('Delete'))
                 ->icon('trash')
                 ->color('negative')
-                ->wireClick('deleteSelectedOrderPositions'),
+                ->wireClick('deleteSelectedOrderPositions(); showSelectedActions = false;'),
         ];
     }
 
@@ -327,6 +330,13 @@ class Order extends OrderPositionList
                 ->isLivewireComponent()
                 ->wireModel('order'),
         ];
+    }
+
+    public function loadData(): void
+    {
+        if (! $this->isDirtyData) {
+            parent::loadData();
+        }
     }
 
     public function updatedTab(): void
@@ -612,6 +622,16 @@ class Order extends OrderPositionList
             $this->data[$this->orderPositionIndex] = $this->itemToArray($this->orderPosition);
         }
 
+        $this->order->total_net_price = bcadd(
+            $this->order->total_net_price,
+            data_get($this->orderPosition, 'total_net_price', 0)
+        );
+        $this->order->total_gross_price = bcadd(
+            $this->order->total_gross_price,
+            data_get($this->orderPosition, 'total_gross_price', 0)
+        );
+
+        $this->recalculateOrderTotals();
         $this->orderPosition->reset();
 
         return true;
@@ -637,30 +657,47 @@ class Order extends OrderPositionList
         $this->editOrderPosition();
         $this->orderPosition->product_id = $productId;
         $this->changedProductId();
-        $success = $this->addOrderPosition();
 
-        return $success;
+        return $this->addOrderPosition();
     }
 
     #[Renderless]
     public function deleteSelectedOrderPositions(): void
     {
-        foreach ($this->selectedOrderPositions as $index) {
-            $slugPositions[] = $this->data[$index]['slug_position'];
+        if ($wildcardIndex = array_search('*', $this->selected)) {
+            unset($this->selected[$wildcardIndex]);
+        }
 
+        $slugPositions = [];
+        foreach ($this->selected as $index) {
+            $slugPositions[] = $this->data[$index]['slug_position'];
             unset($this->data[$index]);
         }
 
         // remove all children
-        foreach ($this->data as $index => $item) {
-            if (Str::startsWith($item['slug_position'] . '.', $slugPositions)) {
-                unset($this->data[$index]);
+        if ($slugPositions) {
+            foreach ($this->data as $index => $item) {
+                if (Str::startsWith($item['slug_position'] . '.', $slugPositions)) {
+                    unset($this->data[$index]);
+                }
             }
         }
 
         $this->data = array_values($this->data);
+        $this->recalculateOrderTotals();
 
-        $this->reset('selectedOrderPositions');
+        $this->reset('selected');
+    }
+
+    #[Renderless]
+    public function deleteOrderPosition(): void
+    {
+        $selected = $this->selected;
+        $this->selected = [$this->orderPositionIndex];
+
+        $this->deleteSelectedOrderPositions();
+
+        $this->selected = $selected;
     }
 
     public function showProduct(Product $product): void
@@ -724,5 +761,23 @@ class Order extends OrderPositionList
             }
 
         }
+    }
+
+    private function recalculateOrderTotals(): void
+    {
+        $this->order->total_net_price = 0;
+        $this->order->total_gross_price = 0;
+        $this->order->total_vats = [];
+        foreach ($this->data as $item) {
+            $this->order->total_net_price = bcadd($this->order->total_net_price, $item['total_net_price'] ?? 0);
+            $this->order->total_gross_price = bcadd($this->order->total_gross_price, $item['total_gross_price'] ?? 0);
+            $this->order->total_vats[$item['vat_rate_percentage']]['total_vat_price'] = bcadd(
+                $this->order->total_vats[$item['vat_rate_percentage']]['total_vat_price'] ?? 0,
+                $item['vat_price'] ?? 0
+            );
+            $this->order->total_vats[$item['vat_rate_percentage']]['vat_rate_percentage'] = $item['vat_rate_percentage'];
+        }
+
+        $this->isDirtyData = true;
     }
 }
