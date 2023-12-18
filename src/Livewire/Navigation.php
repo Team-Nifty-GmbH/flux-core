@@ -30,13 +30,6 @@ class Navigation extends Component
             $this->background = ($setting['nav']['background'] ?? false)
                 ? 'background: linear-gradient(' . ($setting['nav']['background']['angle'] ?? 0) . 'deg, ' . ($setting['nav']['background']['start'] ?? 0) . ', ' . ($setting['nav']['background']['end'] ?? 0) . ');'
                 : null;
-
-            if ($this->setting['nav']['append_links'] ?? false) {
-                foreach ($this->setting['nav']['append_links'] as $index => $appendLink) {
-                    $appendLink['uri'] = __($appendLink['uri']);
-                    $this->navigations['append' . $index] = $appendLink;
-                }
-            }
         }
     }
 
@@ -51,6 +44,10 @@ class Navigation extends Component
 
     public function addFavorite(string $url, ?string $name = null): void
     {
+        if (! method_exists(auth()->user(), 'favorites')) {
+            return;
+        }
+
         auth()->user()->favorites()->create([
             'name' => $name ?: $url,
             'url' => $url,
@@ -59,6 +56,10 @@ class Navigation extends Component
 
     public function deleteFavorite(int $id): void
     {
+        if (! method_exists(auth()->user(), 'favorites')) {
+            return;
+        }
+
         auth()->user()
             ->favorites()
             ->whereKey($id)
@@ -67,7 +68,7 @@ class Navigation extends Component
 
     protected function getVisits(): ?array
     {
-        if (method_exists(auth()->user(), 'activities')) {
+        if (! method_exists(auth()->user(), 'activities')) {
             return null;
         }
 
@@ -93,12 +94,19 @@ class Navigation extends Component
             }
         });
 
+        if ($this->setting['nav']['append_links'] ?? false) {
+            foreach ($this->setting['nav']['append_links'] as $index => $appendLink) {
+                $appendLink['uri'] = __($appendLink['uri']);
+                $navigations['append' . $index] = $appendLink;
+            }
+        }
+
         return collect($navigations);
     }
 
     protected function getFavorites(): ?array
     {
-        if (method_exists(auth()->user(), 'favorites')) {
+        if (! method_exists(auth()->user(), 'favorites')) {
             return null;
         }
 
