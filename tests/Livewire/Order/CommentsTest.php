@@ -70,7 +70,6 @@ class CommentsTest extends BaseSetup
             public function mount(Order $orderModel): void
             {
                 $this->order->fill($orderModel);
-                parent::mount();
             }
         };
 
