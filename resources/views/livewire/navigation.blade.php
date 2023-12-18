@@ -26,7 +26,7 @@
                     this.closeMenu(true);
                 });
             },
-            activeItem: window.location.pathname.split('/')[1] || 'dashboard',
+            activeItem: 'dashboard',
             activeSubItem: window.location.pathname,
             open: [],
             toggleMenu(key) {
@@ -57,7 +57,9 @@
                 this.menuOpen = false;
             },
             forced: false,
-            menuOpen: false
+            menuOpen: false,
+            frequentlyVisitedOpen: false,
+            favoritesOpen: false,
         }"
     >
         <div class="pb-4 md:pt-4 md:pr-8 md:pl-28">
@@ -70,7 +72,7 @@
             @endif
         </div>
         <x-nav.nav :background="$background">
-            <nav class="flex-1 space-y-2 overflow-x-hidden overflow-y-hidden px-2 py-4 hover:overflow-y-auto">
+            <nav class="flex-1 space-y-2 overflow-x-hidden overflow-y-hidden px-2 py-4 hover:overflow-y-auto flex flex-col gap-6">
                 <div>
                     @foreach($navigations as $key => $navigation)
                         <div>
@@ -91,11 +93,11 @@
                                     </div>
                                 </div>
                                 <span class="truncate text-sm text-white"> {{ __($navigation['label'] ?? $key) }} </span>
-                                @if($navigation['children'] ?? false)
-                                    <span aria-hidden="true" class="ml-auto pl-2 pr-2">
-                                    <x-icon name="chevron-left" class="h-4 w-4 text-white transform transition-transform" x-bind:class="{ '-rotate-90': isOpen('{{ $key }}') }" />
+                                    @if($navigation['children'] ?? false)
+                                        <span aria-hidden="true" class="ml-auto pl-2 pr-2">
+                                        <x-icon name="chevron-left" class="h-4 w-4 text-white transform transition-transform" x-bind:class="{ '-rotate-90': isOpen('{{ $key }}') }" />
+                                    @endif
                                 </span>
-                                @endif
                             </a>
                             @if($navigation['children'] ?? false)
                                 <div x-show="isOpen('{{ $key }}')" x-transition class="mt-2 space-y-2 overflow-x-hidden text-white" role="menu"
@@ -112,6 +114,70 @@
                             @endif
                         </div>
                     @endforeach
+                </div>
+                <div class="whitespace-nowrap">
+                    <div x-on:click="frequentlyVisitedOpen = ! frequentlyVisitedOpen" class="cursor-pointer dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50">
+                        <div class="w-16 flex-none">
+                            <div class="flex w-full justify-center text-white">
+                                <x-heroicons name="clock" class="h-4 w-4" />
+                            </div>
+                        </div>
+                        <span class="truncate text-sm text-white">{{ __('Frequently visited') }}</span>
+                        <span aria-hidden="true" class="ml-auto pl-2 pr-2">
+                            <x-icon name="chevron-left" class="h-4 w-4 text-white transform transition-transform" x-bind:class="frequentlyVisitedOpen && '-rotate-90'" />
+                        </span>
+                    </div>
+                    <div x-show="frequentlyVisitedOpen" x-cloak x-collapse>
+                        @foreach($visits as $visit)
+                            <a
+                                wire:navigate
+                                href="{{ $visit }}"
+                                class="dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
+                            >
+                                <div class="w-16 flex-none">
+                                    <div class="flex w-full justify-center text-white">
+                                        <x-heroicons :name="$navigations->first(fn($item) => str_starts_with($visit, $item['uri'] ) && $item['uri'] !== '/')['icon'] ?? 'no-symbol'" class="h-4 w-4" />
+                                    </div>
+                                </div>
+                                <span class="truncate text-sm text-white"> {{ $visit }} </span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="whitespace-nowrap">
+                    <div x-on:click="favoritesOpen = ! favoritesOpen" class="cursor-pointer dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50">
+                        <div class="w-16 flex-none">
+                            <div class="flex w-full justify-center text-white">
+                                <x-heroicons name="star" variant="solid" class="h-4 w-4 fill-warning-400" />
+                            </div>
+                        </div>
+                        <span class="truncate text-sm text-white">{{ __('Favorites') }}</span>
+                        <span aria-hidden="true" class="ml-auto pl-2 pr-2">
+                            <x-icon name="chevron-left" class="h-4 w-4 text-white transform transition-transform" x-bind:class="favoritesOpen && '-rotate-90'" />
+                        </span>
+                    </div>
+                    <div x-show="favoritesOpen" x-cloak x-collapse class="max-w-full">
+                        @foreach($favorites as $favorite)
+                            <div class="flex justify-between">
+                                <a
+                                    wire:navigate
+                                    href="{{ $favorite['url'] }}"
+                                    class="flex-1 overflow-hidden dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
+                                >
+                                    <div class="w-16 flex-none">
+                                        <div class="flex w-full justify-center text-white">
+                                            <x-heroicons :name="$navigations->first(fn($item) => str_starts_with($favorite['url'], $item['uri'] ) && $item['uri'] !== '/')['icon'] ?? 'no-symbol'" class="h-4 w-4" />
+                                        </div>
+                                    </div>
+                                    <div class="truncate text-sm text-white"> {{ $favorite['name'] }} </div>
+                                </a>
+                                <div class="truncate" x-show="menuOpen" x-transition x-cloak>
+                                    <x-button.circle xs negative icon="trash" wire:click="deleteFavorite({{ $favorite['id'] }})" wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Favorite')]) }}"/>
+                                </div>
+                            </div>
+                        @endforeach
+                        <x-button x-bind:class="! menuOpen && 'invisible'" positive class="w-full" icon="plus" :label="__('Add')" wire:click="addFavorite(window.location.pathname + window.location.search, $promptValue())" wire:confirm.prompt="{{  __('New Favorite') }}||{{  __('Cancel') }}|{{  __('Save') }}" />
+                    </div>
                 </div>
             </nav>
         </x-nav.nav>

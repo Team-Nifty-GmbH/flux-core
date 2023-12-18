@@ -64,7 +64,7 @@
         >
             <x-slot:beforeOptions>
                 <div class="px-1">
-                    <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{  __('New Tag') }}||{{  __('Cancel') }}|{{  _('Save') }}" />
+                    <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{  __('New Tag') }}||{{  __('Cancel') }}|{{  __('Save') }}" />
                 </div>
             </x-slot:beforeOptions>
         </x-select>

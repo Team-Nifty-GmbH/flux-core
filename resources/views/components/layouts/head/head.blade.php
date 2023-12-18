@@ -10,7 +10,6 @@
 <meta name="currency-code" content="{{ $defaultCurrency?->iso }}">
 <meta http-equiv="refresh" content="{{ config('session.lifetime') * 60 + 1 }}">
 @stack('meta')
-<title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
 {!! WireUi::directives()->scripts(absolute: false) !!}
 @vite([
     'resources/js/app.js',

@@ -37,7 +37,7 @@ class OrderPositions extends OrderPositionList
 
     public bool $showGroupAdd = false;
 
-    public ?int $selectedIndex = null;
+    public array $selectedIndex = [];
 
     public bool $showOrderPosition = false;
 

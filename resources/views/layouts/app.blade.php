@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html class="soft-scrollbar h-full text-sm" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
+    <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
     <x-layouts.head.head/>
 </head>
 <body class="dark:bg-secondary-900 h-full bg-slate-50 transition duration-300">
