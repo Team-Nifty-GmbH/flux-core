@@ -64,8 +64,6 @@ class CreateOrderPosition extends FluxAction
 
     public function performAction(): OrderPosition
     {
-        $this->data['amount'] = $this->data['amount'] ?? 1;
-
         $tags = Arr::pull($this->data, 'tags', []);
         $order = Order::query()
             ->with('orderType:id,order_type_enum')
@@ -95,10 +93,10 @@ class CreateOrderPosition extends FluxAction
         $product = null;
         if (data_get($this->data, 'product_id', false)) {
             $product = Product::query()
+                ->whereKey($this->data['product_id'])
                 ->with([
                     'bundleProducts:id,name',
                 ])
-                ->whereKey($this->data['product_id'])
                 ->first();
 
             data_set($this->data, 'vat_rate_id', $product->vat_rate_id, false);
@@ -107,6 +105,10 @@ class CreateOrderPosition extends FluxAction
             data_set($this->data, 'product_number', $product->product_number, false);
             data_set($this->data, 'ean_code', $product->ean, false);
             data_set($this->data, 'unit_gram_weight', $product->weight_gram, false);
+        }
+
+        if (! ($this->data['is_free_text'] ?? false)) {
+            $this->data['amount'] = $this->data['amount'] ?? 1;
         }
 
         $orderPosition->fill($this->data);

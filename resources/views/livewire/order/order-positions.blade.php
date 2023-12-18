@@ -19,16 +19,16 @@
                                         option-description="product_number"
                                         :clearable="false"
                                         :template="[
-                                        'name'   => 'user-option',
-                                    ]"
+                                            'name' => 'user-option',
+                                        ]"
                                         :async-data="[
-                                        'api' => route('search', \FluxErp\Models\Product::class),
-                                        'params' => [
-                                            'whereDoesntHave' => 'children',
-                                            'fields' => ['id', 'name', 'product_number'],
-                                            'with' => 'media',
-                                        ]
-                                    ]"
+                                            'api' => route('search', \FluxErp\Models\Product::class),
+                                            'params' => [
+                                                'whereDoesntHave' => 'children',
+                                                'fields' => ['id', 'name', 'product_number'],
+                                                'with' => 'media',
+                                            ]
+                                        ]"
                                 />
                                 <div x-cloak x-show="$wire.orderPosition.product_id">
                                     <x-select
@@ -39,7 +39,9 @@
                                             :async-data="route('search', \FluxErp\Models\Warehouse::class)"
                                     />
                                 </div>
-                                <x-checkbox wire:model.boolean="orderPosition.is_alternative" :label="__('Alternative')" />
+                                <div class="mt-2">
+                                    <x-checkbox wire:model.boolean="orderPosition.is_alternative" :label="__('Alternative')" />
+                                </div>
                             </div>
                         </div>
                         <div class="flex-auto space-y-2" x-cloak x-show="$wire.orderPosition.is_free_text !== true">
@@ -53,10 +55,16 @@
                             >
                             </x-input>
                             <x-input type="number" :label="__('Discount')" wire:model="orderPosition.discount_percentage"></x-input>
-                            <x-select :options="$vatRates" option-label="name" option-value="id" :label="__('Vat rate')" wire:model.live="orderPosition.vat_rate_id" />
+                            <x-select
+                                :options="$vatRates"
+                                option-value="id"
+                                option-label="name"
+                                :label="__('Vat rate')"
+                                wire:model.live="orderPosition.vat_rate_id"
+                            />
                         </div>
                     </div>
-                    <x-editor :label="__('Description')" wire:model="orderPosition.description"></x-editor>
+                    <x-editor :label="__('Description')" wire:model="orderPosition.description" />
                 </div>
                 <x-errors />
             </div>
@@ -95,16 +103,16 @@
                                 option-description="product_number"
                                 :clearable="false"
                                 :template="[
-                                            'name'   => 'user-option',
-                                        ]"
+                                    'name'   => 'user-option',
+                                ]"
                                 :async-data="[
-                                            'api' => route('search', \FluxErp\Models\Product::class),
-                                            'params' => [
-                                                'whereDoesntHave' => 'children',
-                                                'fields' => ['id', 'name', 'product_number'],
-                                                'with' => 'media',
-                                            ]
-                                        ]"
+                                    'api' => route('search', \FluxErp\Models\Product::class),
+                                    'params' => [
+                                        'whereDoesntHave' => 'children',
+                                        'fields' => ['id', 'name', 'product_number'],
+                                        'with' => 'media',
+                                    ]
+                                ]"
                             />
                             <div
                                 x-transition

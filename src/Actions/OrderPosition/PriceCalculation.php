@@ -6,7 +6,6 @@ use FluxErp\Helpers\PriceHelper;
 use FluxErp\Livewire\Forms\OrderPositionForm;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
-use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
@@ -43,6 +42,7 @@ class PriceCalculation
             : Product::query()
                 ->whereKey($orderPosition->product_id)
                 ->first();
+
         $order = $orderPosition instanceof Model
             ? $orderPosition->order
             : Order::query()

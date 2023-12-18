@@ -85,11 +85,14 @@ class Order extends OrderPositionList
     {
         parent::mount();
 
-        $this->filters = [[
-            'column' => 'order_id',
-            'operator' => '=',
-            'value' => $id,
-        ]];
+        $this->filters = [
+            [
+                'column' => 'order_id',
+                'operator' => '=',
+                'value' => $id,
+            ],
+        ];
+
         $order = \FluxErp\Models\Order::query()
             ->whereKey($id)
             ->with([
@@ -110,16 +113,10 @@ class Order extends OrderPositionList
         );
 
         $this->order->fill($order);
-        //        $this->order['invoice'] = $order->invoice()?->toArray();
 
         $this->getAvailableStates(['payment_state', 'delivery_state', 'state']);
 
         $this->isSelectable = ! $this->order->is_locked;
-    }
-
-    public function boot(): void
-    {
-
     }
 
     public function getSelectAttributes(): ComponentAttributeBag
@@ -151,7 +148,7 @@ class Order extends OrderPositionList
                 ->color('primary')
                 ->attributes([
                     'wire:click' => <<<'JS'
-                            editOrderPosition(index).then(() =>$openModal('edit-order-position'));
+                            editOrderPosition(index).then(() => $openModal('edit-order-position'));
                         JS,
                     'x-show' => '! record.is_bundle_position',
                     'x-cloak' => true,
@@ -351,6 +348,7 @@ class Order extends OrderPositionList
             ->with('contact')
             ->first()
             ->toArray();
+
         $this->order->payment_type_id = $this->order->address_invoice['contact']['payment_type_id'] ?? null;
         $this->order->price_list_id = $this->order->address_invoice['contact']['price_list_id'] ?? null;
         $this->order->language_id = $this->order->address_invoice['language_id'];
@@ -450,6 +448,7 @@ class Order extends OrderPositionList
             ->whereKey($this->order->id)
             ->with('addresses')
             ->first();
+
         $hash = md5(json_encode($order->toArray()) . json_encode($order->orderPositions->toArray()));
 
         $createDocuments = [];
@@ -577,7 +576,7 @@ class Order extends OrderPositionList
         $this->orderPosition->price_list_id = $this->orderPosition->price_list_id ?: $this->order->price_list_id;
         $this->orderPosition->contact_id = $this->orderPosition->contact_id ?: $this->order->contact_id;
 
-        if ($this->orderPosition->product_id) {
+        if (is_null($index) && $this->orderPosition->product_id) {
             $this->changedProductId();
         }
     }
@@ -664,7 +663,7 @@ class Order extends OrderPositionList
     #[Renderless]
     public function deleteSelectedOrderPositions(): void
     {
-        if ($wildcardIndex = array_search('*', $this->selected)) {
+        if (($wildcardIndex = array_search('*', $this->selected)) !== false) {
             unset($this->selected[$wildcardIndex]);
         }
 
@@ -768,9 +767,13 @@ class Order extends OrderPositionList
         $this->order->total_net_price = 0;
         $this->order->total_gross_price = 0;
         $this->order->total_vats = [];
+
         foreach ($this->data as $item) {
             $this->order->total_net_price = bcadd($this->order->total_net_price, $item['total_net_price'] ?? 0);
-            $this->order->total_gross_price = bcadd($this->order->total_gross_price, $item['total_gross_price'] ?? 0);
+            $this->order->total_gross_price = bcadd(
+                $this->order->total_gross_price,
+                $item['total_gross_price'] ?? 0
+            );
             $this->order->total_vats[$item['vat_rate_percentage']]['total_vat_price'] = bcadd(
                 $this->order->total_vats[$item['vat_rate_percentage']]['total_vat_price'] ?? 0,
                 $item['vat_price'] ?? 0

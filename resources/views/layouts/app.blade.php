@@ -23,13 +23,15 @@
             >
                 <div
                     class="w-full"
-                    x-data="{openUrl() {
-                        let urlObj = new URL($el.querySelector('embed').src);
-                        urlObj.searchParams.delete('no-navigation');
+                    x-data="{
+                        openUrl() {
+                            let urlObj = new URL($el.querySelector('embed').src);
+                            urlObj.searchParams.delete('no-navigation');
 
-                        window.open(urlObj);
-                        close();
-                    }}"
+                            window.open(urlObj);
+                            close();
+                        }
+                    }"
                 >
                     <x-card class="grid h-screen">
                         <embed class="object-contain" height="100%" width="100%" id="detail-modal-embed" src="#" />

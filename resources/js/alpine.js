@@ -170,7 +170,7 @@ document.addEventListener('livewire:init', () => {
             if (status === 419) {
                 window.location.reload();
 
-                preventDefault()
+                preventDefault();
             }
         })
     })
@@ -183,27 +183,27 @@ function wireNavigation() {
     });
 
     links.forEach(link => {
-        link.setAttribute('wire:navigate', 'true')
+        link.setAttribute('wire:navigate', 'true');
     });
 }
 
 Livewire.directive('confirm', ({ el, directive }) => {
     let icon = directive.modifiers.includes('icon')
         ? directive.modifiers[directive.modifiers.indexOf('icon') + 1]
-        : 'question'
+        : 'question';
 
     let id = directive.modifiers.includes('prompt')
         ? 'prompt'
-        : null
+        : null;
 
     // Convert sanitized linebreaks ("\n") to real line breaks...
     let message = directive.expression.replaceAll('\\n', '\n').split('|');
-    let title = message.shift()
-    let description = message[0]
-    let cancelLabel = message[1] ?? 'Cancel'
-    let confirmLabel = message[2] ?? 'Confirm'
+    let title = message.shift();
+    let description = message[0];
+    let cancelLabel = message[1] ?? 'Cancel';
+    let confirmLabel = message[2] ?? 'Confirm';
 
-    if (message === '') message = 'Are you sure?'
+    if (title === '') title = 'Are you sure?';
 
     el.__livewire_confirm = (action) => {
         window.$wireui.confirmDialog({
@@ -226,7 +226,7 @@ Livewire.directive('confirm', ({ el, directive }) => {
 })
 
 window.$promptValue = () => {
-    return document.getElementById('prompt-value').value
+    return document.getElementById('prompt-value').value;
 }
 
 document.addEventListener('livewire:navigating', () => {

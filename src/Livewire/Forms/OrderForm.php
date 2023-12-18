@@ -48,6 +48,8 @@ class OrderForm extends Form
 
     public ?int $payment_discount_target = null;
 
+    public ?int $payment_discount_percent = null;
+
     public ?string $total_net_price = null;
 
     public ?string $total_gross_price = null;
@@ -69,8 +71,6 @@ class OrderForm extends Form
     public ?string $footer = null;
 
     public ?string $logistic_note = null;
-
-    public ?int $payment_discount_percent = null;
 
     public ?array $payment_texts = [];
 
@@ -102,9 +102,23 @@ class OrderForm extends Form
 
     public function save(): void
     {
+        $data = $this->toArray();
+
+        if (! $this->id) {
+            unset(
+                $data['state'],
+                $data['payment_state'],
+                $data['delivery_state'],
+                $data['order_number'],
+                $data['order_date'],
+                $data['invoice_date'],
+                $data['invoice_number']
+            );
+        }
+
         $action = $this->id
-            ? UpdateOrder::make($this->toArray())
-            : CreateOrder::make($this->toArray());
+            ? UpdateOrder::make($data)
+            : CreateOrder::make($data);
 
         $response = $action
             ->checkPermission()

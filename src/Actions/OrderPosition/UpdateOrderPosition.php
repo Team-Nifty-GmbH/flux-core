@@ -36,8 +36,8 @@ class UpdateOrderPosition extends FluxAction
             ->firstOrNew();
 
         $order = Order::query()
-            ->with('orderType:id,order_type_enum')
             ->whereKey(data_get($this->data, 'order_id', $orderPosition->order_id))
+            ->select(['id', 'client_id', 'price_list_id'])
             ->first();
 
         $this->data['client_id'] = data_get($this->data, 'client_id', $order->client_id);
@@ -56,24 +56,31 @@ class UpdateOrderPosition extends FluxAction
                 ->increment('sort_number');
         }
 
+        $orderPosition->fill($this->data);
+
         $product = null;
-        if (data_get($this->data, 'product_id', false)) {
+        if ($orderPosition->isDirty('product_id') && $orderPosition->product_id) {
             $product = Product::query()
+                ->whereKey($this->data['product_id'])
                 ->with([
                     'bundleProducts:id,name',
                 ])
-                ->whereKey($this->data['product_id'])
                 ->first();
 
-            data_set($this->data, 'vat_rate_id', $product->vat_rate_id, false);
-            data_set($this->data, 'name', $product->name, false);
-            data_set($this->data, 'description', $product->description, false);
-            data_set($this->data, 'product_number', $product->product_number, false);
-            data_set($this->data, 'ean_code', $product->ean, false);
-            data_set($this->data, 'unit_gram_weight', $product->weight_gram, false);
+            $orderPosition->vat_rate_id = $orderPosition->isDirty('vat_rate_id') ?
+                $orderPosition->vat_rate_id : $product->vat_rate_id;
+            $orderPosition->name = $orderPosition->isDirty('name') ?
+                $orderPosition->name : $product->name;
+            $orderPosition->description = $orderPosition->isDirty('description') ?
+                $orderPosition->description : $product->description;
+            $orderPosition->product_number = $orderPosition->isDirty('product_number') ?
+                $orderPosition->product_number : $product->product_number;
+            $orderPosition->ean_code = $orderPosition->isDirty('ean_code') ?
+                $orderPosition->ean_code : $product->ean_code;
+            $orderPosition->unit_gram_weight = $orderPosition->isDirty('unit_gram_weight') ?
+                $orderPosition->unit_gram_weight : $product->unit_gram_weight;
         }
 
-        $orderPosition->fill($this->data);
         PriceCalculation::fill($orderPosition, $this->data);
         unset($orderPosition->discounts, $orderPosition->unit_price);
         $orderPosition->save();

@@ -43,7 +43,10 @@ class EditMail extends Component
                     ])
                     ->get(['mail_accounts.id', 'email'])
                     ->toArray(),
-                [['id' => null, 'email' => __('Default')]]),
+                [
+                    ['id' => null, 'email' => __('Default')],
+                ]
+            ),
         ]);
     }
 
@@ -71,6 +74,7 @@ class EditMail extends Component
                 'path' => $file->getRealPath(),
             ];
         }, $this->files);
+
         $this->mailMessage->attachments = array_merge($this->mailMessage->attachments, $files);
     }
 
@@ -78,7 +82,10 @@ class EditMail extends Component
     public function send(): bool
     {
         if ($this->mailMessage->mail_account_id) {
-            $mailAccount = MailAccount::query()->whereKey($this->mailMessage->mail_account_id)->first();
+            $mailAccount = MailAccount::query()
+                ->whereKey($this->mailMessage->mail_account_id)
+                ->first();
+
             config([
                 'mail.default' => 'mail_account',
                 'mail.mailers.mail_account.transport' => $mailAccount->smtp_mailer,
@@ -115,7 +122,7 @@ class EditMail extends Component
     }
 
     #[Renderless]
-    public function clear()
+    public function clear(): void
     {
         $this->mailMessage->reset();
 

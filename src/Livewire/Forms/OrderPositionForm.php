@@ -116,9 +116,9 @@ class OrderPositionForm extends Form
         }
 
         $product = $product ?: Product::query()
-            ->with('vatRate:id,rate_percentage')
             ->whereKey($this->product_id)
             ->first();
+
         $this->vat_rate_id = $product->vat_rate_id;
         $this->name = $product->name;
         $this->description = $product->description;
@@ -128,7 +128,7 @@ class OrderPositionForm extends Form
 
         $this->calculate();
 
-        $this->warehouse_id = $this->warehouse_id ?: Warehouse::query()->first()->id;
+        $this->warehouse_id = $this->warehouse_id ?: Warehouse::query()->first()?->id;
     }
 
     public function validate($rules = null, $messages = [], $attributes = []): void

@@ -1,16 +1,18 @@
-<div x-data="{addReceiver($event, type) {
-    let value = $event.target.value;
-    if ($event instanceof KeyboardEvent) {
-        value = value.slice(0, -1);
-    }
+<div x-data="{
+    addReceiver($event, type) {
+        let value = $event.target.value;
+        if ($event instanceof KeyboardEvent) {
+            value = value.slice(0, -1);
+        }
 
-    value = value.trim();
+        value = value.trim();
 
-    if (value && ($event instanceof FocusEvent || ($event.code === 'Comma' || $event.code === 'Enter' || $event.code === 'Space'))) {
-        $wire.mailMessage[type].push(value);
-        $event.target.value = null;
+        if (value && ($event instanceof FocusEvent || ($event.code === 'Comma' || $event.code === 'Enter' || $event.code === 'Space'))) {
+            $wire.mailMessage[type].push(value);
+            $event.target.value = null;
+        }
     }
-}}">
+}">
     <x-modal max-width="7xl" name="edit-mail" x-on:close="$wire.clear()">
         <x-card class="flex flex-col gap-4">
             <div class="flex flex-col gap-1.5">
@@ -130,7 +132,6 @@
                 </label>
                 <input class="hidden" wire:model="files" id="files" type="file" multiple/>
             </div>
-
             <x-editor wire:model="mailMessage.html_body" />
             <x-slot:footer>
                 <div class="flex justify-end">

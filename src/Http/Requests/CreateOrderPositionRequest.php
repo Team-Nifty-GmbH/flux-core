@@ -122,6 +122,7 @@ class CreateOrderPositionRequest extends BaseFormRequest
                     'exclude_if:is_bundle_position,true',
                     'required_if:is_free_text,false',
                     'required_if:is_bundle_position,false',
+                    'boolean',
                 ],
                 'is_free_text' => 'boolean',
                 'is_bundle_position' => 'exclude_without:parent_id|boolean',

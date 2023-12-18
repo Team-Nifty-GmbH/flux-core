@@ -22,9 +22,6 @@ class OrderPositionController extends BaseController
         $this->model = new OrderPosition();
     }
 
-    /**
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function create(CreateOrderPositionRequest $request): JsonResponse
     {
         $orderPosition = CreateOrderPosition::make($request->validated())
@@ -94,9 +91,20 @@ class OrderPositionController extends BaseController
 
     public function fill(FillOrderPositionRequest $request): JsonResponse
     {
-        return ResponseHelper::createResponseFromArrayResponse(
-            FillOrderPositions::make($request->validated())
-                ->execute()
+        try {
+            $orderPositions = FillOrderPositions::make($request->validated())
+                ->validate()
+                ->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 422,
+                data: $e->errors(),
+            );
+        }
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $orderPositions
         );
     }
 }

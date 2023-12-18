@@ -32,7 +32,6 @@ class OrderTypeForm extends Form
 
     public function save(): void
     {
-
         $action = $this->id ? UpdateOrderType::make($this->toArray()) : CreateOrderType::make($this->toArray());
 
         $response = $action->checkPermission()->validate()->execute();
@@ -40,7 +39,7 @@ class OrderTypeForm extends Form
         $this->fill($response);
     }
 
-    public function fill($values)
+    public function fill($values): void
     {
         parent::fill($values);
 
