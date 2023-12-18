@@ -77,6 +77,7 @@ class OrderPositionTableSeeder extends Seeder
                     $data['unit_price'] = bcmul(rand(1, 9999) / 100, $multiplier);
 
                     PriceCalculation::fill($orderPosition, $data);
+                    unset($data['unit_price']);
                     $orderPosition->save();
 
                     // Create Bundle Positions

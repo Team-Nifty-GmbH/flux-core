@@ -67,14 +67,14 @@ class CommentsTest extends BaseSetup
     {
         $class = new class extends Comments
         {
-            public function mount(Order $order): void
+            public function mount(Order $orderModel): void
             {
-                $this->order->fill($order);
+                $this->order->fill($orderModel);
                 parent::mount();
             }
         };
 
-        Livewire::test($class, ['order' => $this->order])
+        Livewire::test($class, ['orderModel' => $this->order])
             ->assertStatus(200);
     }
 }
