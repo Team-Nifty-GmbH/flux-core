@@ -23,7 +23,7 @@ class CreateProjectRequest extends BaseFormRequest
                 'order_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
                 'responsible_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'parent_id' => 'integer|nullable|exists:projects,id,deleted_at,NULL',
-                'project_number' => 'sometimes|required|string',
+                'project_number' => 'nullable|string',
                 'name' => 'required|string',
                 'start_date' => 'date_format:Y-m-d|nullable',
                 'end_date' => 'date_format:Y-m-d|nullable',

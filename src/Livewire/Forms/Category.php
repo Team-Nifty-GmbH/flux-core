@@ -4,10 +4,12 @@ namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Category\CreateCategory;
 use FluxErp\Actions\Category\UpdateCategory;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 class Category extends Form
 {
+    #[Locked]
     public ?int $id = null;
 
     public ?string $model_type = null;
