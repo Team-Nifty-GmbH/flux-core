@@ -13,7 +13,7 @@ class FillOrderPositionRequest extends BaseFormRequest
     {
         return [
             'order_id' => 'required|integer|exists:orders,id,deleted_at,NULL',
-            'order_positions' => 'required|array',
+            'order_positions' => 'array',
             'simulate' => 'boolean',
         ];
     }

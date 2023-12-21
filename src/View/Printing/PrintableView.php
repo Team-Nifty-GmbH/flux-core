@@ -165,8 +165,8 @@ abstract class PrintableView extends Component
             'model_type' => get_class($this->getModel()),
             'model_id' => $this->getModel()->getKey(),
             'collection_name' => $this->getCollectionName(),
-            'file_name' => now()->toString() . '_' . Str::finish($this->getFileName(), '.pdf'),
-            'name' => now()->toString() . '_' . $this->getFileName(),
+            'file_name' => now()->format('Y-m-d_H-i-s') . '_' . Str::finish($this->getFileName(), '.pdf'),
+            'name' => now()->format('Y-m-d_H-i-s') . '_' . $this->getFileName(),
             'media' => $resource,
             'media_type' => 'stream',
         ];

@@ -65,7 +65,15 @@ class CommentsTest extends BaseSetup
 
     public function test_renders_successfully()
     {
-        Livewire::test(Comments::class, ['orderId' => $this->order->id])
+        $class = new class extends Comments
+        {
+            public function mount(Order $orderModel): void
+            {
+                $this->order->fill($orderModel);
+            }
+        };
+
+        Livewire::test($class, ['orderModel' => $this->order])
             ->assertStatus(200);
     }
 }

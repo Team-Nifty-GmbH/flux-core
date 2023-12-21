@@ -2,144 +2,110 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use FluxErp\Actions\OrderType\CreateOrderType;
+use FluxErp\Actions\OrderType\DeleteOrderType;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Http\Requests\CreateOrderTypeRequest;
-use FluxErp\Http\Requests\UpdateOrderTypeRequest;
+use FluxErp\Livewire\DataTables\OrderTypeList;
+use FluxErp\Livewire\Forms\OrderTypeForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
-use FluxErp\Services\OrderTypeService;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Arr;
-use Livewire\Component;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
 
-class OrderTypes extends Component
+class OrderTypes extends OrderTypeList
 {
     use Actions;
 
-    public array $printViews = [];
+    protected string $view = 'flux::livewire.settings.order-types';
 
-    public array $clients;
-
-    public array $enum;
-
-    public array $orderType = [
-        'id' => null,
-        'name' => null,
-        'client_id' => null,
-        'description' => null,
-        'print_layouts' => [],
-        'order_type_enum' => null,
-        'is_active' => false,
-        'is_hidden' => false,
-    ];
-
-    public bool $editModal = false;
-
-    public function getRules(): array
-    {
-        $orderTypeRequest = $this->orderType['id'] ?
-            new UpdateOrderTypeRequest() :
-            new CreateOrderTypeRequest();
-
-        return Arr::prependKeysWith($orderTypeRequest->rules(), 'orderType.');
-    }
-
-    public function messages(): array
-    {
-        $orderTypeMessages = [
-            'name.required' => 'Order Type Name is required.',
-            'description.max' => 'Description can have a maximum of 500 characters.',
-            'print_layouts.*.required' => 'Print layout is required for each item in the print_layouts array.',
-            'print_layouts.*.max' => 'Print layout can have a maximum of 255 characters for each item in the print_layouts array.',
-            'order_type_enum.required' => 'Order Type Enum is required.',
-            'is_active.required' => 'Is Active is required.',
-            'is_hidden.required' => 'Is Hidden is required.',
-        ];
-
-        return Arr::prependKeysWith($orderTypeMessages, 'orderType.');
-    }
+    public OrderTypeForm $orderType;
 
     public function mount(): void
     {
+        parent::mount();
 
+        $this->headline = __('Order Types');
+    }
+
+    public function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('New'))
+                ->icon('plus')
+                ->color('primary')
+                ->when(CreateOrderType::canPerformAction(false))
+                ->attributes(
+                    ['wire:click' => 'edit']
+                ),
+        ];
+    }
+
+    public function getViewData(): array
+    {
+        $printViews = [];
         foreach ((new Order())->getAvailableViews() as $view) {
-            $this->printViews[] = [
+            $printViews[] = [
                 'value' => $view,
                 'label' => __($view),
             ];
         }
 
-        $this->clients = Client::query()
-            ->get(['id', 'name'])
-            ->toArray();
-
-        $this->enum = OrderTypeEnum::values();
+        return array_merge(
+            parent::getViewData(),
+            [
+                'printViews' => $printViews,
+                'clients' => Client::query()
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'enum' => OrderTypeEnum::values(),
+            ]
+        );
     }
 
-    public function render(): View|Factory|Application
+    public function save(): bool
     {
-        return view('flux::livewire.settings.order-types');
-    }
+        try {
+            $this->orderType->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
 
-    public function save(): void
-    {
-        $validated = $this->validate()['orderType'];
-
-        $orderType = OrderType::query()
-            ->whereKey($validated['id'] ?? null)
-            ->firstOrNew();
-
-        $orderType->fill($validated);
-        $orderType->save();
-
-        $this->editModal = false;
-        $this->skipRender();
-        $this->dispatch('loadData')->to('data-tables.order-type-list');
-    }
-
-    public function showEditModal(?int $orderTypeId = null): void
-    {
-        $orderType = OrderType::query()
-            ->whereKey($orderTypeId)
-            ->first();
-
-        if ($orderType) {
-            $this->orderType = [
-                'id' => $orderType->id,
-                'name' => $orderType->name,
-                'description' => $orderType->description,
-                'print_layouts' => $orderType->print_layouts ?? [],
-                'order_type_enum' => $orderType->order_type_enum,
-                'is_active' => $orderType->is_active,
-                'is_hidden' => $orderType->is_hidden,
-            ];
-        } else {
-            $this->orderType = [
-                'id' => null,
-                'name' => null,
-                'description' => null,
-                'print_layouts' => [],
-                'order_type_enum' => null,
-                'is_active' => false,
-                'is_hidden' => false,
-            ];
+            return false;
         }
 
-        $this->editModal = true;
+        $this->loadData();
+
+        return true;
     }
 
-    public function delete(): void
+    public function edit(OrderType $orderType): void
     {
-        if (! user_can('api.order-types.{id}.delete')) {
-            return;
-        }
-        (new OrderTypeService())->delete($this->orderType['id']);
+        $this->orderType->reset();
+        $this->orderType->fill($orderType);
 
-        $this->dispatch('loadData')->to('data-tables.order-type-list');
-        $this->skipRender();
+        $this->js(<<<'JS'
+            $openModal('edit-order-type');
+        JS);
+    }
+
+    public function delete(): bool
+    {
+        try {
+            DeleteOrderType::make($this->orderType->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 }

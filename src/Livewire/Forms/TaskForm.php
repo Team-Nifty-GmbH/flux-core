@@ -5,10 +5,12 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\UpdateTask;
 use Illuminate\Support\Arr;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 class TaskForm extends Form
 {
+    #[Locked]
     public ?int $id = null;
 
     public ?int $project_id = null;

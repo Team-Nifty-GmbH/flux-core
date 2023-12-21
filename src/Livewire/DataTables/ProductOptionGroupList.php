@@ -21,7 +21,7 @@ class ProductOptionGroupList extends DataTable
         'selected',
     ];
 
-    public function updatedSearch(): void
+    public function startSearch(): void
     {
         $this->filters = [[
             'name',
@@ -29,7 +29,7 @@ class ProductOptionGroupList extends DataTable
             '%' . $this->search . '%',
         ]];
 
-        parent::updatedSearch();
+        parent::startSearch();
     }
 
     public function getRowAttributes(): ComponentAttributeBag

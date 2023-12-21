@@ -5,9 +5,11 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\BankConnection\CreateBankConnection;
 use FluxErp\Actions\BankConnection\DeleteBankConnection;
 use FluxErp\Actions\BankConnection\UpdateBankConnection;
+use Livewire\Attributes\Locked;
 
 class BankConnectionForm extends FluxForm
 {
+    #[Locked]
     public ?int $id = null;
 
     public ?int $currency_id = null;

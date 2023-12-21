@@ -6,6 +6,7 @@ use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
 use FluxErp\Models\MailAccount;
+use Livewire\Attributes\Locked;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Webklex\PHPIMAP\Exceptions\AuthFailedException;
 use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
@@ -16,6 +17,7 @@ use Webklex\PHPIMAP\Exceptions\RuntimeException;
 
 class MailAccountForm extends FluxForm
 {
+    #[Locked]
     public ?int $id = null;
 
     public ?string $protocol = 'imap';

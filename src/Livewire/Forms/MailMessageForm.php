@@ -3,11 +3,15 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Models\MailMessage;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 class MailMessageForm extends Form
 {
+    #[Locked]
     public ?int $id = null;
+
+    public ?int $mail_account_id = null;
 
     public ?string $from = null;
 
