@@ -66,10 +66,8 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
     ->name('icons');
 
 Route::middleware(['auth:web', 'permission'])->group(function () {
-
-    Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);
-
     Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);
+
     Route::middleware(TrackVisits::class)->group(function () {
         Route::get('/mail', Mail::class)->name('mail')->registersMenuItem(icon: 'envelope');
         Route::get('/calendars', Calendar::class)->name('calendars')->registersMenuItem(icon: 'calendar');
@@ -78,7 +76,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
 
         Route::name('orders.')->prefix('orders')
             ->group(function () {
-                Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'shopping-bag');
+                Route::permanentRedirect('/', '/')
+                    ->withoutMiddleware(TrackVisits::class)
+                    ->registersMenuItem(icon: 'shopping-bag');
                 Route::get('/list', OrderList::class)->name('orders')->registersMenuItem();
                 Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions')
                     ->registersMenuItem();
@@ -92,11 +92,11 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
         Route::get('/projects', ProjectList::class)->name('projects')->registersMenuItem(icon: 'briefcase');
         Route::get('/projects/{id}', Project::class)->name('projects.id');
 
-        Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);
-
         Route::name('products.')->prefix('products')
             ->group(function () {
-                Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'square-3-stack-3d');
+                Route::permanentRedirect('/', '/')
+                    ->withoutMiddleware(TrackVisits::class)
+                    ->registersMenuItem(icon: 'square-3-stack-3d');
                 Route::get('/list', ProductList::class)->name('products')->registersMenuItem();
                 Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers')->registersMenuItem();
                 Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
@@ -105,7 +105,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
 
         Route::name('accounting.')->prefix('accounting')
             ->group(function () {
-                Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'square-3-stack-3d');
+                Route::permanentRedirect('/', '/')
+                    ->withoutMiddleware(TrackVisits::class)
+                    ->registersMenuItem(icon: 'square-3-stack-3d');
                 Route::get('/work-times', WorkTimeList::class)->name('work-times')->registersMenuItem();
                 Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
                 Route::get('/transactions', TransactionList::class)->name('transactions')->registersMenuItem();
@@ -113,13 +115,11 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
 
         Route::get('/my-profile', Profile::class)->name('my-profile');
 
-        Route::get('/media/{media}/{filename}', function (Media $media) {
-            return $media;
-        });
-
         Route::name('settings.')->prefix('settings')
             ->group(function () {
-                Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'cog', order: 9999);
+                Route::permanentRedirect('/', '/')
+                    ->withoutMiddleware(TrackVisits::class)
+                    ->registersMenuItem(icon: 'cog', order: 9999);
                 Route::get('/additional-columns', AdditionalColumns::class)
                     ->name('additional-columns')
                     ->registersMenuItem();
@@ -154,6 +154,12 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                     ->name('serial-number-ranges')
                     ->registersMenuItem();
             });
+    });
+
+    Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);
+
+    Route::get('/media/{media}/{filename}', function (Media $media) {
+        return $media;
     });
 });
 

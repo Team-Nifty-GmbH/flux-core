@@ -13,11 +13,15 @@ class TrackVisits
     {
         $url = $request->getPathInfo();
 
-        TrackVisitJob::dispatch($url, [
-            'full_url' => $request->fullUrl(),
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+        TrackVisitJob::dispatch(
+            $request->user(),
+            $url,
+            [
+                'full_url' => $request->fullUrl(),
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]
+        );
 
         return $next($request);
     }

@@ -28,7 +28,9 @@ class Navigation extends Component
             $this->setting = $setting;
 
             $this->background = ($setting['nav']['background'] ?? false)
-                ? 'background: linear-gradient(' . ($setting['nav']['background']['angle'] ?? 0) . 'deg, ' . ($setting['nav']['background']['start'] ?? 0) . ', ' . ($setting['nav']['background']['end'] ?? 0) . ');'
+                ? 'background: linear-gradient(' . ($setting['nav']['background']['angle'] ?? 0) . 'deg, '
+                . ($setting['nav']['background']['start'] ?? 0) . ', '
+                . ($setting['nav']['background']['end'] ?? 0) . ');'
                 : null;
         }
     }
@@ -36,8 +38,8 @@ class Navigation extends Component
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.navigation', [
-            'visits' => $this->getVisits(),
             'navigations' => $this->getMenu(),
+            'visits' => $this->getVisits(),
             'favorites' => $this->getFavorites(),
         ]);
     }
@@ -48,10 +50,12 @@ class Navigation extends Component
             return;
         }
 
-        auth()->user()->favorites()->create([
-            'name' => $name ?: $url,
-            'url' => $url,
-        ]);
+        auth()->user()
+            ->favorites()
+            ->create([
+                'name' => $name ?: $url,
+                'url' => $url,
+            ]);
     }
 
     public function deleteFavorite(int $id): void
@@ -64,23 +68,6 @@ class Navigation extends Component
             ->favorites()
             ->whereKey($id)
             ->delete();
-    }
-
-    protected function getVisits(): ?array
-    {
-        if (! method_exists(auth()->user(), 'activities')) {
-            return null;
-        }
-
-        return auth()->user()
-            ->activities()
-            ->selectRaw('count(*) as count, description')
-            ->where('event', 'visit')
-            ->groupBy('description')
-            ->orderByDesc('count')
-            ->limit(5)
-            ->pluck('description')
-            ->toArray();
     }
 
     protected function getMenu(): Collection
@@ -104,6 +91,23 @@ class Navigation extends Component
         return collect($navigations);
     }
 
+    protected function getVisits(): ?array
+    {
+        if (! method_exists(auth()->user(), 'activities')) {
+            return null;
+        }
+
+        return auth()->user()
+            ->activities()
+            ->selectRaw('count(*) as count, description')
+            ->where('event', 'visit')
+            ->groupBy('description')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->pluck('description')
+            ->toArray();
+    }
+
     protected function getFavorites(): ?array
     {
         if (! method_exists(auth()->user(), 'favorites')) {
@@ -112,8 +116,7 @@ class Navigation extends Component
 
         return auth()->user()
             ->favorites()
-            ->select(['id', 'name', 'url'])
-            ->get()
+            ->get(['id', 'name', 'url'])
             ->toArray();
     }
 }

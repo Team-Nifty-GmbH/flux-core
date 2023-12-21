@@ -137,7 +137,7 @@
                                 >
                                     <div class="w-16 flex-none">
                                         <div class="flex w-full justify-center text-white">
-                                            <x-heroicons :name="$navigations->first(fn($item) => str_starts_with($visit, $item['uri'] ) && $item['uri'] !== '/')['icon'] ?? 'no-symbol'" class="h-4 w-4" />
+                                            <x-heroicons :name="$navigations->first(fn ($item) => str_starts_with($visit, $item['uri']) && $item['uri'] !== '/')['icon'] ?? 'no-symbol'" class="h-4 w-4" />
                                         </div>
                                     </div>
                                     <span class="truncate text-sm text-white"> {{ $visit }} </span>
@@ -169,7 +169,7 @@
                                     >
                                         <div class="w-16 flex-none">
                                             <div class="flex w-full justify-center text-white">
-                                                <x-heroicons :name="$navigations->first(fn($item) => str_starts_with($favorite['url'], $item['uri'] ) && $item['uri'] !== '/')['icon'] ?? 'no-symbol'" class="h-4 w-4" />
+                                                <x-heroicons :name="$navigations->first(fn ($item) => str_starts_with($favorite['url'], $item['uri']) && $item['uri'] !== '/')['icon'] ?? 'no-symbol'" class="h-4 w-4" />
                                             </div>
                                         </div>
                                         <div class="truncate text-sm text-white"> {{ $favorite['name'] }} </div>
