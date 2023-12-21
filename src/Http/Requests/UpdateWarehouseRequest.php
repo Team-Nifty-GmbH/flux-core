@@ -20,6 +20,7 @@ class UpdateWarehouseRequest extends BaseFormRequest
                 (new ExistsWithIgnore('addresses', 'id'))->whereNull('deleted_at'),
             ],
             'name' => 'sometimes|required|string',
+            'is_default' => 'boolean',
         ];
     }
 }

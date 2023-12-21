@@ -78,7 +78,18 @@ class Categories extends CategoryList
         return true;
     }
 
-    public function close(): void
+    public function delete(): bool
     {
+        try {
+            $this->category->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 }

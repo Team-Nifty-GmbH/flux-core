@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Forms;
 
+use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateOrder;
@@ -109,7 +110,7 @@ class OrderForm extends FluxForm
         ];
     }
 
-    public function save(): void
+    protected function makeAction(string $name, ?array $data = null): FluxAction
     {
         $data = $this->toArray();
 
@@ -125,6 +126,6 @@ class OrderForm extends FluxForm
             );
         }
 
-        parent::save();
+        return parent::makeAction($name, $data);
     }
 }

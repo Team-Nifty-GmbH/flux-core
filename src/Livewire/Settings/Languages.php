@@ -5,10 +5,13 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Http\Requests\CreateLanguageRequest;
 use FluxErp\Http\Requests\UpdateLanguageRequest;
 use FluxErp\Livewire\DataTables\LanguageList;
+use FluxErp\Livewire\Forms\LanguageForm;
 use FluxErp\Models\Language;
 use FluxErp\Services\LanguageService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
 
@@ -18,19 +21,9 @@ class Languages extends LanguageList
 
     protected string $view = 'flux::livewire.settings.languages';
 
-    public array $selectedLanguage = [];
+    public LanguageForm $selectedLanguage;
 
     public bool $editModal = false;
-
-    public function getRules(): array
-    {
-        $languageRequest = ($this->selectedLanguage['id'] ?? false)
-            ? new UpdateLanguageRequest()
-            : new CreateLanguageRequest();
-
-        return Arr::prependKeysWith($languageRequest->getRules($this->selectedLanguage),
-            'selectedLanguage.');
-    }
 
     public function getTableActions(): array
     {
@@ -61,53 +54,47 @@ class Languages extends LanguageList
     public function showEditModal(?int $languageId = null): void
     {
         if (! $languageId) {
-            $this->selectedLanguage = [];
+            $this->selectedLanguage->reset();
         } else {
-            $this->selectedLanguage = Language::query()
-                ->whereKey($languageId)
-                ->first()
-                ->toArray();
+            $this->selectedLanguage
+                ->fill(
+                    Language::query()
+                        ->whereKey($languageId)
+                        ->first()
+                );
         }
 
         $this->editModal = true;
         $this->resetErrorBag();
     }
 
-    public function save(): void
+    public function save(): bool
     {
-        if (! user_can('api.languages.post')) {
-            return;
-        }
+        try {
+            $this->selectedLanguage->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
 
-        $validated = $this->validate();
-
-        $language = Language::query()
-            ->whereKey($this->selectedLanguage['id'] ?? false)
-            ->firstOrNew();
-
-        $function = $language->exists ? 'update' : 'create';
-
-        $response = (new LanguageService())->{$function}($validated['selectedLanguage']);
-
-        if (($response['status'] ?? false) === 200 || $response instanceof Model) {
-            $this->notification()->success(__('Successfully saved'));
-            $this->editModal = false;
+            return false;
         }
 
         $this->loadData();
+
+        return true;
     }
 
-    public function delete(): void
+    public function delete(): bool
     {
-        if (! user_can('api.languages.{id}.delete')) {
-            return;
+        try {
+            $this->selectedLanguage->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
         }
 
-        Language::query()
-            ->whereKey($this->selectedLanguage['id'])
-            ->first()
-            ->delete();
-
         $this->loadData();
+
+        return true;
     }
 }

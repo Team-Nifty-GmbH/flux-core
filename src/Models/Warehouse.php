@@ -27,4 +27,9 @@ class Warehouse extends Model
     {
         return $this->hasMany(StockPosting::class, 'warehouse_id');
     }
+
+    public static function default(): ?static
+    {
+        return static::query()->where('is_default', true)->first();
+    }
 }

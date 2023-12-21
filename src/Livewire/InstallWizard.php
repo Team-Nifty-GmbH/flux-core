@@ -5,6 +5,7 @@ namespace FluxErp\Livewire;
 use FluxErp\Actions\OrderType\CreateOrderType;
 use FluxErp\Actions\PaymentType\CreatePaymentType;
 use FluxErp\Actions\PriceList\CreatePriceList;
+use FluxErp\Actions\Warehouse\CreateWarehouse;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Events\InstallProcessOutputEvent;
 use FluxErp\Jobs\InstallWizard\CommandJob;
@@ -306,6 +307,7 @@ class InstallWizard extends Component
 
         $this->userForm->language_id = $this->languageForm->id;
         $this->userForm->setCheckPermission(false)->save();
+        User::query()->whereKey($this->userForm->id)->first()->assignRole('Super Admin');
 
         if ($this->languageForm->language_code !== 'en') {
             $this->languageForm->reset();
@@ -340,6 +342,9 @@ class InstallWizard extends Component
             'is_default' => true,
         ])->execute();
 
-        User::query()->whereKey($this->userForm->id)->first()->assignRole('Super Admin');
+        CreateWarehouse::make([
+            'name' => __('Default'),
+            'is_default' => true,
+        ])->execute();
     }
 }

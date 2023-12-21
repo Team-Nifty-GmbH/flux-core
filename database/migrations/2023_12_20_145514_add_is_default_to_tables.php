@@ -29,6 +29,13 @@ return new class extends Migration
                 ->default(false);
         });
         DB::table('clients')->first()?->update(['is_default' => true]);
+
+        Schema::table('warehouses', function (Blueprint $table) {
+            $table->boolean('is_default')
+                ->after('name')
+                ->default(false);
+        });
+        DB::table('warehouses')->first()?->update(['is_default' => true]);
     }
 
     public function down(): void
@@ -42,6 +49,10 @@ return new class extends Migration
         });
 
         Schema::table('clients', function (Blueprint $table) {
+            $table->dropColumn('is_default');
+        });
+
+        Schema::table('warehouses', function (Blueprint $table) {
             $table->dropColumn('is_default');
         });
     }

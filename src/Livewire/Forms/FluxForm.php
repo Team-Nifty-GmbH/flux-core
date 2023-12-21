@@ -11,9 +11,9 @@ abstract class FluxForm extends BaseForm
 
     abstract protected function getActions(): array;
 
-    protected function makeAction(string $name): FluxAction
+    protected function makeAction(string $name, ?array $data = null): FluxAction
     {
-        return $this->getActions()[$name]::make($this->toArray());
+        return $this->getActions()[$name]::make($data ?? $this->toArray());
     }
 
     protected function getKey(): string

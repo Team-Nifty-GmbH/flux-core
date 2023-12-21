@@ -112,7 +112,7 @@ class Order extends OrderPositionList
             array_keys($order->resolvePrintViews())
         );
 
-        $this->order->fill($order);
+        $this->order->fill($order->toArray());
 
         $this->getAvailableStates(['payment_state', 'delivery_state', 'state']);
 

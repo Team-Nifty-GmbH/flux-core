@@ -1,4 +1,4 @@
-<div class="py-6" x-data="{currency: @entangle('selectedCurrency')}">
+<div class="py-6">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
@@ -9,7 +9,7 @@
         @include('tall-datatables::livewire.data-table')
     </div>
 
-    <x-modal.card :title="$selectedCurrency['id'] ?? false ? __('Edit Currency') : __('Create Currency')" wire:model="editModal">
+    <x-modal.card :title="($selectedCurrency->id ?? false) ? __('Edit Currency') : __('Create Currency')" wire:model="editModal">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
@@ -25,12 +25,20 @@
         </div>
         <x-slot name="footer">
             <div class="flex justify-between gap-x-4">
-                <div x-bind:class="currency.id > 0 || 'invisible'">
-                    <x-button flat negative :label="__('Delete')" x-on:click="close" wire:click="delete"/>
-                </div>
+                @if(\FluxErp\Actions\Currency\DeleteCurreny::canPerformAction(false))
+                    <div x-bind:class="$wire.selectedCurrency.id > 0 || 'invisible'">
+                        <x-button
+                            flat
+                            negative
+                            :label="__('Delete')"
+                            wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Currency')]) }}"
+                            wire:click="delete().then((success) => {if(success) close();});"
+                        />
+                    </div>
+                @endif
                 <div class="flex">
                     <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                    <x-button primary :label="__('Save')" wire:click="save"/>
+                    <x-button primary :label="__('Save')" wire:click="save().then((success) => {if(success) close();});"/>
                 </div>
             </div>
         </x-slot>

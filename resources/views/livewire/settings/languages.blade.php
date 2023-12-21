@@ -1,5 +1,5 @@
-<div class="py-6" x-data="{language: @entangle('selectedLanguage')}">
-    <x-modal.card :title="$selectedLanguage['id'] ?? false ? __('Edit Language') : __('Create Language')" wire:model="editModal">
+<div class="py-6">
+    <x-modal.card :title="$selectedLanguage->id ?? false ? __('Edit Language') : __('Create Language')" wire:model="editModal">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
@@ -16,14 +16,20 @@
         </div>
         <x-slot name="footer">
             <div class="flex justify-between gap-x-4">
-                @if(user_can('action.language.delete'))
-                    <div x-bind:class="language.id > 0 || 'invisible'">
-                        <x-button flat negative :label="__('Delete')" x-on:click="close" wire:click="delete"/>
+                @if(\FluxErp\Actions\Language\DeleteLanguage::canPerformAction(false))
+                    <div x-bind:class="$wire.selectedLanguage.id > 0 || 'invisible'">
+                        <x-button
+                            flat
+                            negative
+                            :label="__('Delete')"
+                            wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Language')]) }}"
+                            wire:click="delete().then((success) => {if(success) close();});"
+                        />
                     </div>
                 @endif
                 <div class="flex">
                     <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                    <x-button primary :label="__('Save')" wire:click="save"/>
+                    <x-button primary :label="__('Save')" wire:click="save().then((success) => {if(success) close();});"/>
                 </div>
             </div>
         </x-slot>
