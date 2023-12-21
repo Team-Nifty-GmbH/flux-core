@@ -29,8 +29,12 @@ class OrderPositionList extends DataTable
         return array_merge(
             parent::getFormatters(),
             [
+                'unit_net_price' => 'coloredMoney',
+                'unit_gross_price' => 'coloredMoney',
                 'total_net_price' => 'coloredMoney',
                 'total_gross_price' => 'coloredMoney',
+                'total_base_net_price' => 'coloredMoney',
+                'total_base_gross_price' => 'coloredMoney',
                 'margin' => 'coloredMoney',
             ]
         );

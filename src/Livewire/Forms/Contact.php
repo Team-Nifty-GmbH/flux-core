@@ -9,10 +9,12 @@ use FluxErp\Actions\Contact\UpdateContact;
 use FluxErp\Models\Client;
 use FluxErp\Models\Language;
 use Illuminate\Support\Arr;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 class Contact extends Form
 {
+    #[Locked]
     public ?int $id = null;
 
     public ?int $client_id = null;

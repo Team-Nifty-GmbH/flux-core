@@ -27,6 +27,7 @@ use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
+use FluxErp\View\Printing\Order\OrderConfirmation;
 use FluxErp\View\Printing\Order\Retoure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -382,6 +383,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             : [
                 'invoice' => Invoice::class,
                 'offer' => Offer::class,
+                'order-confirmation' => OrderConfirmation::class,
                 'retoure' => Retoure::class,
             ];
     }

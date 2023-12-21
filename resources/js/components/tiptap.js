@@ -35,7 +35,7 @@ export default function (content) {
                 });
                 this.$watch('content', (content) => {
                     if (content === this.editor().getHTML()) return
-                    this.proxy.commands.setContent(content, false)
+                    this.editor().commands.setContent(content, false)
                 });
             }
         };

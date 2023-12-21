@@ -2,16 +2,14 @@
 
 namespace FluxErp\Livewire\Order;
 
+use FluxErp\Livewire\Forms\OrderForm;
+use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
 class Attachments extends Component
 {
-    public int $orderId;
-
-    public function mount(int $orderId): void
-    {
-        $this->orderId = $orderId;
-    }
+    #[Modelable]
+    public OrderForm $order;
 
     public function render()
     {

@@ -37,14 +37,13 @@ class UpdateOrderPositionRequest extends BaseFormRequest
                 ],
                 'price_id' => [
                     'exclude_if:is_free_text,true',
-                    'required_without_all:product_id,price_list_id,unit_price',
                     'integer',
                     'nullable',
                     (new ExistsWithIgnore('prices', 'id'))->whereNull('deleted_at'),
                 ],
                 'price_list_id' => [
                     'exclude_if:is_free_text,true',
-                    'required_with:vat_rate_id',
+                    'exclude_if:is_bundle_position,true',
                     'integer',
                     (new ExistsWithIgnore('price_lists', 'id'))->whereNull('deleted_at'),
                 ],
@@ -103,8 +102,8 @@ class UpdateOrderPositionRequest extends BaseFormRequest
                 'name' => 'sometimes|required|string',
                 'product_number' => [
                     'exclude_if:is_free_text,true',
+                    'exclude_with:product_id',
                     'sometimes',
-                    'required_with:product_id',
                     'string',
                     'nullable',
                 ],

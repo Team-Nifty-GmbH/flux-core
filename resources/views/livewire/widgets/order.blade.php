@@ -64,16 +64,29 @@
         </div>
     </div>
     <div class="pt-8 pb-2 font-semibold uppercase">{{ __('Order positions') }}</div>
-    <div x-show="orderPositions.length > 0" x-cloak x-transition>
-        <livewire:data-tables.order.order-position-list
-            cache-key="widgets.order.order-position-list"
-            :order-id="$order['id']"
-            :show-row-buttons="false"
-            :is-filterable="false"
-            :filters="[['column' => 'order_id', 'operator' => '=', 'value' => $order['id']]]"
-        />
+    <div class="w-full pb-2" x-show="orderPositions.length > 0" x-collapse x-cloak>
+        <x-table>
+            <x-slot:header>
+                <x-table.head-cell>
+                    {{ __('Name') }}
+                </x-table.head-cell>
+                <x-table.head-cell>
+                    {{ __('Amount') }}
+                </x-table.head-cell>
+                <x-table.head-cell>
+                    {{ __('Total Net Price') }}
+                </x-table.head-cell>
+            </x-slot:header>
+            <template x-for="orderPosition in orderPositions">
+                <x-table.row>
+                    <x-table.cell x-html="orderPosition.name"></x-table.cell>
+                    <x-table.cell class="text-right" x-html="window.formatters.float(orderPosition.amount)"></x-table.cell>
+                    <x-table.cell class="text-right" x-html="window.formatters.coloredMoney(orderPosition.total_net_price)"></x-table.cell>
+                </x-table.row>
+            </template>
+        </x-table>
     </div>
-    <x-button x-show="orderPositions.length < 1" spinner primary x-on:click="$wire.loadOrderPositions()">
-        {{ __('Show') }}
+    <x-button spinner primary x-on:click="orderPositions.length < 1 ? $wire.loadOrderPositions() : orderPositions = []">
+        <span x-text="orderPositions.length < 1 ? '{{ __('Show') }}' : '{{ __('Hide') }}'"></span>
     </x-button>
 </div>

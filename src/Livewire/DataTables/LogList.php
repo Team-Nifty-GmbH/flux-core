@@ -103,7 +103,7 @@ class LogList extends DataTable
         return $item;
     }
 
-    public function updatedSearch(): void
+    public function startSearch(): void
     {
         $this->filters = [[
             'message',
@@ -111,7 +111,7 @@ class LogList extends DataTable
             '%' . $this->search . '%',
         ]];
 
-        parent::updatedSearch();
+        parent::startSearch();
     }
 
     public function markAsDone(Log $log): void
