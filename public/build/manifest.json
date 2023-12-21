@@ -35,7 +35,7 @@
     "src": "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-7eeac848.css",
+    "file": "assets/app-4b9300a1.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
@@ -48,7 +48,7 @@
     "src": "resources/js/alpine.js"
   },
   "resources/js/apex-charts.js": {
-    "file": "assets/apex-charts-e7dd0ed8.js",
+    "file": "assets/apex-charts-ead41a8d.js",
     "imports": [
       "__commonjsHelpers-725317a4.js"
     ],
