@@ -25,7 +25,7 @@ class ActionManager
      */
     public function register(string $name, string $action): void
     {
-        if (! in_array(FluxAction::class, class_parents($action))) {
+        if (! is_a($action, FluxAction::class, true) || $action === FluxAction::class) {
             throw new InvalidArgumentException('The provided action class is not a valid action class');
         }
 
@@ -74,7 +74,7 @@ class ActionManager
                     : '';
                 $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
 
-                if (! class_exists($class) || ! in_array(FluxAction::class, class_parents($class))) {
+                if (! class_exists($class) || ! is_a($class, FluxAction::class, true)) {
                     continue;
                 }
 

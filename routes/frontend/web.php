@@ -36,6 +36,7 @@ use FluxErp\Livewire\Settings\PaymentTypes;
 use FluxErp\Livewire\Settings\Permissions;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Livewire\Settings\Profile;
+use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Translations;
@@ -150,6 +151,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
             Route::get('/serial-number-ranges', SerialNumberRanges::class)
                 ->name('serial-number-ranges')
                 ->registersMenuItem();
+            Route::get('/scheduling', Scheduling::class)->name('scheduling')->registersMenuItem();
         });
 });
 
