@@ -23,6 +23,7 @@ use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Spatie\Tags\TagsServiceProvider;
+use Spatie\TranslationLoader\TranslationServiceProvider;
 use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
@@ -61,6 +62,7 @@ abstract class DuskTestCase extends TestCase
     protected function getApplicationProviders($app): array
     {
         return array_merge(parent::getApplicationProviders($app), [
+            TranslationServiceProvider::class,
             LivewireServiceProvider::class,
             ViewServiceProvider::class,
             PermissionServiceProvider::class,
