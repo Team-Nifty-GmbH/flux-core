@@ -3,11 +3,11 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\PaymentType\CreatePaymentType;
+use FluxErp\Actions\PaymentType\DeletePaymentType;
 use FluxErp\Actions\PaymentType\UpdatePaymentType;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
 
-class PaymentTypeForm extends Form
+class PaymentTypeForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -32,12 +32,12 @@ class PaymentTypeForm extends Form
 
     public bool $is_active = true;
 
-    public function save(): void
+    protected function getActions(): array
     {
-        $action = $this->id ? UpdatePaymentType::make($this->toArray()) : CreatePaymentType::make($this->toArray());
-
-        $response = $action->validate()->execute();
-
-        $this->fill($response);
+        return [
+            'create' => CreatePaymentType::class,
+            'update' => UpdatePaymentType::class,
+            'delete' => DeletePaymentType::class,
+        ];
     }
 }

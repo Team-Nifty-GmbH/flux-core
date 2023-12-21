@@ -33,4 +33,9 @@ class PaymentType extends Model
     {
         return $this->hasMany(PaymentNotice::class, 'payment_type_id');
     }
+
+    public static function default(): ?static
+    {
+        return static::query()->where('is_default', true)->first();
+    }
 }

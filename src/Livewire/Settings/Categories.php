@@ -3,7 +3,7 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Livewire\DataTables\CategoryList;
-use FluxErp\Livewire\Forms\Category;
+use FluxErp\Livewire\Forms\CategoryForm;
 use FluxErp\Traits\Categorizable;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -16,7 +16,7 @@ class Categories extends CategoryList
 
     protected string $view = 'flux::livewire.settings.categories';
 
-    public Category $category;
+    public CategoryForm $category;
 
     public function getViewData(): array
     {

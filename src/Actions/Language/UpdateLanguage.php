@@ -26,6 +26,14 @@ class UpdateLanguage extends FluxAction
 
     public function performAction(): Model
     {
+        $this->data['is_default'] = ! Language::query()->where('is_default', true)->exists()
+            ? true
+            : $this->data['is_default'] ?? false;
+
+        if ($this->data['is_default']) {
+            Language::query()->update(['is_default' => false]);
+        }
+
         $language = Language::query()
             ->whereKey($this->data['id'])
             ->first();

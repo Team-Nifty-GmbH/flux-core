@@ -32,6 +32,7 @@ class UpdateClientRequest extends BaseFormRequest
             'website' => 'string|nullable',
             'opening_hours' => 'array|nullable',
             'is_active' => 'boolean',
+            'is_default' => 'boolean',
             'bank_connections' => 'array|nullable',
             'bank_connections.*' => [
                 'integer',

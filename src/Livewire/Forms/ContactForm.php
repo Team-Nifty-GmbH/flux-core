@@ -11,7 +11,7 @@ use FluxErp\Models\Language;
 use Illuminate\Support\Arr;
 use Livewire\Form;
 
-class Contact extends Form
+class ContactForm extends Form
 {
     public ?int $id = null;
 

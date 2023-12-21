@@ -2,6 +2,8 @@
 
 use FluxErp\Http\Controllers\LoginLinkController;
 use FluxErp\Http\Controllers\PrintController;
+use FluxErp\Http\Middleware\NoAuth;
+use FluxErp\Livewire\InstallWizard;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Vite;
 
@@ -20,6 +22,8 @@ Route::get('/pwa-service-worker', function () {
     return response(Vite::content('resources/js/sw.js', 'flux/build'))
         ->header('Content-Type', 'application/javascript');
 })->name('pwa-service-worker');
+
+Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)->name('flux.install');
 
 Route::get('/login-link', LoginLinkController::class)->name('login-link');
 

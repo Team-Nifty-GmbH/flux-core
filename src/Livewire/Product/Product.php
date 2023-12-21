@@ -104,7 +104,7 @@ class Product extends Component
                 ->label(__('Variants'))
                 ->isLivewireComponent()
                 ->wireModel('product')
-                ->when(! $this->product->parent_id ?? false),
+                ->when(! $this->product->parent_id),
             TabButton::make('product.prices')->label(__('Prices')),
             TabButton::make('product.warehouse-list')
                 ->label(__('Stock'))

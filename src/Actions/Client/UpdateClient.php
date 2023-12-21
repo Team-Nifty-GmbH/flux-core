@@ -26,6 +26,14 @@ class UpdateClient extends FluxAction
 
     public function performAction(): Model
     {
+        $this->data['is_default'] = ! Client::query()->where('is_default', true)->exists()
+            ? true
+            : $this->data['is_default'] ?? false;
+
+        if ($this->data['is_default']) {
+            Client::query()->update(['is_default' => false]);
+        }
+
         $bankConnections = Arr::pull($this->data, 'bank_connections');
         $client = Client::query()
             ->whereKey($this->data['id'])

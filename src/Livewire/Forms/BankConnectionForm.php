@@ -3,10 +3,10 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\BankConnection\CreateBankConnection;
+use FluxErp\Actions\BankConnection\DeleteBankConnection;
 use FluxErp\Actions\BankConnection\UpdateBankConnection;
-use Livewire\Form;
 
-class BankConnectionForm extends Form
+class BankConnectionForm extends FluxForm
 {
     public ?int $id = null;
 
@@ -28,14 +28,12 @@ class BankConnectionForm extends Form
 
     public bool $is_active = true;
 
-    public function save(): void
+    protected function getActions(): array
     {
-        $action = $this->id
-            ? UpdateBankConnection::make($this->toArray())
-            : CreateBankConnection::make($this->toArray());
-
-        $response = $action->validate()->execute();
-
-        $this->fill($response);
+        return [
+            'create' => CreateBankConnection::class,
+            'update' => UpdateBankConnection::class,
+            'delete' => DeleteBankConnection::class,
+        ];
     }
 }

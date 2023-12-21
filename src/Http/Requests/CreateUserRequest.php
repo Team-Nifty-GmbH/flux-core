@@ -15,7 +15,7 @@ class CreateUserRequest extends BaseFormRequest
     {
         return [
             'uuid' => 'string|uuid|unique:users,uuid',
-            'language_id' => 'sometimes|integer|exists:languages,id,deleted_at,NULL',
+            'language_id' => 'nullable|integer|exists:languages,id,deleted_at,NULL',
             'parent_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
             'email' => 'required|email|unique:users,email',
             'firstname' => 'required|string',

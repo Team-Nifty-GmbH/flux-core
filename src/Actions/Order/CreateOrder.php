@@ -8,8 +8,11 @@ use FluxErp\Http\Requests\CreateOrderRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
+use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -30,38 +33,73 @@ class CreateOrder extends FluxAction
 
     public function performAction(): Order
     {
-        $this->data['currency_id'] = $this->data['currency_id']
-            ?? Currency::query()
-                ->where('is_default', true)
-                ->first()
-                ?->id;
+        $this->data['currency_id'] = $this->data['currency_id'] ?? Currency::default()?->id;
         $addresses = Arr::pull($this->data, 'addresses', []);
-        $addressInvoice = Address::query()->whereKey($this->data['address_invoice_id'])->first();
+
+        if (! data_get($this->data, 'address_invoice_id', false)
+            && $contactId = data_get($this->data, 'contact_id', false)
+        ) {
+            $contact = Contact::query()->with('invoiceAddress')->whereKey($contactId)->first();
+            $addressInvoice = $contact->invoiceAddress;
+            $this->data['address_invoice_id'] = $addressInvoice->id;
+        } elseif (! data_get($this->data, 'contact_id', false)
+            && $addressInvoiceId = data_get($this->data, 'address_invoice_id', false)
+        ) {
+            $addressInvoice = Address::query()->with('contact')->whereKey($addressInvoiceId)->first();
+            $contact = $addressInvoice->contact;
+            $this->data['contact_id'] = $contact->id;
+        } else {
+            $contact = Contact::query()->whereKey($this->data['contact_id'])->first();
+            $addressInvoice = Address::query()->whereKey($this->data['address_invoice_id'])->first();
+        }
 
         if ($this->data['address_delivery'] ?? false) {
             $this->data['address_delivery_id'] = data_get($this->data, 'address_delivery.id');
+        } else {
+            $this->data['address_delivery_id'] = $this->data['address_delivery_id']
+                ?? $contact->delivery_address_id
+                ?? $addressInvoice->id;
         }
 
-        $contactId = $this->data['contact_id'] ?? $addressInvoice?->contact_id;
-        $contact = Contact::query()->whereKey($contactId)->first();
+        $this->data['payment_type_id'] = $this->data['payment_type_id']
+            ?? $contact->payment_type_id
+            ?? PaymentType::default()?->id;
+        $paymentType = PaymentType::query()
+            ->whereKey(data_get($this->data, 'payment_type_id') ?? $contact->payment_type_id)
+            ->first();
 
         $this->data['agent_id'] = $this->data['agent_id'] ?? $contact->agent_id;
         $this->data['approval_user_id'] = $this->data['approval_user_id'] ?? $contact->approval_user_id;
         $this->data['bank_connection_id'] = $this->data['bank_connection_id']
             ?? $contact->contactBankConnections()->first()?->id;
-        $this->data['payment_target'] = $this->data['payment_target'] ?? $contact->payment_target_days;
-        $this->data['payment_discount_target'] = $this->data['payment_discount_target'] ?? $contact->discount_days;
-        $this->data['payment_discount_percent'] = $this->data['payment_discount_percent'] ?? $contact->discount_percent;
+        $this->data['payment_target'] = $this->data['payment_target']
+            ?? $contact->payment_target_days
+            ?? $paymentType->payment_target_days;
+        $this->data['payment_discount_target'] = $this->data['payment_discount_target']
+            ?? $contact->discount_days
+            ?? $paymentType->payment_discount_target;
+        $this->data['payment_discount_percent'] = $this->data['payment_discount_percent']
+            ?? $contact->discount_percent
+            ?? $paymentType->payment_discount_percent;
         $this->data['payment_reminder_days_1'] = $this->data['payment_reminder_days_1']
-            ?? $contact->payment_reminder_days_1;
+            ?? $contact->payment_reminder_days_1
+            ?? $paymentType->payment_reminder_days_1;
         $this->data['payment_reminder_days_2'] = $this->data['payment_reminder_days_2']
-            ?? $contact->payment_reminder_days_2;
+            ?? $contact->payment_reminder_days_2
+            ?? $paymentType->payment_reminder_days_2;
         $this->data['payment_reminder_days_3'] = $this->data['payment_reminder_days_3']
-            ?? $contact->payment_reminder_days_3;
+            ?? $contact->payment_reminder_days_3
+            ?? $paymentType->payment_reminder_days_3;
+
+        $this->data['price_list_id'] = $this->data['price_list_id']
+            ?? $contact->price_list_id
+            ?? PriceList::default()?->id;
+
+        $this->data['language_id'] = $this->data['language_id']
+            ?? $addressInvoice->language_id
+            ?? Language::default()?->id;
 
         $this->data['order_date'] = $this->data['order_date'] ?? now();
-
-        $this->data['contact_id'] = $contactId;
 
         $users = Arr::pull($this->data, 'users');
 

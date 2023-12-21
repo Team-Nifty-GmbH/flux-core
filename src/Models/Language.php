@@ -37,4 +37,9 @@ class Language extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public static function default(): ?static
+    {
+        return static::query()->where('is_default', true)->first();
+    }
 }
