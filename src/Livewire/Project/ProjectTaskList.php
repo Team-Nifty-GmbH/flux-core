@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Project;
 
+use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
@@ -27,6 +28,8 @@ class ProjectTaskList extends BaseTaskList
     public array $availableStates = [];
 
     public ?int $projectId;
+
+    public bool $hasNoRedirect = true;
 
     public function mount(): void
     {
@@ -97,11 +100,34 @@ class ProjectTaskList extends BaseTaskList
         JS);
     }
 
+    public function updatedTaskTab(): void
+    {
+        $this->forceRender = true;
+    }
+
     #[Renderless]
     public function save(): bool
     {
         try {
             $this->task->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    public function delete(): bool
+    {
+        try {
+            DeleteTask::make($this->task->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

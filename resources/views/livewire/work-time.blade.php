@@ -116,7 +116,7 @@
                     option-value="id"
                     option-label="label"
                     :async-data="[
-                        'api' => route('search', \FluxErp\Models\Order::class),
+                        'api' => route('search', '__model__'),
                         'method' => 'POST',
                     ]"
                     wire:model="workTime.trackable_id"

@@ -65,7 +65,7 @@
                             <x-input x-model="link.icon" :label="__('Icon')"/>
                             <x-input x-model="link.uri" :label="__('URL')" placeholder="your-website.com" />
                             <div class="ml-1 flex h-full items-center sm:col-span-1">
-                                <x-button.circle negative icon="trash" x-on:click="setting.settings.nav.appendLinks.splice(index,1)" />
+                                <x-button.circle negative icon="trash" x-on:click="setting.settings.nav.append_links.splice(index,1)" />
                             </div>
                         </div>
                     </template>

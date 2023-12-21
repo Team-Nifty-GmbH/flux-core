@@ -1,3 +1,7 @@
+@props([
+    'card' => false,
+    'tabs' => [],
+])
 <div class="mt-2"
      x-data="{
         tab: $wire.entangle('{{ $attributes->wire('model')->value() }}', true),
@@ -17,19 +21,21 @@
         </div>
     </div>
 </div>
-<div {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6']) }}>
-    {{ $prepend ?? '' }}
-    @if($attributes->has('wire:loading'))
-        <x-spinner {{ $attributes->thatStartWith('wire:loading') }} />
-    @endif
-    <div class="w-full">
-        @if($slot->isNotEmpty())
-            {{ $slot }}
-        @elseif($tabs[$this->{$attributes->wire('model')->value()}]?->isLivewireComponent)
-            <livewire:dynamic-component wire:model="{{ $tabs[$this->{$attributes->wire('model')->value()}]?->wireModel }}" :is="$this->{$attributes->wire('model')->value()}" wire:key="{{ uniqid() }}"/>
-        @else
-            <x-dynamic-component :component="$this->{$attributes->wire('model')->value()}" />
+<x-dynamic-component :component="$card ? 'card' : 'div'">
+    <div {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6']) }}>
+        {{ $prepend ?? '' }}
+        @if($attributes->has('wire:loading'))
+            <x-spinner {{ $attributes->thatStartWith('wire:loading') }} />
         @endif
+        <div class="w-full">
+            @if($slot->isNotEmpty())
+                {{ $slot }}
+            @elseif($tabs[$this->{$attributes->wire('model')->value()}]?->isLivewireComponent)
+                <livewire:dynamic-component wire:model="{{ $tabs[$this->{$attributes->wire('model')->value()}]?->wireModel }}" :is="$this->{$attributes->wire('model')->value()}" wire:key="{{ uniqid() }}"/>
+            @else
+                <x-dynamic-component :component="$this->{$attributes->wire('model')->value()}" />
+            @endif
+        </div>
+        {{ $append ?? '' }}
     </div>
-    {{ $append ?? '' }}
-</div>
+</x-dynamic-component>

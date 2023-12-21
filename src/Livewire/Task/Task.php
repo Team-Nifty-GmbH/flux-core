@@ -10,6 +10,7 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -101,11 +102,11 @@ class Task extends Component
         );
     }
 
+    #[Renderless]
     public function delete(): void
     {
-        $this->skipRender();
         try {
-            DeleteTask::make($this->task)
+            DeleteTask::make($this->task->toArray())
                 ->checkPermission()
                 ->validate()
                 ->execute();
