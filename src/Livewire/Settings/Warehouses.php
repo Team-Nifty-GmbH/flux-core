@@ -18,7 +18,7 @@ class Warehouses extends WarehouseList
 
     public string $view = 'flux::livewire.settings.warehouses';
 
-    public WareHouseForm $warehouseForm;
+    public WareHouseForm $warehouse;
 
     public function mount(): void
     {
@@ -57,8 +57,8 @@ class Warehouses extends WarehouseList
 
     public function edit(Warehouse $warehouse): void
     {
-        $this->warehouseForm->reset();
-        $this->warehouseForm->fill($warehouse);
+        $this->warehouse->reset();
+        $this->warehouse->fill($warehouse);
 
         $this->js(<<<'JS'
             $openModal('edit-warehouse');
@@ -68,7 +68,7 @@ class Warehouses extends WarehouseList
     public function save(): bool
     {
         try {
-            $this->warehouseForm->save();
+            $this->warehouse->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -83,7 +83,7 @@ class Warehouses extends WarehouseList
     public function delete(): bool
     {
         try {
-            $this->warehouseForm->delete();
+            $this->warehouse->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

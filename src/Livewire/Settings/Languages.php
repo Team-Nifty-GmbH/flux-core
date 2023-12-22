@@ -51,12 +51,7 @@ class Languages extends LanguageList
         if (! $languageId) {
             $this->selectedLanguage->reset();
         } else {
-            $this->selectedLanguage
-                ->fill(
-                    Language::query()
-                        ->whereKey($languageId)
-                        ->first()
-                );
+            $this->selectedLanguage->fill(Language::query()->whereKey($languageId)->first());
         }
 
         $this->editModal = true;

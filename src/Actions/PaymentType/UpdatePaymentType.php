@@ -23,11 +23,7 @@ class UpdatePaymentType extends FluxAction
 
     public function performAction(): Model
     {
-        $this->data['is_default'] = ! PaymentType::query()->where('is_default', true)->exists()
-            ? true
-            : $this->data['is_default'] ?? false;
-
-        if ($this->data['is_default']) {
+        if ($this->data['is_default'] ?? false) {
             PaymentType::query()->update(['is_default' => false]);
         }
 
@@ -43,6 +39,15 @@ class UpdatePaymentType extends FluxAction
 
     public function validateData(): void
     {
+        if (($this->data['is_default'] ?? false)
+            && ! PaymentType::query()
+                ->whereKeyNot($this->data['id'] ?? 0)
+                ->where('is_default', true)
+                ->exists()
+        ) {
+            $this->rules['is_default'] .= '|accepted';
+        }
+
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new PaymentType());
 

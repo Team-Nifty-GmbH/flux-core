@@ -70,6 +70,7 @@ class InitEnv extends Command
                 break;
             }
         }
+
         if ($pusherChanged) {
             Artisan::call('websockets:restart');
 
@@ -82,7 +83,7 @@ class InitEnv extends Command
         Artisan::call('queue:restart');
     }
 
-    protected function fluxDefault()
+    protected function fluxDefault(): array
     {
         return [
             'app_env' => 'production',

@@ -34,13 +34,13 @@ class ClientForm extends FluxForm
 
     public ?string $website = null;
 
-    public bool $is_active = true;
-
-    public bool $is_default = false;
-
     public ?array $opening_hours = [];
 
     public ?string $terms_and_conditions = null;
+
+    public bool $is_active = true;
+
+    public bool $is_default = false;
 
     public ?array $bank_connections = null;
 

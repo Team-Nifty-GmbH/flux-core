@@ -69,8 +69,6 @@ class InstallWizard extends Component
             abort(403);
         }
 
-        $this->currencyForm->is_default = true;
-
         $this->dbForm->host = config('database.connections.mysql.host');
         $this->dbForm->port = config('database.connections.mysql.port');
         $this->dbForm->database = config('database.connections.mysql.database');
@@ -109,9 +107,6 @@ class InstallWizard extends Component
                 'view' => 'currency',
                 'property' => 'currencyForm',
                 'title' => __('Currency'),
-                'callback' => function () {
-                    $this->currencyForm->is_default = true;
-                },
             ],
             [
                 'view' => 'client',
@@ -307,7 +302,11 @@ class InstallWizard extends Component
 
         $this->userForm->language_id = $this->languageForm->id;
         $this->userForm->setCheckPermission(false)->save();
-        User::query()->whereKey($this->userForm->id)->first()->assignRole('Super Admin');
+
+        User::query()
+            ->whereKey($this->userForm->id)
+            ->first()
+            ->assignRole('Super Admin');
 
         if ($this->languageForm->language_code !== 'en') {
             $this->languageForm->reset();

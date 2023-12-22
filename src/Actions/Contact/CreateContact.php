@@ -29,7 +29,6 @@ class CreateContact extends FluxAction
         $discountGroups = Arr::pull($this->data, 'discount_groups', []);
 
         $this->data['price_list_id'] = $this->data['price_list_id'] ?? PriceList::default()?->id;
-        $this->data['language_id'] = $this->data['language_id'] ?? Language::default()?->id;
         $this->data['payment_type_id'] = $this->data['payment_type_id'] ?? PaymentType::default()?->id;
 
         $contact = new Contact($this->data);

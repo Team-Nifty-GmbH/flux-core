@@ -39,18 +39,30 @@ class CreateOrder extends FluxAction
         if (! data_get($this->data, 'address_invoice_id', false)
             && $contactId = data_get($this->data, 'contact_id', false)
         ) {
-            $contact = Contact::query()->with('invoiceAddress')->whereKey($contactId)->first();
+            $contact = Contact::query()
+                ->whereKey($contactId)
+                ->with('invoiceAddress')
+                ->first();
+
             $addressInvoice = $contact->invoiceAddress;
             $this->data['address_invoice_id'] = $addressInvoice->id;
         } elseif (! data_get($this->data, 'contact_id', false)
             && $addressInvoiceId = data_get($this->data, 'address_invoice_id', false)
         ) {
-            $addressInvoice = Address::query()->with('contact')->whereKey($addressInvoiceId)->first();
+            $addressInvoice = Address::query()
+                ->whereKey($addressInvoiceId)
+                ->with('contact')
+                ->first();
+
             $contact = $addressInvoice->contact;
             $this->data['contact_id'] = $contact->id;
         } else {
-            $contact = Contact::query()->whereKey($this->data['contact_id'])->first();
-            $addressInvoice = Address::query()->whereKey($this->data['address_invoice_id'])->first();
+            $contact = Contact::query()
+                ->whereKey($this->data['contact_id'])
+                ->first();
+            $addressInvoice = Address::query()
+                ->whereKey($this->data['address_invoice_id'])
+                ->first();
         }
 
         if ($this->data['address_delivery'] ?? false) {
@@ -64,8 +76,9 @@ class CreateOrder extends FluxAction
         $this->data['payment_type_id'] = $this->data['payment_type_id']
             ?? $contact->payment_type_id
             ?? PaymentType::default()?->id;
+
         $paymentType = PaymentType::query()
-            ->whereKey(data_get($this->data, 'payment_type_id') ?? $contact->payment_type_id)
+            ->whereKey(data_get($this->data, 'payment_type_id'))
             ->first();
 
         $this->data['agent_id'] = $this->data['agent_id'] ?? $contact->agent_id;

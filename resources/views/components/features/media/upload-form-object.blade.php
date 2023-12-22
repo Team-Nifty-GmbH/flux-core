@@ -14,12 +14,12 @@
         progress: 0,
         handleFileSelect(event) {
             if (event.target.files.length) {
-                this.uploadFiles(event.target.files, event)
+                this.uploadFiles(event.target.files, event);
             }
         },
         handleFileDrop(event) {
             if (event.dataTransfer.files.length > 0) {
-                this.uploadFiles(event.dataTransfer.files, event)
+                this.uploadFiles(event.dataTransfer.files, event);
             }
         },
         uploadError() {
@@ -32,14 +32,14 @@
             });
         },
         uploadSuccess(success, files) {
-            this.isUploading = false
-            this.progress = 0
+            this.isUploading = false;
+            this.progress = 0;
         },
         uploadProgress(progress) {
-            this.progress = progress
+            this.progress = progress;
         },
         uploadFiles(files, event) {
-            this.isUploading = true
+            this.isUploading = true;
             let $this = this;
             $wire.uploadMultiple('{{ $target }}', files,
                 function (success) {

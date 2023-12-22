@@ -28,7 +28,7 @@
         "spatie/laravel-translation-loader": "^2.7",
         "spatie/pdf-to-image": "^2.2",
         "team-nifty-gmbh/tall-calendar": "^0.2.3",
-        "team-nifty-gmbh/tall-datatables": ">0.7.0",
+        "team-nifty-gmbh/tall-datatables": "^0.7|^0.8",
         "webklex/laravel-imap": "^5.3",
         "wireui/heroicons": "^2.3",
         "wireui/wireui": "^1.18.4"

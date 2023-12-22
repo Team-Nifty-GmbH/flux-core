@@ -88,5 +88,6 @@ abstract class TestCase extends BaseTestCase
     {
         $app['config']->set('database.default', 'mysql');
         $app['config']->set('database.connections.mysql.collation', 'utf8mb4_unicode_ci');
+        $app['config']->set('flux.install_done', true);
     }
 }

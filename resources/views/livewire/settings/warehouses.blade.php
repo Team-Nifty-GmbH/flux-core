@@ -2,13 +2,13 @@
     <x-modal name="edit-warehouse">
         <x-card>
             <div class="flex flex-col gap-4">
-                <x-input wire:model="warehouseForm.name" :label="__('Name')" />
-                <x-toggle wire:model.boolean="warehouseForm.is_default" :label="__('Is Default')" />
+                <x-input wire:model="warehouse.name" :label="__('Name')" />
+                <x-toggle wire:model.boolean="warehouse.is_default" :label="__('Is Default')" />
             </div>
             <x-slot:footer>
                 <div class="flex justify-between gap-x-4">
                     @if(\FluxErp\Actions\Warehouse\DeleteWarehouse::canPerformAction(false))
-                        <div x-bind:class="$wire.warehouseForm.id > 0 || 'invisible'">
+                        <div x-bind:class="$wire.warehouse.id > 0 || 'invisible'">
                             <x-button
                                 flat
                                 negative

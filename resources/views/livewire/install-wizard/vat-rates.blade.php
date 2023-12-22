@@ -20,7 +20,7 @@
             <x-table.cell>{{ $vatRate['name'] }}</x-table.cell>
             <x-table.cell>{{ $vatRate['rate_percentage_frontend'] }}%</x-table.cell>
             <x-table.cell>
-                <x-button wire:click="removeVatRate({{ $index }})" negative :label="__('Delete')" />
+                <x-button wire:click="removeVatRate({{ $index }})" negative icon="trash" />
             </x-table.cell>
         </x-table.row>
     @endforeach

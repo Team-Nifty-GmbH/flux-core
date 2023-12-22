@@ -23,6 +23,8 @@ class MediaForm extends FluxForm
 
     public ?int $parent_id = null;
 
+    public ?string $collection_name = null;
+
     public ?string $name = null;
 
     public ?string $file_name = null;
@@ -33,11 +35,9 @@ class MediaForm extends FluxForm
 
     public ?string $media_type = null;
 
-    public ?string $collection_name = null;
+    public array $custom_properties = [];
 
     public array $categories = [];
-
-    public array $custom_properties = [];
 
     // virtual attributes
 
@@ -118,7 +118,7 @@ class MediaForm extends FluxForm
         $this->fill($response);
     }
 
-    public function __set(string $name, $value)
+    public function __set(string $name, $value): void
     {
         $this->{$name} = $value;
 

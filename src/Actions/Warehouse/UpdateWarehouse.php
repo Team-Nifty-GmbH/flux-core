@@ -22,11 +22,7 @@ class UpdateWarehouse extends FluxAction
 
     public function performAction(): Model
     {
-        $this->data['is_default'] = ! Warehouse::query()->where('is_default', true)->exists()
-            ? true
-            : $this->data['is_default'] ?? false;
-
-        if ($this->data['is_default']) {
+        if ($this->data['is_default'] ?? false) {
             Warehouse::query()->update(['is_default' => false]);
         }
 
@@ -38,5 +34,19 @@ class UpdateWarehouse extends FluxAction
         $warehouse->save();
 
         return $warehouse->withoutRelations()->fresh();
+    }
+
+    public function validateData(): void
+    {
+        if (($this->data['is_default'] ?? false)
+            && ! Warehouse::query()
+                ->whereKeyNot($this->data['id'] ?? 0)
+                ->where('is_default', true)
+                ->exists()
+        ) {
+            $this->rules['is_default'] .= '|accepted';
+        }
+
+        parent::validateData();
     }
 }

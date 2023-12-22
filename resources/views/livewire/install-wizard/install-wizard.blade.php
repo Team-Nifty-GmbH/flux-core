@@ -36,7 +36,7 @@
                             <x-button
                                 flat
                                 :label="__('Back')"
-                                x-on:click="$wire.step = $wire.step - 1; $wire.$refresh();"
+                                x-on:click="$wire.step--; $wire.$refresh();"
                             />
                        @endif
                     </div>

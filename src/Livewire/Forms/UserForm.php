@@ -39,6 +39,6 @@ class UserForm extends FluxForm
 
     public function validateSave($rules = null, $messages = [], $attributes = []): void
     {
-        parent::validate(['password' => 'required|confirmed'], $messages, $attributes);
+        parent::validateSave(['password' => 'required|confirmed'], $messages, $attributes);
     }
 }

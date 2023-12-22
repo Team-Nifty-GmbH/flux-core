@@ -14,28 +14,44 @@ return new class extends Migration
                 ->after('is_active')
                 ->default(false);
         });
-        DB::table('payment_types')->first()?->update(['is_default' => true]);
+
+        DB::table('payment_types')
+            ->whereNull('deleted_at')
+            ->limit(1)
+            ->update(['is_default' => true]);
 
         Schema::table('languages', function (Blueprint $table) {
             $table->boolean('is_default')
                 ->after('language_code')
                 ->default(false);
         });
-        DB::table('languages')->first()?->update(['is_default' => true]);
+
+        DB::table('languages')
+            ->whereNull('deleted_at')
+            ->limit(1)
+            ->update(['is_default' => true]);
 
         Schema::table('clients', function (Blueprint $table) {
             $table->boolean('is_default')
                 ->after('is_active')
                 ->default(false);
         });
-        DB::table('clients')->first()?->update(['is_default' => true]);
+
+        DB::table('clients')
+            ->whereNull('deleted_at')
+            ->limit(1)
+            ->update(['is_default' => true]);
 
         Schema::table('warehouses', function (Blueprint $table) {
             $table->boolean('is_default')
                 ->after('name')
                 ->default(false);
         });
-        DB::table('warehouses')->first()?->update(['is_default' => true]);
+
+        DB::table('warehouses')
+            ->whereNull('deleted_at')
+            ->limit(1)
+            ->update(['is_default' => true]);
     }
 
     public function down(): void

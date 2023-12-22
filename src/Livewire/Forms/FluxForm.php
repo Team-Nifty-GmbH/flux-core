@@ -40,8 +40,8 @@ abstract class FluxForm extends BaseForm
     public function create(): void
     {
         $response = $this->makeAction('create')
-            ->validate()
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
+            ->validate()
             ->execute();
 
         $this->fill($response);
@@ -50,8 +50,8 @@ abstract class FluxForm extends BaseForm
     public function update(): void
     {
         $response = $this->makeAction('update')
-            ->validate()
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
+            ->validate()
             ->execute();
 
         $this->fill($response);
