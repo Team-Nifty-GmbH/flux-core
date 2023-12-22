@@ -112,4 +112,9 @@ class ProjectTaskList extends BaseTaskList
 
         return true;
     }
+
+    public function updatedTaskTab(): void
+    {
+        $this->forceRender();
+    }
 }

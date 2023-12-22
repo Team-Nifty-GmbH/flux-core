@@ -30,7 +30,26 @@ abstract class FluxForm extends BaseForm
 
     public function save(): void
     {
-        $response = $this->makeAction($this->{$this->getKey()} ? 'update' : 'create')
+        if ($this->{$this->getKey()}) {
+            $this->update();
+        } else {
+            $this->create();
+        }
+    }
+
+    public function create(): void
+    {
+        $response = $this->makeAction('create')
+            ->validate()
+            ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
+            ->execute();
+
+        $this->fill($response);
+    }
+
+    public function update(): void
+    {
+        $response = $this->makeAction('update')
             ->validate()
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
             ->execute();

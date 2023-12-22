@@ -338,7 +338,7 @@ class Order extends OrderPositionList
 
     public function updatedTab(): void
     {
-        $this->forceRender = true;
+        $this->forceRender();
     }
 
     public function updatedOrderAddressInvoiceId(): void

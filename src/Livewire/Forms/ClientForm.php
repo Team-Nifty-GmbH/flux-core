@@ -36,6 +36,14 @@ class ClientForm extends FluxForm
 
     public bool $is_active = true;
 
+    public bool $is_default = false;
+
+    public ?array $opening_hours = [];
+
+    public ?string $terms_and_conditions = null;
+
+    public ?array $bank_connections = null;
+
     protected function getActions(): array
     {
         return [
