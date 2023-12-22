@@ -25,7 +25,7 @@
         </div>
         <x-slot name="footer">
             <div class="flex justify-between gap-x-4">
-                @if(\FluxErp\Actions\Currency\DeleteCurreny::canPerformAction(false))
+                @if(\FluxErp\Actions\Currency\DeleteCurrency::canPerformAction(false))
                     <div x-bind:class="$wire.selectedCurrency.id > 0 || 'invisible'">
                         <x-button
                             flat
