@@ -29,6 +29,7 @@ class Client extends Model implements HasMedia
         'uuid' => 'string',
         'is_active' => 'boolean',
         'opening_hours' => 'array',
+        'is_default' => 'boolean',
     ];
 
     protected $guarded = [

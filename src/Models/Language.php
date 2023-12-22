@@ -18,6 +18,7 @@ class Language extends Model
 
     protected $casts = [
         'uuid' => 'string',
+        'is_default' => 'boolean',
     ];
 
     protected $guarded = [

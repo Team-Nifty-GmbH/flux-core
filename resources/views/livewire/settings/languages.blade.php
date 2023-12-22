@@ -9,6 +9,7 @@
                             <x-input wire:model="selectedLanguage.iso_name" :label="__('ISO Name')"/>
                             <x-input wire:model="selectedLanguage.language_code" :label="__('Language Code')"
                                      list="language-code-data" autocomplete="off"/>
+                            <x-toggle wire:model.boolean="selectedLanguage.is_default" :label="__('Is Default')" />
                         </div>
                     </div>
                 </div>

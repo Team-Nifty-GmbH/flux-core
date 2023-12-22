@@ -18,6 +18,8 @@ class LanguageForm extends FluxForm
 
     public ?string $language_code = null;
 
+    public ?bool $is_default = false;
+
     protected function getActions(): array
     {
         return [

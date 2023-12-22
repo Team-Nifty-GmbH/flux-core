@@ -2,33 +2,41 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Livewire\DataTables\LanguageList;
-use FluxErp\Livewire\Forms\LanguageForm;
-use FluxErp\Models\Language;
+use FluxErp\Actions\Warehouse\CreateWarehouse;
+use FluxErp\Actions\Warehouse\UpdateWarehouse;
+use FluxErp\Livewire\DataTables\WarehouseList;
+use FluxErp\Livewire\Forms\WarehouseForm;
+use FluxErp\Models\Warehouse;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
 
-class Languages extends LanguageList
+class Warehouses extends WarehouseList
 {
     use Actions;
 
-    protected string $view = 'flux::livewire.settings.languages';
+    public string $view = 'flux::livewire.settings.warehouses';
 
-    public LanguageForm $selectedLanguage;
+    public WareHouseForm $warehouseForm;
 
-    public bool $editModal = false;
+    public function mount(): void
+    {
+        parent::mount();
+
+        $this->headline = __('Warehouses');
+    }
 
     public function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->label(__('New'))
                 ->icon('plus')
+                ->color('primary')
+                ->when(CreateWarehouse::canPerformAction(false))
                 ->attributes([
-                    'x-on:click' => '$wire.showEditModal()',
+                    'wire:click' => 'edit',
                 ]),
         ];
     }
@@ -38,35 +46,29 @@ class Languages extends LanguageList
         return [
             DataTableButton::make()
                 ->label(__('Edit'))
-                ->color('primary')
                 ->icon('pencil')
+                ->color('primary')
+                ->when(UpdateWarehouse::canPerformAction(false))
                 ->attributes([
-                    'x-on:click' => '$wire.showEditModal(record.id)',
+                    'wire:click' => 'edit(record.id)',
                 ]),
         ];
     }
 
-    public function showEditModal(?int $languageId = null): void
+    public function edit(Warehouse $warehouse): void
     {
-        if (! $languageId) {
-            $this->selectedLanguage->reset();
-        } else {
-            $this->selectedLanguage
-                ->fill(
-                    Language::query()
-                        ->whereKey($languageId)
-                        ->first()
-                );
-        }
+        $this->warehouseForm->reset();
+        $this->warehouseForm->fill($warehouse);
 
-        $this->editModal = true;
-        $this->resetErrorBag();
+        $this->js(<<<'JS'
+            $openModal('edit-warehouse');
+        JS);
     }
 
     public function save(): bool
     {
         try {
-            $this->selectedLanguage->save();
+            $this->warehouseForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -81,7 +83,7 @@ class Languages extends LanguageList
     public function delete(): bool
     {
         try {
-            $this->selectedLanguage->delete();
+            $this->warehouseForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

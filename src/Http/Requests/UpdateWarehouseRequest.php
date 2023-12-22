@@ -17,6 +17,7 @@ class UpdateWarehouseRequest extends BaseFormRequest
             'id' => 'required|integer|exists:warehouses,id,deleted_at,NULL',
             'address_id' => [
                 'integer',
+                'nullable',
                 (new ExistsWithIgnore('addresses', 'id'))->whereNull('deleted_at'),
             ],
             'name' => 'sometimes|required|string',

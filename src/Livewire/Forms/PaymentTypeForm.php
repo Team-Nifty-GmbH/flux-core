@@ -32,6 +32,8 @@ class PaymentTypeForm extends FluxForm
 
     public bool $is_active = true;
 
+    public bool $is_default = false;
+
     protected function getActions(): array
     {
         return [
