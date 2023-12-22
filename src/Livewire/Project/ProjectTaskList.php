@@ -102,7 +102,7 @@ class ProjectTaskList extends BaseTaskList
 
     public function updatedTaskTab(): void
     {
-        $this->forceRender = true;
+        $this->forceRender();
     }
 
     #[Renderless]
