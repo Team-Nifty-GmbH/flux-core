@@ -58,10 +58,10 @@
              x-on:dragover.prevent="isDropping = true"
              x-on:dragleave.prevent="isDropping = false"
         >
-            <div class="absolute top-0 bottom-0 left-0 right-0 z-30 flex items-center justify-center bg-blue-500 opacity-90"
+            <div class="absolute top-0 bottom-0 left-0 right-0 z-30 flex items-center justify-center bg-primary-500 opacity-90"
                  x-show="isDropping"
             >
-                <span class="text-3xl text-white">{{ __('Release file to upload!') }}</span>
+                <span class="text-3xl text-white">{{ __('Release to upload!') }}</span>
             </div>
             <label class="order-2 flex w-full cursor-pointer select-none flex-col items-center justify-center rounded-md border-dashed border-gray-300 bg-gray-50 p-10 shadow hover:bg-slate-50 dark:bg-gray-700"
                    for="file-upload"

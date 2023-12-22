@@ -112,7 +112,7 @@ class Order extends OrderPositionList
             array_keys($order->resolvePrintViews())
         );
 
-        $this->order->fill($order);
+        $this->order->fill($order->toArray());
 
         $this->getAvailableStates(['payment_state', 'delivery_state', 'state']);
 
@@ -338,7 +338,7 @@ class Order extends OrderPositionList
 
     public function updatedTab(): void
     {
-        $this->forceRender = true;
+        $this->forceRender();
     }
 
     public function updatedOrderAddressInvoiceId(): void

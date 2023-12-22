@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+@props(['navigation' => request()->get('no-navigation', false)])
 <html class="soft-scrollbar h-full text-sm" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
@@ -13,7 +14,7 @@
     @if(auth('web')->check())
         @persist('mail')
             <div id="mail">
-                <livewire:edit-mail/>
+                <livewire:edit-mail lazy />
             </div>
         @endpersist
         @persist('detail-modal')
@@ -47,16 +48,17 @@
             </x-modal>
         @endpersist
     @endif
-    <div x-data="{ open: false }" @keydown.window.escape="open = false" class="flex h-screen w-full flex-col">
-        @if(auth()->check() && ! request()->get('no-navigation', false))
+    <div x-data="{ open: false }" x-on:keydown.window.escape="open = false" class="flex h-screen w-full flex-col">
+        @if(auth()->check() && method_exists(auth()->guard(), 'getName') && ! $navigation)
+            @php($navigation = true)
             @persist('navigation')
                 <div id="nav">
-                    <livewire:navigation/>
+                    <livewire:navigation />
                 </div>
             @endpersist
         @endif
-        <div @if(! request()->get('no-navigation', false)) class="md:pl-20" @endif>
-            <main class="px-1.5 md:px-8 pb-1.5 md:pb-8">
+        <div @if($navigation) class="md:pl-20" @endif>
+            <main @if($navigation) class="px-1.5 md:px-8 pb-1.5 md:pb-8" @endif>
                 {{ $slot }}
             </main>
         </div>

@@ -12,7 +12,7 @@ use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
 
-class Contact extends Form
+class ContactForm extends Form
 {
     #[Locked]
     public ?int $id = null;

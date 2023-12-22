@@ -7,9 +7,8 @@ use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\UpdateProduct;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
 
-class ProductForm extends Form
+class ProductForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -104,18 +103,13 @@ class ProductForm extends Form
 
     public ?array $parent = null;
 
-    public function save(): void
+    protected function getActions(): array
     {
-        $action = $this->id
-            ? UpdateProduct::make($this->toArray())
-            : CreateProduct::make($this->toArray());
-
-        $response = $action
-            ->checkPermission()
-            ->validate()
-            ->execute();
-
-        $this->fill($response);
+        return [
+            'create' => CreateProduct::class,
+            'update' => UpdateProduct::class,
+            'delete' => DeleteProduct::class,
+        ];
     }
 
     public function fill($values): void
@@ -150,15 +144,5 @@ class ProductForm extends Form
             ];
         }, $this->bundle_products);
 
-    }
-
-    public function delete(): void
-    {
-        DeleteProduct::make($this->toArray())
-            ->checkPermission()
-            ->validate()
-            ->execute();
-
-        $this->reset();
     }
 }

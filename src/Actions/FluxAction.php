@@ -187,6 +187,19 @@ abstract class FluxAction
         $this->data = Validator::validate($this->data, $this->rules);
     }
 
+    final public function when(callable|bool $condition, callable $callback): static
+    {
+        if (is_callable($condition)) {
+            $condition = $condition();
+        }
+
+        if ($condition) {
+            $callback($this);
+        }
+
+        return $this;
+    }
+
     final public function withEvents(): static
     {
         $this->setEventDispatcher();

@@ -2,13 +2,11 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Http\Requests\CreateCurrencyRequest;
-use FluxErp\Http\Requests\UpdateCurrencyRequest;
 use FluxErp\Livewire\DataTables\CurrencyList;
+use FluxErp\Livewire\Forms\CurrencyForm;
 use FluxErp\Models\Currency;
-use FluxErp\Services\CurrencyService;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
 
@@ -18,18 +16,9 @@ class Currencies extends CurrencyList
 
     protected string $view = 'flux::livewire.settings.currencies';
 
-    public array $selectedCurrency = [];
+    public CurrencyForm $selectedCurrency;
 
     public bool $editModal = false;
-
-    public function getRules(): array
-    {
-        $currencyRequest = ($this->selectedCurrency['id'] ?? false)
-            ? new UpdateCurrencyRequest()
-            : new CreateCurrencyRequest();
-
-        return Arr::prependKeysWith($currencyRequest->getRules($this->selectedCurrency), 'selectedCurrency.');
-    }
 
     public function getTableActions(): array
     {
@@ -60,47 +49,42 @@ class Currencies extends CurrencyList
     public function showEditModal(?int $currencyId = null): void
     {
         if (! $currencyId) {
-            $this->selectedCurrency = [];
+            $this->selectedCurrency->reset();
         } else {
-            $this->selectedCurrency = Currency::query()->whereKey($currencyId)->first()->toArray();
+            $this->selectedCurrency->fill(Currency::query()->whereKey($currencyId)->first());
         }
 
         $this->editModal = true;
         $this->resetErrorBag();
     }
 
-    public function save(): void
+    public function save(): bool
     {
-        if (! user_can('api.currencies.post')) {
-            return;
+        try {
+            $this->selectedCurrency->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
         }
 
-        $validated = $this->validate();
-
-        $currency = Currency::query()->whereKey($this->selectedCurrency['id'] ?? false)->firstOrNew();
-
-        $function = $currency->exists ? 'update' : 'create';
-
-        $response = (new CurrencyService())->{$function}($validated['selectedCurrency']);
-
-        if (($response['status'] ?? false) === 200 || $response instanceof Model) {
-            $this->notification()->success(__('Successfully saved'));
-            $this->editModal = false;
-        }
         $this->loadData();
+
+        return true;
     }
 
-    public function delete(): void
+    public function delete(): bool
     {
-        if (! user_can('api.currencies.{id}.delete')) {
-            return;
+        try {
+            $this->selectedCurrency->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
         }
 
-        Currency::query()
-            ->whereKey($this->selectedCurrency['id'])
-            ->first()
-            ->delete();
-
         $this->loadData();
+
+        return true;
     }
 }

@@ -2,9 +2,11 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use Livewire\Form;
+use FluxErp\Actions\Tag\CreateTag;
+use FluxErp\Actions\Tag\DeleteTag;
+use FluxErp\Actions\Tag\UpdateTag;
 
-class TagForm extends Form
+class TagForm extends FluxForm
 {
     public ?int $id = null;
 
@@ -18,12 +20,12 @@ class TagForm extends Form
 
     public ?int $order_column = null;
 
-    public function save(): void
+    protected function getActions(): array
     {
-        $action = $this->id ? UpdateTag::make($this->toArray()) : CreateTag::make($this->toArray());
-
-        $response = $action->validate()->execute();
-
-        $this->fill($response);
+        return [
+            'create' => CreateTag::class,
+            'update' => UpdateTag::class,
+            'delete' => DeleteTag::class,
+        ];
     }
 }

@@ -18,6 +18,7 @@ class Language extends Model
 
     protected $casts = [
         'uuid' => 'string',
+        'is_default' => 'boolean',
     ];
 
     protected $guarded = [
@@ -36,5 +37,10 @@ class Language extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    public static function default(): ?static
+    {
+        return static::query()->where('is_default', true)->first();
     }
 }

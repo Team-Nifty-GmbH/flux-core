@@ -1,4 +1,4 @@
-<div class="py-6" x-data="{customerPortalUrl: '{{ route('settings.customer-portal', ['client' => ':clientId']) }}' }">
+<div class="py-6">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
@@ -6,50 +6,39 @@
                 <div class="mt-2 text-sm text-gray-300">{{ __('Here you can manage your clients...') }}</div>
             </div>
         </div>
-        @include('tall-datatables::livewire.data-table')
+        <div wire:ignore>
+            @include('tall-datatables::livewire.data-table')
+        </div>
     </div>
-
-    <x-modal.card max-width="6xl" z-index="z-30" wire:model="showClientModal" :title="$create ? __('Create Client') : __('Edit Client')">
-        <livewire:settings.client-edit/>
-        <x-slot name="footer">
-            <div class="w-full" x-data="{create: @entangle('create')}">
-                <div
-                    class="flex justify-between gap-x-4">
-                    @if(user_can('action.client.delete'))
-                        <x-button x-bind:class="! create || 'invisible'" flat negative label="{{ __('Delete') }}"
-                                  x-on:click="window.$wireui.confirmDialog({
-                                                            title: '{{ __('Delete client') }}',
-                                                            description: '{{ __('Do you really want to delete this client?') }}',
-                                                            icon: 'error',
-                                                            accept: {
-                                                                label: '{{ __('Delete') }}',
-                                                                execute: () => {
-                                                                    $wire.dispatchTo('settings.client-edit', 'delete')
-                                                                }
-                                                            },
-                                                            reject: {
-                                                                label: '{{ __('Cancel') }}',
-                                                            }
-                                                        }, $wire.__instance.id)
-                                                        " label="{{ __('Delete') }}"/>
-                    @endif
-                    <div class="flex">
-                        <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.client-edit', 'save')"/>
+    <x-modal max-width="6xl" name="edit-client">
+        <x-card>
+            <x-tabs
+                :$tabs
+                wire:model="tab"
+                wire:loading
+            >
+                @includeWhen($tab === 'general', 'flux::components.settings.client.general')
+            </x-tabs>
+            <x-slot:footer>
+                <div class="w-full">
+                    <div class="flex justify-between gap-x-4">
+                        @if(\FluxErp\Actions\Client\DeleteClient::canPerformAction(false))
+                            <x-button
+                                wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Client')]) }}"
+                                x-bind:class="$wire.client.id > 0 || 'invisible'"
+                                wire:click="delete().then((success) => {if(success) close();});"
+                                flat
+                                negative
+                                :label="__('Delete')"
+                            />
+                        @endif
+                        <div class="flex">
+                            <x-button flat :label="__('Cancel')" x-on:click="close"/>
+                            <x-button primary :label="__('Save')" wire:click="save().then((success) => {if(success) close();});"/>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </x-slot>
-    </x-modal.card>
-    <x-modal.card wire:model="showClientLogosModal" :title="__('Manage Logos')">
-        <livewire:settings.client-logos/>
-        <x-slot name="footer">
-            <div class="w-full">
-                    <div class="flex justify-end gap-x-4">
-                        <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.client-logos', 'save')"/>
-                    </div>
-            </div>
-        </x-slot>
-    </x-modal.card>
+            </x-slot:footer>
+        </x-card>
+    </x-modal>
 </div>

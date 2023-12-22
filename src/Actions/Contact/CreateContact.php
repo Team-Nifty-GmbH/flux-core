@@ -5,6 +5,9 @@ namespace FluxErp\Actions\Contact;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateContactRequest;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Language;
+use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
@@ -24,6 +27,9 @@ class CreateContact extends FluxAction
     public function performAction(): Contact
     {
         $discountGroups = Arr::pull($this->data, 'discount_groups', []);
+
+        $this->data['price_list_id'] = $this->data['price_list_id'] ?? PriceList::default()?->id;
+        $this->data['payment_type_id'] = $this->data['payment_type_id'] ?? PaymentType::default()?->id;
 
         $contact = new Contact($this->data);
         $contact->save();

@@ -28,6 +28,7 @@ class CreateOrderRequest extends BaseFormRequest
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
                 'agent_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'contact_id' => [
+                    'required_without:address_invoice_id',
                     'integer',
                     'nullable',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'contacts'),
@@ -39,8 +40,9 @@ class CreateOrderRequest extends BaseFormRequest
                 ],
                 'currency_id' => 'integer|exists:currencies,id,deleted_at,NULL',
                 'address_invoice_id' => [
-                    'required',
+                    'required_without:contact_id',
                     'integer',
+                    'nullable',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'addresses'),
                 ],
                 'address_delivery_id' => [
@@ -48,17 +50,17 @@ class CreateOrderRequest extends BaseFormRequest
                     'nullable',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'addresses'),
                 ],
-                'language_id' => 'required|integer|exists:languages,id,deleted_at,NULL',
+                'language_id' => 'integer|nullable|exists:languages,id,deleted_at,NULL',
                 'order_type_id' => [
                     'required',
                     'integer',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'order_types'),
                 ],
-                'price_list_id' => 'required|integer|exists:price_lists,id,deleted_at,NULL',
+                'price_list_id' => 'integer|nullable|exists:price_lists,id,deleted_at,NULL',
                 'unit_price_price_list_id' => 'integer|nullable|exists:price_lists,id,deleted_at,NULL',
                 'payment_type_id' => [
-                    'required',
                     'integer',
+                    'nullable',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'payment_types'),
                 ],
                 'responsible_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
@@ -92,9 +94,9 @@ class CreateOrderRequest extends BaseFormRequest
                 'shipping_costs_net_price' => 'numeric|nullable',
                 'margin' => 'numeric|nullable',
                 'number_of_packages' => 'integer|nullable',
-                'payment_reminder_days_1' => 'required_without_all:address_invoice_id,contact_id|integer|min:1',
-                'payment_reminder_days_2' => 'required_without_all:address_invoice_id,contact_id|integer|min:1',
-                'payment_reminder_days_3' => 'required_without_all:address_invoice_id,contact_id|integer|min:1',
+                'payment_reminder_days_1' => 'integer|nullable|min:1',
+                'payment_reminder_days_2' => 'integer|nullable|min:1',
+                'payment_reminder_days_3' => 'integer|nullable|min:1',
 
                 'order_number' => 'sometimes|required|string|unique:orders',
                 'commission' => 'string|nullable',

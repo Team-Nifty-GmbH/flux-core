@@ -3,11 +3,11 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\WorkTimeType\CreateWorkTimeType;
+use FluxErp\Actions\WorkTimeType\DeleteWorkTimeType;
 use FluxErp\Actions\WorkTimeType\UpdateWorkTimeType;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
 
-class WorkTimeTypeForm extends Form
+class WorkTimeTypeForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -16,12 +16,12 @@ class WorkTimeTypeForm extends Form
 
     public bool $is_billable = true;
 
-    public function save(): void
+    protected function getActions(): array
     {
-        $action = $this->id ? UpdateWorkTimeType::make($this->toArray()) : CreateWorkTimeType::make($this->toArray());
-
-        $response = $action->validate()->execute();
-
-        $this->fill($response);
+        return [
+            'create' => CreateWorkTimeType::class,
+            'update' => UpdateWorkTimeType::class,
+            'delete' => DeleteWorkTimeType::class,
+        ];
     }
 }

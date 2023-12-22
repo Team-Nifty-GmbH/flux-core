@@ -96,6 +96,13 @@ class TabButton implements Htmlable
 
     public function when(\Closure|bool $condition): static
     {
+        // when running in console, dont call the closure
+        if (app()->runningInConsole()) {
+            $this->shouldRender = true;
+
+            return $this;
+        }
+
         $this->shouldRender = (bool) value($condition);
 
         return $this;
