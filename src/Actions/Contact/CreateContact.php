@@ -5,7 +5,6 @@ namespace FluxErp\Actions\Contact;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateContactRequest;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use Illuminate\Support\Arr;

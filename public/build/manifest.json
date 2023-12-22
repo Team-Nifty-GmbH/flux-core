@@ -35,12 +35,12 @@
     "src": "node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-4b9300a1.css",
+    "file": "assets/app-4e3f28eb.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
   "resources/js/alpine.js": {
-    "file": "assets/alpine-2295727f.js",
+    "file": "assets/alpine-3cc43954.js",
     "imports": [
       "__commonjsHelpers-725317a4.js"
     ],
