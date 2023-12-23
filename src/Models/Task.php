@@ -23,9 +23,10 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
 use Spatie\ModelStates\HasStates;
 use Spatie\Tags\HasTags;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Task extends Model implements HasMedia
+class Task extends Model implements HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
         HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
@@ -39,6 +40,8 @@ class Task extends Model implements HasMedia
         'state' => TaskState::class,
         'time_budget' => TimeDuration::class,
     ];
+
+    public string $detailRouteName = 'tasks.id';
 
     public static function booted(): void
     {
@@ -98,5 +101,25 @@ class Task extends Model implements HasMedia
             ->whereKey($this->id)
             ->first()
             ?->toArray() ?? [];
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->id . ' - ' . $this->name . ($this->project ? ' (' . $this->project->name . ')' : '');
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->detailRoute();
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return null;
     }
 }

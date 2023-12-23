@@ -43,6 +43,7 @@
                 template="user-option"
                 :async-data="[
                 'api' => route('search', \FluxErp\Models\Address::class),
+                'method' => 'POST',
                 'params' => [
                     'fields' => [
                         'contact_id',
@@ -91,16 +92,14 @@
             @endif
         </div>
         @if($collapsed)
-            <x-button
-                class="bg-gray-300"
-                x-on:click="expanded = !expanded"
-                class="w-full"
-                icon="chevron-down"
-            >
+            <x-badge outline md label="Prepend" class="w-full cursor-pointer gap-x-4 py-2" x-on:click="expanded = !expanded">
                 <x-slot:label>
                     <span x-text="expanded ? '{{ __('Show less') }}' : '{{ __('Show more') }}'"></span>
                 </x-slot:label>
-            </x-button>
+                <x-slot:prepend class="relative flex items-center w-2 h-2 transition-transform" x-bind:class="expanded && '-rotate-180'">
+                    <x-icon name="chevron-down" class="w-4 h-4 shrink-0" />
+                </x-slot:prepend>
+            </x-badge>
         @endif
     </div>
     <x-errors />

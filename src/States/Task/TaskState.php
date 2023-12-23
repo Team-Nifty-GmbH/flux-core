@@ -40,7 +40,10 @@ abstract class TaskState extends State implements HasFrontendFormatter
                     Canceled::class,
                 ],
                 [
-                    InProgress::class,
+                    [
+                        InProgress::class,
+                        Canceled::class,
+                    ],
                     Open::class,
                 ],
             ]);

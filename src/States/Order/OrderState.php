@@ -17,7 +17,10 @@ abstract class OrderState extends State implements Arrayable, HasFrontendFormatt
             ->default(Draft::class)
             ->allowTransitions([
                 [
-                    Draft::class,
+                    [
+                        Draft::class,
+                        Canceled::class,
+                    ],
                     Open::class,
                 ],
                 [
