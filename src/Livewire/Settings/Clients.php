@@ -2,25 +2,55 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use FluxErp\Actions\Client\CreateClient;
+use FluxErp\Actions\Client\UpdateClient;
+use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\DataTables\ClientList;
+use FluxErp\Livewire\Forms\ClientForm;
+use FluxErp\Livewire\Forms\MediaForm;
+use FluxErp\Models\BankConnection;
 use FluxErp\Models\Client;
+use FluxErp\Models\Country;
+use FluxErp\Traits\Livewire\WithTabs;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
+use Livewire\WithFileUploads;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use WireUi\Traits\Actions;
 
 class Clients extends ClientList
 {
+    use Actions, WithFileUploads, WithTabs;
+
     protected string $view = 'flux::livewire.settings.clients';
 
-    public bool $showClientModal = false;
+    public string $tab = 'general';
 
-    public bool $showClientLogosModal = false;
+    public ClientForm $client;
 
-    public bool $create = true;
+    public MediaForm $logo;
 
-    protected $listeners = [
-        'loadData',
-        'closeModal',
-        'closeLogosModal',
-    ];
+    public MediaForm $logoSmall;
+
+    public function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'bankConnections' => BankConnection::query()
+                    ->where('is_active', true)
+                    ->select(['id', 'name'])
+                    ->get()
+                    ->toArray(),
+                'countries' => Country::query()
+                    ->orderBy('iso_alpha2', 'ASC')
+                    ->select(['id', 'name', 'iso_alpha2'])
+                    ->get()
+                    ->toArray(),
+            ]
+        );
+    }
 
     public function getTableActions(): array
     {
@@ -30,8 +60,9 @@ class Clients extends ClientList
                 ->color('primary')
                 ->icon('plus')
                 ->attributes([
-                    'x-on:click' => '$wire.show()',
-                ]),
+                    'wire:click' => 'show()',
+                ])
+                ->when(CreateClient::canPerformAction(false)),
         ];
     }
 
@@ -43,59 +74,114 @@ class Clients extends ClientList
                 ->color('primary')
                 ->icon('pencil')
                 ->attributes([
-                    'x-on:click' => '$wire.show(record)',
-                ]),
-            DataTableButton::make()
-                ->label(__('Logos'))
-                ->color('primary')
-                ->icon('photograph')
-                ->attributes([
-                    'x-on:click' => '$wire.showLogos(record.id)',
-                ]),
+                    'wire:click' => 'show(record)',
+                ])
+                ->when(UpdateClient::canPerformAction(false)),
             DataTableButton::make()
                 ->label(__('Customer portal'))
                 ->color('primary')
                 ->icon('user')
                 ->attributes([
-                    'x-on:click' => '$wire.showCustomerPortal(record)',
-                ]),
+                    'wire:click' => 'showCustomerPortal(record)',
+                ])
+                ->when(UpdateClient::canPerformAction(false)),
         ];
     }
 
+    #[Renderless]
     public function show(?Client $record = null): void
     {
+        $this->client->reset();
         $record->load('bankConnections:id');
         $client = $record->toArray();
         $client['bank_connections'] = array_column($client['bank_connections'], 'id');
+        $client['opening_hours'] = $client['opening_hours'] ?? [];
 
-        $this->dispatch('show', $client)->to('settings.client-edit');
+        $this->client->fill($client);
 
-        $this->create = ! $record->exists;
-        $this->showClientLogosModal = false;
-        $this->showClientModal = true;
+        $this->logo->fill($record->getMedia('logo')->first() ?? []);
+        $this->logoSmall->fill($record->getMedia('logo_small')->first() ?? []);
+
+        $this->js(<<<'JS'
+            $openModal('edit-client');
+        JS);
+    }
+
+    #[Renderless]
+    public function save(): bool
+    {
+        try {
+            $this->client->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->logo->model_type = Client::class;
+        $this->logo->model_id = $this->client->id;
+        $this->logo->collection_name = 'logo';
+
+        $this->logoSmall->model_type = Client::class;
+        $this->logoSmall->model_id = $this->client->id;
+        $this->logoSmall->collection_name = 'logo_small';
+
+        if ($this->logo->stagedFiles || $this->logo->id) {
+            try {
+                $this->logo->save();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+
+        if ($this->logoSmall->stagedFiles || $this->logoSmall->id) {
+            try {
+                $this->logoSmall->save();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    #[Renderless]
+    public function delete(): bool
+    {
+        try {
+            $this->client->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     public function showCustomerPortal(Client $record): void
     {
-        $this->redirect(route('settings.customer-portal', ['client' => $record->id]));
+        $this->redirect(route('settings.customer-portal', ['client' => $record->id]), true);
     }
 
-    public function showLogos(int $id): void
+    public function getTabs(): array
     {
-        $this->dispatch('show', $id)->to('settings.client-logos');
-
-        $this->showClientModal = false;
-        $this->showClientLogosModal = true;
-        $this->skipRender();
+        return [
+            TabButton::make('general')
+                ->label(__('General')),
+            TabButton::make('settings.client.logos')
+                ->label(__('Logos')),
+            TabButton::make('settings.client.terms-and-conditions')
+                ->label(__('Terms and Conditions')),
+        ];
     }
 
-    public function closeModal(): void
+    public function updatingTab(): void
     {
-        $this->showClientModal = false;
-    }
-
-    public function closeLogosModal(): void
-    {
-        $this->showClientLogosModal = false;
+        $this->forceRender();
     }
 }

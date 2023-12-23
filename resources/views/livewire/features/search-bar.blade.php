@@ -73,7 +73,7 @@
                             </template>
                         </ul>
                         <div wire:ignore class="hidden basis-1/2 sm:block">
-                            <livewire:widgets.search-bar />
+                            <livewire:widgets.search-bar lazy />
                         </div>
                     </div>
                 </x-card>

@@ -15,8 +15,8 @@ class UpdateLanguage extends FluxAction
         parent::boot($data);
         $this->rules = (new UpdateLanguageRequest())->rules();
 
-        $this->rules['language_code'] = $this->rules['language_code'] . ',' . $this->data['id'];
-        $this->rules['iso_name'] = $this->rules['iso_name'] . ',' . $this->data['id'];
+        $this->rules['language_code'] .= ',' . $this->data['id'];
+        $this->rules['iso_name'] .= ',' . $this->data['id'];
     }
 
     public static function models(): array
@@ -26,6 +26,12 @@ class UpdateLanguage extends FluxAction
 
     public function performAction(): Model
     {
+        if ($this->data['is_default'] ?? false) {
+            Language::query()
+                ->whereKeyNot($this->data['id'])
+                ->update(['is_default' => false]);
+        }
+
         $language = Language::query()
             ->whereKey($this->data['id'])
             ->first();
@@ -38,6 +44,15 @@ class UpdateLanguage extends FluxAction
 
     public function validateData(): void
     {
+        if (($this->data['is_default'] ?? false)
+            && ! Language::query()
+                ->whereKeyNot($this->data['id'] ?? 0)
+                ->where('is_default', true)
+                ->exists()
+        ) {
+            $this->rules['is_default'] .= '|accepted';
+        }
+
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Language());
 

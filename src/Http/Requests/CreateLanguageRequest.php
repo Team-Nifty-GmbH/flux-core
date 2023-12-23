@@ -16,6 +16,7 @@ class CreateLanguageRequest extends BaseFormRequest
             'name' => 'required|string',
             'iso_name' => 'required|string',
             'language_code' => 'required|string|unique:languages,language_code',
+            'is_default' => 'boolean',
         ];
     }
 }

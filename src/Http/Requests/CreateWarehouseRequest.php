@@ -13,8 +13,9 @@ class CreateWarehouseRequest extends BaseFormRequest
     {
         return [
             'uuid' => 'string|uuid|unique:warehouses,uuid',
-            'name' => 'required|string',
             'address_id' => 'integer|nullable|exists:addresses,id,deleted_at,NULL',
+            'name' => 'required|string',
+            'is_default' => 'boolean',
         ];
     }
 }

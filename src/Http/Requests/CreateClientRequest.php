@@ -13,7 +13,7 @@ class CreateClientRequest extends BaseFormRequest
     {
         return [
             'uuid' => 'string|uuid|unique:clients,uuid',
-            'country_id' => 'required|integer|exists:countries,id,deleted_at,NULL',
+            'country_id' => 'nullable|integer|exists:countries,id,deleted_at,NULL',
             'name' => 'required|string',
             'client_code' => 'required|string|unique:clients,client_code',
             'ceo' => 'string|nullable',
@@ -25,7 +25,9 @@ class CreateClientRequest extends BaseFormRequest
             'email' => 'email|nullable',
             'website' => 'string|nullable',
             'opening_hours' => 'array|nullable',
+            'terms_and_conditions' => 'string|nullable',
             'is_active' => 'boolean',
+            'is_default' => 'boolean',
             'bank_connections' => 'array|nullable',
             'bank_connections.*' => 'integer|exists:bank_connections,id',
         ];

@@ -102,3 +102,7 @@ Broadcast::channel('FluxErp.Models.WorkTime', function ($user) {
 Broadcast::channel('FluxErp.Models.User.{user}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+Broadcast::channel('job-batch.{id}', function () {
+    return true;
+});

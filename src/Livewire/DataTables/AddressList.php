@@ -3,7 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Contact\CreateContact;
-use FluxErp\Livewire\Forms\Contact;
+use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -35,7 +35,7 @@ class AddressList extends DataTable
         'avatar' => 'image',
     ];
 
-    public Contact $contact;
+    public ContactForm $contact;
 
     public function getTableActions(): array
     {

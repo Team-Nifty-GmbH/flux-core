@@ -17,6 +17,7 @@ class Warehouse extends Model
 
     protected $casts = [
         'uuid' => 'string',
+        'is_default' => 'boolean',
     ];
 
     protected $guarded = [
@@ -26,5 +27,10 @@ class Warehouse extends Model
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class, 'warehouse_id');
+    }
+
+    public static function default(): ?static
+    {
+        return static::query()->where('is_default', true)->first();
     }
 }

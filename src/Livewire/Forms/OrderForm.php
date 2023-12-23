@@ -2,12 +2,13 @@
 
 namespace FluxErp\Livewire\Forms;
 
+use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Order\CreateOrder;
+use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
 
-class OrderForm extends Form
+class OrderForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -56,11 +57,11 @@ class OrderForm extends Form
 
     public ?array $total_vats = null;
 
-    public int $payment_reminder_days_1 = 0;
+    public ?int $payment_reminder_days_1 = null;
 
-    public int $payment_reminder_days_2 = 0;
+    public ?int $payment_reminder_days_2 = null;
 
-    public int $payment_reminder_days_3 = 0;
+    public ?int $payment_reminder_days_3 = null;
 
     public ?string $order_number = null;
 
@@ -100,7 +101,16 @@ class OrderForm extends Form
     #[Locked]
     public ?array $updated_by = null;
 
-    public function save(): void
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateOrder::class,
+            'update' => UpdateOrder::class,
+            'delete' => DeleteOrder::class,
+        ];
+    }
+
+    protected function makeAction(string $name, ?array $data = null): FluxAction
     {
         $data = $this->toArray();
 
@@ -116,15 +126,6 @@ class OrderForm extends Form
             );
         }
 
-        $action = $this->id
-            ? UpdateOrder::make($data)
-            : CreateOrder::make($data);
-
-        $response = $action
-            ->checkPermission()
-            ->validate()
-            ->execute();
-
-        $this->fill($response);
+        return parent::makeAction($name, $data);
     }
 }

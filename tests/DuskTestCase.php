@@ -23,6 +23,7 @@ use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Spatie\Tags\TagsServiceProvider;
+use Spatie\Translatable\TranslatableServiceProvider;
 use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
@@ -61,6 +62,7 @@ abstract class DuskTestCase extends TestCase
     protected function getApplicationProviders($app): array
     {
         return array_merge(parent::getApplicationProviders($app), [
+            TranslatableServiceProvider::class,
             LivewireServiceProvider::class,
             ViewServiceProvider::class,
             PermissionServiceProvider::class,
@@ -90,6 +92,7 @@ abstract class DuskTestCase extends TestCase
         $app['config']->set('app.debug', true);
         $app['config']->set('database.connections.mysql.database', 'laravel');
         $app['config']->set('auth.defaults.guard', 'web');
+        $app['config']->set('flux.install_done', true);
     }
 
     public function openMenu(): void

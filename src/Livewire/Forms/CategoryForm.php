@@ -3,11 +3,11 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Category\CreateCategory;
+use FluxErp\Actions\Category\DeleteCategory;
 use FluxErp\Actions\Category\UpdateCategory;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
 
-class Category extends Form
+class CategoryForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -22,12 +22,12 @@ class Category extends Form
 
     public bool $is_active = true;
 
-    public function save(): void
+    protected function getActions(): array
     {
-        $action = $this->id ? UpdateCategory::make($this->toArray()) : CreateCategory::make($this->toArray());
-
-        $response = $action->validate()->execute();
-
-        $this->fill($response);
+        return [
+            'create' => CreateCategory::class,
+            'update' => UpdateCategory::class,
+            'delete' => DeleteCategory::class,
+        ];
     }
 }

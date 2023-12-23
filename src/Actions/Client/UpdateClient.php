@@ -16,7 +16,7 @@ class UpdateClient extends FluxAction
         parent::boot($data);
         $this->rules = (new UpdateClientRequest())->rules();
 
-        $this->rules['client_code'] = $this->rules['client_code'] . ',' . $this->data['id'];
+        $this->rules['client_code'] .= ',' . $this->data['id'];
     }
 
     public static function models(): array
@@ -26,6 +26,12 @@ class UpdateClient extends FluxAction
 
     public function performAction(): Model
     {
+        if ($this->data['is_default'] ?? false) {
+            Client::query()
+                ->whereKeyNot($this->data['id'])
+                ->update(['is_default' => false]);
+        }
+
         $bankConnections = Arr::pull($this->data, 'bank_connections');
         $client = Client::query()
             ->whereKey($this->data['id'])
@@ -43,6 +49,15 @@ class UpdateClient extends FluxAction
 
     public function validateData(): void
     {
+        if (($this->data['is_default'] ?? false)
+            && ! Client::query()
+                ->whereKeyNot($this->data['id'] ?? 0)
+                ->where('is_default', true)
+                ->exists()
+        ) {
+            $this->rules['is_default'] .= '|accepted';
+        }
+
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Client());
 

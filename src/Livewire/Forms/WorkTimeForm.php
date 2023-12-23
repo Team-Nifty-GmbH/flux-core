@@ -3,11 +3,11 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\WorkTime\CreateWorkTime;
+use FluxErp\Actions\WorkTime\DeleteWorkTime;
 use FluxErp\Actions\WorkTime\UpdateWorkTime;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
 
-class WorkTimeForm extends Form
+class WorkTimeForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -50,6 +50,15 @@ class WorkTimeForm extends Form
     #[Locked]
     public bool $is_pause = false;
 
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateWorkTime::class,
+            'update' => UpdateWorkTime::class,
+            'delete' => DeleteWorkTime::class,
+        ];
+    }
+
     public function save(): void
     {
         $this->user_id = $this->user_id ?? auth()->id();
@@ -59,16 +68,7 @@ class WorkTimeForm extends Form
             unset($workTime['trackable_type'], $workTime['trackable_id']);
         }
 
-        $action = $this->id
-            ? UpdateWorkTime::make($workTime)
-            : CreateWorkTime::make($workTime);
-
-        $response = $action
-            ->checkPermission()
-            ->validate()
-            ->execute();
-
-        $this->fill($response);
+        parent::save();
     }
 
     public function __toString(): string

@@ -86,10 +86,10 @@
             />
         </div>
     </div>
-    <x-tabs wire:model="tab" :$tabs class="w-full lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
+    <x-tabs wire:loading="tab" wire:model="tab" :$tabs class="w-full lg:col-start-1 xl:col-span-2 xl:flex gap-4">
         <x-slot:prepend>
             <section class="relative basis-2/12" wire:ignore>
-                <div class="sticky top-6 space-y-6">
+                <div class="sticky top-6 flex flex-col gap-4">
                     @section('invoice-address-card')
                         <x-card>
                             <x-slot:header>

@@ -26,9 +26,7 @@ class CreateUser extends FluxAction
         $mailAccounts = Arr::pull($this->data, 'mail_accounts');
 
         $this->data['is_active'] = $this->data['is_active'] ?? true;
-        $this->data['language_id'] = array_key_exists('language_id', $this->data) ?
-            $this->data['language_id'] :
-            Language::query()->where('language_code', config('app.locale'))->first()?->id;
+        $this->data['language_id'] = $this->data['language_id'] ?? Language::default()?->id;
 
         $user = new User($this->data);
         $user->save();

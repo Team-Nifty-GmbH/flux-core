@@ -22,6 +22,14 @@ class CreateLanguage extends FluxAction
 
     public function performAction(): Language
     {
+        $this->data['is_default'] = ! Language::query()->where('is_default', true)->exists()
+            ? true
+            : $this->data['is_default'] ?? false;
+
+        if ($this->data['is_default']) {
+            Language::query()->update(['is_default' => false]);
+        }
+
         $language = new Language($this->data);
         $language->save();
 
