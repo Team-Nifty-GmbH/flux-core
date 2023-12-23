@@ -13,6 +13,7 @@ use FluxErp\Models\Schedule;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
@@ -94,6 +95,7 @@ class Scheduling extends ScheduleList
         ];
     }
 
+    #[Renderless]
     public function edit(Schedule $schedule): void
     {
         $this->schedule->reset();
@@ -104,6 +106,7 @@ class Scheduling extends ScheduleList
         JS);
     }
 
+    #[Renderless]
     public function save(): bool
     {
         try {
@@ -119,6 +122,7 @@ class Scheduling extends ScheduleList
         return true;
     }
 
+    #[Renderless]
     public function delete(): bool
     {
         try {
@@ -137,6 +141,7 @@ class Scheduling extends ScheduleList
         return true;
     }
 
+    #[Renderless]
     public function updatedScheduleName(): void
     {
         $this->schedule->description = $this->repeatable[$this->schedule->name]['description'];

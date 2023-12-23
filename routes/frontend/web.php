@@ -103,7 +103,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
 
     Route::name('accounting.')->prefix('accounting')
         ->group(function () {
-            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'square-3-stack-3d');
+            Route::permanentRedirect('/', '/')->registersMenuItem(icon: 'banknotes');
             Route::get('/work-times', WorkTimeList::class)->name('work-times')->registersMenuItem();
             Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
             Route::get('/transactions', TransactionList::class)->name('transactions')->registersMenuItem();

@@ -22,7 +22,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
         $dispatcher->dispatch(new ScheduleTasksRegistering($schedule));
 
         $overdueEvents = [];
-        $repeatables = ScheduleModel::all();
+        $repeatables = ScheduleModel::query()->where('is_active', true)->get();
         foreach ($repeatables as $repeatable) {
             if (method_exists($repeatable->class, 'isRepeatable') && ! $repeatable->class::isRepeatable()) {
                 continue;

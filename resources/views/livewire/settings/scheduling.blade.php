@@ -2,7 +2,7 @@
     <x-modal name="edit-schedule">
         <x-card>
             <div class="flex flex-col gap-4">
-                <div x-show="! $wire.schedule.id">
+                <div x-cloak x-show="! $wire.schedule.id">
                     <x-select
                         :label="__('Name')"
                         :options="$repeatable"
@@ -14,7 +14,7 @@
                         wire:model.live="schedule.name"
                     />
                 </div>
-                <div x-show="$wire.schedule.id">
+                <div x-cloak x-show="$wire.schedule.id">
                     <span x-text="$wire.schedule.name"></span>
                 </div>
                 <x-textarea wire:model="schedule.description" :label="__('Description')" />
@@ -30,9 +30,9 @@
                     option-value="name"
                     option-label="label"
                     autocomplete="off"
-                    wire:model.live="schedule.cron.methods.basic"
+                    wire:model="schedule.cron.methods.basic"
                 />
-                <div x-show="[
+                <div x-cloak x-show="[
                         'hourlyAt',
                         'everyOddHour',
                         'everyTwoHours',
@@ -43,29 +43,23 @@
                 ">
                     <x-inputs.number :max="59" :min="0" wire:model="schedule.cron.parameters.basic.0" :label="__('Minute')" />
                 </div>
-                <div x-show="['dailyAt', 'lastDayOfMonth'].indexOf($wire.schedule.cron.methods.basic) >= 0">
+                <div x-cloak x-show="['dailyAt', 'lastDayOfMonth'].indexOf($wire.schedule.cron.methods.basic) >= 0">
                     <x-time-picker
                         :label="__('Time')"
                         format="24"
                         wire:model="schedule.cron.parameters.basic.0"
                     />
                 </div>
-                <div x-show="$wire.schedule.cron.methods.basic === 'twiceDaily'">
+                <div x-cloak x-show="$wire.schedule.cron.methods.basic === 'twiceDaily'" class="flex flex-col gap-4">
                     <x-inputs.number :max="23" :min="0" wire:model="schedule.cron.parameters.basic.0" :label="__('Hour')" />
-                    <div class="mt-4">
-                        <x-inputs.number :max="23" :min="0" wire:model="schedule.cron.parameters.basic.1" :label="__('Hour')" />
-                    </div>
+                    <x-inputs.number :max="23" :min="0" wire:model="schedule.cron.parameters.basic.1" :label="__('Hour')" />
                 </div>
-                <div x-show="$wire.schedule.cron.methods.basic === 'twiceDailyAt'">
+                <div x-cloak x-show="$wire.schedule.cron.methods.basic === 'twiceDailyAt'" class="flex flex-col gap-4">
                     <x-inputs.number :max="23" :min="0" wire:model="schedule.cron.parameters.basic.0" :label="__('Hour')" />
-                    <div class="mt-4">
-                        <x-inputs.number :max="23" :min="0" wire:model="schedule.cron.parameters.basic.1" :label="__('Hour')" />
-                    </div>
-                    <div class="mt-4">
-                        <x-inputs.number :max="59" :min="0" wire:model="schedule.cron.parameters.basic.2" :label="__('Minute')" />
-                    </div>
+                    <x-inputs.number :max="23" :min="0" wire:model="schedule.cron.parameters.basic.1" :label="__('Hour')" />
+                    <x-inputs.number :max="59" :min="0" wire:model="schedule.cron.parameters.basic.2" :label="__('Minute')" />
                 </div>
-                <div x-show="$wire.schedule.cron.methods.basic === 'weeklyOn'">
+                <div x-cloak x-show="$wire.schedule.cron.methods.basic === 'weeklyOn'" class="flex flex-col gap-4">
                     <x-select
                         :label="__('Weekday')"
                         :options="[
@@ -81,38 +75,32 @@
                         option-label="name"
                         wire:model="schedule.cron.parameters.basic.0"
                     />
-                    <div class="mt-4">
-                        <x-time-picker
-                            :label="__('Time')"
-                            format="24"
-                            wire:model="schedule.cron.parameters.basic.1"
-                        />
-                    </div>
+                    <x-time-picker
+                        :label="__('Time')"
+                        format="24"
+                        wire:model="schedule.cron.parameters.basic.1"
+                    />
                 </div>
-                <div x-show="['monthlyOn', 'quarterlyOn'].indexOf($wire.schedule.cron.methods.basic) >= 0">
+                <div x-cloak x-show="['monthlyOn', 'quarterlyOn'].indexOf($wire.schedule.cron.methods.basic) >= 0" class="flex flex-col gap-4">
                     <x-inputs.number :max="31" :min="0" wire:model="schedule.cron.parameters.basic.0" :label="__('Day')" />
-                    <div class="mt-4">
-                        <x-time-picker
-                            :label="__('Time')"
-                            format="24"
-                            wire:model="schedule.cron.parameters.basic.1"
-                        />
-                    </div>
+                    <x-time-picker
+                        :label="__('Time')"
+                        format="24"
+                        wire:model="schedule.cron.parameters.basic.1"
+                    />
                 </div>
-                <div x-show="$wire.schedule.cron.methods.basic === 'twiceMonthly'">
+                <div x-cloak x-show="$wire.schedule.cron.methods.basic === 'twiceMonthly'" class="flex flex-col gap-4">
                     <x-inputs.number :max="31" :min="0" wire:model="schedule.cron.parameters.basic.0" :label="__('Day')" />
                     <div class="mt-4">
                         <x-inputs.number :max="31" :min="0" wire:model="schedule.cron.parameters.basic.1" :label="__('Day')" />
                     </div>
-                    <div class="mt-4">
-                        <x-time-picker
-                            :label="__('Time')"
-                            format="24"
-                            wire:model="schedule.cron.parameters.basic.2"
-                        />
-                    </div>
+                    <x-time-picker
+                        :label="__('Time')"
+                        format="24"
+                        wire:model="schedule.cron.parameters.basic.2"
+                    />
                 </div>
-                <div x-show="$wire.schedule.cron.methods.basic === 'yearlyOn'">
+                <div x-cloak x-show="$wire.schedule.cron.methods.basic === 'yearlyOn'" class="flex flex-col gap-4">
                     <x-select
                         :label="__('Month')"
                         :options="[
@@ -134,16 +122,12 @@
                         wire:model="schedule.cron.parameters.basic.0"
                         x-on:selected="document.getElementById('month-day-input').max = $event.detail.days; $wire.schedule.cron.parameters.basic[1] = Math.min($wire.schedule.cron.parameters.basic[1], $event.detail.days);"
                     />
-                    <div class="mt-4">
-                        <x-inputs.number id="month-day-input" :max="31" :min="0" wire:model.blur="schedule.cron.parameters.basic.1" :label="__('Day')" />
-                    </div>
-                    <div class="mt-4">
-                        <x-time-picker
-                            :label="__('Time')"
-                            format="24"
-                            wire:model="schedule.cron.parameters.basic.2"
-                        />
-                    </div>
+                    <x-inputs.number id="month-day-input" :max="31" :min="0" wire:model.blur="schedule.cron.parameters.basic.1" :label="__('Day')" />
+                    <x-time-picker
+                        :label="__('Time')"
+                        format="24"
+                        wire:model="schedule.cron.parameters.basic.2"
+                    />
                 </div>
                 <x-select
                     :label="__('Day Constraints')"
@@ -151,9 +135,9 @@
                     option-value="name"
                     option-label="label"
                     autocomplete="off"
-                    wire:model.live="schedule.cron.methods.dayConstraint"
+                    wire:model="schedule.cron.methods.dayConstraint"
                 />
-                <div x-show="$wire.schedule.cron.methods.dayConstraint === 'days'">
+                <div x-cloak x-show="$wire.schedule.cron.methods.dayConstraint === 'days'">
                     <x-select
                         :options="[
                             ['id' => 1, 'name' => __('Mondays')],
@@ -176,28 +160,26 @@
                     option-value="name"
                     option-label="label"
                     autocomplete="off"
-                    wire:model.live="schedule.cron.methods.timeConstraint"
+                    wire:model="schedule.cron.methods.timeConstraint"
                 />
-                <div x-show="$wire.schedule.cron.methods.timeConstraint === 'at'">
+                <div x-cloak x-show="$wire.schedule.cron.methods.timeConstraint === 'at'">
                     <x-time-picker
                         :label="__('Time')"
                         format="24"
                         wire:model="schedule.cron.parameters.timeConstraint.0"
                     />
                 </div>
-                <div x-show="$wire.schedule.cron.methods.timeConstraint && $wire.schedule.cron.methods.timeConstraint !== 'at'">
+                <div x-cloak x-show="$wire.schedule.cron.methods.timeConstraint && $wire.schedule.cron.methods.timeConstraint !== 'at'" class="flex flex-col gap-4">
                     <x-time-picker
                         :label="__('Start')"
                         format="24"
                         wire:model="schedule.cron.parameters.timeConstraint.0"
                     />
-                    <div class="mt-4">
-                        <x-time-picker
-                            :label="__('End')"
-                            format="24"
-                            wire:model="schedule.cron.parameters.timeConstraint.1"
-                        />
-                    </div>
+                    <x-time-picker
+                        :label="__('End')"
+                        format="24"
+                        wire:model="schedule.cron.parameters.timeConstraint.1"
+                    />
                 </div>
                 <x-toggle wire:model="schedule.is_active" :label="__('Is Active')" />
             </div>
@@ -209,7 +191,6 @@
                                 flat
                                 negative
                                 :label="__('Delete')"
-                                x-on:click="close"
                                 wire:click="delete().then((success) => { if(success) close()})"
                                 wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Schedule')]) }}"
                             />

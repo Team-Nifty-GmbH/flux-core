@@ -2,6 +2,7 @@
 
 namespace FluxErp\Jobs;
 
+use Cron\CronExpression;
 use FluxErp\Actions\MailFolder\CreateMailFolder;
 use FluxErp\Actions\MailFolder\DeleteMailFolder;
 use FluxErp\Actions\MailFolder\UpdateMailFolder;
@@ -254,5 +255,10 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         return [
             'email' => null,
         ];
+    }
+
+    public static function defaultCron(): ?CronExpression
+    {
+        return null;
     }
 }

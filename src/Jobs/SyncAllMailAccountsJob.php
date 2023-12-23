@@ -2,6 +2,7 @@
 
 namespace FluxErp\Jobs;
 
+use Cron\CronExpression;
 use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Models\MailAccount;
 use Illuminate\Bus\Queueable;
@@ -48,5 +49,10 @@ class SyncAllMailAccountsJob implements Repeatable, ShouldQueue
     public static function parameters(): array
     {
         return [];
+    }
+
+    public static function defaultCron(): ?CronExpression
+    {
+        return new CronExpression('*/15 * * * *');
     }
 }

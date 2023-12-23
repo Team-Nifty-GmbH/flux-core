@@ -2,6 +2,8 @@
 
 namespace FluxErp\Console\Scheduling;
 
+use Cron\CronExpression;
+
 interface Repeatable
 {
     public static function isRepeatable(): bool;
@@ -11,4 +13,6 @@ interface Repeatable
     public static function description(): ?string;
 
     public static function parameters(): array;
+
+    public static function defaultCron(): ?CronExpression;
 }
