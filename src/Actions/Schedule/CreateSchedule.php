@@ -2,7 +2,6 @@
 
 namespace FluxErp\Actions\Schedule;
 
-use Cron\CronExpression;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Facades\Repeatable;
 use FluxErp\Http\Requests\CreateScheduleRequest;

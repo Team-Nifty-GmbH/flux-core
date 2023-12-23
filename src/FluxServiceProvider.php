@@ -3,9 +3,9 @@
 namespace FluxErp;
 
 use FluxErp\Actions\ActionManager;
-use FluxErp\Console\Scheduling\RepeatableManager;
 use FluxErp\Console\Commands\Init\InitEnv;
 use FluxErp\Console\Commands\Init\InitPermissions;
+use FluxErp\Console\Scheduling\RepeatableManager;
 use FluxErp\DataType\ArrayHandler;
 use FluxErp\DataType\BooleanHandler;
 use FluxErp\DataType\DateTimeHandler;
