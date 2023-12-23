@@ -22,6 +22,14 @@ class CreatePaymentType extends FluxAction
 
     public function performAction(): PaymentType
     {
+        $this->data['is_default'] = ! PaymentType::query()->where('is_default', true)->exists()
+            ? true
+            : $this->data['is_default'] ?? false;
+
+        if ($this->data['is_default']) {
+            PaymentType::query()->update(['is_default' => false]);
+        }
+
         $paymentType = new PaymentType($this->data);
         $paymentType->save();
 

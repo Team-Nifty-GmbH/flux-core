@@ -35,6 +35,10 @@ class Login extends Component
         if (Auth::guard($this->guard)->check()) {
             $this->redirect(route($this->dashboardRoute));
         }
+
+        if (! config('flux.install_done')) {
+            $this->redirect(route('flux.install'));
+        }
     }
 
     public function render(): Factory|View|Application

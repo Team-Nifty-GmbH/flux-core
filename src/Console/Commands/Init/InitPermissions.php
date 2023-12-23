@@ -131,7 +131,7 @@ class InitPermissions extends Command
     {
         $this->info('Registering tab permissions');
         $registry = app(ComponentRegistry::class);
-        foreach (invade($registry)->aliases as $alias => $component) {
+        foreach (invade($registry)->aliases as $component) {
             if (! in_array(WithTabs::class, class_uses_recursive($component))) {
                 continue;
             }

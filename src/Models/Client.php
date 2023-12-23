@@ -29,6 +29,7 @@ class Client extends Model implements HasMedia
         'uuid' => 'string',
         'is_active' => 'boolean',
         'opening_hours' => 'array',
+        'is_default' => 'boolean',
     ];
 
     protected $guarded = [
@@ -77,5 +78,10 @@ class Client extends Model implements HasMedia
     {
         $this->addMediaCollection('logo')->useDisk('public')->singleFile();
         $this->addMediaCollection('logo_small')->useDisk('public')->singleFile();
+    }
+
+    public static function default(): ?static
+    {
+        return static::query()->where('is_default', true)->first();
     }
 }

@@ -4,16 +4,18 @@
             <div class="flex flex-col gap-4">
                 <x-input wire:model="paymentType.name" :label="__('Name')" />
                 <x-toggle wire:model="paymentType.is_active" :label="__('Is Active')" />
-                <x-select
-                    x-show="! $wire.paymentType.id"
-                    :label="__('Client')"
-                    :options="$clients"
-                    option-value="id"
-                    option-label="name"
-                    :clearable="false"
-                    autocomplete="off"
-                    wire:model.live="paymentType.client_id"
-                />
+                <x-toggle wire:model.boolean="paymentType.is_default" :label="__('Is Default')" />
+                <div x-cloak x-show="! $wire.paymentType.id">
+                    <x-select
+                        :label="__('Client')"
+                        :options="$clients"
+                        option-value="id"
+                        option-label="name"
+                        :clearable="false"
+                        autocomplete="off"
+                        wire:model="paymentType.client_id"
+                    />
+                </div>
                 <x-inputs.number wire:model="paymentType.payment_reminder_days_1" :label="__('Payment Reminder Days 1')" />
                 <x-inputs.number wire:model="paymentType.payment_reminder_days_2" :label="__('Payment Reminder Days 2')" />
                 <x-inputs.number wire:model="paymentType.payment_reminder_days_3" :label="__('Payment Reminder Days 3')" />

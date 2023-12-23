@@ -3,6 +3,8 @@
 namespace FluxErp;
 
 use FluxErp\Actions\ActionManager;
+use FluxErp\Console\Commands\Init\InitEnv;
+use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\DataType\ArrayHandler;
 use FluxErp\DataType\BooleanHandler;
 use FluxErp\DataType\DateTimeHandler;
@@ -53,6 +55,7 @@ use RecursiveIteratorIterator;
 use RegexIterator;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Spatie\Translatable\Facades\Translatable;
 
 class FluxServiceProvider extends ServiceProvider
 {
@@ -63,9 +66,9 @@ class FluxServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->offerPublishing();
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         }
 
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
         $this->registerBladeComponents();
@@ -100,6 +103,10 @@ class FluxServiceProvider extends ServiceProvider
 
             return $registry;
         });
+
+        Translatable::fallback(
+            fallbackAny: true,
+        );
 
         $this->app->alias(Registry::class, 'datatype.registry');
 
@@ -389,6 +396,10 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerCommands(): void
     {
         if (! $this->app->runningInConsole()) {
+            // commands required for installation
+            $this->commands(InitEnv::class);
+            $this->commands(InitPermissions::class);
+
             return;
         }
 
@@ -411,6 +422,7 @@ class FluxServiceProvider extends ServiceProvider
 
     private function registerMiddleware(): void
     {
+        /** @var Kernel $kernel */
         $kernel = app()->make(Kernel::class);
         $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);
 

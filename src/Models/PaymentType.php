@@ -18,6 +18,7 @@ class PaymentType extends Model
     protected $casts = [
         'uuid' => 'string',
         'is_active' => 'boolean',
+        'is_default' => 'boolean',
     ];
 
     protected $guarded = [
@@ -32,5 +33,10 @@ class PaymentType extends Model
     public function paymentNotices(): HasMany
     {
         return $this->hasMany(PaymentNotice::class, 'payment_type_id');
+    }
+
+    public static function default(): ?static
+    {
+        return static::query()->where('is_default', true)->first();
     }
 }

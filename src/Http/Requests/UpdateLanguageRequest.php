@@ -16,6 +16,7 @@ class UpdateLanguageRequest extends BaseFormRequest
             'name' => 'string',
             'iso_name' => 'string|unique:languages,iso_name',
             'language_code' => 'string|unique:languages,language_code',
+            'is_default' => 'boolean',
         ];
     }
 }

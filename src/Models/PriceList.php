@@ -54,4 +54,9 @@ class PriceList extends Model
     {
         return $this->hasMany(Price::class);
     }
+
+    public static function default(): ?static
+    {
+        return static::query()->where('is_default', true)->first();
+    }
 }

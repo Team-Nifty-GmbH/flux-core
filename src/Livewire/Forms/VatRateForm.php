@@ -3,11 +3,12 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\VatRate\CreateVatRate;
+use FluxErp\Actions\VatRate\DeleteVatRate;
 use FluxErp\Actions\VatRate\UpdateVatRate;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
+use Livewire\Attributes\Validate;
 
-class VatRateForm extends Form
+class VatRateForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -18,16 +19,23 @@ class VatRateForm extends Form
 
     public ?string $footer_text = null;
 
+    #[Validate(['required', 'numeric', 'min:0', 'max:99.99'])]
     public ?float $rate_percentage_frontend = null;
+
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateVatRate::class,
+            'update' => UpdateVatRate::class,
+            'delete' => DeleteVatRate::class,
+        ];
+    }
 
     public function save(): void
     {
         $this->rate_percentage = bcdiv($this->rate_percentage_frontend, 100);
-        $action = $this->id ? UpdateVatRate::make($this->toArray()) : CreateVatRate::make($this->toArray());
 
-        $response = $action->validate()->execute();
-
-        $this->fill($response);
+        parent::save();
     }
 
     public function fill($values): void

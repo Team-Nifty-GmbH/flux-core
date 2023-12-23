@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'install_done' => false,
+
     'portal_domain' => env(
         'PORTAL_DOMAIN',
         'portal.' . preg_replace('(^https?://)', '', env('APP_URL'))

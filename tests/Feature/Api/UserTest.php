@@ -148,6 +148,9 @@ class UserTest extends BaseSetup
         // validation requirement: min 8, mixedCase, numbers
         $user['password'] = 'Test12345';
 
+        $this->language->is_default = true;
+        $this->language->save();
+
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
@@ -159,9 +162,7 @@ class UserTest extends BaseSetup
             ->whereKey($responseUser->id)
             ->first();
 
-        $defaultLanguage = Language::query()
-            ->where('language_code', config('app.locale'))
-            ->first();
+        $defaultLanguage = Language::default();
 
         $this->assertNotEmpty($user);
         $this->assertEquals($user['name'], $dbUser->name);

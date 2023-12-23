@@ -34,7 +34,7 @@
                     negative
                     label="{{ __('Delete') }}"
                     wire:click="delete()"
-                    wire:confirm.icon.error="{{ __('Delete product') }}|{{ __('Do you really want to delete this product?') }}|{{ __('Cancel') }}|{{ __('Delete') }}"
+                    wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Product')]) }}"
                 />
             @endif
             @if(\FluxErp\Actions\Product\UpdateProduct::canPerformAction(false))
@@ -68,6 +68,7 @@
     </div>
     <x-tabs
         wire:model.live="tab"
+        wire:loading="tab"
         :$tabs
         wire:ignore
     />

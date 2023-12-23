@@ -100,11 +100,6 @@ class ProjectTaskList extends BaseTaskList
         JS);
     }
 
-    public function updatedTaskTab(): void
-    {
-        $this->forceRender();
-    }
-
     #[Renderless]
     public function save(): bool
     {
@@ -137,5 +132,10 @@ class ProjectTaskList extends BaseTaskList
         $this->loadData();
 
         return true;
+    }
+
+    public function updatedTaskTab(): void
+    {
+        $this->forceRender();
     }
 }

@@ -8,6 +8,7 @@
             Alpine.$data(
                 document.getElementById('delivery-address-id').querySelector('[x-data]')
             ).asyncData.params.where[0][2] = id;
+            $wire.fetchContactData();
         }
     }">
     <x-modal name="create-order">
@@ -25,7 +26,7 @@
                         <x-select
                             :label="__('Contact')"
                             class="pb-4"
-                            wire:model.live="order.contact_id"
+                            wire:model="order.contact_id"
                             option-value="contact_id"
                             option-label="label"
                             option-description="description"
@@ -34,6 +35,7 @@
                             template="user-option"
                             :async-data="[
                                 'api' => route('search', \FluxErp\Models\Address::class),
+                                'method' => 'POST',
                                 'params' => [
                                     'fields' => [
                                         'name',
@@ -64,6 +66,7 @@
                                 :clearable="false"
                                 :async-data="[
                                     'api' => route('search', \FluxErp\Models\Address::class),
+                                    'method' => 'POST',
                                     'params' => [
                                         'with' => 'contact.media',
                                         'where' => [
@@ -84,6 +87,7 @@
                                 :clearable="false"
                                 :async-data="[
                                     'api' => route('search', \FluxErp\Models\Address::class),
+                                    'method' => 'POST',
                                     'params' => [
                                         'with' => 'contact.media',
                                         'where' => [
@@ -102,7 +106,7 @@
                             option-label="name"
                             :clearable="false"
                             autocomplete="off"
-                            wire:model.live="order.client_id"
+                            wire:model="order.client_id"
                         />
                         <x-select
                             :label="__('Price list')"
@@ -112,7 +116,6 @@
                             :clearable="false"
                             autocomplete="off"
                             wire:model="order.price_list_id"
-                            x-bind:disabled="order.is_locked"
                         />
                         <x-select
                             :label="__('Payment method')"
@@ -122,7 +125,6 @@
                             :clearable="false"
                             autocomplete="off"
                             wire:model="order.payment_type_id"
-                            x-bind:disabled="order.is_locked"
                         />
                         <x-select
                             :label="__('Language')"
@@ -132,7 +134,6 @@
                             :clearable="false"
                             autocomplete="off"
                             wire:model="order.language_id"
-                            x-bind:disabled="order.is_locked"
                         />
                     </div>
                 </div>

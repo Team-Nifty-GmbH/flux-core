@@ -3,10 +3,10 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\MailAccount\CreateMailAccount;
+use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
 use FluxErp\Models\MailAccount;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Webklex\PHPIMAP\Exceptions\AuthFailedException;
 use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
@@ -15,7 +15,7 @@ use Webklex\PHPIMAP\Exceptions\ImapServerErrorException;
 use Webklex\PHPIMAP\Exceptions\ResponseException;
 use Webklex\PHPIMAP\Exceptions\RuntimeException;
 
-class MailAccountForm extends Form
+class MailAccountForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -46,14 +46,20 @@ class MailAccountForm extends Form
 
     public bool $has_valid_certificate = true;
 
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateMailAccount::class,
+            'update' => UpdateMailAccount::class,
+            'delete' => DeleteMailAccount::class,
+        ];
+    }
+
     public function save(): void
     {
         $this->smtp_email = $this->smtp_email ?: $this->email;
-        $action = $this->id ? UpdateMailAccount::make($this->toArray()) : CreateMailAccount::make($this->toArray());
 
-        $response = $action->validate()->execute();
-
-        $this->fill($response);
+        parent::save();
     }
 
     /**

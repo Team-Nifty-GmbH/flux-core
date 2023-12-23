@@ -23,6 +23,7 @@ class CreatePaymentTypeRequest extends BaseFormRequest
             'payment_discount_target' => 'integer|nullable',
             'payment_discount_percentage' => 'integer|nullable',
             'is_active' => 'boolean',
+            'is_default' => 'boolean',
         ];
     }
 }
