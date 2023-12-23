@@ -3,6 +3,7 @@
 namespace FluxErp;
 
 use FluxErp\Actions\ActionManager;
+use FluxErp\Console\Scheduling\RepeatableManager;
 use FluxErp\Console\Commands\Init\InitEnv;
 use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\DataType\ArrayHandler;
@@ -18,6 +19,7 @@ use FluxErp\DataType\SerializableHandler;
 use FluxErp\DataType\StringHandler;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Menu;
+use FluxErp\Facades\Repeatable;
 use FluxErp\Facades\Widget;
 use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\MediaLibraryDownloader;
@@ -113,6 +115,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->singleton('flux.widget_manager', fn ($app) => new WidgetManager());
         $this->app->singleton('flux.action_manager', fn ($app) => new ActionManager());
         $this->app->singleton('flux.menu_manager', fn ($app) => new MenuManager());
+        $this->app->singleton('flux.repeatable_manager', fn ($app) => new RepeatableManager());
     }
 
     /**
@@ -140,6 +143,15 @@ class FluxServiceProvider extends ServiceProvider
 
         Action::autoDiscover(flux_path('src/Actions'), 'FluxErp\Actions');
         Action::autoDiscover();
+
+        // Register repeatable artisan commands
+        Repeatable::autoDiscover(flux_path('src/Console/Commands'), 'FluxErp\Console\Commands');
+        // Register repeatable jobs
+        Repeatable::autoDiscover(flux_path('src/Jobs'), 'FluxErp\Jobs');
+        // Register repeatable invokable classes in "Repeatable" directory
+        Repeatable::autoDiscover(flux_path('src/Repeatable'), 'FluxErp\Repeatable');
+        // Register repeatable artisan commands, jobs and invokable classes (in "Repeatable" directory) from app
+        Repeatable::autoDiscover();
     }
 
     protected function registerMarcos(): void
