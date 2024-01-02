@@ -139,11 +139,17 @@ class MediaForm extends FluxForm
             ];
         }
 
+        try {
+            $tmpUrl = $file->temporaryUrl();
+        } catch (\RuntimeException) {
+            $tmpUrl = route('icons', ['name' => 'document']);
+        }
+
         return [
             'name' => $file->getClientOriginalName(),
             'temporary_filename' => $file->getFilename(),
             'file_name' => $file->getClientOriginalName(),
-            'preview_url' => $file->temporaryUrl(),
+            'preview_url' => $tmpUrl,
             'media' => $file->getRealPath(),
         ];
     }

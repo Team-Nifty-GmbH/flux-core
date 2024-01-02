@@ -20,6 +20,7 @@ use FluxErp\Facades\Action;
 use FluxErp\Facades\Menu;
 use FluxErp\Facades\Widget;
 use FluxErp\Factories\ValidatorFactory;
+use FluxErp\Helpers\Composer;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
@@ -80,6 +81,10 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->app->extend('validator', function () {
             return $this->app->get(ValidatorFactory::class);
+        });
+
+        $this->app->extend('composer', function () {
+            return $this->app->get(Composer::class);
         });
 
         $this->app->singleton(Registry::class, function () {

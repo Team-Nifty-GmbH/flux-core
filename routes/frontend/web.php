@@ -35,6 +35,7 @@ use FluxErp\Livewire\Settings\Notifications;
 use FluxErp\Livewire\Settings\OrderTypes;
 use FluxErp\Livewire\Settings\PaymentTypes;
 use FluxErp\Livewire\Settings\Permissions;
+use FluxErp\Livewire\Settings\Plugins;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
@@ -121,6 +122,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::permanentRedirect('/', '/')
                     ->withoutMiddleware(TrackVisits::class)
                     ->registersMenuItem(icon: 'cog', order: 9999);
+                Route::get('/plugins', Plugins::class)
+                    ->name('plugins')
+                    ->registersMenuItem();
                 Route::get('/additional-columns', AdditionalColumns::class)
                     ->name('additional-columns')
                     ->registersMenuItem();
