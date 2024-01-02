@@ -18,7 +18,7 @@
         "php-http/discovery": "^1.15",
         "pusher/pusher-php-server": "^7.0.2",
         "spatie/laravel-activitylog": "^4.6",
-        "spatie/laravel-medialibrary": "^10.0",
+        "spatie/laravel-medialibrary": "^11.0",
         "spatie/laravel-model-info": "^1.4",
         "spatie/laravel-model-states": "^2.4",
         "spatie/laravel-permission": "^6.0",
