@@ -38,6 +38,7 @@ use FluxErp\Livewire\Settings\Permissions;
 use FluxErp\Livewire\Settings\Plugins;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Livewire\Settings\Profile;
+use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Translations;
@@ -109,7 +110,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
             ->group(function () {
                 Route::permanentRedirect('/', '/')
                     ->withoutMiddleware(TrackVisits::class)
-                    ->registersMenuItem(icon: 'square-3-stack-3d');
+                    ->registersMenuItem(icon: 'banknotes');
                 Route::get('/work-times', WorkTimeList::class)->name('work-times')->registersMenuItem();
                 Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
                 Route::get('/transactions', TransactionList::class)->name('transactions')->registersMenuItem();
@@ -159,6 +160,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::get('/serial-number-ranges', SerialNumberRanges::class)
                     ->name('serial-number-ranges')
                     ->registersMenuItem();
+                Route::get('/scheduling', Scheduling::class)->name('scheduling')->registersMenuItem();
             });
     });
 

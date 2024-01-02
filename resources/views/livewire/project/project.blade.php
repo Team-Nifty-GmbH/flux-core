@@ -1,30 +1,6 @@
 <div x-data="{
     project: $wire.entangle('project'),
-    edit: false,
-    deleteProject() {
-        window.$wireui.confirmDialog(
-            {
-                title: '{{ __('Delete project') }}',
-                description: '{{ __('Do you really want to delete this project?') }}',
-                icon: 'error',
-                accept: {
-                    label: '{{ __('Delete') }}',
-                    execute: () => {
-                        $wire.delete().then((success) => {
-                            if (success) {
-                                window.location.href = '{{ route('projects') }}';
-                                close();
-                            }
-                        });
-                    },
-                },
-                reject: {
-                    label: '{{ __('Cancel') }}',
-                }
-            },
-            $wire.__instance.id
-        );
-    }
+    edit: false
 }"
 >
     <div
@@ -49,8 +25,13 @@
             </div>
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-            @if(user_can('action.project.delete'))
-                <x-button negative label="{{ __('Delete') }}" x-on:click="deleteProject()"/>
+            @if(\FluxErp\Actions\Project\DeleteProject::canPerformAction(false))
+                <x-button
+                    wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Project')]) }}"
+                    negative
+                    label="{{ __('Delete') }}"
+                    wire:click="delete()"
+                />
             @endif
             <x-button
                 primary

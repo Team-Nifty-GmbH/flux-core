@@ -6,6 +6,7 @@ use FluxErp\Models\Log;
 use FluxErp\Models\MailMessage;
 use FluxErp\Models\Order;
 use FluxErp\Models\Project;
+use FluxErp\Models\Schedule;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\WorkTime;
@@ -64,6 +65,14 @@ Broadcast::channel('FluxErp.Models.Project.{project}', function ($user) {
 
 Broadcast::channel('FluxErp.Models.Project', function ($user) {
     return $user->can(channel_to_permission((new Project())->broadcastChannelRoute()));
+});
+
+Broadcast::channel('FluxErp.Models.Schedule.{schedule}', function ($user) {
+    return $user->can(channel_to_permission((new Schedule())->broadcastChannelRoute()));
+});
+
+Broadcast::channel('FluxErp.Models.Schedule', function ($user) {
+    return $user->can(channel_to_permission((new Schedule())->broadcastChannelRoute()));
 });
 
 Broadcast::channel('FluxErp.Models.Task.{task}', function ($user) {
