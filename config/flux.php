@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'install_done' => false,
+    'install_done' => env('FLUX_INSTALL_DONE', false),
 
     'portal_domain' => env(
         'PORTAL_DOMAIN',
