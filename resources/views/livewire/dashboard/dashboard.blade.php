@@ -12,7 +12,6 @@
                     const widget = JSON.parse(event.item.dataset.widget);
                     widget.width = 1;
                     widget.height = 1;
-                    widget.component_name = widget.name;
                     widget.name = widget.label;
                     widget.id = event.item.dataset.id;
                     $wire.widgets.push(widget);

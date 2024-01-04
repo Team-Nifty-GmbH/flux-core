@@ -38,7 +38,7 @@ class WidgetManager
         }
 
         $this->widgets[$name] = [
-            'name' => $widget,
+            'component_name' => $widget,
             'label' => $componentClass::getLabel(),
             'class' => $componentClass,
         ];

@@ -37,11 +37,10 @@ class Dashboard extends Component
     }
 
     #[Renderless]
-    public function saveDashboard(array $sortedIds): void
+    public function saveDashboard(array $sortedIds = []): void
     {
         $existingItemIds = array_filter(Arr::pluck($this->widgets, 'id'), 'is_numeric');
         auth()->user()->widgets()->whereNotIn('id', $existingItemIds)->delete();
-        $existingItemIds = [];
 
         // create new widgets, update existing widgets
         foreach ($this->widgets as &$widget) {
@@ -64,7 +63,7 @@ class Dashboard extends Component
         return array_filter(
             $widgets,
             function (array $widget) {
-                $name = $widget['component_name'] ?? $widget['name'];
+                $name = $widget['component_name'];
 
                 try {
                     $permissionExists = Permission::findByName('widget.' . $name)->exists;
