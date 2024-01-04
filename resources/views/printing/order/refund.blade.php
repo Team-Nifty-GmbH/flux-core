@@ -2,19 +2,19 @@
 @section('first-page-right-block.labels')
     @parent
     <div class="font-semibold">
-        {{ __('Invoice Date') }}:
+        {{ __('Refund Date') }}:
     </div>
     <div class="font-semibold">
-        {{ __('Performance Date') }}:
+        {{ __('Related Invoice Number') }}:
     </div>
 @endsection
 @section('first-page-right-block.values')
     @parent
     <div>
-        {{ ($model->invoice_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
+        {{ $model->invoice_date->locale(app()->getLocale())->isoFormat('L') }}
     </div>
     <div>
-        {{ ($model->system_delivery_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
+        {{ $model->parent->invoice_number }}
     </div>
 @endsection
 @section('total')

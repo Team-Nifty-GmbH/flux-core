@@ -1,4 +1,4 @@
-<div class="flex gap-6" x-data="{
+<div class="flex flex-col-reverse sm:flex-row gap-6" x-data="{
                        ...folderTree(),
                        levels: $wire.entangle('folders'),
                        selectable: false,

@@ -1,4 +1,6 @@
-<div x-data="{
+<div
+    x-on:start-time-tracking.window="relatedSelected($event.detail.trackable_type); $wire.start($event.detail);"
+    x-data="{
     currentWorkTime: $wire.entangle('workTime'),
     time: 0,
     open: false,
@@ -92,7 +94,7 @@
             <x-select :label="__('Work Time Type')" :options="$workTimeTypes" wire:model="workTime.work_time_type_id" option-value="id" option-label="name"/>
             <x-select :label="__('Contact')"
                 wire:model="workTime.contact_id"
-                option-value="id"
+                option-value="contact_id"
                 option-label="label"
                 template="user-option"
                 :async-data="[
@@ -106,6 +108,8 @@
                                 true,
                             ]
                         ],
+                        'option-value' => 'contact_id',
+                        'fields' => ['contact_id', 'name'],
                         'with' => 'contact.media',
                     ]
                 ]"
@@ -113,11 +117,15 @@
             <x-select x-on:selected="relatedSelected($event.detail.value)" :label="__('Model')" :options="$trackableTypes" wire:model="workTime.trackable_type" />
             <div id="trackable-id" x-show="$wire.workTime.trackable_type">
                 <x-select :label="__('Record')"
+                    x-on:selected="$event.detail.contact_id ? $wire.workTime.contact_id = $event.detail.contact_id : null"
                     option-value="id"
                     option-label="label"
                     :async-data="[
                         'api' => route('search', '__model__'),
                         'method' => 'POST',
+                        'params' => [
+                            'appends' => ['contact_id'],
+                        ]
                     ]"
                     wire:model="workTime.trackable_id"
                 />
@@ -156,6 +164,9 @@
          class="z-30"
     >
         <x-card id="active-work-times" class="flex flex-col gap-4" :title="__('Active Work Times')">
+            <x-slot:action>
+                <x-button.circle xs x-on:click="open = false" icon="x" />
+            </x-slot:action>
             <div class="flex w-full gap-1.5">
                 <x-button class="w-full" x-show="! $wire.dailyWorkTime.id" positive :label="__('Start Workday')" x-on:click="$wire.toggleWorkDay(true)" />
                 <x-button class="w-1/2" x-show="$wire.dailyWorkTime.id" negative :label="__('End Workday')" x-on:click="stopWorkDay()" />

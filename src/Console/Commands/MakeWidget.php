@@ -4,6 +4,7 @@ namespace FluxErp\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class MakeWidget extends Command
@@ -39,6 +40,9 @@ class MakeWidget extends Command
 
         $viewPath = resource_path('views/livewire/widgets/' . $kebabCaseClassName . '.blade.php');
         $viewContents = '<div></div>';
+
+        File::ensureDirectoryExists(pathinfo($filePath, PATHINFO_DIRNAME));
+        File::ensureDirectoryExists(pathinfo($viewPath, PATHINFO_DIRNAME));
 
         $filesystem = new Filesystem();
         $filesystem->ensureDirectoryExists(app_path('Http/Livewire/Widgets'));

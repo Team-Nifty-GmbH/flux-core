@@ -7,7 +7,8 @@ use FluxErp\Models\Permission;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use WireUi\Traits\Actions;
@@ -35,36 +36,25 @@ class Dashboard extends Component
         $this->widgets = $this->filterWidgets(auth()->user()->widgets()->get()->toArray());
     }
 
-    public function saveWidgets(array $itemIds): void
+    #[Renderless]
+    public function saveDashboard(array $sortedIds): void
     {
-        $existingItemIds = array_filter($itemIds, 'is_numeric');
+        $existingItemIds = array_filter(Arr::pluck($this->widgets, 'id'), 'is_numeric');
         auth()->user()->widgets()->whereNotIn('id', $existingItemIds)->delete();
-        \FluxErp\Models\Widget::setNewOrder($existingItemIds);
-        $newItemIds = array_filter(array_map(function ($id) {
-            $componentName = substr($id, 4);
+        $existingItemIds = [];
 
-            return str_starts_with($id, 'new-')
-                ? [
-                    'name' => Str::headline($componentName),
-                    'component_name' => $componentName,
-                ]
-                : null;
-        }, $itemIds));
-
-        if ($newItemIds) {
-            auth()->user()->widgets()->createMany(array_filter($newItemIds));
+        // create new widgets, update existing widgets
+        foreach ($this->widgets as &$widget) {
+            $savedWidget = auth()->user()->widgets()->updateOrCreate(['id' => $widget['id']], $widget);
+            $position = array_search($widget['id'], $sortedIds);
+            if ($position !== false) {
+                $sortedIds[$position] = $savedWidget->id;
+            }
+            $widget['id'] = $savedWidget->id;
         }
 
-        $this->widgets();
-    }
-
-    public function updateWidget(array $widget): void
-    {
-        $widgetModel = \FluxErp\Models\Widget::query()
-            ->whereKey($widget['id'])
-            ->firstOrFail();
-        $widgetModel->fill($widget);
-        $widgetModel->save();
+        $sortedIds = array_filter($sortedIds, 'is_numeric');
+        \FluxErp\Models\Widget::setNewOrder($sortedIds);
 
         $this->widgets();
     }

@@ -1,7 +1,6 @@
 <?php
 
 use FluxErp\Http\Controllers\LoginLinkController;
-use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Middleware\NoAuth;
 use FluxErp\Livewire\InstallWizard;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +25,3 @@ Route::get('/pwa-service-worker', function () {
 Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)->name('flux.install');
 
 Route::get('/login-link', LoginLinkController::class)->name('login-link');
-
-Route::match(['get', 'post'], '/print/render', [PrintController::class, 'render'])->name('print.render');
-Route::match(['get', 'post'], '/print/pdf', [PrintController::class, 'renderPdf']);

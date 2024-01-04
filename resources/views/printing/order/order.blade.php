@@ -1,6 +1,6 @@
 <x-layouts.print>
     @php
-        $isNet = $model->is_net;
+        $isNet = $model->priceList->is_net;
         $currency = $model->currency->iso;
         $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
     @endphp
@@ -38,12 +38,12 @@
                 </div>
         </x-slot:right-block>
     </x-print.first-page-header>
-    <main class="text-sm">
-        <div class="pt-10 pb-16 text-sm">
+    <main>
+        <div class="pt-10 pb-4">
             {!! $model->header !!}
         </div>
         <div class="pb-6">
-            <table class="w-full table-auto text-sm">
+            <table class="w-full table-auto text-xs">
                 <thead class="border-b-2 border-black">
                 <tr>
                     <th class="pr-8 text-left font-normal">
@@ -100,7 +100,7 @@
         </div>
         @if($summary)
             <div class="pb-6">
-                <table class="w-full text-sm">
+                <table class="w-full">
                     <tbody class="break-inside-avoid">
                     <tr>
                         <td colspan="3" class="border-b border-black font-semibold">
@@ -124,43 +124,47 @@
                 </table>
             </div>
         @endif
-        <table class="w-full text-sm pb-16">
-            <tbody class="break-inside-avoid">
-            <tr>
-                <td colspan="2" class="border-b-2 border-black font-semibold">
-                    {{ __('Total') }}
-                </td>
-            </tr>
-            <tr>
-                <td class="text-right">
-                    {{ __('Sum net') }}
-                </td>
-                <td class="text-right w-0 whitespace-nowrap pl-12">
-                    {{ $formatter->formatCurrency($model->total_net_price, $currency) }}
-                </td>
-            </tr>
-            @foreach($model->total_vats as $vat)
-                <tr>
-                    <td class="text-right">
-                        {{ __('Plus ') }} {{ format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT) }}
-                    </td>
-                    <td class="text-right w-0 whitespace-nowrap pl-12">
-                        {{ $formatter->formatCurrency($vat['total_vat_price'], $currency) }}
-                    </td>
-                </tr>
-            @endforeach
-            <tr class="font-bold">
-                <td class="text-right">
-                    {{ __('Total Gross') }}
-                </td>
-                <td class="text-right w-0 whitespace-nowrap pl-12">
-                    {{ $formatter->formatCurrency($model->total_gross_price, $currency) }}
-                </td>
-            </tr>
-            </tbody>
-        </table>
-        <div class="break-inside-avoid">
-            {{ $model->footer }}
-        </div>
+        @section('total')
+            <table class="w-full pb-16 text-xs">
+                <tbody class="break-inside-avoid">
+                    <tr>
+                        <td colspan="2" class="border-b-2 border-black font-semibold">
+                            {{ __('Total') }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">
+                            {{ __('Sum net') }}
+                        </td>
+                        <td class="text-right w-0 whitespace-nowrap pl-12">
+                            {{ $formatter->formatCurrency($model->total_net_price, $currency) }}
+                        </td>
+                    </tr>
+                    @foreach($model->total_vats ?? [] as $vat)
+                        <tr>
+                            <td class="text-right">
+                                {{ __('Plus ') }} {{ format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT) }}
+                            </td>
+                            <td class="text-right w-0 whitespace-nowrap pl-12">
+                                {{ $formatter->formatCurrency($vat['total_vat_price'], $currency) }}
+                            </td>
+                        </tr>
+                    @endforeach
+                    <tr class="font-bold">
+                        <td class="text-right">
+                            {{ __('Total Gross') }}
+                        </td>
+                        <td class="text-right w-0 whitespace-nowrap pl-12">
+                            {{ $formatter->formatCurrency($model->total_gross_price, $currency) }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        @show
+        @section('footer')
+            <div class="break-inside-avoid">
+                {{ $model->footer }}
+            </div>
+        @show
     </main>
 </x-layouts.print>

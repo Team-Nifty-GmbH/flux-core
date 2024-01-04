@@ -1,10 +1,16 @@
 <div class="cover-page h-auto overflow-auto z-10 bg-white">
     <div class="grid h-48 content-center">
-        <div class="text-center m-auto max-h-72 w-72">
-            <img class="logo m-auto" src="{{ $client->logo }}" />
+        <div class="text-center m-auto max-h-72">
+            @if($client->logo)
+                <img class="logo m-auto" src="{{ $client->logo }}" />
+            @else
+                <div class="text-5xl font-semibold">
+                    {{ $client->name }}
+                </div>
+            @endif
         </div>
     </div>
-    <div class="-mt-2 w-full pb-1 text-xs">
+    <div class="-mt-2 w-full pb-1 text-2xs">
         {{ $client->name . ' | ' . $client->street . ' | ' . $client->zip . ' ' . $client->city }}
     </div>
     <div class="black-bar"></div>
@@ -29,7 +35,7 @@
             </div>
         </div>
     </div>
-    <h1 class="pt-32 text-2xl font-semibold">
+    <h1 class="pt-32 text-xl font-semibold">
         {{ $subject ?? '' }}
     </h1>
 </div>
