@@ -29,6 +29,16 @@ class WorkTime extends Component
 
     public array $activeWorkTimes = [];
 
+    #[Renderless]
+    public function start(?array $data): void
+    {
+        $this->workTime->fill($data ?? []);
+
+        $this->js(<<<'JS'
+            $openModal('work-time');
+        JS);
+    }
+
     public function mount(): void
     {
         $this->activeWorkTimes = WorkTimeModel::query()

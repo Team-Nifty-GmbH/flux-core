@@ -51,9 +51,12 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                     ->get(['id', 'name'])
                     ->toArray(),
                 'clients' => Client::query()
+                    ->where('is_active', true)
                     ->get(['id', 'name'])
                     ->toArray(),
                 'orderTypes' => OrderType::query()
+                    ->where('is_hidden', false)
+                    ->where('is_active', true)
                     ->get(['id', 'name'])
                     ->toArray(),
             ]

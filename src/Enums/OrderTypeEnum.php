@@ -11,6 +11,7 @@ enum OrderTypeEnum: string
     case Order = 'order';
     case SplitOrder = 'split-order';
     case Retoure = 'retoure';
+    case Refund = 'refund';
     case Purchase = 'purchase';
     case PurchaseRefund = 'purchase-refund';
     case Subscription = 'subscription';

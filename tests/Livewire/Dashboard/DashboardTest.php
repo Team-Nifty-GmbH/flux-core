@@ -88,6 +88,7 @@ class DashboardTest extends BaseSetup
     {
         // Perform the Livewire test
         Livewire::test('dashboard.dashboard')
+            ->assertOk()
             ->assertSee('Hello from sample component')
             ->assertDontSee('Hello from sample component 2')
             ->assertSeeLivewire('sample-component')
@@ -124,8 +125,20 @@ class DashboardTest extends BaseSetup
     public function test_dashboard_widget_adding()
     {
         // Add another widget to the dashboard
-        Livewire::test('dashboard.dashboard')
-            ->call('saveWidgets', [$this->user->widgets->first()->id, 'new-' . 'sample-component-2'])
+        $livewire = Livewire::test('dashboard.dashboard');
+        $widgets = array_merge($livewire->get('widgets'), [
+            [
+                'id' => uniqid(),
+                'component_name' => 'sample-component-2',
+                'name' => 'Widget 2',
+                'width' => 2,
+                'height' => 1,
+            ],
+        ]);
+        $livewire->set('widgets', $widgets)
+            ->call('saveDashboard')
+            ->assertOk()
+            ->call('$refresh')
             ->assertOk()
             ->assertSee('Hello from sample component')
             ->assertSee('Hello from sample component 2')
@@ -135,26 +148,30 @@ class DashboardTest extends BaseSetup
 
     public function test_dashboard_widget_removal()
     {
-        Livewire::test('dashboard.dashboard')
-            ->call('saveWidgets', [$this->user->widgets->first()->id])
+        $livewire = Livewire::test('dashboard.dashboard');
+
+        $livewire->assertSee('Hello from sample component')
+            ->assertSeeLivewire('sample-component');
+
+        $widgets = $livewire->get('widgets');
+        unset($widgets[0]);
+
+        $livewire->set('widgets', $widgets)
+            ->call('saveDashboard')
             ->assertOk()
-            ->assertSee('Hello from sample component')
-            ->assertDontSee('Hello from sample component 2')
-            ->assertSeeLivewire('sample-component')
-            ->assertDontSeeLivewire('sample-component-2');
+            ->call('$refresh')
+            ->assertOk()
+            ->assertDontSee('Hello from sample component')
+            ->assertDontSeeLivewire('sample-component');
     }
 
     public function test_dashboard_update_widget()
     {
         Livewire::test('dashboard.dashboard')
-            ->call('updateWidget',
-                [
-                    'id' => $this->user->widgets->first()->id,
-                    'name' => 'New Name',
-                    'width' => 3,
-                    'height' => 3,
-                ]
-            )
+            ->set('widgets.0.name', 'New Name')
+            ->set('widgets.0.width', 3)
+            ->set('widgets.0.height', 3)
+            ->call('saveDashboard')
             ->assertOk()
             ->assertSet('widgets.0.name', 'New Name')
             ->assertSet('widgets.0.width', 3)

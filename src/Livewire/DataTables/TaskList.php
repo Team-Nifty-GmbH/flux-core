@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Task;
 use TeamNiftyGmbH\DataTable\DataTable;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class TaskList extends DataTable
@@ -27,4 +28,25 @@ class TaskList extends DataTable
         'due_date' => 'date',
         'progress' => 'percentage',
     ];
+
+    public function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->icon('clock')
+                ->label(__('Track Time'))
+                ->xOnClick(<<<'JS'
+                    $event.stopPropagation();
+                    $dispatch(
+                        'start-time-tracking',
+                        {
+                            trackable_type: 'FluxErp\\\Models\\\Task',
+                            trackable_id: record.id,
+                            name: record.name,
+                            description: record.description
+                        }
+                    );
+                JS),
+        ];
+    }
 }

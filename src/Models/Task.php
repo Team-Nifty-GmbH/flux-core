@@ -37,6 +37,8 @@ class Task extends Model implements HasMedia, InteractsWithDataTables
     ];
 
     protected $casts = [
+        'start_date' => 'date',
+        'due_date' => 'date',
         'state' => TaskState::class,
         'time_budget' => TimeDuration::class,
     ];

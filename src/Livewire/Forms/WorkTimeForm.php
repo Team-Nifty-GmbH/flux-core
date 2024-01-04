@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Forms;
 
+use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\WorkTime\CreateWorkTime;
 use FluxErp\Actions\WorkTime\DeleteWorkTime;
 use FluxErp\Actions\WorkTime\UpdateWorkTime;
@@ -59,16 +60,16 @@ class WorkTimeForm extends FluxForm
         ];
     }
 
-    public function save(): void
+    protected function makeAction(string $name, ?array $data = null): FluxAction
     {
         $this->user_id = $this->user_id ?? auth()->id();
 
-        $workTime = $this->toArray();
+        $workTime = $data ?? $this->toArray();
         if (! $workTime['trackable_type'] ?? false) {
             unset($workTime['trackable_type'], $workTime['trackable_id']);
         }
 
-        parent::save();
+        return $this->getActions()[$name]::make($workTime);
     }
 
     public function __toString(): string

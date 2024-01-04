@@ -67,8 +67,8 @@ class PriceCalculation
             $productPrice = $priceHelper->price();
 
             $price = $orderPosition->is_net
-                ? $productPrice->getNet($product->vatRate->rate_percentage)
-                : $productPrice->getGross($product->vatRate->rate_percentage);
+                ? $productPrice?->getNet($product->vatRate->rate_percentage)
+                : $productPrice?->getGross($product->vatRate->rate_percentage);
         }
 
         if (is_null($price)) {

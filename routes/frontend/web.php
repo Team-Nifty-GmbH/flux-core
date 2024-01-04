@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\PushSubscriptionController;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\Calendars\Calendar;
@@ -167,6 +168,10 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
     });
 });
 
-Route::name('search')->middleware('auth:web')->prefix('search')->group(function () {
-    Route::any('/{model}', SearchController::class)->where('model', '(.*)');
+Route::group(['middleware' => ['auth:web']], function () {
+    Route::any('/search/{model}', SearchController::class)
+        ->where('model', '(.*)')
+        ->name('search');
+    Route::match(['get', 'post'], '/print/render', [PrintController::class, 'render'])->name('print.render');
+    Route::match(['get', 'post'], '/print/pdf', [PrintController::class, 'renderPdf']);
 });
