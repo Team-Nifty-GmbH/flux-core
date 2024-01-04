@@ -14,7 +14,7 @@
         {{ $model->invoice_date->locale(app()->getLocale())->isoFormat('L') }}
     </div>
     <div>
-        {{ $model->parent->invoice_number }}
+        {{ $model->parent?->invoice_number }}
     </div>
 @endsection
 @section('total')

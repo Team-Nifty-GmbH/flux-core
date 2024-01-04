@@ -109,7 +109,10 @@
                             ]
                         ],
                         'option-value' => 'contact_id',
-                        'fields' => ['contact_id', 'name'],
+                        'fields' => [
+                            'contact_id',
+                            'name',
+                        ],
                         'with' => 'contact.media',
                     ]
                 ]"
@@ -124,7 +127,9 @@
                         'api' => route('search', '__model__'),
                         'method' => 'POST',
                         'params' => [
-                            'appends' => ['contact_id'],
+                            'appends' => [
+                                'contact_id',
+                            ],
                         ]
                     ]"
                     wire:model="workTime.trackable_id"

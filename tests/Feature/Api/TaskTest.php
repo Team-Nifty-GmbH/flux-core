@@ -74,9 +74,9 @@ class TaskTest extends BaseSetup
         $this->assertEquals($this->tasks[0]->name, $task->name);
         $this->assertEquals($this->tasks[0]->description, $task->description);
         $this->assertEquals($this->tasks[0]->start_date,
-            ! is_null($task->start_date) ? Carbon::parse($task->start_date)->toDateString() : null);
+            ! is_null($task->start_date) ? Carbon::parse($task->start_date) : null);
         $this->assertEquals($this->tasks[0]->due_date,
-            ! is_null($task->due_date) ? Carbon::parse($task->due_date)->toDateString() : null);
+            ! is_null($task->due_date) ? Carbon::parse($task->due_date) : null);
         $this->assertEquals($this->tasks[0]->priority, $task->priority);
         $this->assertEquals($this->tasks[0]->state, $task->state);
         $this->assertEquals($this->tasks[0]->progress, $task->progress);
@@ -116,9 +116,9 @@ class TaskTest extends BaseSetup
         $this->assertEquals($referenceTask->name, $tasks[0]->name);
         $this->assertEquals($referenceTask->description, $tasks[0]->description);
         $this->assertEquals($referenceTask->start_date,
-            ! is_null($tasks[0]->start_date) ? Carbon::parse($tasks[0]->start_date)->toDateString() : null);
+            ! is_null($tasks[0]->start_date) ? Carbon::parse($tasks[0]->start_date) : null);
         $this->assertEquals($referenceTask->due_date,
-            ! is_null($tasks[0]->due_date) ? Carbon::parse($tasks[0]->due_date)->toDateString() : null);
+            ! is_null($tasks[0]->due_date) ? Carbon::parse($tasks[0]->due_date) : null);
         $this->assertEquals($referenceTask->priority, $tasks[0]->priority);
         $this->assertEquals($referenceTask->state, $tasks[0]->state);
         $this->assertEquals($referenceTask->progress, $tasks[0]->progress);
@@ -314,16 +314,16 @@ class TaskTest extends BaseSetup
                 'project_id' => null,
                 'name' => 'test',
                 'description' => Str::random(),
-                'start_date' => $this->tasks[0]->start_date,
-                'due_date' => $this->tasks[0]->due_date,
+                'start_date' => $this->tasks[0]->start_date?->toDateString(),
+                'due_date' => $this->tasks[0]->due_date?->toDateString(),
             ],
             [
                 'id' => $this->tasks[1]->id,
                 'project_id' => null,
                 'name' => 'test',
                 'description' => Str::random(),
-                'start_date' => $this->tasks[1]->start_date,
-                'due_date' => $this->tasks[1]->due_date,
+                'start_date' => $this->tasks[1]->start_date?->toDateString(),
+                'due_date' => $this->tasks[1]->due_date?->toDateString(),
             ],
         ];
 

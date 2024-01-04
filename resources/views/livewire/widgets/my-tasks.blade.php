@@ -20,7 +20,19 @@
                     @endif
                 </x-slot:sub-value>
                 <x-slot:actions>
-                    <x-button icon="clock" x-on:click="$dispatch('start-time-tracking', {trackable_type: 'FluxErp\\\Models\\\Task', trackable_id: {{ $task->id }}, name: '{{ $task->name }}', description: {{ json_encode($task->description) }}})">
+                    <x-button
+                        icon="clock"
+                        x-on:click="
+                            $dispatch(
+                                'start-time-tracking',
+                                {
+                                    trackable_type: 'FluxErp\\\Models\\\Task',
+                                    trackable_id: {{ $task->id }},
+                                    name: '{{ $task->name }}',
+                                    description: {{ json_encode($task->description) }}
+                                }
+                            )"
+                        >
                         <div class="hidden sm:block">{{ __('Track Time') }}</div>
                     </x-button>
                     <x-button icon="eye" wire:navigate :href="route('tasks.id', $task->id)">
