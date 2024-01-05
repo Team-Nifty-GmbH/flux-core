@@ -64,6 +64,7 @@ class InitPermissions extends Command
 
         $routes = Route::getRoutes()->getRoutes();
 
+        $this->info('Registering route permissions…');
         $bar = $this->output->createProgressBar(count($routes));
         foreach ($routes as $route) {
             $permissionName = route_to_permission($route, false);
@@ -101,7 +102,9 @@ class InitPermissions extends Command
 
         $bar->finish();
 
-        Role::findOrCreate('Super Admin');
+        foreach (array_keys(config('auth.guards')) as $guard) {
+            Role::findOrCreate('Super Admin', $guard);
+        }
 
         $this->newLine();
         $this->info('Permissions initiated!');
@@ -109,7 +112,7 @@ class InitPermissions extends Command
 
     private function registerActionPermission(): void
     {
-        $this->info('Registering action permissions');
+        $this->info('Registering action permissions…');
         foreach (Action::all() as $action) {
             if ($action['class']::hasPermission()) {
                 $permission = Permission::findOrCreate('action.' . $action['name'], 'web');
@@ -120,16 +123,16 @@ class InitPermissions extends Command
 
     private function registerWidgetPermissions(): void
     {
-        $this->info('Registering widget permissions');
+        $this->info('Registering widget permissions…');
         foreach (Widget::all() as $widget) {
-            $permission = Permission::findOrCreate('widget.' . $widget['name'], 'web');
+            $permission = Permission::findOrCreate('widget.' . $widget['component_name'], 'web');
             unset($this->currentPermissions[$permission->id]);
         }
     }
 
     public function registerTabPermissions(): void
     {
-        $this->info('Registering tab permissions');
+        $this->info('Registering tab permissions…');
         $registry = app(ComponentRegistry::class);
         foreach (invade($registry)->aliases as $component) {
             if (! in_array(WithTabs::class, class_uses_recursive($component))) {
@@ -138,7 +141,7 @@ class InitPermissions extends Command
 
             $componentInstance = new $component;
 
-            foreach ($componentInstance->getTabs() as $tab) {
+            foreach ($componentInstance->renderingWithTabs()->getTabsToRender() as $tab) {
                 $permission = Permission::findOrCreate('tab.' . $tab->component, 'web');
                 unset($this->currentPermissions[$permission->id]);
             }
