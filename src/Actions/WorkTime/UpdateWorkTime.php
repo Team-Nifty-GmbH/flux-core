@@ -42,7 +42,8 @@ class UpdateWorkTime extends FluxAction
                 $this->data['paused_time_ms'] = $workTime->paused_time_ms -
                     $endedAt->diffInSeconds($workTime->ended_at) * 1000;
             } else {
-                $this->data['paused_time_ms'] = $workTime->paused_time_ms + $endedAt->diffInSeconds(now()) * 1000;
+                $this->data['paused_time_ms'] = $workTime->paused_time_ms +
+                    $workTime->ended_at->diffInSeconds(now()) * 1000;
             }
         }
 
