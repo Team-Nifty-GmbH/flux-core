@@ -42,6 +42,8 @@ class MailAccountForm extends FluxForm
 
     public ?string $smtp_encryption = null;
 
+    public bool $is_auto_assign = false;
+
     public bool $is_o_auth = false;
 
     public bool $has_valid_certificate = true;

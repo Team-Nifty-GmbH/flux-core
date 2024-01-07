@@ -33,7 +33,7 @@ class MailMessageForm extends Form
 
     public ?string $slug = null;
 
-    public function fill($values)
+    public function fill($values): void
     {
         parent::fill($values);
 

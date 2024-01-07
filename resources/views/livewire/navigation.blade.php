@@ -64,7 +64,21 @@
     >
         <div class="pb-4 md:pt-4 md:pr-8 md:pl-28">
             @if($showSearchBar)
-                <livewire:features.search-bar />
+                <div>
+                    <x-card class="flex w-full gap-2">
+                        <x-button
+                            class="block md:hidden"
+                            icon="menu"
+                            primary
+                            x-on:click="showMenu(true)"
+                        />
+                            <livewire:features.search-bar />
+                            <div class="flex gap-1.5" wire:ignore>
+                                <livewire:work-time lazy />
+                                <livewire:features.notifications lazy />
+                            </div>
+                    </x-card>
+                </div>
             @else
                 <x-card class="block md:hidden">
                     <x-button primary icon="menu" x-on:click="showMenu(true)" />

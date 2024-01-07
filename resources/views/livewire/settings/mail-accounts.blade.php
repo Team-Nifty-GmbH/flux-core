@@ -1,22 +1,4 @@
-<div class="py-6"
-     x-data="{
-        deleteDialog(id) {
-            window.$wireui.confirmDialog({
-                title: {{  '\'' . __('Delete Mail Account') . '\''}},
-                description: {{ '\'' . __('Do you really want to delete this mail account?') . '\''}},
-                icon: 'error',
-                accept: {
-                    label: {{ '\'' . __('Delete') . '\''}},
-                    method: 'delete',
-                    params: id
-                },
-                reject: {
-                    label: {{ '\'' . __('Cancel') . '\''}}
-                }
-            }, $wire.__instance.id)
-        }
-    }"
->
+<div class="py-6">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
@@ -25,11 +7,62 @@
             </div>
         </div>
         @include('tall-datatables::livewire.data-table')
+        <x-modal name="edit-mail-folders">
+            <x-card class="bg-gray-50">
+                <div class="grid grid-cols-2 gap-4"
+                    x-data="{
+                        ...folderTree(),
+                        levels: $wire.entangle('folders'),
+                        selectable: false,
+                        select(event, level) {
+                           if (level) {
+                              $wire.editMailFolder(level.id);
+                              const current = document.querySelector('#mail-folders [selected]');
+                              current?.classList.remove('bg-primary-500', 'text-white');
+                              current?.removeAttribute('selected');
+
+                              event.target.parentNode.classList.add('bg-primary-500', 'text-white');
+                              event.target.parentNode.setAttribute('selected', true);
+                           }
+                        }
+                    }"
+                >
+                    <x-card id="mail-folders">
+                        <div class="flex flex-col gap-1.5">
+                            <ul class="flex flex-col gap-1" wire:ignore>
+                                <template x-for="(level, i) in levels">
+                                    <li x-html="renderLevel(level, i)"></li>
+                                </template>
+                            </ul>
+                            <x-button spinner="syncFolders" class="w-full" primary :label="__('Sync folders')" wire:click="syncFolders($wire.mailAccount.id)"/>
+                        </div>
+                    </x-card>
+                    <div x-show="$wire.mailFolder.id" x-transition>
+                        <x-card>
+                            <div class="flex flex-col gap-1.5">
+                                <x-input wire:model="mailFolder.name" :label="__('Name')" :disabled="true" />
+                                <x-toggle wire:model="mailFolder.is_active" :label="__('Active')" />
+                            </div>
+                            <x-slot:footer>
+                                <div class="flex w-full justify-end">
+                                    <x-button spinner="saveMailFolder" primary :label="__('Save')" wire:click="saveMailFolder()"/>
+                                </div>
+                            </x-slot:footer>
+                        </x-card>
+                    </div>
+                </div>
+                <x-slot:footer>
+                    <div class="flex w-full justify-end">
+                        <x-button :label="__('Close')" x-on:click="close()" />
+                    </div>
+                </x-slot:footer>
+            </x-card>
+        </x-modal>
         <x-modal name="edit-mail-account">
             <x-card>
-                <x-slot name="title">
+                <x-slot:title>
                     {{ __('Edit Mail Account') }}
-                </x-slot>
+                </x-slot:title>
                 <div class="flex flex-col gap-4">
                     <x-card :title="__('IMAP Settings')">
                         <div class="flex flex-col gap-4">
@@ -46,8 +79,9 @@
                                 <x-select.option value="ssl">{{ __('SSL') }}</x-select.option>
                                 <x-select.option value="tls">{{ __('TLS') }}</x-select.option>
                             </x-select>
-                            <x-checkbox wire:model="mailAccount.has_valid_certificate" :label="__('Validate Certificate')" />
-                            <x-checkbox wire:model="mailAccount.is_o_auth" :label="__('oAuth')" />
+                            <x-checkbox wire:model.boolean="mailAccount.has_valid_certificate" :label="__('Validate Certificate')" />
+                            <x-checkbox wire:model.boolean="mailAccount.is_o_auth" :label="__('oAuth')" />
+                            <x-toggle wire:model.boolean="mailAccount.is_auto_assign" :label="__('Auto assign mails')" />
                         </div>
                         <x-slot:footer>
                             <div class="flex w-full justify-end">

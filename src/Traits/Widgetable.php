@@ -18,6 +18,10 @@ trait Widgetable
 
     public function placeholder(): View
     {
+        if (method_exists(parent::class, 'placeholder')) {
+            return parent::placeholder();
+        }
+
         return view('flux::livewire.placeholders.box');
     }
 }

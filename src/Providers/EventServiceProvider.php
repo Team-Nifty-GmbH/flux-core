@@ -2,16 +2,12 @@
 
 namespace FluxErp\Providers;
 
-use FluxErp\Events\Print\PdfCreatedEvent;
-use FluxErp\Events\Print\PdfCreatingEvent;
 use FluxErp\Listeners\Auth\LoginListener;
 use FluxErp\Listeners\Auth\LogoutListener;
 use FluxErp\Listeners\BroadcastEventSubscriber;
 use FluxErp\Listeners\CacheKeyWrittenListener;
 use FluxErp\Listeners\NotificationEloquentEventSubscriber;
 use FluxErp\Listeners\Order\OrderInvoiceAddedSubscriber;
-use FluxErp\Listeners\Order\PdfCreatedListener;
-use FluxErp\Listeners\Order\PdfCreatingListener;
 use FluxErp\Listeners\SnapshotEventSubscriber;
 use FluxErp\Listeners\Ticket\CommentCreatedListener;
 use FluxErp\Listeners\Ticket\TicketCreatedNotificationListener;
@@ -31,13 +27,6 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        PdfCreatingEvent::class => [
-            PdfCreatingListener::class,
-        ],
-        PdfCreatedEvent::class => [
-            PdfCreatedListener::class,
-        ],
-
         Login::class => [
             LoginListener::class,
         ],

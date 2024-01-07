@@ -6,9 +6,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Routing\Redirector;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Livewire\Component;
@@ -105,7 +103,7 @@ class SearchBar extends Component
         $this->skipRender();
     }
 
-    public function showDetail(string $model, int $id): null|Redirector|RedirectResponse|Application
+    public function showDetail(string $model, int $id): void
     {
         /** @var \Illuminate\Database\Eloquent\Model $model */
         $modelInstance = $model::query()->whereKey($id)->first();
@@ -113,9 +111,9 @@ class SearchBar extends Component
         if (! $modelInstance) {
             $this->notification()->error(__('Record not found'));
 
-            return null;
+            return;
         }
 
-        return redirect($modelInstance->detailRoute());
+        $this->redirect($modelInstance->detailRoute(), true);
     }
 }

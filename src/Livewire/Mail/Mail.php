@@ -39,7 +39,7 @@ class Mail extends MailMessageList
             ?->toArray() ?? [];
 
         MailFolder::addGlobalScope('children', function (Builder $builder) {
-            $builder->with('children');
+            $builder->with('children')->where('is_active', true);
         });
 
         $this->folders[] = [
@@ -66,6 +66,7 @@ class Mail extends MailMessageList
     {
         $this->skipRender();
         $this->mailMessage->fill($message);
+
         $this->js(<<<'JS'
             writeHtml();
             $openModal('show-mail');
@@ -102,7 +103,7 @@ class Mail extends MailMessageList
 
         $this->search = '';
 
-        $this->updatedSearch();
+        $this->applyUserFilters();
     }
 
     public function getNewMessages(): void
