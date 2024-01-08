@@ -85,7 +85,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::get('/list', OrderList::class)->name('orders')->registersMenuItem();
                 Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions')
                     ->registersMenuItem();
-                Route::get('/{id}', Order::class)->name('id');
+                Route::get('/{id}', Order::class)->name('id')->where('id', '[0-9]+');
             });
 
         Route::get('/tasks', TaskList::class)->name('tasks')->registersMenuItem(icon: 'clipboard-document-list');
@@ -103,7 +103,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::get('/list', ProductList::class)->name('products')->registersMenuItem();
                 Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers')->registersMenuItem();
                 Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
-                Route::get('/{id}', Product::class)->name('id');
+                Route::get('/{id}', Product::class)->name('id')->where('id', '[0-9]+');
             });
 
         Route::name('accounting.')->prefix('accounting')

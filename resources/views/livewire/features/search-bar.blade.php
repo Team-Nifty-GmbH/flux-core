@@ -1,42 +1,41 @@
-
-    <div
-        x-data="{
-            init() {
-                $watch('show', value => {
-                    if (! value) {
-                        showDetails(null, null);
-                    }
-                })
-            },
-            show: false,
-            search: $wire.entangle('search', true),
-            detailModel: null,
-            detailId: null,
-            result: $wire.entangle('return'),
-            modelLabels: $wire.entangle('modelLabels'),
-            showDetails(model, id) {
-                if (model === this.detailModel && id === this.detailId) {
-                    return;
+<div
+    x-data="{
+        init() {
+            $watch('show', value => {
+                if (! value) {
+                    showDetails(null, null);
                 }
+            })
+        },
+        show: false,
+        search: $wire.entangle('search', true),
+        detailModel: null,
+        detailId: null,
+        result: $wire.entangle('return'),
+        modelLabels: $wire.entangle('modelLabels'),
+        showDetails(model, id) {
+            if (model === this.detailModel && id === this.detailId) {
+                return;
+            }
 
-                this.detailModel = model;
-                this.detailId = id;
-                $dispatch('render-search-bar-widget', {model: model, id: id})
-            },
-        }"
+            this.detailModel = model;
+            this.detailId = id;
+            $dispatch('render-search-bar-widget', {model: model, id: id})
+        }
+    }"
     x-on:click.outside="show = false"
     x-on:keydown.escape.window="show = false"
     class="relative flex-1"
 >
     <x-input shadowless
-             autocomplete="off"
-             icon="search"
-             class="w-full border-0"
-             x-on:click="show = true"
-             x-on:keydown="show = true"
-             x-on:keydown.enter="show = false"
-             wire:model.live.debounce.500ms="search"
-             placeholder="{{ __('Search everywhere...') }}"
+         autocomplete="off"
+         icon="search"
+         class="w-full border-0"
+         x-on:click="show = true"
+         x-on:keydown="show = true"
+         x-on:keydown.enter="show = false"
+         wire:model.live.debounce.500ms="search"
+         placeholder="{{ __('Search everywhere...') }}"
     />
     <div class="absolute z-[9] w-full pt-6" x-show="show" x-transition x-cloak>
         <x-card class="relative !px-0 !py-0 pb-2">
