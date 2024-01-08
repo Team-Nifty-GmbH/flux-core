@@ -7,6 +7,7 @@ use FluxErp\Facades\Widget;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Permission;
+use FluxErp\Tests\Feature\BaseSetup;
 use FluxErp\Tests\TestCase;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\Traits\Widgetable;
@@ -19,7 +20,7 @@ use PHPUnit\Framework\Attributes\Test;
 
 use function Livewire\invade;
 
-class InitPermissionsTest extends TestCase
+class InitPermissionsTest extends BaseSetup
 {
     use DatabaseTransactions;
 
