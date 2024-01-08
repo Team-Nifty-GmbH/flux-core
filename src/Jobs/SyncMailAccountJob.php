@@ -31,7 +31,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
 
     private readonly MailAccount $mailAccount;
 
-    public function __construct(MailAccount|string $email)
+    public function __construct(MailAccount|string $email, public readonly bool $onlyFolders = false)
     {
         if (is_string($email)) {
             $this->mailAccount = MailAccount::query()
@@ -64,7 +64,20 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->id])->validate()->execute()
             );
 
+        if ($this->onlyFolders) {
+            return;
+        }
+
         foreach ($folders as $folder) {
+            if (! MailFolder::query()
+                ->where('mail_account_id', $this->mailAccount->id)
+                ->where('slug', $folder->path)
+                ->first()
+                ?->is_active
+            ) {
+                continue;
+            }
+
             $this->getNewMessages($folder);
             $this->getUnseenMessages($folder);
         }
@@ -112,7 +125,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 ->limit(1)
                 ->get()
                 ->first()
-                ?->getUid()
+                ?->getUid() - 1
             ?? ($folder->examine()['uidnext'] ?? 0) - 1
             ?: 0;
 

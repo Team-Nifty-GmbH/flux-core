@@ -46,39 +46,41 @@ class CreateMailMessage extends FluxAction
             UploadMedia::make($attachment)->execute();
         }
 
-        if ($mailMessage->from_mail && $mailMessage->mailAccount->email !== $mailMessage->from_mail) {
-            $addresses = Address::query()
-                ->where('login_name', $mailMessage->from_mail)
-                ->get()
-                ->each(
-                    fn (Address $address) => $address->mailMessages()->attach($mailMessage->id)
-                );
+        if ($mailMessage->mailAccount->is_auto_assign) {
+            if ($mailMessage->from_mail && $mailMessage->mailAccount->email !== $mailMessage->from_mail) {
+                $addresses = Address::query()
+                    ->where('login_name', $mailMessage->from_mail)
+                    ->get()
+                    ->each(
+                        fn (Address $address) => $address->mailMessages()->attach($mailMessage->id)
+                    );
 
-            ContactOption::query()
-                ->where('value', $mailMessage->from_mail)
-                ->whereIntegerNotInRaw('address_id', $addresses->pluck('id')->toArray())
-                ->with('address')
-                ->get()
-                ->each(
-                    fn (ContactOption $contactOption) => $contactOption
-                        ->address
-                        ->mailMessages()
-                        ->attach($mailMessage->id)
-                );
-        }
-
-        Order::search(
-            $mailMessage->subject,
-            function (Indexes $meilisearch, string $query, array $options) {
-                return $meilisearch->search(
-                    $query,
-                    $options + ['attributesToSearchOn' => ['invoice_number', 'order_number', 'commission']]
-                );
+                ContactOption::query()
+                    ->where('value', $mailMessage->from_mail)
+                    ->whereIntegerNotInRaw('address_id', $addresses->pluck('id')->toArray())
+                    ->with('address')
+                    ->get()
+                    ->each(
+                        fn (ContactOption $contactOption) => $contactOption
+                            ->address
+                            ->mailMessages()
+                            ->attach($mailMessage->id)
+                    );
             }
-        )
-            ->first()
-            ?->mailMessages()
-            ->attach($mailMessage->id);
+
+            Order::search(
+                $mailMessage->subject,
+                function (Indexes $meilisearch, string $query, array $options) {
+                    return $meilisearch->search(
+                        $query,
+                        $options + ['attributesToSearchOn' => ['invoice_number', 'order_number', 'commission']]
+                    );
+                }
+            )
+                ->first()
+                ?->mailMessages()
+                ->attach($mailMessage->id);
+        }
 
         return $mailMessage->withoutRelations()->fresh();
     }

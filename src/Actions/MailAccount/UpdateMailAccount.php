@@ -22,6 +22,10 @@ class UpdateMailAccount extends FluxAction
 
     public function performAction(): Model
     {
+        if (array_key_exists('password', $this->data) && is_null($this->data['password'])) {
+            unset($this->data['password']);
+        }
+
         $mailAccount = MailAccount::query()
             ->whereKey($this->data['id'])
             ->first();

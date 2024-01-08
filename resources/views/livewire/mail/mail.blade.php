@@ -77,7 +77,7 @@
             </template>
          </ul>
       </x-card>
-      <x-button x-show="$wire.mailAccounts" x-cloak spinner class="w-full" :label="__('Get new messages')" x-on:click="$wire.getNewMessages()" primary/>
+      <x-button x-show="$wire.mailAccounts" x-cloak spinner="getNewMessages()" class="w-full" :label="__('Get new messages')" x-on:click="$wire.getNewMessages()" primary/>
    </section>
    <section class="grow" x-on:data-table-row-clicked="$wire.showMail($event.detail.id)">
       @include('tall-datatables::livewire.data-table')
