@@ -8,7 +8,6 @@ use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
-use FluxErp\Tests\TestCase;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -16,7 +15,6 @@ use Illuminate\Support\Facades\Event;
 use Livewire\Component;
 use Livewire\Livewire;
 use Livewire\Mechanisms\ComponentRegistry;
-use PHPUnit\Framework\Attributes\Test;
 
 use function Livewire\invade;
 
