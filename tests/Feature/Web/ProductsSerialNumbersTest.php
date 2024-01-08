@@ -30,7 +30,7 @@ class ProductsSerialNumbersTest extends BaseSetup
 
     public function test_products_serial_numbers_no_user()
     {
-        $this->get('/products/serial_numbers')
+        $this->get('/products/serial-numbers')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
