@@ -14,7 +14,7 @@ trait WithTabs
     /**
      * @throws ViewException
      */
-    public function renderingWithTabs(?View $view = null): ?static
+    public function renderingWithTabs(?View $view = null): static
     {
         $this->setTabsToRender($this->getTabs());
 
@@ -24,13 +24,9 @@ trait WithTabs
             throw new ViewException('View is null');
         }
 
-        if ($view === null) {
-            return $this;
-        }
+        $view?->with('tabs', collect($this->_tabs)->keyBy('component')->toArray());
 
-        $view->with('tabs', collect($this->_tabs)->keyBy('component')->toArray());
-
-        return null;
+        return $this;
     }
 
     public function setTabsToRender(array $tabs): void
