@@ -37,6 +37,10 @@ class WidgetManager
             throw new \Exception("The provided widget class '{$componentClass}' must not have any parameters in the mount method.");
         }
 
+        if (! in_array(Widgetable::class, class_uses_recursive($componentClass))) {
+            throw new \Exception("The provided widget class '{$componentClass}' does not use the Widgetable trait.");
+        }
+
         $this->widgets[$name] = [
             'component_name' => $widget,
             'label' => $componentClass::getLabel(),
