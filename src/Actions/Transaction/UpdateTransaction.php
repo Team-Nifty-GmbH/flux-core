@@ -22,13 +22,13 @@ class UpdateTransaction extends FluxAction
 
     public function performAction(): Model
     {
-        $warehouse = Transaction::query()
+        $transaction = Transaction::query()
             ->whereKey($this->data['id'])
             ->first();
 
-        $warehouse->fill($this->data);
-        $warehouse->save();
+        $transaction->fill($this->data);
+        $transaction->save();
 
-        return $warehouse->withoutRelations()->fresh();
+        return $transaction->withoutRelations()->fresh();
     }
 }
