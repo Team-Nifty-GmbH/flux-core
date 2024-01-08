@@ -24,8 +24,7 @@ class InitPermissionsTest extends BaseSetup
 {
     use DatabaseTransactions;
 
-    #[Test]
-    public function it_creates_permissions_for_routes()
+    public function test_it_creates_permissions_for_routes()
     {
         $this->callInitPermissions();
 
@@ -41,8 +40,7 @@ class InitPermissionsTest extends BaseSetup
         );
     }
 
-    #[Test]
-    public function it_creates_permissions_for_actions()
+    public function test_it_creates_permissions_for_actions()
     {
         $this->callInitPermissions();
 
@@ -56,16 +54,14 @@ class InitPermissionsTest extends BaseSetup
         $this->assertEquals($actionsWithPermission, Permission::query()->where('name', 'like', 'action.%')->count());
     }
 
-    #[Test]
-    public function it_creates_permissions_for_widgets()
+    public function test_it_creates_permissions_for_widgets()
     {
         $this->callInitPermissions();
 
         $this->assertEquals(count(Widget::all()), Permission::query()->where('name', 'like', 'widget.%')->count());
     }
 
-    #[Test]
-    public function it_creates_permission_for_custom_widget()
+    public function test_it_creates_permission_for_custom_widget()
     {
         Livewire::component('custom-widget-that-never-exists', new class extends Component
         {
@@ -91,8 +87,7 @@ class InitPermissionsTest extends BaseSetup
         $this->assertDatabaseHas('permissions', ['name' => 'widget.custom-widget-that-never-exists']);
     }
 
-    #[Test]
-    public function it_creates_permissions_for_tabs()
+    public function test_it_creates_permissions_for_tabs()
     {
         $this->callInitPermissions();
 
@@ -116,8 +111,7 @@ class InitPermissionsTest extends BaseSetup
         );
     }
 
-    #[Test]
-    public function it_creates_permission_for_custom_tab()
+    public function test_it_creates_permission_for_custom_tab()
     {
         Event::listen('tabs.rendering: ' . Product::class, function (Component $component) {
             $component->mergeTabsToRender([
@@ -130,8 +124,7 @@ class InitPermissionsTest extends BaseSetup
         $this->assertDatabaseHas('permissions', ['name' => 'tab.custom-tab-that-never-exists']);
     }
 
-    #[Test]
-    public function it_deletes_unused_permissions()
+    public function test_it_deletes_unused_permissions()
     {
         Permission::create(['name' => 'unused.permission']);
         $this->assertDatabaseHas('permissions', ['name' => 'unused.permission']);
