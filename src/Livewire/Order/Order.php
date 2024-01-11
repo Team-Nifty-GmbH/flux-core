@@ -29,7 +29,6 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
-use Illuminate\View\View;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
