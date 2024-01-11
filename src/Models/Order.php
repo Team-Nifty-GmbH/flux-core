@@ -287,7 +287,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             ->singleFile();
     }
 
-    public function calculatePrices()
+    public function calculatePrices(): static
     {
         return $this->calculateTotalGrossPrice()
             ->calculateTotalNetPrice()

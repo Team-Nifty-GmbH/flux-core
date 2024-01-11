@@ -37,6 +37,7 @@
                                 'api' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
                                 'params' => [
+                                    'option-value' => 'contact_id',
                                     'fields' => [
                                         'name',
                                         'contact_id',
