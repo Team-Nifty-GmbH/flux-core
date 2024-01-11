@@ -29,6 +29,16 @@ trait WithTabs
         return $this;
     }
 
+    public function getTabButton(string $component)
+    {
+        $this->setTabsToRender($this->getTabs());
+
+        // fire event to get tab buttons that are registered
+        event('tabs.rendering: ' . get_class($this), $this);
+
+        return collect($this->getTabsToRender())->keyBy('component')->toArray()[$component];
+    }
+
     public function setTabsToRender(array $tabs): void
     {
         $this->_tabs = $tabs;

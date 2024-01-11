@@ -60,12 +60,12 @@ class UpdateAddress extends FluxAction
             $this->data['is_delivery_address'] = true;
         }
 
-        $contactOptions = Arr::pull($this->data, 'contact_options', []);
+        $contactOptions = Arr::pull($this->data, 'contact_options', null);
 
         $address->fill($this->data);
         $address->save();
 
-        if ($contactOptions) {
+        if (! is_null($contactOptions)) {
             // TODO: Update instead of delete and create
             $address->contactOptions()->delete();
             $address->contactOptions()->createMany($contactOptions);

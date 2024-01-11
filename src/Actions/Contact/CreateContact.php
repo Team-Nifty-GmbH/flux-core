@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions\Contact;
 
+use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateContactRequest;
 use FluxErp\Models\Contact;
@@ -26,6 +27,7 @@ class CreateContact extends FluxAction
     public function performAction(): Contact
     {
         $discountGroups = Arr::pull($this->data, 'discount_groups', []);
+        $mainAddress = Arr::pull($this->data, 'main_address', []);
 
         $this->data['price_list_id'] = $this->data['price_list_id'] ?? PriceList::default()?->id;
         $this->data['payment_type_id'] = $this->data['payment_type_id'] ?? PaymentType::default()?->id;
@@ -43,6 +45,12 @@ class CreateContact extends FluxAction
                 $contact->client_id,
             );
         }
+
+        $mainAddress['contact_id'] = $contact->id;
+        $mainAddress['client_id'] = $contact->client_id;
+        CreateAddress::make($mainAddress)
+            ->validate()
+            ->execute();
 
         return $contact->withoutRelations()->fresh();
     }

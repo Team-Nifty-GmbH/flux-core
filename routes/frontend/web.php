@@ -4,7 +4,7 @@ use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\PushSubscriptionController;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\Calendars\Calendar;
-use FluxErp\Livewire\Contacts\Contact;
+use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Livewire\DataTables\CommissionList;

@@ -2,75 +2,96 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use FluxErp\Actions\Address\CreateAddress;
-use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Actions\Contact\CreateContact;
+use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Actions\Contact\UpdateContact;
 use FluxErp\Models\Client;
 use FluxErp\Models\Language;
-use Illuminate\Support\Arr;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
+use Livewire\Component;
 
-class ContactForm extends Form
+class ContactForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
 
+    public ?int $approval_user_id = null;
+
+    public ?int $payment_type_id = null;
+
+    public ?int $price_list_id = null;
+
     public ?int $client_id = null;
+
+    public ?int $agent_id = null;
 
     public ?int $countryId = null;
 
     public ?int $language_id = null;
 
-    public ?string $company = null;
+    public ?string $customer_number = null;
 
-    public ?string $title = null;
+    public ?string $creditor_number = null;
 
-    public ?string $salutation = null;
+    public ?string $debtor_number = null;
 
-    public ?string $firstname = null;
+    public ?int $payment_target_days = null;
 
-    public ?string $lastname = null;
+    public ?int $payment_reminder_days_1 = null;
 
-    public ?string $zip = null;
+    public ?int $payment_reminder_days_2 = null;
 
-    public ?string $city = null;
+    public ?int $payment_reminder_days_3 = null;
 
-    public ?string $street = null;
+    public ?int $discount_days = null;
 
-    public function save(): void
+    public ?float $discount_percent = null;
+
+    public ?float $credit_line = null;
+
+    public ?string $vat_id = null;
+
+    public array $main_address = [];
+
+    public array $categories = [];
+
+    public function __construct(
+        protected Component $component,
+        protected $propertyName
+    ) {
+        parent::__construct($component, $propertyName);
+
+        $this->main_address['client_id'] = null;
+        $this->main_address['country_id'] = null;
+        $this->main_address['language_id'] = null;
+    }
+
+    protected function getActions(): array
     {
-        $contact = Arr::only($this->toArray(), ['id', 'client_id']);
-        $action = $this->id ? UpdateContact::make($contact) : CreateContact::make($contact);
-        $response = $action->checkPermission()
-            ->validate()
-            ->execute();
-
-        $address = array_merge($this->toArray(), ['contact_id' => $response->id]);
-        if ($action instanceof UpdateContact) {
-            $addressId = $response->addresses()->where('is_main_address', true)->first()?->id;
-            $address = array_merge($address, ['id' => $addressId]);
-        }
-
-        $addressAction = $action instanceof UpdateContact
-            ? UpdateAddress::make($address)
-            : CreateAddress::make($address);
-
-        $addressResponse = $addressAction
-            ->validate()
-            ->execute();
-
-        $this->fill(array_merge($addressResponse->toArray(), $response->toArray()));
+        return [
+            'create' => CreateContact::class,
+            'update' => UpdateContact::class,
+            'delete' => DeleteContact::class,
+        ];
     }
 
     public function reset(...$properties): void
     {
         parent::reset(...$properties);
 
-        $this->client_id = Client::query()->where('is_active', true)->count() === 1
+        $this->main_address['client_id'] = Client::query()->where('is_active', true)->count() === 1
             ? Client::query()->where('is_active', true)->first()->id
             : null;
-        $this->language_id = Language::query()->count() === 1 ? Language::query()->first()->id : null;
+        $this->main_address['language_id'] = Language::query()->count() === 1 ? Language::query()->first()->id : null;
+    }
+
+    public function fill($values): void
+    {
+        parent::fill($values);
+
+        if ($values instanceof Model) {
+            $this->categories = $values->categories?->pluck('id')->toArray() ?? [];
+        }
     }
 }

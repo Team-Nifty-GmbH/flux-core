@@ -2,7 +2,9 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Category;
 use FluxErp\Models\Contact;
+use Illuminate\Support\Arr;
 
 class CreateContactRequest extends BaseFormRequest
 {
@@ -13,8 +15,12 @@ class CreateContactRequest extends BaseFormRequest
      */
     public function rules(): array
     {
+        $addressRules = (new CreateAddressRequest())->rules();
+        unset($addressRules['contact_id'], $addressRules['client_id']);
+
         return array_merge(
             (new Contact())->hasAdditionalColumnsValidationRules(),
+            Arr::prependKeysWith($addressRules, 'main_address.'),
             [
                 'uuid' => 'string|uuid|unique:contacts,uuid',
                 'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
@@ -23,7 +29,7 @@ class CreateContactRequest extends BaseFormRequest
                 'price_list_id' => 'sometimes|integer|nullable|exists:price_lists,id,deleted_at,NULL',
                 'expense_ledger_account_id' => 'sometimes|integer|nullable|exists:ledger_accounts,id',
                 'vat_rate_id' => 'sometimes|integer|nullable|exists:vat_rates,id,deleted_at,NULL',
-                'customer_number' => 'sometimes|required|string|unique:contacts,customer_number',
+                'customer_number' => 'string|nullable|unique:contacts,customer_number',
                 'creditor_number' => 'string|nullable|unique:contacts,creditor_number',
                 'debtor_number' => 'string|nullable|unique:contacts,debtor_number',
                 'payment_target_days' => 'sometimes|integer|min:1|nullable',
@@ -40,6 +46,11 @@ class CreateContactRequest extends BaseFormRequest
 
                 'discount_groups' => 'array',
                 'discount_groups.*' => 'integer|exists:discount_groups,id',
+
+                'main_address' => 'array',
+
+                'categories' => 'array',
+                'categories.*' => 'integer|exists:' . Category::class . ',id,model_type,' . Contact::class,
             ]
         );
     }

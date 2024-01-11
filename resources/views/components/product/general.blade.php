@@ -39,6 +39,15 @@
             :async-data="[
                 'api' => route('search', \FluxErp\Models\Category::class),
                 'method' => 'POST',
+                'params' => [
+                    'where' => [
+                        [
+                            'model_type',
+                            '=',
+                            \FluxErp\Models\Contact::class,
+                        ],
+                    ],
+                ],
             ]"
         ></x-select>
         <x-select
