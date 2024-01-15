@@ -9,7 +9,7 @@ on:
 jobs:
   laravel:
     name: Laravel (PHP ${{ matrix.php-versions }})
-    runs-on: test_runner
+    runs-on: self-hosted
     env:
       DB_DATABASE: laravel
       DB_USERNAME: root
@@ -57,6 +57,8 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           extensions: mbstring, dom, fileinfo, mysql
           coverage: xdebug
+        env:
+          runner: self-hosted
 
       - name: Cache composer dependencies
         run: |
