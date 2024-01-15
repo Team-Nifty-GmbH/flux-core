@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Task;
 
+use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\TaskForm;
@@ -10,8 +11,10 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
 
 class Task extends Component
@@ -115,5 +118,28 @@ class Task extends Component
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
         }
+    }
+
+    #[Renderless]
+    public function addTag(string $name): void
+    {
+        try {
+            $tag = CreateTag::make([
+                'name' => $name,
+                'type' => TaskModel::class,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->task->tags[] = $tag->id;
+        $this->js(<<<'JS'
+            edit = true;
+        JS);
     }
 }

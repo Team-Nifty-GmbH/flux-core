@@ -201,6 +201,40 @@
                       :options="$languages" option-label="name" option-value="id"></x-select>
         </div>
     </div>
+    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <label for="{{ md5('address.language_id') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
+            {{ __('Tags') }}
+        </label>
+        <div class="col-span-2">
+            <x-select
+                multiselect
+                x-bind:disabled="! $wire.edit"
+                wire:model.number="address.tags"
+                option-value="id"
+                option-label="label"
+                :async-data="[
+                    'api' => route('search', \FluxErp\Models\Tag::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'option-value' => 'id',
+                        'where' => [
+                            [
+                                'type',
+                                '=',
+                                \FluxErp\Models\Address::class,
+                            ],
+                        ],
+                    ],
+                ]"
+            >
+                <x-slot:beforeOptions>
+                    <div class="px-1">
+                        <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{  __('New Tag') }}||{{  __('Cancel') }}|{{  __('Save') }}" />
+                    </div>
+                </x-slot:beforeOptions>
+            </x-select>
+        </div>
+    </div>
 </div>
 <h3 class="pt-12 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50">
     {{ __('Attributes') }}

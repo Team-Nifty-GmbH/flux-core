@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Address\DeleteAddress;
 use FluxErp\Actions\Address\UpdateAddress;
+use FluxErp\Models\Address;
 use Livewire\Attributes\Locked;
 
 class AddressForm extends FluxForm
@@ -81,6 +82,8 @@ class AddressForm extends FluxForm
 
     public array $additional_columns = [];
 
+    public array $tags = [];
+
     protected function getActions(): array
     {
         return [
@@ -88,5 +91,17 @@ class AddressForm extends FluxForm
             'update' => UpdateAddress::class,
             'delete' => DeleteAddress::class,
         ];
+    }
+
+    public function fill($values): void
+    {
+        if ($values instanceof Address) {
+            $values->loadMissing(['contactOptions', 'tags:id']);
+
+            $values = $values->toArray();
+            $values['tags'] = array_column($values['tags'] ?? [], 'id');
+        }
+
+        parent::fill($values);
     }
 }

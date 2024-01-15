@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Contact;
 
+use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;
@@ -120,7 +121,7 @@ class Addresses extends Component
 
     public function select(Address $address): void
     {
-        $address->loadMissing('contactOptions');
+        $address->loadMissing(['contactOptions', 'tags:id']);
 
         $currentTab = $this->getTabButton($this->tab);
         if (! $currentTab->isLivewireComponent) {
@@ -287,5 +288,28 @@ class Addresses extends Component
         }
 
         $this->addresses = $addresses->toArray();
+    }
+
+    #[Renderless]
+    public function addTag(string $name): void
+    {
+        try {
+            $tag = CreateTag::make([
+                'name' => $name,
+                'type' => \FluxErp\Models\Address::class,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->address->tags[] = $tag->id;
+        $this->js(<<<'JS'
+            edit = true;
+        JS);
     }
 }

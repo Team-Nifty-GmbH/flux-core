@@ -55,12 +55,13 @@
             x-bind:disabled="!edit"
             wire:model.number="product.tags"
             :label="__('Tags')"
-            option-value="description"
+            option-value="id"
             option-label="label"
             :async-data="[
                 'api' => route('search', \FluxErp\Models\Tag::class),
                 'method' => 'POST',
                 'params' => [
+                    'option-value' => 'id',
                     'where' => [
                         [
                             'type',

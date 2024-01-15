@@ -66,6 +66,36 @@
                 ]
             ]"
         />
+        <div class="col-span-2">
+            <x-select
+                :label="__('Tags')"
+                multiselect
+                x-bind:disabled="! edit"
+                wire:model.number="task.tags"
+                option-value="id"
+                option-label="label"
+                :async-data="[
+                    'api' => route('search', \FluxErp\Models\Tag::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'option-value' => 'id',
+                        'where' => [
+                            [
+                                'type',
+                                '=',
+                                \FluxErp\Models\Task::class,
+                            ],
+                        ],
+                    ],
+                ]"
+            >
+                <x-slot:beforeOptions>
+                    <div class="px-1">
+                        <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{  __('New Tag') }}||{{  __('Cancel') }}|{{  __('Save') }}" />
+                    </div>
+                </x-slot:beforeOptions>
+            </x-select>
+        </div>
         <x-inputs.number x-bind:readonly="!edit" :label="__('Budget')" wire:model="task.budget" step="0.01" />
         <x-input x-bind:readonly="!edit"
                  :label="__('Time Budget')"

@@ -91,6 +91,10 @@ class Contact extends Component
                 ->label(__('Tickets'))
                 ->isLivewireComponent()
                 ->wireModel('contact.id'),
+            TabButton::make('contact.work-times')
+                ->label(__('Work Times'))
+                ->isLivewireComponent()
+                ->wireModel('contact.id'),
             TabButton::make('contact.accounting')
                 ->label(__('Accounting'))
                 ->isLivewireComponent()

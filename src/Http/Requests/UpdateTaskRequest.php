@@ -52,6 +52,9 @@ class UpdateTaskRequest extends BaseFormRequest
                     'required',
                     new Numeric(min: 0),
                 ],
+
+                'tags' => 'array',
+                'tags.*' => 'integer|exists:tags,id',
             ],
         );
     }

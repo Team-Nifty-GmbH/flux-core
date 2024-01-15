@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\UpdateTask;
+use FluxErp\Models\Task;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
@@ -37,6 +38,8 @@ class TaskForm extends Form
 
     public array $additionalColumns = [];
 
+    public array $tags = [];
+
     public function save(): void
     {
         if (! is_null($this->time_budget) && preg_match('/[0-9]*/', $this->time_budget)) {
@@ -51,5 +54,17 @@ class TaskForm extends Form
         $response = $action->validate()->execute();
 
         $this->fill($response);
+    }
+
+    public function fill($values): void
+    {
+        if ($values instanceof Task) {
+            $values->loadMissing(['tags:id']);
+
+            $values = $values->toArray();
+            $values['tags'] = array_column($values['tags'] ?? [], 'id');
+        }
+
+        parent::fill($values);
     }
 }

@@ -34,34 +34,30 @@
                 ]
             ]"
             />
-            <x-select
-                :label="__('Contact')"
+            <x-select :label="__('Contact')"
                 wire:model="project.contact_id"
                 option-value="contact_id"
                 option-label="label"
-                option-description="description"
                 template="user-option"
                 :async-data="[
-                'api' => route('search', \FluxErp\Models\Address::class),
-                'method' => 'POST',
-                'params' => [
-                    'fields' => [
-                        'contact_id',
-                        'firstname',
-                        'lastname',
-                        'company',
-                        'name',
-                    ],
-                    'where' => [
-                        [
-                            'is_main_address',
-                            '=',
-                            true,
-                        ]
-                    ],
-                    'with' => 'contact.media',
-                ]
-            ]"
+                    'api' => route('search', \FluxErp\Models\Address::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'where' => [
+                            [
+                                'is_main_address',
+                                '=',
+                                true,
+                            ]
+                        ],
+                        'option-value' => 'contact_id',
+                        'fields' => [
+                            'contact_id',
+                            'name',
+                        ],
+                        'with' => 'contact.media',
+                    ]
+                ]"
             />
             <x-select
                 x-bind:readonly="!edit"

@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateAddressRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
+use FluxErp\Models\Tag;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -30,6 +31,8 @@ class UpdateAddress extends FluxAction
         $address = Address::query()
             ->whereKey($this->data['id'])
             ->first();
+
+        $tags = Arr::pull($this->data, 'tags');
 
         $canLogin = $address->can_login;
 
@@ -60,10 +63,14 @@ class UpdateAddress extends FluxAction
             $this->data['is_delivery_address'] = true;
         }
 
-        $contactOptions = Arr::pull($this->data, 'contact_options', null);
+        $contactOptions = Arr::pull($this->data, 'contact_options');
 
         $address->fill($this->data);
         $address->save();
+
+        if (! is_null($tags)) {
+            $address->syncTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
+        }
 
         if (! is_null($contactOptions)) {
             // TODO: Update instead of delete and create

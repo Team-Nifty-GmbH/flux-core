@@ -59,6 +59,9 @@ class CreateAddressRequest extends BaseFormRequest
                 'contact_options.*.label' => 'required|string',
                 'contact_options.*.value' => 'required|string',
                 'contact_options.*.is_primary' => 'boolean',
+
+                'tags' => 'array',
+                'tags.*' => 'string',
             ],
         );
     }

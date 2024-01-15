@@ -10,6 +10,7 @@ use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateProductRequest;
 use FluxErp\Models\Price;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tag;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -60,7 +61,7 @@ class UpdateProduct extends FluxAction
         $product->save();
 
         if (! is_null($tags)) {
-            $product->syncTags($tags);
+            $product->syncTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
         }
 
         $product->productOptions()->sync($productOptions);
