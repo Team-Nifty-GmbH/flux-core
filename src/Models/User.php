@@ -127,9 +127,14 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
         return $this->morphMany(Setting::class, 'model');
     }
 
-    public function tasks()
+    public function tasks(): BelongsToMany
     {
         return $this->belongsToMany(Task::class, 'task_user');
+    }
+
+    public function tasksResponsible(): HasMany
+    {
+        return $this->hasMany(Task::class, 'responsible_user_id');
     }
 
     public function tickets(): BelongsToMany
