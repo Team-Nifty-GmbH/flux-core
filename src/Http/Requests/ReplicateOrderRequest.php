@@ -15,6 +15,7 @@ class ReplicateOrderRequest extends BaseFormRequest
                     'required_without:address_invoice_id',
                     'integer',
                     'nullable',
+                    'exists:contacts,id,deleted_at,NULL',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'contacts'),
                 ],
             ]

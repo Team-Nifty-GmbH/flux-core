@@ -448,19 +448,29 @@ class Order extends OrderPositionList
     }
 
     #[Renderless]
-    public function fetchContactData(): void
+    public function fetchContactData(bool $replicate = false): void
     {
+        $orderVariable = ! $replicate ? 'order' : 'replicateOrder';
+
         $contact = Contact::query()
-            ->whereKey($this->replicateOrder->contact_id)
+            ->whereKey($this->{$orderVariable}->contact_id)
             ->with('mainAddress:id,contact_id')
             ->first();
 
-        $this->replicateOrder->client_id = $contact->client_id;
-        $this->replicateOrder->agent_id = $contact->agent_id ?: $this->replicateOrder->agent_id;
-        $this->replicateOrder->address_invoice_id = $contact->invoice_address_id ?? $contact->mainAddress->id;
-        $this->replicateOrder->address_delivery_id = $contact->delivery_address_id ?? $contact->mainAddress->id;
-        $this->replicateOrder->price_list_id = $contact->price_list_id;
-        $this->replicateOrder->payment_type_id = $contact->payment_type_id;
+        $this->{$orderVariable}->client_id = $contact->client_id;
+        $this->{$orderVariable}->agent_id = $contact->agent_id ?: $this->{$orderVariable}->agent_id;
+        $this->{$orderVariable}->address_invoice_id = $contact->invoice_address_id ?? $contact->mainAddress->id;
+        $this->{$orderVariable}->address_delivery_id = $contact->delivery_address_id ?? $contact->mainAddress->id;
+        $this->{$orderVariable}->price_list_id = $contact->price_list_id;
+        $this->{$orderVariable}->payment_type_id = $contact->payment_type_id;
+
+        if (! $replicate) {
+            $this->order->address_invoice = Address::query()
+                ->whereKey($this->order->address_invoice_id)
+                ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
+                ->first()
+                ->toArray();
+        }
     }
 
     #[Renderless]
