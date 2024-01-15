@@ -55,7 +55,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: mbstring, dom, fileinfo, mysql, bc-math
+          extensions: mbstring, dom, fileinfo, mysql, imagick
           coverage: xdebug
         env:
           runner: self-hosted
