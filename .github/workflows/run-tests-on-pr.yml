@@ -84,7 +84,9 @@ jobs:
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
       - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
+        run: |
+          sudo apt update
+          sudo apt install chromium-browser -y
 
       - name: Install ChromeDriver
         run: composer dusk:install-chromedriver
