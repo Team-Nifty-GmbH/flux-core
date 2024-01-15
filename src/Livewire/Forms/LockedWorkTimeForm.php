@@ -2,14 +2,13 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
-use FluxErp\Actions\WorkTime\CreateWorkTime;
 use FluxErp\Actions\WorkTime\DeleteWorkTime;
-use FluxErp\Actions\WorkTime\UpdateWorkTime;
+use FluxErp\Actions\WorkTime\UpdateLockedWorkTime;
+use Illuminate\Support\Carbon;
 use Livewire\Attributes\Locked;
 
-class WorkTimeForm extends FluxForm
+class LockedWorkTimeForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -18,10 +17,8 @@ class WorkTimeForm extends FluxForm
 
     public ?int $user_id = null;
 
-    #[Locked]
     public ?int $order_position_id = null;
 
-    #[Locked]
     public ?int $parent_id = null;
 
     public ?int $work_time_type_id = null;
@@ -30,13 +27,10 @@ class WorkTimeForm extends FluxForm
 
     public ?int $trackable_id = null;
 
-    #[Locked]
     public ?string $started_at = null;
 
-    #[Locked]
     public ?string $ended_at = null;
 
-    #[Locked]
     public ?int $paused_time_ms = null;
 
     public ?string $name = null;
@@ -55,8 +49,7 @@ class WorkTimeForm extends FluxForm
     protected function getActions(): array
     {
         return [
-            'create' => CreateWorkTime::class,
-            'update' => UpdateWorkTime::class,
+            'update' => UpdateLockedWorkTime::class,
             'delete' => DeleteWorkTime::class,
         ];
     }
@@ -69,6 +62,14 @@ class WorkTimeForm extends FluxForm
         if (! $workTime['trackable_type'] ?? false) {
             unset($workTime['trackable_type'], $workTime['trackable_id']);
         }
+
+        $workTime['started_at'] = $workTime['started_at']
+            ? Carbon::parse($workTime['started_at'])->format('Y-m-d H:i:s')
+            : null;
+        $workTime['ended_at'] = $workTime['ended_at']
+            ? Carbon::parse($workTime['ended_at'])->format('Y-m-d H:i:s')
+            : null;
+        $workTime['is_locked'] = (bool) $workTime['ended_at'];
 
         return $this->getActions()[$name]::make($workTime);
     }

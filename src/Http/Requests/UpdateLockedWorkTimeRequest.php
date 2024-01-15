@@ -7,13 +7,21 @@ use FluxErp\Rules\ExistsWithIgnore;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
 
-class UpdateWorkTimeRequest extends BaseFormRequest
+class UpdateLockedWorkTimeRequest extends BaseFormRequest
 {
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:work_times,id,is_locked,0,deleted_at,NULL',
+            'id' => 'required|integer|exists:work_times,id,deleted_at,NULL',
+            'user_id' => [
+                'required',
+                'integer',
+                Rule::exists('users', 'id')
+                    ->where('is_active', true)
+                    ->whereNull('deleted_at'),
+            ],
             'contact_id' => [
                 'nullable',
                 'integer',
@@ -39,7 +47,8 @@ class UpdateWorkTimeRequest extends BaseFormRequest
                 'integer',
                 new MorphExists('trackable_type'),
             ],
-            'ended_at' => 'nullable|date_format:Y-m-d H:i:s',
+            'started_at' => 'required|date_format:Y-m-d H:i:s|before:ended_at',
+            'ended_at' => 'present|nullable|date_format:Y-m-d H:i:s|after:started_at',
             'name' => 'exclude_if:is_daily_work_time,true|string|nullable',
             'description' => 'string|nullable',
             'is_locked' => 'boolean',
