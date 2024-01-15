@@ -33,7 +33,7 @@
     },
     "dependencies": {
         "@alpinejs/collapse": "^3.13.3",
-        "@tiptap/core": "^2.1.13",
+        "@tiptap/core": "^2.1.16",
         "@tiptap/pm": "^2.1.15",
         "@tiptap/starter-kit": "^2.1.15",
         "@wireui/alpinejs-hold-directive": "^1.0.1",
