@@ -3,8 +3,6 @@
 namespace FluxErp\Tests;
 
 use Dotenv\Dotenv;
-use Facebook\WebDriver\Remote\DesiredCapabilities;
-use Facebook\WebDriver\Remote\RemoteWebDriver;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
@@ -41,7 +39,6 @@ abstract class DuskTestCase extends TestCase
 
     protected function setUp(): void
     {
-        $this->serve(static::getBaseServeHost(), static::getBaseServePort());
         if (file_exists(__DIR__ . '/../../../.env')) {
             $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
             $dotenv->load();
@@ -96,17 +93,6 @@ abstract class DuskTestCase extends TestCase
         $app['config']->set('database.connections.mysql.database', 'laravel');
         $app['config']->set('auth.defaults.guard', 'web');
         $app['config']->set('flux.install_done', true);
-    }
-
-    public static function prepare(){
-
-    }
-
-    public function driver(): RemoteWebDriver
-    {
-        return RemoteWebDriver::create(
-            'http://localhost:4444/wd/hub', DesiredCapabilities::chrome()
-        );
     }
 
     public function openMenu(): void

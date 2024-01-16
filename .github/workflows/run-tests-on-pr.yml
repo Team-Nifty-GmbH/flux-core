@@ -9,7 +9,7 @@ on:
 jobs:
   laravel:
     name: Laravel (PHP ${{ matrix.php-versions }})
-    runs-on: self-hosted
+    runs-on: test_runner
     env:
       DB_DATABASE: laravel
       DB_USERNAME: root
@@ -21,10 +21,6 @@ jobs:
 
     # Docs: https://docs.github.com/en/actions/using-containerized-services
     services:
-      selenium:
-        image: seleniarm/standalone-chromium
-        ports:
-          - 4444:4444
       mysql:
         image: mysql:8.0
         env:
@@ -59,10 +55,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: mbstring, dom, fileinfo, mysql, imagick
+          extensions: mbstring, dom, fileinfo, mysql
           coverage: xdebug
-        env:
-          runner: self-hosted
 
       - name: Cache composer dependencies
         run: |
@@ -70,11 +64,6 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
-
-      - name: Install node
-        uses: actions/setup-node@v2
-        with:
-          node-version: 20
 
       - name: Install npm dependencies
         run: npm ci
@@ -87,22 +76,22 @@ jobs:
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
-#      - name: Run Feature Tests
-#        run: composer test-feature
-#        env:
-#          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
-#          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-#          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-#
-#      - name: Run Livewire Tests
-#        run: composer test-livewire
-#        env:
-#          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
-#          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-#          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
+      - name: Install ChromeDriver
+        run: composer dusk:install-chromedriver
 
-#      - name: Install ChromeDriver
-#        run: ./vendor/bin/dusk-updater detect --chrome-dir=/usr/local/bin/chromium-browser  --all --auto-update
+      - name: Run Feature Tests
+        run: composer test-feature
+        env:
+          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
+
+      - name: Run Livewire Tests
+        run: composer test-livewire
+        env:
+          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
       - name: Run Browser Tests
         run: composer test-browser
@@ -110,7 +99,6 @@ jobs:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-          DUSK_DRIVER_URL: http://localhost:${{ job.services.selenium.ports['4444'] }}/wd/hub
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
