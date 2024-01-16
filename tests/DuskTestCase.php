@@ -97,6 +97,10 @@ abstract class DuskTestCase extends TestCase
         $app['config']->set('flux.install_done', true);
     }
 
+    public static function prepare(){
+
+    }
+
     public function driver(): RemoteWebDriver
     {
         return RemoteWebDriver::create(
