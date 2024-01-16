@@ -57,7 +57,7 @@ class UpdateLockedWorkTime extends FluxAction
 
             if ($totalTimeMs < 0) {
                 throw ValidationException::withMessages([
-                    'paused_time_ms' => [__('Pause can not be longer than time between started_at and ended_at.')]
+                    'paused_time_ms' => [__('Pause can not be longer than time between started_at and ended_at.')],
                 ])->errorBag('updateLockedWorkTime');
             }
         }

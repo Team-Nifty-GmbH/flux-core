@@ -7,7 +7,6 @@ use FluxErp\Rules\ExistsWithIgnore;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Validation\Rule;
 
 class UpdateLockedWorkTimeRequest extends BaseFormRequest
 {
