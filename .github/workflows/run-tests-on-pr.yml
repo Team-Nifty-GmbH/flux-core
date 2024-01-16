@@ -104,13 +104,15 @@ jobs:
 #      - name: Install ChromeDriver
 #        run: ./vendor/bin/dusk-updater detect --chrome-dir=/usr/local/bin/chromium-browser  --all --auto-update
 
+      - name: Serve application
+        run: php artisan serve --port=80 &
       - name: Run Browser Tests
         run: composer test-browser
         env:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-          DUSK_DRIVER_URL: http://0.0.0.0:${{ job.services.selenium.ports['4444'] }}/wd/hub
+          DUSK_DRIVER_URL: http://localhost:${{ job.services.selenium.ports['4444'] }}/wd/hub
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
