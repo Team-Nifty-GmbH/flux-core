@@ -15,13 +15,7 @@ class UpdateLockedWorkTimeRequest extends BaseFormRequest
     {
         return [
             'id' => 'required|integer|exists:work_times,id,deleted_at,NULL',
-            'user_id' => [
-                'required',
-                'integer',
-                Rule::exists('users', 'id')
-                    ->where('is_active', true)
-                    ->whereNull('deleted_at'),
-            ],
+            'user_id' => 'required|integer|exists:users,id,is_active,1,deleted_at,NULL',
             'contact_id' => [
                 'nullable',
                 'integer',
@@ -49,6 +43,7 @@ class UpdateLockedWorkTimeRequest extends BaseFormRequest
             ],
             'started_at' => 'required|date_format:Y-m-d H:i:s|before:ended_at',
             'ended_at' => 'present|nullable|date_format:Y-m-d H:i:s|after:started_at',
+            'paused_time_ms' => 'integer|nullable|min:0',
             'name' => 'exclude_if:is_daily_work_time,true|string|nullable',
             'description' => 'string|nullable',
             'is_locked' => 'boolean',

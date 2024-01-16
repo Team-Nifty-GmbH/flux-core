@@ -13,11 +13,11 @@
                         <div>{{ $task->project?->name }}</div>
                         @if($task->due_date)
                             <x-badge
-                                :color="$task->due_date?->diffInDays(now(), false) > 0
+                                :color="($diff = $task->due_date->diffInDays(now(), false)) > 0
                                     ? 'negative'
-                                    : ($task->due_date?->diffInDays(now(), false) === 0 ? 'warning' : 'positive')
+                                    : ($diff === 0 ? 'warning' : 'positive')
                                 "
-                                :label="__('Due At') . ' ' .$task->due_date?->locale(app()->getLocale())->isoFormat('L')"
+                                :label="__('Due At') . ' ' . $task->due_date->locale(app()->getLocale())->isoFormat('L')"
                             />
                         @endif
                     </div>

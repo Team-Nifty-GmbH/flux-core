@@ -75,7 +75,7 @@ class WorkTimeList extends DataTable
                 ->when(DeleteWorkTime::canPerformAction(false))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Work time')]),
+                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Work Time')]),
                 ]),
         ];
     }
@@ -86,11 +86,12 @@ class WorkTimeList extends DataTable
             parent::getViewData(),
             [
                 'workTimeTypes' => WorkTimeType::query()
-                    ->select(['id', 'name'])
-                    ->get()
+                    ->get(['id', 'name'])
                     ->toArray(),
                 'trackableTypes' => model_info_all()
-                    ->filter(fn (ModelInfo $modelInfo) => in_array(Trackable::class, $modelInfo->traits->toArray()))
+                    ->filter(
+                        fn (ModelInfo $modelInfo) => in_array(Trackable::class, $modelInfo->traits->toArray())
+                    )
                     ->map(fn (ModelInfo $modelInfo) => $modelInfo->class)
                     ->toArray(),
             ]

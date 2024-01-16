@@ -687,6 +687,7 @@
     "Password": "Passwort",
     "Password reset link sent": "Passwort zurücksetzen Link gesendet",
     "Path": "Pfad",
+    "Pause can not be longer than time between started_at and ended_at.": "Die Pausenzeit kann nicht länger als die Zeit zwischen 'Gestartet am' und 'Beendet am' sein.",
     "Paused At": "Pausiert am",
     "Paused Time": "Pausenzeit",
     "Paused Time Ms": "Pausenzeit (ms)",

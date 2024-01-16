@@ -14,9 +14,9 @@ class WorkTimeForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public ?int $contact_id = null;
-
     public ?int $user_id = null;
+
+    public ?int $contact_id = null;
 
     #[Locked]
     public ?int $order_position_id = null;
