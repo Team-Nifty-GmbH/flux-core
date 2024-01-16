@@ -21,6 +21,17 @@ jobs:
 
     # Docs: https://docs.github.com/en/actions/using-containerized-services
     services:
+      chrome:
+        image: robcherry/docker-chromedriver
+        networks:
+          - app-network
+        environment:
+          CHROMEDRIVER_WHITELISTED_IPS: ""
+          CHROMEDRIVER_PORT: "9515"
+        ports:
+          - 9515:9515
+        cap_add:
+          - "SYS_ADMIN"
       mysql:
         image: mysql:8.0
         env:
@@ -97,8 +108,8 @@ jobs:
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
-      - name: Install ChromeDriver
-        run: ./vendor/bin/dusk-updater detect --chrome-dir=/usr/local/bin/chromium-browser  --all --auto-update
+#      - name: Install ChromeDriver
+#        run: ./vendor/bin/dusk-updater detect --chrome-dir=/usr/local/bin/chromium-browser  --all --auto-update
 
       - name: Run Browser Tests
         run: composer test-browser
