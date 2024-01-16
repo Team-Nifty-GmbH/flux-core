@@ -41,6 +41,7 @@ abstract class DuskTestCase extends TestCase
 
     protected function setUp(): void
     {
+        $this->serve(static::getBaseServeHost(), static::getBaseServePort());
         if (file_exists(__DIR__ . '/../../../.env')) {
             $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
             $dotenv->load();

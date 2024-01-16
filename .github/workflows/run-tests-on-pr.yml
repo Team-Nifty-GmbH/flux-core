@@ -104,8 +104,6 @@ jobs:
 #      - name: Install ChromeDriver
 #        run: ./vendor/bin/dusk-updater detect --chrome-dir=/usr/local/bin/chromium-browser  --all --auto-update
 
-      - name: Serve application
-        run: php artisan serve --port=80 &
       - name: Run Browser Tests
         run: composer test-browser
         env:
