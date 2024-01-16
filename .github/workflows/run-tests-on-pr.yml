@@ -23,8 +23,6 @@ jobs:
     services:
       chrome:
         image: robcherry/docker-chromedriver
-        networks:
-          - app-network
         environment:
           CHROMEDRIVER_WHITELISTED_IPS: ""
           CHROMEDRIVER_PORT: "9515"
