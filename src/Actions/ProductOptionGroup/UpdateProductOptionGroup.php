@@ -3,11 +3,15 @@
 namespace FluxErp\Actions\ProductOptionGroup;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\ProductOption\CreateProductOption;
+use FluxErp\Actions\ProductOption\DeleteProductOption;
+use FluxErp\Actions\ProductOption\UpdateProductOption;
 use FluxErp\Http\Requests\UpdateProductOptionGroupRequest;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class UpdateProductOptionGroup extends FluxAction
 {
@@ -34,13 +38,31 @@ class UpdateProductOptionGroup extends FluxAction
         $productOptionGroup->save();
 
         if (! is_null($productOptions)) {
+            $existingProductOptions = $productOptionGroup->productOptions()->pluck('id')->toArray();
             $productOptionGroup->productOptions()->whereNotIn('id', Arr::pluck($productOptions, 'id'))->delete();
 
+            $updatedProductOptions = [];
             foreach ($productOptions as $productOption) {
-                $productOptionGroup->productOptions()->updateOrCreate(
-                    ['id' => $productOption['id'] ?? null],
-                    $productOption
-                );
+                $productOption = array_merge($productOption, ['product_option_group_id' => $productOptionGroup->id]);
+                if (! ($productOption['id'] ?? false)) {
+                    try {
+                        CreateProductOption::make($productOption)->validate()->execute();
+                    } catch (ValidationException) {
+                    }
+                } else {
+                    try {
+                        UpdateProductOption::make($productOption)->validate()->execute();
+                    } catch (ValidationException) {
+                    }
+                    $updatedProductOptions[] = $productOption['id'];
+                }
+            }
+
+            foreach (array_diff($existingProductOptions, $updatedProductOptions) as $deletedProductOption) {
+                try {
+                    DeleteProductOption::make(['id' => $deletedProductOption])->validate()->execute();
+                } catch (ValidationException) {
+                }
             }
         }
 

@@ -23,6 +23,11 @@ class ProductOptionGroupList extends DataTable
 
     public ProductOptionGroupForm $productOptionGroupForm;
 
+    public array $enabledCols = [
+        'name',
+        'product_options.name',
+    ];
+
     public function getTableActions(): array
     {
         return [
