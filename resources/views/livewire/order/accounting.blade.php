@@ -1,8 +1,10 @@
-<div class="flex flex-col gap-4" x-data="{baseDate(daysToAdd) {
-    let result = $wire.$parent.order.invoice_date ? new Date($wire.$parent.order.invoice_date) : new Date();
-    result.setDate(result.getDate() + daysToAdd);
-    return '(' + window.formatters.date(result) + ')';
-}}">
+<div class="flex flex-col gap-4" x-data="{
+    baseDate(daysToAdd) {
+        let result = $wire.$parent.order.invoice_date ? new Date($wire.$parent.order.invoice_date) : new Date();
+        result.setDate(result.getDate() + daysToAdd);
+        return '(' + window.formatters.date(result) + ')';
+    }
+}">
     <x-card :title="__('Payment Conditions')">
         <div class="flex flex-col gap-4">
             <div>

@@ -154,8 +154,8 @@ class UpdateOrderRequest extends BaseFormRequest
                     'exclude_if:invoice_number,null',
                     'string',
                 ],
-                'system_delivery_date' => 'sometimes|required_with:system_delivery_date_end|date|nullable',
-                'system_delivery_date_end' => 'sometimes|date|nullable|after:system_delivery_date',
+                'system_delivery_date' => 'required_with:system_delivery_date_end|date|nullable',
+                'system_delivery_date_end' => 'date|nullable|after:system_delivery_date',
                 'customer_delivery_date' => 'sometimes|date|nullable',
                 'date_of_approval' => 'sometimes|date|nullable',
 

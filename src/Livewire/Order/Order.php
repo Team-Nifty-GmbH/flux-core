@@ -478,8 +478,6 @@ class Order extends OrderPositionList
                 }
             }
 
-            $this->fetchOrder($this->order->id);
-
             $mediaIds[$createDocument] = $media->id;
 
             if ($this->selectedPrintLayouts['download'][$createDocument] ?? false) {
@@ -498,6 +496,8 @@ class Order extends OrderPositionList
                 ];
             }
         }
+
+        $this->fetchOrder($this->order->id);
 
         if (($this->selectedPrintLayouts['email'] ?? false) && $mailAttachments) {
             $to = [];

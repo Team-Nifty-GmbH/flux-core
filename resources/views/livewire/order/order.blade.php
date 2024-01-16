@@ -345,7 +345,7 @@
                                         </span>
                                     </div>
                                 </div>
-                                <hr>
+                                <hr />
                                 <template x-for="vat in $wire.order.total_vats">
                                     <div class="flex justify-between py-2.5">
                                         <div>

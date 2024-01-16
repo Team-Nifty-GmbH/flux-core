@@ -114,7 +114,7 @@ class CreateOrderRequest extends BaseFormRequest
                 'order_date' => 'date',
                 'invoice_date' => 'date|nullable',
                 'invoice_number' => 'string',
-                'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end|',
+                'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
                 'system_delivery_date_end' => 'date|nullable|after:system_delivery_date',
                 'customer_delivery_date' => 'date|nullable',
                 'date_of_approval' => 'date|nullable',

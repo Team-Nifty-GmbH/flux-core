@@ -35,15 +35,7 @@ if (! function_exists('exception_to_notifications')) {
             case method_exists($exception, 'getResponse')
             && $errors = json_decode($exception->getResponse()->getContent(), true)['errors'] ?? []:
 
-                $errors = \Illuminate\Support\Arr::dot($errors);
                 foreach ($errors as $field => $messages) {
-                    if (is_string($messages)) {
-                        $component->notification()->error(__(\Illuminate\Support\Str::headline($field)), __($messages));
-                        $component->addError($field, __($messages));
-
-                        continue;
-                    }
-
                     foreach ($messages as $message) {
                         $component->notification()->error(__(\Illuminate\Support\Str::headline($field)), __($message));
                         $component->addError($field, __($message));
