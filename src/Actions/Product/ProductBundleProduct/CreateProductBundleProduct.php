@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateProductBundleProductRequest;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Product;
+use Illuminate\Validation\Rule;
 
 class CreateProductBundleProduct extends FluxAction
 {
@@ -15,7 +16,8 @@ class CreateProductBundleProduct extends FluxAction
         $this->rules = (new CreateProductBundleProductRequest())->rules();
 
         $this->rules['bundle_product_id'] = [
-            'unique:product_bundle_product,bundle_product_id,NULL,id,product_id,' . $this->data['product_id'],
+            Rule::unique('product_bundle_product', 'bundle_product_id')
+                ->where('product_id', $this->data['product_id'] ?? 0),
         ];
     }
 

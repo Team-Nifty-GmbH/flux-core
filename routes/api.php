@@ -352,11 +352,11 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::delete('/products/{id}', [ProductController::class, 'delete']);
 
         //Product bundle products
-        Route::get('/product-bundle-product/{id}', [ProductBundleProductController::class, 'show']);
-        Route::get('/product-bundle-product', [ProductBundleProductController::class, 'index']);
-        Route::post('/product-bundle-product', [ProductBundleProductController::class, 'create']);
-        Route::put('/product-bundle-product', [ProductBundleProductController::class, 'update']);
-        Route::delete('/product-bundle-product/{id}', [ProductBundleProductController::class, 'delete']);
+        Route::get('/product-bundle-products/{id}', [ProductBundleProductController::class, 'show']);
+        Route::get('/product-bundle-products', [ProductBundleProductController::class, 'index']);
+        Route::post('/product-bundle-products', [ProductBundleProductController::class, 'create']);
+        Route::put('/product-bundle-products', [ProductBundleProductController::class, 'update']);
+        Route::delete('/product-bundle-products/{id}', [ProductBundleProductController::class, 'delete']);
 
         //ProductCrossSellings
         Route::get('/product-cross-sellings/{id}', [ProductCrossSellingController::class, 'show']);

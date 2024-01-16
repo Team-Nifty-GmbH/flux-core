@@ -37,7 +37,6 @@
             <x-slot:footer>
                 <div class="flex justify-end gap-1.5">
                     <x-button
-                        x-show="! Object.values($wire.variants).length > 0"
                         flat
                         :label="__('Cancel')"
                         x-on:click="close()"

@@ -26,14 +26,6 @@ class DeleteProductBundleProduct extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
-        $delete = $productBundleProduct->delete();
-
-        if ($delete && $productBundleProduct->product->bundleProducts()->count() === 0) {
-            $productBundleProduct->product->update([
-                'is_bundle' => false,
-            ]);
-        }
-
-        return $delete;
+        return $productBundleProduct->delete();
     }
 }

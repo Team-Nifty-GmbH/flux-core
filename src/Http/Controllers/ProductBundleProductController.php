@@ -22,14 +22,23 @@ class ProductBundleProductController extends BaseController
 
     public function create(CreateProductBundleProductRequest $request): JsonResponse
     {
-        $productBundleProduct = CreateProductBundleProduct::make($request->validated())
-            ->execute();
+        try {
+            $productBundleProduct = CreateProductBundleProduct::make($request->validated())
+                ->validate()
+                ->execute();
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 201,
+                data: $productBundleProduct,
+                statusMessage: 'bundle product created'
+            );
+        } catch (ValidationException $e) {
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 422,
+                data: $e->errors()
+            );
+        }
 
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 201,
-            data: $productBundleProduct,
-            statusMessage: 'bundle product created'
-        );
+        return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
     public function update(Request $request): JsonResponse
@@ -79,7 +88,7 @@ class ProductBundleProductController extends BaseController
             );
         } catch (ValidationException $e) {
             $response = ResponseHelper::createArrayResponse(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                statusCode: 404,
                 data: $e->errors()
             );
         }

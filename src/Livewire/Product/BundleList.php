@@ -3,6 +3,8 @@
 namespace FluxErp\Livewire\Product;
 
 use FluxErp\Actions\Product\ProductBundleProduct\CreateProductBundleProduct;
+use FluxErp\Actions\Product\ProductBundleProduct\DeleteProductBundleProduct;
+use FluxErp\Actions\Product\ProductBundleProduct\UpdateProductBundleProduct;
 use FluxErp\Livewire\DataTables\ProductBundleProductList;
 use FluxErp\Livewire\Forms\ProductBundleProductForm;
 use FluxErp\Livewire\Forms\ProductForm;
@@ -58,7 +60,7 @@ class BundleList extends ProductBundleProductList
                 ->label(__('Edit'))
                 ->icon('pencil')
                 ->wireClick('edit(record.id)')
-                ->when(fn () => true),
+                ->when(fn () => UpdateProductBundleProduct::canPerformAction(false)),
             DataTableButton::make()
                 ->color('negative')
                 ->label(__('Delete'))
@@ -67,7 +69,7 @@ class BundleList extends ProductBundleProductList
                     'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Bundle Product')]),
                     'wire:click' => 'delete(record.id)',
                 ])
-                ->when(fn () => true),
+                ->when(fn () => DeleteProductBundleProduct::canPerformAction(false)),
         ];
     }
 
