@@ -62,10 +62,13 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         'shipping_costs_gross_price' => Money::class,
         'shipping_costs_vat_price' => Money::class,
         'shipping_costs_vat_rate_percentage' => Percentage::class,
+        'total_base_gross_price' => Money::class,
+        'total_base_net_price' => Money::class,
         'margin' => Money::class,
         'total_gross_price' => Money::class,
         'total_net_price' => Money::class,
         'total_vats' => 'array',
+        'balance' => Money::class,
         'payment_texts' => 'array',
         'order_date' => 'date',
         'invoice_date' => 'date',
@@ -140,6 +143,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
             if (! $order->exists && ! $order->order_number) {
                 $order->getSerialNumber('order_number');
+            }
+
+            if ($order->isDirty('invoice_number')) {
+                $order->calculateBalance();
             }
         });
     }
@@ -264,6 +271,8 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             }
         }
 
+        $this->calculateBalance();
+
         return $this;
     }
 
@@ -295,7 +304,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             ->calculateTotalVats();
     }
 
-    public function calculateTotalGrossPrice(): self
+    public function calculateTotalGrossPrice(): static
     {
         $totalGross = $this->orderPositions()
             ->where('is_alternative', false)
@@ -310,7 +319,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this;
     }
 
-    public function calculateTotalNetPrice(): self
+    public function calculateTotalNetPrice(): static
     {
         $totalNet = $this->orderPositions()
             ->where('is_alternative', false)
@@ -325,7 +334,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this;
     }
 
-    public function calculateTotalVats(): self
+    public function calculateTotalVats(): static
     {
         $totalVats = $this->orderPositions()
             ->where('is_alternative', false)
@@ -358,6 +367,13 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         }
 
         $this->total_vats = $totalVats->sortBy('vat_rate_percentage')->values();
+
+        return $this;
+    }
+
+    public function calculateBalance(): static
+    {
+        $this->balance = bcsub($this->total_gross_price, $this->transactions()->sum('amount'), 2);
 
         return $this;
     }

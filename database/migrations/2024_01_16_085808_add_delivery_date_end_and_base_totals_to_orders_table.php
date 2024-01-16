@@ -18,6 +18,10 @@ return new class extends Migration
             $table->decimal('total_base_gross_price', 40, 10)
                 ->nullable()
                 ->after('total_base_net_price');
+
+            $table->decimal('balance', 40, 10)
+                ->nullable()
+                ->after('total_vats');
         });
 
         $this->migrateTotals();
@@ -56,6 +60,18 @@ return new class extends Migration
                         GROUP BY order_id
                     ) op ON orders.id = op.order_id
                     SET orders.total_base_gross_price = COALESCE(op.totalSum, 0) + COALESCE(orders.shipping_costs_gross_price, 0)'
+        );
+
+        // SET balance
+        DB::statement(
+            'UPDATE orders
+                    LEFT JOIN (
+                        SELECT order_id, SUM(amount) AS totalSum
+                        FROM transactions
+                        GROUP BY order_id
+                    ) op ON orders.id = op.order_id
+                    SET orders.balance = ROUND(COALESCE(orders.total_gross_price, 0), 2) - COALESCE(op.totalSum, 0)
+                    WHERE orders.invoice_number IS NOT NULL'
         );
     }
 };

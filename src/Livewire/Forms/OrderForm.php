@@ -55,7 +55,7 @@ class OrderForm extends FluxForm
 
     public ?string $total_base_gross_price = null;
 
-    public ?string $margin = null;
+    public ?float $margin = 0;
 
     public ?string $total_net_price = null;
 
