@@ -12,7 +12,7 @@ return new class extends Migration
             $table->boolean('is_dark_mode')->default(false)->after('is_active');
         });
 
-        Schema::table('addresses', function(Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table) {
             $table->boolean('is_dark_mode')->default(false)->after('is_invoice_address');
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->dropColumn('is_dark_mode');
         });
 
-        Schema::table('addresses', function(Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table) {
             $table->dropColumn('is_dark_mode');
         });
     }
