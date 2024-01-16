@@ -26,6 +26,7 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SCOUT_DRIVER" value="collection"/>
         <env name="BROADCAST_DRIVER" value="log"/>
+        <env name="DUSK_DRIVER_URL" value="http://localhost:4444/wd/hub"/>
     </php>
     <source>
         <include>

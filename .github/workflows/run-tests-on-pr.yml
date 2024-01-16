@@ -22,12 +22,10 @@ jobs:
     # Docs: https://docs.github.com/en/actions/using-containerized-services
     services:
       chrome:
-        image: robcherry/docker-chromedriver
-        env:
-          CHROMEDRIVER_WHITELISTED_IPS: ""
-          CHROMEDRIVER_PORT: "9515"
+        image: seleniarm/standalone-chromium
         ports:
-          - 9515:9515
+          - 4444:4444
+#          - 5900:5900
       mysql:
         image: mysql:8.0
         env:
