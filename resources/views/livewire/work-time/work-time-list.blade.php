@@ -12,7 +12,13 @@
     <x-modal name="edit-work-time">
         <x-card class="flex flex-col gap-4">
             <div class="flex flex-col gap-1.5" x-cloak x-show="! $wire.workTime.is_daily_work_time">
-                <x-select :label="__('Work Time Type')" :options="$workTimeTypes" wire:model="workTime.work_time_type_id" option-value="id" option-label="name"/>
+                <x-select
+                    :label="__('Work Time Type')"
+                    :options="$workTimeTypes"
+                    wire:model="workTime.work_time_type_id"
+                    option-value="id"
+                    option-label="name"
+                />
                 <x-select
                     :label="__('User')"
                     option-value="id"
@@ -43,6 +49,10 @@
                parse-format="YYYY-MM-DD HH:mm:ss"
                wire:model="workTime.ended_at"
             />
+            <x-input :label="__('Paused Time')"
+                     wire:model.blur="workTime.paused_time"
+                     :corner-hint="__('Hours:Minutes')"
+            />
             <div class="flex flex-col gap-1.5" x-cloak x-show="! $wire.workTime.is_daily_work_time">
                 <x-select :label="__('Contact')"
                     wire:model="workTime.contact_id"
@@ -53,6 +63,7 @@
                         'api' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
                         'params' => [
+                            'option-value' => 'contact_id',
                             'where' => [
                                 [
                                     'is_main_address',
@@ -60,7 +71,6 @@
                                     true,
                                 ]
                             ],
-                            'option-value' => 'contact_id',
                             'fields' => [
                                 'contact_id',
                                 'name',
@@ -99,7 +109,7 @@
                 <div class="flex justify-end gap-x-4">
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close" />
-                        <x-button primary spinner x-on:click="$wire.save().then((response) => {if(response) close();})" :label="__('Save')" />
+                        <x-button primary spinner x-on:click="$wire.save().then((success) => { if (success) close(); })" :label="__('Save')" />
                     </div>
                 </div>
             </x-slot:footer>
