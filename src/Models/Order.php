@@ -70,6 +70,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         'order_date' => 'date',
         'invoice_date' => 'date',
         'system_delivery_date' => 'date',
+        'system_delivery_date_end' => 'date',
         'customer_delivery_date' => 'date',
         'date_of_approval' => 'date',
         'has_logistic_notify_phone_number' => 'boolean',
@@ -299,8 +300,12 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         $totalGross = $this->orderPositions()
             ->where('is_alternative', false)
             ->sum('total_gross_price');
+        $totalBaseGross = $this->orderPositions()
+            ->where('is_alternative', false)
+            ->sum('total_base_gross_price');
 
         $this->total_gross_price = bcadd($totalGross, $this->shipping_costs_gross_price ?: 0, 9);
+        $this->total_base_gross_price = bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9);
 
         return $this;
     }
@@ -310,8 +315,12 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         $totalNet = $this->orderPositions()
             ->where('is_alternative', false)
             ->sum('total_net_price');
+        $totalBaseNet = $this->orderPositions()
+            ->where('is_alternative', false)
+            ->sum('total_base_net_price');
 
         $this->total_net_price = bcadd($totalNet, $this->shipping_costs_net_price ?: 0, 9);
+        $this->total_base_net_price = bcadd($totalBaseNet, $this->shipping_costs_net_price ?: 0, 9);
 
         return $this;
     }

@@ -49,7 +49,13 @@ class OrderForm extends FluxForm
 
     public ?int $payment_discount_target = null;
 
-    public ?int $payment_discount_percent = null;
+    public ?float $payment_discount_percent = null;
+
+    public ?string $total_base_net_price = null;
+
+    public ?string $total_base_gross_price = null;
+
+    public ?string $margin = null;
 
     public ?string $total_net_price = null;
 
@@ -82,6 +88,8 @@ class OrderForm extends FluxForm
     public ?string $invoice_number = null;
 
     public ?string $system_delivery_date = null;
+
+    public ?string $system_delivery_date_end = null;
 
     public bool $is_locked = false;
 

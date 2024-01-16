@@ -93,26 +93,7 @@ class Order extends OrderPositionList
             ],
         ];
 
-        $order = \FluxErp\Models\Order::query()
-            ->whereKey($id)
-            ->with([
-                'priceList:id,name,is_net',
-                'addresses',
-                'client:id,name',
-                'contact.media',
-                'contact.contactBankConnections:id,contact_id,iban',
-                'currency:id,iso,name,symbol',
-                'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
-            ])
-            ->firstOrFail()
-            ->append('avatar_url');
-
-        $this->printLayouts = array_intersect(
-            $order->orderType?->print_layouts ?: [],
-            array_keys($order->resolvePrintViews())
-        );
-
-        $this->order->fill($order->toArray());
+        $this->fetchOrder($id);
 
         $this->getAvailableStates(['payment_state', 'delivery_state', 'state']);
 
@@ -310,6 +291,10 @@ class Order extends OrderPositionList
                 ->label(__('Attachments'))
                 ->isLivewireComponent()
                 ->wireModel('order'),
+            TabButton::make('order.texts')
+                ->label(__('Texts'))
+                ->isLivewireComponent()
+                ->wireModel('order'),
             TabButton::make('order.accounting')
                 ->label(__('Accounting'))
                 ->isLivewireComponent()
@@ -379,19 +364,21 @@ class Order extends OrderPositionList
         $order = $action->execute();
         $this->notification()->success(__('Order saved successfully!'));
 
-        try {
-            FillOrderPositions::make([
-                'order_id' => $order->id,
-                'order_positions' => array_filter($this->data, fn ($item) => ! $item['is_bundle_position']),
-                'simulate' => false,
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+        if ($this->initialized) {
+            try {
+                FillOrderPositions::make([
+                    'order_id' => $order->id,
+                    'order_positions' => array_filter($this->data, fn ($item) => ! $item['is_bundle_position']),
+                    'simulate' => false,
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
 
-            return false;
+                return false;
+            }
         }
 
         return true;
@@ -432,7 +419,7 @@ class Order extends OrderPositionList
         }
 
         return response()->streamDownload(
-            fn () => print($pdf->pdf->output()),
+            fn () => print ($pdf->pdf->output()),
             Str::finish($pdf->getFileName(), '.pdf')
         );
     }
@@ -490,6 +477,8 @@ class Order extends OrderPositionList
                     continue;
                 }
             }
+
+            $this->fetchOrder($this->order->id);
 
             $mediaIds[$createDocument] = $media->id;
 
@@ -782,5 +771,29 @@ class Order extends OrderPositionList
         }
 
         $this->isDirtyData = true;
+    }
+
+    protected function fetchOrder(int $id): void
+    {
+        $order = \FluxErp\Models\Order::query()
+            ->whereKey($id)
+            ->with([
+                'priceList:id,name,is_net',
+                'addresses',
+                'client:id,name',
+                'contact.media',
+                'contact.contactBankConnections:id,contact_id,iban',
+                'currency:id,iso,name,symbol',
+                'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
+            ])
+            ->firstOrFail()
+            ->append('avatar_url');
+
+        $this->printLayouts = array_intersect(
+            $order->orderType?->print_layouts ?: [],
+            array_keys($order->resolvePrintViews())
+        );
+
+        $this->order->fill($order->toArray());
     }
 }

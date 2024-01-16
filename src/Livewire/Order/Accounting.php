@@ -2,20 +2,20 @@
 
 namespace FluxErp\Livewire\Order;
 
+use FluxErp\Livewire\DataTables\TransactionList;
 use FluxErp\Livewire\Forms\OrderForm;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Modelable;
-use Livewire\Component;
 
-class Accounting extends Component
+class Accounting extends TransactionList
 {
     #[Modelable]
     public OrderForm $order;
 
-    public function render(): View|Factory|Application
+    protected string $view = 'flux::livewire.order.accounting';
+
+    public function getBuilder(Builder $builder): Builder
     {
-        return view('flux::livewire.order.accounting');
+        return $builder->where('order_id', $this->order->id);
     }
 }
