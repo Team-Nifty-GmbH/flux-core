@@ -87,8 +87,13 @@ class CreateOrderRequest extends BaseFormRequest
                     ValidStateRule::make(PaymentState::class),
                 ],
 
-                'payment_target' => 'required_without_all:address_invoice_id,contact_id|integer|min:0',
-                'payment_discount_target' => 'integer|min:0|nullable',
+                'payment_target' => [
+                    'required_with:payment_discount_target',
+                    'required_without_all:address_invoice_id,contact_id',
+                    'integer',
+                    'min:0',
+                ],
+                'payment_discount_target' => 'integer|min:0|nullable|lte:payment_target',
                 'payment_discount_percent' => 'numeric|min:0|nullable',
                 'header_discount' => 'numeric|min:0|nullable',
                 'shipping_costs_net_price' => 'numeric|nullable',
@@ -109,7 +114,8 @@ class CreateOrderRequest extends BaseFormRequest
                 'order_date' => 'date',
                 'invoice_date' => 'date|nullable',
                 'invoice_number' => 'string',
-                'system_delivery_date' => 'date|nullable',
+                'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
+                'system_delivery_date_end' => 'date|nullable|after:system_delivery_date',
                 'customer_delivery_date' => 'date|nullable',
                 'date_of_approval' => 'date|nullable',
 
