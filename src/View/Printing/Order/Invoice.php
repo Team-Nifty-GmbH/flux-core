@@ -8,6 +8,8 @@ use Illuminate\Contracts\View\View;
 
 class Invoice extends OrderView
 {
+    protected bool $showAlternatives = false;
+
     public function render(): View|Factory
     {
         return view('print::order.invoice', [

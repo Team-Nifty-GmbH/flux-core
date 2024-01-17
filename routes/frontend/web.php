@@ -9,6 +9,7 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Livewire\DataTables\CommissionList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
+use FluxErp\Livewire\DataTables\ProductOptionGroupList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\TransactionList;
@@ -128,6 +129,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                     ->registersMenuItem();
                 Route::get('/categories', Categories::class)
                     ->name('categories')
+                    ->registersMenuItem();
+                Route::get('/product-option-groups', ProductOptionGroupList::class)
+                    ->name('product-option-groups')
                     ->registersMenuItem();
                 Route::get('/clients', Clients::class)
                     ->name('clients')

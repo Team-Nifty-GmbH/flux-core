@@ -13,7 +13,7 @@ class UpdateWorkTimeRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:work_times,id,deleted_at,NULL',
+            'id' => 'required|integer|exists:work_times,id,is_locked,0,deleted_at,NULL',
             'contact_id' => [
                 'nullable',
                 'integer',

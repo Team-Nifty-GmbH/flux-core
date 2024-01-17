@@ -39,7 +39,7 @@
         </x-slot:right-block>
     </x-print.first-page-header>
     <main>
-        <div class="pt-10 pb-4">
+        <div class="pt-10 pb-4 prose prose-xs">
             {!! $model->header !!}
         </div>
         <div class="pb-6">
@@ -67,15 +67,20 @@
                             {{ $position->total_net_price ? $position->slug_position : '' }}
                         </td>
                         <td class="py-4 pr-8 align-top" style="padding-left: {{ $position->depth * 15 }}px">
+                            @if($position->is_alternative)
+                                <x-badge color="warning" class="mb-2">
+                                    {{ __('Alternative') }}
+                                </x-badge>
+                            @endif
                             <p class="font-italic text-xs">
                                 {{ $position->product_number }}
                             </p>
                             <p class="font-semibold">
                                 {{ $position->name }}
                             </p>
-                            <p class="prose prose-sm">
+                            <div class="prose prose-xs">
                                 {!! $position->description !!}
-                            </p>
+                            </div>
                         </td>
                         <td class="py-4 pr-8 text-center align-top">
                             {{ format_number($position->amount) }}
@@ -162,7 +167,7 @@
             </table>
         @show
         @section('footer')
-            <div class="break-inside-avoid">
+            <div class="break-inside-avoid prose prose-sm">
                 {{ $model->footer }}
             </div>
         @show

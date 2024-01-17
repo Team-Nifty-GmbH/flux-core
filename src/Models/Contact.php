@@ -231,6 +231,6 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->getFirstMediaUrl('images') ?: self::icon()->getUrl();
+        return $this->getFirstMediaUrl('images', 'thumb') ?: self::icon()->getUrl();
     }
 }

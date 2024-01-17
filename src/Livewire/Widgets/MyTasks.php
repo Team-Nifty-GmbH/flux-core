@@ -22,6 +22,7 @@ class MyTasks extends Component
                 'tasks' => auth()
                     ->user()
                     ->tasks()
+                    ->with('project:id,name')
                     ->whereNotIn('state', $endStates)
                     ->orderByDesc('priority')
                     ->orderByRaw('ISNULL(due_date), due_date ASC')
