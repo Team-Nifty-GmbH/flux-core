@@ -58,6 +58,14 @@ class UpdateWorkTime extends FluxAction
         $workTime->save();
 
         if ($workTime->is_daily_work_time && $workTime->is_locked && ! $workTime->is_pause) {
+            // if a daily work time pause is currently running delete it
+            WorkTime::query()
+                ->where('user_id', $workTime->user_id)
+                ->where('is_daily_work_time', true)
+                ->where('is_locked', false)
+                ->where('is_pause', true)
+                ->delete();
+
             // end all active work times for this user
             WorkTime::query()
                 ->where('user_id', $workTime->user_id)
