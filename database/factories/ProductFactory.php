@@ -22,7 +22,7 @@ class ProductFactory extends Factory
         return [
             'product_number' => $this->faker->word,
             'name' => $this->faker->jobTitle(),
-            'description' => $this->faker->randomHtml(),
+            'description' => $this->faker->randomHtml(1, 1),
             'ean' => $this->faker->ean13(),
             'min_delivery_time' => $this->faker->numberBetween(3, 7),
             'max_delivery_time' => $this->faker->numberBetween(7, 15),

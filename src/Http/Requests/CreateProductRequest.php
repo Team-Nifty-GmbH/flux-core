@@ -2,17 +2,15 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Models\Category;
 use FluxErp\Models\Product;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\Rules\Enum;
 
 class CreateProductRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $productCrossSellingsRules = Arr::prependKeysWith(
@@ -37,9 +35,15 @@ class CreateProductRequest extends BaseFormRequest
                 'product_number' => 'string|nullable|unique:products,product_number',
                 'description' => 'string|nullable',
                 'weight_gram' => 'numeric|nullable',
-                'dimension_height_mm' => 'numeric|nullable',
-                'dimension_width_mm' => 'numeric|nullable',
                 'dimension_length_mm' => 'numeric|nullable',
+                'dimension_width_mm' => 'numeric|nullable',
+                'dimension_height_mm' => 'numeric|nullable',
+                'selling_unit' => 'numeric|nullable',
+                'basic_unit' => 'numeric|nullable',
+                'time_unit_enum' => [
+                    'required_if:is_service,true',
+                    new Enum(TimeUnitEnum::class),
+                ],
                 'ean' => 'string|nullable',
                 'stock' => 'integer|nullable',
                 'min_delivery_time' => 'integer|nullable',
@@ -56,6 +60,7 @@ class CreateProductRequest extends BaseFormRequest
                 'is_active' => 'boolean',
                 'is_highlight' => 'boolean',
                 'is_bundle' => 'boolean',
+                'is_service' => 'boolean',
                 'is_shipping_free' => 'boolean',
                 'is_required_product_serial_number' => 'boolean',
                 'is_required_manufacturer_serial_number' => 'boolean',

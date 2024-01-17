@@ -10,11 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateWorkTimeRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
@@ -47,6 +42,7 @@ class UpdateWorkTimeRequest extends BaseFormRequest
             'ended_at' => 'nullable|date_format:Y-m-d H:i:s',
             'name' => 'exclude_if:is_daily_work_time,true|string|nullable',
             'description' => 'string|nullable',
+            'is_billable' => 'boolean',
             'is_locked' => 'boolean',
         ];
     }

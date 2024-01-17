@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\WorkTime;
 use TeamNiftyGmbH\DataTable\DataTable;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class WorkTimeList extends DataTable
@@ -11,6 +12,8 @@ class WorkTimeList extends DataTable
     use HasEloquentListeners;
 
     protected string $model = WorkTime::class;
+
+    protected ?string $includeBefore = 'flux::livewire.datatables.work-time-list.include-before';
 
     public array $enabledCols = [
         'user.name',
@@ -43,5 +46,23 @@ class WorkTimeList extends DataTable
     public function getAggregatable(): array
     {
         return array_merge(parent::getAggregatable(), ['paused_time_ms', 'total_time_ms']);
+    }
+
+    public function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('Create Orders'))
+                ->color('primary')
+                ->wireClick('createOrders'),
+        ];
+    }
+
+    public function createOrders()
+    {
+        dd($this->selected);
+        $this->js(<<<'JS'
+            $openModal('create-orders');
+        JS);
     }
 }

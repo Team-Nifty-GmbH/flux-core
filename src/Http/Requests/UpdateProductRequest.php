@@ -2,9 +2,12 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Models\Category;
 use FluxErp\Models\Product;
 use FluxErp\Rules\ExistsWithIgnore;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateProductRequest extends BaseFormRequest
 {
@@ -53,9 +56,15 @@ class UpdateProductRequest extends BaseFormRequest
                 'name' => 'string',
                 'description' => 'string|nullable',
                 'weight_gram' => 'numeric|nullable',
-                'dimension_height_mm' => 'numeric|nullable',
-                'dimension_width_mm' => 'numeric|nullable',
                 'dimension_length_mm' => 'numeric|nullable',
+                'dimension_width_mm' => 'numeric|nullable',
+                'dimension_height_mm' => 'numeric|nullable',
+                'selling_unit' => 'numeric|nullable',
+                'basic_unit' => 'numeric|nullable',
+                'time_unit_enum' => [
+                    'required_if:is_service,true',
+                    new Enum(TimeUnitEnum::class),
+                ],
                 'ean' => 'string|nullable',
                 'stock' => 'integer|nullable',
                 'min_delivery_time' => 'integer|nullable',
@@ -72,6 +81,7 @@ class UpdateProductRequest extends BaseFormRequest
                 'is_active' => 'boolean',
                 'is_highlight' => 'boolean',
                 'is_bundle' => 'boolean',
+                'is_service' => 'boolean',
                 'is_shipping_free' => 'boolean',
                 'is_required_product_serial_number' => 'boolean',
                 'is_required_manufacturer_serial_number' => 'boolean',

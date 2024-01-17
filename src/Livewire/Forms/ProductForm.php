@@ -41,6 +41,12 @@ class ProductForm extends FluxForm
 
     public ?float $dimension_length_mm = null;
 
+    public ?float $selling_unit = null;
+
+    public ?float $basic_unit = null;
+
+    public ?string $time_unit_enum = null;
+
     public ?string $ean = null;
 
     public ?int $stock = null;
@@ -70,6 +76,8 @@ class ProductForm extends FluxForm
     public ?bool $is_highlight = false;
 
     public ?bool $is_bundle = false;
+
+    public ?bool $is_service = false;
 
     public ?bool $is_shipping_free = false;
 
