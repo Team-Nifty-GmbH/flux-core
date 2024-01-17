@@ -4,7 +4,7 @@
             <div x-transition x-show="! Object.values($wire.variants).length > 0">
                 <div class="flex gap-4" x-on:data-table-row-clicked="$wire.loadOptions($event.detail.id); productOptionGroup = $event.detail;">
                     <div class="flex-grow">
-                        <livewire:data-tables.product-option-group-list lazy />
+                        <livewire:data-tables.product-option-group-list />
                     </div>
                     <div x-collapse x-show="Object.values($wire.productOptions).length > 0" class="w-1/2">
                         <x-card>

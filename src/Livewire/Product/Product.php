@@ -104,7 +104,12 @@ class Product extends Component
                 ->label(__('Variants'))
                 ->isLivewireComponent()
                 ->wireModel('product')
-                ->when(fn () => ! $this->product->parent_id),
+                ->when(fn () => ! $this->product->parent_id && ! $this->product->is_bundle),
+            TabButton::make('product.bundle-list')
+                ->label(__('Bundle'))
+                ->isLivewireComponent()
+                ->wireModel('product')
+                ->when(fn () => ! $this->product->children_count),
             TabButton::make('product.prices')->label(__('Prices')),
             TabButton::make('product.warehouse-list')
                 ->label(__('Stock'))
