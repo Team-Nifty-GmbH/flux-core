@@ -1,11 +1,22 @@
+@props([
+    'editable' => true,
+])
 <div>
     <x-label class="mb-1">
         {{ $label ?? '' }}
     </x-label>
     <div
-        x-modelable="editable"
+        @if($attributes->has('x-modelable'))
+            x-modelable="{{ $attributes->get('x-modelable') }}"
+        @else
+            x-modelable="editable"
+        @endif
         x-data="{
-            ...setupEditor(@if($attributes->wire('model')->value()) $wire.entangle('{{ $attributes->wire('model')->value() }}') @endif),
+            ...setupEditor(
+                @if($attributes->wire('model')->value())
+                    $wire.entangle('{{ $attributes->wire('model')->value() }}')
+               @endif
+            ),
         }"
         x-init="() => init($refs.editor)"
         {{ $attributes->whereDoesntStartWith('wire:model') }}

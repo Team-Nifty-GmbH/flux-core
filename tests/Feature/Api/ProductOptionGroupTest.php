@@ -3,6 +3,7 @@
 namespace FluxErp\Tests\Feature\Api;
 
 use FluxErp\Models\Permission;
+use FluxErp\Models\Product;
 use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Tests\Feature\BaseSetup;
@@ -171,13 +172,19 @@ class ProductOptionGroupTest extends BaseSetup
         $response->assertStatus(404);
     }
 
-    public function test_delete_product_option_group_group_has_product_options()
+    public function test_delete_product_option_group_group_option_has_product()
     {
+        $product = Product::factory()->create([
+            'client_id' => $this->dbClient->id,
+        ]);
+
+        $product->productOptions()->attach($this->productOptions[1]->id);
+
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
             ->delete('/api/product-option-groups/' . $this->productOptionGroups[1]->id);
-        $response->assertStatus(423);
+        $response->assertStatus(207);
     }
 }

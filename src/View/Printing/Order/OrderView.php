@@ -13,6 +13,8 @@ class OrderView extends PrintableView
 
     public array $summary = [];
 
+    protected bool $showAlternatives = true;
+
     public function __construct(Order $order)
     {
         app()->setLocale($order->addressInvoice?->language?->language_code ?? config('app.locale'));
@@ -32,7 +34,7 @@ class OrderView extends PrintableView
             $this->model
                 ->orderPositions()
                 ->whereNull('parent_id')
-                ->whereNot('is_alternative', true)
+                ->when(! $this->showAlternatives, fn ($query) => $query->whereNot('is_alternative', true))
                 ->with('tags')
                 ->get()
                 ->append('children')

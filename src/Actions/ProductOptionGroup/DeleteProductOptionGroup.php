@@ -22,21 +22,23 @@ class DeleteProductOptionGroup extends FluxAction
         return [ProductOptionGroup::class];
     }
 
-    public function performAction(): ?bool
+    public function performAction(): array|bool|null
     {
         $productOptionGroup = ProductOptionGroup::query()
             ->whereKey($this->data['id'])
             ->first();
 
-        $errors = false;
+        $productOptions = [];
         foreach ($productOptionGroup->productOptions()->pluck('id')->toArray() as $productOption) {
             try {
                 DeleteProductOption::make(['id' => $productOption])->validate()->execute();
+                $productOptions[$productOption] = true;
             } catch (ValidationException) {
-                $errors = true;
+                $productOptions[$productOption] = false;
             }
         }
 
-        return ! $errors ? $productOptionGroup->delete() : false;
+        return ! array_filter($productOptions, fn ($item) => ! $item) ?
+            $productOptionGroup->delete() : ['product_options' => $productOptions];
     }
 }
