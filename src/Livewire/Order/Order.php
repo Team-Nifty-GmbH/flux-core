@@ -10,10 +10,13 @@ use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Forms\OrderPositionForm;
+use FluxErp\Livewire\Forms\OrderReplicateForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Media;
+use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
@@ -43,6 +46,8 @@ class Order extends OrderPositionList
     protected string $view = 'flux::livewire.order.order';
 
     public OrderForm $order;
+
+    public OrderReplicateForm $replicateOrder;
 
     public OrderPositionForm $orderPosition;
 
@@ -297,6 +302,11 @@ class Order extends OrderPositionList
                 'clients' => Client::query()
                     ->get(['id', 'name'])
                     ->toArray(),
+                'orderTypes' => OrderType::query()
+                    ->where('is_hidden', false)
+                    ->where('is_active', true)
+                    ->get(['id', 'name'])
+                    ->toArray(),
             ]
         );
     }
@@ -409,6 +419,57 @@ class Order extends OrderPositionList
             $this->redirect(route('orders.orders'), true);
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
+        }
+    }
+
+    #[Renderless]
+    public function replicate(): void
+    {
+        $this->replicateOrder->fill($this->order->toArray());
+        $this->fetchContactData();
+
+        $this->js(<<<'JS'
+            $openModal('replicate-order');
+        JS);
+    }
+
+    #[Renderless]
+    public function saveReplicate(): void
+    {
+        try {
+            $this->replicateOrder->save();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->redirectRoute('orders.id', ['id' => $this->replicateOrder->id], navigate: true);
+    }
+
+    #[Renderless]
+    public function fetchContactData(bool $replicate = false): void
+    {
+        $orderVariable = ! $replicate ? 'order' : 'replicateOrder';
+
+        $contact = Contact::query()
+            ->whereKey($this->{$orderVariable}->contact_id)
+            ->with('mainAddress:id,contact_id')
+            ->first();
+
+        $this->{$orderVariable}->client_id = $contact->client_id;
+        $this->{$orderVariable}->agent_id = $contact->agent_id ?: $this->{$orderVariable}->agent_id;
+        $this->{$orderVariable}->address_invoice_id = $contact->invoice_address_id ?? $contact->mainAddress->id;
+        $this->{$orderVariable}->address_delivery_id = $contact->delivery_address_id ?? $contact->mainAddress->id;
+        $this->{$orderVariable}->price_list_id = $contact->price_list_id;
+        $this->{$orderVariable}->payment_type_id = $contact->payment_type_id;
+
+        if (! $replicate) {
+            $this->order->address_invoice = Address::query()
+                ->whereKey($this->order->address_invoice_id)
+                ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
+                ->first()
+                ->toArray();
         }
     }
 

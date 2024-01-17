@@ -47,6 +47,156 @@
                 </x-slot:footer>
             </x-card>
         </x-modal>
+        <x-modal name="replicate-order">
+            <x-card>
+                <section x-data="{
+                    updateContactId(id) {
+                        Alpine.$data(
+                            document.getElementById('invoice-address-id').querySelector('[x-data]')
+                        ).asyncData.params.where[0][2] = id;
+                        Alpine.$data(
+                            document.getElementById('delivery-address-id').querySelector('[x-data]')
+                        ).asyncData.params.where[0][2] = id;
+                        $wire.fetchContactData(true);
+                    }
+                }
+                ">
+                    <div class="space-y-2.5 divide-y divide-secondary-200">
+                        <x-select
+                            :options="$orderTypes"
+                            option-label="name"
+                            option-value="id"
+                            :label="__('Order type')"
+                            wire:model="replicateOrder.order_type_id"
+                        />
+                        <div class="pt-4">
+                            <x-select
+                                :label="__('Contact')"
+                                class="pb-4"
+                                wire:model="replicateOrder.contact_id"
+                                option-value="contact_id"
+                                option-label="label"
+                                option-description="description"
+                                :clearable="false"
+                                x-on:selected="updateContactId($event.detail.contact_id)"
+                                template="user-option"
+                                :async-data="[
+                                    'api' => route('search', \FluxErp\Models\Address::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'option-value' => 'contact_id',
+                                        'fields' => [
+                                            'name',
+                                            'contact_id',
+                                            'firstname',
+                                            'lastname',
+                                            'company',
+                                        ],
+                                        'where' => [
+                                            [
+                                                'is_main_address',
+                                                '=',
+                                                true,
+                                            ]
+                                        ],
+                                        'with' => 'contact.media',
+                                    ]
+                                ]"
+                            />
+                            <div id="invoice-address-id">
+                                <x-select
+                                    class="pb-4"
+                                    :label="__('Invoice Address')"
+                                    wire:model="replicateOrder.address_invoice_id"
+                                    option-value="id"
+                                    option-label="label"
+                                    option-description="description"
+                                    :clearable="false"
+                                    :async-data="[
+                                        'api' => route('search', \FluxErp\Models\Address::class),
+                                        'method' => 'POST',
+                                        'params' => [
+                                            'with' => 'contact.media',
+                                            'where' => [
+                                                ['contact_id', '=', $order->contact_id],
+                                            ],
+                                        ]
+                                    ]"
+                                />
+                            </div>
+                            <div id="delivery-address-id">
+                                <x-select
+                                    :label="__('Delivery Address')"
+                                    class="pb-4"
+                                    wire:model="replicateOrder.address_delivery_id"
+                                    option-value="id"
+                                    option-label="label"
+                                    option-description="description"
+                                    :clearable="false"
+                                    :async-data="[
+                                        'api' => route('search', \FluxErp\Models\Address::class),
+                                        'method' => 'POST',
+                                        'params' => [
+                                            'with' => 'contact.media',
+                                            'where' => [
+                                                ['contact_id', '=', $order->contact_id],
+                                            ],
+                                        ]
+                                    ]"
+                                />
+                            </div>
+                        </div>
+                        <div class="space-y-3 pt-4">
+                            <x-select
+                                :label="__('Client')"
+                                :options="$clients"
+                                option-value="id"
+                                option-label="name"
+                                :clearable="false"
+                                autocomplete="off"
+                                wire:model="replicateOrder.client_id"
+                            />
+                            <x-select
+                                :label="__('Price list')"
+                                :options="$priceLists"
+                                option-value="id"
+                                option-label="name"
+                                :clearable="false"
+                                autocomplete="off"
+                                wire:model="replicateOrder.price_list_id"
+                            />
+                            <x-select
+                                :label="__('Payment method')"
+                                :options="$paymentTypes"
+                                option-value="id"
+                                option-label="name"
+                                :clearable="false"
+                                autocomplete="off"
+                                wire:model="replicateOrder.payment_type_id"
+                            />
+                            <x-select
+                                :label="__('Language')"
+                                :options="$languages"
+                                option-value="id"
+                                option-label="name"
+                                :clearable="false"
+                                autocomplete="off"
+                                wire:model="replicateOrder.language_id"
+                            />
+                        </div>
+                    </div>
+                </section>
+                <x-errors />
+                <x-slot:footer>
+                    <div class="flex justify-end gap-x-4">
+                        <div class="flex">
+                            <x-button flat :label="__('Cancel')" x-on:click="close" />
+                            <x-button spinner="saveReplicate" primary :label="__('Save')" wire:click="saveReplicate()" />
+                        </div>
+                    </div>
+                </x-slot:footer>
+            </x-card>
+        </x-modal>
     @show
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
@@ -69,7 +219,15 @@
             </div>
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-            @if(\FluxErp\Actions\Order\DeleteOrder::canPerformAction(false) && $order->id && ! $order->is_locked)
+            @if(\FluxErp\Actions\Order\ReplicateOrder::canPerformAction(false))
+                <x-button
+                    spinner="replicate"
+                    class="w-full"
+                    wire:click="replicate()"
+                    :label="__('Replicate')"
+                />
+            @endif
+            @if(\FluxErp\Actions\Order\DeleteOrder::canPerformAction(false) && ! $order->is_locked)
                 <x-button
                     wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order')]) }}"
                     negative
@@ -77,19 +235,84 @@
                     wire:click="delete"
                 />
             @endif
-            <x-button
-                primary
-                spinner
-                class="w-full"
-                x-on:click="$wire.save(orderPositions)"
-                :label="__('Save')"
-            />
+            @if(\FluxErp\Actions\Order\UpdateOrder::canPerformAction(false) && ! $order->is_locked)
+                <x-button
+                    primary
+                    spinner="save"
+                    class="w-full"
+                    x-on:click="$wire.save(orderPositions)"
+                    :label="__('Save')"
+                />
+            @endif
         </div>
     </div>
     <x-tabs wire:loading="tab" wire:model="tab" :$tabs class="w-full lg:col-start-1 xl:col-span-2 xl:flex gap-4">
         <x-slot:prepend>
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 flex flex-col gap-4">
+                    @section('contact-address-card')
+                        <x-card>
+                            <x-slot:header>
+                                <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
+                                    <x-label>
+                                        {{ __('Contact') }}
+                                    </x-label>
+                                    <div class="pl-2">
+                                        <x-button outline icon="eye" href="{{ route('contacts.id?', $order->contact_id ?? '') }}">
+                                        </x-button>
+                                    </div>
+                                </div>
+                            </x-slot:header>
+                            <div x-data="{
+                                    updateContactId(id) {
+                                        Alpine.$data(
+                                            document.getElementById('order-invoice-address-id').querySelector('[x-data]')
+                                        ).asyncData.params.where[0][2] = id;
+                                        Alpine.$data(
+                                            document.getElementById('order-delivery-address-id').querySelector('[x-data]')
+                                        ).asyncData.params.where[0][2] = id;
+                                        $wire.fetchContactData();
+                                        console.log('a');
+                                    }
+                                }"
+                            >
+                                <x-select
+                                    class="pb-4"
+                                    :label="__('Contact')"
+                                    :disabled="$order->is_locked"
+                                    wire:model="order.contact_id"
+                                    option-value="contact_id"
+                                    option-label="label"
+                                    option-description="description"
+                                    :clearable="false"
+                                    x-on:selected="updateContactId($event.detail.contact_id)"
+                                    template="user-option"
+                                    :async-data="[
+                                        'api' => route('search', \FluxErp\Models\Address::class),
+                                        'method' => 'POST',
+                                        'params' => [
+                                            'option-value' => 'contact_id',
+                                            'fields' => [
+                                                'name',
+                                                'contact_id',
+                                                'firstname',
+                                                'lastname',
+                                                'company',
+                                            ],
+                                            'where' => [
+                                                [
+                                                    'is_main_address',
+                                                    '=',
+                                                    true,
+                                                ]
+                                            ],
+                                            'with' => 'contact.media',
+                                        ]
+                                    ]"
+                                />
+                            </div>
+                        </x-card>
+                    @show
                     @section('invoice-address-card')
                         <x-card>
                             <x-slot:header>
@@ -103,24 +326,26 @@
                                     </div>
                                 </div>
                             </x-slot:header>
-                            <x-select
-                                :disabled="$order->is_locked"
-                                class="pb-4"
-                                wire:model.live="order.address_invoice_id"
-                                option-value="id"
-                                option-label="label"
-                                option-description="description"
-                                :clearable="false"
-                                :async-data="[
-                                'api' => route('search', \FluxErp\Models\Address::class),
-                                'params' => [
-                                    'with' => 'contact.media',
-                                    'where' => [
-                                        ['contact_id', '=', $order->contact_id],
-                                    ],
-                                ]
-                            ]"
-                            />
+                            <div id="order-invoice-address-id">
+                                <x-select
+                                    :disabled="$order->is_locked"
+                                    class="pb-4"
+                                    wire:model.live="order.address_invoice_id"
+                                    option-value="id"
+                                    option-label="label"
+                                    option-description="description"
+                                    :clearable="false"
+                                    :async-data="[
+                                        'api' => route('search', \FluxErp\Models\Address::class),
+                                        'params' => [
+                                            'with' => 'contact.media',
+                                            'where' => [
+                                                ['contact_id', '=', $order->contact_id],
+                                            ],
+                                        ]
+                                    ]"
+                                />
+                            </div>
                             <div class="text-sm">
                                 <div x-text="$wire.order.address_invoice.company">
                                 </div>
@@ -146,23 +371,26 @@
                                     </div>
                                 </div>
                             </x-slot:header>
-                            <x-select
-                                :disabled="$order->is_locked"
-                                class="pb-4"
-                                wire:model.live="order.address_delivery_id"
-                                option-value="id"
-                                option-label="label"
-                                option-description="description"
-                                :clearable="false"
-                                :async-data="[
-                                'api' => route('search', \FluxErp\Models\Address::class),
-                                'params' => [
-                                    'with' => 'contact.media',
-                                    'where' => [
-                                        ['contact_id', '=', $order->contact_id],
-                                    ],
-                                ]
-                            ]" />
+                            <div id="order-delivery-address-id">
+                                <x-select
+                                    :disabled="$order->is_locked"
+                                    class="pb-4"
+                                    wire:model.live="order.address_delivery_id"
+                                    option-value="id"
+                                    option-label="label"
+                                    option-description="description"
+                                    :clearable="false"
+                                    :async-data="[
+                                        'api' => route('search', \FluxErp\Models\Address::class),
+                                        'params' => [
+                                            'with' => 'contact.media',
+                                            'where' => [
+                                                ['contact_id', '=', $order->contact_id],
+                                            ],
+                                        ]
+                                    ]"
+                                />
+                            </div>
                             <div class="text-sm" x-bind:class="$wire.order.address_delivery_id === $wire.order.address_invoice_id && 'hidden'">
                                 <div x-text="$wire.order.address_delivery?.company">
                                 </div>
@@ -196,15 +424,15 @@
                                     autocomplete="off"
                                     wire:model="order.agent_id"
                                     :template="[
-                                    'name'   => 'user-option',
-                                ]"
+                                        'name'   => 'user-option',
+                                    ]"
                                     :async-data="[
-                                    'api' => route('search', \FluxErp\Models\User::class),
-                                    'method' => 'POST',
-                                    'params' => [
-                                        'with' => 'media',
-                                    ]
-                                ]"
+                                        'api' => route('search', \FluxErp\Models\User::class),
+                                        'method' => 'POST',
+                                        'params' => [
+                                            'with' => 'media',
+                                        ]
+                                    ]"
                                 />
                                 <x-select
                                     :label="__('Price list')"
