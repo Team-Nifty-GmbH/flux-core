@@ -493,7 +493,7 @@ class Order extends OrderPositionList
         }
 
         return response()->streamDownload(
-            fn () => print($pdf->pdf->output()),
+            fn () => print ($pdf->pdf->output()),
             Str::finish($pdf->getFileName(), '.pdf')
         );
     }
