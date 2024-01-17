@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 @props(['navigation' => request()->get('no-navigation', false)])
-<html class="soft-scrollbar h-full text-sm" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html @class([
+        'sort-scrollbar',
+        'h-full',
+        'text-sm',
+        'dark' => auth()->check() && auth()->user()->is_dark_mode,
+    ]
+) lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
     <x-layouts.head.head/>

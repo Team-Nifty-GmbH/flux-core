@@ -181,7 +181,7 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->getFirstMediaUrl('avatar') ?: self::icon()->getUrl();
+        return $this->getFirstMediaUrl('avatar', 'thumb') ?: self::icon()->getUrl();
     }
 
     public function sendLoginLink(): void
