@@ -2,9 +2,9 @@
     <x-modal name="generate-variants-modal" max-width="6xl">
         <x-card :title="__('Edit Variants')">
             <div x-transition x-show="! Object.values($wire.variants).length > 0">
-                <div class="flex gap-4" x-on:data-table-row-clicked="$wire.loadOptions($event.detail.id); productOptionGroup = $event.detail;">
+                <div class="flex gap-4" x-on:data-table-row-clicked="$wire.loadOptions($event.detail.id ?? $event.detail.record.id); productOptionGroup = $event.detail.record ?? $event.detail;">
                     <div class="flex-grow">
-                        <livewire:data-tables.product-option-group-list />
+                        <livewire:product.product-option-group-list />
                     </div>
                     <div x-collapse x-show="Object.values($wire.productOptions).length > 0" class="w-1/2">
                         <x-card>
@@ -54,7 +54,7 @@
                     <x-button
                         x-show="! Object.values($wire.variants).length > 0"
                         primary
-                        spinner
+                        spinner="next()"
                         :label="__('Next')"
                         wire:click="next()"
                     />
@@ -69,7 +69,7 @@
                         x-show="Object.values($wire.variants).length > 0"
                         x-cloak
                         primary
-                        spinner
+                        spinner="save()"
                         :label="__('Save')"
                         wire:confirm.icon.error="{{ __('Save Variants') }}|{{ __('Non existing product option combinations will be deleted!') }}|{{ __('Cancel') }}|{{ __('OK') }}"
                         wire:click="save().then(() => { close(); })"
