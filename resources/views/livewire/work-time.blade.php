@@ -5,6 +5,7 @@
     time: 0,
     open: false,
     activeWorkTimes: $wire.entangle('activeWorkTimes'),
+    trackable_type: $wire.entangle('workTime.trackable_type'),
     init() {
         this.activeWorkTimes.forEach((workTime) => {
             if (! workTime.interval) {
@@ -27,6 +28,25 @@
                 return this.calculateTime(workTime) + acc;
             }, 0);
         });
+
+        this.$watch('trackable_type', () => {
+            this.relatedSelected(this.trackable_type);
+        });
+    },
+    relatedSelected(type) {
+        let searchRoute = {{  '\'' . route('search', '__model__') . '\'' }};
+        $wire.workTime.trackable_id = null;
+        searchRoute = searchRoute.replace('__model__', type);
+        Alpine.$data(document.getElementById('trackable-id').querySelector('[x-data]')).asyncData.api = searchRoute;
+    },
+    recordSelected(data) {
+        if (! data) {
+            return;
+        }
+
+        data.contact_id ? $wire.workTime.contact_id = data.contact_id : null;
+        data.description ? $wire.workTime.description = data.description : null;
+        data.label ? $wire.workTime.name = data.label : null;
     },
     calculateTime(workTime) {
         let diff = (workTime.ended_at ? new Date(workTime.ended_at) : new Date()) - new Date(workTime.started_at);
@@ -81,15 +101,9 @@
                 workTime.ended_at = null;
             }
         });
-    },
-    relatedSelected(value) {
-        let searchRoute = {{  '\'' . route('search', '__model__') . '\'' }}
-        searchRoute = searchRoute.replace('__model__', value);
-        $wire.trackable_id = null;
-        Alpine.$data(document.getElementById('trackable-id').querySelector('[x-data]')).asyncData.api = searchRoute;
-    },
+    }
 }">
-    <x-modal name="work-time" persistent="true">
+    <x-modal name="work-time" persistent="true" x-on:close="$wire.resetWorkTime()">
         <x-card class="flex flex-col gap-4">
             <x-select :label="__('Work Time Type')" :options="$workTimeTypes" wire:model="workTime.work_time_type_id" option-value="id" option-label="name"/>
             <x-select :label="__('Contact')"
@@ -117,10 +131,10 @@
                     ]
                 ]"
             />
-            <x-select x-on:selected="relatedSelected($event.detail.value)" :label="__('Model')" :options="$trackableTypes" wire:model="workTime.trackable_type" />
+            <x-select :label="__('Model')" :options="$trackableTypes" wire:model="workTime.trackable_type" />
             <div id="trackable-id" x-show="$wire.workTime.trackable_type">
                 <x-select :label="__('Record')"
-                    x-on:selected="$event.detail.contact_id ? $wire.workTime.contact_id = $event.detail.contact_id : null"
+                    x-on:selected="recordSelected($event.detail)"
                     option-value="id"
                     option-label="label"
                     :async-data="[
@@ -141,7 +155,11 @@
                 <div class="flex justify-end gap-x-4">
                     <div class="flex">
                         <x-button flat :label="__('Cancel')" x-on:click="close" />
-                        <x-button primary spinner x-on:click="$wire.save().then((response) => {if(response) close();})" :label="__('Start')" />
+                        <x-button primary spinner x-on:click="$wire.save().then((success) => { if (success) close(); })">
+                            <x-slot:label>
+                                <span x-text="$wire.workTime.id ? '{{ __('Save') }}' : '{{ __('Start') }}'">
+                            </x-slot:label>
+                        </x-button>
                     </div>
                 </div>
             </x-slot:footer>
@@ -166,7 +184,7 @@
          x-transition:leave-end="opacity-0 scale-95"
          x-show="open"
          x-anchor.bottom-end.offset.5="$refs.button"
-         class="z-30"
+         class="z-10"
     >
         <x-card id="active-work-times" class="flex flex-col gap-4" :title="__('Active Work Times')">
             <x-slot:action>
@@ -183,7 +201,7 @@
                 <div class="odd:bg-neutral-100 rounded-md p-1.5 flex flex-col gap-1.5">
                     <div class="flex justify-between w-full">
                         <div class="flex flex-col w-full">
-                            <div class="text-gray-500 dark:text-gray-400" x-text="workTime.name"></div>
+                            <div class="text-gray-500 dark:text-gray-400 text-ellipsis" x-text="workTime.name"></div>
                             <div class="text-xs text-gray-500 dark:text-gray-400" x-text="workTime.work_time_type?.name"></div>
                             <div class="text-xs text-gray-500 dark:text-gray-400" x-text="formatters.datetime(workTime.started_at)"></div>
                             <x-badge primary>
@@ -196,6 +214,7 @@
                         <x-button class="w-1/2" x-show="! workTime.ended_at" warning icon="pause" :label="__('Pause')" x-on:click="pauseWorkTime(workTime)" />
                         <x-button class="w-1/2" x-show="workTime.ended_at" positive icon="play" :label="__('Continue')" x-on:click="continueWorkTime(workTime)" />
                         <x-button class="w-1/2" negative icon="stop" :label="__('Stop')" x-on:click="stopWorkTime(workTime)" />
+                        <x-button class="flex-none" primary icon="pencil" wire:click="edit(workTime.id)" />
                     </div>
                 </div>
             </template>
