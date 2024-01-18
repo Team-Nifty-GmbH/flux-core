@@ -8,12 +8,11 @@
     </div>
     <div class="space-y-6 sm:space-y-5">
         <div class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5">
-            <label for="{{ md5('address.can_login') }}"
-                   class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
+            <label for="{{ md5('address.can_login') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                 {{ __('Active') }}
             </label>
             <div class="col-span-2">
-                <x-toggle md x-bind:disabled="!edit" wire:model="address.can_login"/>
+                <x-toggle md x-bind:disabled="!$wire.edit" wire:model="address.can_login"/>
             </div>
         </div>
         <div
@@ -23,38 +22,36 @@
                 {{ __('Login name') }}
             </label>
             <div class="col-span-2">
-                <x-input x-bind:readonly="!edit" wire:model="address.login_name"/>
+                <x-input x-bind:readonly="!$wire.edit" wire:model="address.login_name"/>
             </div>
         </div>
         <div
             class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5">
-            <label for="{{ md5('password') }}"
-                   class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
+            <label for="{{ md5('password') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                 {{ __('Password') }}
             </label>
             <div class="col-span-2">
-                <x-inputs.password x-bind:readonly="!edit" wire:model="loginPassword"/>
+                <x-inputs.password x-bind:readonly="!$wire.edit" wire:model="loginPassword"/>
             </div>
         </div>
         <div
             class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5">
-            <label for="{{ md5('permissions') }}"
-                   class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
+            <label for="{{ md5('permissions') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                 {{ __('Permissions') }}
             </label>
-            <div class="col-span-2 space-y-3" x-data="{permissions: @entangle('permissions')}">
+            <div class="col-span-2 space-y-3">
                 <x-button
                     primary
                     :label="__('Select all')"
-                    x-bind:disabled="!edit"
-                    x-on:click="address.permissions = permissions.map(permission => permission.id)"
+                    x-bind:disabled="!$wire.edit"
+                    x-on:click="$wire.address.permissions = $wire.permissions.map(permission => permission.id)"
                 />
-                <template x-for="permission in permissions">
+                <template x-for="permission in $wire.permissions()">
                     <div class="flex">
                         <div>
                             <x-checkbox
-                                x-bind:disabled="!edit"
-                                x-model="address.permissions"
+                                x-bind:disabled="!$wire.edit"
+                                wire:model.number="address.permissions"
                                 x-bind:value="permission.id"
                                 x-on:change="save = true"
                                 x-bind:id="'permission-' + permission.id"

@@ -41,6 +41,9 @@ class CreateTaskRequest extends BaseFormRequest
                     'required',
                     new Numeric(min: 0),
                 ],
+
+                'tags' => 'array',
+                'tags.*' => 'required|integer|exists:tags,id,type,' . Task::class,
             ]
         );
     }

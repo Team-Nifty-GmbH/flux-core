@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Task;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateTaskRequest;
+use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -30,6 +31,7 @@ class UpdateTask extends FluxAction
 
         $users = Arr::pull($this->data, 'users');
         $orderPositions = Arr::pull($this->data, 'order_positions');
+        $tags = Arr::pull($this->data, 'tags');
 
         $task->fill($this->data);
         $task->save();
@@ -45,6 +47,10 @@ class UpdateTask extends FluxAction
                     fn ($item, $key) => [$item['id'] => ['amount' => $item['amount']]]
                 )
             );
+        }
+
+        if (! is_null($tags)) {
+            $task->syncTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
         }
 
         return $task->withoutRelations()->fresh();

@@ -187,9 +187,12 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
      *
      * @param  string  $event
      */
-    public function broadcastOn($event): PrivateChannel
+    public function broadcastOn($event): array
     {
-        return new PrivateChannel((new Contact())->broadcastChannel() . '.' . $this->contact_id);
+        return [
+            new PrivateChannel($this->broadcastChannel()),
+            new PrivateChannel((new Contact())->broadcastChannel() . $this->contact_id),
+        ];
     }
 
     public function detailRouteParams(): array
