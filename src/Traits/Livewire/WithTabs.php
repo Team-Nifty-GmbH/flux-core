@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits\Livewire;
 
+use FluxErp\Htmlables\TabButton;
 use Illuminate\View\View;
 use Illuminate\View\ViewException;
 
@@ -27,6 +28,16 @@ trait WithTabs
         $view?->with('tabs', collect($this->_tabs)->keyBy('component')->toArray());
 
         return $this;
+    }
+
+    public function getTabButton(string $component): TabButton
+    {
+        $this->setTabsToRender($this->getTabs());
+
+        // fire event to get tab buttons that are registered
+        event('tabs.rendering: ' . get_class($this), $this);
+
+        return collect($this->getTabsToRender())->keyBy('component')->toArray()[$component];
     }
 
     public function setTabsToRender(array $tabs): void

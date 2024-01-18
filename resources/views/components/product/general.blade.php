@@ -50,19 +50,29 @@
             :async-data="[
                 'api' => route('search', \FluxErp\Models\Category::class),
                 'method' => 'POST',
+                'params' => [
+                    'where' => [
+                        [
+                            'model_type',
+                            '=',
+                            \FluxErp\Models\Product::class,
+                        ],
+                    ],
+                ],
             ]"
-        ></x-select>
+        />
         <x-select
             multiselect
             x-bind:disabled="!edit"
             wire:model.number="product.tags"
             :label="__('Tags')"
-            option-value="description"
+            option-value="id"
             option-label="label"
             :async-data="[
                 'api' => route('search', \FluxErp\Models\Tag::class),
                 'method' => 'POST',
                 'params' => [
+                    'option-value' => 'id',
                     'where' => [
                         [
                             'type',
@@ -75,7 +85,7 @@
         >
             <x-slot:beforeOptions>
                 <div class="px-1">
-                    <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{  __('New Tag') }}||{{  __('Cancel') }}|{{  __('Save') }}" />
+                    <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
                 </div>
             </x-slot:beforeOptions>
         </x-select>

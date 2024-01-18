@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Validator;
 
 trait Categorizable
 {
-    public static array|int $categoryIds;
+    public static array|int|null $categoryIds = null;
 
     public static function bootCategorizable(): void
     {
@@ -26,8 +26,8 @@ trait Categorizable
 
         static::saved(function (Model $model) {
             // after saving attach the attributes
-            if (self::$categoryIds ?? false) {
-                $model->categories()->sync(self::$categoryIds);
+            if (! is_null(static::$categoryIds)) {
+                $model->categories()->sync(static::$categoryIds);
             }
         });
     }

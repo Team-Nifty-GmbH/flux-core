@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Http\Requests\CreateProductRequest;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tag;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -39,10 +40,13 @@ class CreateProduct extends FluxAction
         $product = new Product($this->data);
         $product->save();
 
-        $product->attachTags($tags);
         $product->productOptions()->attach($productOptions);
         $product->productProperties()->attach($productProperties);
         $product->prices()->createMany($this->data['prices'] ?? []);
+
+        if ($tags) {
+            $product->attachTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
+        }
 
         if ($product->is_bundle && $bundleProducts) {
             $product->bundleProducts()
