@@ -79,8 +79,8 @@ class Client extends Model implements HasMedia
         $this->addMediaCollection('logo')
             ->useDisk('public')
             ->singleFile();
-        $this
-            ->addMediaCollection('logo_small')
+
+        $this->addMediaCollection('logo_small')
             ->useDisk('public')
             ->singleFile();
     }

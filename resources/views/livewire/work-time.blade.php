@@ -1,108 +1,109 @@
 <div
     x-on:start-time-tracking.window="relatedSelected($event.detail.trackable_type); $wire.start($event.detail);"
     x-data="{
-    currentWorkTime: $wire.entangle('workTime'),
-    time: 0,
-    open: false,
-    activeWorkTimes: $wire.entangle('activeWorkTimes'),
-    trackable_type: $wire.entangle('workTime.trackable_type'),
-    init() {
-        this.activeWorkTimes.forEach((workTime) => {
-            if (! workTime.interval) {
-                this.startTimer(workTime);
+        currentWorkTime: $wire.entangle('workTime'),
+        time: 0,
+        open: false,
+        activeWorkTimes: $wire.entangle('activeWorkTimes'),
+        trackable_type: $wire.entangle('workTime.trackable_type'),
+        init() {
+            this.activeWorkTimes.forEach((workTime) => {
+                if (! workTime.interval) {
+                    this.startTimer(workTime);
+                }
+                this.time = this.activeWorkTimes.reduce((acc, workTime) => {
+                    if (! workTime.interval) {
+                        this.startTimer(workTime);
+                    }
+                    return this.calculateTime(workTime) + acc;
+                }, 0);
+            });
+
+            this.$watch('activeWorkTimes', (value) => {
+                this.time = value.reduce((acc, workTime) => {
+                    if (! workTime.interval) {
+                        this.startTimer(workTime);
+                    }
+
+                    return this.calculateTime(workTime) + acc;
+                }, 0);
+            });
+
+            this.$watch('trackable_type', () => {
+                this.relatedSelected(this.trackable_type);
+            });
+        },
+        relatedSelected(type) {
+            let searchRoute = {{  '\'' . route('search', '__model__') . '\'' }};
+            $wire.workTime.trackable_id = null;
+            searchRoute = searchRoute.replace('__model__', type);
+            Alpine.$data(document.getElementById('trackable-id').querySelector('[x-data]')).asyncData.api = searchRoute;
+        },
+        recordSelected(data) {
+            if (! data) {
+                return;
             }
-            this.time = this.activeWorkTimes.reduce((acc, workTime) => {
-                if (! workTime.interval) {
-                    this.startTimer(workTime);
-                }
-                return this.calculateTime(workTime) + acc;
-            }, 0);
-        });
 
-        this.$watch('activeWorkTimes', (value) => {
-            this.time = value.reduce((acc, workTime) => {
-                if (! workTime.interval) {
-                    this.startTimer(workTime);
-                }
+            data.contact_id ? $wire.workTime.contact_id = data.contact_id : null;
+            data.description ? $wire.workTime.description = data.description : null;
+            data.label ? $wire.workTime.name = data.label : null;
+        },
+        calculateTime(workTime) {
+            let diff = (workTime.ended_at ? new Date(workTime.ended_at) : new Date()) - new Date(workTime.started_at);
 
-                return this.calculateTime(workTime) + acc;
-            }, 0);
-        });
+            return diff - workTime.paused_time_ms;
+        },
+        startTimer(workTime) {
+            if (workTime.ended_at) {
+                return;
+            }
 
-        this.$watch('trackable_type', () => {
-            this.relatedSelected(this.trackable_type);
-        });
-    },
-    relatedSelected(type) {
-        let searchRoute = {{  '\'' . route('search', '__model__') . '\'' }};
-        $wire.workTime.trackable_id = null;
-        searchRoute = searchRoute.replace('__model__', type);
-        Alpine.$data(document.getElementById('trackable-id').querySelector('[x-data]')).asyncData.api = searchRoute;
-    },
-    recordSelected(data) {
-        if (! data) {
-            return;
-        }
+            workTime.interval = setInterval(() => {
+                this.time += 1000;
+                document.querySelector(`#active-work-times [data-id='${workTime.id}']`).innerHTML = this.msTimeToString(this.calculateTime(workTime));
+            }, 1000);
+        },
+        msTimeToString(time) {
+            let seconds = Math.floor(time / 1000);
+            let minutes = Math.floor(seconds / 60);
+            seconds = seconds % 60;
+            let hours = Math.floor(minutes / 60);
+            minutes = minutes % 60;
 
-        data.contact_id ? $wire.workTime.contact_id = data.contact_id : null;
-        data.description ? $wire.workTime.description = data.description : null;
-        data.label ? $wire.workTime.name = data.label : null;
-    },
-    calculateTime(workTime) {
-        let diff = (workTime.ended_at ? new Date(workTime.ended_at) : new Date()) - new Date(workTime.started_at);
+            hours = hours.toString().padStart(2, '0');
+            minutes = minutes.toString().padStart(2, '0');
+            seconds = seconds.toString().padStart(2, '0');
 
-        return diff - workTime.paused_time_ms;
-    },
-    startTimer(workTime) {
-        if (workTime.ended_at) {
-            return;
-        }
-
-        workTime.interval = setInterval(() => {
-            this.time += 1000;
-            document.querySelector(`#active-work-times [data-id='${workTime.id}']`).innerHTML = this.msTimeToString(this.calculateTime(workTime));
-        }, 1000);
-    },
-    msTimeToString(time) {
-        let seconds = Math.floor(time / 1000);
-        let minutes = Math.floor(seconds / 60);
-        seconds = seconds % 60;
-        let hours = Math.floor(minutes / 60);
-        minutes = minutes % 60;
-
-        hours = hours.toString().padStart(2, '0');
-        minutes = minutes.toString().padStart(2, '0');
-        seconds = seconds.toString().padStart(2, '0');
-
-        return `${hours}:${minutes}:${seconds}`;
-    },
-    stopWorkDay() {
-        this.activeWorkTimes.forEach((workTime) => {
+            return `${hours}:${minutes}:${seconds}`;
+        },
+        stopWorkDay() {
+            this.activeWorkTimes.forEach((workTime) => {
+                clearInterval(workTime.interval);
+            });
+            $wire.toggleWorkDay(false);
+            this.time = 0;
+        },
+        stopWorkTime(workTime) {
             clearInterval(workTime.interval);
-        });
-        $wire.toggleWorkDay(false);
-        this.time = 0;
-    },
-    stopWorkTime(workTime) {
-        clearInterval(workTime.interval);
-        $wire.stop(workTime.id).then((response) => {
-            if(response) {
-                this.time = Math.max(this.time - this.calculateTime(workTime), 0);
-            }
-        });
-    },
-    pauseWorkTime(workTime) {
-        clearInterval(workTime.interval);
-        $wire.pause(workTime.id);
-    },
-    continueWorkTime(workTime) {
-        $wire.continue(workTime.id).then((response) => {
-            if(response) {
-                workTime.ended_at = null;
-            }
-        });
-    }
-}">
+            $wire.stop(workTime.id).then((response) => {
+                if(response) {
+                    this.time = Math.max(this.time - this.calculateTime(workTime), 0);
+                }
+            });
+        },
+        pauseWorkTime(workTime) {
+            clearInterval(workTime.interval);
+            $wire.pause(workTime.id);
+        },
+        continueWorkTime(workTime) {
+            $wire.continue(workTime.id).then((response) => {
+                if(response) {
+                    workTime.ended_at = null;
+                }
+            });
+        }
+    }"
+>
     <x-modal name="work-time" persistent="true" x-on:close="$wire.resetWorkTime()">
         <x-card class="flex flex-col gap-4">
             <x-select :label="__('Work Time Type')" :options="$workTimeTypes" wire:model="workTime.work_time_type_id" option-value="id" option-label="name"/>

@@ -189,7 +189,6 @@ class MyWorkTimes extends BarChart
             $activeWorkTimeTypeIds = array_merge(
                 $activeWorkTimeTypeIds,
                 $baseQuery->clone()
-                    ->select(['work_time_type_id'])
                     ->where('is_daily_work_time', false)
                     ->where('parent_id', $day->id)
                     ->distinct()
@@ -231,6 +230,7 @@ class MyWorkTimes extends BarChart
                 ->whereNull('work_time_type_id')
                 ->where('parent_id', $day->id)
                 ->sum('total_time_ms');
+
             $current[$day->id] = ceil($taskTime / 60);
             $data['task_time_0'] = [
                 'name' => __('Unknown'),
@@ -245,6 +245,7 @@ class MyWorkTimes extends BarChart
 
             return $item;
         }, $data);
+
         $this->series = array_values($data);
     }
 }
