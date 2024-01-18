@@ -61,7 +61,7 @@ class CreateAddressRequest extends BaseFormRequest
                 'contact_options.*.is_primary' => 'boolean',
 
                 'tags' => 'array',
-                'tags.*' => 'string',
+                'tags.*' => 'required|integer|exists:tags,id,type,' . Address::class,
             ],
         );
     }

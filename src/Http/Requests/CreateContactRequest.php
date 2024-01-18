@@ -2,7 +2,6 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Models\Category;
 use FluxErp\Models\Contact;
 use Illuminate\Support\Arr;
 
@@ -44,13 +43,13 @@ class CreateContactRequest extends BaseFormRequest
                 'has_sensitive_reminder' => 'sometimes|boolean',
                 'has_delivery_lock' => 'sometimes|boolean',
 
+                'main_address' => 'array',
+
                 'discount_groups' => 'array',
                 'discount_groups.*' => 'integer|exists:discount_groups,id',
 
-                'main_address' => 'array',
-
                 'categories' => 'array',
-                'categories.*' => 'integer|exists:' . Category::class . ',id,model_type,' . Contact::class,
+                'categories.*' => 'required|integer|exists:categories,id,model_type,' . Contact::class,
             ]
         );
     }

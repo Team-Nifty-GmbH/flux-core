@@ -60,7 +60,7 @@ class CreateAddress extends FluxAction
         $address = new Address($this->data);
         $address->save();
 
-        if (! is_null($tags)) {
+        if ($tags) {
             $address->attachTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
         }
 

@@ -44,12 +44,12 @@
                         [
                             'model_type',
                             '=',
-                            \FluxErp\Models\Contact::class,
+                            \FluxErp\Models\Product::class,
                         ],
                     ],
                 ],
             ]"
-        ></x-select>
+        />
         <x-select
             multiselect
             x-bind:disabled="!edit"
@@ -74,7 +74,7 @@
         >
             <x-slot:beforeOptions>
                 <div class="px-1">
-                    <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{  __('New Tag') }}||{{  __('Cancel') }}|{{  __('Save') }}" />
+                    <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
                 </div>
             </x-slot:beforeOptions>
         </x-select>

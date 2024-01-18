@@ -54,7 +54,7 @@ class UpdateTaskRequest extends BaseFormRequest
                 ],
 
                 'tags' => 'array',
-                'tags.*' => 'integer|exists:tags,id',
+                'tags.*' => 'required|integer|exists:tags,id,type,' . Task::class,
             ],
         );
     }

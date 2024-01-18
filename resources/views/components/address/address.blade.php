@@ -87,7 +87,8 @@
                       searchable
                       :options="$countries"
                       option-label="name"
-                      option-value="id"></x-select>
+                      option-value="id"
+            />
         </div>
     </div>
     <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
@@ -197,8 +198,12 @@
         <div class="col-span-2">
             <x-select x-bind:disabled="!$wire.edit"
                       x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                      wire:model="address.language_id" searchable
-                      :options="$languages" option-label="name" option-value="id"></x-select>
+                      wire:model="address.language_id"
+                      searchable
+                      :options="$languages"
+                      option-label="name"
+                      option-value="id"
+            />
         </div>
     </div>
     <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
@@ -229,7 +234,7 @@
             >
                 <x-slot:beforeOptions>
                     <div class="px-1">
-                        <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{  __('New Tag') }}||{{  __('Cancel') }}|{{  __('Save') }}" />
+                        <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
                     </div>
                 </x-slot:beforeOptions>
             </x-select>
@@ -239,7 +244,7 @@
 <h3 class="pt-12 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50">
     {{ __('Attributes') }}
 </h3>
-<hr class="py-2">
+<hr class="py-2" />
 <div class="flex flex-col gap-1.5">
     <x-toggle :label="__('Active')" x-bind:disabled="!$wire.edit" wire:model="address.is_active"/>
     <x-toggle :label="__('Main Address')" x-bind:disabled="!$wire.edit || $wire.address.is_main_address" wire:model="address.is_main_address"/>
@@ -249,7 +254,7 @@
 <h3 class="pt-12 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50">
     {{ __('Contact options') }}
 </h3>
-<hr class="py-2">
+<hr class="py-2" />
 <div class="flex flex-col gap-1.5">
     <template x-for="(contactOption, index) in $wire.address.contact_options">
         <div class="flex gap-1.5 items-center">

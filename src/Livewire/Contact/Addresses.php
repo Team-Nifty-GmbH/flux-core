@@ -47,7 +47,7 @@ class Addresses extends Component
 
         $this->address->fill(
             $this->addressId
-                ? Address::query()->with('contactOptions')->whereKey($this->addressId)->first()
+                ? Address::query()->whereKey($this->addressId)->with('contactOptions')->first()
                     ?? $this->contact->main_address
                 : $this->contact->main_address
         );
@@ -63,14 +63,14 @@ class Addresses extends Component
         $listeners = [];
         foreach ($this->addresses as $address) {
             $model->id = $address['id'];
-            $channel = 'echo-private:' . $model->broadcastChannel(false);
+            $channel = 'echo-private:' . $model->broadcastChannel();
             $listeners[$channel . ',.AddressUpdated'] = 'addressUpdated';
             $listeners[$channel . ',.AddressDeleted'] = 'addressDeleted';
         }
 
         $contactModel = new Contact();
         $contactModel->id = $this->contact->id;
-        $listeners['echo-private:' . $contactModel->broadcastChannel(false) . ',.AddressCreated'] = 'loadAddresses';
+        $listeners['echo-private:' . $contactModel->broadcastChannel() . ',.AddressCreated'] = 'loadAddresses';
 
         return $listeners;
     }
@@ -146,7 +146,7 @@ class Addresses extends Component
     }
 
     #[Renderless]
-    public function duplicate(): void
+    public function replicate(): void
     {
         $this->address->reset('id', 'is_main_address', 'is_delivery_address', 'is_invoice_address');
         $this->addressId = null;
@@ -169,7 +169,9 @@ class Addresses extends Component
             fn ($address) => $address['id'] !== $this->addressId
         ));
 
-        $address = Address::query()->whereKey($this->addresses[0]['id'])->first();
+        $address = Address::query()
+            ->whereKey($this->addresses[0]['id'])
+            ->first();
         $this->select($address);
 
         $this->edit = false;
@@ -247,7 +249,12 @@ class Addresses extends Component
     public function reloadAddress(): void
     {
         if (! $this->address->id) {
-            $this->select(Address::query()->whereKey($this->addresses[0]['id'])->with('contactOptions')->first());
+            $this->select(
+                Address::query()
+                    ->whereKey($this->addresses[0]['id'])
+                    ->with('contactOptions')
+                    ->first()
+            );
 
             return;
         }
@@ -283,8 +290,12 @@ class Addresses extends Component
             ]);
 
         foreach ($addresses as $address) {
-            $this->listeners['echo-private:' . $address->broadcastChannel(false) . ',.AddressUpdated'] = 'lala';
-            $this->listeners['echo-private:' . $address->broadcastChannel(false) . ',.AddressDeleted'] = 'lala';
+            $this->listeners[
+                'echo-private:' . $address->broadcastChannel(false) . ',.AddressUpdated'
+            ] = 'addressUpdated';
+            $this->listeners[
+                'echo-private:' . $address->broadcastChannel(false) . ',.AddressDeleted'
+            ] = 'addressDeleted';
         }
 
         $this->addresses = $addresses->toArray();
@@ -296,7 +307,7 @@ class Addresses extends Component
         try {
             $tag = CreateTag::make([
                 'name' => $name,
-                'type' => \FluxErp\Models\Address::class,
+                'type' => Address::class,
             ])
                 ->checkPermission()
                 ->validate()

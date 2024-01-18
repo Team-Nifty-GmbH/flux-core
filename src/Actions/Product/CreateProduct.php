@@ -40,10 +40,13 @@ class CreateProduct extends FluxAction
         $product = new Product($this->data);
         $product->save();
 
-        $product->attachTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
         $product->productOptions()->attach($productOptions);
         $product->productProperties()->attach($productProperties);
         $product->prices()->createMany($this->data['prices'] ?? []);
+
+        if ($tags) {
+            $product->attachTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
+        }
 
         if ($product->is_bundle && $bundleProducts) {
             $product->bundleProducts()

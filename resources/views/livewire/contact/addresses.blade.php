@@ -21,7 +21,7 @@
                             <div class="flex w-full justify-between gap-1.5">
                                 <div class="text-sm dark:text-gray-50 text-ellipsis whitespace-nowrap">
                                     <div class="font-semibold" x-text="addressItem.company"></div>
-                                    <div x-text="(addressItem.firstname + ' ' + addressItem.lastname).trim()"></div>
+                                    <div x-text="((addressItem.firstname || '') + ' ' + (addressItem.lastname || '')).trim()"></div>
                                     <div x-text="addressItem.street"></div>
                                     <div x-text="((addressItem.zip || '') + ' ' + (addressItem.city || '')).trim()"></div>
                                 </div>
@@ -59,7 +59,7 @@
                             ],
                         ],
                     ]"
-                ></x-select>
+                />
             </div>
         </x-card>
     </div>
@@ -81,7 +81,7 @@
                         </div>
                         <div x-cloak x-show="! $wire.edit">
                             <x-button
-                                wire:click="duplicate()"
+                                wire:click="replicate()"
                                 :label="__('Duplicate')"
                             />
                         </div>

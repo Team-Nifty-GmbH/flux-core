@@ -2,7 +2,6 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Models\Category;
 use FluxErp\Models\Contact;
 use FluxErp\Rules\ExistsWithIgnore;
 
@@ -67,7 +66,7 @@ class UpdateContactRequest extends BaseFormRequest
                 'discount_groups.*' => 'integer|exists:discount_groups,id',
 
                 'categories' => 'array',
-                'categories.*' => 'integer|exists:' . Category::class . ',id,model_type,' . Contact::class,
+                'categories.*' => 'required|integer|exists:categories,id,model_type,' . Contact::class,
             ]
         );
     }

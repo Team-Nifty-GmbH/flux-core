@@ -11,6 +11,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Orders extends OrderList
 {
+    protected string $view = 'flux::livewire.contact.orders';
+
     #[Modelable]
     public ContactForm $contact;
 
@@ -35,11 +37,9 @@ class Orders extends OrderList
     {
         $this->order->reset();
         $this->order->contact_id = $this->contact->id;
-        $contactId = $this->contact->id;
 
-        $this->js(<<<JS
-            updateContactId($contactId);
-            \$openModal('create-order');
+        $this->js(<<<'JS'
+            $openModal('create-order');
         JS);
     }
 }

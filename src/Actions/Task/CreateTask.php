@@ -44,7 +44,7 @@ class CreateTask extends FluxAction
             );
         }
 
-        if (! is_null($tags)) {
+        if ($tags) {
             $task->attachTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
         }
 

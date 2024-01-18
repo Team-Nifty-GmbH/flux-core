@@ -87,7 +87,7 @@ class UpdateAddressRequest extends BaseFormRequest
                 'contact_options.*.is_primary' => 'boolean',
 
                 'tags' => 'array',
-                'tags.*' => 'integer|exists:tags,id',
+                'tags.*' => 'required|integer|exists:tags,id,type,' . Address::class,
             ],
         );
     }

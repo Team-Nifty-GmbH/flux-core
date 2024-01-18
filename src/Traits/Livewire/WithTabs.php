@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits\Livewire;
 
+use FluxErp\Htmlables\TabButton;
 use Illuminate\View\View;
 use Illuminate\View\ViewException;
 
@@ -29,7 +30,7 @@ trait WithTabs
         return $this;
     }
 
-    public function getTabButton(string $component)
+    public function getTabButton(string $component): TabButton
     {
         $this->setTabsToRender($this->getTabs());
 

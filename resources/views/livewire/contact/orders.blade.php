@@ -1,16 +1,7 @@
 <div x-data="{
         order: $wire.entangle('order'),
-        updateContactId(id) {
-            const modal = document.querySelector('[wireui-modal]');
-            Alpine.$data(
-                document.getElementById('invoice-address-id').querySelector('[x-data]')
-            ).asyncData.params.where[0][2] = id;
-            Alpine.$data(
-                document.getElementById('delivery-address-id').querySelector('[x-data]')
-            ).asyncData.params.where[0][2] = id;
-            $wire.fetchContactData();
-        }
-    }">
+    }"
+>
     <x-modal name="create-order">
         <x-card :title="__('New Order')">
             <section>
@@ -31,6 +22,7 @@
                             option-label="label"
                             option-description="description"
                             :clearable="false"
+                            disabled
                             x-on:selected="updateContactId($event.detail.contact_id)"
                             template="user-option"
                             :async-data="[

@@ -4,7 +4,8 @@
             <x-select
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 wire:model="contact.price_list_id"
-                :clearable="false" :label="__('Price group')"
+                :clearable="false"
+                :label="__('Price group')"
                 :options="$priceLists"
                 option-label="name"
                 option-value="id"

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Forms;
 
+use Carbon\Carbon;
 use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Models\Task;
@@ -64,6 +65,11 @@ class TaskForm extends Form
             $values = $values->toArray();
             $values['tags'] = array_column($values['tags'] ?? [], 'id');
         }
+
+        $values['start_date'] = ! is_null($values['start_date'] ?? null) ?
+            Carbon::parse($values['start_date'])->toDateString() : null;
+        $values['due_date'] = ! is_null($values['due_date'] ?? null) ?
+            Carbon::parse($values['due_date'])->toDateString() : null;
 
         parent::fill($values);
     }

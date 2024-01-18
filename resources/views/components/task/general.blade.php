@@ -35,8 +35,18 @@
             ]"
         />
         <div class="flex justify-between gap-x-4">
-            <x-input x-bind:readonly="!edit" type="date" wire:model="task.start_date" label="{{ __('Start Date') }}" />
-            <x-input x-bind:readonly="!edit" type="date" wire:model="task.due_date" label="{{ __('Due Date') }}" />
+            <x-datetime-picker
+                x-bind:readonly="!edit"
+                :without-time="true"
+                wire:model="task.start_date"
+                label="{{ __('Start Date') }}"
+            />
+            <x-datetime-picker
+                x-bind:readonly="!edit"
+                :without-time="true"
+                wire:model="task.due_date"
+                label="{{ __('Due Date') }}"
+            />
         </div>
         <x-state
             class="w-full"
@@ -91,7 +101,7 @@
             >
                 <x-slot:beforeOptions>
                     <div class="px-1">
-                        <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{  __('New Tag') }}||{{  __('Cancel') }}|{{  __('Save') }}" />
+                        <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
                     </div>
                 </x-slot:beforeOptions>
             </x-select>

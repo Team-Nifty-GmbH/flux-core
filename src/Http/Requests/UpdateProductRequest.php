@@ -114,7 +114,7 @@ class UpdateProductRequest extends BaseFormRequest
                 'product_cross_sellings.*.products.*' => 'required|integer|exists:products,id,deleted_at,NULL',
 
                 'tags' => 'array',
-                'tags.*' => 'integer|exists:tags,id',
+                'tags.*' => 'required|integer|exists:tags,id,type,' . Product::class,
             ],
         );
     }

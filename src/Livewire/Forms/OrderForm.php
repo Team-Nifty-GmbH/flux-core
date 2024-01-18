@@ -89,16 +89,12 @@ class OrderForm extends FluxForm
 
     public ?array $order_type = null;
 
-    #[Locked]
     public ?string $created_at = null;
 
-    #[Locked]
     public ?array $created_by = null;
 
-    #[Locked]
     public ?string $updated_at = null;
 
-    #[Locked]
     public ?array $updated_by = null;
 
     protected function getActions(): array

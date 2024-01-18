@@ -6,6 +6,7 @@ use FluxErp\Actions\Contact\CreateContact;
 use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Actions\Contact\UpdateContact;
 use FluxErp\Models\Client;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
@@ -25,10 +26,6 @@ class ContactForm extends FluxForm
     public ?int $client_id = null;
 
     public ?int $agent_id = null;
-
-    public ?int $countryId = null;
-
-    public ?int $language_id = null;
 
     public ?string $customer_number = null;
 
@@ -52,20 +49,13 @@ class ContactForm extends FluxForm
 
     public ?string $vat_id = null;
 
-    public array $main_address = [];
+    public array $main_address = [
+        'client_id' => null,
+        'country_id' => null,
+        'language_id' => null,
+    ];
 
     public array $categories = [];
-
-    public function __construct(
-        protected Component $component,
-        protected $propertyName
-    ) {
-        parent::__construct($component, $propertyName);
-
-        $this->main_address['client_id'] = null;
-        $this->main_address['country_id'] = null;
-        $this->main_address['language_id'] = null;
-    }
 
     protected function getActions(): array
     {
@@ -83,15 +73,17 @@ class ContactForm extends FluxForm
         $this->main_address['client_id'] = Client::query()->where('is_active', true)->count() === 1
             ? Client::query()->where('is_active', true)->first()->id
             : null;
-        $this->main_address['language_id'] = Language::query()->count() === 1 ? Language::query()->first()->id : null;
     }
 
     public function fill($values): void
     {
-        parent::fill($values);
+        if ($values instanceof Contact) {
+            $values->loadMissing(['categories:id']);
 
-        if ($values instanceof Model) {
-            $this->categories = $values->categories?->pluck('id')->toArray() ?? [];
+            $values = $values->toArray();
+            $values['categories'] = array_column($values['categories'] ?? [], 'id');
         }
+
+        parent::fill($values);
     }
 }

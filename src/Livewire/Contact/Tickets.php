@@ -17,9 +17,12 @@ class Tickets extends TicketList
         return $builder->whereHasMorph(
             'authenticatable',
             Address::class,
-            function ($query) {
-                return $query->where('contact_id', $this->contactId);
-            }
+            fn ($query) => $query->where('contact_id', $this->contactId)
         );
+    }
+
+    public function getTableActions(): array
+    {
+        return [];
     }
 }

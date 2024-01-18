@@ -7,6 +7,7 @@ use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\WithTabs;
@@ -41,7 +42,7 @@ class Product extends Component
 
     public function mount(int $id): void
     {
-        $product = \FluxErp\Models\Product::query()
+        $product = ProductModel::query()
             ->whereKey($id)
             ->with([
                 'categories:id',
@@ -79,7 +80,7 @@ class Product extends Component
         try {
             $tag = CreateTag::make([
                 'name' => $name,
-                'type' => \FluxErp\Models\Product::class,
+                'type' => ProductModel::class,
             ])
                 ->checkPermission()
                 ->validate()
@@ -165,7 +166,7 @@ class Product extends Component
         $priceLists = PriceList::query()
             ->with('parent')
             ->get(['id', 'parent_id', 'name', 'price_list_code', 'is_net', 'is_default']);
-        $product = \FluxErp\Models\Product::query()->whereKey($this->product->id)->first();
+        $product = ProductModel::query()->whereKey($this->product->id)->first();
         $priceListHelper = PriceHelper::make($product)->useDefault(false);
 
         $priceLists->map(function (PriceList $priceList) use ($priceListHelper) {

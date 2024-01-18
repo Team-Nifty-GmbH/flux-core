@@ -10,6 +10,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class CreateContact extends FluxAction
 {
@@ -48,9 +49,13 @@ class CreateContact extends FluxAction
 
         $mainAddress['contact_id'] = $contact->id;
         $mainAddress['client_id'] = $contact->client_id;
-        CreateAddress::make($mainAddress)
-            ->validate()
-            ->execute();
+
+        try {
+            CreateAddress::make($mainAddress)
+                ->validate()
+                ->execute();
+        } catch (ValidationException) {
+        }
 
         return $contact->withoutRelations()->fresh();
     }

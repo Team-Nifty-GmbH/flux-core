@@ -99,7 +99,8 @@ class Contact extends Component
                 ->label(__('Accounting'))
                 ->isLivewireComponent()
                 ->wireModel('contact'),
-            TabButton::make('contact.statistics')->label(__('Statistics')),
+            TabButton::make('contact.statistics')
+                ->label(__('Statistics')),
         ];
     }
 
@@ -144,28 +145,15 @@ class Contact extends Component
         $this->contact->fill($contact);
     }
 
-    public function changeCommissionAgent(int $id): void
-    {
-        try {
-            UpdateContact::make([
-                'id' => $this->contact['id'],
-                'agent_id' => $id,
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-        }
-
-        $this->skipRender();
-    }
-
     public function updatedAvatar(): void
     {
         $this->collection = 'avatar';
         try {
-            $response = $this->saveFileUploadsToMediaLibrary('avatar', $this->contactId, ContactModel::class);
+            $response = $this->saveFileUploadsToMediaLibrary(
+                'avatar',
+                $this->contactId,
+                ContactModel::class
+            );
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
 

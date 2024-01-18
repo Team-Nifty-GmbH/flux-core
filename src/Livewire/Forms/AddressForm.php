@@ -76,11 +76,11 @@ class AddressForm extends FluxForm
     public bool $can_login = false;
 
     // relations
+    public array $additional_columns = [];
+
     public array $contact_options = [];
 
     public array $permissions = [];
-
-    public array $additional_columns = [];
 
     public array $tags = [];
 
