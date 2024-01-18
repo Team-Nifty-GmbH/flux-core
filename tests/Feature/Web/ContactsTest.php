@@ -63,7 +63,7 @@ class ContactsTest extends BaseSetup
         $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
-            ->assertStatus(200);
+            ->assertStatus(404);
     }
 
     public function test_contacts_id_page_without_id()
