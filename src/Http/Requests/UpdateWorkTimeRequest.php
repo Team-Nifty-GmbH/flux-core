@@ -42,7 +42,7 @@ class UpdateWorkTimeRequest extends BaseFormRequest
             'ended_at' => 'nullable|date_format:Y-m-d H:i:s',
             'name' => 'exclude_if:is_daily_work_time,true|string|nullable',
             'description' => 'string|nullable',
-            'is_billable' => 'boolean',
+            'is_billable' => 'nullable|boolean',
             'is_locked' => 'boolean',
         ];
     }

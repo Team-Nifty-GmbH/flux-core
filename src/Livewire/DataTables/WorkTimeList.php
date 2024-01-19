@@ -2,9 +2,17 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\Order\CreateOrder;
+use FluxErp\Actions\Order\UpdateOrder;
+use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Actions\WorkTime\DeleteWorkTime;
 use FluxErp\Actions\WorkTime\UpdateLockedWorkTime;
+use FluxErp\Livewire\Forms\CreateOrdersFromWorkTimesForm;
 use FluxErp\Livewire\Forms\LockedWorkTimeForm;
+use FluxErp\Models\Contact;
+use FluxErp\Models\OrderType;
+use FluxErp\Models\Product;
+use FluxErp\Models\Warehouse;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\Trackable;
@@ -27,6 +35,8 @@ class WorkTimeList extends DataTable
     protected string $view = 'flux::livewire.work-time.work-time-list';
 
     public LockedWorkTimeForm $workTime;
+
+    public CreateOrdersFromWorkTimesForm $createOrdersFromWorkTimes;
 
     public array $enabledCols = [
         'user.name',
@@ -56,6 +66,14 @@ class WorkTimeList extends DataTable
         return $item;
     }
 
+    public function getReturnKeys(): array
+    {
+        return array_merge(
+            parent::getReturnKeys(),
+            ['name']
+        );
+    }
+
     public function getAggregatable(): array
     {
         return array_merge(parent::getAggregatable(), ['paused_time_ms', 'total_time_ms']);
@@ -67,16 +85,168 @@ class WorkTimeList extends DataTable
             DataTableButton::make()
                 ->label(__('Create Orders'))
                 ->color('primary')
-                ->wireClick('createOrders'),
+                ->xOnClick(<<<'JS'
+                    $openModal('create-orders');
+                JS)
+                ->when(fn () => CreateOrder::canPerformAction(false)),
         ];
     }
 
-    public function createOrders()
+    public function createOrders(): void
     {
-        dd($this->selected);
-        $this->js(<<<'JS'
-            $openModal('create-orders');
-        JS);
+        try {
+            $this->createOrdersFromWorkTimes->validate();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $product = Product::query()->whereKey($this->createOrdersFromWorkTimes->product_id)->firstOrFail();
+        $roundMs = $this->createOrdersFromWorkTimes->round_to_minutes * 60 * 1000;
+
+        $selectedIds = $this->getSelectedValues();
+
+        // get all contact_ids from selected worktimes
+        $contactIds = WorkTime::query()
+            ->whereIntegerInRaw('id', $selectedIds)
+            ->whereNotNull('contact_id')
+            ->distinct('contact_id')
+            ->pluck('contact_id');
+        $contacts = Contact::query()
+            ->whereIntegerInRaw('id', $contactIds)
+            ->with('client')
+            ->get();
+
+        $orderIds = [];
+        $billedWorkTimes = 0;
+        foreach ($contacts as $contact) {
+            $workTimes = WorkTime::query()
+                ->orderBy('is_billable', 'desc')
+                ->orderBy('started_at', 'desc')
+                ->whereIntegerInRaw('id', $selectedIds)
+                ->where('contact_id', $contact->id)
+                ->where('is_locked', true)
+                ->where('is_daily_work_time', false)
+                ->where('total_time_ms', '>', 0)
+                ->whereNull('order_position_id')
+                ->when(
+                    ! $this->createOrdersFromWorkTimes->add_non_billable_work_times,
+                    fn ($query) => $query->where('is_billable', true)
+                )
+                ->get();
+
+            if ($workTimes->isEmpty()) {
+                continue;
+            }
+
+            $billedWorkTimes += $workTimes->count();
+
+            try {
+                $order = CreateOrder::make([
+                    'client_id' => $contact->client_id,
+                    'contact_id' => $contact->id,
+                    'order_type_id' => $this->createOrdersFromWorkTimes->order_type_id,
+                ])
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException $e) {
+                exception_to_notifications($e, $this);
+
+                continue;
+            }
+
+            $orderIds[] = $order->id;
+            $smallestStartedAt = null;
+            $greatestEndedAt = null;
+            foreach ($workTimes as $workTime) {
+                if ($this->createOrdersFromWorkTimes->round == 'ceil') {
+                    $time = ceil($workTime->total_time_ms / $roundMs) * $roundMs;
+                } elseif ($this->createOrdersFromWorkTimes->round == 'floor') {
+                    $time = floor($workTime->total_time_ms / $roundMs) * $roundMs;
+                } else {
+                    $time = round($workTime->total_time_ms / 60000) * 60000;
+                }
+
+                $billingAmount = round($product->time_unit_enum->convertFromMiliseconds($time), 2);
+
+                try {
+                    $prefix = ($workTime->workTimeType?->name
+                        ? __('Type') . ': ' . $workTime->workTimeType->name . '<br>'
+                        : ''
+                    );
+                    $description = $prefix
+                        . __('Date') . ': '
+                        . $workTime->started_at
+                            ->locale($contact->invoiceAddress->language->language_code)
+                            ->isoFormat('L')
+                        . '<br>'
+                        . __('User') . ': ' . $workTime->user->name
+                        . '<br><br>'
+                        . $workTime->description;
+
+                    $orderPosition = CreateOrderPosition::make([
+                        'name' => $workTime->name,
+                        'description' => $description,
+                        'warehouse_id' => Warehouse::default()?->id,
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'amount' => $billingAmount,
+                        'discount_percentage' => ! $workTime->is_billable ? 1 : null,
+                    ])->validate()
+                        ->execute();
+                } catch (ValidationException $e) {
+                    exception_to_notifications($e, $this);
+
+                    continue;
+                }
+
+                try {
+                    UpdateLockedWorkTime::make([
+                        'id' => $workTime->id,
+                        'order_position_id' => $orderPosition->id,
+                    ])->validate()
+                        ->execute();
+                } catch (ValidationException $e) {
+                    exception_to_notifications($e, $this);
+
+                    continue;
+                }
+
+                // Check and update the smallest started_at
+                if (is_null($smallestStartedAt) || $workTime->started_at->lt($smallestStartedAt)) {
+                    $smallestStartedAt = $workTime->started_at->startOfDay();
+                }
+
+                // Check and update the greatest ended_at
+                if (is_null($greatestEndedAt) || $workTime->ended_at->gt($greatestEndedAt)) {
+                    $greatestEndedAt = $workTime->ended_at->startOfDay();
+                }
+            }
+
+            if ($smallestStartedAt->lt($greatestEndedAt)) {
+                try {
+                    UpdateOrder::make([
+                        'id' => $order->id,
+                        'system_delivery_date' => ($smallestStartedAt ?? now())->format('Y-m-d'),
+                        'system_delivery_date_end' => ($greatestEndedAt ?? now())->format('Y-m-d'),
+                    ])->validate()
+                        ->execute();
+                } catch (ValidationException $e) {
+                    exception_to_notifications($e, $this);
+                }
+            }
+
+            $order->calculatePrices()->save();
+        }
+
+        $this->selected = [];
+        $this->notification()->success(
+            count($orderIds) . ' ' . __('Orders created'),
+            __('Resulting from :count billable work times', ['count' => $billedWorkTimes])
+        );
+
+        $this->loadData();
     }
 
     public function getRowActions(): array
@@ -106,13 +276,20 @@ class WorkTimeList extends DataTable
             parent::getViewData(),
             [
                 'workTimeTypes' => WorkTimeType::query()
-                    ->get(['id', 'name'])
+                    ->get(['id', 'name', 'is_billable'])
                     ->toArray(),
                 'trackableTypes' => model_info_all()
                     ->filter(
                         fn (ModelInfo $modelInfo) => in_array(Trackable::class, $modelInfo->traits->toArray())
                     )
                     ->map(fn (ModelInfo $modelInfo) => $modelInfo->class)
+                    ->toArray(),
+                'orderTypes' => OrderType::query()
+                    ->where('is_hidden', false)
+                    ->where('is_active', true)
+                    ->get(['id', 'name', 'order_type_enum'])
+                    ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase())
+                    ->pluck('name', 'id')
                     ->toArray(),
             ]
         );

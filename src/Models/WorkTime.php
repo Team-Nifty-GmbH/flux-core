@@ -17,6 +17,7 @@ class WorkTime extends Model
     protected $casts = [
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
+        'is_billable' => 'boolean',
         'is_daily_work_time' => 'boolean',
         'is_locked' => 'boolean',
         'is_pause' => 'boolean',
@@ -42,6 +43,11 @@ class WorkTime extends Model
     public function model(): MorphTo
     {
         return $this->morphTo('trackable');
+    }
+
+    public function orderPosition(): BelongsTo
+    {
+        return $this->belongsTo(OrderPosition::class);
     }
 
     public function user(): BelongsTo

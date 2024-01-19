@@ -105,7 +105,14 @@
 }">
     <x-modal name="work-time" persistent="true" x-on:close="$wire.resetWorkTime()">
         <x-card class="flex flex-col gap-4">
-            <x-select :label="__('Work Time Type')" :options="$workTimeTypes" wire:model="workTime.work_time_type_id" option-value="id" option-label="name"/>
+            <x-select :label="__('Work Time Type')"
+                      :options="$workTimeTypes"
+                      wire:model="workTime.work_time_type_id"
+                      option-value="id"
+                      option-label="name"
+                      x-on:selected="$wire.workTime.is_billable = $event.detail.is_billable"
+            />
+            <x-toggle :label="__('Is Billable')" wire:model="workTime.is_billable" />
             <x-select :label="__('Contact')"
                 wire:model="workTime.contact_id"
                 option-value="contact_id"

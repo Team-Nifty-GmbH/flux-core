@@ -45,6 +45,8 @@ class Order extends OrderPositionList
 
     protected string $view = 'flux::livewire.order.order';
 
+    protected ?string $selectValue = 'index';
+
     public OrderForm $order;
 
     public OrderReplicateForm $replicateOrder;

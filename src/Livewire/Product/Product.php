@@ -3,8 +3,6 @@
 namespace FluxErp\Livewire\Product;
 
 use FluxErp\Actions\Tag\CreateTag;
-use FluxErp\Enums\TimeFrameEnum;
-use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProductForm;

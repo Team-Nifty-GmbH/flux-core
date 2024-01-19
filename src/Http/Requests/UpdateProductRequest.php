@@ -2,7 +2,6 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Models\Category;
 use FluxErp\Models\Product;

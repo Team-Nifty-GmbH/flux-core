@@ -20,26 +20,6 @@ class CreateOrderPosition extends FluxAction
         $this->rules = array_merge(
             (new CreateOrderPositionRequest())->rules(),
             [
-                'price_list_id' => [
-                    Rule::requiredIf(
-                        ! data_get($this->data, 'is_free_text', false)
-                        && ! data_get($this->data, 'is_bundle_position', false)
-                        && ! data_get($this->data, 'price_id', false)
-                    ),
-                    'integer',
-                    'exists:price_lists,id,deleted_at,NULL',
-                    'exclude_if:is_free_text,true',
-                ],
-                'purchase_price' => [
-                    Rule::requiredIf(
-                        ! data_get($this->data, 'is_free_text', false)
-                        && ! data_get($this->data, 'is_bundle_position', false)
-                        && data_get($this->data, 'product_id', false)
-                        && ! data_get($this->data, 'price_id', false)
-                    ),
-                    'numeric',
-                    'exclude_if:is_free_text,true',
-                ],
                 'vat_rate_percentage' => [
                     Rule::excludeIf(
                         data_get($this->data, 'is_free_text', false)
@@ -50,6 +30,7 @@ class CreateOrderPosition extends FluxAction
                         ! data_get($this->data, 'is_free_text', false)
                         && ! data_get($this->data, 'is_bundle_position', false)
                         && ! data_get($this->data, 'vat_rate_id', false)
+                        && ! data_get($this->data, 'product_id', false)
                     ),
                     'numeric',
                 ],
