@@ -177,6 +177,8 @@ class Clients extends ClientList
                 ->label(__('Logos')),
             TabButton::make('settings.client.terms-and-conditions')
                 ->label(__('Terms and Conditions')),
+            TabButton::make('settings.client.sepa')
+                ->label(__('SEPA')),
         ];
     }
 

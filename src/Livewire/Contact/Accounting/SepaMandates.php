@@ -2,24 +2,34 @@
 
 namespace FluxErp\Livewire\Contact\Accounting;
 
+use FluxErp\Actions\Printing;
 use FluxErp\Actions\SepaMandate\CreateSepaMandate;
 use FluxErp\Actions\SepaMandate\DeleteSepaMandate;
 use FluxErp\Actions\SepaMandate\UpdateSepaMandate;
 use FluxErp\Livewire\DataTables\SepaMandateList;
 use FluxErp\Livewire\Forms\ContactForm;
+use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Livewire\Forms\SepaMandateForm;
 use FluxErp\Models\ContactBankConnection;
+use FluxErp\Models\Media;
 use FluxErp\Models\SepaMandate;
+use FluxErp\Traits\Livewire\WithFileUploads;
+use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
+use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
 
 class SepaMandates extends SepaMandateList
 {
-    use Actions;
+    use Actions, WithFileUploads;
 
     protected string $view = 'flux::livewire.contact.accounting.sepa-mandates';
 
@@ -27,6 +37,22 @@ class SepaMandates extends SepaMandateList
     public ContactForm $contact;
 
     public SepaMandateForm $sepaMandate;
+
+    public MediaForm $signedMandate;
+
+    #[Locked]
+    public array $printLayouts = [];
+
+    public array $selectedPrintLayouts = [];
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        $this->printLayouts = [
+            'sepa-mandate',
+        ];
+    }
 
     protected function getViewData(): array
     {
@@ -64,6 +90,11 @@ class SepaMandates extends SepaMandateList
                 ->wireClick('edit(record.id)')
                 ->when(UpdateSepaMandate::canPerformAction(false)),
             DataTableButton::make()
+                ->label(__('Create Template'))
+                ->icon('document-text')
+                ->color('primary')
+                ->wireClick('createTemplate(record.id)'),
+            DataTableButton::make()
                 ->label(__('Delete'))
                 ->icon('trash')
                 ->color('negative')
@@ -86,6 +117,18 @@ class SepaMandates extends SepaMandateList
             exception_to_notifications($e, $this);
 
             return false;
+        }
+
+        $this->signedMandate->model_type = SepaMandate::class;
+        $this->signedMandate->model_id = $this->sepaMandate->id;
+        $this->signedMandate->collection_name = 'signed_mandate';
+
+        if ($this->signedMandate->stagedFiles || $this->signedMandate->id) {
+            try {
+                $this->signedMandate->save();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
         }
 
         $this->loadData();
@@ -116,5 +159,83 @@ class SepaMandates extends SepaMandateList
         $this->js(<<<'JS'
             $openModal('edit-sepa-mandate');
         JS);
+    }
+
+    public function createTemplate(?SepaMandate $sepaMandate = null): void
+    {
+        $this->sepaMandate->reset();
+        $this->sepaMandate->fill($sepaMandate);
+
+        $this->selectedPrintLayouts = [];
+
+        $this->js(<<<'JS'
+            $openModal('create-documents');
+        JS);
+    }
+
+    #[Renderless]
+    public function createDocuments(): ?BinaryFileResponse
+    {
+        $sepaMandate = SepaMandate::query()
+            ->whereKey($this->sepaMandate->id)
+            ->with([
+                'contact.mainAddress',
+            ])
+            ->first();
+
+        // create the documents
+        try {
+            /** @var PrintableView $file */
+            $file = Printing::make([
+                'model_type' => SepaMandate::class,
+                'model_id' => $this->sepaMandate->id,
+                'view' => 'sepa-mandate',
+            ])->checkPermission()->validate()->execute();
+
+            $filename = $file->getSubject() . '.pdf';
+            $file->savePDF($path = sys_get_temp_dir() . '/' . $filename);
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return null;
+        }
+
+        if ($this->selectedPrintLayouts['print']['sepa-mandate'] ?? false) {
+            // TODO: add to print queue for spooler
+        }
+
+        if ($this->selectedPrintLayouts['email']['sepa-mandate'] ?? false) {
+            $to[] = $sepaMandate->contact->mainAddress->email;
+
+            $this->dispatch(
+                'create',
+                [
+                    'to' => $to,
+                    'subject' => __('Sepa Mandate'),
+                    'attachments' => [
+                        [
+                            'name' => $filename,
+                            'path' => $path,
+                        ],
+                    ],
+                ]
+            )->to('edit-mail');
+        }
+
+        if ($this->selectedPrintLayouts['download']['sepa-mandate'] ?? false) {
+            $headers = [
+                'Content-type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename=' . $filename,
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+                'Expires' => '0',
+            ];
+
+            return response()
+                ->download($path, $filename, $headers)
+                ->deleteFileAfterSend();
+        }
+
+        return null;
     }
 }
