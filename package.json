@@ -32,7 +32,7 @@
         "vite": "^4.5.2"
     },
     "dependencies": {
-        "@alpinejs/collapse": "^3.13.3",
+        "@alpinejs/collapse": "^3.13.4",
         "@tiptap/core": "^2.1.13",
         "@tiptap/pm": "^2.1.16",
         "@tiptap/starter-kit": "^2.1.16",
