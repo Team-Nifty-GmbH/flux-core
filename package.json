@@ -37,7 +37,7 @@
         "@tiptap/pm": "^2.1.16",
         "@tiptap/starter-kit": "^2.1.16",
         "@wireui/alpinejs-hold-directive": "^1.0.1",
-        "apexcharts": "^3.45.1",
+        "apexcharts": "^3.45.2",
         "dayjs": "^1.11.10"
     }
 }
