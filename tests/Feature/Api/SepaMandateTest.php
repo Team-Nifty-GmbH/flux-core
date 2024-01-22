@@ -266,9 +266,7 @@ class SepaMandateTest extends BaseSetup
     {
         $sepaMandate = [
             'id' => $this->sepaMandates[0]->id,
-            'client_id' => $this->sepaMandates[2]->client_id,
-            'contact_id' => $this->contacts[2]->id,
-            'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
             'signed_date' => date('Y-m-d'),
         ];
 
@@ -285,8 +283,8 @@ class SepaMandateTest extends BaseSetup
 
         $this->assertNotEmpty($dbSepaMandate);
         $this->assertEquals($sepaMandate['id'], $dbSepaMandate->id);
-        $this->assertEquals($sepaMandate['client_id'], $dbSepaMandate->client_id);
-        $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
+        $this->assertEquals($this->sepaMandates[0]->client_id, $dbSepaMandate->client_id);
+        $this->assertEquals($this->sepaMandates[0]->contact_id, $dbSepaMandate->contact_id);
         $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
         $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date);
         $this->assertEquals($this->user->id, $dbSepaMandate->updated_by->id);

@@ -39,44 +39,21 @@ class UpdateSepaMandate extends FluxAction
     {
         parent::validateData();
 
-        $sepaMandate = SepaMandate::query()
-            ->whereKey($this->data['id'])
-            ->first();
+        if ($this->data['contact_bank_connection_id'] ?? false) {
+            $sepaMandate = SepaMandate::query()
+                ->whereKey($this->data['id'])
+                ->first();
 
-        $this->data['contact_id'] = $this->data['contact_id'] ?? $sepaMandate->contact_id;
-        $this->data['client_id'] = $this->data['client_id'] ?? $sepaMandate->client_id;
-        $this->data['contact_bank_connection_id'] = $this->data['contact_bank_connection_id'] ??
-            $sepaMandate->contact_bank_connection_id;
+            $contactBankConnectionExists = ContactBankConnection::query()
+                ->whereKey($this->data['contact_bank_connection_id'])
+                ->where('contact_id', $sepaMandate->contact_id)
+                ->exists();
 
-        $clientContactExists = Contact::query()
-            ->whereKey($this->data['contact_id'])
-            ->where('client_id', $this->data['client_id'])
-            ->exists();
-
-        $contactBankConnectionExists = ContactBankConnection::query()
-            ->whereKey($this->data['contact_bank_connection_id'])
-            ->where('contact_id', $this->data['contact_id'])
-            ->exists();
-
-        $errors = [];
-        if (! $clientContactExists) {
-            $errors += [
-                'contact_id' => ['contact with id: \'' . $this->data['contact_id'] .
-                    '\' doesnt match client id:\'' . $this->data['client_id'] . '\'',
-                ],
-            ];
-        }
-
-        if (! $contactBankConnectionExists) {
-            $errors += [
-                'contact_bank_connection_id' => ['contact bank connection with id: \'' .
-                    $this->data['contact_bank_connection_id'] . '\' doesnt match contact id:' . $this->data['contact_id'] . '\'',
-                ],
-            ];
-        }
-
-        if ($errors) {
-            throw ValidationException::withMessages($errors)->errorBag('updateSepaMandate');
+            if (! $contactBankConnectionExists) {
+                throw ValidationException::withMessages([
+                    'contact_bank_connection_id' => ['contact bank connection does not exist on contact.'],
+                ])->errorBag('updateSepaMandate');
+            }
         }
     }
 }
