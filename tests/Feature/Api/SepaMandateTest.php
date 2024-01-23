@@ -266,9 +266,7 @@ class SepaMandateTest extends BaseSetup
     {
         $sepaMandate = [
             'id' => $this->sepaMandates[0]->id,
-            'client_id' => $this->sepaMandates[2]->client_id,
-            'contact_id' => $this->contacts[2]->id,
-            'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
             'signed_date' => date('Y-m-d'),
         ];
 
@@ -285,8 +283,8 @@ class SepaMandateTest extends BaseSetup
 
         $this->assertNotEmpty($dbSepaMandate);
         $this->assertEquals($sepaMandate['id'], $dbSepaMandate->id);
-        $this->assertEquals($sepaMandate['client_id'], $dbSepaMandate->client_id);
-        $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
+        $this->assertEquals($this->sepaMandates[0]->client_id, $dbSepaMandate->client_id);
+        $this->assertEquals($this->sepaMandates[0]->contact_id, $dbSepaMandate->contact_id);
         $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
         $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date);
         $this->assertEquals($this->user->id, $dbSepaMandate->updated_by->id);
@@ -310,30 +308,16 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals(422, $responseSepaMandate->status);
     }
 
-    public function test_update_sepa_mandate_multi_status_client_contact_bank_connection_not_exists()
+    public function test_update_sepa_mandate_multi_status_contact_bank_connection_not_exists()
     {
         $sepaMandates = [
-            [
-                'id' => $this->sepaMandates[0]->id,
-                'client_id' => $this->sepaMandates[2]->client_id,
-            ],
-            [
-                'id' => $this->sepaMandates[1]->id,
-                'contact_id' => $this->contacts[2]->id,
-            ],
-            [
-                'id' => $this->sepaMandates[0]->id,
-                'client_id' => $this->sepaMandates[2]->client_id,
-                'contact_id' => $this->contacts[1]->id,
-            ],
             [
                 'id' => $this->sepaMandates[2]->id,
                 'contact_bank_connection_id' => $this->contactBankConnections[0]->id,
             ],
             [
                 'id' => $this->sepaMandates[1]->id,
-                'contact_id' => $this->contacts[2]->id,
-                'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
+                'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
             ],
         ];
 
@@ -346,20 +330,10 @@ class SepaMandateTest extends BaseSetup
         $responses = json_decode($response->getContent())->responses;
         $this->assertEquals($sepaMandates[0]['id'], $responses[0]->id);
         $this->assertEquals(422, $responses[0]->status);
-        $this->assertTrue(property_exists($responses[0]->errors, 'contact_id'));
+        $this->assertTrue(property_exists($responses[0]->errors, 'contact_bank_connection_id'));
         $this->assertEquals($sepaMandates[1]['id'], $responses[1]->id);
         $this->assertEquals(422, $responses[1]->status);
-        $this->assertTrue(property_exists($responses[1]->errors, 'contact_id'));
         $this->assertTrue(property_exists($responses[1]->errors, 'contact_bank_connection_id'));
-        $this->assertEquals($sepaMandates[2]['id'], $responses[2]->id);
-        $this->assertEquals(422, $responses[2]->status);
-        $this->assertTrue(property_exists($responses[2]->errors, 'contact_id'));
-        $this->assertEquals($sepaMandates[3]['id'], $responses[3]->id);
-        $this->assertEquals(422, $responses[3]->status);
-        $this->assertTrue(property_exists($responses[3]->errors, 'contact_bank_connection_id'));
-        $this->assertEquals($sepaMandates[4]['id'], $responses[4]->id);
-        $this->assertEquals(422, $responses[4]->status);
-        $this->assertTrue(property_exists($responses[4]->errors, 'contact_bank_connection_id'));
     }
 
     public function test_delete_sepa_mandate()
