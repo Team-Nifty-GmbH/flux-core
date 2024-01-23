@@ -24,6 +24,8 @@ class CreateClientRequest extends BaseFormRequest
             'fax' => 'string|nullable',
             'email' => 'email|nullable',
             'website' => 'string|nullable',
+            'creditor_identifier' => 'string|nullable',
+            'sepa_text' => 'string|nullable',
             'opening_hours' => 'array|nullable',
             'terms_and_conditions' => 'string|nullable',
             'is_active' => 'boolean',

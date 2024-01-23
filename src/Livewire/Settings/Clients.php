@@ -74,7 +74,7 @@ class Clients extends ClientList
                 ->color('primary')
                 ->icon('pencil')
                 ->attributes([
-                    'wire:click' => 'show(record)',
+                    'wire:click' => 'show(record.id)',
                 ])
                 ->when(UpdateClient::canPerformAction(false)),
             DataTableButton::make()
@@ -177,6 +177,8 @@ class Clients extends ClientList
                 ->label(__('Logos')),
             TabButton::make('settings.client.terms-and-conditions')
                 ->label(__('Terms and Conditions')),
+            TabButton::make('settings.client.sepa')
+                ->label(__('SEPA')),
         ];
     }
 
