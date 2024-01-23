@@ -9,7 +9,7 @@ use FluxErp\Actions\Media\UpdateMedia;
 use FluxErp\Actions\Media\UploadMedia;
 use Livewire\Attributes\Locked;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-use Spatie\MediaLibrary\MediaCollections\MediaCollection;
+use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MediaForm extends FluxForm
@@ -62,7 +62,6 @@ class MediaForm extends FluxForm
     public function generatePreviewUrls(): void
     {
         if (is_array($this->file)) {
-            $this->stagedFiles = [];
             foreach ($this->file as $file) {
                 $this->stagedFiles[] = $this->arrayFromUpload($file);
             }
@@ -80,11 +79,12 @@ class MediaForm extends FluxForm
 
             $this->generatePreviewUrls();
         } elseif ($values instanceof MediaCollection) {
+            $this->file = [];
             foreach ($values as $value) {
-                $this->file = $value;
-
-                $this->generatePreviewUrls();
+                $this->file[] = $value;
             }
+
+            $this->generatePreviewUrls();
         }
     }
 
@@ -94,6 +94,8 @@ class MediaForm extends FluxForm
 
         foreach ($stagedFiles as $file) {
             $file = array_intersect_key($file, $this->all());
+            $file['id'] = $file['id'] ?? null;
+
             $this->fill($file);
 
             if ($this->id && $this->shouldDelete) {
@@ -143,7 +145,7 @@ class MediaForm extends FluxForm
             'name' => $file->getClientOriginalName(),
             'temporary_filename' => $file->getFilename(),
             'file_name' => $file->getClientOriginalName(),
-            'preview_url' => $file->temporaryUrl(),
+            'preview_url' => $file->isPreviewable() ? $file->temporaryUrl() : null,
             'media' => $file->getRealPath(),
         ];
     }

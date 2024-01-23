@@ -207,7 +207,7 @@
         </div>
     </div>
     <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="{{ md5('address.language_id') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
+        <label for="{{ md5('address.tags') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Tags') }}
         </label>
         <div class="col-span-2">

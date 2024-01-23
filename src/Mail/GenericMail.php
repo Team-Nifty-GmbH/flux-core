@@ -2,7 +2,7 @@
 
 namespace FluxErp\Mail;
 
-use FluxErp\Livewire\Forms\MailMessageForm;
+use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Models\Media;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Attachment;
@@ -16,7 +16,7 @@ class GenericMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public MailMessageForm $mailMessageForm)
+    public function __construct(public CommunicationForm $mailMessageForm)
     {
         //
     }

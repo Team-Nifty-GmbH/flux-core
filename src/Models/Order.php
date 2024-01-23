@@ -21,7 +21,7 @@ use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\Mailable;
+use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Printable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
@@ -43,9 +43,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes, HasPackageFactory,
-        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Mailable,
-        Printable, Searchable, SoftDeletes, Trackable;
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
+        HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
+        InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable;
 
     protected $with = [
         'currency',
