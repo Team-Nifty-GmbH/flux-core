@@ -74,7 +74,7 @@ class Clients extends ClientList
                 ->color('primary')
                 ->icon('pencil')
                 ->attributes([
-                    'wire:click' => 'show(record)',
+                    'wire:click' => 'show(record.id)',
                 ])
                 ->when(UpdateClient::canPerformAction(false)),
             DataTableButton::make()
