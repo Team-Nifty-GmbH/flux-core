@@ -40,6 +40,7 @@ class CreateProductRequest extends BaseFormRequest
                 'selling_unit' => 'numeric|nullable',
                 'basic_unit' => 'numeric|nullable',
                 'time_unit_enum' => [
+                    'nullable',
                     'required_if:is_service,true',
                     new Enum(TimeUnitEnum::class),
                 ],

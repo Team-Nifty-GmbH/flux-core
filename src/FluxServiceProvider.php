@@ -49,9 +49,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Livewire\Exceptions\ComponentNotFoundException;
 use Livewire\Livewire;
-use Livewire\Mechanisms\ComponentRegistry;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
@@ -363,15 +361,9 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerLivewireComponents(): void
     {
         $livewireNamespace = 'FluxErp\\Livewire\\';
-        $componentRegistry = app(ComponentRegistry::class);
 
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
-            // if an alias is already registered, skip it
-            try {
-                $componentRegistry->getClass($alias);
-            } catch (ComponentNotFoundException $e) {
-                Livewire::component($alias, $class);
-            }
+            Livewire::component($alias, $class);
         }
     }
 

@@ -10,11 +10,6 @@ use Illuminate\Validation\Rules\Enum;
 
 class UpdateProductRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
@@ -61,6 +56,7 @@ class UpdateProductRequest extends BaseFormRequest
                 'selling_unit' => 'numeric|nullable',
                 'basic_unit' => 'numeric|nullable',
                 'time_unit_enum' => [
+                    'nullable',
                     'required_if:is_service,true',
                     new Enum(TimeUnitEnum::class),
                 ],
