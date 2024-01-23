@@ -87,16 +87,16 @@ class OrdersTest extends PortalDuskTestCase
                 ->waitForRoute('portal.orders')
                 ->assertRouteIs('portal.orders')
                 ->waitForText('My orders')
-                ->waitForText('ORDER NUMBER')
-                ->waitForText('ORDER TYPE -> NAME')
-                ->waitForText('COMMISSION')
-                ->waitForText('PAYMENT STATE')
-                ->waitForText('TOTAL GROSS PRICE')
-                ->assertSee('ORDER NUMBER')
-                ->assertSee('ORDER TYPE -> NAME')
-                ->assertSee('COMMISSION')
-                ->assertSee('PAYMENT STATE')
-                ->assertSee('TOTAL GROSS PRICE');
+                ->waitForText('Order Number')
+                ->waitForText('Order Type -> NAME')
+                ->waitForText('Commission')
+                ->waitForText('Payment State')
+                ->waitForText('Total Gross Price')
+                ->assertSee('Order Number')
+                ->assertSee('Order Type -> name')
+                ->assertSee('Commission')
+                ->assertSee('Payment State')
+                ->assertSee('Total Gross Price');
 
             $rows = $browser->elements('[tall-datatable] tbody [data-id]');
 

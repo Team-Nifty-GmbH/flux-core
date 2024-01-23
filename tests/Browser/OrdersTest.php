@@ -22,7 +22,7 @@ class OrdersTest extends DuskTestCase
                 ->click('nav [href="/orders/list"]')
                 ->waitForRoute('orders.orders')
                 ->assertRouteIs('orders.orders')
-                ->waitForText('ORDER TYPE -> NAME');
+                ->waitForText('Order Type -> Name');
         });
     }
 }
