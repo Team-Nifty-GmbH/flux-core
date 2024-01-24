@@ -14,7 +14,7 @@ class CreateOrdersFromWorkTimesForm extends Form
     public ?int $order_type_id = null;
 
     #[Rule('required_if:round,ceil|required_if:round,floor|nullable|integer')]
-    public ?int $round_to_minutes = null;
+    public ?int $round_to_minute = null;
 
     #[Rule('boolean')]
     public bool $add_non_billable_work_times = true;

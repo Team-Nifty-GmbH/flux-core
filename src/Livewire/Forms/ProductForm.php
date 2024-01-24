@@ -35,11 +35,11 @@ class ProductForm extends FluxForm
 
     public ?float $weight_gram = null;
 
-    public ?float $dimension_height_mm = null;
+    public ?float $dimension_length_mm = null;
 
     public ?float $dimension_width_mm = null;
 
-    public ?float $dimension_length_mm = null;
+    public ?float $dimension_height_mm = null;
 
     public ?float $selling_unit = null;
 

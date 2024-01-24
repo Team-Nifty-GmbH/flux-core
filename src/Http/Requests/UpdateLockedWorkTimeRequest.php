@@ -40,7 +40,7 @@ class UpdateLockedWorkTimeRequest extends BaseFormRequest
                 'integer',
                 new MorphExists('trackable_type'),
             ],
-            'started_at' => 'date_format:Y-m-d H:i:s|before:ended_at',
+            'started_at' => 'required_with:ended_at|date_format:Y-m-d H:i:s|before:ended_at',
             'ended_at' => 'nullable|date_format:Y-m-d H:i:s|after:started_at',
             'paused_time_ms' => 'integer|nullable|min:0',
             'name' => 'exclude_if:is_daily_work_time,true|string|nullable',

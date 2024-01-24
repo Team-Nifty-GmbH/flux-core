@@ -67,7 +67,10 @@ class OrderList extends DataTable
 
     public function delete(): void
     {
-        $orders = Order::query()->whereIntegerInRaw('id', $this->selected)->where('is_locked', false)->pluck('id');
+        $orders = Order::query()
+            ->whereIntegerInRaw('id', $this->selected)
+            ->where('is_locked', false)
+            ->pluck('id');
 
         $deleted = 0;
         foreach ($orders as $orderId) {
@@ -85,9 +88,11 @@ class OrderList extends DataTable
         }
 
         $this->notification()->success(__('Deleted :count orders', ['count' => $deleted]));
+
         if ($deleted > 0) {
             $this->loadData();
         }
+
         $this->selected = [];
     }
 }

@@ -25,7 +25,7 @@
                     />
                 </div>
             @show
-            <hr>
+            <hr/>
             <x-input x-bind:readonly="!edit" label="{{ __('EAN') }}" wire:model="product.ean" />
             <x-input x-bind:readonly="!edit" label="{{ __('Manufacturer product number') }}" wire:model="product.manufacturer_product_number" />
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">

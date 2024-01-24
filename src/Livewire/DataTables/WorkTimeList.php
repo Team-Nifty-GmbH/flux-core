@@ -16,6 +16,7 @@ use FluxErp\Models\Warehouse;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\Trackable;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\ModelInfo\ModelInfo;
@@ -96,18 +97,20 @@ class WorkTimeList extends DataTable
     {
         try {
             $this->createOrdersFromWorkTimes->validate();
-        } catch (ValidationException $e) {
+            $product = Product::query()
+                ->whereKey($this->createOrdersFromWorkTimes->product_id)
+                ->firstOrFail();
+        } catch (ValidationException|ModelNotFoundException $e) {
             exception_to_notifications($e, $this);
 
             return;
         }
 
-        $product = Product::query()->whereKey($this->createOrdersFromWorkTimes->product_id)->firstOrFail();
-        $roundMs = $this->createOrdersFromWorkTimes->round_to_minutes * 60 * 1000;
+        $roundMs = bcmul($this->createOrdersFromWorkTimes->round_to_minute, 60 * 1000);
 
         $selectedIds = $this->getSelectedValues();
 
-        // get all contact_ids from selected worktimes
+        // get all contact_ids from selected work times
         $contactIds = WorkTime::query()
             ->whereIntegerInRaw('id', $selectedIds)
             ->whereNotNull('contact_id')
@@ -122,14 +125,14 @@ class WorkTimeList extends DataTable
         $billedWorkTimes = 0;
         foreach ($contacts as $contact) {
             $workTimes = WorkTime::query()
-                ->orderBy('is_billable', 'desc')
-                ->orderBy('started_at', 'desc')
                 ->whereIntegerInRaw('id', $selectedIds)
                 ->where('contact_id', $contact->id)
                 ->where('is_locked', true)
                 ->where('is_daily_work_time', false)
                 ->where('total_time_ms', '>', 0)
                 ->whereNull('order_position_id')
+                ->orderBy('is_billable', 'desc')
+                ->orderBy('started_at', 'desc')
                 ->when(
                     ! $this->createOrdersFromWorkTimes->add_non_billable_work_times,
                     fn ($query) => $query->where('is_billable', true)
@@ -161,18 +164,18 @@ class WorkTimeList extends DataTable
             $greatestEndedAt = null;
             foreach ($workTimes as $workTime) {
                 if ($this->createOrdersFromWorkTimes->round == 'ceil') {
-                    $time = ceil($workTime->total_time_ms / $roundMs) * $roundMs;
+                    $time = bcmul(bcceil(bcdiv($workTime->total_time_ms, $roundMs)), $roundMs);
                 } elseif ($this->createOrdersFromWorkTimes->round == 'floor') {
-                    $time = floor($workTime->total_time_ms / $roundMs) * $roundMs;
+                    $time = bcmul(bcfloor(bcdiv($workTime->total_time_ms, $roundMs)), $roundMs);
                 } else {
-                    $time = round($workTime->total_time_ms / 60000) * 60000;
+                    $time = bcmul(bcround(bcdiv($workTime->total_time_ms, 60000)), 60000);
                 }
 
-                $billingAmount = round($product->time_unit_enum->convertFromMiliseconds($time), 2);
+                $billingAmount = bcround($product->time_unit_enum->convertFromMilliseconds($time), 2);
 
                 try {
                     $prefix = ($workTime->workTimeType?->name
-                        ? __('Type') . ': ' . $workTime->workTimeType->name . '<br>'
+                        ? __('Type') . ': ' . $workTime->workTimeType->name . '<br/>'
                         : ''
                     );
                     $description = $prefix
@@ -180,9 +183,9 @@ class WorkTimeList extends DataTable
                         . $workTime->started_at
                             ->locale($contact->invoiceAddress->language->language_code)
                             ->isoFormat('L')
-                        . '<br>'
+                        . '<br/>'
                         . __('User') . ': ' . $workTime->user->name
-                        . '<br><br>'
+                        . '<br/><br/>'
                         . $workTime->description;
 
                     $orderPosition = CreateOrderPosition::make([
@@ -193,8 +196,7 @@ class WorkTimeList extends DataTable
                         'product_id' => $product->id,
                         'amount' => $billingAmount,
                         'discount_percentage' => ! $workTime->is_billable ? 1 : null,
-                    ])->validate()
-                        ->execute();
+                    ])->validate()->execute();
                 } catch (ValidationException $e) {
                     exception_to_notifications($e, $this);
 
@@ -205,8 +207,7 @@ class WorkTimeList extends DataTable
                     UpdateLockedWorkTime::make([
                         'id' => $workTime->id,
                         'order_position_id' => $orderPosition->id,
-                    ])->validate()
-                        ->execute();
+                    ])->validate()->execute();
                 } catch (ValidationException $e) {
                     exception_to_notifications($e, $this);
 
@@ -228,10 +229,9 @@ class WorkTimeList extends DataTable
                 try {
                     UpdateOrder::make([
                         'id' => $order->id,
-                        'system_delivery_date' => ($smallestStartedAt ?? now())->format('Y-m-d'),
+                        'system_delivery_date' => $smallestStartedAt,
                         'system_delivery_date_end' => ($greatestEndedAt ?? now())->format('Y-m-d'),
-                    ])->validate()
-                        ->execute();
+                    ])->validate()->execute();
                 } catch (ValidationException $e) {
                     exception_to_notifications($e, $this);
                 }

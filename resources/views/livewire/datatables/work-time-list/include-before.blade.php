@@ -26,13 +26,13 @@
                         ],
                     ],
                 ]"
-            ></x-select>
-            <hr>
+            />
+            <hr/>
             <x-radio value="round" :label="__('Do not round')" wire:model="createOrdersFromWorkTimes.round"/>
             <x-radio value="ceil" :label="__('Round up')" wire:model="createOrdersFromWorkTimes.round"/>
             <x-radio value="floor" :label="__('Round down')" wire:model="createOrdersFromWorkTimes.round"/>
-            <div x-show="$wire.createOrdersFromWorkTimes.round" x-cloak x-transition>
-                <x-inputs.number :label="__('Round to nearest minutes')" wire:model="createOrdersFromWorkTimes.round_to_minutes"/>
+            <div x-show="$wire.createOrdersFromWorkTimes.round !== 'round'" x-cloak x-transition>
+                <x-inputs.number :label="__('Round to nearest minute')" wire:model="createOrdersFromWorkTimes.round_to_minute"/>
             </div>
             <x-toggle :label="__('Add non billable times')" wire:model="createOrdersFromWorkTimes.add_non_billable_work_times" />
         </div>
