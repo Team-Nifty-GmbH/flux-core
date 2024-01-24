@@ -11,11 +11,15 @@ use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Livewire\DataTables\CommunicationList;
 use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Livewire\Forms\MediaForm;
+use FluxErp\Mail\GenericMail;
+use FluxErp\Models\Address;
 use FluxErp\Models\Communication as CommunicationModel;
 use FluxErp\Models\Contact;
+use FluxErp\Models\MailAccount;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -106,6 +110,11 @@ class Communication extends CommunicationList
         return $builder->whereRelation('contacts', 'communicatable_id', $this->contactId);
     }
 
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['communication_type_enum']);
+    }
+
     #[Renderless]
     public function save(): bool
     {
@@ -154,6 +163,45 @@ class Communication extends CommunicationList
     }
 
     #[Renderless]
+    public function send(): bool
+    {
+        $this->communication->attachments = $this->attachments->uploadedFile;
+
+        if ($this->communication->mail_account_id) {
+            $mailAccount = MailAccount::query()
+                ->whereKey($this->communication->mail_account_id)
+                ->first();
+
+            config([
+                'mail.default' => 'mail_account',
+                'mail.mailers.mail_account.transport' => $mailAccount->smtp_mailer,
+                'mail.mailers.mail_account.username' => $mailAccount->smtp_email,
+                'mail.mailers.mail_account.password' => $mailAccount->smtp_password,
+                'mail.mailers.mail_account.host' => $mailAccount->smtp_host,
+                'mail.mailers.mail_account.port' => $mailAccount->smtp_port,
+                'mail.mailers.mail_account.encryption' => $mailAccount->smtp_encryption,
+                'mail.from.address' => $mailAccount->smtp_email,
+                'mail.from.name' => auth()->user()->name,
+            ]);
+        }
+
+        try {
+            Mail::to($this->communication->to)
+                ->cc($this->communication->cc)
+                ->bcc($this->communication->bcc)
+                ->send(new GenericMail($this->communication));
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->notification()->success(__('Email sent successfully!'));
+
+        return true;
+    }
+
+    #[Renderless]
     public function edit(?CommunicationModel $communication = null): void
     {
         $this->communication->reset();
@@ -167,6 +215,22 @@ class Communication extends CommunicationList
         $this->js(<<<'JS'
             $openModal('edit-communication');
         JS);
+    }
+
+    #[Renderless]
+    public function setTo(Address $address): void
+    {
+        $this->communication->to = [
+            implode(
+                "\n",
+                array_filter([
+                    $address->company,
+                    trim($address->firstname . ' ' . $address->lastname),
+                    $address->street,
+                    trim($address->zip . ' ' . $address->city),
+                ])
+            )
+        ];
     }
 
     #[Renderless]

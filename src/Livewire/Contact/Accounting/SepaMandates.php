@@ -227,9 +227,7 @@ class SepaMandates extends SepaMandateList
                 'Expires' => '0',
             ];
 
-            return response()
-                ->download($path, $filename, $headers)
-                ->deleteFileAfterSend();
+            return response()->download($path, $filename, $headers);
         }
 
         return null;

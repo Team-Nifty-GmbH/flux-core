@@ -44,7 +44,7 @@ return new class extends Migration
             $table->renameColumn('communicatable_id', 'mailable_id');
             $table->renameColumn('communication_id', 'mail_message_id');
 
-            $table->unique(['mailable_type', 'mailable_id'], 'mailables_ids_type_unique');
+            $table->unique(['mailable_id', 'mailable_type', 'mail_message_id'], 'mailables_ids_type_unique');
             $table->index(['mailable_type', 'mailable_id']);
             $table->foreign('mail_message_id')
                 ->references('id')
