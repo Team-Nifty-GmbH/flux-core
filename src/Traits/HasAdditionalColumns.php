@@ -533,7 +533,7 @@ trait HasAdditionalColumns
     /**
      * Find current Meta model for the given key.
      *
-     * @return  ?Meta
+     * @return ?Meta
      */
     public function findMeta(string $key): ?Meta
     {
