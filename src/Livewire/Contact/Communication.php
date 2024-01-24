@@ -217,7 +217,7 @@ class Communication extends CommunicationList
             ->whereKey($this->communication->id)
             ->with([
                 'media' => fn ($query) => $query->where('collection_name', 'attachments')
-                    ->select(['id', 'file_name'])
+                    ->select(['id', 'file_name']),
             ])
             ->first();
 

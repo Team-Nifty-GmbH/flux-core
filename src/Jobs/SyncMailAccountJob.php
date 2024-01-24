@@ -8,11 +8,10 @@ use FluxErp\Actions\MailFolder\CreateMailFolder;
 use FluxErp\Actions\MailFolder\DeleteMailFolder;
 use FluxErp\Actions\MailFolder\UpdateMailFolder;
 use FluxErp\Actions\MailMessage\CreateMailMessage;
-use FluxErp\Actions\MailMessage\UpdateMailMessage;
 use FluxErp\Console\Scheduling\Repeatable;
+use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
-use FluxErp\Models\Communication;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -226,7 +225,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 'to' => $message->getTo()->toArray(),
                 'cc' => $message->getCc()->toArray(),
                 'bcc' => $message->getBcc()->toArray(),
-                'communication_type' => 'mail',
+                'communication_type_enum' => 'mail',
                 'date' => $message->getDate()->toDate(),
                 'subject' => $message->getSubject()->toString(),
                 'text_body' => $message->getTextBody(),
@@ -242,7 +241,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 'id' => $messageModel->id,
                 'mail_folder_id' => $folderId,
                 'message_uid' => $message->getUid(),
-                'communication_type' => 'mail',
+                'communication_type_enum' => 'mail',
                 'tags' => $message->getFlags()->toArray(),
                 'is_seen' => $message->hasFlag('seen'),
             ])

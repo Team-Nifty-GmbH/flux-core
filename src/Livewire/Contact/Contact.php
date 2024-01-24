@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Contact;
 
-use FluxErp\Actions\Contact\UpdateContact;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Contact as ContactModel;

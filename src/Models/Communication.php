@@ -35,7 +35,7 @@ class Communication extends Model implements HasMedia, OffersPrinting
         'to' => 'array',
         'cc' => 'array',
         'bcc' => 'array',
-        'communication_type' => CommunicationTypeEnum::class,
+        'communication_type_enum' => CommunicationTypeEnum::class,
         'date' => 'datetime',
         'is_seen' => 'boolean',
     ];
@@ -103,7 +103,7 @@ class Communication extends Model implements HasMedia, OffersPrinting
     public function getPrintViews(): array
     {
         return [
-            'communication' => CommunicationView::class
+            'communication' => CommunicationView::class,
         ];
     }
 }

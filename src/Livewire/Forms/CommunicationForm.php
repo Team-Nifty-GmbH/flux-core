@@ -25,7 +25,7 @@ class CommunicationForm extends FluxForm
 
     public ?array $bcc = [];
 
-    public ?string $communication_type = null;
+    public ?string $communication_type_enum = null;
 
     public ?string $date = null;
 

@@ -18,7 +18,7 @@ class CommunicationList extends DataTable
         'from',
         'subject',
         'text_body',
-        'communication_type',
+        'communication_type_enum',
     ];
 
     public function getFormatters(): array
@@ -27,7 +27,7 @@ class CommunicationList extends DataTable
             'from' => 'email',
             'subject' => 'string',
             'text_body' => 'string',
-            'communication_type' => [
+            'communication_type_enum' => [
                 'state',
                 [
                     __('Letter') => 'secondary',
@@ -42,8 +42,8 @@ class CommunicationList extends DataTable
     {
         $array = parent::itemToArray($item);
 
-        if ($array['communication_type'] ?? false) {
-            $array['communication_type'] = __(Str::headline($array['communication_type']));
+        if ($array['communication_type_enum'] ?? false) {
+            $array['communication_type_enum'] = __(Str::headline($array['communication_type_enum']));
         }
 
         if ($array['text_body'] ?? false) {

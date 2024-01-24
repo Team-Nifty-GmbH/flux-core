@@ -15,7 +15,7 @@ return new class extends Migration
             $table->unsignedBigInteger('mail_account_id')->nullable()->change();
             $table->unsignedBigInteger('mail_folder_id')->nullable()->change();
 
-            $table->string('communication_type')->nullable()->after('bcc');
+            $table->string('communication_type_enum')->nullable()->after('bcc');
             $table->softDeletes()->after('updated_at');
 
             $table->renameIndex('mail_messages_mail_account_id_foreign', 'communications_mail_account_id_foreign');
@@ -25,7 +25,7 @@ return new class extends Migration
         $this->migrateCommunicationsTable();
 
         Schema::table('communications', function (Blueprint $table) {
-            $table->string('communication_type')->nullable(false)->change();
+            $table->string('communication_type_enum')->nullable(false)->change();
         });
     }
 
@@ -38,7 +38,7 @@ return new class extends Migration
             $table->unsignedBigInteger('mail_folder_id')->nullable(false)->change();
 
             $table->dropColumn([
-                'communication_type',
+                'communication_type_enum',
                 'deleted_at',
             ]);
 
@@ -52,7 +52,7 @@ return new class extends Migration
     private function migrateCommunicationsTable(): void
     {
         DB::table('communications')
-            ->update(['communication_type' => 'mail']);
+            ->update(['communication_type_enum' => 'mail']);
     }
 
     private function rollbackCommunicationsTable(): void

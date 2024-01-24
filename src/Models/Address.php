@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Traits\Commentable;
+use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasCalendarEvents;
@@ -12,7 +13,6 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\Lockable;
-use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Broadcasting\PrivateChannel;

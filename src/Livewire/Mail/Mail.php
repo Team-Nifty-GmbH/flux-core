@@ -5,9 +5,9 @@ namespace FluxErp\Livewire\Mail;
 use FluxErp\Jobs\SyncMailAccountJob;
 use FluxErp\Livewire\DataTables\CommunicationList;
 use FluxErp\Livewire\Forms\CommunicationForm;
+use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
-use FluxErp\Models\Communication;
 use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -120,7 +120,7 @@ class Mail extends CommunicationList
     public function getBuilder(Builder $builder): Builder
     {
         return $builder
-            ->where('communication_type', 'mail')
+            ->where('communication_type_enum', 'mail')
             ->whereIntegerInRaw('mail_account_id', array_column($this->mailAccounts, 'id'))
             ->when($this->folderId, function (Builder $builder) {
                 $builder->whereIntegerInRaw('mail_folder_id', $this->selectedFolderIds);

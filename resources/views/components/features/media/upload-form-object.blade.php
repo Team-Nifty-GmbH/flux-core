@@ -66,6 +66,7 @@
         >
             <div class="absolute top-0 bottom-0 left-0 right-0 z-30 flex items-center justify-center bg-blue-500 opacity-90"
                  x-show="isDropping"
+                 x-cloak
             >
                 <span class="text-3xl text-white">{{ __('Release to upload!') }}</span>
             </div>
@@ -77,7 +78,7 @@
                 </div>
                 <p>{{ __('Click here to select files to upload') }}</p>
                 <em class="italic text-slate-400">{{ __('(Or drag files to the page)') }}</em>
-                <div class="mt-3 h-[2px] w-1/2 bg-gray-200" x-show="isUploading">
+                <div class="mt-3 h-[2px] w-1/2 bg-gray-200" x-show="isUploading" x-cloak>
                     <div
                         class="h-[2px] bg-blue-500 transition-all"
                         style="transition: width 1s"
@@ -90,7 +91,7 @@
         </div>
         <div class="space-y-3">
             <template x-for="(file, index) in $wire.{{ $wireModel }}.stagedFiles">
-                <x-card class="!py-0 !px-0" x-show="! file.shouldDelete">
+                <x-card class="!py-0 !px-0" x-show="! file.shouldDelete" x-cloak>
                     <div class="flex items-center justify-between text-sm">
                         <div class="flex w-0 flex-1 items-center gap-1.5">
                             <div class="flex-shrink-0 rounded-md object-contain">

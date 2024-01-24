@@ -1,9 +1,9 @@
 <?php
 
 use FluxErp\Models\Address;
+use FluxErp\Models\Communication;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Log;
-use FluxErp\Models\Communication;
 use FluxErp\Models\Order;
 use FluxErp\Models\Project;
 use FluxErp\Models\Schedule;
@@ -43,11 +43,11 @@ Broadcast::channel('FluxErp.Models.Log', function ($user) {
     return $user->can(channel_to_permission((new Log())->broadcastChannelRoute()));
 });
 
-Broadcast::channel('FluxErp.Models.MailMessage.{message}', function ($user) {
+Broadcast::channel('FluxErp.Models.Communication.{message}', function ($user) {
     return $user->can(channel_to_permission((new Communication())->broadcastChannelRoute()));
 });
 
-Broadcast::channel('FluxErp.Models.MailMessage', function ($user) {
+Broadcast::channel('FluxErp.Models.Communication', function ($user) {
     return $user->can(channel_to_permission((new Communication())->broadcastChannelRoute()));
 });
 

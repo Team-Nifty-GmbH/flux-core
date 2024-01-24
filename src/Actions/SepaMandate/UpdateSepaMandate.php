@@ -4,7 +4,6 @@ namespace FluxErp\Actions\SepaMandate;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\UpdateSepaMandateRequest;
-use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\SepaMandate;
 use Illuminate\Database\Eloquent\Model;

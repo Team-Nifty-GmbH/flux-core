@@ -6,8 +6,9 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Http\Requests\CreateCommunicationRequest;
 use FluxErp\Models\Address;
-use FluxErp\Models\ContactOption;
 use FluxErp\Models\Communication;
+use FluxErp\Models\ContactOption;
+use FluxErp\Models\MailMessage;
 use FluxErp\Models\Order;
 use Illuminate\Support\Arr;
 use Meilisearch\Endpoints\Indexes;
@@ -26,7 +27,7 @@ class CreateMailMessage extends FluxAction
         return [Communication::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): MailMessage
     {
         $tags = Arr::pull($this->data, 'tags');
         $attachments = Arr::pull($this->data, 'attachments', []);

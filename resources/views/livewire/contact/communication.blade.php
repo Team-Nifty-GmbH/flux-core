@@ -18,7 +18,7 @@
             <x-select
                 :clearable="false"
                 :options="$communicationTypes"
-                wire:model="communication.communication_type"
+                wire:model="communication.communication_type_enum"
                 :label="__('Communication Type')"
                 option-value="name"
                 option-label="label"
@@ -53,7 +53,7 @@
                 </div>
                 <x-input :placeholder="__('Add a new to')" x-on:blur="addReceiver($event, 'to')" x-on:keyup="addReceiver($event, 'to')" class="w-full" />
             </div>
-            <div class="flex flex-col gap-1.5" x-cloak x-show="$wire.communication.communication_type === 'mail'">
+            <div class="flex flex-col gap-1.5" x-cloak x-show="$wire.communication.communication_type_enum === 'mail'">
                 <x-label>{{ __('CC') }}</x-label>
                 <div class="flex gap-1">
                     <template x-for="cc in $wire.communication.cc">
@@ -80,7 +80,7 @@
                 </div>
                 <x-input :placeholder="__('Add a new cc')" x-on:blur="addReceiver($event, 'cc')" x-on:keyup="addReceiver($event, 'cc')" class="w-full" />
             </div>
-            <div class="flex flex-col gap-1.5" x-cloak x-show="$wire.communication.communication_type === 'mail'">
+            <div class="flex flex-col gap-1.5" x-cloak x-show="$wire.communication.communication_type_enum === 'mail'">
                 <x-label>{{ __('BCC') }}</x-label>
                 <div class="flex gap-1">
                     <template x-for="bcc in $wire.communication.bcc">
