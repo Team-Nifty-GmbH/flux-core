@@ -143,7 +143,7 @@ class MediaForm extends FluxForm
             'name' => $file->getClientOriginalName(),
             'temporary_filename' => $file->getFilename(),
             'file_name' => $file->getClientOriginalName(),
-            'preview_url' => $file->temporaryUrl(),
+            'preview_url' => $file->isPreviewable() ? $file->temporaryUrl() : null,
             'media' => $file->getRealPath(),
         ];
     }
