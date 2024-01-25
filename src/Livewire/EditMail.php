@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire;
 
-use FluxErp\Livewire\Forms\MailMessageForm;
+use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Mail\GenericMail;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\Media;
@@ -20,7 +20,7 @@ class EditMail extends Component
 {
     use Actions, WithFileUploads;
 
-    public MailMessageForm $mailMessage;
+    public CommunicationForm $mailMessage;
 
     public array $files = [];
 
@@ -51,7 +51,7 @@ class EditMail extends Component
     }
 
     #[Renderless]
-    public function create(array|MailMessageForm|Model $values): void
+    public function create(array|CommunicationForm|Model $values): void
     {
         if ($values instanceof Model || is_array($values)) {
             $this->mailMessage->fill($values);

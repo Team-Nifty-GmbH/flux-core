@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Traits\Commentable;
+use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasCalendarEvents;
@@ -12,7 +13,6 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\Lockable;
-use FluxErp\Traits\Mailable;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -38,9 +38,9 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendarEvents, HasCalendars,
-        HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid, Lockable,
-        Mailable, Notifiable, Searchable, SoftDeletes;
+    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens,
+        HasCalendarEvents, HasCalendars, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags,
+        HasUserModification, HasUuid, Lockable, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'login_password',

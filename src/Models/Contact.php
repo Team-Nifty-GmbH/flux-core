@@ -6,6 +6,7 @@ use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
+use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasFrontendAttributes;
@@ -30,9 +31,9 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Contact extends Model implements HasMedia, InteractsWithDataTables
 {
-    use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasPackageFactory, HasSerialNumberRange, HasUserModification, HasUuid, InteractsWithMedia, Lockable,
-        SoftDeletes;
+    use BroadcastsEvents, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
+        HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification, HasUuid,
+        InteractsWithMedia, Lockable, SoftDeletes;
 
     protected $casts = [
         'uuid' => 'string',

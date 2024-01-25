@@ -2,9 +2,15 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\Printable;
+use FluxErp\Traits\SoftDeletes;
+use FluxErp\View\Printing\Communication\CommunicationView;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,9 +21,10 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class MailMessage extends Model implements HasMedia
+class Communication extends Model implements HasMedia, OffersPrinting
 {
-    use BroadcastsEvents, HasPackageFactory, HasTags, HasUuid, InteractsWithMedia, Searchable;
+    use BroadcastsEvents, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Printable,
+        Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -28,12 +35,14 @@ class MailMessage extends Model implements HasMedia
         'to' => 'array',
         'cc' => 'array',
         'bcc' => 'array',
+        'communication_type_enum' => CommunicationTypeEnum::class,
+        'date' => 'datetime',
         'is_seen' => 'boolean',
     ];
 
     public static function booted(): void
     {
-        static::saving(function (MailMessage $message) {
+        static::saving(function (Communication $message) {
             if ($message->isDirty('text_body')) {
                 $message->text_body = strip_tags($message->text_body ?? '');
             }
@@ -49,7 +58,12 @@ class MailMessage extends Model implements HasMedia
 
     public function addresses(): MorphToMany
     {
-        return $this->morphedByMany(Address::class, 'mailable');
+        return $this->morphedByMany(Address::class, 'communicatable', 'communicatable');
+    }
+
+    public function contacts(): MorphToMany
+    {
+        return $this->morphedByMany(Contact::class, 'communicatable', 'communicatable');
     }
 
     public function mailAccount(): BelongsTo
@@ -64,7 +78,7 @@ class MailMessage extends Model implements HasMedia
 
     public function orders(): MorphToMany
     {
-        return $this->morphedByMany(Order::class, 'mailable');
+        return $this->morphedByMany(Order::class, 'communicatable', 'communicatable');
     }
 
     public function toSearchableArray(): array
@@ -84,5 +98,12 @@ class MailMessage extends Model implements HasMedia
 
         $this->addMediaCollection('attachments')
             ->useDisk('local');
+    }
+
+    public function getPrintViews(): array
+    {
+        return [
+            'communication' => CommunicationView::class,
+        ];
     }
 }

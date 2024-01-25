@@ -1,28 +1,28 @@
 <?php
 
-namespace FluxErp\Actions\MailMessage;
+namespace FluxErp\Actions\Communication;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Models\MailMessage;
+use FluxErp\Models\Communication;
 
-class DeleteMailMessage extends FluxAction
+class DeleteCommunication extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
         $this->rules = [
-            'id' => 'required|integer|exists:mail_messages,id',
+            'id' => 'required|integer|exists:communications,id,deleted_at,NULL',
         ];
     }
 
     public static function models(): array
     {
-        return [MailMessage::class];
+        return [Communication::class];
     }
 
     public function performAction(): ?bool
     {
-        return MailMessage::query()
+        return Communication::query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

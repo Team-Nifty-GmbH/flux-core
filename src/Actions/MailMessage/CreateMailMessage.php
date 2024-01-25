@@ -4,8 +4,9 @@ namespace FluxErp\Actions\MailMessage;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
-use FluxErp\Http\Requests\CreateMailMessageRequest;
+use FluxErp\Http\Requests\CreateCommunicationRequest;
 use FluxErp\Models\Address;
+use FluxErp\Models\Communication;
 use FluxErp\Models\ContactOption;
 use FluxErp\Models\MailMessage;
 use FluxErp\Models\Order;
@@ -17,20 +18,21 @@ class CreateMailMessage extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateMailMessageRequest())->rules();
+        $this->rules = (new CreateCommunicationRequest())->rules();
+        unset($this->rules['communicatable_type'], $this->rules['communicatable_id']);
     }
 
     public static function models(): array
     {
-        return [MailMessage::class];
+        return [Communication::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): MailMessage
     {
         $tags = Arr::pull($this->data, 'tags');
         $attachments = Arr::pull($this->data, 'attachments', []);
 
-        $mailMessage = new MailMessage($this->data);
+        $mailMessage = new Communication($this->data);
         $mailMessage->save();
 
         if ($tags) {
@@ -39,7 +41,7 @@ class CreateMailMessage extends FluxAction
 
         foreach ($attachments as $attachment) {
             $attachment['model_id'] = $mailMessage->id;
-            $attachment['model_type'] = MailMessage::class;
+            $attachment['model_type'] = Communication::class;
             $attachment['collection_name'] = 'attachments';
             $attachment['media_type'] = 'string';
 

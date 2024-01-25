@@ -6,6 +6,7 @@ use FluxErp\Listeners\Auth\LoginListener;
 use FluxErp\Listeners\Auth\LogoutListener;
 use FluxErp\Listeners\BroadcastEventSubscriber;
 use FluxErp\Listeners\CacheKeyWrittenListener;
+use FluxErp\Listeners\MessageSendingEventSubscriber;
 use FluxErp\Listeners\NotificationEloquentEventSubscriber;
 use FluxErp\Listeners\Order\OrderInvoiceAddedSubscriber;
 use FluxErp\Listeners\SnapshotEventSubscriber;
@@ -50,6 +51,7 @@ class EventServiceProvider extends ServiceProvider
         SnapshotEventSubscriber::class,
         WebhookEventSubscriber::class,
         OrderInvoiceAddedSubscriber::class,
+        MessageSendingEventSubscriber::class,
     ];
 
     /**

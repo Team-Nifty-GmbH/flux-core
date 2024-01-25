@@ -15,20 +15,24 @@
     </div>
     <div class="black-bar"></div>
     <div class="block pt-20 ">
-        <address class="inline-block not-italic float-left align-top">
-            <div class="font-semibold">
-                {{ $address->company ?? '' }}
-            </div>
-            <div>
-                {{ trim(($address->firstname ?? '') . ' ' . ($address->lastname ?? '')) }}
-            </div>
-            <div>
-                {{ $address->street ?? '' }}
-            </div>
-            <div>
-                {{ trim(($address->zip ?? '') . ' ' . ($address->city ?? '')) }}
-            </div>
-        </address>
+        @if($slot->isNotEmpty())
+            {!! $slot !!}
+        @else
+            <address class="inline-block not-italic float-left align-top">
+                <div class="font-semibold">
+                    {{ $address->company ?? '' }}
+                </div>
+                <div>
+                    {{ trim(($address->firstname ?? '') . ' ' . ($address->lastname ?? '')) }}
+                </div>
+                <div>
+                    {{ $address->street ?? '' }}
+                </div>
+                <div>
+                    {{ trim(($address->zip ?? '') . ' ' . ($address->city ?? '')) }}
+                </div>
+            </address>
+        @endif
         <div class="inline-block float-right items-end float-right align-top">
             <div>
                 {{ $rightBlock ?? '' }}

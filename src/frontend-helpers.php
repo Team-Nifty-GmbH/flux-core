@@ -36,8 +36,15 @@ if (! function_exists('exception_to_notifications')) {
             && $errors = json_decode($exception->getResponse()->getContent(), true)['errors'] ?? []:
 
                 foreach ($errors as $field => $messages) {
+                    $title = array_map(
+                        fn ($segment) => is_numeric($segment)
+                            ? $segment + 1
+                            : __(\Illuminate\Support\Str::headline($segment)),
+                        explode('.', $field)
+                    );
+
                     foreach ($messages as $message) {
-                        $component->notification()->error(__(\Illuminate\Support\Str::headline($field)), __($message));
+                        $component->notification()->error(implode(' -> ', $title), __($message));
                         $component->addError($field, __($message));
                     }
                 }
