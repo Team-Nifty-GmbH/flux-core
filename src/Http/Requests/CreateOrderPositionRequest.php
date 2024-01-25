@@ -85,6 +85,7 @@ class CreateOrderPositionRequest extends BaseFormRequest
                 'purchase_price' => [
                     new Numeric(),
                     'nullable',
+                    'exclude_if:is_free_text,true',
                 ],
                 'unit_price' => [
                     'exclude_if:is_free_text,true',
@@ -126,6 +127,11 @@ class CreateOrderPositionRequest extends BaseFormRequest
                 ],
                 'is_free_text' => 'boolean',
                 'is_bundle_position' => 'exclude_without:parent_id|boolean',
+
+                'discount_percentage' => [
+                    new Numeric(0, 1),
+                    'nullable',
+                ],
 
                 'discounts' => 'array',
                 'discounts.*.sort_number' => 'required|integer|min:0',

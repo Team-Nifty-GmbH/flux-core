@@ -30,12 +30,14 @@ class UpdateLockedWorkTime extends FluxAction
 
         $workTime->fill($this->data);
 
-        if (! data_get($this->data, 'ended_at')) {
-            $workTime->total_time_ms = 0;
-            $workTime->is_locked = false;
-        } else {
-            $workTime->total_time_ms = Carbon::parse($this->data['ended_at'])
-                ->diffInMilliseconds(Carbon::parse($workTime->started_at)) - $workTime->paused_time_ms;
+        if (array_key_exists('ended_at', $this->data)) {
+            if (! data_get($this->data, 'ended_at')) {
+                $workTime->total_time_ms = 0;
+                $workTime->is_locked = false;
+            } else {
+                $workTime->total_time_ms = Carbon::parse($this->data['ended_at'])
+                    ->diffInMilliseconds(Carbon::parse($workTime->started_at)) - $workTime->paused_time_ms;
+            }
         }
 
         $workTime->save();

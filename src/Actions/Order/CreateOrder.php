@@ -76,6 +76,7 @@ class CreateOrder extends FluxAction
         $this->data['payment_type_id'] = $this->data['payment_type_id']
             ?? $contact->payment_type_id
             ?? PaymentType::default()?->id;
+        $this->data['client_id'] ??= $contact->client_id;
 
         $paymentType = PaymentType::query()
             ->whereKey(data_get($this->data, 'payment_type_id'))

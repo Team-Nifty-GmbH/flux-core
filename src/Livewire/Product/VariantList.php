@@ -7,6 +7,7 @@ use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Product;
+use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -155,6 +156,14 @@ class VariantList extends ProductList
 
         foreach (data_get($this->variants, 'new', []) as $variantCreate) {
             $product['product_options'] = $variantCreate;
+            $product['name'] = $this->product->name . ' - '
+                . implode(
+                    ' ',
+                    ProductOption::query()
+                        ->whereIntegerInRaw('id', $variantCreate)
+                        ->pluck('name')
+                        ->toArray()
+                );
 
             try {
                 CreateProduct::make($product)

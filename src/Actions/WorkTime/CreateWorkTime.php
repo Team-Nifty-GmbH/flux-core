@@ -22,6 +22,11 @@ class CreateWorkTime extends FluxAction
     public function performAction(): WorkTime
     {
         $workTime = new WorkTime($this->data);
+
+        if (is_null(data_get($this->data, 'is_billable'))) {
+            $workTime->is_billable = $workTime->workTimeType?->is_billable ?? false;
+        }
+
         $workTime->save();
 
         return $workTime->fresh();

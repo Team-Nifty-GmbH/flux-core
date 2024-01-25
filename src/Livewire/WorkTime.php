@@ -58,7 +58,7 @@ class WorkTime extends Component
     {
         return view('flux::livewire.work-time', [
             'workTimeTypes' => WorkTimeType::query()
-                ->select(['id', 'name'])
+                ->select(['id', 'name', 'is_billable'])
                 ->get()
                 ->toArray(),
             'trackableTypes' => model_info_all()

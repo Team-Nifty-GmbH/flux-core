@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -31,6 +32,7 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
 
     protected $casts = [
         'uuid' => 'string',
+        'time_unit_enum' => TimeUnitEnum::class,
         'is_active' => 'boolean',
         'is_highlight' => 'boolean',
         'is_shipping_free' => 'boolean',
