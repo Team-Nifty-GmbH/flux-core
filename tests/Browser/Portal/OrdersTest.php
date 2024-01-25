@@ -93,7 +93,7 @@ class OrdersTest extends PortalDuskTestCase
                 ->waitForText('Payment State')
                 ->waitForText('Total Gross Price')
                 ->assertSee('Order Number')
-                ->assertSee('Order Type -> name')
+                ->assertSee('Order Type -> Name')
                 ->assertSee('Commission')
                 ->assertSee('Payment State')
                 ->assertSee('Total Gross Price');
