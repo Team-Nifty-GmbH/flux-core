@@ -88,7 +88,7 @@ class OrdersTest extends PortalDuskTestCase
                 ->assertRouteIs('portal.orders')
                 ->waitForText('My orders')
                 ->waitForText('Order Number')
-                ->waitForText('Order Type -> Nme')
+                ->waitForText('Order Type -> Name')
                 ->waitForText('Commission')
                 ->waitForText('Payment State')
                 ->waitForText('Total Gross Price')
