@@ -3,8 +3,11 @@
 use FluxErp\Http\Controllers\LoginLinkController;
 use FluxErp\Http\Middleware\NoAuth;
 use FluxErp\Livewire\InstallWizard;
+use FluxErp\Models\Client;
+use FluxErp\Models\Communication;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Vite;
+use Livewire\Drawer\Utils;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,3 +28,18 @@ Route::get('/pwa-service-worker', function () {
 Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)->name('flux.install');
 
 Route::get('/login-link', LoginLinkController::class)->name('login-link');
+
+Route::get('/mail-pixel/{communication:uuid?}', function (Communication $communication) {
+    if ($communication->exists) {
+        activity('communication')
+            ->performedOn($communication)
+            ->log('Mail opened');
+    }
+
+    $logo = Client::default()->getFirstMedia('logo_small');
+
+    return Utils::pretendResponseIsFile(
+        $logo->getPath(),
+        $logo->mime_type
+    );
+})->name('mail-pixel');

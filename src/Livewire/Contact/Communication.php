@@ -86,7 +86,10 @@ class Communication extends CommunicationList
                 ->color('negative')
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Communication')]),
+                    'wire:confirm.icon.error' => __(
+                        'wire:confirm.delete',
+                        ['model' => __('Communication')]
+                    ),
                 ])
                 ->when(DeleteCommunication::canPerformAction(false)),
         ];
@@ -165,7 +168,7 @@ class Communication extends CommunicationList
     #[Renderless]
     public function send(): bool
     {
-        $this->communication->attachments = $this->attachments->uploadedFile;
+        $this->communication->attachments = $this->attachments->uploadedFile ?? [];
 
         if ($this->communication->mail_account_id) {
             $mailAccount = MailAccount::query()
@@ -185,6 +188,9 @@ class Communication extends CommunicationList
             ]);
         }
 
+        $this->communication->communicatable_type = Contact::class;
+        $this->communication->communicatable_id = $this->contactId;
+
         try {
             Mail::to($this->communication->to)
                 ->cc($this->communication->cc)
@@ -197,6 +203,8 @@ class Communication extends CommunicationList
         }
 
         $this->notification()->success(__('Email sent successfully!'));
+
+        $this->loadData();
 
         return true;
     }
@@ -229,7 +237,7 @@ class Communication extends CommunicationList
                     $address->street,
                     trim($address->zip . ' ' . $address->city),
                 ])
-            )
+            ),
         ];
     }
 

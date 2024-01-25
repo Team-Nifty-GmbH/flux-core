@@ -586,6 +586,8 @@ class Order extends OrderPositionList
                         html_entity_decode($this->order->order_type['mail_body']),
                         ['order' => $order]
                     ),
+                    'communicatable_type' => \FluxErp\Models\Order::class,
+                    'communicatable_id' => $this->order->id,
                 ]
             )->to('edit-mail');
         }
