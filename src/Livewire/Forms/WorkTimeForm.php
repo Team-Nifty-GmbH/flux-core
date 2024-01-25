@@ -43,6 +43,8 @@ class WorkTimeForm extends FluxForm
 
     public ?string $description = null;
 
+    public ?bool $is_billable = null;
+
     #[Locked]
     public bool $is_daily_work_time = false;
 

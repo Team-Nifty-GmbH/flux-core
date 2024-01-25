@@ -89,7 +89,7 @@
                             @if($position->total_base_net_price > $position->total_net_price)
                                 <div class="text-xs whitespace-nowrap">
                                     <div class="line-through">
-                                        {{ $formatter->formatCurrency($isNet ? $position->total_net_price : $position->total_gross_price, $currency) }}
+                                        {{ $formatter->formatCurrency($isNet ? $position->total_base_net_price : $position->total_base_gross_price, $currency) }}
                                     </div>
                                     <div>
                                         -{{ format_number(diff_percentage($position->total_base_net_price, $position->total_net_price), NumberFormatter::PERCENT) }}

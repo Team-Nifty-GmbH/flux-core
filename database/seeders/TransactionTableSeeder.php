@@ -15,7 +15,7 @@ class TransactionTableSeeder extends Seeder
         $orders = Order::all(['id']);
         foreach ($bankConnections as $bankConnection) {
             Transaction::factory(20)->create([
-                'bank_connection_id' => $bankConnections->id,
+                'bank_connection_id' => $bankConnection->id,
                 'currency_id' => $bankConnection->currency_id,
                 'order_id' => rand(0, 1) ? $orders->random()->id : null,
             ]);

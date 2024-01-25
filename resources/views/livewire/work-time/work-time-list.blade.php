@@ -18,7 +18,9 @@
                     wire:model="workTime.work_time_type_id"
                     option-value="id"
                     option-label="name"
+                    x-on:selected="$wire.workTime.is_billable = $event.detail.is_billable"
                 />
+                <x-toggle :label="__('Is Billable')" wire:model="workTime.is_billable" />
                 <x-select
                     :label="__('User')"
                     option-value="id"

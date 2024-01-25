@@ -33,14 +33,9 @@ class Transaction extends Model implements InteractsWithDataTables
     protected static function booted(): void
     {
         static::saving(function (Transaction $transaction) {
-            $transaction->currency_id = $transaction->currency_id ?:
-                (
-                    Auth::user()->currency_id ?:
-                    Currency::query()
-                        ->orderBy('is_default', 'DESC')
-                        ->first('id')
-                        ?->id
-                );
+            $transaction->currency_id = $transaction->currency_id
+                ?? Auth::user()?->currency_id
+                ?? Currency::default()?->id;
         });
 
         static::saved(function (Transaction $transaction) {

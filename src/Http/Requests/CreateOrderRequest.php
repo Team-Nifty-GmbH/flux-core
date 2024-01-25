@@ -11,11 +11,6 @@ use Spatie\ModelStates\Validation\ValidStateRule;
 
 class CreateOrderRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
@@ -25,7 +20,7 @@ class CreateOrderRequest extends BaseFormRequest
                 'uuid' => 'string|uuid|unique:orders,uuid',
                 'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'parent_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
-                'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
+                'client_id' => 'required_without_all:contact_id,address_invoice_id|integer|exists:clients,id,deleted_at,NULL',
                 'agent_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'contact_id' => [
                     'required_without:address_invoice_id',
