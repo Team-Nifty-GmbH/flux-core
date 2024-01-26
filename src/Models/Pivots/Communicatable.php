@@ -7,8 +7,6 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Communicatable extends MorphPivot
 {
-    use BroadcastsEvents;
-
     protected $table = 'communicatable';
 
     protected $guarded = [

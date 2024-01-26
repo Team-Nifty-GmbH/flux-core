@@ -6,6 +6,7 @@ use FluxErp\Models\Permission;
 use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Events\NullDispatcher;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -115,8 +116,12 @@ abstract class FluxAction
         static::$dispatcher->listen('action.executed: ' . static::class, $callback);
     }
 
-    public function setData(array $data, bool $keepEmptyStrings = false): static
+    public function setData(array|Arrayable $data, bool $keepEmptyStrings = false): static
     {
+        if (! is_array($data)) {
+            $data = $data->toArray();
+        }
+
         $this->data = $keepEmptyStrings ? $data : $this->convertEmptyStringToNull($data);
 
         return $this;

@@ -6,11 +6,15 @@ use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Actions\Printing;
+use FluxErp\Enums\FrequenciesEnum;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Htmlables\TabButton;
+use FluxErp\Jobs\ProcessSubscriptionOrderJob;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Forms\OrderPositionForm;
 use FluxErp\Livewire\Forms\OrderReplicateForm;
+use FluxErp\Livewire\Forms\ScheduleForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
@@ -20,6 +24,7 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Schedule;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\View\Printing\PrintableView;
@@ -52,6 +57,8 @@ class Order extends OrderPositionList
     public OrderReplicateForm $replicateOrder;
 
     public OrderPositionForm $orderPosition;
+
+    public ScheduleForm $schedule;
 
     public ?int $orderPositionIndex = null;
 
@@ -102,9 +109,19 @@ class Order extends OrderPositionList
 
         $this->fetchOrder($id);
 
+        $orderType = OrderType::query()
+            ->whereKey($this->order->order_type_id)
+            ->first();
+
+        $this->view = 'flux::livewire.order.' .  (($value = $orderType?->order_type_enum->value) ? $value : 'order');
+
         $this->getAvailableStates(['payment_state', 'delivery_state', 'state']);
 
         $this->isSelectable = ! $this->order->is_locked;
+
+        if (in_array($value, [OrderTypeEnum::PurchaseSubscription->value, OrderTypeEnum::Subscription->value])) {
+            $this->fillSchedule();
+        }
     }
 
     public function getSelectAttributes(): ComponentAttributeBag
@@ -290,6 +307,26 @@ class Order extends OrderPositionList
                     ->where('is_active', true)
                     ->get(['id', 'name'])
                     ->toArray(),
+                'frequencies' => array_map(
+                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
+                    array_intersect(
+                        FrequenciesEnum::getBasicFrequencies(),
+                        [
+                            'daily',
+                            'dailyAt',
+                            'weekly',
+                            'weeklyOn',
+                            'monthly',
+                            'monthlyOn',
+                            'twiceMonthly',
+                            'lastDayOfMonth',
+                            'quarterly',
+                            'quarterlyOn',
+                            'yearly',
+                            'yearlyOn',
+                        ]
+                    )
+                ),
             ]
         );
     }
@@ -753,6 +790,51 @@ class Order extends OrderPositionList
         $this->selected = $selected;
     }
 
+    public function fillSchedule(): void
+    {
+        $schedule = Schedule::query()
+            ->where('class', ProcessSubscriptionOrderJob::class)
+            ->whereJsonContains('parameters->order', $this->order->id)
+            ->first();
+
+        if ($schedule) {
+            $this->schedule->fill($schedule->toArray());
+        } else {
+            $defaultOrderType = OrderType::query()
+                ->whereKey($this->order->order_type_id)
+                ->first()
+                ->order_type_enum === OrderTypeEnum::PurchaseSubscription ?
+                OrderTypeEnum::Purchase->value : OrderTypeEnum::Order->value;
+
+            $this->schedule->parameters['orderType'] = OrderType::query()
+                ->where('order_type_enum', $defaultOrderType)
+                ->where('is_active', true)
+                ->where('is_hidden', false)
+                ->first()
+                ?->id;
+        }
+    }
+
+    #[Renderless]
+    public function saveSchedule(): bool
+    {
+        $this->schedule->name = ProcessSubscriptionOrderJob::name();
+        $this->schedule->parameters = [
+            'order' => $this->order->id,
+            'orderType' => $this->schedule->parameters['orderType'] ?? null,
+        ];
+
+        try {
+            $this->schedule->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return true;
+    }
+
     public function showProduct(Product $product): void
     {
         $this->js(<<<JS
@@ -854,10 +936,7 @@ class Order extends OrderPositionList
             ->firstOrFail()
             ->append('avatar_url');
 
-        $this->printLayouts = array_intersect(
-            $order->orderType?->print_layouts ?: [],
-            array_keys($order->resolvePrintViews())
-        );
+        $this->printLayouts = array_keys($order->resolvePrintViews());
 
         $this->order->fill($order->toArray());
     }

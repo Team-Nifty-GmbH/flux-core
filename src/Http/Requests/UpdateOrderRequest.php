@@ -155,7 +155,7 @@ class UpdateOrderRequest extends BaseFormRequest
                     'string',
                 ],
                 'system_delivery_date' => 'required_with:system_delivery_date_end|date|nullable',
-                'system_delivery_date_end' => 'date|nullable|after:system_delivery_date',
+                'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
                 'customer_delivery_date' => 'sometimes|date|nullable',
                 'date_of_approval' => 'sometimes|date|nullable',
 

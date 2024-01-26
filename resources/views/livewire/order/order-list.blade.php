@@ -150,6 +150,30 @@
             </x-slot>
         </x-card>
     </x-modal>
+    <x-modal name="create-documents">
+        <x-card :title="__('Create Documents')">
+            <div class="grid grid-cols-4 gap-1.5">
+                <div class="font-semibold text-sm">{{ __('Print') }}</div>
+                <div class="font-semibold text-sm">{{ __('Email') }}</div>
+                <div class="font-semibold text-sm">{{ __('Download') }}</div>
+                <div class="font-semibold text-sm">{{ __('Force Create') }}</div>
+                @foreach($printLayouts as $printLayout)
+                    <x-checkbox wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}" :label="__($printLayout)" />
+                    <x-checkbox wire:model.boolean="selectedPrintLayouts.email.{{ $printLayout }}" :label="__($printLayout)" />
+                    <x-checkbox wire:model.boolean="selectedPrintLayouts.download.{{ $printLayout }}" :label="__($printLayout)" />
+                    <x-checkbox wire:model.boolean="selectedPrintLayouts.force.{{ $printLayout }}" :label="__($printLayout)" />
+                @endforeach
+            </div>
+            <x-slot:footer>
+                <div class="flex justify-end gap-x-4">
+                    <div class="flex">
+                        <x-button flat :label="__('Cancel')" x-on:click="close" />
+                        <x-button primary :label="__('Continue')" spinner wire:click="createDocuments().then(() => { close(); });" />
+                    </div>
+                </div>
+            </x-slot:footer>
+        </x-card>
+    </x-modal>
     <div wire:ignore>
         @include('tall-datatables::livewire.data-table')
     </div>

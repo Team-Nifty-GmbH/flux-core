@@ -9,6 +9,8 @@ use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -24,8 +26,13 @@ class EditMail extends Component
 
     public array $files = [];
 
+    public array $mailMessages = [];
+
+    public bool $multiple = false;
+
     protected $listeners = [
         'create',
+        'createMany',
     ];
 
     public function render(): View
@@ -64,6 +71,17 @@ class EditMail extends Component
         JS);
     }
 
+    public function createMany(Collection|array $mailMessages): void
+    {
+        if (count($mailMessages) > 1) {
+            $this->multiple = true;
+        }
+
+        $this->mailMessages = $mailMessages;
+
+        $this->create($mailMessages[0]);
+    }
+
     #[Renderless]
     public function updatedFiles(): void
     {
@@ -99,18 +117,57 @@ class EditMail extends Component
             ]);
         }
 
-        try {
-            Mail::to($this->mailMessage->to)
-                ->cc($this->mailMessage->cc)
-                ->bcc($this->mailMessage->bcc)
-                ->send(new GenericMail($this->mailMessage));
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
+        if (! $this->mailMessages) {
+            $this->mailMessages = [$this->mailMessage];
         }
 
-        $this->notification()->success(__('Email sent successfully!'));
+        $cc = $this->mailMessage->cc;
+        $bcc = $this->mailMessage->bcc;
+
+        $exceptions = 0;
+        foreach ($this->mailMessages as $mailMessage) {
+            if (! $mailMessage instanceof CommunicationForm) {
+                $this->mailMessage->fill(array_merge(
+                    $mailMessage,
+                    [
+                        'cc' => $cc,
+                        'bcc' => $bcc,
+                        'subject' => Blade::render(
+                            $this->mailMessage->subject,
+                            $mailMessage['blade_parameters'] ?? []
+                        ),
+                        'html_body' => Blade::render(
+                            $this->mailMessage->html_body,
+                            $mailMessage['blade_parameters'] ?? []
+                        )
+                    ]
+                ));
+            }
+
+            try {
+                Mail::to($this->mailMessage->to)
+                    ->cc($cc)
+                    ->bcc($bcc)
+                    ->send(new GenericMail($this->mailMessage));
+            } catch (\Exception $e) {
+                exception_to_notifications($e, $this);
+
+                if ($this->multiple) {
+                    $exceptions++;
+                    continue;
+                }
+
+                return false;
+            }
+        }
+
+        if ($exceptions === 0) {
+            $this->notification()->success(__('Email(s) sent successfully!'));
+        }
+
+        if (count($this->mailMessages) === $exceptions) {
+            $this->notification()->error(__('Failed to send emails!'));
+        }
 
         return true;
     }

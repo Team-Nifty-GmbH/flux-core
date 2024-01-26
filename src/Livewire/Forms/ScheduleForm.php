@@ -32,6 +32,8 @@ class ScheduleForm extends Form
         ],
     ];
 
+    public ?string $due_at = null;
+
     public bool $is_active = true;
 
     public function save(): void

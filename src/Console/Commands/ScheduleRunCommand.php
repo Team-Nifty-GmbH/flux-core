@@ -28,6 +28,10 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 continue;
             }
 
+            if ($repeatable->due_at->greaterThan(now())) {
+                continue;
+            }
+
             $event = match ($repeatable->type) {
                 RepeatableTypeEnum::Command => $schedule->command($repeatable->class, $repeatable->parameters ?? []),
                 RepeatableTypeEnum::Job => $schedule->job($repeatable->parameters ?
@@ -61,13 +65,12 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             // Mark event as overdue
             if ($repeatable->due_at &&
                 ! $event->isDue($this->laravel)
-                && Carbon::parse($repeatable->due_at)->greaterThan($nextRunDate)
+                && $repeatable->due_at->lessThan(now())
             ) {
                 $overdueEvents[] = $event;
             }
 
             $repeatable->cron_expression = $event->expression;
-            $repeatable->due_at = $nextRunDate;
             $repeatable->save();
 
             $event->before(function () use ($repeatable) {
@@ -79,6 +82,12 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 $repeatable->last_success = now();
                 $repeatable->save();
             });
+
+            $event->after(function () use ($repeatable, $nextRunDate) {
+                $repeatable->due_at = $nextRunDate;
+                $repeatable->save();
+            });
+
         }
 
         $dispatcher->dispatch(new ScheduleTasksRegistered($schedule));

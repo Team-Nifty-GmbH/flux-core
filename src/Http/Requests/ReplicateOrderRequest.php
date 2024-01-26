@@ -11,6 +11,7 @@ class ReplicateOrderRequest extends BaseFormRequest
         return array_merge(
             (new UpdateOrderRequest())->rules(),
             [
+                'parent_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
                 'contact_id' => [
                     'required_without:address_invoice_id',
                     'integer',
