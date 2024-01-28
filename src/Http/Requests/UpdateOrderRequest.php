@@ -37,7 +37,7 @@ class UpdateOrderRequest extends BaseFormRequest
                     'nullable',
                     new ExistsWithForeign(
                         foreignAttribute: 'contact_id',
-                        table: 'bank_connections',
+                        table: 'contact_bank_connections',
                         baseTable: 'orders'
                     ),
                 ],

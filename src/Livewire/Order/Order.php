@@ -283,6 +283,10 @@ class Order extends OrderPositionList
 
     public function getViewData(): array
     {
+        $orderType = OrderType::query()
+            ->whereKey($this->order->order_type_id)
+            ->first();
+
         return array_merge(
             parent::getViewData(),
             [
@@ -327,6 +331,14 @@ class Order extends OrderPositionList
                         ]
                     )
                 ),
+                'contactBankConnections' => Contact::query()
+                    ->whereKey($this->order->contact_id)
+                    ->with('contactBankConnections')
+                    ->first('id')
+                    ->contactBankConnections()
+                    ->select(['id', 'contact_id', 'iban'])
+                    ->pluck('iban', 'id')
+                    ?->toArray() ?? [],
             ]
         );
     }
@@ -938,6 +950,12 @@ class Order extends OrderPositionList
 
         $this->printLayouts = array_keys($order->resolvePrintViews());
 
-        $this->order->fill($order->toArray());
+        $this->order->fill($order);
+
+        $invoice = $order->invoice();
+        $this->order->invoice = [
+            'url' => $invoice->getUrl(),
+            'mime_type' => $invoice->mime_type,
+        ];
     }
 }
