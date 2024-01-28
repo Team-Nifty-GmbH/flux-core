@@ -37,7 +37,6 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
     public array $selectedPrintLayouts = [];
 
-
     public function getTableActions(): array
     {
         return [
@@ -136,8 +135,8 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
         $this->printLayouts = $this->orders->printLayouts();
 
-        $this->js(<<<JS
-            \$openModal('create-documents');
+        $this->js(<<<'JS'
+            $openModal('create-documents');
         JS);
 
         $this->forceRender();
@@ -233,7 +232,8 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                         $order->orderType->name . ' ' . $order->order_number,
                     'attachments' => $mailAttachments,
                     'html_body' => html_entity_decode($order->orderType->mail_body),
-                    'blade_parameters' => ['order' => $order],
+                    'blade_parameters_serialized' => true,
+                    'blade_parameters' => serialize(['order' => $order]),
                     'communicatable_type' => Order::class,
                     'communicatable_id' => $order->id,
                 ];

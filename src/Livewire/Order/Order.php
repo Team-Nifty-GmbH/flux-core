@@ -113,7 +113,7 @@ class Order extends OrderPositionList
             ->whereKey($this->order->order_type_id)
             ->first();
 
-        $this->view = 'flux::livewire.order.' .  (($value = $orderType?->order_type_enum->value) ? $value : 'order');
+        $this->view = 'flux::livewire.order.' . (($value = $orderType?->order_type_enum->value) ? $value : 'order');
 
         $this->getAvailableStates(['payment_state', 'delivery_state', 'state']);
 

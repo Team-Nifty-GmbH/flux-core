@@ -60,6 +60,9 @@ class EditMail extends Component
     #[Renderless]
     public function create(array|CommunicationForm|Model $values): void
     {
+        $this->multiple = false;
+        $this->reset('mailMessages');
+
         if ($values instanceof Model || is_array($values)) {
             $this->mailMessage->fill($values);
         } else {
@@ -73,13 +76,14 @@ class EditMail extends Component
 
     public function createMany(Collection|array $mailMessages): void
     {
-        if (count($mailMessages) > 1) {
-            $this->multiple = true;
-        }
+        $this->create($mailMessages[0]);
+        $this->mailMessage->reset('attachments');
 
         $this->mailMessages = $mailMessages;
 
-        $this->create($mailMessages[0]);
+        if (count($mailMessages) > 1) {
+            $this->multiple = true;
+        }
     }
 
     #[Renderless]
@@ -121,25 +125,35 @@ class EditMail extends Component
             $this->mailMessages = [$this->mailMessage];
         }
 
-        $cc = $this->mailMessage->cc;
         $bcc = $this->mailMessage->bcc;
+        $cc = $this->mailMessage->cc;
+        $baseMailMessage = clone $this->mailMessage;
 
         $exceptions = 0;
+
         foreach ($this->mailMessages as $mailMessage) {
             if (! $mailMessage instanceof CommunicationForm) {
+                $this->mailMessage->reset();
+                if (($mailMessage['blade_parameters_serialized'] ?? false)
+                    && is_string($mailMessage['blade_parameters'])
+                ) {
+                    $bladeParameters = unserialize($mailMessage['blade_parameters']);
+                } else {
+                    $bladeParameters = $mailMessage['blade_parameters'] ?? [];
+                }
+
                 $this->mailMessage->fill(array_merge(
                     $mailMessage,
                     [
-                        'cc' => $cc,
                         'bcc' => $bcc,
                         'subject' => Blade::render(
-                            $this->mailMessage->subject,
-                            $mailMessage['blade_parameters'] ?? []
+                            $baseMailMessage->subject,
+                            $bladeParameters
                         ),
                         'html_body' => Blade::render(
-                            $this->mailMessage->html_body,
-                            $mailMessage['blade_parameters'] ?? []
-                        )
+                            $baseMailMessage->html_body,
+                            $bladeParameters
+                        ),
                     ]
                 ));
             }
@@ -154,6 +168,7 @@ class EditMail extends Component
 
                 if ($this->multiple) {
                     $exceptions++;
+
                     continue;
                 }
 

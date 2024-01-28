@@ -2,7 +2,6 @@
 
 namespace FluxErp\Console\Commands;
 
-use Carbon\Carbon;
 use Cron\CronExpression;
 use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Events\Scheduling\ScheduleTasksRegistered;
@@ -28,7 +27,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 continue;
             }
 
-            if ($repeatable->due_at->greaterThan(now())) {
+            if ($repeatable->due_at?->greaterThan(now())) {
                 continue;
             }
 

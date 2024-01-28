@@ -17,7 +17,7 @@
         <x-card class="flex flex-col gap-4">
             <div class="flex flex-col gap-1.5">
                 <x-label>{{ __('To') }}</x-label>
-                <div class="flex gap-1">
+                <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
                     <template x-for="to in $wire.mailMessage.to">
                         <x-badge flat primary cl>
                             <x-slot:label>
@@ -51,7 +51,7 @@
             </div>
             <div class="flex flex-col gap-1.5">
                 <x-label>{{ __('CC') }}</x-label>
-                <div class="flex gap-1">
+                <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
                     <template x-for="cc in $wire.mailMessage.cc">
                         <x-badge flat primary cl>
                             <x-slot:label>
