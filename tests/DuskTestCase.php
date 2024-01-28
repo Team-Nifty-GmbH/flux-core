@@ -90,7 +90,7 @@ abstract class DuskTestCase extends TestCase
     {
         $app['config']->set('database.default', 'mysql');
         $app['config']->set('app.debug', true);
-        $app['config']->set('database.connections.mysql.database', 'testing');
+        $app['config']->set('database.connections.mysql.database', 'laravel');
         $app['config']->set('auth.defaults.guard', 'web');
         $app['config']->set('flux.install_done', true);
     }
