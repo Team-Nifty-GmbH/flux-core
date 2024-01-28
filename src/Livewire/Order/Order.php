@@ -953,9 +953,11 @@ class Order extends OrderPositionList
         $this->order->fill($order);
 
         $invoice = $order->invoice();
-        $this->order->invoice = [
-            'url' => $invoice->getUrl(),
-            'mime_type' => $invoice->mime_type,
-        ];
+        if ($invoice) {
+            $this->order->invoice = [
+                'url' => $invoice->getUrl(),
+                'mime_type' => $invoice->mime_type,
+            ];
+        }
     }
 }

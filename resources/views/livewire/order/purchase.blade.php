@@ -35,11 +35,13 @@
         <x-input wire:model="order.commission" :disabled="$order->is_locked" :label="__('Commission')" />
     @endsection
     @section('content.right.invoice_preview')
-        <x-card class="space-y-3">
-            <div>
-                <embed class="object-contain" width="100%" height="400px" type="{{  $order->invoice['mime_type'] ?? null }}" src="{{ $order->invoice['url'] ?? null }}">
-            </div>
-            <x-button primary :label="__('View')" x-on:click="$openDetailModal($wire.order.invoice.url)" />
-        </x-card>
+        @if($order->invoice)
+            <x-card class="space-y-3">
+                <div>
+                    <embed class="object-contain" width="100%" height="400px" type="{{  $order->invoice['mime_type'] ?? null }}" src="{{ $order->invoice['url'] ?? null }}">
+                </div>
+                <x-button primary :label="__('View')" x-on:click="$openDetailModal($wire.order.invoice.url)" />
+            </x-card>
+        @endif
     @show
 @endsection
