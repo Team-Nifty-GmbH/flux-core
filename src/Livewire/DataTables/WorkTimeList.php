@@ -46,6 +46,7 @@ class WorkTimeList extends DataTable
         'paused_time_ms',
         'started_at',
         'ended_at',
+        'is_billable',
         'is_locked',
         'is_daily_work_time',
     ];

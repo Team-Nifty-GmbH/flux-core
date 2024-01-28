@@ -1,4 +1,4 @@
-@extends('flux::livewire.order.order')
+@extends('flux::livewire.order.purchase')
 @section('modals')
     @parent
     <x-modal name="edit-schedule">

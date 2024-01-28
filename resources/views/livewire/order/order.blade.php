@@ -406,16 +406,18 @@
                     @section('general-card')
                         <x-card>
                             <div class="space-y-3">
-                                <x-select
-                                    disabled
-                                    :label="__('Client')"
-                                    :options="$clients"
-                                    option-value="id"
-                                    option-label="name"
-                                    :clearable="false"
-                                    autocomplete="off"
-                                    wire:model.live="order.client_id"
-                                />
+                                @if(count($clients) > 1)
+                                    <x-select
+                                        disabled
+                                        :label="__('Client')"
+                                        :options="$clients"
+                                        option-value="id"
+                                        option-label="name"
+                                        :clearable="false"
+                                        autocomplete="off"
+                                        wire:model.live="order.client_id"
+                                    />
+                                @endif
                                 <x-select
                                     :label="__('Commission Agent')"
                                     option-value="id"
@@ -454,16 +456,27 @@
                                     wire:model.live="order.payment_type_id"
                                     x-bind:disabled="$wire.order.is_locked"
                                 />
-                                <x-select
-                                    :label="__('Language')"
-                                    :options="$languages"
-                                    option-value="id"
-                                    option-label="name"
-                                    :clearable="false"
-                                    autocomplete="off"
-                                    wire:model="order.language_id"
-                                    x-bind:disabled="$wire.order.is_locked"
-                                />
+                                @if($contactBankConnections)
+                                    <x-select
+                                        wire:model="order.bank_connection_id"
+                                        :label="__('Bank connection')"
+                                        :disabled="$order->is_locked"
+                                        :options="$contactBankConnections"
+                                        option-key-value
+                                    />
+                                @endif
+                                @if(count($languages) > 1)
+                                    <x-select
+                                        :label="__('Language')"
+                                        :options="$languages"
+                                        option-value="id"
+                                        option-label="name"
+                                        :clearable="false"
+                                        autocomplete="off"
+                                        wire:model="order.language_id"
+                                        x-bind:disabled="$wire.order.is_locked"
+                                    />
+                                @endif
                             </div>
                         </x-card>
                     @show
@@ -611,13 +624,17 @@
                         </x-card>
                     @show
                     <x-card>
-                        <div class="grid grid-cols-3 auto-cols-max gap-1">
-                            <span class="">{{ __('Created At') }}:</span>
-                            <span x-text="window.formatters.datetime($wire.order.created_at)"></span>
-                            <span x-text="$wire.order.created_by?.name"></span>
-                            <span class="">{{ __('Updated At') }}:</span>
-                            <span x-text="window.formatters.datetime($wire.order.updated_at)"></span>
-                            <span x-text="$wire.order.updated_by?.name"></span>
+                        <div class="text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                            <div class="flex gap-0.5">
+                                <div class="">{{ __('Created At') }}:</div>
+                                <div x-text="window.formatters.datetime($wire.order.created_at)"></div>
+                                <div x-text="$wire.order.created_by?.name || '{{ __('Unknown') }}'"></div>
+                            </div>
+                            <div class="flex gap-0.5">
+                                <div class="">{{ __('Updated At') }}:</div>
+                                <div x-text="window.formatters.datetime($wire.order.updated_at)"></div>
+                                <div x-text="$wire.order.updated_by?.name || '{{ __('Unknown') }}'"></div>
+                            </div>
                         </div>
                     </x-card>
                 </div>

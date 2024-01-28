@@ -28,31 +28,34 @@ class ReplicateOrder extends FluxAction
             ->first()
             ->toArray();
 
-        unset(
-            $originalOrder['id'],
-            $originalOrder['uuid'],
-            $originalOrder['parent_id'],
-            $originalOrder['agent_id'],
-            $originalOrder['bank_connection_id'],
-            $originalOrder['address_invoice'],
-            $originalOrder['address_delivery'],
-            $originalOrder['state'],
-            $originalOrder['payment_state'],
-            $originalOrder['delivery_state'],
-            $originalOrder['invoice_number'],
-            $originalOrder['invoice_date'],
-            $originalOrder['order_number'],
-            $originalOrder['order_date'],
-            $originalOrder['is_locked'],
-            $originalOrder['is_imported'],
-            $originalOrder['is_confirmed'],
-            $originalOrder['is_paid'],
-        );
-
         $orderData = array_merge(
             $originalOrder,
             $this->data,
         );
+
+        unset(
+            $orderData['id'],
+            $orderData['uuid'],
+            $orderData['agent_id'],
+            $orderData['bank_connection_id'],
+            $orderData['address_invoice'],
+            $orderData['address_delivery'],
+            $orderData['state'],
+            $orderData['payment_state'],
+            $orderData['delivery_state'],
+            $orderData['invoice_number'],
+            $orderData['invoice_date'],
+            $orderData['order_number'],
+            $orderData['order_date'],
+            $orderData['is_locked'],
+            $orderData['is_imported'],
+            $orderData['is_confirmed'],
+            $orderData['is_paid'],
+        );
+
+        if ($originalOrder['parent_id'] === $orderData['parent_id']) {
+            unset($orderData['parent_id']);
+        }
 
         $order = CreateOrder::make($orderData)
             ->checkPermission()

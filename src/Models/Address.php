@@ -237,7 +237,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->contact?->getFirstMediaUrl('avatar') ?: self::icon()->getUrl();
+        return $this->contact?->getAvatarUrl();
     }
 
     public function sendLoginLink(): void

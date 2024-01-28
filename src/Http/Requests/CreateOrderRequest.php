@@ -31,7 +31,7 @@ class CreateOrderRequest extends BaseFormRequest
                 'bank_connection_id' => [
                     'integer',
                     'nullable',
-                    new ExistsWithForeign(foreignAttribute: 'contact_id', table: 'bank_connections'),
+                    new ExistsWithForeign(foreignAttribute: 'contact_id', table: 'contact_bank_connections'),
                 ],
                 'currency_id' => 'integer|exists:currencies,id,deleted_at,NULL',
                 'address_invoice_id' => [
@@ -110,7 +110,7 @@ class CreateOrderRequest extends BaseFormRequest
                 'invoice_date' => 'date|nullable',
                 'invoice_number' => 'string',
                 'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
-                'system_delivery_date_end' => 'date|nullable|after:system_delivery_date',
+                'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
                 'customer_delivery_date' => 'date|nullable',
                 'date_of_approval' => 'date|nullable',
 
