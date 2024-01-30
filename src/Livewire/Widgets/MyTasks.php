@@ -14,7 +14,10 @@ class MyTasks extends Component
 
     public function render(): View|Factory
     {
-        $endStates = TaskState::all()->filter(fn ($state) => $state::$isEndState)->keys()->toArray();
+        $endStates = TaskState::all()
+            ->filter(fn ($state) => $state::$isEndState)
+            ->keys()
+            ->toArray();
 
         return view(
             'flux::livewire.widgets.my-tasks',

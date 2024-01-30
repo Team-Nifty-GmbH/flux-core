@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class BankConnection extends Model
 {
-    use Filterable, HasPackageFactory, HasUserModification, HasUuid;
+    use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid;
 
     protected $casts = [
         'uuid' => 'string',

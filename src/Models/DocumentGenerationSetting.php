@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DocumentGenerationSetting extends Model
 {
-    use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
     protected $casts = [
         'uuid' => 'string',
@@ -20,6 +21,11 @@ class DocumentGenerationSetting extends Model
     protected $guarded = [
         'id',
     ];
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
 
     public function documentType(): BelongsTo
     {

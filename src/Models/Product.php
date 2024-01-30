@@ -7,6 +7,7 @@ use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasSerialNumberRange;
@@ -26,9 +27,12 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends Model implements HasMedia, InteractsWithDataTables
 {
-    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
-        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable, Searchable,
-        SoftDeletes;
+    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
+        HasPackageFactory, HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable,
+        Searchable, SoftDeletes {
+        HasClientAssignment::search insteadof Searchable;
+        Searchable::search as protected static searchableSearch;
+    }
 
     protected $casts = [
         'uuid' => 'string',
@@ -76,6 +80,11 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
     public function children(): HasMany
     {
         return $this->hasMany(Product::class, 'parent_id');
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 
     public function coverMedia(): BelongsTo

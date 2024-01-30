@@ -38,6 +38,11 @@
                  class="cursor-pointer whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium hover:border-gray-200 hover:text-gray-700">
                 {{ __('Permissions') }}
             </div>
+            <div x-on:click="active = 'clients'"
+                 x-bind:class="active === 'clients' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500'"
+                 class="cursor-pointer whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium hover:border-gray-200 hover:text-gray-700">
+                {{ __('Clients') }}
+            </div>
             <div x-on:click="active = 'commission-rates'"
                  x-bind:class="active === 'commission-rates' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500'"
                  class="cursor-pointer whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium hover:border-gray-200 hover:text-gray-700"
@@ -86,6 +91,21 @@
                 </div>
                 <div class="pt-3">
                     {{ $permissions->links() }}
+                </div>
+            </div>
+        @endif
+        @if(user_can('action.user.update-clients'))
+            <div x-cloak x-show="active === 'clients'">
+                <div class="max-h-96 space-y-3 overflow-y-auto">
+                    @foreach($clients as $client)
+                        <div class="flex">
+                            <div class="flex-1 text-sm">{{ $client['name'] }}</div>
+                            <div class="flex-1 text-sm">{{ $client['client_code'] }}</div>
+                            <div class="">
+                                <x-checkbox wire:model="user.clients" :value="$client['id']" :id="Str::uuid()->toString()"/>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         @endif

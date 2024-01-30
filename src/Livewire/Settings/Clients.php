@@ -40,7 +40,7 @@ class Clients extends ClientList
             [
                 'bankConnections' => BankConnection::query()
                     ->where('is_active', true)
-                    ->select(['id', 'name'])
+                    ->select(['bank_connections.id', 'name'])
                     ->get()
                     ->toArray(),
                 'countries' => Country::query()
