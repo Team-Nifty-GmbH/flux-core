@@ -193,7 +193,7 @@ class MailAccounts extends MailAccountList
         }
     }
 
-    private function loadFolders()
+    private function loadFolders(): void
     {
         MailFolder::addGlobalScope('children', function (Builder $builder) {
             $builder->with('children')->where('mail_account_id', $this->mailAccount->id);

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace FluxErp\Tests\Feature\Console;
 
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
@@ -22,8 +22,29 @@ class InitPermissionsTest extends BaseSetup
 {
     use DatabaseTransactions;
 
-    public function test_it_creates_permissions_for_routes()
+    public function test_init_permissions()
     {
+        $actionsWithPermission = 0;
+        foreach (Action::all() as $action) {
+            if ($action['class']::hasPermission()) {
+                $actionsWithPermission++;
+            }
+        }
+
+        /** @var ComponentRegistry $registry */
+        $registry = app(ComponentRegistry::class);
+        $componentTabs = [];
+        foreach (invade($registry)->aliases as $component) {
+            if (! in_array(WithTabs::class, class_uses_recursive($component))) {
+                continue;
+            }
+
+            $componentInstance = new $component;
+            foreach ($componentInstance->getTabs() as $tab) {
+                $componentTabs[] = 'tab.' . $tab->component;
+            }
+        }
+
         $this->callInitPermissions();
 
         $this->assertDatabaseCount('roles', count(config('auth.guards')));
@@ -36,30 +57,21 @@ class InitPermissionsTest extends BaseSetup
                 ->whereNot('name', 'like', 'tab.%')
                 ->count()
         );
-    }
 
-    public function test_it_creates_permissions_for_actions()
-    {
-        $this->callInitPermissions();
-
-        $actionsWithPermission = 0;
-        foreach (Action::all() as $action) {
-            if ($action['class']::hasPermission()) {
-                $actionsWithPermission++;
-            }
-        }
-
+        // Assert all action permissions created
         $this->assertEquals($actionsWithPermission, Permission::query()->where('name', 'like', 'action.%')->count());
-    }
 
-    public function test_it_creates_permissions_for_widgets()
-    {
-        $this->callInitPermissions();
-
+        // Assert all widget permissions created
         $this->assertEquals(count(Widget::all()), Permission::query()->where('name', 'like', 'widget.%')->count());
+
+        // Assert all tab permissions created
+        $this->assertEquals(
+            count(array_unique($componentTabs)),
+            Permission::query()->where('name', 'like', 'tab.%')->count()
+        );
     }
 
-    public function test_it_creates_permission_for_custom_widget()
+    public function test_init_permissions_with_custom_widget()
     {
         Livewire::component('custom-widget-that-never-exists', new class extends Component
         {
@@ -85,31 +97,7 @@ class InitPermissionsTest extends BaseSetup
         $this->assertDatabaseHas('permissions', ['name' => 'widget.custom-widget-that-never-exists']);
     }
 
-    public function test_it_creates_permissions_for_tabs()
-    {
-        $this->callInitPermissions();
-
-        /** @var ComponentRegistry $registry */
-        $registry = app(ComponentRegistry::class);
-        $componentTabs = [];
-        foreach (invade($registry)->aliases as $component) {
-            if (! in_array(WithTabs::class, class_uses_recursive($component))) {
-                continue;
-            }
-
-            $componentInstance = new $component;
-            foreach ($componentInstance->getTabs() as $tab) {
-                $componentTabs[] = 'tab.' . $tab->component;
-            }
-        }
-
-        $this->assertEquals(
-            count(array_unique($componentTabs)),
-            Permission::query()->where('name', 'like', 'tab.%')->count()
-        );
-    }
-
-    public function test_it_creates_permission_for_custom_tab()
+    public function test_init_permissions_with_custom_tab()
     {
         Event::listen('tabs.rendering: ' . Product::class, function (Component $component) {
             $component->mergeTabsToRender([
@@ -122,13 +110,12 @@ class InitPermissionsTest extends BaseSetup
         $this->assertDatabaseHas('permissions', ['name' => 'tab.custom-tab-that-never-exists']);
     }
 
-    public function test_it_deletes_unused_permissions()
+    public function test_init_permissions_unused_permissions()
     {
         Permission::create(['name' => 'unused.permission']);
         $this->assertDatabaseHas('permissions', ['name' => 'unused.permission']);
 
-        $this->artisan('init:permissions')
-            ->assertExitCode(0);
+        $this->callInitPermissions();
 
         $this->assertDatabaseMissing('permissions', ['name' => 'unused.permission']);
     }

@@ -34,8 +34,7 @@ class ListItem extends Component
                         ])
                     }}
                 >
-
-                    @if($link && (data_get($item, $avatar) || !is_string($avatar)))
+                    @if($link && (data_get($item, $avatar) || ! is_string($avatar)))
                         <div>
                             <a href="{{ $link }}" wire:navigate>
                     @endif
@@ -51,14 +50,14 @@ class ListItem extends Component
                         </div>
                     @endif
 
-                    @if(!is_string($avatar))
+                    @if(! is_string($avatar))
                         <div class="py-3">
                             {{ $avatar }}
                         </div>
                     @endif
 
 
-                    @if($link && (data_get($item, $avatar) || !is_string($avatar)))
+                    @if($link && (data_get($item, $avatar) || ! is_string($avatar)))
                             </a>
                         </div>
                     @endif
@@ -70,11 +69,10 @@ class ListItem extends Component
                         @endif
 
                         <div class="py-3">
-                            <div @if(!is_string($value)) {{ $value->attributes->class(["font-semibold truncate"]) }} @else class="font-semibold truncate" @endif>
+                            <div @if(! is_string($value)) {{ $value->attributes->class(["font-semibold truncate"]) }} @else class="font-semibold truncate" @endif>
                                 {{ is_string($value) ? data_get($item, $value) : $value }}
                             </div>
-
-                            <div @if(!is_string($subValue))  {{ $subValue->attributes->class(["text-gray-400 text-sm truncate"]) }} @else class="text-gray-400 text-sm truncate" @endif>
+                            <div @if(! is_string($subValue))  {{ $subValue->attributes->class(["text-gray-400 text-sm truncate"]) }} @else class="text-gray-400 text-sm truncate" @endif>
                                 {{ is_string($subValue) ? data_get($item, $subValue) : $subValue }}
                             </div>
                         </div>
@@ -86,21 +84,21 @@ class ListItem extends Component
 
                     <!-- ACTION -->
                     @if($actions)
-                        @if($link && !Str::of($actions)->contains([':click', '@click' , 'href']))
+                        @if($link && ! Str::of($actions)->contains([':click', '@click' , 'href']))
                             <a href="{{ $link }}" wire:navigate>
                         @endif
 
-                            <div class="py-3 flex items-center gap-3 mary-hideable">
-                                    {{ $actions }}
-                            </div>
+                        <div class="py-3 flex items-center gap-3 mary-hideable">
+                            {{ $actions }}
+                        </div>
 
-                        @if($link && !Str::of($actions)->contains([':click', '@click' , 'href']))
+                        @if($link && ! Str::of($actions)->contains([':click', '@click' , 'href']))
                             </a>
                         @endif
                     @endif
                 </div>
 
-                @if(!$noSeparator)
+                @if(! $noSeparator)
                     <hr class="border-base-300"/>
                 @endif
             </div>
