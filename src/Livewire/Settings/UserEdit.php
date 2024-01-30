@@ -74,19 +74,13 @@ class UserEdit extends Component
 
     public function render(): View|Factory|Application
     {
-        $clients = Auth::user()
-            ->clients()
-            ->get(['id', 'name', 'client_code']);
-
         return view('flux::livewire.settings.user-edit',
             [
                 'permissions' => Permission::query()
                     ->where('guard_name', '!=', 'address')
                     ->when($this->searchPermission, fn ($query) => $query->search($this->searchPermission))
                     ->paginate(pageName: 'permissionsPage'),
-                'clients' => $clients->isNotEmpty() ?
-                    $clients :
-                    Client::query()
+                'clients' => Client::query()
                         ->get(['id', 'name', 'client_code'])
             ]
         );
@@ -120,7 +114,7 @@ class UserEdit extends Component
             ->toArray();
         $this->user['roles'] = $user->roles->pluck('id')->toArray();
         $this->user['mail_accounts'] = $user->mailAccounts->pluck('id')->toArray();
-        $this->user['clients'] = $user->clients->pluck('id')->toArray() ?: Client::query()->pluck('id')->toArray();
+        $this->user['clients'] = Client::query()->pluck('id')->toArray();
 
         $this->updatedUserRoles();
         $this->skipRender();

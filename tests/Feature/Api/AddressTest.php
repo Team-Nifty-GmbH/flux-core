@@ -80,6 +80,8 @@ class AddressTest extends BaseSetup
             'is_main_address' => true,
         ]);
 
+        $this->user->clients()->attach($dbClients->pluck('id')->toArray());
+
         $this->permissions = [
             'show' => Permission::findOrCreate('api.addresses.{id}.get'),
             'index' => Permission::findOrCreate('api.addresses.get'),

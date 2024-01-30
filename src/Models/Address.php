@@ -43,7 +43,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         HasCalendarEvents, HasCalendars, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles,
         HasTags, HasUserModification, HasUuid, Lockable, Notifiable, Searchable, SoftDeletes {
         HasClientAssignment::search insteadof Searchable;
-        Searchable::search as protected static searchableSearch;
+        Searchable::search as protected searchableSearch;
     }
 
     protected $hidden = [

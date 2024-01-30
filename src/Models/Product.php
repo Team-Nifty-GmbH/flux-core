@@ -31,7 +31,7 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         HasPackageFactory, HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable,
         Searchable, SoftDeletes {
         HasClientAssignment::search insteadof Searchable;
-        Searchable::search as protected static searchableSearch;
+        Searchable::search as protected searchableSearch;
     }
 
     protected $casts = [

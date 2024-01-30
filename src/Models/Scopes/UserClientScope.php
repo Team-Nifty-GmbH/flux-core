@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models\Scopes;
 
+use FluxErp\Models\Client;
 use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -17,9 +18,19 @@ class UserClientScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        $clients = ($user = Auth::user()) instanceof User ? $user->clients()->pluck('id')->toArray() : [];
+        $clients = ($user = Auth::user()) instanceof User ?
+            $user->clients()
+                ->withoutGlobalScope(UserClientScope::class)
+                ->pluck('id')
+                ->toArray() : [];
 
         if (! $clients) {
+            return;
+        }
+
+        if ($model instanceof Client) {
+            $builder->whereIntegerInRaw($model->getKeyName(), $clients);
+
             return;
         }
 

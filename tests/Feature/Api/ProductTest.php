@@ -56,6 +56,8 @@ class ProductTest extends BaseSetup
 
         $this->productProperties = ProductProperty::factory()->count(3)->create();
 
+        $this->user->clients()->attach($this->clients->pluck('id')->toArray());
+
         $this->permissions = [
             'show' => Permission::findOrCreate('api.products.{id}.get'),
             'index' => Permission::findOrCreate('api.products.get'),

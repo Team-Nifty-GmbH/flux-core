@@ -35,5 +35,7 @@ class BaseSetup extends TestCase
         $this->user->lastname = 'lastname';
         $this->user->password = 'password';
         $this->user->save();
+
+        $this->user->clients()->attach($this->dbClient->id);
     }
 }

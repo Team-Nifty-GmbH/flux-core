@@ -51,7 +51,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         HasUuid, InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable {
         HasClientAssignment::search insteadof Searchable;
         Printable::resolvePrintViews as protected printableResolvePrintViews;
-        Searchable::search as protected static searchableSearch;
+        Searchable::search as protected searchableSearch;
     }
 
     protected $with = [
