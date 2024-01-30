@@ -40,7 +40,7 @@
     "src": "resources/css/app.css"
   },
   "resources/js/alpine.js": {
-    "file": "assets/alpine-e3347498.js",
+    "file": "assets/alpine-4ee8317a.js",
     "imports": [
       "__commonjsHelpers-725317a4.js"
     ],
@@ -56,7 +56,7 @@
     "src": "resources/js/apex-charts.js"
   },
   "resources/js/app.js": {
-    "file": "assets/app-1c5b16ee.js",
+    "file": "assets/app-0b1c37ce.js",
     "imports": [
       "__commonjsHelpers-725317a4.js"
     ],
