@@ -22,6 +22,8 @@ class CreatePaymentTypeRequest extends BaseFormRequest
             'payment_target' => 'integer|nullable',
             'payment_discount_target' => 'integer|nullable',
             'payment_discount_percentage' => 'integer|nullable',
+            'payment_reminder_text' => 'string|nullable',
+            'payment_reminder_email_text' => 'string|nullable',
             'is_active' => 'boolean',
             'is_default' => 'boolean',
         ];
