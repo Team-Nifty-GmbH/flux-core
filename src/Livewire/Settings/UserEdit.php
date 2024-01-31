@@ -19,7 +19,6 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -81,7 +80,7 @@ class UserEdit extends Component
                     ->when($this->searchPermission, fn ($query) => $query->search($this->searchPermission))
                     ->paginate(pageName: 'permissionsPage'),
                 'clients' => Client::query()
-                        ->get(['id', 'name', 'client_code'])
+                    ->get(['id', 'name', 'client_code']),
             ]
         );
     }
@@ -114,7 +113,7 @@ class UserEdit extends Component
             ->toArray();
         $this->user['roles'] = $user->roles->pluck('id')->toArray();
         $this->user['mail_accounts'] = $user->mailAccounts->pluck('id')->toArray();
-        $this->user['clients'] = Client::query()->pluck('id')->toArray();
+        $this->user['clients'] = $user->clients->pluck('id')->toArray();
 
         $this->updatedUserRoles();
         $this->skipRender();

@@ -49,10 +49,8 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment, HasCustomEvents,
         HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification,
         HasUuid, InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable {
-        HasClientAssignment::search insteadof Searchable;
-        Printable::resolvePrintViews as protected printableResolvePrintViews;
-        Searchable::search as protected searchableSearch;
-    }
+            Printable::resolvePrintViews as protected printableResolvePrintViews;
+        }
 
     protected $with = [
         'currency',

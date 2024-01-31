@@ -11,6 +11,9 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @deprecated
+ */
 class PaymentNotice extends Model
 {
     use HasClientAssignment, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;

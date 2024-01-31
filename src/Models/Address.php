@@ -41,10 +41,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 {
     use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens,
         HasCalendarEvents, HasCalendars, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles,
-        HasTags, HasUserModification, HasUuid, Lockable, Notifiable, Searchable, SoftDeletes {
-        HasClientAssignment::search insteadof Searchable;
-        Searchable::search as protected searchableSearch;
-    }
+        HasTags, HasUserModification, HasUuid, Lockable, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'login_password',

@@ -13,9 +13,6 @@ use Illuminate\Support\Facades\Auth;
 
 class UserClientScope implements Scope
 {
-    /**
-     * Apply the scope to a given Eloquent query builder.
-     */
     public function apply(Builder $builder, Model $model): void
     {
         $clients = ($user = Auth::user()) instanceof User ?

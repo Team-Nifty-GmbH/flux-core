@@ -28,6 +28,7 @@ use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Menu\MenuManager;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
+use FluxErp\Models\Client;
 use FluxErp\Models\Order;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
@@ -36,8 +37,11 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Widgets\WidgetManager;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Application;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
@@ -49,6 +53,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Laravel\Scout\Builder;
 use Livewire\Livewire;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -64,6 +69,20 @@ class FluxServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->extend(Builder::class, function (Builder $scoutBuilder) {
+            if (($user = auth()->user()) instanceof User
+                && in_array(HasClientAssignment::class, class_uses_recursive($scoutBuilder->model))
+                && $scoutBuilder->model->isRelation('client')
+                && ($relation = $scoutBuilder->model->client()) instanceof BelongsTo
+            ) {
+                $clients = $user->clients()->pluck('id')->toArray() ?: Client::query()->pluck('id')->toArray();
+
+                $scoutBuilder->whereIn($relation->getForeignKeyName(), $clients);
+            }
+
+            return $scoutBuilder;
+        });
+
         if ($this->app->runningInConsole()) {
             $this->offerPublishing();
         }

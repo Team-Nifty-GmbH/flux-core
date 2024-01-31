@@ -51,7 +51,7 @@
                 {{ __('Commission Rates') }}
             </div>
         </nav>
-        @if(user_can('api.roles.{id}.get') && user_can('action.role.update-users'))
+        @if(\FluxErp\Actions\Role\UpdateUserRoles::canPerformAction(false))
             <div x-show="active === 'roles'">
                 <div class="max-h-96 space-y-3 overflow-y-auto">
                     @php
@@ -65,14 +65,14 @@
                             <div class="flex-1 text-sm">{{ __($role['name']) }}</div>
                             <div class="flex-1 text-sm">{{ __($role['guard_name']) }}</div>
                             <div class="">
-                                <x-checkbox wire:model.live="user.roles" :value="$role['id']" :id="Str::uuid()->toString()"/>
+                                <x-checkbox wire:model.live.number="user.roles" :value="$role['id']" />
                             </div>
                         </div>
                     @endforeach
                 </div>
             </div>
         @endif
-        @if(user_can('action.user.update-permissions'))
+        @if(\FluxErp\Actions\Permission\UpdateUserPermissions::canPerformAction(false))
             <div x-show="active === 'permissions'">
                 <div class="pb-3">
                     <x-input wire:model.live.debounce.500ms="searchPermission" icon="search"/>
@@ -82,10 +82,10 @@
                         @foreach($permissions as $permission)
                             <div class="col-span-3 font-medium">{{ __($permission['name']) }}</div>
                             <div class="font-medium">{{ __($permission['guard_name']) }}</div>
-                            <x-checkbox readonly :label="__('Role')" disabled wire:model="lockedPermissions"
-                                        :value="$permission['id']" :id="uniqid()"/>
-                            <x-checkbox :label="__('Direct')" wire:model="user.permissions"
-                                        :value="$permission['id']" :id="uniqid()"/>
+                            <x-checkbox readonly :label="__('Role')" disabled wire:model.number="lockedPermissions"
+                                        :value="$permission['id']" />
+                            <x-checkbox :label="__('Direct')" wire:model.number="user.permissions"
+                                        :value="$permission['id']" />
                         @endforeach
                     </div>
                 </div>
@@ -94,7 +94,7 @@
                 </div>
             </div>
         @endif
-        @if(user_can('action.user.update-clients'))
+        @if(\FluxErp\Actions\User\UpdateUserClients::canPerformAction(false))
             <div x-cloak x-show="active === 'clients'">
                 <div class="max-h-96 space-y-3 overflow-y-auto">
                     @foreach($clients as $client)
@@ -102,7 +102,7 @@
                             <div class="flex-1 text-sm">{{ $client['name'] }}</div>
                             <div class="flex-1 text-sm">{{ $client['client_code'] }}</div>
                             <div class="">
-                                <x-checkbox wire:model="user.clients" :value="$client['id']" :id="Str::uuid()->toString()"/>
+                                <x-checkbox wire:model.number="user.clients" :value="$client['id']" />
                             </div>
                         </div>
                     @endforeach

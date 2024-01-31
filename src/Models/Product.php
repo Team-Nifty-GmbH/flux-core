@@ -29,10 +29,7 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
         HasPackageFactory, HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable,
-        Searchable, SoftDeletes {
-        HasClientAssignment::search insteadof Searchable;
-        Searchable::search as protected searchableSearch;
-    }
+        Searchable, SoftDeletes;
 
     protected $casts = [
         'uuid' => 'string',

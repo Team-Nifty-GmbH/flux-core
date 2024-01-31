@@ -10,6 +10,9 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @deprecated
+ */
 class DocumentGenerationSetting extends Model
 {
     use HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
