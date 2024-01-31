@@ -28,10 +28,10 @@ class CreateOrderRequest extends BaseFormRequest
                     'nullable',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'contacts'),
                 ],
-                'bank_connection_id' => [
+                'contact_bank_connection_id' => [
                     'integer',
                     'nullable',
-                    new ExistsWithForeign(foreignAttribute: 'contact_id', table: 'bank_connections'),
+                    new ExistsWithForeign(foreignAttribute: 'contact_id', table: 'contact_bank_connections'),
                 ],
                 'currency_id' => 'integer|exists:currencies,id,deleted_at,NULL',
                 'address_invoice_id' => [

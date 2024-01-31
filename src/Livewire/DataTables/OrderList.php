@@ -26,6 +26,7 @@ class OrderList extends DataTable
         'contact.customer_number',
         'address_invoice.name',
         'total_net_price',
+        'balance',
         'payment_state',
         'commission',
     ];

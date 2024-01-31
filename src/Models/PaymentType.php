@@ -18,7 +18,11 @@ class PaymentType extends Model
     protected $casts = [
         'uuid' => 'string',
         'is_active' => 'boolean',
+        'is_direct_debit' => 'boolean',
         'is_default' => 'boolean',
+        'is_purchase' => 'boolean',
+        'is_sales' => 'boolean',
+        'requires_manual_transfer' => 'boolean',
     ];
 
     protected $guarded = [
