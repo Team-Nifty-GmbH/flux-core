@@ -69,20 +69,6 @@ class FluxServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->extend(Builder::class, function (Builder $scoutBuilder) {
-            if (($user = auth()->user()) instanceof User
-                && in_array(HasClientAssignment::class, class_uses_recursive($scoutBuilder->model))
-                && $scoutBuilder->model->isRelation('client')
-                && ($relation = $scoutBuilder->model->client()) instanceof BelongsTo
-            ) {
-                $clients = $user->clients()->pluck('id')->toArray() ?: Client::query()->pluck('id')->toArray();
-
-                $scoutBuilder->whereIn($relation->getForeignKeyName(), $clients);
-            }
-
-            return $scoutBuilder;
-        });
-
         if ($this->app->runningInConsole()) {
             $this->offerPublishing();
         }
@@ -133,6 +119,20 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->singleton('flux.action_manager', fn ($app) => new ActionManager());
         $this->app->singleton('flux.menu_manager', fn ($app) => new MenuManager());
         $this->app->singleton('flux.repeatable_manager', fn ($app) => new RepeatableManager());
+
+        $this->app->extend(Builder::class, function (Builder $scoutBuilder) {
+            if (($user = auth()->user()) instanceof User
+                && in_array(HasClientAssignment::class, class_uses_recursive($scoutBuilder->model))
+                && $scoutBuilder->model->isRelation('client')
+                && ($relation = $scoutBuilder->model->client()) instanceof BelongsTo
+            ) {
+                $clients = $user->clients()->pluck('id')->toArray() ?: Client::query()->pluck('id')->toArray();
+
+                $scoutBuilder->whereIn($relation->getForeignKeyName(), $clients);
+            }
+
+            return $scoutBuilder;
+        });
     }
 
     /**
