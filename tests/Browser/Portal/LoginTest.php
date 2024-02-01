@@ -35,7 +35,8 @@ class LoginTest extends PortalDuskTestCase
                 ->type('password', $this->password)
                 ->press('Login')
                 ->waitForReload()
-                ->assertRouteIs('portal.dashboard');
+                ->assertRouteIs('portal.dashboard')
+                ->assertSee('Return to website');
 
             $this->openMenu();
 

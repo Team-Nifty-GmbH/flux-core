@@ -15,6 +15,8 @@ class PortalDuskTestCase extends DuskTestCase
 {
     public Client $dbClient;
 
+    protected static string $guard = 'address';
+
     public function defineEnvironment($app): void
     {
         parent::defineEnvironment($app);

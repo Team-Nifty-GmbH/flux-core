@@ -38,6 +38,8 @@ abstract class DuskTestCase extends TestCase
 
     public string $password = '#Password123';
 
+    protected static string $guard = 'web';
+
     protected function setUp(): void
     {
         if (file_exists(__DIR__ . '/../../../.env')) {
@@ -111,7 +113,7 @@ abstract class DuskTestCase extends TestCase
         $this->createLoginUser();
 
         $this->browse(function (Browser $browser) {
-            $browser->loginAs($this->user->id, $this->password);
+            $browser->loginAs($this->user->id, static::$guard);
         });
     }
 

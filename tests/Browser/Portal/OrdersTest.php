@@ -79,7 +79,6 @@ class OrdersTest extends PortalDuskTestCase
 
     public function test_can_see_orders()
     {
-        $this->login();
         $this->browse(function (Browser $browser) {
             $browser->visit('/');
             $this->openMenu();
