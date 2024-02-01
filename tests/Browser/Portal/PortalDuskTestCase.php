@@ -65,7 +65,10 @@ class PortalDuskTestCase extends DuskTestCase
     public function login(): void
     {
         $this->createLoginUser();
+    }
 
+    public function browserLogin(): void
+    {
         $this->browse(function (Browser $browser) {
             $browser->visit(Str::finish($this->baseUrl(), '/') . 'login')
                 ->type('email', $this->user->email)

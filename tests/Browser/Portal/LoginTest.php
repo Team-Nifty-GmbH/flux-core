@@ -6,11 +6,6 @@ use Laravel\Dusk\Browser;
 
 class LoginTest extends PortalDuskTestCase
 {
-    public function login(): void
-    {
-        $this->createLoginUser();
-    }
-
     public function test_login_wrong_credentials()
     {
         $this->browse(function (Browser $browser) {
