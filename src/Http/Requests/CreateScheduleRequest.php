@@ -52,6 +52,7 @@ class CreateScheduleRequest extends BaseFormRequest
                 new Frequency('cron.methods.timeConstraint'),
             ],
             'parameters' => 'array',
+            'due_at' => 'date|nullable',
             'is_active' => 'boolean',
         ];
     }

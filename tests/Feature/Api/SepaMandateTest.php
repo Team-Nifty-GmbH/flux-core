@@ -63,6 +63,8 @@ class SepaMandateTest extends BaseSetup
             'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
         ]);
 
+        $this->user->clients()->attach($dbClients->pluck('id')->toArray());
+
         $this->permissions = [
             'show' => Permission::findOrCreate('api.sepa-mandates.{id}.get'),
             'index' => Permission::findOrCreate('api.sepa-mandates.get'),

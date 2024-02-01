@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -18,7 +19,8 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Client extends Model implements HasMedia
 {
-    use Commentable, Filterable, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, SoftDeletes;
+    use Commentable, Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid,
+        InteractsWithMedia, SoftDeletes;
 
     protected $appends = [
         'logo_url',
@@ -79,8 +81,8 @@ class Client extends Model implements HasMedia
         $this->addMediaCollection('logo')
             ->useDisk('public')
             ->singleFile();
-        $this
-            ->addMediaCollection('logo_small')
+
+        $this->addMediaCollection('logo_small')
             ->useDisk('public')
             ->singleFile();
     }

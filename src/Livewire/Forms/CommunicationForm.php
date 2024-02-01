@@ -6,6 +6,7 @@ use FluxErp\Actions\Communication\CreateCommunication;
 use FluxErp\Actions\Communication\DeleteCommunication;
 use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Models\Communication;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 
 class CommunicationForm extends FluxForm
@@ -90,5 +91,10 @@ class CommunicationForm extends FluxForm
             $this->slug = $message->mailAccount ?
                 $message->mailAccount->email . ' -> ' . $message->mailFolder?->slug : null;
         }
+    }
+
+    public function communicatable(): ?Model
+    {
+        return $this->communicatable_type::query()->whereKey($this->communicatable_id)->first();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
 use FluxErp\Traits\HasUserModification;
@@ -10,9 +11,12 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @deprecated
+ */
 class PaymentNotice extends Model
 {
-    use HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
+    use HasClientAssignment, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
     protected $casts = [
         'uuid' => 'string',
@@ -25,6 +29,11 @@ class PaymentNotice extends Model
     public $translatable = [
         'payment_notice',
     ];
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
 
     public function paymentType(): BelongsTo
     {

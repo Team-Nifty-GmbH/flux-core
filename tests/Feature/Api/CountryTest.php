@@ -357,9 +357,11 @@ class CountryTest extends BaseSetup
 
     public function test_delete_country_country_referenced_by_client()
     {
-        Client::factory()->create([
+        $client = Client::factory()->create([
             'country_id' => $this->countries[1]->id,
         ]);
+
+        $this->user->clients()->attach($client->id);
 
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);

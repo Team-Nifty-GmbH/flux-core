@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Dashboard;
 
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Widget as WidgetModel;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -46,14 +47,16 @@ class Dashboard extends Component
         foreach ($this->widgets as &$widget) {
             $savedWidget = auth()->user()->widgets()->updateOrCreate(['id' => $widget['id']], $widget);
             $position = array_search($widget['id'], $sortedIds);
+
             if ($position !== false) {
                 $sortedIds[$position] = $savedWidget->id;
             }
+
             $widget['id'] = $savedWidget->id;
         }
 
         $sortedIds = array_filter($sortedIds, 'is_numeric');
-        \FluxErp\Models\Widget::setNewOrder($sortedIds);
+        WidgetModel::setNewOrder($sortedIds);
 
         $this->widgets();
     }
@@ -67,7 +70,7 @@ class Dashboard extends Component
 
                 try {
                     $permissionExists = Permission::findByName('widget.' . $name)->exists;
-                } catch (PermissionDoesNotExist $e) {
+                } catch (PermissionDoesNotExist) {
                     $permissionExists = false;
                 }
 

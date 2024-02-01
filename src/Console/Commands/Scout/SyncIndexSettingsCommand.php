@@ -2,6 +2,8 @@
 
 namespace FluxErp\Console\Commands\Scout;
 
+use FluxErp\Traits\HasClientAssignment;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Console\SyncIndexSettingsCommand as BaseSyncIndexSettingsCommand;
 use Laravel\Scout\EngineManager;
@@ -48,10 +50,20 @@ class SyncIndexSettingsCommand extends BaseSyncIndexSettingsCommand
                         $model = new $name;
                     }
 
+                    $uses = class_uses_recursive($model);
                     if (isset($model) &&
                         config('scout.soft_delete', false) &&
-                        in_array(SoftDeletes::class, class_uses_recursive($model))) {
+                        in_array(SoftDeletes::class, $uses)
+                    ) {
                         $settings['filterableAttributes'][] = '__soft_deleted';
+                    }
+
+                    if (isset($model)
+                        && in_array(HasClientAssignment::class, $uses)
+                        && $model->isRelation('client')
+                        && ($relation = $model->client()) instanceof BelongsTo
+                    ) {
+                        $settings['filterableAttributes'][] = $relation->getForeignKeyName();
                     }
 
                     if (isset($model) &&

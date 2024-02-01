@@ -17,7 +17,7 @@
         <x-card class="flex flex-col gap-4">
             <div class="flex flex-col gap-1.5">
                 <x-label>{{ __('To') }}</x-label>
-                <div class="flex gap-1">
+                <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
                     <template x-for="to in $wire.mailMessage.to">
                         <x-badge flat primary cl>
                             <x-slot:label>
@@ -30,6 +30,7 @@
                                 <button
                                     type="button"
                                     x-on:click="$wire.mailMessage.to.splice($wire.mailMessage.to.indexOf(to), 1)"
+                                    x-bind:disabled="$wire.multiple"
                                 >
                                     <x-icon
                                         name="x"
@@ -40,11 +41,17 @@
                         </x-badge>
                     </template>
                 </div>
-                <x-input :placeholder="__('Add a new to')" x-on:blur="addReceiver($event, 'to')" x-on:keyup="addReceiver($event, 'to')" class="w-full" />
+                <x-input
+                    :placeholder="__('Add a new to')"
+                    x-on:blur="addReceiver($event, 'to')"
+                    x-on:keyup="addReceiver($event, 'to')"
+                    class="w-full"
+                    x-bind:disabled="$wire.multiple"
+                />
             </div>
             <div class="flex flex-col gap-1.5">
                 <x-label>{{ __('CC') }}</x-label>
-                <div class="flex gap-1">
+                <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
                     <template x-for="cc in $wire.mailMessage.cc">
                         <x-badge flat primary cl>
                             <x-slot:label>
@@ -130,7 +137,7 @@
                         </template>
                     </div>
                 </label>
-                <input class="hidden" wire:model="files" id="files" type="file" multiple/>
+                <input class="hidden" wire:model="files" id="files" type="file" multiple x-bind:disabled="$wire.multiple"/>
             </div>
             <x-editor wire:model="mailMessage.html_body" />
             <x-slot:footer>

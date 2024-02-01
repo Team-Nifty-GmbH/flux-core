@@ -10,10 +10,12 @@ use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
+use FluxErp\Support\OrderCollection;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
@@ -30,6 +32,7 @@ use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
 use FluxErp\View\Printing\Order\Retoure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -43,9 +46,11 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
-        HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
-        InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable;
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment, HasCustomEvents,
+        HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification,
+        HasUuid, InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable {
+            Printable::resolvePrintViews as protected printableResolvePrintViews;
+        }
 
     protected $with = [
         'currency',
@@ -254,10 +259,12 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->belongsToMany(User::class, 'order_user');
     }
 
-    /**
-     * @return $this
-     */
-    public function calculatePaymentState(): self
+    public function newCollection(array $models = []): Collection
+    {
+        return new OrderCollection($models);
+    }
+
+    public function calculatePaymentState(): static
     {
         if (! $this->transactions()->exists()) {
             if ($this->payment_state->canTransitionTo(Open::class)) {
@@ -421,5 +428,12 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                 'order-confirmation' => OrderConfirmation::class,
                 'retoure' => Retoure::class,
             ];
+    }
+
+    public function resolvePrintViews(): array
+    {
+        $printViews = $this->printableResolvePrintViews();
+
+        return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
     }
 }

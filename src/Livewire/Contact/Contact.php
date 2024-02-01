@@ -154,7 +154,7 @@ class Contact extends Component
         try {
             $response = $this->saveFileUploadsToMediaLibrary(
                 'avatar',
-                $this->contactId,
+                $this->contact->id,
                 ContactModel::class
             );
         } catch (\Exception $e) {
@@ -163,6 +163,9 @@ class Contact extends Component
             return;
         }
 
-        $this->avatar = $response[0]['data']->getUrl();
+        $this->avatar = ContactModel::query()
+            ->whereKey($this->contact->id)
+            ->first()
+            ->getAvatarUrl();
     }
 }

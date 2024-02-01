@@ -13,6 +13,8 @@ class OrderForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public ?int $approval_user_id = null;
+
     public ?int $parent_id = null;
 
     public ?int $client_id = null;
@@ -20,6 +22,8 @@ class OrderForm extends FluxForm
     public ?int $agent_id = null;
 
     public ?int $contact_id = null;
+
+    public ?int $bank_connection_id = null;
 
     public ?int $address_invoice_id = null;
 
@@ -93,6 +97,8 @@ class OrderForm extends FluxForm
 
     public bool $is_locked = false;
 
+    public bool $is_confirmed = false;
+
     public ?array $currency = null;
 
     public ?array $order_type = null;
@@ -104,6 +110,9 @@ class OrderForm extends FluxForm
     public ?string $updated_at = null;
 
     public ?array $updated_by = null;
+
+    #[Locked]
+    public ?array $invoice = null;
 
     protected function getActions(): array
     {

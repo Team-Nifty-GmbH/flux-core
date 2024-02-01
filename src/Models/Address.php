@@ -8,6 +8,7 @@ use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasCalendarEvents;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
@@ -39,8 +40,8 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens,
-        HasCalendarEvents, HasCalendars, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags,
-        HasUserModification, HasUuid, Lockable, Notifiable, Searchable, SoftDeletes;
+        HasCalendarEvents, HasCalendars, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles,
+        HasTags, HasUserModification, HasUuid, Lockable, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'login_password',
@@ -141,6 +142,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         return $this->belongsToMany(AddressType::class);
     }
 
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
@@ -237,7 +243,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->contact?->getFirstMediaUrl('avatar') ?: self::icon()->getUrl();
+        return $this->contact?->getAvatarUrl();
     }
 
     public function sendLoginLink(): void

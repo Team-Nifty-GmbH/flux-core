@@ -6,16 +6,11 @@ use Laravel\Dusk\Browser;
 
 class LoginTest extends PortalDuskTestCase
 {
-    public function login(): void
-    {
-        $this->createLoginUser();
-    }
-
     public function test_login_wrong_credentials()
     {
         $this->browse(function (Browser $browser) {
             $browser
-                ->visit(config('flux.portal_domain') . ':8001/')
+                ->visit($this->baseUrl())
                 ->assertSee('For more transparency, quality and speed in all service processes')
                 ->type('email', 'user@usertest.de')
                 ->type('password', 'testpassword')
@@ -25,17 +20,18 @@ class LoginTest extends PortalDuskTestCase
         });
     }
 
-    public function test_login_successfull()
+    public function test_login_successful()
     {
         $this->browse(function (Browser $browser) {
             $browser
-                ->visit(config('flux.portal_domain') . ':8001/')
+                ->visit($this->baseUrl())
                 ->assertSee(__('For more transparency, quality and speed in all service processes'))
                 ->type('email', $this->user->login_name)
                 ->type('password', $this->password)
                 ->press('Login')
                 ->waitForReload()
-                ->assertRouteIs('portal.dashboard');
+                ->assertRouteIs('portal.dashboard')
+                ->assertSee('Return to website');
 
             $this->openMenu();
 
