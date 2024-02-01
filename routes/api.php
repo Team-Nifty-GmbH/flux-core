@@ -35,6 +35,7 @@ use FluxErp\Http\Controllers\NotificationSettingsController;
 use FluxErp\Http\Controllers\OrderController;
 use FluxErp\Http\Controllers\OrderPositionController;
 use FluxErp\Http\Controllers\OrderTypeController;
+use FluxErp\Http\Controllers\PaymentRunController;
 use FluxErp\Http\Controllers\PaymentTypeController;
 use FluxErp\Http\Controllers\PermissionController;
 use FluxErp\Http\Controllers\PriceController;
@@ -308,6 +309,13 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::post('/order-types', [OrderTypeController::class, 'create']);
         Route::put('/order-types', [OrderTypeController::class, 'update']);
         Route::delete('/order-types/{id}', [OrderTypeController::class, 'delete']);
+
+        //PaymentRuns
+        Route::get('/payment-runs/{id}', [PaymentRunController::class, 'show']);
+        Route::get('/payment-runs', [PaymentRunController::class, 'index']);
+        Route::post('/payment-runs', [PaymentRunController::class, 'create']);
+        Route::put('/payment-runs', [PaymentRunController::class, 'update']);
+        Route::delete('/payment-runs/{id}', [PaymentRunController::class, 'delete']);
 
         //PaymentTypes
         Route::get('/payment-types/{id}', [PaymentTypeController::class, 'show']);

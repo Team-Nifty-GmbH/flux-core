@@ -199,6 +199,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->belongsTo(Contact::class);
     }
 
+    public function contactBankConnection(): BelongsTo
+    {
+        return $this->belongsTo(ContactBankConnection::class);
+    }
+
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
@@ -222,6 +227,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'parent_id');
+    }
+
+    public function paymentRuns(): BelongsToMany
+    {
+        return $this->belongsToMany(PaymentRun::class, 'order_payment_run');
     }
 
     public function paymentType(): BelongsTo

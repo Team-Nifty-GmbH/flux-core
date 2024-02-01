@@ -3,8 +3,12 @@
         <x-card>
             <div class="flex flex-col gap-4">
                 <x-input wire:model="paymentType.name" :label="__('Name')" />
-                <x-toggle wire:model="paymentType.is_active" :label="__('Is Active')" />
+                <x-toggle wire:model.boolean="paymentType.is_active" :label="__('Is Active')" />
                 <x-toggle wire:model.boolean="paymentType.is_default" :label="__('Is Default')" />
+                <x-toggle wire:model.boolean="paymentType.is_purchase" :label="__('Is Purchase')" />
+                <x-toggle wire:model.boolean="paymentType.is_sales" :label="__('Is Sales')" />
+                <x-toggle wire:model.boolean="paymentType.is_direct_debit" :label="__('Is Direct Debit')" />
+                <x-toggle wire:model.boolean="paymentType.requires_manual_transfer" :label="__('Requires Manual Transfer')" />
                 <div x-cloak x-show="! $wire.paymentType.id">
                     <x-select
                         :label="__('Client')"
@@ -22,7 +26,7 @@
                 <x-inputs.number wire:model="paymentType.payment_target" :label="__('Payment Target')" />
                 <x-inputs.number wire:model="paymentType.payment_discount_target" :label="__('Payment Discount Target')" />
                 <x-inputs.number wire:model="paymentType.payment_discount_percentage" :label="__('Payment Discount Percentage')" />
-                <x-textarea wire:model="paymentType.description" :label="__('Description')" />
+                <x-editor wire:model="paymentType.description" :label="__('Description')" />
             </div>
             <x-slot:footer>
                 <div class="flex justify-between gap-x-4">

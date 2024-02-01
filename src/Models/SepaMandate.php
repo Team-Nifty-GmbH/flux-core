@@ -24,6 +24,7 @@ class SepaMandate extends Model implements HasMedia, OffersPrinting
 
     protected $casts = [
         'uuid' => 'string',
+        'signed_date' => 'date',
     ];
 
     protected $guarded = [
