@@ -80,6 +80,7 @@ class OrdersTest extends PortalDuskTestCase
     public function test_can_see_orders()
     {
         $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->user->id, static::$guard);
             $browser->visit($this->baseUrl());
             $this->openMenu();
 
@@ -107,6 +108,7 @@ class OrdersTest extends PortalDuskTestCase
     public function test_can_see_order_details()
     {
         $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->user->id, static::$guard);
             $browser->visit($this->baseUrl());
             $this->openMenu();
             $browser
