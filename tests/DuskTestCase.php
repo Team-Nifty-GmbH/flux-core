@@ -98,6 +98,7 @@ abstract class DuskTestCase extends TestCase
         $app['config']->set('database.connections.mysql.database', 'laravel');
         $app['config']->set('auth.defaults.guard', 'web');
         $app['config']->set('flux.install_done', true);
+        $app['config']->set('flux.portal_domain', 'http://portal.localhost');
     }
 
     public function openMenu(): void
