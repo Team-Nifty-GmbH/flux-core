@@ -15,6 +15,7 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
@@ -45,12 +46,11 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
-        HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
-        InteractsWithMedia, Searchable, SoftDeletes, Trackable;
-    use Printable {
-        Printable::resolvePrintViews as protected printableResolvePrintViews;
-    }
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment, HasCustomEvents,
+        HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification,
+        HasUuid, InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable {
+            Printable::resolvePrintViews as protected printableResolvePrintViews;
+        }
 
     protected $with = [
         'currency',

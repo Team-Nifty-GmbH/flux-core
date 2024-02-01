@@ -20,6 +20,15 @@
                                 :label="__('Due At') . ' ' . $task->due_date->locale(app()->getLocale())->isoFormat('L')"
                             />
                         @endif
+                        <x-badge
+                            :color="match (true) {
+                                $task->priority === 0 => 'secondary',
+                                $task->priority < 5 => 'primary',
+                                $task->priority < 8 => 'warning',
+                                default => 'negative',
+                            }"
+                            :label="__('Priority') . ': ' . $task->priority"
+                        />
                     </div>
                 </x-slot:sub-value>
                 <x-slot:actions>

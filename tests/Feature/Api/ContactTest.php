@@ -47,6 +47,8 @@ class ContactTest extends BaseSetup
             'payment_type_id' => $this->paymentTypes[1]->id,
         ]);
 
+        $this->user->clients()->attach($dbClients->pluck('id')->toArray());
+
         $this->permissions = [
             'show' => Permission::findOrCreate('api.contacts.{id}.get'),
             'index' => Permission::findOrCreate('api.contacts.get'),

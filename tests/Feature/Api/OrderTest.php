@@ -89,6 +89,8 @@ class OrderTest extends BaseSetup
             'is_locked' => false,
         ]);
 
+        $this->user->clients()->attach($this->clients->pluck('id')->toArray());
+
         $this->permissions = [
             'show' => Permission::findOrCreate('api.orders.{id}.get'),
             'index' => Permission::findOrCreate('api.orders.get'),

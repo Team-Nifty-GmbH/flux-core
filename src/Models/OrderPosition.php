@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasSerialNumberRange;
@@ -28,8 +29,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class OrderPosition extends Model implements InteractsWithDataTables, Sortable
 {
-    use HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasTags,
-        HasUserModification, HasUuid, SoftDeletes, SortableTrait;
+    use HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange,
+        HasTags, HasUserModification, HasUuid, SoftDeletes, SortableTrait;
 
     protected $appends = [
         'unit_price',
@@ -120,6 +121,11 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
     public function children(): HasMany
     {
         return $this->hasMany(OrderPosition::class, 'parent_id');
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 
     public function currency(): HasOneThrough

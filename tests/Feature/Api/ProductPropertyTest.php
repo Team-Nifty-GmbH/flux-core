@@ -36,6 +36,8 @@ class ProductPropertyTest extends BaseSetup
 
         $this->products->productProperties()->sync($this->productProperties[1]->id);
 
+        $this->user->clients()->attach($client->id);
+
         $this->permissions = [
             'show' => Permission::findOrCreate('api.product-properties.{id}.get'),
             'index' => Permission::findOrCreate('api.product-properties.get'),
