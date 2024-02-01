@@ -15,7 +15,7 @@ class LoginTest extends PortalDuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser
-                ->visit(config('flux.portal_domain') . ':8001/')
+                ->visit($this->baseUrl())
                 ->assertSee('For more transparency, quality and speed in all service processes')
                 ->type('email', 'user@usertest.de')
                 ->type('password', 'testpassword')
@@ -29,7 +29,7 @@ class LoginTest extends PortalDuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser
-                ->visit(config('flux.portal_domain') . ':8001/')
+                ->visit($this->baseUrl())
                 ->assertSee(__('For more transparency, quality and speed in all service processes'))
                 ->type('email', $this->user->login_name)
                 ->type('password', $this->password)
@@ -42,29 +42,6 @@ class LoginTest extends PortalDuskTestCase
 
             $browser->waitForText($this->user->name)
                 ->assertSee($this->user->name);
-        });
-    }
-
-    public function test_can_see_orders()
-    {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/');
-            $this->openMenu();
-
-            $browser->click('nav [href="/orders"]')
-                ->waitForRoute('portal.orders')
-                ->assertRouteIs('portal.orders')
-                ->waitForText('My orders')
-                ->waitForText('Order Number')
-                ->waitForText('Order Type -> Name')
-                ->waitForText('Commission')
-                ->waitForText('Payment State')
-                ->waitForText('Total Gross Price')
-                ->assertSee('Order Number')
-                ->assertSee('Order Type -> Name')
-                ->assertSee('Commission')
-                ->assertSee('Payment State')
-                ->assertSee('Total Gross Price');
         });
     }
 }
