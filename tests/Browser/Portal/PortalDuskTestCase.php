@@ -32,7 +32,13 @@ class PortalDuskTestCase extends DuskTestCase
     {
         $this->dbClient = Client::factory()->create();
 
+        Language::factory()->create();
+        // ensure a language with language code 'en' exists
+        if (Language::query()->where('language_code', 'en')->doesntExist()) {
+            Language::factory()->create(['language_code' => 'en']);
+        }
         $language = Language::query()->where('language_code', 'en')->first();
+
         $currency = Currency::factory()->create();
 
         $country = Country::factory()->create([
