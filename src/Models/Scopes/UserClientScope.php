@@ -15,6 +15,11 @@ class UserClientScope implements Scope
 {
     public function apply(Builder $builder, Model $model): void
     {
+        // Dont apply scope if the model is the same as the auth model
+        if (Auth::getProvider()->getModel() === get_class($model)) {
+            return;
+        }
+
         $clients = ($user = Auth::user()) instanceof User ?
             $user->clients()
                 ->withoutGlobalScope(UserClientScope::class)

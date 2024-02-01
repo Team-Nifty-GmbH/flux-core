@@ -25,7 +25,7 @@ class LoginTest extends PortalDuskTestCase
         });
     }
 
-    public function test_login_successfull()
+    public function test_login_successful()
     {
         $this->browse(function (Browser $browser) {
             $browser
