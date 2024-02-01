@@ -5,15 +5,15 @@ namespace FluxErp\Models;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\States\PaymentRun\PaymentRunState;
 use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class PaymentRun extends Model
 {
-    use HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid;
+    use HasFrontendAttributes, HasUserModification, HasUuid;
 
     protected $casts = [
         'uuid' => 'string',
@@ -27,8 +27,13 @@ class PaymentRun extends Model
         'id',
     ];
 
+    public function bankConnection(): BelongsTo
+    {
+        return $this->belongsTo(BankConnection::class);
+    }
+
     public function orders(): BelongsToMany
     {
-        return $this->belongsToMany(Order::class);
+        return $this->belongsToMany(Order::class, 'order_payment_run');
     }
 }

@@ -79,7 +79,7 @@ class PaymentRunController extends BaseController
             );
         } catch (ValidationException $e) {
             $response = ResponseHelper::createArrayResponse(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                statusCode: 404,
                 data: $e->errors()
             );
         }

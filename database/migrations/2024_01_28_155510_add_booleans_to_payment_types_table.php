@@ -19,10 +19,12 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('payment_types', function (Blueprint $table) {
-            $table->dropColumn('is_direct_debit');
-            $table->dropColumn('is_purchase');
-            $table->dropColumn('is_sales');
-            $table->dropColumn('requires_manual_transfer');
+            $table->dropColumn([
+                'is_direct_debit',
+                'is_purchase',
+                'is_sales',
+                'requires_manual_transfer',
+            ]);
         });
     }
 };

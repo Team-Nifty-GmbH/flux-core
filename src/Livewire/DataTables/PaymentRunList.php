@@ -17,7 +17,7 @@ class PaymentRunList extends DataTable
     public ?string $includeBefore = 'flux::livewire.accounting.payment-run.include-before';
 
     public array $enabledCols = [
-        'iban',
+        'bank_connection.iban',
         'state',
         'payment_run_type_enum',
     ];
@@ -80,7 +80,9 @@ class PaymentRunList extends DataTable
 
     public function removeOrder(int $id): bool
     {
-        $paymentRun = PaymentRun::query()->whereKey($this->paymentRunForm->id)->first();
+        $paymentRun = PaymentRun::query()
+            ->whereKey($this->paymentRunForm->id)
+            ->first();
         $paymentRun->orders()->detach($id);
 
         $this->loadPaymentRun($paymentRun);
@@ -96,17 +98,19 @@ class PaymentRunList extends DataTable
 
     protected function loadPaymentRun(PaymentRun $paymentRun): void
     {
-        $paymentRun->loadMissing([
-            'orders' => fn ($query) => $query->select([
-                'orders.id',
-                'orders.invoice_number',
-                'orders.contact_bank_connection_id',
-                'orders.address_invoice_id',
+        $paymentRun
+            ->loadMissing([
+                'orders' => fn ($query) => $query
+                    ->select([
+                        'orders.id',
+                        'orders.invoice_number',
+                        'orders.contact_bank_connection_id',
+                        'orders.address_invoice_id',
+                    ])
+                    ->with(['contactBankConnection:id,iban', 'addressInvoice:id,name'])
+                    ->withPivot('amount'),
             ])
-                ->with(['contactBankConnection:id,iban', 'addressInvoice:id,name'])
-                ->withPivot('amount'),
-        ])
-            ->loadAggregate('orders', 'order_payment_run.amount', 'sum');
+            ->loadSum('orders AS total_amount', 'order_payment_run.amount');
 
         $this->paymentRunForm->fill($paymentRun);
     }

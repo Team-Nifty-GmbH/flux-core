@@ -27,7 +27,7 @@ class CreatePaymentRun extends FluxAction
         $payment = new PaymentRun($this->data);
         $payment->save();
 
-        $payment->orders()->sync($orders);
+        $payment->orders()->attach($orders);
 
         return $payment->fresh();
     }

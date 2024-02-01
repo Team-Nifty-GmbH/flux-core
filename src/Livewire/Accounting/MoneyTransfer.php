@@ -32,13 +32,18 @@ class MoneyTransfer extends DirectDebit
             )
             ->pluck('id');
 
-        return $builder->whereRelation('paymentType', 'is_direct_debit', false)
-            ->whereRelation('paymentType', 'requires_manual_transfer', true)
+        return $builder
+            ->whereHas('paymentType', function (Builder $query) {
+                $query->where('is_direct_debit', false)
+                    ->where('requires_manual_transfer', true);
+            })
             ->where(function (Builder $query) {
-                $query->whereHas(
-                    'paymentRuns',
-                    fn (Builder $builder) => $builder->whereNotIn('state', ['open', 'successful', 'pending'])
-                )->orWhereDoesntHave('paymentRuns');
+                $query
+                    ->whereHas(
+                        'paymentRuns',
+                        fn (Builder $builder) => $builder->whereNotIn('state', ['open', 'successful', 'pending'])
+                    )
+                    ->orWhereDoesntHave('paymentRuns');
             })
             ->where('balance', '<', 0)
             ->whereNotNull('invoice_number')
@@ -50,7 +55,7 @@ class MoneyTransfer extends DirectDebit
         $orderPayments = $this->getSelectedModels()
             ->map(fn ($order) => [
                 'order_id' => $order->id,
-                'amount' => round($order->balance, 2),
+                'amount' => bcround($order->balance, 2),
             ])
             ->toArray();
 

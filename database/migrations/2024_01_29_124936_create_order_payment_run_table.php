@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('payment_run_id')
                 ->constrained()
                 ->cascadeOnDelete();
-            $table->decimal('amount', 40);
+            $table->decimal('amount', 40, 10);
         });
     }
 

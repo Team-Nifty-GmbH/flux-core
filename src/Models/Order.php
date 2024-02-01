@@ -226,7 +226,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
     public function paymentRuns(): BelongsToMany
     {
-        return $this->belongsToMany(PaymentRun::class);
+        return $this->belongsToMany(PaymentRun::class, 'order_payment_run');
     }
 
     public function paymentType(): BelongsTo

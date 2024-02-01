@@ -26,7 +26,7 @@
                 </div>
                 <div class="flex justify-end pt-4 gap-1.5">
                     <div>{{ __('Total') }}</div>
-                    <div x-html="window.formatters.coloredMoney($wire.paymentRunForm.orders_sum_order_payment_runamount)"></div>
+                    <div x-html="window.formatters.coloredMoney($wire.paymentRunForm.total_amount)"></div>
                 </div>
                 <hr class="py-4" />
                 <div class="flex flex-col gap-4">
@@ -44,12 +44,11 @@
                         :label="__('Execution Date')"
                         :min="now()->format('Y-m-d')"
                     />
-                    <x-toggle wire:model="paymentRunForm.isSingleBooking" :label="__('Single Booking')" />
                     <div x-cloak x-show="$wire.paymentRunForm.payment_run_type_enum === 'direct_debit'">
-
+                        <x-toggle wire:model="paymentRunForm.is_single_booking" :label="__('Single Booking')" />
                     </div>
                     <div x-cloak x-show="$wire.paymentRunForm.payment_run_type_enum === 'money_transfer'">
-                        <x-toggle wire:model="paymentRunForm.isInstantPayment" :label="__('Is Instant Payment')" />
+                        <x-toggle wire:model="paymentRunForm.is_instant_payment" :label="__('Is Instant Payment')" />
                     </div>
                 </div>
             </div>
@@ -60,7 +59,7 @@
                     flat
                     negative
                     :label="__('Delete')"
-                    wire:click="delete().then((success) => {if(success) close();})" w
+                    wire:click="delete().then((success) => {if(success) close();})"
                     wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Payment Run')]) }}"
                 />
                 <div class="flex justify-end gap-1.5">

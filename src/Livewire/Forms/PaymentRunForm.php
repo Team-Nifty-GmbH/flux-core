@@ -19,15 +19,15 @@ class PaymentRunForm extends FluxForm
 
     public ?string $instructed_execution_date = null;
 
-    public ?bool $isSingleBooking = false;
+    public ?bool $is_single_booking = false;
 
-    public ?bool $isInstantPayment = false;
+    public ?bool $is_instant_payment = false;
 
     #[Locked]
     public array $orders = [];
 
     #[Locked]
-    public ?string $orders_sum_order_payment_runamount = null;
+    public ?string $total_amount = null;
 
     protected function getActions(): array
     {

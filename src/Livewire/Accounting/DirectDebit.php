@@ -52,10 +52,12 @@ class DirectDebit extends OrderList
 
         return $builder->whereRelation('paymentType', 'is_direct_debit', true)
             ->where(function (Builder $query) {
-                $query->whereHas(
-                    'paymentRuns',
-                    fn (Builder $builder) => $builder->whereNotIn('state', ['open', 'successful', 'pending'])
-                )->orWhereDoesntHave('paymentRuns');
+                $query
+                    ->whereHas(
+                        'paymentRuns',
+                        fn (Builder $builder) => $builder->whereNotIn('state', ['open', 'successful', 'pending'])
+                    )
+                    ->orWhereDoesntHave('paymentRuns');
             })
             ->where('balance', '>', 0)
             ->whereNotNull('invoice_number')
@@ -67,7 +69,7 @@ class DirectDebit extends OrderList
         $orderPayments = $this->getSelectedModels()
             ->map(fn ($order) => [
                 'order_id' => $order->id,
-                'amount' => round($order->balance, 2),
+                'amount' => bcround($order->balance, 2),
             ])
             ->toArray();
 
