@@ -44,4 +44,27 @@ class LoginTest extends PortalDuskTestCase
                 ->assertSee($this->user->name);
         });
     }
+
+    public function test_can_see_orders()
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/');
+            $this->openMenu();
+
+            $browser->click('nav [href="/orders"]')
+                ->waitForRoute('portal.orders')
+                ->assertRouteIs('portal.orders')
+                ->waitForText('My orders')
+                ->waitForText('Order Number')
+                ->waitForText('Order Type -> Name')
+                ->waitForText('Commission')
+                ->waitForText('Payment State')
+                ->waitForText('Total Gross Price')
+                ->assertSee('Order Number')
+                ->assertSee('Order Type -> Name')
+                ->assertSee('Commission')
+                ->assertSee('Payment State')
+                ->assertSee('Total Gross Price');
+        });
+    }
 }
