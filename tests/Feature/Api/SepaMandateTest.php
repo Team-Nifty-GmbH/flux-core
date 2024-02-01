@@ -90,7 +90,14 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($this->sepaMandates[0]->contact_id, $jsonSepaMandate->contact_id);
         $this->assertEquals($this->sepaMandates[0]->contact_bank_connection_id,
             $jsonSepaMandate->contact_bank_connection_id);
-        $this->assertEquals($this->sepaMandates[0]->signed_date, $jsonSepaMandate->signed_date);
+
+        if (is_null($this->sepaMandates[0]->signed_date)) {
+            $this->assertNull($jsonSepaMandate->signed_date);
+        } else {
+            $this->assertEquals($this->sepaMandates[0]->signed_date->toDateString(),
+                Carbon::parse($jsonSepaMandate->signed_date)->toDateString());
+        }
+
         $this->assertEquals($this->sepaMandates[0]->created_at->toDateTimeString(),
             Carbon::parse($jsonSepaMandate->created_at)->toDateTimeString());
         $this->assertEquals($this->sepaMandates[0]->updated_at->toDateTimeString(),
