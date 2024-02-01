@@ -10,6 +10,7 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
 use FluxErp\Tests\DuskTestCase;
+use Laravel\Dusk\Browser;
 
 class PortalDuskTestCase extends DuskTestCase
 {
@@ -58,5 +59,18 @@ class PortalDuskTestCase extends DuskTestCase
             'login_password' => $this->password,
             'is_main_address' => true,
         ]);
+    }
+
+    public function login(): void
+    {
+        $this->createLoginUser();
+
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/login')
+                ->type('email', $this->user->email)
+                ->type('password', $this->password)
+                ->clickAndWaitForReload('@login-button')
+                ->assertRouteIs('dashboard');
+        });
     }
 }
