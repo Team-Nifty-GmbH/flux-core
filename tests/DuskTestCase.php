@@ -20,6 +20,7 @@ use NotificationChannels\WebPush\WebPushServiceProvider;
 use Orchestra\Testbench\Dusk\TestCase;
 use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
+use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Spatie\Tags\TagsServiceProvider;
@@ -55,6 +56,8 @@ abstract class DuskTestCase extends TestCase
         if (! file_exists(public_path('flux'))) {
             symlink(package_path('public'), public_path('flux'));
         }
+
+        $this->app->make(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $this->login();
     }
