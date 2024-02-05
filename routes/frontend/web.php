@@ -123,9 +123,6 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::permanentRedirect('/', '/')
                     ->withoutMiddleware(TrackVisits::class)
                     ->registersMenuItem(icon: 'cog', order: 9999);
-                Route::get('/plugins', Plugins::class)
-                    ->name('plugins')
-                    ->registersMenuItem();
                 Route::get('/additional-columns', AdditionalColumns::class)
                     ->name('additional-columns')
                     ->registersMenuItem();
@@ -161,6 +158,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                     ->name('serial-number-ranges')
                     ->registersMenuItem();
                 Route::get('/scheduling', Scheduling::class)->name('scheduling')->registersMenuItem();
+                Route::get('/plugins', Plugins::class)
+                    ->name('plugins')
+                    ->registersMenuItem();
             });
     });
 

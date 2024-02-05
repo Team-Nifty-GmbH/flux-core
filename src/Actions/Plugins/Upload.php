@@ -2,13 +2,12 @@
 
 namespace FluxErp\Actions\Plugins;
 
-use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\ComposerRepositoryTypeEnum;
 use FluxErp\Http\Requests\PluginUploadRequest;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
-class Upload extends FluxAction
+class Upload extends BasePluginAction
 {
     protected function boot(array $data): void
     {
@@ -16,16 +15,15 @@ class Upload extends FluxAction
         $this->rules = (new PluginUploadRequest())->rules();
     }
 
-    public static function models(): array
-    {
-        return [];
-    }
-
-    public function performAction(): bool
+    public function performAction(): true
     {
         $composer = app('composer');
-        $composer->addRepository(ComposerRepositoryTypeEnum::path, './packages/*', 'packages-local');
-        $composer->addRepository(ComposerRepositoryTypeEnum::path, './packages/*/*', 'packages-uploaded');
+        $composer->addRepository(ComposerRepositoryTypeEnum::Path, './packages/*', 'packages-local');
+        $composer->addRepository(
+            ComposerRepositoryTypeEnum::Path,
+            './packages/*/*',
+            'packages-uploaded'
+        );
 
         $packages = [];
         foreach ($this->data['packages'] as $package) {
@@ -43,7 +41,10 @@ class Upload extends FluxAction
                 $composerJson = json_decode($content, true);
                 $vendor = Str::before($composerJson['name'], '/');
                 $packageName = Str::after($composerJson['name'], '/');
-                $packagePath = base_path('packages' . DIRECTORY_SEPARATOR . $vendor . DIRECTORY_SEPARATOR . $packageName);
+                $packagePath = base_path(
+                    'packages' . DIRECTORY_SEPARATOR . $vendor . DIRECTORY_SEPARATOR . $packageName
+                );
+
                 if (File::exists($packagePath)) {
                     File::deleteDirectory($packagePath);
                 }
@@ -71,11 +72,12 @@ class Upload extends FluxAction
             File::delete($package->getRealPath());
         }
 
-        return Install::make([
-            'packages' => $packages,
-            'migrate' => true,
-            'options' => ['--prefer-source'],
-        ])
-            ->execute();
+        return $packages ?
+            Install::make([
+                'packages' => $packages,
+                'migrate' => true,
+                'options' => ['--prefer-source'],
+            ])
+                ->execute() : true;
     }
 }

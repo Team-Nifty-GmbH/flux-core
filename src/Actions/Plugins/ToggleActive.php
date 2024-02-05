@@ -2,10 +2,9 @@
 
 namespace FluxErp\Actions\Plugins;
 
-use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\PluginToggleActiveRequest;
 
-class ToggleActive extends FluxAction
+class ToggleActive extends BasePluginAction
 {
     protected function boot(array $data): void
     {
@@ -13,12 +12,7 @@ class ToggleActive extends FluxAction
         $this->rules = (new PluginToggleActiveRequest())->rules();
     }
 
-    public static function models(): array
-    {
-        return [];
-    }
-
-    public function performAction(): mixed
+    public function performAction(): true
     {
         /** @var \FluxErp\Helpers\Composer $composer */
         $composer = app('composer');

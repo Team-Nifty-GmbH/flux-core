@@ -2,10 +2,9 @@
 
 namespace FluxErp\Actions\Plugins;
 
-use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\PluginUpdateRequest;
 
-class Update extends FluxAction
+class Update extends BasePluginAction
 {
     protected function boot(array $data): void
     {
@@ -13,28 +12,14 @@ class Update extends FluxAction
         $this->rules = (new PluginUpdateRequest())->rules();
     }
 
-    public static function models(): array
-    {
-        return [];
-    }
-
     public function performAction(): mixed
     {
+        /** @var \FluxErp\Helpers\Composer $composer */
         $composer = app('composer');
-
         $composer->updatePackages($this->data['packages']);
 
-        $migrator = app('migrator');
-        $paths = collect($migrator->paths());
         if ($this->data['migrate'] ?? true) {
-            foreach ($this->data['packages'] as $package) {
-                $packageInfo = $composer->show($package);
-                $migrationPaths = $paths->filter(fn ($path) => str_starts_with($path, $packageInfo['path']));
-
-                foreach ($migrationPaths as $migrationPath) {
-                    $migrator->run($migrationPath);
-                }
-            }
+            $this::migrate($this->data['packages']);
         }
 
         return app('composer')->updatePackages($this->data[0] ?? null);

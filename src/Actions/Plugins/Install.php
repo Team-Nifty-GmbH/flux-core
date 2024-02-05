@@ -2,10 +2,9 @@
 
 namespace FluxErp\Actions\Plugins;
 
-use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\PluginInstallRequest;
 
-class Install extends FluxAction
+class Install extends BasePluginAction
 {
     protected function boot(array $data): void
     {
@@ -13,12 +12,7 @@ class Install extends FluxAction
         $this->rules = (new PluginInstallRequest())->rules();
     }
 
-    public static function models(): array
-    {
-        return [];
-    }
-
-    public function performAction(): bool
+    public function performAction(): true
     {
         /** @var \FluxErp\Helpers\Composer $composer */
         $composer = app('composer');
@@ -37,17 +31,8 @@ class Install extends FluxAction
             throw new \RuntimeException($output);
         }
 
-        $migrator = app('migrator');
-        $paths = collect($migrator->paths());
         if ($this->data['migrate'] ?? true) {
-            foreach ($this->data['packages'] as $package) {
-                $packageInfo = $composer->show($package);
-                $migrationPaths = $paths->filter(fn ($path) => str_starts_with($path, $packageInfo['path']));
-
-                foreach ($migrationPaths as $migrationPath) {
-                    $migrator->run($migrationPath);
-                }
-            }
+            $this::migrate($this->data['packages']);
         }
 
         return $run;

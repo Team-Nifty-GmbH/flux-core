@@ -63,8 +63,10 @@ class Plugins extends Component
 
     public function getInstalled(): void
     {
-        $available = Arr::keyBy(app('composer')->showAvailable()['available'], 'name');
-        $this->installed = app('composer')->installed(true)['installed'] ?? [];
+        /** @var \FluxErp\Helpers\Composer $composer */
+        $composer = app('composer');
+        $available = Arr::keyBy($composer->showAvailable()['available'], 'name');
+        $this->installed = $composer->installed(true)['installed'] ?? [];
 
         foreach ($available as $key => $package) {
             if (! array_key_exists($key, $this->installed)) {
@@ -133,7 +135,8 @@ class Plugins extends Component
         $this->searchResult = array_values(
             array_filter(
                 $result,
-                fn ($package) => ! in_array($package['name'], array_keys($this->installed)) && $package['name'] !== 'team-nifty-gmbh/flux-erp'
+                fn ($package) => ! in_array($package['name'], array_keys($this->installed))
+                    && $package['name'] !== 'team-nifty-gmbh/flux-erp'
             )
         );
 
@@ -250,10 +253,7 @@ class Plugins extends Component
         $this->offerRefresh = true;
         $this->notification()
             ->success(
-                __(
-                    'Package :package uninstalled successfully.',
-                    ['package' => implode(',', $packages)]
-                )
+                __('Package :package uninstalled successfully.', ['package' => implode(',', $packages)])
             );
 
         if ($this->offerRefresh) {

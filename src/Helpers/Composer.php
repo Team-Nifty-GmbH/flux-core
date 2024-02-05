@@ -23,18 +23,18 @@ class Composer extends BaseComposer
     /**
      * @throws \Symfony\Component\Process\Exception\ProcessFailedException
      */
-    public function search(string $search, ?bool $composerBinary = null): array
+    public function search(string $search, ?string $composerBinary = null): array
     {
         if (! $search) {
             return [];
         }
 
-        $command = collect([
+        $command = [
             ...$this->findComposer($composerBinary),
             'search',
             '--format=json',
             $search,
-        ])->all();
+        ];
 
         return json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
     }
@@ -42,23 +42,20 @@ class Composer extends BaseComposer
     /**
      * @throws \Symfony\Component\Process\Exception\ProcessFailedException
      */
-    public function show(string $package, ?bool $composerBinary = null): array
+    public function show(string $package, ?string $composerBinary = null): array
     {
-        $command = collect([
+        $command = [
             ...$this->findComposer($composerBinary),
             'show',
             '--format=json',
             $package,
-        ])->all();
+        ];
 
         return json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
     }
 
-    public function addRepository(
-        ComposerRepositoryTypeEnum $type,
-        string $url,
-        string $name,
-    ): void {
+    public function addRepository(ComposerRepositoryTypeEnum $type, string $url, string $name): void
+    {
         $this->modify(function ($composer) use ($type, $url, $name) {
             $composer['repositories'][$name] = [
                 'type' => $type->value,
@@ -83,33 +80,33 @@ class Composer extends BaseComposer
      */
     public function showAvailable(bool $withPackagist = false, ?bool $composerBinary = null): array
     {
-        $command = collect([
+        $command = [
             ...$this->findComposer($composerBinary),
             'show',
             '--available',
             '--format=json',
-        ])->all();
+        ];
 
         if (! $withPackagist) {
             // disable packagist
-            $disableCommand = collect([
+            $disableCommand = [
                 ...$this->findComposer($composerBinary),
                 'config',
                 'repo.packagist',
                 'false',
-            ])->all();
+            ];
             $this->getProcess($disableCommand)->mustRun();
         }
 
         $available = json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
 
         // enable packagist
-        $enableCommand = collect([
+        $enableCommand = [
             ...$this->findComposer($composerBinary),
             'config',
             '--unset',
             'repo.packagist',
-        ])->all();
+        ];
         $this->getProcess($enableCommand)->mustRun();
 
         return $available;
@@ -133,7 +130,8 @@ class Composer extends BaseComposer
             })
             ->when($direct, function ($command) {
                 $command->push('--direct');
-            })->all();
+            })
+            ->all();
 
         $installed = json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
         $installed['installed'] = Arr::keyBy($installed['installed'], 'name');
@@ -182,7 +180,8 @@ class Composer extends BaseComposer
             })
             ->when($direct, function ($command) {
                 $command->push('--direct');
-            })->all();
+            })
+            ->all();
 
         return json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
     }
@@ -223,7 +222,7 @@ class Composer extends BaseComposer
                     ],
                 ],
             ]);
-            $this->addRepository(ComposerRepositoryTypeEnum::composer, $repoUrl, 'repman');
+            $this->addRepository(ComposerRepositoryTypeEnum::Composer, $repoUrl, 'repman');
         } else {
             $this->removeRepository('repman');
         }

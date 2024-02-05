@@ -2,10 +2,10 @@
 
 namespace FluxErp\Actions\Plugins;
 
-use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\PluginUninstallRequest;
+use Illuminate\Validation\ValidationException;
 
-class Uninstall extends FluxAction
+class Uninstall extends BasePluginAction
 {
     protected function boot(array $data): void
     {
@@ -13,38 +13,54 @@ class Uninstall extends FluxAction
         $this->rules = (new PluginUninstallRequest())->rules();
     }
 
-    public static function models(): array
-    {
-        return [];
-    }
-
     public function performAction(): bool
     {
-        $migrator = app('migrator');
-        $paths = collect($migrator->paths());
         /** @var \FluxErp\Helpers\Composer $composer */
         $composer = app('composer');
 
         if ($this->data['rollback'] ?? false) {
-            foreach ($this->data['packages'] as $package) {
-                $packageInfo = $composer->show($package);
-                $migrationPaths = $paths->filter(fn ($path) => str_starts_with($path, $packageInfo['path']));
-
-                foreach ($migrationPaths as $migrationPath) {
-                    $migrator->rollback($migrationPath, ['step' => 99999]);
-                }
-            }
+            $this::migrate($this->data['packages'], true);
         }
 
         $output = '';
-        $run = $composer->removePackages($this->data['packages'], false, function ($type, $buffer) use (&$output) {
-            $output .= $buffer;
-        });
+        $run = $composer->removePackages(
+            $this->data['packages'],
+            false,
+            function ($type, $buffer) use (&$output) {
+                $output .= $buffer;
+            }
+        );
 
         if (! $run) {
             throw new \RuntimeException($output);
         }
 
         return $run;
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        /** @var \FluxErp\Helpers\Composer $composer */
+        $composer = app('composer');
+        $installedPackages = array_keys($composer->installed(true)['installed']);
+
+        $errors = [];
+        foreach ($this->data['packages'] as $key => $package) {
+            if (in_array($package, ['laravel/framework', 'team-nifty-gmbh/flux-erp'])) {
+                $errors += [
+                    'packages.' . $key => ['Unable to uninstall \'' . $package . '\'.'],
+                ];
+            } elseif (! in_array($package, $installedPackages)) {
+                $errors += [
+                    'packages.' . $key => ['Plugin \'' . $package . '\' not installed.'],
+                ];
+            }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)->errorBag('uninstallPlugins');
+        }
     }
 }

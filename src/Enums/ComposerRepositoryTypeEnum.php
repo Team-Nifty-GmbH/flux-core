@@ -8,11 +8,11 @@ enum ComposerRepositoryTypeEnum: string
 {
     use EnumTrait;
 
-    case composer = 'composer';
+    case Composer = 'composer';
 
-    case vcs = 'vcs';
+    case Vcs = 'vcs';
 
-    case package = 'package';
+    case Package = 'package';
 
-    case path = 'path';
+    case Path = 'path';
 }
