@@ -173,6 +173,12 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function registerMarcos(): void
     {
+        if (! Str::hasMacro('iban')) {
+            Str::macro('iban', function (string $iban) {
+                return trim(chunk_split($iban, 4, ' '));
+            });
+        }
+
         if (! Request::hasMacro('isPortal')) {
             Request::macro('isPortal', function () {
                 return $this->getHost() === preg_replace(
@@ -344,7 +350,6 @@ class FluxServiceProvider extends ServiceProvider
                         'is_active',
                     ],
                 ],
-
             ],
         ]);
 

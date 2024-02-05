@@ -9,6 +9,7 @@ use FluxErp\Models\Project;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
+use FluxErp\Models\Transaction;
 use FluxErp\Models\WorkTime;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -89,6 +90,14 @@ Broadcast::channel('FluxErp.Models.Ticket.{ticket}', function ($user) {
 
 Broadcast::channel('FluxErp.Models.Ticket', function ($user) {
     return $user->can(channel_to_permission((new Ticket())->broadcastChannelRoute()));
+});
+
+Broadcast::channel('FluxErp.Models.Transaction.{transaction}', function ($user) {
+    return $user->can(channel_to_permission((new Transaction())->broadcastChannelRoute()));
+});
+
+Broadcast::channel('FluxErp.Models.Transaction', function ($user) {
+    return $user->can(channel_to_permission((new Transaction())->broadcastChannelRoute()));
 });
 
 Broadcast::channel('FluxErp.Models.WorkTime.{workTime}', function ($user) {
