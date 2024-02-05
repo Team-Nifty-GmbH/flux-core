@@ -11,11 +11,6 @@ use Spatie\ModelStates\Validation\ValidStateRule;
 
 class CreateOrderRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
@@ -25,7 +20,7 @@ class CreateOrderRequest extends BaseFormRequest
                 'uuid' => 'string|uuid|unique:orders,uuid',
                 'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'parent_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
-                'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
+                'client_id' => 'required_without_all:contact_id,address_invoice_id|integer|exists:clients,id,deleted_at,NULL',
                 'agent_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
                 'contact_id' => [
                     'required_without:address_invoice_id',
@@ -33,10 +28,10 @@ class CreateOrderRequest extends BaseFormRequest
                     'nullable',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'contacts'),
                 ],
-                'bank_connection_id' => [
+                'contact_bank_connection_id' => [
                     'integer',
                     'nullable',
-                    new ExistsWithForeign(foreignAttribute: 'contact_id', table: 'bank_connections'),
+                    new ExistsWithForeign(foreignAttribute: 'contact_id', table: 'contact_bank_connections'),
                 ],
                 'currency_id' => 'integer|exists:currencies,id,deleted_at,NULL',
                 'address_invoice_id' => [
@@ -87,8 +82,13 @@ class CreateOrderRequest extends BaseFormRequest
                     ValidStateRule::make(PaymentState::class),
                 ],
 
-                'payment_target' => 'required_without_all:address_invoice_id,contact_id|integer|min:0',
-                'payment_discount_target' => 'integer|min:0|nullable',
+                'payment_target' => [
+                    'required_with:payment_discount_target',
+                    'required_without_all:address_invoice_id,contact_id',
+                    'integer',
+                    'min:0',
+                ],
+                'payment_discount_target' => 'integer|min:0|nullable|lte:payment_target',
                 'payment_discount_percent' => 'numeric|min:0|nullable',
                 'header_discount' => 'numeric|min:0|nullable',
                 'shipping_costs_net_price' => 'numeric|nullable',
@@ -109,7 +109,8 @@ class CreateOrderRequest extends BaseFormRequest
                 'order_date' => 'date',
                 'invoice_date' => 'date|nullable',
                 'invoice_number' => 'string',
-                'system_delivery_date' => 'date|nullable',
+                'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
+                'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
                 'customer_delivery_date' => 'date|nullable',
                 'date_of_approval' => 'date|nullable',
 

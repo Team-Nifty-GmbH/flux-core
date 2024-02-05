@@ -12,6 +12,7 @@ class CreateMailFolderRequest extends BaseFormRequest
             'parent_id' => 'nullable|integer|exists:mail_folders,id',
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255',
+            'is_active' => 'boolean',
         ];
     }
 }

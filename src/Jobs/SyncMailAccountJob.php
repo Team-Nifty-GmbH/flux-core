@@ -3,15 +3,15 @@
 namespace FluxErp\Jobs;
 
 use Cron\CronExpression;
+use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Actions\MailFolder\CreateMailFolder;
 use FluxErp\Actions\MailFolder\DeleteMailFolder;
 use FluxErp\Actions\MailFolder\UpdateMailFolder;
 use FluxErp\Actions\MailMessage\CreateMailMessage;
-use FluxErp\Actions\MailMessage\UpdateMailMessage;
 use FluxErp\Console\Scheduling\Repeatable;
+use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
-use FluxErp\Models\MailMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -31,7 +31,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
 
     private readonly MailAccount $mailAccount;
 
-    public function __construct(MailAccount|string $email)
+    public function __construct(MailAccount|string $email, public readonly bool $onlyFolders = false)
     {
         if (is_string($email)) {
             $this->mailAccount = MailAccount::query()
@@ -64,7 +64,20 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->id])->validate()->execute()
             );
 
+        if ($this->onlyFolders) {
+            return;
+        }
+
         foreach ($folders as $folder) {
+            if (! MailFolder::query()
+                ->where('mail_account_id', $this->mailAccount->id)
+                ->where('slug', $folder->path)
+                ->first()
+                ?->is_active
+            ) {
+                continue;
+            }
+
             $this->getNewMessages($folder);
             $this->getUnseenMessages($folder);
         }
@@ -103,7 +116,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
 
     private function getNewMessages(Folder $folder): void
     {
-        $startUid = MailMessage::query()
+        $startUid = Communication::query()
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('mail_folder_id', $this->folderIds[$folder->path])
             ->max('message_uid')
@@ -112,7 +125,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 ->limit(1)
                 ->get()
                 ->first()
-                ?->getUid()
+                ?->getUid() - 1
             ?? ($folder->examine()['uidnext'] ?? 0) - 1
             ?: 0;
 
@@ -157,24 +170,24 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             $unreadUids[] = $messages->map(fn (Message $message) => $message->getUid())->toArray();
         } while ($page !== $messages->lastPage());
 
-        MailMessage::query()
+        Communication::query()
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('mail_folder_id', $this->folderIds[$folder->path])
             ->where('is_seen', false)
             ->whereIntegerNotInRaw('message_uid', $unreadUids)
             ->each(
-                fn (MailMessage $message) => UpdateMailMessage::make(['id' => $message->id, 'is_seen' => true])
+                fn (Communication $message) => UpdateCommunication::make(['id' => $message->id, 'is_seen' => true])
                     ->validate()
                     ->execute()
             );
 
-        MailMessage::query()
+        Communication::query()
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('mail_folder_id', $this->folderIds[$folder->path])
             ->where('is_seen', true)
             ->whereIntegerInRaw('message_uid', $unreadUids)
             ->each(
-                fn (MailMessage $message) => UpdateMailMessage::make(['id' => $message->id, 'is_seen' => false])
+                fn (Communication $message) => UpdateCommunication::make(['id' => $message->id, 'is_seen' => false])
                     ->validate()
                     ->execute()
             );
@@ -182,7 +195,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
 
     private function storeMessage(Message $message, int $folderId): void
     {
-        $messageModel = MailMessage::query()
+        $messageModel = Communication::query()
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('message_id', $message->getMessageId())
             ->first();
@@ -194,7 +207,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             foreach ($message->getAttachments() as $attachment) {
                 /** @var Attachment $attachment */
                 $attachments[] = [
-                    'model_type' => MailMessage::class,
+                    'model_type' => Communication::class,
                     'file_name' => $attachment->getName(),
                     'mime_type' => $attachment->getMimeType(),
                     'name' => $attachment->getName(),
@@ -212,6 +225,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 'to' => $message->getTo()->toArray(),
                 'cc' => $message->getCc()->toArray(),
                 'bcc' => $message->getBcc()->toArray(),
+                'communication_type_enum' => 'mail',
                 'date' => $message->getDate()->toDate(),
                 'subject' => $message->getSubject()->toString(),
                 'text_body' => $message->getTextBody(),
@@ -223,10 +237,11 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 ->validate()
                 ->execute();
         } else {
-            UpdateMailMessage::make([
+            UpdateCommunication::make([
                 'id' => $messageModel->id,
                 'mail_folder_id' => $folderId,
                 'message_uid' => $message->getUid(),
+                'communication_type_enum' => 'mail',
                 'tags' => $message->getFlags()->toArray(),
                 'is_seen' => $message->hasFlag('seen'),
             ])

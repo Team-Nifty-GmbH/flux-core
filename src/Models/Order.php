@@ -10,9 +10,12 @@ use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
+use FluxErp\Support\OrderCollection;
 use FluxErp\Traits\Commentable;
+use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
@@ -21,7 +24,6 @@ use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
-use FluxErp\Traits\Mailable;
 use FluxErp\Traits\Printable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
@@ -30,6 +32,7 @@ use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
 use FluxErp\View\Printing\Order\Retoure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -43,9 +46,11 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes, HasPackageFactory,
-        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, Mailable,
-        Printable, Searchable, SoftDeletes, Trackable;
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment, HasCustomEvents,
+        HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification,
+        HasUuid, InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable {
+            Printable::resolvePrintViews as protected printableResolvePrintViews;
+        }
 
     protected $with = [
         'currency',
@@ -62,14 +67,18 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         'shipping_costs_gross_price' => Money::class,
         'shipping_costs_vat_price' => Money::class,
         'shipping_costs_vat_rate_percentage' => Percentage::class,
+        'total_base_gross_price' => Money::class,
+        'total_base_net_price' => Money::class,
         'margin' => Money::class,
         'total_gross_price' => Money::class,
         'total_net_price' => Money::class,
         'total_vats' => 'array',
+        'balance' => Money::class,
         'payment_texts' => 'array',
         'order_date' => 'date',
         'invoice_date' => 'date',
         'system_delivery_date' => 'date',
+        'system_delivery_date_end' => 'date',
         'customer_delivery_date' => 'date',
         'date_of_approval' => 'date',
         'has_logistic_notify_phone_number' => 'boolean',
@@ -140,6 +149,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             if (! $order->exists && ! $order->order_number) {
                 $order->getSerialNumber('order_number');
             }
+
+            if ($order->isDirty('invoice_number')) {
+                $order->calculateBalance();
+            }
         });
     }
 
@@ -186,6 +199,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->belongsTo(Contact::class);
     }
 
+    public function contactBankConnection(): BelongsTo
+    {
+        return $this->belongsTo(ContactBankConnection::class);
+    }
+
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
@@ -209,6 +227,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'parent_id');
+    }
+
+    public function paymentRuns(): BelongsToMany
+    {
+        return $this->belongsToMany(PaymentRun::class, 'order_payment_run');
     }
 
     public function paymentType(): BelongsTo
@@ -236,10 +259,12 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->belongsToMany(User::class, 'order_user');
     }
 
-    /**
-     * @return $this
-     */
-    public function calculatePaymentState(): self
+    public function newCollection(array $models = []): Collection
+    {
+        return new OrderCollection($models);
+    }
+
+    public function calculatePaymentState(): static
     {
         if (! $this->transactions()->exists()) {
             if ($this->payment_state->canTransitionTo(Open::class)) {
@@ -262,6 +287,8 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                 }
             }
         }
+
+        $this->calculateBalance();
 
         return $this;
     }
@@ -287,36 +314,44 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             ->singleFile();
     }
 
-    public function calculatePrices()
+    public function calculatePrices(): static
     {
         return $this->calculateTotalGrossPrice()
             ->calculateTotalNetPrice()
             ->calculateTotalVats();
     }
 
-    public function calculateTotalGrossPrice(): self
+    public function calculateTotalGrossPrice(): static
     {
         $totalGross = $this->orderPositions()
             ->where('is_alternative', false)
             ->sum('total_gross_price');
+        $totalBaseGross = $this->orderPositions()
+            ->where('is_alternative', false)
+            ->sum('total_base_gross_price');
 
         $this->total_gross_price = bcadd($totalGross, $this->shipping_costs_gross_price ?: 0, 9);
+        $this->total_base_gross_price = bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9);
 
         return $this;
     }
 
-    public function calculateTotalNetPrice(): self
+    public function calculateTotalNetPrice(): static
     {
         $totalNet = $this->orderPositions()
             ->where('is_alternative', false)
             ->sum('total_net_price');
+        $totalBaseNet = $this->orderPositions()
+            ->where('is_alternative', false)
+            ->sum('total_base_net_price');
 
         $this->total_net_price = bcadd($totalNet, $this->shipping_costs_net_price ?: 0, 9);
+        $this->total_base_net_price = bcadd($totalBaseNet, $this->shipping_costs_net_price ?: 0, 9);
 
         return $this;
     }
 
-    public function calculateTotalVats(): self
+    public function calculateTotalVats(): static
     {
         $totalVats = $this->orderPositions()
             ->where('is_alternative', false)
@@ -349,6 +384,13 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         }
 
         $this->total_vats = $totalVats->sortBy('vat_rate_percentage')->values();
+
+        return $this;
+    }
+
+    public function calculateBalance(): static
+    {
+        $this->balance = bcsub($this->total_gross_price, $this->transactions()->sum('amount'), 2);
 
         return $this;
     }
@@ -386,5 +428,12 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                 'order-confirmation' => OrderConfirmation::class,
                 'retoure' => Retoure::class,
             ];
+    }
+
+    public function resolvePrintViews(): array
+    {
+        $printViews = $this->printableResolvePrintViews();
+
+        return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
     }
 }

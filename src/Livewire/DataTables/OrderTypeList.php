@@ -36,12 +36,4 @@ class OrderTypeList extends DataTable
     {
         return $builder->with('client:id,name');
     }
-
-    public function itemToArray($item): array
-    {
-        $item = parent::itemToArray($item);
-        $item['print_layouts'] = implode(', ', $item['print_layouts'] ?? []);
-
-        return $item;
-    }
 }

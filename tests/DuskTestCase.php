@@ -20,6 +20,7 @@ use NotificationChannels\WebPush\WebPushServiceProvider;
 use Orchestra\Testbench\Dusk\TestCase;
 use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
+use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Spatie\Tags\TagsServiceProvider;
@@ -36,6 +37,8 @@ abstract class DuskTestCase extends TestCase
     public Model $user;
 
     public string $password = '#Password123';
+
+    protected static string $guard = 'web';
 
     protected function setUp(): void
     {
@@ -55,6 +58,8 @@ abstract class DuskTestCase extends TestCase
         if (! file_exists(public_path('flux'))) {
             symlink(package_path('public'), public_path('flux'));
         }
+
+        $this->app->make(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $this->login();
     }
@@ -108,7 +113,7 @@ abstract class DuskTestCase extends TestCase
         $this->createLoginUser();
 
         $this->browse(function (Browser $browser) {
-            $browser->loginAs($this->user->id, $this->password);
+            $browser->loginAs($this->user->id, static::$guard);
         });
     }
 

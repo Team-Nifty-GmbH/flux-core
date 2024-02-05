@@ -3,7 +3,9 @@
 namespace FluxErp\Actions\ProductOption;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\Product;
 use FluxErp\Models\ProductOption;
+use Illuminate\Validation\ValidationException;
 
 class DeleteProductOption extends FluxAction
 {
@@ -26,5 +28,19 @@ class DeleteProductOption extends FluxAction
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (Product::query()
+            ->whereRelation('productOptions', 'product_option_id', $this->data['id'])
+            ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'id' => [__('Product with given Product Option exists.')],
+            ]);
+        }
     }
 }

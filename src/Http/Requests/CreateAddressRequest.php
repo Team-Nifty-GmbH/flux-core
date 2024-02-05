@@ -7,11 +7,6 @@ use FluxErp\Rules\ExistsWithForeign;
 
 class CreateAddressRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
@@ -59,6 +54,9 @@ class CreateAddressRequest extends BaseFormRequest
                 'contact_options.*.label' => 'required|string',
                 'contact_options.*.value' => 'required|string',
                 'contact_options.*.is_primary' => 'boolean',
+
+                'tags' => 'array',
+                'tags.*' => 'required|integer|exists:tags,id,type,' . Address::class,
             ],
         );
     }

@@ -22,6 +22,22 @@
                         {{ $client->phone ?? '' }}
                     </div>
                 </address>
+                @foreach($client->bankConnections as $bankConnection)
+                    <div class="float-right text-left pl-3">
+                        <div class="font-semibold">
+                            {{ $bankConnection->bank_name ?? '' }}
+                        </div>
+                        <div>
+                            {{ $bankConnection->iban ?? '' }}
+                        </div>
+                        <div>
+                            {{ $bankConnection->bic ?? '' }}
+                        </div>
+                    </div>
+                    @if($client->logo_small)
+                        @break
+                    @endif
+                @endforeach
                 <div class="clear-both"></div>
             </div>
         </div>

@@ -2,6 +2,7 @@ import folderTree from './components/folder-tree';
 import '../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
 import '../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables';
 import setupEditor from './components/tiptap';
+import PullToRefresh from "pulltorefreshjs";
 
 window.folderTree = folderTree;
 window.setupEditor = setupEditor;
@@ -160,11 +161,9 @@ document.addEventListener('livewire:navigated', function() {
     wireNavigation();
 });
 
-document.addEventListener('livewire:init', function() {
-    wireNavigation();
-});
-
 document.addEventListener('livewire:init', () => {
+    wireNavigation();
+
     Livewire.hook('request', ({ fail }) => {
         fail(({ status, preventDefault }) => {
             if (status === 419) {
@@ -185,6 +184,19 @@ function wireNavigation() {
     links.forEach(link => {
         link.setAttribute('wire:navigate', 'true');
     });
+
+    const standalone =
+        navigator.standalone ||
+        window.matchMedia("(display-mode: standalone)").matches;
+    if (standalone) {
+        PullToRefresh.init({
+            distThreshold: 100,
+            distMax: 120,
+            onRefresh() {
+                window.location.reload();
+            },
+        });
+    }
 }
 
 Livewire.directive('confirm', ({ el, directive }) => {

@@ -11,7 +11,9 @@ use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Client;
 use FluxErp\Models\Country;
+use FluxErp\Models\Scopes\UserClientScope;
 use FluxErp\Traits\Livewire\WithTabs;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\WithFileUploads;
@@ -40,7 +42,7 @@ class Clients extends ClientList
             [
                 'bankConnections' => BankConnection::query()
                     ->where('is_active', true)
-                    ->select(['id', 'name'])
+                    ->select(['bank_connections.id', 'name'])
                     ->get()
                     ->toArray(),
                 'countries' => Country::query()
@@ -74,7 +76,7 @@ class Clients extends ClientList
                 ->color('primary')
                 ->icon('pencil')
                 ->attributes([
-                    'wire:click' => 'show(record)',
+                    'wire:click' => 'show(record.id)',
                 ])
                 ->when(UpdateClient::canPerformAction(false)),
             DataTableButton::make()
@@ -86,6 +88,11 @@ class Clients extends ClientList
                 ])
                 ->when(UpdateClient::canPerformAction(false)),
         ];
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->withoutGlobalScope(UserClientScope::class);
     }
 
     #[Renderless]
@@ -177,6 +184,8 @@ class Clients extends ClientList
                 ->label(__('Logos')),
             TabButton::make('settings.client.terms-and-conditions')
                 ->label(__('Terms and Conditions')),
+            TabButton::make('settings.client.sepa')
+                ->label(__('SEPA')),
         ];
     }
 

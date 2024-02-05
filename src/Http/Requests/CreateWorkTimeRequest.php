@@ -56,6 +56,7 @@ class CreateWorkTimeRequest extends BaseFormRequest
             'ended_at' => 'nullable|date_format:Y-m-d H:i:s|after:started_at',
             'name' => 'required_unless:is_daily_work_time,true|string|nullable',
             'description' => 'string|nullable',
+            'is_billable' => 'nullable|boolean',
             'is_daily_work_time' => 'boolean',
             'is_locked' => 'boolean',
             'is_pause' => 'boolean',

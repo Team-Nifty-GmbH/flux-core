@@ -82,6 +82,11 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
         return $this->hasMany(User::class, 'parent_id');
     }
 
+    public function clients(): BelongsToMany
+    {
+        return $this->belongsToMany(Client::class, 'client_user');
+    }
+
     public function commissionRates(): HasMany
     {
         return $this->hasMany(CommissionRate::class);
@@ -125,6 +130,16 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
     public function settings(): MorphMany
     {
         return $this->morphMany(Setting::class, 'model');
+    }
+
+    public function tasks(): BelongsToMany
+    {
+        return $this->belongsToMany(Task::class, 'task_user');
+    }
+
+    public function tasksResponsible(): HasMany
+    {
+        return $this->hasMany(Task::class, 'responsible_user_id');
     }
 
     public function tickets(): BelongsToMany
@@ -176,7 +191,7 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->getFirstMediaUrl('avatar') ?: self::icon()->getUrl();
+        return $this->getFirstMediaUrl('avatar', 'thumb') ?: self::icon()->getUrl();
     }
 
     public function sendLoginLink(): void

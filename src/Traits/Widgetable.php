@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 
 trait Widgetable
@@ -13,5 +14,14 @@ trait Widgetable
         }
 
         return __(Str::headline(class_basename(static::class)));
+    }
+
+    public function placeholder(): View
+    {
+        if (method_exists(parent::class, 'placeholder')) {
+            return parent::placeholder();
+        }
+
+        return view('flux::livewire.placeholders.box');
     }
 }

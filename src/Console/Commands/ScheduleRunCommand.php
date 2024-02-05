@@ -2,7 +2,6 @@
 
 namespace FluxErp\Console\Commands;
 
-use Carbon\Carbon;
 use Cron\CronExpression;
 use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Events\Scheduling\ScheduleTasksRegistered;
@@ -25,6 +24,10 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
         $repeatables = ScheduleModel::query()->where('is_active', true)->get();
         foreach ($repeatables as $repeatable) {
             if (method_exists($repeatable->class, 'isRepeatable') && ! $repeatable->class::isRepeatable()) {
+                continue;
+            }
+
+            if ($repeatable->due_at?->greaterThan(now())) {
                 continue;
             }
 
@@ -61,13 +64,12 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             // Mark event as overdue
             if ($repeatable->due_at &&
                 ! $event->isDue($this->laravel)
-                && Carbon::parse($repeatable->due_at)->greaterThan($nextRunDate)
+                && $repeatable->due_at->lessThan(now())
             ) {
                 $overdueEvents[] = $event;
             }
 
             $repeatable->cron_expression = $event->expression;
-            $repeatable->due_at = $nextRunDate;
             $repeatable->save();
 
             $event->before(function () use ($repeatable) {
@@ -79,6 +81,12 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 $repeatable->last_success = now();
                 $repeatable->save();
             });
+
+            $event->after(function () use ($repeatable, $nextRunDate) {
+                $repeatable->due_at = $nextRunDate;
+                $repeatable->save();
+            });
+
         }
 
         $dispatcher->dispatch(new ScheduleTasksRegistered($schedule));

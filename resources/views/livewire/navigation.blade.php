@@ -64,7 +64,21 @@
     >
         <div class="pb-4 md:pt-4 md:pr-8 md:pl-28">
             @if($showSearchBar)
-                <livewire:features.search-bar />
+                <div>
+                    <x-card class="flex w-full gap-2">
+                        <x-button
+                            class="block md:hidden"
+                            icon="menu"
+                            primary
+                            x-on:click="showMenu(true)"
+                        />
+                        <livewire:features.search-bar />
+                        <div class="flex gap-1.5" wire:ignore>
+                            <livewire:work-time lazy />
+                            <livewire:features.notifications lazy />
+                        </div>
+                    </x-card>
+                </div>
             @else
                 <x-card class="block md:hidden">
                     <x-button primary icon="menu" x-on:click="showMenu(true)" />
@@ -76,8 +90,7 @@
                 <div>
                     @foreach($navigations as $key => $navigation)
                         <div>
-                            <a
-                                x-bind:class="activeItem === '{{ $key }}' && 'bg-primary-500 dark:bg-primary-700 !text-white hover:bg-primary-600 nav-item-active'"
+                            <a x-bind:class="activeItem === '{{ $key }}' && 'bg-primary-500 dark:bg-primary-700 !text-white hover:bg-primary-600 nav-item-active'"
                                 @if($navigation['children'] ?? false)
                                     x-on:click.prevent="toggleMenu('{{ $key }}')"
                                 @else
@@ -86,7 +99,8 @@
                                     x-on:click="activeItem = '{{ $key }}'; activeSubItem = ''"
                                 @endif
                                 class="dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
-                                role="button" aria-haspopup="true">
+                                role="button" aria-haspopup="true"
+                            >
                                 <div class="w-16 flex-none">
                                     <div class="flex w-full justify-center text-white">
                                         <x-heroicons :name="$navigation['icon'] ?? 'no-symbol'" class="h-4 w-4" />
@@ -162,8 +176,7 @@
                         <div x-show="favoritesOpen" x-cloak x-collapse class="max-w-full">
                             @foreach($favorites as $favorite)
                                 <div class="flex justify-between">
-                                    <a
-                                        wire:navigate
+                                    <a wire:navigate
                                         href="{{ $favorite['url'] }}"
                                         class="flex-1 overflow-hidden dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
                                     >

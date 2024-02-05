@@ -16,14 +16,25 @@
                 <x-checkbox x-bind:disabled="!edit" label="{{ __('Is highlight') }}" wire:model="product.is_highlight" />
                 <x-checkbox x-bind:disabled="!edit" label="{{ __('Is NOS') }}" wire:model="product.is_nos" />
                 <x-checkbox x-bind:disabled="!edit" label="{{ __('Export to Webshop') }}" wire:model="product.is_active_export_to_web_shop" />
+                <x-checkbox x-bind:disabled="!edit" label="{{ __('Is service') }}" wire:model="product.is_service" />
+                <div x-cloak x-show="$wire.product.is_service">
+                    <x-select label="{{ __('Time unit') }}"
+                        option-key-value
+                        wire:model="product.time_unit_enum"
+                        :options="\FluxErp\Enums\TimeUnitEnum::valuesLocalized()"
+                    />
+                </div>
             @show
+            <hr/>
             <x-input x-bind:readonly="!edit" label="{{ __('EAN') }}" wire:model="product.ean" />
             <x-input x-bind:readonly="!edit" label="{{ __('Manufacturer product number') }}" wire:model="product.manufacturer_product_number" />
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <x-input suffix="mm" x-bind:readonly="!edit" label="{{ __('Length') }}" wire:model="product.dimension_length_mm" />
-                <x-input suffix="mm" x-bind:readonly="!edit" label="{{ __('Width') }}" wire:model="product.dimension_width_mm" />
-                <x-input suffix="mm" x-bind:readonly="!edit" label="{{ __('Height') }}" wire:model="product.dimension_height_mm" />
-                <x-input :suffix="__('Gram')" x-bind:readonly="!edit" label="{{ __('Weight') }}" wire:model="product.weight_gram" />
+                <x-input :suffix="__('mm')" x-bind:readonly="!edit" label="{{ __('Length') }}" wire:model.number="product.dimension_length_mm" />
+                <x-input :suffix="__('mm')" x-bind:readonly="!edit" label="{{ __('Width') }}" wire:model.number="product.dimension_width_mm" />
+                <x-input :suffix="__('mm')" x-bind:readonly="!edit" label="{{ __('Height') }}" wire:model.number="product.dimension_height_mm" />
+                <x-input :suffix="__('Gram')" x-bind:readonly="!edit" label="{{ __('Weight') }}" wire:model.number="product.weight_gram" />
+                <x-input x-bind:readonly="!edit" label="{{ __('Selling unit') }}" wire:model.number="product.selling_unit" />
+                <x-input x-bind:readonly="!edit" label="{{ __('Basic unit') }}" wire:model.number="product.basic_unit" />
             </div>
         @show
     </x-card>
@@ -39,19 +50,29 @@
             :async-data="[
                 'api' => route('search', \FluxErp\Models\Category::class),
                 'method' => 'POST',
+                'params' => [
+                    'where' => [
+                        [
+                            'model_type',
+                            '=',
+                            \FluxErp\Models\Product::class,
+                        ],
+                    ],
+                ],
             ]"
-        ></x-select>
+        />
         <x-select
             multiselect
             x-bind:disabled="!edit"
             wire:model.number="product.tags"
             :label="__('Tags')"
-            option-value="description"
+            option-value="id"
             option-label="label"
             :async-data="[
                 'api' => route('search', \FluxErp\Models\Tag::class),
                 'method' => 'POST',
                 'params' => [
+                    'option-value' => 'id',
                     'where' => [
                         [
                             'type',
@@ -64,7 +85,7 @@
         >
             <x-slot:beforeOptions>
                 <div class="px-1">
-                    <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{  __('New Tag') }}||{{  __('Cancel') }}|{{  __('Save') }}" />
+                    <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
                 </div>
             </x-slot:beforeOptions>
         </x-select>

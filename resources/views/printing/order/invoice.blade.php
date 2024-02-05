@@ -11,9 +11,21 @@
 @section('first-page-right-block.values')
     @parent
     <div>
-        {{ $model->invoice_date->locale(app()->getLocale())->isoFormat('L') }}
+        {{ ($model->invoice_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
     </div>
+    @if($model->system_delivery_date_end)
+        <div>
+            {{ ($model->system_delivery_date ?: now())->locale(app()->getLocale())->isoFormat('L') }} - {{ ($model->system_delivery_date_end ?: now())->locale(app()->getLocale())->isoFormat('L') }}
+        </div>
+    @else
+        <div>
+            {{ ($model->system_delivery_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
+        </div>
+    @endif
+@endsection
+@section('total')
+    @parent
     <div>
-        {{ $model->system_delivery_date->locale(app()->getLocale())->isoFormat('L') }}
+        {!! $model->paymentType->description !!}
     </div>
 @endsection

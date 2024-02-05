@@ -9,6 +9,8 @@ abstract class FluxForm extends BaseForm
 {
     protected bool $checkPermission = true;
 
+    protected mixed $actionResult = null;
+
     abstract protected function getActions(): array;
 
     protected function makeAction(string $name, ?array $data = null): FluxAction
@@ -19,6 +21,11 @@ abstract class FluxForm extends BaseForm
     protected function getKey(): string
     {
         return 'id';
+    }
+
+    public function getActionResult(): mixed
+    {
+        return $this->actionResult;
     }
 
     public function setCheckPermission(bool $checkPermission): static
@@ -44,6 +51,8 @@ abstract class FluxForm extends BaseForm
             ->validate()
             ->execute();
 
+        $this->actionResult = $response;
+
         $this->fill($response);
     }
 
@@ -54,15 +63,19 @@ abstract class FluxForm extends BaseForm
             ->validate()
             ->execute();
 
+        $this->actionResult = $response;
+
         $this->fill($response);
     }
 
     public function delete(): void
     {
-        $this->getActions()['delete']::make($this->toArray())
+        $response = $this->getActions()['delete']::make($this->toArray())
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
             ->validate()
             ->execute();
+
+        $this->actionResult = $response;
 
         $this->reset();
     }

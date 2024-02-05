@@ -4,15 +4,16 @@ namespace FluxErp\Models;
 
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Traits\Commentable;
+use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasCalendarEvents;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\Lockable;
-use FluxErp\Traits\Mailable;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -38,9 +39,9 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendarEvents, HasCalendars,
-        HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid, Lockable,
-        Mailable, Notifiable, Searchable, SoftDeletes;
+    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens,
+        HasCalendarEvents, HasCalendars, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles,
+        HasTags, HasUserModification, HasUuid, Lockable, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'login_password',
@@ -141,6 +142,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         return $this->belongsToMany(AddressType::class);
     }
 
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
@@ -187,9 +193,12 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
      *
      * @param  string  $event
      */
-    public function broadcastOn($event): PrivateChannel
+    public function broadcastOn($event): array
     {
-        return new PrivateChannel((new Contact())->broadcastChannel() . '.' . $this->contact_id);
+        return [
+            new PrivateChannel($this->broadcastChannel()),
+            new PrivateChannel((new Contact())->broadcastChannel() . $this->contact_id),
+        ];
     }
 
     public function detailRouteParams(): array
@@ -234,7 +243,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->contact?->getFirstMediaUrl('avatar') ?: self::icon()->getUrl();
+        return $this->contact?->getAvatarUrl();
     }
 
     public function sendLoginLink(): void

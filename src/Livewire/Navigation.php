@@ -8,6 +8,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -72,6 +73,12 @@ class Navigation extends Component
 
     protected function getMenu(): Collection
     {
+        $menuHash = md5(serialize(Menu::all()));
+
+        if (Session::has('navigations.' . $menuHash)) {
+            return Session::get('navigations.' . $menuHash);
+        }
+
         $guard = explode('_', Auth::guard()->getName());
 
         $navigations = Menu::forGuard($guard[1], $guard[1] === 'address' ? 'portal' : null);
@@ -87,6 +94,8 @@ class Navigation extends Component
                 $navigations['append' . $index] = $appendLink;
             }
         }
+
+        Session::put('navigations.' . $menuHash, collect($navigations));
 
         return collect($navigations);
     }

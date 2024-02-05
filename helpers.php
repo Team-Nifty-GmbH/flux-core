@@ -408,6 +408,28 @@ if (! function_exists('bcround')) {
     }
 }
 
+if (! function_exists('bcceil')) {
+    function bcceil(string $number): string
+    {
+        if (! str_contains($number, '.')) {
+            return $number;
+        }
+
+        return $number[0] != '-' ? bcadd($number, 1, 0) : bcsub($number, 0, 0);
+    }
+}
+
+if (! function_exists('bcfloor')) {
+    function bcfloor(string $number): string
+    {
+        if (! str_contains($number, '.')) {
+            return $number;
+        }
+
+        return $number[0] != '-' ? bcadd($number, 0, 0) : bcsub($number, 1, 0);
+    }
+}
+
 if (! function_exists('flux_path')) {
     function flux_path(string $path = ''): string
     {

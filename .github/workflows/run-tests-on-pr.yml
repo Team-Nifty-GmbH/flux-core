@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: [ '8.2' ]
+        php-versions: [ '8.3' ]
         browser: [ 'chrome' ]
     steps:
       - name: Checkout
@@ -79,20 +79,6 @@ jobs:
       - name: Install ChromeDriver
         run: composer dusk:install-chromedriver
 
-      - name: Run Feature Tests
-        run: composer test-feature
-        env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
-          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-
-      - name: Run Livewire Tests
-        run: composer test-livewire
-        env:
-          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
-          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
-
       - name: Run Browser Tests
         run: composer test-browser
         env:
@@ -106,3 +92,17 @@ jobs:
         with:
           name: ${{ matrix.browser }}
           path: tests/Browser/screenshots/*.png
+
+      - name: Run Livewire Tests
+        run: composer test-livewire
+        env:
+          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
+
+      - name: Run Feature Tests
+        run: composer test-feature
+        env:
+          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
+          REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+          MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}

@@ -6,17 +6,25 @@ use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Actions\Printing;
+use FluxErp\Enums\FrequenciesEnum;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Htmlables\TabButton;
+use FluxErp\Jobs\ProcessSubscriptionOrderJob;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Forms\OrderPositionForm;
+use FluxErp\Livewire\Forms\OrderReplicateForm;
+use FluxErp\Livewire\Forms\ScheduleForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Media;
+use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Schedule;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\View\Printing\PrintableView;
@@ -42,9 +50,15 @@ class Order extends OrderPositionList
 
     protected string $view = 'flux::livewire.order.order';
 
+    protected ?string $selectValue = 'index';
+
     public OrderForm $order;
 
+    public OrderReplicateForm $replicateOrder;
+
     public OrderPositionForm $orderPosition;
+
+    public ScheduleForm $schedule;
 
     public ?int $orderPositionIndex = null;
 
@@ -93,30 +107,21 @@ class Order extends OrderPositionList
             ],
         ];
 
-        $order = \FluxErp\Models\Order::query()
-            ->whereKey($id)
-            ->with([
-                'priceList:id,name,is_net',
-                'addresses',
-                'client:id,name',
-                'contact.media',
-                'contact.contactBankConnections:id,contact_id,iban',
-                'currency:id,iso,name,symbol',
-                'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
-            ])
-            ->firstOrFail()
-            ->append('avatar_url');
+        $this->fetchOrder($id);
 
-        $this->printLayouts = array_intersect(
-            $order->orderType?->print_layouts ?: [],
-            array_keys($order->resolvePrintViews())
-        );
+        $orderType = OrderType::query()
+            ->whereKey($this->order->order_type_id)
+            ->first();
 
-        $this->order->fill($order->toArray());
+        $this->view = 'flux::livewire.order.' . (($value = $orderType?->order_type_enum->value) ? $value : 'order');
 
         $this->getAvailableStates(['payment_state', 'delivery_state', 'state']);
 
         $this->isSelectable = ! $this->order->is_locked;
+
+        if (in_array($value, [OrderTypeEnum::PurchaseSubscription->value, OrderTypeEnum::Subscription->value])) {
+            $this->fillSchedule();
+        }
     }
 
     public function getSelectAttributes(): ComponentAttributeBag
@@ -278,6 +283,10 @@ class Order extends OrderPositionList
 
     public function getViewData(): array
     {
+        $orderType = OrderType::query()
+            ->whereKey($this->order->order_type_id)
+            ->first();
+
         return array_merge(
             parent::getViewData(),
             [
@@ -297,6 +306,39 @@ class Order extends OrderPositionList
                 'clients' => Client::query()
                     ->get(['id', 'name'])
                     ->toArray(),
+                'orderTypes' => OrderType::query()
+                    ->where('is_hidden', false)
+                    ->where('is_active', true)
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'frequencies' => array_map(
+                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
+                    array_intersect(
+                        FrequenciesEnum::getBasicFrequencies(),
+                        [
+                            'daily',
+                            'dailyAt',
+                            'weekly',
+                            'weeklyOn',
+                            'monthly',
+                            'monthlyOn',
+                            'twiceMonthly',
+                            'lastDayOfMonth',
+                            'quarterly',
+                            'quarterlyOn',
+                            'yearly',
+                            'yearlyOn',
+                        ]
+                    )
+                ),
+                'contactBankConnections' => Contact::query()
+                    ->whereKey($this->order->contact_id)
+                    ->with('contactBankConnections')
+                    ->first('id')
+                    ->contactBankConnections()
+                    ->select(['id', 'contact_id', 'iban'])
+                    ->pluck('iban', 'id')
+                    ?->toArray() ?? [],
             ]
         );
     }
@@ -308,6 +350,10 @@ class Order extends OrderPositionList
                 ->label(__('Order positions')),
             TabButton::make('order.attachments')
                 ->label(__('Attachments'))
+                ->isLivewireComponent()
+                ->wireModel('order'),
+            TabButton::make('order.texts')
+                ->label(__('Texts'))
                 ->isLivewireComponent()
                 ->wireModel('order'),
             TabButton::make('order.accounting')
@@ -379,19 +425,21 @@ class Order extends OrderPositionList
         $order = $action->execute();
         $this->notification()->success(__('Order saved successfully!'));
 
-        try {
-            FillOrderPositions::make([
-                'order_id' => $order->id,
-                'order_positions' => array_filter($this->data, fn ($item) => ! $item['is_bundle_position']),
-                'simulate' => false,
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+        if ($this->initialized) {
+            try {
+                FillOrderPositions::make([
+                    'order_id' => $order->id,
+                    'order_positions' => array_filter($this->data, fn ($item) => ! $item['is_bundle_position']),
+                    'simulate' => false,
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
 
-            return false;
+                return false;
+            }
         }
 
         return true;
@@ -409,6 +457,57 @@ class Order extends OrderPositionList
             $this->redirect(route('orders.orders'), true);
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
+        }
+    }
+
+    #[Renderless]
+    public function replicate(): void
+    {
+        $this->replicateOrder->fill($this->order->toArray());
+        $this->fetchContactData();
+
+        $this->js(<<<'JS'
+            $openModal('replicate-order');
+        JS);
+    }
+
+    #[Renderless]
+    public function saveReplicate(): void
+    {
+        try {
+            $this->replicateOrder->save();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->redirectRoute('orders.id', ['id' => $this->replicateOrder->id], navigate: true);
+    }
+
+    #[Renderless]
+    public function fetchContactData(bool $replicate = false): void
+    {
+        $orderVariable = ! $replicate ? 'order' : 'replicateOrder';
+
+        $contact = Contact::query()
+            ->whereKey($this->{$orderVariable}->contact_id)
+            ->with('mainAddress:id,contact_id')
+            ->first();
+
+        $this->{$orderVariable}->client_id = $contact->client_id;
+        $this->{$orderVariable}->agent_id = $contact->agent_id ?: $this->{$orderVariable}->agent_id;
+        $this->{$orderVariable}->address_invoice_id = $contact->invoice_address_id ?? $contact->mainAddress->id;
+        $this->{$orderVariable}->address_delivery_id = $contact->delivery_address_id ?? $contact->mainAddress->id;
+        $this->{$orderVariable}->price_list_id = $contact->price_list_id;
+        $this->{$orderVariable}->payment_type_id = $contact->payment_type_id;
+
+        if (! $replicate) {
+            $this->order->address_invoice = Address::query()
+                ->whereKey($this->order->address_invoice_id)
+                ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
+                ->first()
+                ->toArray();
         }
     }
 
@@ -432,7 +531,7 @@ class Order extends OrderPositionList
         }
 
         return response()->streamDownload(
-            fn () => print($pdf->pdf->output()),
+            fn () => print ($pdf->pdf->output()),
             Str::finish($pdf->getFileName(), '.pdf')
         );
     }
@@ -510,6 +609,8 @@ class Order extends OrderPositionList
             }
         }
 
+        $this->fetchOrder($this->order->id);
+
         if (($this->selectedPrintLayouts['email'] ?? false) && $mailAttachments) {
             $to = [];
 
@@ -536,6 +637,8 @@ class Order extends OrderPositionList
                         html_entity_decode($this->order->order_type['mail_body']),
                         ['order' => $order]
                     ),
+                    'communicatable_type' => \FluxErp\Models\Order::class,
+                    'communicatable_id' => $this->order->id,
                 ]
             )->to('edit-mail');
         }
@@ -699,6 +802,51 @@ class Order extends OrderPositionList
         $this->selected = $selected;
     }
 
+    public function fillSchedule(): void
+    {
+        $schedule = Schedule::query()
+            ->where('class', ProcessSubscriptionOrderJob::class)
+            ->whereJsonContains('parameters->order', $this->order->id)
+            ->first();
+
+        if ($schedule) {
+            $this->schedule->fill($schedule->toArray());
+        } else {
+            $defaultOrderType = OrderType::query()
+                ->whereKey($this->order->order_type_id)
+                ->first()
+                ->order_type_enum === OrderTypeEnum::PurchaseSubscription ?
+                OrderTypeEnum::Purchase->value : OrderTypeEnum::Order->value;
+
+            $this->schedule->parameters['orderType'] = OrderType::query()
+                ->where('order_type_enum', $defaultOrderType)
+                ->where('is_active', true)
+                ->where('is_hidden', false)
+                ->first()
+                ?->id;
+        }
+    }
+
+    #[Renderless]
+    public function saveSchedule(): bool
+    {
+        $this->schedule->name = ProcessSubscriptionOrderJob::name();
+        $this->schedule->parameters = [
+            'order' => $this->order->id,
+            'orderType' => $this->schedule->parameters['orderType'] ?? null,
+        ];
+
+        try {
+            $this->schedule->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return true;
+    }
+
     public function showProduct(Product $product): void
     {
         $this->js(<<<JS
@@ -782,5 +930,34 @@ class Order extends OrderPositionList
         }
 
         $this->isDirtyData = true;
+    }
+
+    protected function fetchOrder(int $id): void
+    {
+        $order = \FluxErp\Models\Order::query()
+            ->whereKey($id)
+            ->with([
+                'priceList:id,name,is_net',
+                'addresses',
+                'client:id,name',
+                'contact.media',
+                'contact.contactBankConnections:id,contact_id,iban',
+                'currency:id,iso,name,symbol',
+                'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
+            ])
+            ->firstOrFail()
+            ->append('avatar_url');
+
+        $this->printLayouts = array_keys($order->resolvePrintViews());
+
+        $this->order->fill($order);
+
+        $invoice = $order->invoice();
+        if ($invoice) {
+            $this->order->invoice = [
+                'url' => $invoice->getUrl(),
+                'mime_type' => $invoice->mime_type,
+            ];
+        }
     }
 }

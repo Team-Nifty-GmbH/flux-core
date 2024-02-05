@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
+use FluxErp\Models\Tag;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -25,6 +26,8 @@ class CreateAddress extends FluxAction
 
     public function performAction(): Address
     {
+        $tags = Arr::pull($this->data, 'tags');
+
         if (! data_get($this->data, 'is_main_address', false)
             && ! Address::query()
                 ->where('contact_id', $this->data['contact_id'])
@@ -56,6 +59,10 @@ class CreateAddress extends FluxAction
 
         $address = new Address($this->data);
         $address->save();
+
+        if ($tags) {
+            $address->attachTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
+        }
 
         if ($contactOptions) {
             $address->contactOptions()->createMany($contactOptions);

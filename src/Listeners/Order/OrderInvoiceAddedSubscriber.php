@@ -6,11 +6,11 @@ use FluxErp\Actions\Commission\CreateCommission;
 use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
-use Spatie\MediaLibrary\MediaCollections\Events\MediaHasBeenAdded;
+use Spatie\MediaLibrary\MediaCollections\Events\MediaHasBeenAddedEvent;
 
 class OrderInvoiceAddedSubscriber
 {
-    public function handle(MediaHasBeenAdded $event): void
+    public function handle(MediaHasBeenAddedEvent $event): void
     {
         if ($event->media->collection_name !== 'invoice'
             || $event->media->model_type !== Order::class
@@ -109,7 +109,7 @@ class OrderInvoiceAddedSubscriber
     public function subscribe(): array
     {
         return [
-            MediaHasBeenAdded::class => 'handle',
+            MediaHasBeenAddedEvent::class => 'handle',
         ];
     }
 }

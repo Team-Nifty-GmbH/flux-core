@@ -1,13 +1,18 @@
 <?php
 
+use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\PushSubscriptionController;
 use FluxErp\Http\Middleware\TrackVisits;
+use FluxErp\Livewire\Accounting\DirectDebit;
+use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Calendars\Calendar;
-use FluxErp\Livewire\Contacts\Contact;
+use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Livewire\DataTables\CommissionList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
+use FluxErp\Livewire\DataTables\PaymentRunList;
+use FluxErp\Livewire\DataTables\ProductOptionGroupList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\TransactionList;
@@ -85,7 +90,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::get('/list', OrderList::class)->name('orders')->registersMenuItem();
                 Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions')
                     ->registersMenuItem();
-                Route::get('/{id}', Order::class)->name('id');
+                Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id');
             });
 
         Route::get('/tasks', TaskList::class)->name('tasks')->registersMenuItem(icon: 'clipboard-document-list');
@@ -103,7 +108,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::get('/list', ProductList::class)->name('products')->registersMenuItem();
                 Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers')->registersMenuItem();
                 Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
-                Route::get('/{id}', Product::class)->name('id');
+                Route::get('/{id}', Product::class)->where('id', '[0-9]+')->name('id');
             });
 
         Route::name('accounting.')->prefix('accounting')
@@ -114,6 +119,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::get('/work-times', WorkTimeList::class)->name('work-times')->registersMenuItem();
                 Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
                 Route::get('/transactions', TransactionList::class)->name('transactions')->registersMenuItem();
+                Route::get('/direct-debit', DirectDebit::class)->name('direct-debit')->registersMenuItem();
+                Route::get('/money-transfer', MoneyTransfer::class)->name('money-transfer')->registersMenuItem();
+                Route::get('/payment-runs', PaymentRunList::class)->name('payment-runs')->registersMenuItem();
             });
 
         Route::get('/my-profile', Profile::class)->name('my-profile');
@@ -128,6 +136,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                     ->registersMenuItem();
                 Route::get('/categories', Categories::class)
                     ->name('categories')
+                    ->registersMenuItem();
+                Route::get('/product-option-groups', ProductOptionGroupList::class)
+                    ->name('product-option-groups')
                     ->registersMenuItem();
                 Route::get('/clients', Clients::class)
                     ->name('clients')
@@ -171,6 +182,10 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
     });
 });
 
-Route::name('search')->middleware('auth:web')->prefix('search')->group(function () {
-    Route::any('/{model}', SearchController::class)->where('model', '(.*)');
+Route::group(['middleware' => ['auth:web']], function () {
+    Route::any('/search/{model}', SearchController::class)
+        ->where('model', '(.*)')
+        ->name('search');
+    Route::match(['get', 'post'], '/print/render', [PrintController::class, 'render'])->name('print.render');
+    Route::match(['get', 'post'], '/print/pdf', [PrintController::class, 'renderPdf']);
 });

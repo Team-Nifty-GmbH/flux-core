@@ -11,7 +11,7 @@
                             {{ __('Company') }}
                         </label>
                         <div class="col-span-2">
-                            <x-input x-ref="company" wire:model="contact.company"/>
+                            <x-input x-ref="company" wire:model="contact.main_address.company"/>
                         </div>
                     </div>
                     <div
@@ -20,7 +20,7 @@
                             {{ __('Salutation') }}
                         </label>
                         <div class="col-span-2">
-                            <x-input wire:model="contact.salutation"/>
+                            <x-input wire:model="contact.main_address.salutation"/>
                         </div>
                     </div>
                     <div
@@ -29,7 +29,7 @@
                             {{ __('Title') }}
                         </label>
                         <div class="col-span-2">
-                            <x-input wire:model="contact.title"/>
+                            <x-input wire:model="contact.main_address.title"/>
                         </div>
                     </div>
                     <div
@@ -38,7 +38,7 @@
                             {{ __('Firstname') }}
                         </label>
                         <div class="col-span-2">
-                            <x-input wire:model="contact.firstname"/>
+                            <x-input wire:model="contact.main_address.firstname"/>
                         </div>
                     </div>
                     <div
@@ -47,7 +47,7 @@
                             {{ __('Lastname') }}
                         </label>
                         <div class="col-span-2">
-                            <x-input wire:model="contact.lastname"/>
+                            <x-input wire:model="contact.main_address.lastname"/>
                         </div>
                     </div>
                     <div
@@ -56,7 +56,7 @@
                             {{ __('Street') }}
                         </label>
                         <div class="col-span-2">
-                            <x-input wire:model="contact.street"/>
+                            <x-input wire:model="contact.main_address.street"/>
                         </div>
                     </div>
                     <div
@@ -66,10 +66,10 @@
                         </label>
                         <div class="mt-1 w-full items-center space-x-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2">
                             <div class="flex-none">
-                                <x-input wire:model="contact.zip"/>
+                                <x-input wire:model="contact.main_address.zip"/>
                             </div>
                             <div class="grow">
-                                <x-input wire:model="contact.city"/>
+                                <x-input wire:model="contact.main_address.city"/>
                             </div>
                         </div>
                     </div>
@@ -79,8 +79,10 @@
                         </label>
                         <div class="col-span-2">
                             <x-select
-                                wire:model="contact.countryId" searchable
-                                :options="\FluxErp\Models\Country::all(['id', 'name'])" option-label="name"
+                                wire:model="contact.main_address.country_id"
+                                searchable
+                                :options="\FluxErp\Models\Country::all(['id', 'name'])"
+                                option-label="name"
                                 option-value="id"
                             />
                         </div>
@@ -92,8 +94,11 @@
                         </label>
                         <div class="col-span-2">
                             <x-select
-                                wire:model="contact.language_id" searchable
-                                :options="\FluxErp\Models\Language::all()" option-label="name" option-value="id"
+                                wire:model="contact.main_address.language_id"
+                                searchable
+                                :options="\FluxErp\Models\Language::all()"
+                                option-label="name"
+                                option-value="id"
                             />
                         </div>
                     </div>

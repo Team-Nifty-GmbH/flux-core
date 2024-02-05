@@ -10,6 +10,7 @@ use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateProductRequest;
 use FluxErp\Models\Price;
 use FluxErp\Models\Product;
+use FluxErp\Models\Tag;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -36,7 +37,7 @@ class UpdateProduct extends FluxAction
 
     public function performAction(): Model
     {
-        $productOptions = Arr::pull($this->data, 'product_options', []);
+        $productOptions = Arr::pull($this->data, 'product_options');
         $productCrossSellings = Arr::pull($this->data, 'product_cross_sellings');
 
         $productProperties = Arr::mapWithKeys(
@@ -60,11 +61,16 @@ class UpdateProduct extends FluxAction
         $product->save();
 
         if (! is_null($tags)) {
-            $product->syncTags($tags);
+            $product->syncTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
         }
 
-        $product->productOptions()->sync($productOptions);
-        $product->productProperties()->sync($productProperties);
+        if (! is_null($productOptions)) {
+            $product->productOptions()->sync($productOptions);
+        }
+
+        if (! is_null($productProperties)) {
+            $product->productProperties()->sync($productProperties);
+        }
 
         if ($prices) {
             $priceCollection = collect($prices)->keyBy('price_list_id');

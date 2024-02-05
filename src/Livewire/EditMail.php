@@ -2,13 +2,15 @@
 
 namespace FluxErp\Livewire;
 
-use FluxErp\Livewire\Forms\MailMessageForm;
+use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Mail\GenericMail;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -20,12 +22,17 @@ class EditMail extends Component
 {
     use Actions, WithFileUploads;
 
-    public MailMessageForm $mailMessage;
+    public CommunicationForm $mailMessage;
 
     public array $files = [];
 
+    public array $mailMessages = [];
+
+    public bool $multiple = false;
+
     protected $listeners = [
         'create',
+        'createMany',
     ];
 
     public function render(): View
@@ -51,8 +58,11 @@ class EditMail extends Component
     }
 
     #[Renderless]
-    public function create(array|MailMessageForm|Model $values): void
+    public function create(array|CommunicationForm|Model $values): void
     {
+        $this->multiple = false;
+        $this->reset('mailMessages');
+
         if ($values instanceof Model || is_array($values)) {
             $this->mailMessage->fill($values);
         } else {
@@ -62,6 +72,18 @@ class EditMail extends Component
         $this->js(<<<'JS'
             $openModal('edit-mail');
         JS);
+    }
+
+    public function createMany(Collection|array $mailMessages): void
+    {
+        $this->create($mailMessages[0]);
+        $this->mailMessage->reset('attachments');
+
+        $this->mailMessages = $mailMessages;
+
+        if (count($mailMessages) > 1) {
+            $this->multiple = true;
+        }
     }
 
     #[Renderless]
@@ -99,18 +121,68 @@ class EditMail extends Component
             ]);
         }
 
-        try {
-            Mail::to($this->mailMessage->to)
-                ->cc($this->mailMessage->cc)
-                ->bcc($this->mailMessage->bcc)
-                ->send(new GenericMail($this->mailMessage));
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
+        if (! $this->mailMessages) {
+            $this->mailMessages = [$this->mailMessage];
         }
 
-        $this->notification()->success(__('Email sent successfully!'));
+        $bcc = $this->mailMessage->bcc;
+        $cc = $this->mailMessage->cc;
+        $baseMailMessage = clone $this->mailMessage;
+
+        $exceptions = 0;
+
+        foreach ($this->mailMessages as $mailMessage) {
+            if (! $mailMessage instanceof CommunicationForm) {
+                $this->mailMessage->reset();
+                if (($mailMessage['blade_parameters_serialized'] ?? false)
+                    && is_string($mailMessage['blade_parameters'])
+                ) {
+                    $bladeParameters = unserialize($mailMessage['blade_parameters']);
+                } else {
+                    $bladeParameters = $mailMessage['blade_parameters'] ?? [];
+                }
+
+                $this->mailMessage->fill(array_merge(
+                    $mailMessage,
+                    [
+                        'bcc' => $bcc,
+                        'subject' => Blade::render(
+                            $baseMailMessage->subject,
+                            $bladeParameters
+                        ),
+                        'html_body' => Blade::render(
+                            $baseMailMessage->html_body,
+                            $bladeParameters
+                        ),
+                    ]
+                ));
+            }
+
+            try {
+                Mail::to($this->mailMessage->to)
+                    ->cc($cc)
+                    ->bcc($bcc)
+                    ->send(new GenericMail($this->mailMessage));
+            } catch (\Exception $e) {
+                exception_to_notifications($e, $this);
+
+                if ($this->multiple) {
+                    $exceptions++;
+
+                    continue;
+                }
+
+                return false;
+            }
+        }
+
+        if ($exceptions === 0) {
+            $this->notification()->success(__('Email(s) sent successfully!'));
+        }
+
+        if (count($this->mailMessages) === $exceptions) {
+            $this->notification()->error(__('Failed to send emails!'));
+        }
 
         return true;
     }

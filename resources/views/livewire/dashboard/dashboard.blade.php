@@ -1,15 +1,23 @@
 <div
     wire:ignore.self
      x-data="{
-        widgets: $wire.entangle('widgets'),
-        removedIds: [],
         widget: {},
         editWidgets() {
             this.widgetsSortable = new Sortable(document.getElementById('widgets'), {
                 swapThreshold: 1,
                 animation: 150,
                 group: 'widgets',
-                delay: 100
+                delay: 100,
+                onAdd: (event) => {
+                    const widget = JSON.parse(event.item.dataset.widget);
+                    widget.width = 1;
+                    widget.height = 1;
+                    widget.name = widget.label;
+                    widget.id = event.item.dataset.id;
+                    $wire.widgets.push(widget);
+
+                    $wire.$refresh();
+                }
             });
             this.availableWidgetsSortable = new Sortable(document.getElementById('available-widgets'), {
                 swapThreshold: 1,
@@ -24,16 +32,19 @@
         },
         save() {
             this.editMode = false;
-            const activeWidgets = this.widgetsSortable.toArray();
-            $wire.saveWidgets(activeWidgets.filter(item => !this.removedIds.includes(item)));
+            $wire.saveDashboard(this.widgetsSortable.toArray());
         },
         edit(widget) {
-            this.widget = this.widgets.find(w => w.id == widget);
-            Alpine.$data(this.$refs.modal.querySelector('[wireui-modal]')).open();
+            this.widget = $wire.widgets.find(w => w.id == widget);
+            $openModal('edit-widget');
         },
-        removeWidget(widget) {
-            this.removedIds.push(widget.parentNode.parentNode.dataset.id);
-            widget.parentNode.parentNode.style.display = 'none';
+        removeWidget(widget, wireId) {
+            const widgetId = widget.parentNode.parentNode.dataset.id;
+            const index = $wire.widgets.findIndex(w => w.id == widgetId);
+            if (index > -1) {
+                $wire.widgets.splice(index, 1);
+                widget.parentNode.parentNode.style.display = 'none';
+            }
         },
         widgetsSortable: {},
         availableWidgetsSortable: {},
@@ -49,20 +60,18 @@
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">{{ __('Hello') }} {{ Auth::user()->name }}</h1>
                 </div>
             </div>
-            <div x-ref="modal">
-                <x-modal>
-                    <x-card class="flex flex-col gap-4">
-                        <x-input :label="__('Name')" x-model="widget.name" />
-                        <x-inputs.number :label="__('Width')" max="12" min="1" step="1" x-model="widget.width" />
-                        <x-inputs.number :label="__('Height')" min="1" step="1" x-model="widget.height" />
-                        <x-slot:footer>
-                            <div class="flex justify-end w-full">
-                                <x-button primary x-on:click="$wire.updateWidget(widget); close()" :label="__('Save')" />
-                            </div>
-                        </x-slot:footer>
-                    </x-card>
-                </x-modal>
-            </div>
+            <x-modal name="edit-widget">
+                <x-card class="flex flex-col gap-4">
+                    <x-input :label="__('Name')" x-model="widget.name" />
+                    <x-inputs.number :label="__('Width')" max="12" min="1" step="1" x-model.number="widget.width" />
+                    <x-inputs.number :label="__('Height')" min="1" step="1" x-model.number="widget.height" />
+                    <x-slot:footer>
+                        <div class="flex justify-end w-full">
+                            <x-button x-on:click="close()" :label="__('Close')" />
+                        </div>
+                    </x-slot:footer>
+                </x-card>
+            </x-modal>
         </div>
         <div class="flex gap-4">
             <div x-show="! editMode">
@@ -77,12 +86,20 @@
         <div class="flex-initial w-full">
             <div id="widgets" class="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-12 auto-cols-fr grid-flow-dense gap-4">
                 @forelse($widgets as $widget)
-                    <div data-id="{{ $widget['id'] }}" x-bind:class="editMode && 'outline-offset-3 bg-primary-100 outline-2 outline-dashed outline-indigo-500'" class="p-1.5 rounded flex place-content-center relative col-span-full {{ 'md:col-span-' . $widget['width'] . ' row-span-' . $widget['height'] }}">
+                    <div
+                        x-data="{widgetModel: $wire.widgets[{{ $loop->index }}]}"
+                        data-id="{{ $widget['id'] ?? 'new-' . uniqid() }}"
+                        class="p-1.5 rounded flex place-content-center relative col-span-full"
+                        x-bind:class="(editMode ? 'outline-offset-3 bg-primary-100 outline-2 outline-dashed outline-indigo-500 select-none' : '') + ' md:col-span-' + widgetModel.width + ' row-span-' + widgetModel.height"
+                    >
+                        <div x-cloak x-show="editMode" x-transition class="w-full absolute top-0 bottom-0 bg-primary-100 opacity-25 z-10 handle"></div>
                         <div class="absolute top-2 right-2 z-10" x-cloak x-show="editMode">
                             <x-button.circle class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" x-on:click="edit($el.parentNode.parentNode.dataset.id)" primary icon="pencil"/>
-                            <x-button.circle class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative x-on:click="removeWidget($el)"/>
+                            <x-button.circle class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative x-on:click="removeWidget($el, $wire.id)"/>
                         </div>
-                        <livewire:is lazy :component="$widget['component_name']" wire:key="{{ uniqid() }}" />
+                        <div class="z-0 w-full">
+                            <livewire:is lazy :component="$widget['component_name'] ?? $widget['class']" wire:key="{{ uniqid() }}" />
+                        </div>
                     </div>
                 @empty
                     <div class="col-span-12 h-96"></div>
@@ -95,10 +112,10 @@
             </h3>
             <div id="available-widgets" class="grid grid-cols-1 gap-4">
                 @foreach($availableWidgets as $availableWidget)
-                    <div class="widget flex-1" data-id="new-{{ $availableWidget['name'] }}">
+                    <div class="widget flex-1" data-id="new-{{ uniqid() }}" data-widget="{{ json_encode($availableWidget) }}">
                         <x-card>
                             <span>
-                                {{ $availableWidget['label'] }}
+                                {{ __($availableWidget['label']) }}
                             </span>
                         </x-card>
                     </div>

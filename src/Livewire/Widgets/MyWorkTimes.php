@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Charts\BarChart;
 use FluxErp\Models\WorkTime;
+use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\Widgetable;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Locked;
@@ -170,6 +171,7 @@ class MyWorkTimes extends BarChart
             'teal-400',
         ];
 
+        $activeWorkTimeTypeIds = [];
         foreach ($workDays as $day) {
             $pause = $baseQuery->clone()
                 ->where('is_daily_work_time', true)
@@ -183,28 +185,66 @@ class MyWorkTimes extends BarChart
 
             $data['work_time']['data'][] = ceil(($workTime->total_time_ms - $pause) / 60);
             $data['pause_time']['data'][] = ceil($pause / 60);
-            $taskTime = $baseQuery->clone()
-                ->where('is_daily_work_time', false)
-                ->where('parent_id', $day->id)
-                ->groupBy('work_time_type_id')
-                ->selectRaw('ROUND(SUM(total_time_ms), 2) as total, work_time_type_id')
-                ->get();
+
+            $activeWorkTimeTypeIds = array_merge(
+                $activeWorkTimeTypeIds,
+                $baseQuery->clone()
+                    ->where('is_daily_work_time', false)
+                    ->where('parent_id', $day->id)
+                    ->distinct()
+                    ->pluck('work_time_type_id')
+                    ->toArray()
+            );
 
             $this->xaxis['categories'][] = $day->started_at->format('Y-m-d')
-               . (auth()->id() === $day->user_id ? '' : '->' . $day->user->name);
+                . (auth()->id() === $day->user_id ? '' : '->' . $day->user->name);
 
-            foreach ($taskTime as $item) {
-                $data['task_time_' . $item->work_time_type_id] = [
-                    'name' => $item->workTimeType?->name ?? __('Unknown'),
+        }
+
+        $activeWorkTimeTypes = WorkTimeType::query()
+            ->whereIntegerInRaw('id', $activeWorkTimeTypeIds)
+            ->get();
+
+        foreach ($workDays as $day) {
+            foreach ($activeWorkTimeTypes as $activeWorkTimeType) {
+                $current = data_get($data, 'task_time_' . $activeWorkTimeType->id . '.data', []);
+                $taskTime = $baseQuery->clone()
+                    ->where('is_daily_work_time', false)
+                    ->where('work_time_type_id', $activeWorkTimeType->id)
+                    ->where('parent_id', $day->id)
+                    ->sum('total_time_ms');
+                $current[$day->id] = ceil($taskTime / 60);
+
+                $data['task_time_' . $activeWorkTimeType->id] = [
+                    'name' => $activeWorkTimeType->name ?? __('Unknown'),
                     'group' => 'tasktime',
-                    'color' => $colors[$item->work_time_type_id ?? 0],
-                    'data' => array_merge(
-                        data_get($data, 'task_time_' . $item->work_time_type_id . '.data', []),
-                        [ceil($item->total / 60)]
-                    ),
+                    'color' => $colors[$activeWorkTimeType->id ?? 0],
+                    'data' => $current,
                 ];
             }
+
+            // add unknown task time
+            $current = data_get($data, 'task_time_0.data', []);
+            $taskTime = $baseQuery->clone()
+                ->where('is_daily_work_time', false)
+                ->whereNull('work_time_type_id')
+                ->where('parent_id', $day->id)
+                ->sum('total_time_ms');
+
+            $current[$day->id] = ceil($taskTime / 60);
+            $data['task_time_0'] = [
+                'name' => __('Unknown'),
+                'group' => 'tasktime',
+                'color' => $colors[0],
+                'data' => $current,
+            ];
         }
+
+        $data = array_map(function ($item) {
+            $item['data'] = array_values($item['data']);
+
+            return $item;
+        }, $data);
 
         $this->series = array_values($data);
     }

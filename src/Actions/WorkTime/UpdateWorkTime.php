@@ -42,21 +42,32 @@ class UpdateWorkTime extends FluxAction
                 $this->data['paused_time_ms'] = $workTime->paused_time_ms -
                     $endedAt->diffInSeconds($workTime->ended_at) * 1000;
             } else {
-                $this->data['paused_time_ms'] = $workTime->paused_time_ms + $endedAt->diffInSeconds(now()) * 1000;
+                $this->data['paused_time_ms'] = $workTime->paused_time_ms +
+                    $workTime->ended_at->diffInSeconds(now()) * 1000;
             }
+        }
+
+        if (is_null(data_get($this->data, 'is_billable')) && array_key_exists('is_billable', $this->data)) {
+            unset($this->data['is_billable']);
         }
 
         $workTime->fill($this->data);
 
-        if ($this->data['is_locked']) {
-            $workTime->total_time_ms =
-                $workTime->ended_at->diffInSeconds($workTime->started_at) * 1000 -
-                $workTime->paused_time_ms;
-        }
-
-        $workTime->save();
-
         if ($workTime->is_daily_work_time && $workTime->is_locked && ! $workTime->is_pause) {
+            // if a daily work time pause is currently running delete it
+            $pauseTime = WorkTime::query()
+                ->where('user_id', $workTime->user_id)
+                ->where('is_daily_work_time', true)
+                ->where('is_locked', false)
+                ->where('is_pause', true)
+                ->latest()
+                ->first();
+
+            if (! is_null($pauseTime)) {
+                $workTime->ended_at = $pauseTime->started_at;
+                $pauseTime->delete();
+            }
+
             // end all active work times for this user
             WorkTime::query()
                 ->where('user_id', $workTime->user_id)
@@ -69,6 +80,14 @@ class UpdateWorkTime extends FluxAction
                     UpdateWorkTime::make($workTime->toArray())->execute();
                 });
         }
+
+        if ($this->data['is_locked']) {
+            $workTime->total_time_ms =
+                $workTime->ended_at->diffInSeconds($workTime->started_at) * 1000 -
+                $workTime->paused_time_ms;
+        }
+
+        $workTime->save();
 
         return $workTime->withoutRelations()->fresh();
     }

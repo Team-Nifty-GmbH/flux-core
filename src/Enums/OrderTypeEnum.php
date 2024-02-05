@@ -11,8 +11,10 @@ enum OrderTypeEnum: string
     case Order = 'order';
     case SplitOrder = 'split-order';
     case Retoure = 'retoure';
+    case Refund = 'refund';
     case Purchase = 'purchase';
     case PurchaseRefund = 'purchase-refund';
+    case PurchaseSubscription = 'purchase-subscription';
     case Subscription = 'subscription';
 
     public function multiplier(): string
@@ -23,8 +25,8 @@ enum OrderTypeEnum: string
     public static function getMultiplier(self $value): int
     {
         return match ($value) {
-            self::Order, self::Subscription, self::PurchaseRefund, self::SplitOrder => 1,
-            self::Retoure, self::Purchase => -1,
+            self::Retoure, self::Purchase, self::Refund, self::PurchaseSubscription => -1,
+            default => 1,
         };
     }
 

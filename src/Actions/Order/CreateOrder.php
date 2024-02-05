@@ -76,6 +76,7 @@ class CreateOrder extends FluxAction
         $this->data['payment_type_id'] = $this->data['payment_type_id']
             ?? $contact->payment_type_id
             ?? PaymentType::default()?->id;
+        $this->data['client_id'] ??= $contact->client_id;
 
         $paymentType = PaymentType::query()
             ->whereKey(data_get($this->data, 'payment_type_id'))
@@ -87,22 +88,28 @@ class CreateOrder extends FluxAction
             ?? $contact->contactBankConnections()->first()?->id;
         $this->data['payment_target'] = $this->data['payment_target']
             ?? $contact->payment_target_days
-            ?? $paymentType->payment_target_days;
+            ?? $paymentType->payment_target_days
+            ?? 0;
         $this->data['payment_discount_target'] = $this->data['payment_discount_target']
             ?? $contact->discount_days
-            ?? $paymentType->payment_discount_target;
+            ?? $paymentType->payment_discount_target
+            ?? 0;
         $this->data['payment_discount_percent'] = $this->data['payment_discount_percent']
             ?? $contact->discount_percent
-            ?? $paymentType->payment_discount_percent;
+            ?? $paymentType->payment_discount_percent
+            ?? 0;
         $this->data['payment_reminder_days_1'] = $this->data['payment_reminder_days_1']
             ?? $contact->payment_reminder_days_1
-            ?? $paymentType->payment_reminder_days_1;
+            ?? $paymentType->payment_reminder_days_1
+            ?? 1;
         $this->data['payment_reminder_days_2'] = $this->data['payment_reminder_days_2']
             ?? $contact->payment_reminder_days_2
-            ?? $paymentType->payment_reminder_days_2;
+            ?? $paymentType->payment_reminder_days_2
+            ?? 1;
         $this->data['payment_reminder_days_3'] = $this->data['payment_reminder_days_3']
             ?? $contact->payment_reminder_days_3
-            ?? $paymentType->payment_reminder_days_3;
+            ?? $paymentType->payment_reminder_days_3
+            ?? 1;
 
         $this->data['price_list_id'] = $this->data['price_list_id']
             ?? $contact->price_list_id

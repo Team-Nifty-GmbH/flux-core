@@ -2,56 +2,102 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\ProductOptionGroup\CreateProductOptionGroup;
+use FluxErp\Actions\ProductOptionGroup\DeleteProductOptionGroup;
+use FluxErp\Actions\ProductOptionGroup\UpdateProductOptionGroup;
+use FluxErp\Livewire\Forms\ProductOptionGroupForm;
 use FluxErp\Models\ProductOptionGroup;
-use Illuminate\View\ComponentAttributeBag;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\DataTable;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use WireUi\Traits\Actions;
 
 class ProductOptionGroupList extends DataTable
 {
+    use Actions;
+
     protected string $model = ProductOptionGroup::class;
 
-    public bool $showFilterInputs = false;
+    protected string $view = 'flux::livewire.data-tables.product-option-group-list';
 
-    public ?bool $isSearchable = true;
-
-    public bool $hasSidebar = false;
+    public ProductOptionGroupForm $productOptionGroupForm;
 
     public array $enabledCols = [
         'name',
-        'selected',
+        'product_options.name',
     ];
 
-    public function startSearch(): void
+    public function getTableActions(): array
     {
-        $this->filters = [[
-            'name',
-            'like',
-            '%' . $this->search . '%',
-        ]];
-
-        parent::startSearch();
+        return [
+            DataTableButton::make()
+                ->label(__('Add'))
+                ->icon('plus')
+                ->color('primary')
+                ->wireClick('edit')
+                ->when(fn () => CreateProductOptionGroup::canPerformAction(false)),
+        ];
     }
 
-    public function getRowAttributes(): ComponentAttributeBag
+    public function getRowActions(): array
     {
-        return new ComponentAttributeBag([
-            'x-bind:class' => <<<'JS'
-                record.id === productOptionGroup?.id && 'bg-primary-100 dark:bg-primary-800'
-            JS,
-        ]);
+        return [
+            DataTableButton::make()
+                ->label(__('Edit'))
+                ->icon('pencil')
+                ->color('primary')
+                ->wireClick('edit(record.id)')
+                ->when(fn () => UpdateProductOptionGroup::canPerformAction(false)),
+            DataTableButton::make()
+                ->label(__('Delete'))
+                ->icon('trash')
+                ->color('negative')
+                ->attributes([
+                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Product Option Group')]),
+                    'wire:click' => 'delete(record.id)',
+                ])
+                ->when(fn () => DeleteProductOptionGroup::canPerformAction(false)),
+        ];
     }
 
-    public function getCellAttributes(): ComponentAttributeBag
+    public function edit(?ProductOptionGroup $productOptionGroup = null): void
     {
-        $selectedText = __('Selected');
+        $productOptionGroup->loadMissing('productOptions:id,product_option_group_id,name');
+        $this->productOptionGroupForm->reset();
+        $this->productOptionGroupForm->fill($productOptionGroup);
 
-        return new ComponentAttributeBag([
-            'x-html' => <<<JS
-                \$wire.\$parent.selectedOptions[record.id].length > 0
-                && col === 'selected'
-                && \$wire.\$parent.selectedOptions[record.id].length + ' $selectedText'
-                || formatter(col, record)
-            JS,
-        ]);
+        $this->js(<<<'JS'
+            $openModal('edit-product-option-group');
+        JS);
+    }
+
+    public function delete(ProductOptionGroup $productOptionGroup): void
+    {
+        $this->productOptionGroupForm->fill($productOptionGroup);
+        try {
+            $this->productOptionGroupForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->loadData();
+    }
+
+    public function save(): bool
+    {
+        try {
+            $this->productOptionGroupForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 }

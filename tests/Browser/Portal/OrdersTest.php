@@ -80,23 +80,27 @@ class OrdersTest extends PortalDuskTestCase
     public function test_can_see_orders()
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/');
+            $browser->visit($this->baseUrl())->type('email', $this->user->login_name)
+                ->type('password', $this->password)
+                ->press('Login')
+                ->waitForReload()
+                ->assertRouteIs('portal.dashboard');
             $this->openMenu();
 
             $browser->click('nav [href="/orders"]')
                 ->waitForRoute('portal.orders')
                 ->assertRouteIs('portal.orders')
                 ->waitForText('My orders')
-                ->waitForText('ORDER NUMBER')
-                ->waitForText('ORDER TYPE -> NAME')
-                ->waitForText('COMMISSION')
-                ->waitForText('PAYMENT STATE')
-                ->waitForText('TOTAL GROSS PRICE')
-                ->assertSee('ORDER NUMBER')
-                ->assertSee('ORDER TYPE -> NAME')
-                ->assertSee('COMMISSION')
-                ->assertSee('PAYMENT STATE')
-                ->assertSee('TOTAL GROSS PRICE');
+                ->waitForText('Order Number')
+                ->waitForText('Order Type -> Name')
+                ->waitForText('Commission')
+                ->waitForText('Payment State')
+                ->waitForText('Total Gross Price')
+                ->assertSee('Order Number')
+                ->assertSee('Order Type -> Name')
+                ->assertSee('Commission')
+                ->assertSee('Payment State')
+                ->assertSee('Total Gross Price');
 
             $rows = $browser->elements('[tall-datatable] tbody [data-id]');
 
@@ -107,7 +111,6 @@ class OrdersTest extends PortalDuskTestCase
     public function test_can_see_order_details()
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/');
             $this->openMenu();
             $browser
                 ->click('nav [href="/orders"]')

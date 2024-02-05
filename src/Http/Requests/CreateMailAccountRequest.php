@@ -20,6 +20,7 @@ class CreateMailAccountRequest extends BaseFormRequest
             'smtp_host' => 'nullable|string|max:255',
             'smtp_port' => 'integer',
             'smtp_encryption' => 'nullable|string|max:255|in:ssl,tls',
+            'is_auto_assign' => 'boolean',
             'is_o_auth' => 'boolean',
             'has_valid_certificate' => 'boolean',
         ];

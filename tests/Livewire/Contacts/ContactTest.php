@@ -2,7 +2,7 @@
 
 namespace FluxErp\Tests\Livewire\Contacts;
 
-use FluxErp\Livewire\Contacts\Contact as ContactView;
+use FluxErp\Livewire\Contact\Contact as ContactView;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;

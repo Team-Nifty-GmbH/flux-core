@@ -64,6 +64,9 @@ class UpdateContactRequest extends BaseFormRequest
 
                 'discount_groups' => 'array',
                 'discount_groups.*' => 'integer|exists:discount_groups,id',
+
+                'categories' => 'array',
+                'categories.*' => 'required|integer|exists:categories,id,model_type,' . Contact::class,
             ]
         );
     }

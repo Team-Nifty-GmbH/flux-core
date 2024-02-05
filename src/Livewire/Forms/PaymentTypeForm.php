@@ -32,7 +32,15 @@ class PaymentTypeForm extends FluxForm
 
     public bool $is_active = true;
 
+    public bool $is_direct_debit = false;
+
     public bool $is_default = false;
+
+    public bool $is_purchase = false;
+
+    public bool $is_sales = true;
+
+    public bool $requires_manual_transfer = false;
 
     protected function getActions(): array
     {

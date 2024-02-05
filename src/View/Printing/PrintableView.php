@@ -12,7 +12,6 @@ use FluxErp\Models\Client;
 use FluxErp\Printing\Printable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
@@ -45,28 +44,30 @@ abstract class PrintableView extends Component
     {
         $client = $this->getModel()?->client ?? Client::query()->first();
 
-        $logo = $client->getFirstMedia('logo')?->getPath();
-        $logoSmall = $client->getFirstMedia('logo_small')?->getPath();
+        $logo = $client->getFirstMedia('logo');
+        $logoSmall = $client->getFirstMedia('logo_small');
 
-        $logoCacheKey = 'logo_' . md5(file_get_contents($logo));
-        $logoSmallCacheKey = 'logo_' . md5(file_get_contents($logoSmall));
-        $mimeTypeLogo = File::mimeType($logo);
-        $mimeTypeLogoSmall = File::mimeType($logoSmall);
+        if ($logoPath = $logo?->getPath()) {
+            $mimeTypeLogo = File::mimeType($logo->getPath());
+            if ($mimeTypeLogo === 'image/svg+xml') {
+                $logoPath = $logo->getPath('png');
+                $mimeTypeLogo = 'image/png';
+            }
 
-        if ($mimeTypeLogo === 'image/svg+xml' && ! Cache::driver('file')->has($logoCacheKey)) {
-            $logo = $this->convertSvg($logo, $logoCacheKey);
-        } else {
-            $logo = Cache::driver('file')->get($logoCacheKey) ?? file_get_contents($logo);
+            $logoContent = file_get_contents($logoPath);
+            $client->logo = 'data:image/' . $mimeTypeLogo . ';base64,' . base64_encode($logoContent);
         }
 
-        if ($mimeTypeLogoSmall === 'image/svg+xml' && ! Cache::driver('file')->has($logoSmallCacheKey)) {
-            $logoSmall = $this->convertSvg($logoSmall, $logoSmallCacheKey);
-        } else {
-            $logoSmall = Cache::driver('file')->get($logoSmallCacheKey) ?? file_get_contents($logoSmall);
-        }
+        if ($logoSmallPath = $logoSmall?->getPath()) {
+            $mimeTypeLogoSmall = File::mimeType($logoSmall->getPath());
+            if ($mimeTypeLogoSmall === 'image/svg+xml') {
+                $logoSmallPath = $logoSmall->getPath('png');
+                $mimeTypeLogoSmall = 'image/png';
+            }
 
-        $client->logo = 'data:image/' . $mimeTypeLogo . ';base64,' . base64_encode($logo);
-        $client->logo_small = 'data:image/' . $mimeTypeLogoSmall . ';base64,' . base64_encode($logoSmall);
+            $logoSmallContent = file_get_contents($logoSmallPath);
+            $client->logo_small = 'data:image/' . $mimeTypeLogoSmall . ';base64,' . base64_encode($logoSmallContent);
+        }
 
         View::share('client', $client);
         View::share('subject', $this->getSubject());
@@ -173,21 +174,5 @@ abstract class PrintableView extends Component
 
         return UploadMedia::make($data)->validate()
             ->execute();
-    }
-
-    private function convertSvg(string $path, string $cacheKey): string
-    {
-        if (! $this->imagick) {
-            $this->imagick = new \Imagick();
-            $this->imagick->setResolution(300, 300);
-        }
-
-        $this->imagick->readImage($path);
-        $this->imagick->setImageFormat('png');
-        $this->imagick->setImageCompressionQuality(100);
-        $logo = $this->imagick->getImageBlob();
-        Cache::driver('file')->put($cacheKey, $logo);
-
-        return $logo;
     }
 }

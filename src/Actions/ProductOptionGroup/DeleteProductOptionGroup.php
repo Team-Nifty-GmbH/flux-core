@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\ProductOptionGroup;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\ProductOption\DeleteProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Validation\ValidationException;
 
@@ -21,27 +22,23 @@ class DeleteProductOptionGroup extends FluxAction
         return [ProductOptionGroup::class];
     }
 
-    public function performAction(): ?bool
+    public function performAction(): array|bool|null
     {
-        return ProductOptionGroup::query()
+        $productOptionGroup = ProductOptionGroup::query()
             ->whereKey($this->data['id'])
-            ->first()
-            ->delete();
-    }
+            ->first();
 
-    public function validateData(): void
-    {
-        parent::validateData();
-
-        if (ProductOptionGroup::query()
-            ->whereKey($this->data['id'])
-            ->first()
-            ->productOptions()
-            ->count() > 0
-        ) {
-            throw ValidationException::withMessages([
-                'product_options' => [__('Product option group has product options')],
-            ])->errorBag('deleteProductOptionGroup');
+        $productOptions = [];
+        foreach ($productOptionGroup->productOptions()->pluck('id')->toArray() as $productOption) {
+            try {
+                DeleteProductOption::make(['id' => $productOption])->validate()->execute();
+                $productOptions[$productOption] = true;
+            } catch (ValidationException) {
+                $productOptions[$productOption] = false;
+            }
         }
+
+        return ! array_filter($productOptions, fn ($item) => ! $item) ?
+            $productOptionGroup->delete() : ['product_options' => $productOptions];
     }
 }

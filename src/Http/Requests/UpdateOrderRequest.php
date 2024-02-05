@@ -14,11 +14,6 @@ use Spatie\ModelStates\Validation\ValidStateRule;
 
 class UpdateOrderRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
@@ -32,12 +27,12 @@ class UpdateOrderRequest extends BaseFormRequest
                     (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
                 ],
                 'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
-                'bank_connection_id' => [
+                'contact_bank_connection_id' => [
                     'integer',
                     'nullable',
                     new ExistsWithForeign(
                         foreignAttribute: 'contact_id',
-                        table: 'bank_connections',
+                        table: 'contact_bank_connections',
                         baseTable: 'orders'
                     ),
                 ],
@@ -124,8 +119,8 @@ class UpdateOrderRequest extends BaseFormRequest
                     'string',
                     ValidStateRule::make(PaymentState::class),
                 ],
-                'payment_target' => 'sometimes|integer|min:0',
-                'payment_discount_target' => 'integer|min:0|nullable',
+                'payment_target' => 'sometimes|required_with:payment_discount_target|integer|min:0',
+                'payment_discount_target' => 'integer|min:0|nullable|lte:payment_target',
                 'payment_discount_percent' => 'numeric|min:0|nullable',
                 'header_discount' => 'numeric|min:0|nullable',
                 'shipping_costs_net_price' => 'numeric|nullable',
@@ -154,7 +149,8 @@ class UpdateOrderRequest extends BaseFormRequest
                     'exclude_if:invoice_number,null',
                     'string',
                 ],
-                'system_delivery_date' => 'sometimes|date|nullable',
+                'system_delivery_date' => 'required_with:system_delivery_date_end|date|nullable',
+                'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
                 'customer_delivery_date' => 'sometimes|date|nullable',
                 'date_of_approval' => 'sometimes|date|nullable',
 

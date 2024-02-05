@@ -3,18 +3,18 @@
 namespace FluxErp\Livewire\Mail;
 
 use FluxErp\Jobs\SyncMailAccountJob;
-use FluxErp\Livewire\DataTables\MailMessageList;
-use FluxErp\Livewire\Forms\MailMessageForm as MailMessageForm;
+use FluxErp\Livewire\DataTables\CommunicationList;
+use FluxErp\Livewire\Forms\CommunicationForm;
+use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
-use FluxErp\Models\MailMessage;
 use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-class Mail extends MailMessageList
+class Mail extends CommunicationList
 {
     protected string $view = 'flux::livewire.mail.mail';
 
@@ -27,7 +27,7 @@ class Mail extends MailMessageList
     #[Locked]
     public array $mailAccounts = [];
 
-    public MailMessageForm $mailMessage;
+    public CommunicationForm $mailMessage;
 
     public function mount(): void
     {
@@ -39,7 +39,7 @@ class Mail extends MailMessageList
             ?->toArray() ?? [];
 
         MailFolder::addGlobalScope('children', function (Builder $builder) {
-            $builder->with('children');
+            $builder->with('children')->where('is_active', true);
         });
 
         $this->folders[] = [
@@ -62,10 +62,11 @@ class Mail extends MailMessageList
         }
     }
 
-    public function showMail(MailMessage $message): void
+    public function showMail(Communication $message): void
     {
         $this->skipRender();
         $this->mailMessage->fill($message);
+
         $this->js(<<<'JS'
             writeHtml();
             $openModal('show-mail');
@@ -102,7 +103,7 @@ class Mail extends MailMessageList
 
         $this->search = '';
 
-        $this->updatedSearch();
+        $this->applyUserFilters();
     }
 
     public function getNewMessages(): void
@@ -119,6 +120,7 @@ class Mail extends MailMessageList
     public function getBuilder(Builder $builder): Builder
     {
         return $builder
+            ->where('communication_type_enum', 'mail')
             ->whereIntegerInRaw('mail_account_id', array_column($this->mailAccounts, 'id'))
             ->when($this->folderId, function (Builder $builder) {
                 $builder->whereIntegerInRaw('mail_folder_id', $this->selectedFolderIds);

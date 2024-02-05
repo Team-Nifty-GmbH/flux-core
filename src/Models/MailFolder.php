@@ -33,6 +33,6 @@ class MailFolder extends Model
 
     public function mailMessages(): HasMany
     {
-        return $this->hasMany(MailMessage::class);
+        return $this->hasMany(Communication::class);
     }
 }

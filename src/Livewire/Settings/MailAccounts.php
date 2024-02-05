@@ -5,9 +5,14 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
+use FluxErp\Actions\MailFolder\UpdateMailFolder;
+use FluxErp\Jobs\SyncMailAccountJob;
 use FluxErp\Livewire\DataTables\MailAccountList;
-use FluxErp\Livewire\Forms\MailAccountForm as MailAccountForm;
+use FluxErp\Livewire\Forms\MailAccountForm;
+use FluxErp\Livewire\Forms\MailFolderForm;
 use FluxErp\Models\MailAccount;
+use FluxErp\Models\MailFolder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -26,6 +31,10 @@ class MailAccounts extends MailAccountList
     protected string $view = 'flux::livewire.settings.mail-accounts';
 
     public MailAccountForm $mailAccount;
+
+    public MailFolderForm $mailFolder;
+
+    public array $folders = [];
 
     public function getTableActions(): array
     {
@@ -53,11 +62,20 @@ class MailAccounts extends MailAccountList
                 ])
                 ->when(fn () => UpdateMailAccount::canPerformAction(false)),
             DataTableButton::make()
+                ->label(__('Edit Folders'))
+                ->color('primary')
+                ->icon('pencil')
+                ->attributes([
+                    'x-on:click' => '$wire.editFolders(record.id)',
+                ])
+                ->when(fn () => UpdateMailFolder::canPerformAction(false)),
+            DataTableButton::make()
                 ->label(__('Delete'))
                 ->color('negative')
                 ->icon('trash')
                 ->attributes([
-                    'x-on:click' => 'deleteDialog(record.id)',
+                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Mail Account')]),
+                    'wire:click' => 'delete(record.id)',
                 ])
                 ->when(fn () => DeleteMailAccount::canPerformAction(false)),
         ];
@@ -71,6 +89,42 @@ class MailAccounts extends MailAccountList
         $this->js(<<<'JS'
             $openModal('edit-mail-account');
         JS);
+    }
+
+    public function editFolders(MailAccount $mailAccount): void
+    {
+        $this->mailAccount->reset();
+        $this->mailAccount->fill($mailAccount);
+
+        $this->loadFolders();
+
+        $this->js(<<<'JS'
+            $openModal('edit-mail-folders');
+        JS);
+    }
+
+    public function editMailFolder(MailFolder $mailFolder): void
+    {
+        $this->mailFolder->reset();
+        $this->mailFolder->fill($mailFolder);
+    }
+
+    public function saveMailFolder(): void
+    {
+        try {
+            $this->mailFolder->save();
+            $this->mailFolder->reset();
+            $this->loadFolders();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
+    public function syncFolders(MailAccount $mailAccount): void
+    {
+        SyncMailAccountJob::dispatchSync($mailAccount, true);
+
+        $this->editFolders($mailAccount);
     }
 
     public function save(): bool
@@ -137,5 +191,17 @@ class MailAccounts extends MailAccountList
         ) {
             exception_to_notifications($e, $this);
         }
+    }
+
+    private function loadFolders(): void
+    {
+        MailFolder::addGlobalScope('children', function (Builder $builder) {
+            $builder->with('children')->where('mail_account_id', $this->mailAccount->id);
+        });
+
+        $this->folders = MailFolder::query()
+            ->where('parent_id', null)
+            ->get()
+            ->toArray();
     }
 }

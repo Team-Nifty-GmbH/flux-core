@@ -35,11 +35,13 @@ use FluxErp\Http\Controllers\NotificationSettingsController;
 use FluxErp\Http\Controllers\OrderController;
 use FluxErp\Http\Controllers\OrderPositionController;
 use FluxErp\Http\Controllers\OrderTypeController;
+use FluxErp\Http\Controllers\PaymentRunController;
 use FluxErp\Http\Controllers\PaymentTypeController;
 use FluxErp\Http\Controllers\PermissionController;
 use FluxErp\Http\Controllers\PriceController;
 use FluxErp\Http\Controllers\PriceListController;
 use FluxErp\Http\Controllers\PrintController;
+use FluxErp\Http\Controllers\ProductBundleProductController;
 use FluxErp\Http\Controllers\ProductController;
 use FluxErp\Http\Controllers\ProductCrossSellingController;
 use FluxErp\Http\Controllers\ProductOptionController;
@@ -308,6 +310,13 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::put('/order-types', [OrderTypeController::class, 'update']);
         Route::delete('/order-types/{id}', [OrderTypeController::class, 'delete']);
 
+        //PaymentRuns
+        Route::get('/payment-runs/{id}', [PaymentRunController::class, 'show']);
+        Route::get('/payment-runs', [PaymentRunController::class, 'index']);
+        Route::post('/payment-runs', [PaymentRunController::class, 'create']);
+        Route::put('/payment-runs', [PaymentRunController::class, 'update']);
+        Route::delete('/payment-runs/{id}', [PaymentRunController::class, 'delete']);
+
         //PaymentTypes
         Route::get('/payment-types/{id}', [PaymentTypeController::class, 'show']);
         Route::get('/payment-types', [PaymentTypeController::class, 'index']);
@@ -349,6 +358,13 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::post('/products', [ProductController::class, 'create']);
         Route::put('/products', [ProductController::class, 'update']);
         Route::delete('/products/{id}', [ProductController::class, 'delete']);
+
+        //Product bundle products
+        Route::get('/product-bundle-products/{id}', [ProductBundleProductController::class, 'show']);
+        Route::get('/product-bundle-products', [ProductBundleProductController::class, 'index']);
+        Route::post('/product-bundle-products', [ProductBundleProductController::class, 'create']);
+        Route::put('/product-bundle-products', [ProductBundleProductController::class, 'update']);
+        Route::delete('/product-bundle-products/{id}', [ProductBundleProductController::class, 'delete']);
 
         //ProductCrossSellings
         Route::get('/product-cross-sellings/{id}', [ProductCrossSellingController::class, 'show']);

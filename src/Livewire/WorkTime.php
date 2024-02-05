@@ -58,7 +58,7 @@ class WorkTime extends Component
     {
         return view('flux::livewire.work-time', [
             'workTimeTypes' => WorkTimeType::query()
-                ->select(['id', 'name'])
+                ->select(['id', 'name', 'is_billable'])
                 ->get()
                 ->toArray(),
             'trackableTypes' => model_info_all()
@@ -69,9 +69,31 @@ class WorkTime extends Component
     }
 
     #[Renderless]
+    public function start(?array $data): void
+    {
+        $this->workTime->fill($data ?? []);
+
+        $this->js(<<<'JS'
+            $openModal('work-time');
+        JS);
+    }
+
+    #[Renderless]
+    public function edit(WorkTimeModel $workTime): void
+    {
+        $this->workTime->reset();
+        $this->workTime->fill($workTime);
+
+        $this->js(<<<'JS'
+            $openModal('work-time');
+        JS);
+    }
+
+    #[Renderless]
     public function save(): bool
     {
         $isNew = is_null($this->workTime->id);
+
         try {
             if (! $this->workTime->is_daily_work_time) {
                 $this->workTime->parent_id = $this->dailyWorkTime->id;
@@ -87,6 +109,10 @@ class WorkTime extends Component
         if ($isNew) {
             $this->activeWorkTimes[] = $this->workTime->toArray();
             $this->workTime->reset();
+        } else {
+            $this->activeWorkTimes = Arr::keyBy($this->activeWorkTimes, 'id');
+            $this->activeWorkTimes[$this->workTime->id] = $this->workTime->toArray();
+            $this->activeWorkTimes = array_values($this->activeWorkTimes);
         }
 
         return true;
@@ -195,5 +221,11 @@ class WorkTime extends Component
         }
 
         return false;
+    }
+
+    #[Renderless]
+    public function resetWorkTime(): void
+    {
+        $this->workTime->reset();
     }
 }

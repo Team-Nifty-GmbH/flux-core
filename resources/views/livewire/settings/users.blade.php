@@ -49,6 +49,8 @@
                 <x-button primary :label="__('New User')" wire:click="show()"/>
             </div>
         </div>
-        <livewire:data-tables.user-list />
+        <div wire:ignore>
+            <livewire:data-tables.user-list />
+        </div>
     </div>
 </div>

@@ -24,6 +24,8 @@ class ClientTest extends BaseSetup
 
         $this->clients = Client::factory()->count(3)->create();
 
+        $this->user->clients()->attach($this->clients->pluck('id')->toArray());
+
         $this->permissions = [
             'show' => Permission::findOrCreate('api.clients.{id}.get'),
             'index' => Permission::findOrCreate('api.clients.get'),

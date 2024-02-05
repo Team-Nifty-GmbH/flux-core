@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 @props(['navigation' => request()->get('no-navigation', false)])
-<html class="soft-scrollbar h-full text-sm" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html @class([
+        'sort-scrollbar',
+        'h-full',
+        'text-sm',
+        'dark' => auth()->check() && auth()->user()->is_dark_mode,
+    ]
+) lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
     <x-layouts.head.head/>
@@ -16,12 +22,10 @@
             <div id="mail">
                 <livewire:edit-mail lazy />
             </div>
-        @endpersist
-        @persist('detail-modal')
             <x-modal
                 name="detail-modal"
                 max-width="7xl"
-                x-on:close="$el.querySelector('embed').src = '#'"
+                x-on:close="$el.querySelector('embed').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
             >
                 <div
                     class="w-full"
@@ -36,7 +40,7 @@
                     }"
                 >
                     <x-card class="grid h-screen">
-                        <embed class="object-contain" height="100%" width="100%" id="detail-modal-embed" src="#" />
+                        <embed class="object-contain" height="100%" width="100%" id="detail-modal-embed" src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E" />
                         <x-slot:footer>
                             <div class="w-full flex justify-end gap-1.5">
                                 <x-button :label="__('Cancel')" x-on:click="close"/>

@@ -1,9 +1,7 @@
 <div
     x-data="{
-        baseRoute: '{{ route('tasks.id', ['id' => ':id']) }}',
         edit: true
     }"
-    x-on:data-table-row-clicked="window.location.href = baseRoute.replace(':id', $event.detail.id);"
 >
     <div id="new-task-modal">
         <x-modal x-on:new-task.window="$wire.resetForm(); open();">
