@@ -1,5 +1,6 @@
 {
     "name": "team-nifty-gmbh/flux-erp",
+    "homepage": "https://flux-erp.com",
     "require": {
         "php": "^8.2",
         "ext-bcmath": "*",

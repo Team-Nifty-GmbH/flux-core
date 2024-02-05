@@ -40,6 +40,7 @@ use FluxErp\Livewire\Settings\Notifications;
 use FluxErp\Livewire\Settings\OrderTypes;
 use FluxErp\Livewire\Settings\PaymentTypes;
 use FluxErp\Livewire\Settings\Permissions;
+use FluxErp\Livewire\Settings\Plugins;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\Scheduling;
@@ -168,6 +169,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                     ->name('serial-number-ranges')
                     ->registersMenuItem();
                 Route::get('/scheduling', Scheduling::class)->name('scheduling')->registersMenuItem();
+                Route::get('/plugins', Plugins::class)
+                    ->name('plugins')
+                    ->registersMenuItem();
             });
     });
 

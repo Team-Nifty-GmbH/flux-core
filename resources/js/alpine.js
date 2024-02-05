@@ -206,7 +206,7 @@ Livewire.directive('confirm', ({ el, directive }) => {
 
     let id = directive.modifiers.includes('prompt')
         ? 'prompt'
-        : null;
+        : (directive.modifiers.includes('id') ? directive.modifiers[directive.modifiers.indexOf('id') + 1] : null);
 
     // Convert sanitized linebreaks ("\n") to real line breaks...
     let message = directive.expression.replaceAll('\\n', '\n').split('|');
@@ -237,8 +237,14 @@ Livewire.directive('confirm', ({ el, directive }) => {
     }
 })
 
-window.$promptValue = () => {
-    return document.getElementById('prompt-value').value;
+window.$promptValue = (id) => {
+    const el = document.getElementById(id ? id : 'prompt-value');
+
+    if (el.type === 'checkbox') {
+        return el.checked;
+    }
+
+    return el.value;
 }
 
 document.addEventListener('livewire:navigating', () => {
