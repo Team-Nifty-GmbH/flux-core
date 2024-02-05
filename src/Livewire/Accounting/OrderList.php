@@ -3,10 +3,11 @@
 namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\Transaction\CreateTransaction;
+use FluxErp\Livewire\DataTables\OrderList as DataTableOrderList;
 use Illuminate\Database\Eloquent\Builder;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class OrderList extends \FluxErp\Livewire\DataTables\OrderList
+class OrderList extends DataTableOrderList
 {
     public bool $isSelectable = true;
 

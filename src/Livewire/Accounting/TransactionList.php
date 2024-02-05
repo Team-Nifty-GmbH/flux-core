@@ -10,6 +10,7 @@ use FluxErp\Livewire\DataTables\TransactionList as BaseTransactionList;
 use FluxErp\Models\Order;
 use FluxErp\Models\Transaction;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -32,70 +33,6 @@ class TransactionList extends BaseTransactionList
                     ]),
             ]
         );
-    }
-
-    public function getReturnKeys(): array
-    {
-        return array_merge(
-            parent::getReturnKeys(),
-            [
-                'order_id',
-            ],
-        );
-    }
-
-    public function showOrder(Order $order): void
-    {
-        $this->redirectRoute(name: 'orders.id', parameters: ['id' => $order->id], navigate: true);
-    }
-
-    public function showUnassignedPayments(): void
-    {
-        $this->userFilters = array_merge(
-            $this->userFilters,
-            [
-                [
-                    [
-                        'column' => 'order_id',
-                        'operator' => 'is null',
-                        'value' => '',
-                    ],
-                ],
-            ],
-        );
-
-        $this->loadData();
-    }
-
-    public function matchTransactions(): void
-    {
-        foreach (array_chunk($this->selected, 20) as $chunk) {
-            MatchTransactionsWithOrderJob::dispatchSync($chunk);
-        }
-
-        $this->notification()->success(__('The transactions are being matched with the orders.'));
-    }
-
-    #[Renderless]
-    public function assign(Transaction $transaction): void
-    {
-        $this->transactionForm->reset();
-        $this->transactionForm->fill($transaction);
-
-        $this->js(<<<'JS'
-            $openModal('assign-order');
-        JS);
-    }
-
-    public function getSelectedActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('Start automatic assignment'))
-                ->color('primary')
-                ->wireClick('matchTransactions()')
-                ->when(fn () => UpdateTransaction::canPerformAction(false)),
-        ];
     }
 
     public function getRowActions(): array
@@ -129,11 +66,83 @@ class TransactionList extends BaseTransactionList
         );
     }
 
+    public function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('Start automatic assignment'))
+                ->color('primary')
+                ->wireClick('matchTransactions()')
+                ->when(fn () => UpdateTransaction::canPerformAction(false)),
+        ];
+    }
+
+    public function getReturnKeys(): array
+    {
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'order_id',
+            ],
+        );
+    }
+
+    public function showOrder(Order $order): void
+    {
+        $this->redirectRoute(name: 'orders.id', parameters: ['id' => $order->id], navigate: true);
+    }
+
+    public function showUnassignedPayments(): void
+    {
+        $this->userFilters = array_merge(
+            $this->userFilters,
+            [
+                [
+                    [
+                        'column' => 'order_id',
+                        'operator' => 'is null',
+                        'value' => null,
+                    ],
+                ],
+            ],
+        );
+
+        $this->loadData();
+    }
+
+    #[Renderless]
+    public function editTransaction(?Transaction $transaction): void
+    {
+        $transaction?->loadMissing('children.order.contact.invoiceAddress:id,name');
+
+        parent::editTransaction($transaction);
+    }
+
+    public function matchTransactions(): void
+    {
+        foreach (array_chunk($this->selected, 20) as $chunk) {
+            MatchTransactionsWithOrderJob::dispatchSync($chunk);
+        }
+
+        $this->notification()->success(__('The transactions are being matched with the orders.'));
+    }
+
+    #[Renderless]
+    public function assign(Transaction $transaction): void
+    {
+        $this->transactionForm->reset();
+        $this->transactionForm->fill($transaction);
+
+        $this->js(<<<'JS'
+            $openModal('assign-order');
+        JS);
+    }
+
     public function assignOrders(array $orderIds): void
     {
         $orders = Order::query()
-            ->with('contact.invoiceAddress:id,name')
             ->whereIntegerInRaw('id', $orderIds)
+            ->with('contact.invoiceAddress:id,name')
             ->get(['id', 'invoice_number', 'invoice_date', 'balance', 'contact_id', 'total_gross_price'])
             ->toArray();
 
@@ -149,6 +158,7 @@ class TransactionList extends BaseTransactionList
                     bcround($order['balance'], 2)
                 );
             }
+
             $this->transactionForm->difference = bcsub(
                 $this->transactionForm->difference ?? $this->transactionForm->amount,
                 $amount, 2
@@ -174,7 +184,7 @@ class TransactionList extends BaseTransactionList
     {
         if (
             count($this->transactionForm->children) === 1
-            && $this->transactionForm->amount === data_get($this->transactionForm->children, '0.amount')
+            && bccomp($this->transactionForm->amount, data_get($this->transactionForm->children, '0.amount')) === 0
         ) {
             $this->transactionForm->order_id = data_get($this->transactionForm->children, '0.order.id');
 

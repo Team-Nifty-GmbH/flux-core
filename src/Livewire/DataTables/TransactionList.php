@@ -53,7 +53,7 @@ class TransactionList extends DataTable
         return array_merge(
             parent::getViewData(),
             [
-                'bankConnections' => BankConnection::query()->get(['id', 'name', 'iban']),
+                'bankConnections' => BankConnection::query()->get(['bank_connections.id', 'name', 'iban']),
             ]
         );
     }

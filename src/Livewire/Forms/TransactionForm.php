@@ -20,6 +20,7 @@ class TransactionForm extends FluxForm
 
     public ?int $parent_id = null;
 
+    #[Locked]
     public ?int $order_id = null;
 
     public ?string $value_date = null;
@@ -44,7 +45,7 @@ class TransactionForm extends FluxForm
 
     public array $children = [];
 
-    public ?float $difference = null;
+    public ?string $difference = null;
 
     protected function getActions(): array
     {
@@ -57,15 +58,11 @@ class TransactionForm extends FluxForm
 
     public function fill($values): void
     {
-        if ($values instanceof Model) {
-            $values->loadMissing('children.order.contact.invoiceAddress:id,name');
-        }
-
         parent::fill($values);
 
-        $this->value_date = ! is_null(data_get($values, 'value_date')) ?
-            Carbon::parse(data_get($values, 'value_date'))->toDateString() : null;
-        $this->booking_date = ! is_null(data_get($values, 'booking_date')) ?
-            Carbon::parse(data_get($values, 'booking_date'))->toDateString() : null;
+        $this->value_date = ! is_null($valueDate = data_get($values, 'value_date')) ?
+            Carbon::parse($valueDate)->toDateString() : null;
+        $this->booking_date = ! is_null($bookingDate = data_get($values, 'booking_date')) ?
+            Carbon::parse($bookingDate)->toDateString() : null;
     }
 }

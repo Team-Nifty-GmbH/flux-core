@@ -40,11 +40,6 @@ class Accounting extends TransactionList
         }
     }
 
-    public function getSelectedActions(): array
-    {
-        return [];
-    }
-
     public function deleteTransaction(): bool
     {
         $this->transactionForm->order_id = null;

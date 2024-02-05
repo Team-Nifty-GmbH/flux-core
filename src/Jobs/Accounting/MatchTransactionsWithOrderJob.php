@@ -113,13 +113,11 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
                 $order = Order::query()
                     ->whereNotNull('invoice_number')
                     ->whereHas(
-                        'contact',
-                        function (Builder $builder) use ($transaction) {
-                            return $builder->whereHas(
-                                'addresses',
-                                function (Builder $builder) use ($transaction) {
-                                    return $builder->whereRaw('LOWER(name) like ?', '%' . strtolower($transaction->counterpart_name) . '%');
-                                }
+                        'contact.addresses',
+                        function (Builder $query) use ($transaction) {
+                            return $query->whereRaw(
+                                'LOWER(addresses.name) like ?',
+                                '%' . strtolower($transaction->counterpart_name) . '%'
                             );
                         }
                     )
