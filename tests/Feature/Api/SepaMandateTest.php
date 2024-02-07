@@ -63,6 +63,8 @@ class SepaMandateTest extends BaseSetup
             'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
         ]);
 
+        $this->user->clients()->attach($dbClients->pluck('id')->toArray());
+
         $this->permissions = [
             'show' => Permission::findOrCreate('api.sepa-mandates.{id}.get'),
             'index' => Permission::findOrCreate('api.sepa-mandates.get'),
@@ -90,11 +92,18 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($this->sepaMandates[0]->contact_id, $jsonSepaMandate->contact_id);
         $this->assertEquals($this->sepaMandates[0]->contact_bank_connection_id,
             $jsonSepaMandate->contact_bank_connection_id);
-        $this->assertEquals($this->sepaMandates[0]->signed_date, $jsonSepaMandate->signed_date);
-        $this->assertEquals(Carbon::parse($this->sepaMandates[0]->created_at),
-            Carbon::parse($jsonSepaMandate->created_at));
-        $this->assertEquals(Carbon::parse($this->sepaMandates[0]->updated_at),
-            Carbon::parse($jsonSepaMandate->updated_at));
+
+        if (is_null($this->sepaMandates[0]->signed_date)) {
+            $this->assertNull($jsonSepaMandate->signed_date);
+        } else {
+            $this->assertEquals($this->sepaMandates[0]->signed_date->toDateString(),
+                Carbon::parse($jsonSepaMandate->signed_date)->toDateString());
+        }
+
+        $this->assertEquals($this->sepaMandates[0]->created_at->toDateTimeString(),
+            Carbon::parse($jsonSepaMandate->created_at)->toDateTimeString());
+        $this->assertEquals($this->sepaMandates[0]->updated_at->toDateTimeString(),
+            Carbon::parse($jsonSepaMandate->updated_at)->toDateTimeString());
     }
 
     public function test_get_sepa_mandate_sepa_mandate_not_found()
@@ -186,7 +195,7 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($sepaMandate['client_id'], $dbSepaMandate->client_id);
         $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
         $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
-        $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date);
+        $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date->toDateString());
         $this->assertEquals($this->user->id, $dbSepaMandate->created_by->id);
         $this->assertEquals($this->user->id, $dbSepaMandate->updated_by->id);
     }
@@ -258,7 +267,7 @@ class SepaMandateTest extends BaseSetup
 
         $this->assertNotEmpty($dbSepaMandate);
         $this->assertEquals($sepaMandate['id'], $dbSepaMandate->id);
-        $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date);
+        $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date->toDateString());
         $this->assertEquals($this->user->id, $dbSepaMandate->updated_by->id);
     }
 
@@ -286,7 +295,7 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($this->sepaMandates[0]->client_id, $dbSepaMandate->client_id);
         $this->assertEquals($this->sepaMandates[0]->contact_id, $dbSepaMandate->contact_id);
         $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
-        $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date);
+        $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date->toDateString());
         $this->assertEquals($this->user->id, $dbSepaMandate->updated_by->id);
     }
 

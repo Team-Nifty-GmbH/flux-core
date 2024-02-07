@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasEnums;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
@@ -16,7 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderType extends Model
 {
-    use Filterable, HasEnums, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
+    use Filterable, HasClientAssignment, HasEnums, HasPackageFactory, HasTranslations, HasUserModification, HasUuid,
+        SoftDeletes;
 
     protected $casts = [
         'uuid' => 'string',

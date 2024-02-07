@@ -6,11 +6,6 @@ use FluxErp\Rules\ExistsWithIgnore;
 
 class UpdatePaymentTypeRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
@@ -30,7 +25,11 @@ class UpdatePaymentTypeRequest extends BaseFormRequest
             'payment_reminder_text' => 'string|nullable',
             'payment_reminder_email_text' => 'string|nullable',
             'is_active' => 'boolean',
+            'is_direct_debit' => 'boolean',
             'is_default' => 'boolean',
+            'is_purchase' => 'boolean',
+            'is_sales' => 'boolean',
+            'requires_manual_transfer' => 'boolean',
         ];
     }
 }

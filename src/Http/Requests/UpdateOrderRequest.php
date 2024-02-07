@@ -14,11 +14,6 @@ use Spatie\ModelStates\Validation\ValidStateRule;
 
 class UpdateOrderRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
@@ -32,7 +27,7 @@ class UpdateOrderRequest extends BaseFormRequest
                     (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
                 ],
                 'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
-                'bank_connection_id' => [
+                'contact_bank_connection_id' => [
                     'integer',
                     'nullable',
                     new ExistsWithForeign(

@@ -163,6 +163,9 @@ class Contact extends Component
             return;
         }
 
-        $this->avatar = ContactModel::query()->whereKey($this->contact->id)->first()->getAvatarUrl();
+        $this->avatar = ContactModel::query()
+            ->whereKey($this->contact->id)
+            ->first()
+            ->getAvatarUrl();
     }
 }

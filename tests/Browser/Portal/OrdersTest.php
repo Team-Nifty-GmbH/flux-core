@@ -80,7 +80,11 @@ class OrdersTest extends PortalDuskTestCase
     public function test_can_see_orders()
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/');
+            $browser->visit($this->baseUrl())->type('email', $this->user->login_name)
+                ->type('password', $this->password)
+                ->press('Login')
+                ->waitForReload()
+                ->assertRouteIs('portal.dashboard');
             $this->openMenu();
 
             $browser->click('nav [href="/orders"]')
@@ -107,7 +111,6 @@ class OrdersTest extends PortalDuskTestCase
     public function test_can_see_order_details()
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/');
             $this->openMenu();
             $browser
                 ->click('nav [href="/orders"]')
