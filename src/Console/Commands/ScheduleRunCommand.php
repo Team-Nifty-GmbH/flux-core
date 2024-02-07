@@ -13,6 +13,7 @@ use Illuminate\Console\Scheduling\ScheduleRunCommand as BaseScheduleRunCommand;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\Eloquent\Builder;
 
 class ScheduleRunCommand extends BaseScheduleRunCommand
 {
@@ -21,7 +22,15 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
         $dispatcher->dispatch(new ScheduleTasksRegistering($schedule));
 
         $overdueEvents = [];
-        $repeatables = ScheduleModel::query()->where('is_active', true)->get();
+        $repeatables = ScheduleModel::query()
+            ->where(fn (Builder $query) => $query->where('ends_at', '>', now()->toDateTimeString())
+                ->orWhereNull('ends_at')
+            )
+            ->where(fn (Builder $query) => $query->whereRaw('recurrences > COALESCE(current_recurrence,0)')
+                ->orWhereNull('recurrences')
+            )
+            ->where('is_active', true)
+            ->get();
         foreach ($repeatables as $repeatable) {
             if (method_exists($repeatable->class, 'isRepeatable') && ! $repeatable->class::isRepeatable()) {
                 continue;
@@ -78,6 +87,10 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             });
 
             $event->onSuccess(function () use ($repeatable) {
+                if ($repeatable->recurrences) {
+                    $repeatable->current_recurrence++;
+                }
+
                 $repeatable->last_success = now();
                 $repeatable->save();
             });

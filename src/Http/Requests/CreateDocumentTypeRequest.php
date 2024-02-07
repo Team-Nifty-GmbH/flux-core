@@ -2,6 +2,9 @@
 
 namespace FluxErp\Http\Requests;
 
+/**
+ * @deprecated
+ */
 class CreateDocumentTypeRequest extends BaseFormRequest
 {
     /**

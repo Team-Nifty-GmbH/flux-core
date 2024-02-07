@@ -253,7 +253,7 @@
                     @section('contact-address-card')
                         <x-card>
                             <x-slot:header>
-                                <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
+                                <div class="flex items-center justify-between border-b px-4 p-2.5 dark:border-0">
                                     <x-label>
                                         {{ __('Contact') }}
                                     </x-label>
@@ -316,7 +316,7 @@
                     @section('invoice-address-card')
                         <x-card>
                             <x-slot:header>
-                                <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
+                                <div class="flex items-center justify-between border-b px-4 p-2.5 dark:border-0">
                                     <x-label>
                                         {{ __('Invoice Address') }}
                                     </x-label>
@@ -361,7 +361,7 @@
                     @section('delivery-address-card')
                         <x-card>
                             <x-slot:header>
-                                <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
+                                <div class="flex items-center justify-between border-b px-4 p-2.5 dark:border-0">
                                     <x-label>
                                         {{ __('Delivery Address') }}
                                     </x-label>
@@ -548,7 +548,7 @@
                         </x-card>
                         <x-card>
                             <div class="text-sm">
-                                <div class="flex justify-between py-2.5">
+                                <div class="flex justify-between p-2.5">
                                     <div>
                                         {{ __('Margin') }}
                                     </div>
@@ -558,7 +558,7 @@
                                     </div>
                                 </div>
                                 <div x-cloak x-show="$wire.order.total_net_price !== $wire.order.total_base_net_price">
-                                    <div class="flex justify-between py-2.5">
+                                    <div class="flex justify-between p-2.5">
                                         <div>
                                             {{ __('Sum net without discount') }}
                                         </div>
@@ -567,7 +567,7 @@
                                             </span>
                                         </div>
                                     </div>
-                                    <div class="flex justify-between py-2.5">
+                                    <div class="flex justify-between p-2.5">
                                         <div>
                                             {{ __('Discount') }}
                                         </div>
@@ -577,7 +577,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex justify-between py-2.5">
+                                <div class="flex justify-between p-2.5">
                                     <div>
                                         {{ __('Sum net') }}
                                     </div>
@@ -588,7 +588,7 @@
                                 </div>
                                 <hr />
                                 <template x-for="vat in $wire.order.total_vats">
-                                    <div class="flex justify-between py-2.5">
+                                    <div class="flex justify-between p-2.5">
                                         <div>
                                             <span>{{ __('Plus ') }}</span>
                                             <span x-html="formatters.percentage(vat.vat_rate_percentage ?? 0)">
@@ -600,12 +600,21 @@
                                         </div>
                                     </div>
                                 </template>
-                                <div class="dark:bg-secondary-700 flex justify-between bg-gray-50 py-2.5">
+                                <div class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5">
                                     <div>
                                         {{ __('Total Gross') }}
                                     </div>
                                     <div>
                                         <span x-html="formatters.coloredMoney($wire.order.total_gross_price ?? 0)">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5">
+                                    <div>
+                                        {{ __('Balance') }}
+                                    </div>
+                                    <div>
+                                        <span x-html="formatters.coloredMoney($wire.order.balance ?? 0)">
                                         </span>
                                     </div>
                                 </div>

@@ -150,10 +150,12 @@ abstract class PrintableView extends Component
         return strtolower(class_basename($this));
     }
 
-    public function attachToModel(): ?Media
+    public function attachToModel(Model $model = null): ?Media
     {
-        if (! $this->getModel() instanceof Model
-            || in_array(HasMedia::class, class_uses_recursive($this->getModel()))
+        $model = is_null($model) ? $this->getModel() : $model;
+
+        if (! $model instanceof Model
+            || ! $model instanceof HasMedia
         ) {
             return null;
         }
@@ -163,8 +165,8 @@ abstract class PrintableView extends Component
         rewind($resource);
 
         $data = [
-            'model_type' => get_class($this->getModel()),
-            'model_id' => $this->getModel()->getKey(),
+            'model_type' => get_class($model),
+            'model_id' => $model->getKey(),
             'collection_name' => $this->getCollectionName(),
             'file_name' => now()->format('Y-m-d_H-i-s') . '_' . Str::finish($this->getFileName(), '.pdf'),
             'name' => now()->format('Y-m-d_H-i-s') . '_' . $this->getFileName(),
@@ -172,7 +174,8 @@ abstract class PrintableView extends Component
             'media_type' => 'stream',
         ];
 
-        return UploadMedia::make($data)->validate()
+        return UploadMedia::make($data)
+            ->validate()
             ->execute();
     }
 }

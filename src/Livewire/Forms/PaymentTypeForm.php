@@ -30,6 +30,10 @@ class PaymentTypeForm extends FluxForm
 
     public ?int $payment_discount_percentage = null;
 
+    public ?string $payment_reminder_text = null;
+
+    public ?string $payment_reminder_email_text = null;
+
     public bool $is_active = true;
 
     public bool $is_direct_debit = false;

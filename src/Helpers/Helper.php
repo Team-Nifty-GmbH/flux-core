@@ -5,6 +5,7 @@ namespace FluxErp\Helpers;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class Helper
 {
@@ -71,9 +72,6 @@ class Helper
         }
     }
 
-    /**
-     * @return string[]
-     */
     public static function getHtmlInputFieldTypes(): array
     {
         return [
@@ -93,5 +91,52 @@ class Helper
             'checkbox',
             'select',
         ];
+    }
+
+    public static function updateRelatedRecords(
+        Model $model,
+        array $related,
+        string $relation,
+        string $foreignKey,
+        string $createAction,
+        string $updateAction,
+        string $deleteAction
+    ): void {
+        $relatedKeyName = $model->$relation()->getRelated()->getKeyName();
+
+        $existing = $model->$relation()->pluck($relatedKeyName)->toArray();
+        $model->$relation()->whereNotIn($relatedKeyName, Arr::pluck($related, $relatedKeyName))->delete();
+
+        $canCreate = $createAction::canPerformAction(false);
+        $canUpdate = $updateAction::canPerformAction(false);
+        $updated = [];
+        foreach ($related as $item) {
+            $item = array_merge($item, [$foreignKey => $model->getKey()]);
+            if (! data_get($item, $relatedKeyName)) {
+                if ($canCreate) {
+                    try {
+                        $createAction::make($item)->validate()->execute();
+                    } catch (ValidationException) {
+                    }
+                }
+            } else {
+                if ($canUpdate) {
+                    try {
+                        $updateAction::make($item)->validate()->execute();
+                    } catch (ValidationException) {
+                    }
+                    $updated[] = $item['id'];
+                }
+            }
+        }
+
+        if ($deleteAction::canPerformAction(false)) {
+            foreach (array_diff($existing, $updated) as $deleted) {
+                try {
+                    $deleteAction::make(['id' => $deleted])->validate()->execute();
+                } catch (ValidationException) {
+                }
+            }
+        }
     }
 }

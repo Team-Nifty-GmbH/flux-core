@@ -97,35 +97,16 @@ class UpdateProduct extends FluxAction
                 );
         }
 
-        if ($productCrossSellings !== null) {
-            $activeProductCrossSellings = [];
-            foreach ($productCrossSellings as $productCrossSelling) {
-                $productCrossSelling['product_id'] = $product->id;
-                if ($productCrossSelling['id'] ?? false) {
-                    $action = UpdateProductCrossSelling::make($productCrossSelling);
-                } else {
-                    $action = CreateProductCrossSelling::make($productCrossSelling);
-                }
-
-                try {
-                    $activeProductCrossSellings[] = $action->checkPermission()->validate()->execute()->id;
-                } catch (ValidationException|UnauthorizedException) {
-                }
-            }
-
-            $removedProductCrossSellings = $product->productCrossSellings()
-                ->whereIntegerNotInRaw('id', $activeProductCrossSellings)
-                ->pluck('id')
-                ->toArray();
-
-            try {
-                DeleteProductCrossSelling::canPerformAction();
-                foreach ($removedProductCrossSellings as $removedProductCrossSelling) {
-                    DeleteProductCrossSelling::make(['id' => $removedProductCrossSelling])
-                        ->execute();
-                }
-            } catch (UnauthorizedException) {
-            }
+        if (! is_null($productCrossSellings)) {
+            Helper::updateRelatedRecords(
+                model: $product,
+                related: $productCrossSellings,
+                relation: 'productCrossSellings',
+                foreignKey: 'product_id',
+                createAction: CreateProductCrossSelling::class,
+                updateAction: UpdateProductCrossSelling::class,
+                deleteAction: DeleteProductCrossSelling::class
+            );
         }
 
         return $product->withoutRelations()->fresh();
