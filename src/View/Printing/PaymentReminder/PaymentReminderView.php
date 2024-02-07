@@ -39,4 +39,9 @@ class PaymentReminderView extends PrintableView
             . $this->model->order->orderType->name . ' '
             . $this->model->order->invoice_number;
     }
+
+    protected function getCollectionName(): string
+    {
+        return 'payment-reminders';
+    }
 }

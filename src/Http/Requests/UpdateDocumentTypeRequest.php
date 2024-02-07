@@ -4,6 +4,9 @@ namespace FluxErp\Http\Requests;
 
 use FluxErp\Rules\ExistsWithIgnore;
 
+/**
+ * @deprecated
+ */
 class UpdateDocumentTypeRequest extends BaseFormRequest
 {
     /**
