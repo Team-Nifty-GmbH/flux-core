@@ -53,6 +53,8 @@ class CreateScheduleRequest extends BaseFormRequest
             ],
             'parameters' => 'array',
             'due_at' => 'date|nullable',
+            'ends_at' => 'date|nullable',
+            'recurrences' => 'exclude_unless:ends_at,null|nullable|integer|min:1',
             'is_active' => 'boolean',
         ];
     }
