@@ -5,6 +5,7 @@ namespace FluxErp\Http\Controllers;
 use FluxErp\Actions\WorkTime\CreateWorkTime;
 use FluxErp\Actions\WorkTime\DeleteWorkTime;
 use FluxErp\Actions\WorkTime\UpdateWorkTime;
+use FluxErp\Helpers\QueryBuilder;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\CreateWorkTimeRequest;
 use FluxErp\Http\Requests\UpdateWorkTimeRequest;
@@ -23,10 +24,19 @@ class TimeTrackingController extends BaseController
 
     public function userIndex(Request $request): JsonResponse
     {
+        $page = max((int) $request->page, 1);
+        $perPage = $request->per_page > 500 || $request->per_page < 1 ? 25 : $request->per_page;
+
+        $query = QueryBuilder::filterModel($this->model, $request);
+        $data = $query
+            ->where('user_id', $request->user()->id)
+            ->paginate(perPage: $perPage, page: $page)
+            ->appends($request->query());
+
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
-            data: $request->user()->workTimes,
-        );
+            data: $data,
+        )->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 
     public function create(CreateWorkTimeRequest $request): JsonResponse
@@ -36,18 +46,27 @@ class TimeTrackingController extends BaseController
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
             data: $workTime,
-            statusMessage: __('work time created')
+            statusMessage: 'work time created'
         );
     }
 
     public function update(UpdateWorkTimeRequest $request): JsonResponse
     {
-        $workTime = UpdateWorkTime::make($request->validated())->execute();
+        try {
+            $workTime = UpdateWorkTime::make($request->validated())
+                ->validate()
+                ->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 422,
+                data: $e->errors()
+            );
+        }
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
             data: $workTime,
-            statusMessage: __('work time updated')
+            statusMessage: 'work time updated'
         );
     }
 
@@ -64,7 +83,7 @@ class TimeTrackingController extends BaseController
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 204,
-            statusMessage: __('work time deleted')
+            statusMessage: 'work time deleted'
         );
     }
 }

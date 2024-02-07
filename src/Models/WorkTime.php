@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
@@ -12,7 +13,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class WorkTime extends Model
 {
-    use BroadcastsEvents, HasPackageFactory, HasUuid, SoftDeletes;
+    use BroadcastsEvents, Filterable, HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $casts = [
         'started_at' => 'datetime',
