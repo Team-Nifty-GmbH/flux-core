@@ -21,6 +21,7 @@ class Schedule extends Model
         'cron' => 'array',
         'parameters' => 'array',
         'due_at' => 'datetime',
+        'ends_at' => 'datetime',
         'last_success' => 'datetime',
         'last_run' => 'datetime',
         'is_active' => 'boolean',

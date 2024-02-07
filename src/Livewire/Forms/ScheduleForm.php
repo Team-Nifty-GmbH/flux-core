@@ -34,7 +34,15 @@ class ScheduleForm extends Form
 
     public ?string $due_at = null;
 
+    public ?string $ends_at = null;
+
+    public ?int $recurrences = null;
+
+    public ?int $current_recurrence = null;
+
     public bool $is_active = true;
+
+    public ?string $end_radio = null;
 
     public function save(): void
     {
@@ -71,6 +79,19 @@ class ScheduleForm extends Form
             $data['cron']['parameters']['dayConstraint'] = [];
         }
 
+        switch ($data['end_radio']) {
+            case 'ends_at':
+                $data['recurrences'] = null;
+                break;
+            case 'recurrences':
+                $data['ends_at'] = null;
+                break;
+            default:
+                $data['ends_at'] = null;
+                $data['recurrences'] = null;
+                break;
+        }
+
         $action = $this->id ? UpdateSchedule::make($data) : CreateSchedule::make($data);
 
         $response = $action->validate()->execute();
@@ -98,5 +119,11 @@ class ScheduleForm extends Form
                 $this->parameters
             );
         }
+
+        $this->end_radio = match (true) {
+            ! is_null($this->ends_at) => 'ends_at',
+            ! is_null($this->recurrences) => 'recurrences',
+            default => 'never'
+        };
     }
 }

@@ -181,6 +181,20 @@
                         wire:model="schedule.cron.parameters.timeConstraint.1"
                     />
                 </div>
+                <x-label>
+                    {{ __('End') }}
+                </x-label>
+                <x-radio :label="__('Never')" value="never" wire:model="schedule.end_radio" />
+                <div class="grid grid-cols-2 items-center gap-1.5">
+                    <x-radio :label="__('Ends At')" value="ends_at" wire:model="schedule.end_radio" />
+                    <x-datetime-picker wire:model="schedule.ends_at" timezone="UTC" x-bind:disabled="$wire.schedule.end_radio !== 'ends_at'"/>
+                    <x-radio :label="__('After number of recurrences')" value="recurrences" wire:model="schedule.end_radio" />
+                    <x-inputs.number wire:model="schedule.recurrences" :min="1" x-bind:disabled="$wire.schedule.end_radio !== 'recurrences'" />
+                </div>
+                <div class="grid grid-cols-2 items-center gap-1.5 mb-2" x-cloak x-show="$wire.schedule.id && $wire.schedule.end_radio === 'recurrences'">
+                    <x-label>{{ __('Current Recurrence') }}</x-label>
+                    <span class="flex justify-center">{{ $schedule->current_recurrence ?? 0 }}</span>
+                </div>
                 <x-toggle wire:model="schedule.is_active" :label="__('Is Active')" />
             </div>
             <x-slot:footer>
