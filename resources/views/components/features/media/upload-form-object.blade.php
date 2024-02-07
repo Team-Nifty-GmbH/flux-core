@@ -89,7 +89,7 @@
             </label>
             <input {{ $attributes->whereDoesntStartWith('wire') }} type="file" x-bind:id="uploadObjectId" class="hidden" @if($multiple) multiple @endif x-on:change="handleFileSelect($event)"/>
         </div>
-        <div class="space-y-3">
+        <div class="flex flex-col gap-4">
             <template x-for="(file, index) in $wire.{{ $wireModel }}.stagedFiles">
                 <x-card class="!py-0 !px-0" x-show="! file.shouldDelete" x-cloak>
                     <div class="flex items-center justify-between text-sm">
@@ -108,6 +108,7 @@
                     </div>
                 </x-card>
             </template>
+            {{ $footer ?? '' }}
         </div>
     </div>
 </div>

@@ -145,7 +145,7 @@ class MediaForm extends FluxForm
             'name' => $file->getClientOriginalName(),
             'temporary_filename' => $file->getFilename(),
             'file_name' => $file->getClientOriginalName(),
-            'preview_url' => $file->isPreviewable() ? $file->temporaryUrl() : null,
+            'preview_url' => $file->isPreviewable() ? $file->temporaryUrl() : route('icons', ['name' => 'document']),
             'media' => $file->getRealPath(),
         ];
     }
