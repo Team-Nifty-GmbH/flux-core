@@ -1,66 +1,34 @@
-<div x-data="{
-        transaction: {},
-        order: {},
-        showTransaction(id) {
-            $wire.showTransaction(id).then((transaction) => {
-                this.transaction = transaction;
-
-                const dataTable = Livewire.find(document.querySelector('#order-list')
-                    .querySelector('[wire\\:id]')
-                    .getAttribute('wire:id'));
-
-                if (transaction.order_id) {
-                    dataTable.set('search', '');
-                    dataTable.set('userFilters', [[{column: 'id', operator: '=', value: transaction.order_id}]]);
-                } else {
-                    dataTable.set('search', transaction.purpose || transaction.counterpart_name || '');
-                    dataTable.set('userFilters', []);
-                }
-
-                $openModal('transaction-details');
-            })
-        },
-        showOrder(id) {
-            this.$wire.showOrder(id).then((order) => {
-                this.order = order;
-                document.querySelector('#order-detail').src = order;
-                Alpine.$data(document.querySelector('#order-details').querySelector('[wireui-modal]')).open();
-            })
-        }
-    }"
->
-    <x-modal name="transaction-details" max-width="6xl" x-on:close="document.querySelector('#order-detail').src = '#'">
-        <x-card class="flex flex-col gap-3">
-            <div class="placeholder-secondary-400 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 border border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block w-full sm:text-sm rounded-md transition ease-in-out duration-100 focus:outline-none shadow-sm" x-html="window.formatters.date(transaction.booking_date)"></div>
-            <div class="placeholder-secondary-400 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 border border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block w-full sm:text-sm rounded-md transition ease-in-out duration-100 focus:outline-none shadow-sm" x-html="window.formatters.date(transaction.value_date)"></div>
-            <x-input readonly x-model="transaction.counterpart_name" :label="__('Counterpart Name')"/>
-            <x-input readonly x-model="transaction.counterpart_iban" :label="__('Counterpart IBAN')"/>
-            <x-input readonly x-model="transaction.counterpart_bank_name" :label="__('Counterpart Bank Name')"/>
-            <x-textarea readonly x-model="transaction.purpose" :label="__('Purpose')"/>
-            <div class="placeholder-secondary-400 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 border border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block w-full sm:text-sm rounded-md transition ease-in-out duration-100 focus:outline-none shadow-sm" x-html="window.formatters.coloredMoney(transaction.amount)"></div>
-            <div id="order-list">
-                <livewire:data-tables.transactions.order-list />
-            </div>
-            <x-slot:footer>
-                <div class="w-full flex justify-end">
+<x-modal name="transaction-details" max-width="6xl">
+    <x-card class="flex flex-col gap-3">
+        <x-select
+            :label="__('Bank Connection')"
+            wire:model="transactionForm.bank_connection_id"
+            :options="$bankConnections"
+            option-value="id"
+            option-label="name"
+            option-description="iban"
+        />
+        <x-datetime-picker without-time wire:model="transactionForm.booking_date" :label="__('Booking Date')"/>
+        <x-datetime-picker without-time wire:model="transactionForm.value_date" :label="__('Value Date')"/>
+        <x-input wire:model="transactionForm.counterpart_name" :label="__('Counterpart Name')"/>
+        <x-input wire:model="transactionForm.counterpart_iban" :label="__('Counterpart IBAN')"/>
+        <x-input wire:model="transactionForm.counterpart_bank_name" :label="__('Counterpart Bank Name')"/>
+        <x-textarea wire:model="transactionForm.purpose" :label="__('Purpose')"/>
+        <x-inputs.number step="0.01" wire:model="transactionForm.amount" :label="__('Amount')"/>
+        <x-slot:footer>
+            <div class="flex justify-between">
+                <x-button
+                    :label="__('Delete')"
+                    flat
+                    negative
+                    wire:click="deleteTransaction().then((success) => {if(success) close();})"
+                    wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Transaction')]) }}"
+                />
+                <div class="w-full flex justify-end gap-1.5">
                     <x-button :label="__('Cancel')" x-on:click="close"/>
+                    <x-button primary :label="__('Save')" wire:click="saveTransaction().then((success) => {if(success) close();})"/>
                 </div>
-            </x-slot:footer>
-        </x-card>
-    </x-modal>
-    <div id="order-details">
-        <x-modal max-width="7xl">
-            <x-card class="grid h-screen">
-                <embed class="object-contain" height="100%" width="100%" id="order-detail" src="#" />
-                <x-slot:footer>
-                    <div class="w-full flex justify-end">
-                        <x-button :label="__('Cancel')" x-on:click="close"/>
-                    </div>
-                </x-slot:footer>
-            </x-card>
-        </x-modal>
-    </div>
-    <div wire:ignore x-on:data-table-row-clicked="showTransaction($event.detail.id)">
-        @include('tall-datatables::livewire.data-table')
-    </div>
-</div>
+            </div>
+        </x-slot:footer>
+    </x-card>
+</x-modal>

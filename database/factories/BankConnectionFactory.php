@@ -20,9 +20,10 @@ class BankConnectionFactory extends Factory
     public function definition(): array
     {
         return [
-            'iban' => $this->faker->bothify('??####################'),
+            'name' => $this->faker->name,
             'account_holder' => $this->faker->name,
             'bank_name' => $this->faker->name,
+            'iban' => $this->faker->bothify('??####################'),
             'bic' => $this->faker->bothify('##????##?#?'),
         ];
     }

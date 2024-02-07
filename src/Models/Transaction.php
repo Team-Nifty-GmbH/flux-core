@@ -12,11 +12,12 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Scout\Searchable;
 use TeamNiftyGmbH\DataTable\Casts\Money;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Transaction extends Model implements InteractsWithDataTables
 {
-    use HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, Searchable;
+    use BroadcastsEvents, HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, Searchable;
 
     protected $casts = [
         'uuid' => 'string',

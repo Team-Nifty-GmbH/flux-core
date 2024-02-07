@@ -67,6 +67,8 @@ class OrderForm extends FluxForm
 
     public ?array $total_vats = null;
 
+    public ?float $balance = null;
+
     public ?int $payment_reminder_days_1 = null;
 
     public ?int $payment_reminder_days_2 = null;
