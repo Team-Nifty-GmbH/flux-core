@@ -62,7 +62,6 @@ class CreateOrderPositionRequest extends BaseFormRequest
                 ],
                 'warehouse_id' => [
                     'exclude_if:is_free_text,true',
-                    'required_with:product_id',
                     'integer',
                     'nullable',
                     'exists:warehouses,id,deleted_at,NULL',

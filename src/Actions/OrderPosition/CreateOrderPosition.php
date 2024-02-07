@@ -7,6 +7,7 @@ use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
+use FluxErp\Models\Warehouse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -86,6 +87,10 @@ class CreateOrderPosition extends FluxAction
             data_set($this->data, 'product_number', $product->product_number, false);
             data_set($this->data, 'ean_code', $product->ean, false);
             data_set($this->data, 'unit_gram_weight', $product->weight_gram, false);
+
+            if (! ($this->data['warehouse_id'] ?? false)) {
+                $this->data['warehouse_id'] = Warehouse::default()?->id;
+            }
         }
 
         if (! ($this->data['is_free_text'] ?? false)) {
