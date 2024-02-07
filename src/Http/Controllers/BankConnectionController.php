@@ -10,6 +10,7 @@ use FluxErp\Http\Requests\CreateBankConnectionRequest;
 use FluxErp\Models\BankConnection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class BankConnectionController extends BaseController
 {
@@ -27,7 +28,7 @@ class BankConnectionController extends BaseController
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
             data: $bankConnection,
-            statusMessage: 'contact bank connection created'
+            statusMessage: 'bank connection created'
         );
     }
 

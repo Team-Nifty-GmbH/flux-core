@@ -9,6 +9,9 @@ use FluxErp\Services\DocumentTypeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * @deprecated
+ */
 class DocumentTypeController extends BaseController
 {
     public function __construct()

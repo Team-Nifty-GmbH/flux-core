@@ -5,6 +5,9 @@ namespace FluxErp\Database\Factories;
 use FluxErp\Models\DocumentGenerationSetting;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @deprecated
+ */
 class DocumentGenerationSettingFactory extends Factory
 {
     /**
