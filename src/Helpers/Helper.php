@@ -102,15 +102,17 @@ class Helper
         string $updateAction,
         string $deleteAction
     ): void {
-        $existing = $model->$relation()->pluck('id')->toArray();
-        $model->$relation()->whereNotIn('id', Arr::pluck($related, 'id'))->delete();
+        $relatedKeyName = $model->$relation()->getRelated()->getKeyName();
+
+        $existing = $model->$relation()->pluck($relatedKeyName)->toArray();
+        $model->$relation()->whereNotIn($relatedKeyName, Arr::pluck($related, $relatedKeyName))->delete();
 
         $canCreate = $createAction::canPerformAction(false);
         $canUpdate = $updateAction::canPerformAction(false);
         $updated = [];
         foreach ($related as $item) {
-            $item = array_merge($item, [$foreignKey => $model->id]);
-            if (! ($item['id'] ?? false)) {
+            $item = array_merge($item, [$foreignKey => $model->getKey()]);
+            if (! data_get($item, $relatedKeyName)) {
                 if ($canCreate) {
                     try {
                         $createAction::make($item)->validate()->execute();
