@@ -41,6 +41,11 @@ class UpdateSchedule extends FluxAction
             $schedule->current_recurrence = null;
         }
 
+        // Reset ends_at to null if switched from ends_at to recurrences
+        if (($this->data['recurrences'] ?? false) && $schedule->ends_at) {
+            $schedule->ends_at = null;
+        }
+
         $schedule->fill($this->data);
         $schedule->save();
 
