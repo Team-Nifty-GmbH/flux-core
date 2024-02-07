@@ -249,7 +249,7 @@ class ProjectTest extends BaseSetup
     public function test_create_project_order_not_found()
     {
         $project = [
-            'parent_id' => ++$this->order->id,
+            'parent_id' => $this->order->id + 1000,
             'name' => 'Project Name',
         ];
 
