@@ -150,7 +150,7 @@ abstract class PrintableView extends Component
         return strtolower(class_basename($this));
     }
 
-    public function attachToModel(Model $model = null): ?Media
+    public function attachToModel(?Model $model = null): ?Media
     {
         $model = is_null($model) ? $this->getModel() : $model;
 

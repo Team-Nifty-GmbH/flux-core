@@ -12,7 +12,6 @@ use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class UpdateProductOptionGroup extends FluxAction
 {

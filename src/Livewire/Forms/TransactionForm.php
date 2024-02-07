@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Actions\Transaction\DeleteTransaction;
 use FluxErp\Actions\Transaction\UpdateTransaction;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Locked;
 

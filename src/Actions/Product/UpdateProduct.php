@@ -16,7 +16,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\ValidationException;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class UpdateProduct extends FluxAction
 {
