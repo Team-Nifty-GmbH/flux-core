@@ -12,5 +12,6 @@ class PaymentReminderList extends DataTable
     public array $enabledCols = [
         'order.invoice_number',
         'reminder_level',
+        'created_at',
     ];
 }
