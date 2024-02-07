@@ -2,7 +2,11 @@
 
 namespace FluxErp\Actions\Address;
 
+use FluxErp\Actions\ContactOption\CreateContactOption;
+use FluxErp\Actions\ContactOption\DeleteContactOption;
+use FluxErp\Actions\ContactOption\UpdateContactOption;
 use FluxErp\Actions\FluxAction;
+use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdateAddressRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
@@ -73,9 +77,15 @@ class UpdateAddress extends FluxAction
         }
 
         if (! is_null($contactOptions)) {
-            // TODO: Update instead of delete and create
-            $address->contactOptions()->delete();
-            $address->contactOptions()->createMany($contactOptions);
+            Helper::updateRelatedRecords(
+                model: $address,
+                related: $contactOptions,
+                relation: 'contactOptions',
+                foreignKey: 'address_id',
+                createAction: CreateContactOption::class,
+                updateAction: UpdateContactOption::class,
+                deleteAction: DeleteContactOption::class
+            );
         }
 
         if ($this->data['address_types'] ?? false) {
