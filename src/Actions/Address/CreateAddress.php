@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions\Address;
 
+use FluxErp\Actions\ContactOption\CreateContactOption;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Models\Address;
@@ -10,6 +11,7 @@ use FluxErp\Models\Tag;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class CreateAddress extends FluxAction
 {
@@ -64,8 +66,14 @@ class CreateAddress extends FluxAction
             $address->attachTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
         }
 
-        if ($contactOptions) {
-            $address->contactOptions()->createMany($contactOptions);
+        if (CreateContactOption::canPerformAction(false)) {
+            foreach ($contactOptions as $contactOption) {
+                $contactOption['address_id'] = $address->id;
+                try {
+                    CreateContactOption::make($contactOption)->validate()->execute();
+                } catch (ValidationException) {
+                }
+            }
         }
 
         if ($this->data['address_types'] ?? false) {

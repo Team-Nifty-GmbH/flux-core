@@ -3,30 +3,31 @@
 namespace FluxErp\Http\Requests;
 
 use FluxErp\Models\Ticket;
+use FluxErp\Models\TicketType;
+use FluxErp\Models\User;
 use FluxErp\Rules\ClassExists;
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\States\Ticket\TicketState;
-use Illuminate\Foundation\Auth\User;
+use Illuminate\Foundation\Auth\User as AuthUser;
 use Spatie\ModelStates\Validation\ValidStateRule;
 
 class UpdateTicketRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
             (new Ticket())->hasAdditionalColumnsValidationRules(),
             [
-                'id' => 'required|integer|exists:tickets,id,deleted_at,NULL',
+                'id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(Ticket::class),
+                ],
                 'authenticatable_type' => [
                     'required_with:authenticatable_id',
                     'string',
-                    new ClassExists(instanceOf: User::class),
+                    new ClassExists(instanceOf: AuthUser::class),
                 ],
                 'authenticatable_id' => [
                     'required_with:authenticatable_type',
@@ -36,7 +37,7 @@ class UpdateTicketRequest extends BaseFormRequest
                 'ticket_type_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('ticket_types', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(TicketType::class),
                 ],
                 'title' => 'sometimes|required|string',
                 'description' => 'string|nullable',
@@ -47,7 +48,7 @@ class UpdateTicketRequest extends BaseFormRequest
                 'users' => 'array|nullable',
                 'users.*' => [
                     'integer',
-                    'exists:users,id,deleted_at,NULL',
+                    new ModelExists(User::class),
                 ],
             ],
         );

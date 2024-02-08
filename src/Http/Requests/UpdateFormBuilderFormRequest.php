@@ -2,12 +2,19 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\FormBuilderForm;
+use FluxErp\Rules\ModelExists;
+
 class UpdateFormBuilderFormRequest extends BaseFormRequest
 {
     public function rules(): array
     {
         return [
-            'id' => 'required|exists:form_builder_forms,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(FormBuilderForm::class),
+            ],
             'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'slug' => 'nullable|string|max:255',

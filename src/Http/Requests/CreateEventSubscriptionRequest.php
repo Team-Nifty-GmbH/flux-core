@@ -2,22 +2,23 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\User;
 use FluxErp\Rules\ClassExists;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphExists;
 use Illuminate\Database\Eloquent\Model;
 
 class CreateEventSubscriptionRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
             'event' => 'required|string',
-            'user_id' => 'sometimes|integer|exists:users,id,deleted_at,NULL',
+            'user_id' => [
+                'sometimes',
+                'integer',
+                new ModelExists(User::class),
+            ],
             'model_type' => [
                 'required',
                 'string',

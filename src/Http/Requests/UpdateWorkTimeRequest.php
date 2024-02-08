@@ -2,8 +2,12 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Contact;
+use FluxErp\Models\OrderPosition;
+use FluxErp\Models\WorkTime;
+use FluxErp\Models\WorkTimeType;
 use FluxErp\Rules\ClassExists;
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Model;
@@ -13,21 +17,25 @@ class UpdateWorkTimeRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:work_times,id,is_locked,0,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                (new ModelExists(WorkTime::class))->where('is_locked', false),
+            ],
             'contact_id' => [
                 'nullable',
                 'integer',
-                (new ExistsWithIgnore('contacts', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Contact::class),
             ],
             'order_position_id' => [
                 'nullable',
                 'integer',
-                (new ExistsWithIgnore('order_positions', 'id'))->whereNull('deleted_at'),
+                new ModelExists(OrderPosition::class),
             ],
             'work_time_type_id' => [
                 'nullable',
                 'integer',
-                (new ExistsWithIgnore('work_time_types', 'id'))->whereNull('deleted_at'),
+                new ModelExists(WorkTimeType::class),
             ],
             'trackable_type' => [
                 'required_with:trackable_id',

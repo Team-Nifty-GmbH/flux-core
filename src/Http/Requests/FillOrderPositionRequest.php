@@ -2,17 +2,19 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Order;
+use FluxErp\Rules\ModelExists;
+
 class FillOrderPositionRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'order_id' => 'required|integer|exists:orders,id,deleted_at,NULL',
+            'order_id' => [
+                'required',
+                'integer',
+                new ModelExists(Order::class),
+            ],
             'order_positions' => 'array',
             'simulate' => 'boolean',
         ];

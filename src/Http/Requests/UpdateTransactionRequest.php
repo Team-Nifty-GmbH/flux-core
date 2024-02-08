@@ -2,27 +2,37 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\Currency;
+use FluxErp\Models\Order;
+use FluxErp\Models\Transaction;
 use FluxErp\Rules\Iban;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 
 class UpdateTransactionRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:transactions,id',
-            'parent_id' => 'integer|nullable|exists:transactions,id',
-            'currency_id' => 'integer|nullable|exists:currencies,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Transaction::class),
+            ],
+            'parent_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(Transaction::class),
+            ],
+            'currency_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(Currency::class),
+            ],
             'order_id' => [
                 'integer',
                 'nullable',
-                (new ExistsWithIgnore('orders', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Order::class),
             ],
             'value_date' => 'sometimes|required|date_format:Y-m-d',
             'booking_date' => 'sometimes|required|date_format:Y-m-d',

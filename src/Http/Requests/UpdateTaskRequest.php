@@ -2,34 +2,37 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\OrderPosition;
+use FluxErp\Models\Project;
+use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\User;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\States\Task\TaskState;
 use Spatie\ModelStates\Validation\ValidStateRule;
 
 class UpdateTaskRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
             (new Task())->hasAdditionalColumnsValidationRules(),
             [
-                'id' => 'required|integer|exists:tasks,id,deleted_at,NULL',
+                'id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(Task::class),
+                ],
                 'project_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('projects', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Project::class),
                 ],
                 'responsible_user_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(User::class),
                 ],
                 'name' => 'sometimes|required|string',
                 'description' => 'string|nullable',
@@ -44,17 +47,29 @@ class UpdateTaskRequest extends BaseFormRequest
                 'budget' => 'numeric|nullable|min:0',
 
                 'users' => 'array',
-                'users.*' => 'required|integer|exists:users,id,deleted_at,NULL',
+                'users.*' => [
+                    'required',
+                    'integer',
+                    new ModelExists(User::class),
+                ],
 
                 'order_positions' => 'array',
-                'order_positions.*.id' => 'required|integer|exists:order_positions,id,deleted_at,NULL',
+                'order_positions.*.id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(OrderPosition::class),
+                ],
                 'order_positions.*.amount' => [
                     'required',
                     new Numeric(min: 0),
                 ],
 
                 'tags' => 'array',
-                'tags.*' => 'required|integer|exists:tags,id,type,' . Task::class,
+                'tags.*' => [
+                    'required',
+                    'integer',
+                    (new ModelExists(Tag::class))->where('type', Task::class),
+                ],
             ],
         );
     }

@@ -2,18 +2,25 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Ticket;
+use FluxErp\Models\User;
+use FluxErp\Rules\ModelExists;
+
 class ToggleTicketUserAssignmentRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'ticket_id' => 'required|integer|exists:tickets,id,deleted_at,NULL',
-            'user_id' => 'required|integer|exists:users,id,deleted_at,NULL',
+            'ticket_id' => [
+                'required',
+                'integer',
+                new ModelExists(Ticket::class),
+            ],
+            'user_id' => [
+                'required',
+                'integer',
+                new ModelExists(User::class),
+            ],
         ];
     }
 }

@@ -2,16 +2,21 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Category;
+use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
+use FluxErp\Models\DiscountGroup;
+use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
+use FluxErp\Models\User;
+use FluxErp\Models\VatRate;
+use FluxErp\Rules\ModelExists;
 use Illuminate\Support\Arr;
+use PhpParser\Node\Expr\AssignOp\Mod;
 
 class CreateContactRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         $addressRules = (new CreateAddressRequest())->rules();
@@ -22,12 +27,36 @@ class CreateContactRequest extends BaseFormRequest
             Arr::prependKeysWith($addressRules, 'main_address.'),
             [
                 'uuid' => 'string|uuid|unique:contacts,uuid',
-                'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
-                'agent_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
-                'payment_type_id' => 'sometimes|integer|nullable|exists:payment_types,id,deleted_at,NULL',
-                'price_list_id' => 'sometimes|integer|nullable|exists:price_lists,id,deleted_at,NULL',
-                'expense_ledger_account_id' => 'sometimes|integer|nullable|exists:ledger_accounts,id',
-                'vat_rate_id' => 'sometimes|integer|nullable|exists:vat_rates,id,deleted_at,NULL',
+                'client_id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(Client::class),
+                ],
+                'agent_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(User::class),
+                ],
+                'payment_type_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(PaymentType::class),
+                ],
+                'price_list_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(PriceList::class),
+                ],
+                'expense_ledger_account_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(LedgerAccount::class),
+                ],
+                'vat_rate_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(VatRate::class),
+                ],
                 'customer_number' => 'string|nullable|unique:contacts,customer_number',
                 'creditor_number' => 'string|nullable|unique:contacts,creditor_number',
                 'debtor_number' => 'string|nullable|unique:contacts,debtor_number',
@@ -46,10 +75,18 @@ class CreateContactRequest extends BaseFormRequest
                 'main_address' => 'array',
 
                 'discount_groups' => 'array',
-                'discount_groups.*' => 'integer|exists:discount_groups,id',
+                'discount_groups.*' => [
+                    'required',
+                    'integer',
+                    new ModelExists(DiscountGroup::class),
+                ],
 
                 'categories' => 'array',
-                'categories.*' => 'required|integer|exists:categories,id,model_type,' . Contact::class,
+                'categories.*' => [
+                    'required',
+                    'integer',
+                    (new ModelExists(Category::class))->where('model_type', Contact::class),
+                ],
             ]
         );
     }

@@ -2,17 +2,19 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Currency;
+use FluxErp\Rules\ModelExists;
+
 class UpdateCurrencyRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:currencies,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Currency::class),
+            ],
             'name' => 'string',
             'iso' => 'string|unique:currencies,iso',
             'symbol' => 'string',

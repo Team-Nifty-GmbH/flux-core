@@ -65,8 +65,6 @@ class ProductForm extends FluxForm
 
     public ?string $seo_keywords = null;
 
-    public ?string $manufacturer_product_number = null;
-
     public ?string $posting_account = null;
 
     public ?float $warning_stock_amount = null;
@@ -83,17 +81,13 @@ class ProductForm extends FluxForm
 
     public ?bool $is_required_product_serial_number = false;
 
-    public ?bool $is_required_manufacturer_serial_number = false;
-
-    public ?bool $is_auto_create_serial_number = false;
-
-    public ?bool $is_product_serial_number = false;
-
     public ?bool $is_nos = false;
 
     public ?bool $is_active_export_to_web_shop = false;
 
     public array $product_cross_sellings = [];
+
+    public array $suppliers = [];
 
     public array $categories = [];
 
@@ -124,12 +118,17 @@ class ProductForm extends FluxForm
     {
         if ($values instanceof Model) {
             $values->loadMissing([
-                'categories:id',
-                'tags:id',
                 'bundleProducts:id',
-                'vatRate:id,rate_percentage',
-                'parent',
+                'categories:id',
                 'coverMedia',
+                'parent',
+                'suppliers:id,main_address_id,customer_number,' .
+                    'product_supplier.contact_id,' .
+                    'product_supplier.manufacturer_product_number,' .
+                    'product_supplier.purchase_price',
+                'suppliers.mainAddress:id,name',
+                'tags:id',
+                'vatRate:id,rate_percentage',
             ]);
 
             $values->append('avatar_url');
@@ -151,6 +150,5 @@ class ProductForm extends FluxForm
                 'id' => $bundleProduct['pivot']['product_id'] ?? null,
             ];
         }, $this->bundle_products);
-
     }
 }

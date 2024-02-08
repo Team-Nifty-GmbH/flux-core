@@ -2,22 +2,23 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\ContactBankConnection;
+use FluxErp\Models\SepaMandate;
+use FluxErp\Rules\ModelExists;
 
 class UpdateSepaMandateRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:sepa_mandates,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(SepaMandate::class),
+            ],
             'contact_bank_connection_id' => [
                 'integer',
-                (new ExistsWithIgnore('contact_bank_connections', 'id'))->whereNull('deleted_at'),
+                new ModelExists(ContactBankConnection::class),
             ],
             'signed_date' => 'date|nullable',
         ];

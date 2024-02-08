@@ -2,50 +2,65 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Client;
+use FluxErp\Models\Contact;
+use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Models\Price;
+use FluxErp\Models\PriceList;
+use FluxErp\Models\Product;
+use FluxErp\Models\Tag;
+use FluxErp\Models\VatRate;
+use FluxErp\Models\Warehouse;
 use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use Illuminate\Support\Fluent;
 use Illuminate\Validation\Rule;
 
 class UpdateOrderPositionRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
             (new OrderPosition())->hasAdditionalColumnsValidationRules(),
             [
-                'id' => 'sometimes|required|integer|exists:order_positions,id,deleted_at,NULL',
+                'id' => [
+                    'sometimes',
+                    'required',
+                    'integer',
+                    new ModelExists(OrderPosition::class),
+                ],
                 'client_id' => [
                     'integer',
-                    (new ExistsWithIgnore('clients', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Client::class),
                 ],
-                'ledger_account_id' => 'integer|nullable|exists:ledger_accounts,id',
+                'ledger_account_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(LedgerAccount::class),
+                ],
                 'order_id' => [
                     'integer',
-                    (new ExistsWithIgnore('orders', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Order::class),
                 ],
                 'parent_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('order_positions', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(OrderPosition::class),
                 ],
                 'price_id' => [
                     'exclude_if:is_free_text,true',
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('prices', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Price::class),
                 ],
                 'price_list_id' => [
                     'exclude_if:is_free_text,true',
                     'exclude_if:is_bundle_position,true',
                     'integer',
-                    (new ExistsWithIgnore('price_lists', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(PriceList::class),
                 ],
                 'product_id' => [
                     Rule::when(
@@ -55,18 +70,18 @@ class UpdateOrderPositionRequest extends BaseFormRequest
                     ),
                     'nullable',
                     'integer',
-                    (new ExistsWithIgnore('products', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Product::class),
                 ],
                 'supplier_contact_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('clients', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Contact::class),
                 ],
                 'vat_rate_id' => [
                     'exclude_if:is_free_text,true',
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('vat_rates', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(VatRate::class),
                 ],
                 'warehouse_id' => [
                     'exclude_if:is_free_text,true',
@@ -74,7 +89,7 @@ class UpdateOrderPositionRequest extends BaseFormRequest
                     'required_with:product_id',
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('warehouses', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Warehouse::class),
                 ],
 
                 'amount' => 'sometimes|numeric|nullable|exclude_if:is_free_text,true',
@@ -121,7 +136,11 @@ class UpdateOrderPositionRequest extends BaseFormRequest
                 'discounts.*.discount' => 'required|numeric',
 
                 'tags' => 'array',
-                'tags.*' => 'string',
+                'tags.*' => [
+                    'required',
+                    'integer',
+                    (new ModelExists(Tag::class))->where('type', OrderPosition::class),
+                ],
             ],
         );
     }

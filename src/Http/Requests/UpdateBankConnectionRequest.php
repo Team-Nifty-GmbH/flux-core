@@ -2,14 +2,31 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\BankConnection;
+use FluxErp\Models\Currency;
+use FluxErp\Models\LedgerAccount;
+use FluxErp\Rules\ModelExists;
+
 class UpdateBankConnectionRequest extends BaseFormRequest
 {
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:bank_connections,id',
-            'currency_id' => 'integer|nullable|exists:currencies,id,deleted_at,NULL',
-            'ledger_account_id' => 'integer|nullable|exists:ledger_accounts,id',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(BankConnection::class),
+            ],
+            'currency_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(Currency::class),
+            ],
+            'ledger_account_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(LedgerAccount::class),
+            ],
             'name' => 'sometimes|required|string|max:255',
             'account_holder' => 'string|nullable',
             'bank_name' => 'string|nullable',
