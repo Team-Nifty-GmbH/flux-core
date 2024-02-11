@@ -6,6 +6,9 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Http\Requests\CreateCustomEventRequest;
 use FluxErp\Models\CustomEvent;
 
+/**
+ * @deprecated
+ */
 class CreateCustomEvent extends FluxAction
 {
     protected function boot(array $data): void

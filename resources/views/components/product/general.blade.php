@@ -38,53 +38,7 @@
             </div>
         @show
     </x-card>
-    <x-card class="space-y-2.5" :title="__('Suppliers')">
-        <template x-for="(supplier, index) in $wire.product.suppliers">
-            <x-list-item :item="[]">
-                <x-slot:value>
-                    <span x-text="supplier.main_address.name"></span>
-                </x-slot:value>
-                <x-slot:sub-value>
-                    <div class="flex gap-2">
-                        <span>{{ __('Customer Number') . ':' }}</span><span x-text="supplier.customer_number"></span>
-                    </div>
-                </x-slot:sub-value>
-                <x-slot:actions>
-                    <x-input x-model="supplier.manufacturer_product_number" :label="__('Manufacturer product number')" />
-                    <x-inputs.number x-model="supplier.purchase_price" :label="__('Purchase Price')" step="0.01" />
-                    <div class="mt-6">
-                        <x-button negative icon="trash" x-on:click="$wire.product.suppliers.splice(index, 1);"/>
-                    </div>
-                </x-slot:actions>
-            </x-list-item>
-        </template>
-        <x-select :label="__('Contact')"
-                  option-value="contact_id"
-                  option-label="label"
-                  template="user-option"
-                  x-on:selected="$wire.addSupplier($event.detail.value); clear();"
-                  :async-data="[
-                      'api' => route('search', \FluxErp\Models\Address::class),
-                      'method' => 'POST',
-                      'params' => [
-                          'where' => [
-                              [
-                                  'is_main_address',
-                                  '=',
-                                  true,
-                              ]
-                          ],
-                          'option-value' => 'contact_id',
-                          'fields' => [
-                              'contact_id',
-                              'name',
-                          ],
-                          'with' => 'contact.media',
-                      ]
-                  ]"
-        />
-    </x-card>
-    <x-card class="space-y-2.5" :title="__('Assignment')">
+    <x-card class="flex flex-col gap-1.5" :title="__('Assignment')">
         <x-select
             multiselect
             x-bind:disabled="!edit"
@@ -138,9 +92,66 @@
     </x-card>
     @if($this->additionalColumns)
         <x-card :title="__('Additional columns')">
-            <div class="flex flex-col gap-4">
-                <x-additional-columns :table="false" wire="product" :model="\FluxErp\Models\Product::class" :id="$this->product->id" />
-            </div>
+            @section('additional-columns')
+                <div class="flex flex-col gap-4">
+                    <x-additional-columns :table="false" wire="product" :model="\FluxErp\Models\Product::class" :id="$this->product->id" />
+                </div>
+            @show
         </x-card>
     @endif
+    <x-card class="flex flex-col gap-4" :title="__('Suppliers')">
+        @section('suppliers')
+            <template x-for="(supplier, index) in $wire.product.suppliers">
+                <x-list-item :item="[]">
+                    <x-slot:value>
+                        <span x-text="supplier.main_address.name"></span>
+                    </x-slot:value>
+                    <x-slot:sub-value>
+                        <div class="flex gap-2">
+                            <span>{{ __('Customer Number') . ':' }}</span><span x-text="supplier.customer_number"></span>
+                        </div>
+                    </x-slot:sub-value>
+                    <x-slot:actions>
+                        <x-input x-bind:disabled="! edit" x-model="supplier.manufacturer_product_number" :label="__('Manufacturer product number')" />
+                        <x-inputs.number x-bind:disabled="! edit" x-model="supplier.purchase_price" :label="__('Purchase Price')" step="0.01" />
+                        <div class="mt-6">
+                            <x-button
+                                negative
+                                icon="trash"
+                                x-bind:disabled="!edit"
+                                x-on:click="$wire.product.suppliers.splice(index, 1);"
+                            />
+                        </div>
+                    </x-slot:actions>
+                </x-list-item>
+            </template>
+            <div x-show="edit" x-cloak x-transition>
+                <x-select :label="__('Contact')"
+                          option-value="contact_id"
+                          option-label="label"
+                          template="user-option"
+                          x-on:selected="$wire.addSupplier($event.detail.value); clear();"
+                          :async-data="[
+                              'api' => route('search', \FluxErp\Models\Address::class),
+                              'method' => 'POST',
+                              'params' => [
+                                  'where' => [
+                                      [
+                                          'is_main_address',
+                                          '=',
+                                          true,
+                                      ]
+                                  ],
+                                  'option-value' => 'contact_id',
+                                  'fields' => [
+                                      'contact_id',
+                                      'name',
+                                  ],
+                                  'with' => 'contact.media',
+                              ]
+                          ]"
+                />
+            </div>
+        @show
+    </x-card>
 </div>

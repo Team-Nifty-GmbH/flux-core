@@ -13,7 +13,6 @@ use FluxErp\Models\Product;
 use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
-use FluxErp\Rules\ExistsWithIgnore;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use Illuminate\Support\Fluent;

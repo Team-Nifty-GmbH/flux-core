@@ -5,6 +5,9 @@ namespace FluxErp\Http\Requests;
 use FluxErp\Models\CustomEvent;
 use FluxErp\Rules\ModelExists;
 
+/**
+ * @deprecated
+ */
 class UpdateCustomEventRequest extends BaseFormRequest
 {
     public function rules(): array

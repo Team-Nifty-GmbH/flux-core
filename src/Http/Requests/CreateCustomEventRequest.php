@@ -6,6 +6,9 @@ use FluxErp\Rules\ClassExists;
 use FluxErp\Rules\MorphExists;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @deprecated
+ */
 class CreateCustomEventRequest extends BaseFormRequest
 {
     public function rules(): array
