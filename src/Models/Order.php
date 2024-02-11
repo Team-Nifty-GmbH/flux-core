@@ -244,6 +244,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->belongsTo(PriceList::class);
     }
 
+    public function purchaseInvoice(): HasMany
+    {
+        return $this->hasMany(PurchaseInvoice::class);
+    }
+
     public function responsibleUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_user_id');
@@ -310,7 +315,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('invoice')
-            ->acceptsMimeTypes(['application/pdf'])
+            ->acceptsMimeTypes(['application/pdf', 'image/*'])
             ->singleFile();
 
         $this->addMediaCollection('payment-reminders')

@@ -49,6 +49,8 @@ use FluxErp\Http\Controllers\ProductOptionController;
 use FluxErp\Http\Controllers\ProductOptionGroupController;
 use FluxErp\Http\Controllers\ProductPropertyController;
 use FluxErp\Http\Controllers\ProjectController;
+use FluxErp\Http\Controllers\PurchaseInvoiceController;
+use FluxErp\Http\Controllers\PurchaseInvoicePositionController;
 use FluxErp\Http\Controllers\RoleController;
 use FluxErp\Http\Controllers\SepaMandateController;
 use FluxErp\Http\Controllers\SerialNumberController;
@@ -409,6 +411,20 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::put('/projects', [ProjectController::class, 'update']);
         Route::delete('/projects/{id}', [ProjectController::class, 'delete']);
         Route::post('/projects/finish', [ProjectController::class, 'finish']);
+
+        //PurchaseInvoices
+        Route::get('/purchase-invoices/{id}', [PurchaseInvoiceController::class, 'show']);
+        Route::get('/purchase-invoices', [PurchaseInvoiceController::class, 'index']);
+        Route::post('/purchase-invoices', [PurchaseInvoiceController::class, 'create']);
+        Route::put('/purchase-invoices', [PurchaseInvoiceController::class, 'update']);
+        Route::delete('/purchase-invoices/{id}', [PurchaseInvoiceController::class, 'delete']);
+
+        //PurchaseInvoicePositions
+        Route::get('/purchase-invoice-positions/{id}', [PurchaseInvoicePositionController::class, 'show']);
+        Route::get('/purchase-invoice-positions', [PurchaseInvoicePositionController::class, 'index']);
+        Route::post('/purchase-invoice-positions', [PurchaseInvoicePositionController::class, 'create']);
+        Route::put('/purchase-invoice-positions', [PurchaseInvoicePositionController::class, 'update']);
+        Route::delete('/purchase-invoice-positions/{id}', [PurchaseInvoicePositionController::class, 'delete']);
 
         //Roles
         Route::get('/roles', [RoleController::class, 'index']);

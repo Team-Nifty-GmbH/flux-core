@@ -4,9 +4,6 @@ namespace FluxErp\Http\Requests;
 
 class CreateCommissionRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
         return [

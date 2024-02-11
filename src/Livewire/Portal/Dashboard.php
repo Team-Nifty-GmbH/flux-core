@@ -18,7 +18,6 @@ class Dashboard extends Component
 
     public function render()
     {
-        return view('flux::livewire.portal.dashboard')
-            ->layout('flux::components.layouts.portal');
+        return view('flux::livewire.portal.dashboard');
     }
 }

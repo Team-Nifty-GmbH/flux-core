@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
@@ -29,8 +30,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class OrderPosition extends Model implements InteractsWithDataTables, Sortable
 {
-    use HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange,
-        HasTags, HasUserModification, HasUuid, SoftDeletes, SortableTrait;
+    use Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
+        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, SoftDeletes, SortableTrait;
 
     protected $appends = [
         'unit_price',

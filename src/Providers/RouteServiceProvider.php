@@ -2,6 +2,7 @@
 
 namespace FluxErp\Providers;
 
+use FluxErp\Http\Middleware\Portal;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -69,7 +70,7 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapWebRoutes(): void
     {
         // Load the subdomain routes first.
-        Route::middleware('web')
+        Route::middleware(['web', Portal::class])
             ->domain(config('flux.portal_domain'))
             ->group(__DIR__ . '/../../routes/frontend/portal.php');
 
