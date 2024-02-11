@@ -4,6 +4,7 @@ namespace FluxErp\Actions\PurchaseInvoice;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Rules\ModelExists;
 
 class DeletePurchaseInvoice extends FluxAction
 {
@@ -11,7 +12,11 @@ class DeletePurchaseInvoice extends FluxAction
     {
         parent::boot($data);
         $this->rules = [
-            'id' => 'required|integer|exists:purchase_invoices,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(PurchaseInvoice::class),
+            ],
         ];
     }
 

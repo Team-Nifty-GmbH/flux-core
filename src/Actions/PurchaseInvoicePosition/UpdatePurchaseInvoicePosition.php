@@ -11,7 +11,7 @@ class UpdatePurchaseInvoicePosition extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdatePurchaseInvoicePositionRequest())->rules();
+        $this->rules = resolve_silently(UpdatePurchaseInvoicePositionRequest::class)->rules();
     }
 
     public static function models(): array

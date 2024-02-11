@@ -12,7 +12,7 @@
             <div x-cloak x-show="$wire.purchaseInvoiceForm.id">
                 <embed height="100%" lazy class="w-full h-full" x-bind:src="$wire.purchaseInvoiceForm.mediaUrl" type="application/pdf">
             </div>
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-4 overflow-auto">
                 <x-select
                     wire:model="purchaseInvoiceForm.client_id"
                     option-key-value
@@ -137,6 +137,25 @@
                                         x-on:keyup="recalculatePrices(position, $event)"
                                         x-model.number="position.total_price"
                                         :label="__('Total Price')"
+                                    />
+                                    <x-select
+                                        :label="__('Ledger Account')"
+                                        option-value="id"
+                                        option-label="name"
+                                        option-description="description"
+                                        x-model.number="position.ledger_account_id"
+                                        :async-data="[
+                                            'api' => route('search', \FluxErp\Models\LedgerAccount::class),
+                                            'params' => [
+                                                'where' => [
+                                                    [
+                                                        'ledger_account_type_enum',
+                                                        '=',
+                                                        \FluxErp\Enums\LedgerAccountTypeEnum::Expense,
+                                                    ],
+                                                ]
+                                            ]
+                                        ]"
                                     />
                                 </div>
                             </div>

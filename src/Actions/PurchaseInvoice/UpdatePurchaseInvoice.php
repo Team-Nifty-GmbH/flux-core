@@ -3,6 +3,10 @@
 namespace FluxErp\Actions\PurchaseInvoice;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition;
+use FluxErp\Actions\PurchaseInvoicePosition\DeletePurchaseInvoicePosition;
+use FluxErp\Actions\PurchaseInvoicePosition\UpdatePurchaseInvoicePosition;
+use FluxErp\Helpers\Helper;
 use FluxErp\Http\Requests\UpdatePurchaseInvoiceRequest;
 use FluxErp\Models\Order;
 use FluxErp\Models\PurchaseInvoice;
@@ -14,7 +18,7 @@ class UpdatePurchaseInvoice extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdatePurchaseInvoiceRequest())->rules();
+        $this->rules = resolve_silently(UpdatePurchaseInvoiceRequest::class)->rules();
     }
 
     public static function models(): array
@@ -31,6 +35,16 @@ class UpdatePurchaseInvoice extends FluxAction
 
         $purchaseInvoice->fill($this->data);
         $purchaseInvoice->save();
+
+        Helper::updateRelatedRecords(
+            $purchaseInvoice,
+            $positions,
+            'purchaseInvoicePositions',
+            'purchase_invoice_id',
+            CreatePurchaseInvoicePosition::class,
+            UpdatePurchaseInvoicePosition::class,
+            DeletePurchaseInvoicePosition::class
+        );
 
         return $purchaseInvoice->withoutRelations()->fresh();
     }

@@ -13,6 +13,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\WithFileUploads;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -30,7 +31,6 @@ class PurchaseInvoiceList extends DataTable
 
     public array $enabledCols = [
         'url',
-        'media.original_url',
         'media.file_name',
     ];
 
@@ -41,6 +41,11 @@ class PurchaseInvoiceList extends DataTable
     public PurchaseInvoiceForm $purchaseInvoiceForm;
 
     public MediaForm $mediaForm;
+
+    public function getBuilder(Builder $builder): Builder
+    {
+        return $builder->with('media');
+    }
 
     public function downloadMedia(Media $media): false|BinaryFileResponse
     {
