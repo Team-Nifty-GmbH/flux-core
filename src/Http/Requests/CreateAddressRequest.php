@@ -3,7 +3,12 @@
 namespace FluxErp\Http\Requests;
 
 use FluxErp\Models\Address;
+use FluxErp\Models\Client;
+use FluxErp\Models\Country;
+use FluxErp\Models\Language;
+use FluxErp\Models\Tag;
 use FluxErp\Rules\ExistsWithForeign;
+use FluxErp\Rules\ModelExists;
 
 class CreateAddressRequest extends BaseFormRequest
 {
@@ -14,7 +19,11 @@ class CreateAddressRequest extends BaseFormRequest
             $this->postalAddressRules(),
             [
                 'uuid' => 'string|uuid|unique:addresses,uuid',
-                'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
+                'client_id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(Client::class),
+                ],
                 'contact_id' => [
                     'required',
                     'integer',
@@ -23,12 +32,12 @@ class CreateAddressRequest extends BaseFormRequest
                 'country_id' => [
                     'integer',
                     'nullable',
-                    'exists:countries,id,deleted_at,NULL',
+                    new ModelExists(Country::class),
                 ],
                 'language_id' => [
                     'integer',
                     'nullable',
-                    'exists:languages,id,deleted_at,NULL',
+                    new ModelExists(Language::class),
                 ],
                 'date_of_birth' => 'date|nullable',
                 'department' => 'string|nullable',
@@ -56,7 +65,11 @@ class CreateAddressRequest extends BaseFormRequest
                 'contact_options.*.is_primary' => 'boolean',
 
                 'tags' => 'array',
-                'tags.*' => 'required|integer|exists:tags,id,type,' . Address::class,
+                'tags.*' => [
+                    'required',
+                    'integer',
+                    (new ModelExists(Tag::class))->where('type', Address::class),
+                ],
             ],
         );
     }

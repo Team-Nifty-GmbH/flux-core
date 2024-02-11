@@ -7,6 +7,9 @@ use FluxErp\Http\Requests\UpdateCustomEventRequest;
 use FluxErp\Models\CustomEvent;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @deprecated
+ */
 class UpdateCustomEvent extends FluxAction
 {
     protected function boot(array $data): void

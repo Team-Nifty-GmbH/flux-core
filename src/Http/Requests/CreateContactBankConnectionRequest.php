@@ -2,7 +2,9 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Contact;
 use FluxErp\Rules\Iban;
+use FluxErp\Rules\ModelExists;
 
 class CreateContactBankConnectionRequest extends BaseFormRequest
 {
@@ -10,7 +12,11 @@ class CreateContactBankConnectionRequest extends BaseFormRequest
     {
         return [
             'uuid' => 'string|uuid|unique:bank_connections,uuid',
-            'contact_id' => 'integer|nullable|exists:contacts,id,deleted_at,NULL',
+            'contact_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(Contact::class),
+            ],
             'iban' => ['required', 'string', new Iban()],
             'account_holder' => 'string|nullable',
             'bank_name' => 'string|nullable',

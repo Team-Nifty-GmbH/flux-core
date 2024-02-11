@@ -3,20 +3,18 @@
 namespace FluxErp\Http\Requests;
 
 use FluxErp\Models\Ticket;
+use FluxErp\Models\TicketType;
+use FluxErp\Models\User;
 use FluxErp\Rules\ClassExists;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\States\Ticket\TicketState;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Auth\User;
+use Illuminate\Foundation\Auth\User as AuthUser;
 use Spatie\ModelStates\Validation\ValidStateRule;
 
 class CreateTicketRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
@@ -26,7 +24,7 @@ class CreateTicketRequest extends BaseFormRequest
                 'authenticatable_type' => [
                     'required',
                     'string',
-                    new ClassExists(instanceOf: User::class),
+                    new ClassExists(instanceOf: AuthUser::class),
                 ],
                 'authenticatable_id' => [
                     'required',
@@ -43,7 +41,11 @@ class CreateTicketRequest extends BaseFormRequest
                     'integer',
                     new MorphExists(),
                 ],
-                'ticket_type_id' => 'integer|nullable|exists:ticket_types,id,deleted_at,NULL',
+                'ticket_type_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(TicketType::class),
+                ],
                 'title' => 'required|string',
                 'description' => 'required|string|min:12',
                 'state' => [
@@ -53,7 +55,7 @@ class CreateTicketRequest extends BaseFormRequest
                 'users' => 'array',
                 'users.*' => [
                     'integer',
-                    'exists:users,id,deleted_at,NULL',
+                    new ModelExists(User::class),
                 ],
             ],
         );

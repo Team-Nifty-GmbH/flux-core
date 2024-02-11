@@ -2,21 +2,34 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Address;
+use FluxErp\Models\OrderPosition;
+use FluxErp\Models\Product;
+use FluxErp\Models\SerialNumberRange;
+use FluxErp\Rules\ModelExists;
+
 class CreateSerialNumberRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
             'uuid' => 'string|uuid|unique:serial_numbers,uuid',
-            'serial_number_range_id' => 'integer|exists:serial_number_ranges,id,deleted_at,NULL',
-            'product_id' => 'integer|exists:products,id,deleted_at,NULL',
-            'address_id' => 'integer|exists:addresses,id,deleted_at,NULL',
-            'order_position_id' => 'integer|exists:order_positions,id,deleted_at,NULL',
+            'serial_number_range_id' => [
+                'integer',
+                new ModelExists(SerialNumberRange::class),
+            ],
+            'product_id' => [
+                'integer',
+                new ModelExists(Product::class),
+            ],
+            'address_id' => [
+                'integer',
+                new ModelExists(Address::class),
+            ],
+            'order_position_id' => [
+                'integer',
+                new ModelExists(OrderPosition::class),
+            ],
             'serial_number' => 'required|string',
         ];
     }

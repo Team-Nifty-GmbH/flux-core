@@ -6,20 +6,20 @@ use FluxErp\Helpers\Helper;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Rules\ArrayIsList;
 use FluxErp\Rules\AvailableValidationRule;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\UniqueInFieldDependence;
 use Illuminate\Validation\Rule;
 
 class UpdateAdditionalColumnRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:additional_columns,id',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(AdditionalColumn::class),
+            ],
             'name' => [
                 'sometimes',
                 'required',

@@ -2,30 +2,34 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\Product;
+use FluxErp\Models\ProductCrossSelling;
+use FluxErp\Rules\ModelExists;
 
 class UpdateProductCrossSellingRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:product_cross_sellings,id',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(ProductCrossSelling::class),
+            ],
             'product_id' => [
                 'integer',
                 'nullable',
-                (new ExistsWithIgnore('products', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Product::class),
             ],
             'name' => 'sometimes|required|string|max:255',
             'order_column' => 'integer',
             'is_active' => 'boolean',
 
             'products' => 'array',
-            'products.*' => 'integer|exists:products,id,deleted_at,NULL',
+            'products.*' => [
+                'integer',
+                new ModelExists(Product::class),
+            ],
         ];
     }
 }

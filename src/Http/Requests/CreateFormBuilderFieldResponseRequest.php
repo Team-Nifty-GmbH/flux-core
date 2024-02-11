@@ -2,14 +2,31 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\FormBuilderField;
+use FluxErp\Models\FormBuilderForm;
+use FluxErp\Models\FormBuilderResponse;
+use FluxErp\Rules\ModelExists;
+
 class CreateFormBuilderFieldResponseRequest extends BaseFormRequest
 {
     public function rules(): array
     {
         return [
-            'form_id' => 'required|integer|exists:form_builder_forms,id,deleted_at,NULL',
-            'field_id' => 'required|integer|exists:form_builder_fields,id,deleted_at,NULL',
-            'response_id' => 'required|integer|exists:form_builder_responses,id,deleted_at,NULL',
+            'form_id' => [
+                'required',
+                'integer',
+                new ModelExists(FormBuilderForm::class),
+            ],
+            'field_id' => [
+                'required',
+                'integer',
+                new ModelExists(FormBuilderField::class),
+            ],
+            'response_id' => [
+                'required',
+                'integer',
+                new ModelExists(FormBuilderResponse::class),
+            ],
             'response' => 'required|string',
         ];
     }

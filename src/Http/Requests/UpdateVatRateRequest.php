@@ -2,17 +2,19 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\VatRate;
+use FluxErp\Rules\ModelExists;
+
 class UpdateVatRateRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:vat_rates,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(VatRate::class),
+            ],
             'name' => 'required|string',
             'rate_percentage' => 'required|numeric|lt:1|min:0',
             'footer_text' => 'string|nullable',

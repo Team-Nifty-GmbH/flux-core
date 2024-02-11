@@ -2,26 +2,28 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\Price;
+use FluxErp\Models\PriceList;
+use FluxErp\Models\Product;
+use FluxErp\Rules\ModelExists;
 
 class UpdatePriceRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:prices,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Price::class),
+            ],
             'product_id' => [
                 'integer',
-                (new ExistsWithIgnore('products', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Product::class),
             ],
             'price_list_id' => [
                 'integer',
-                (new ExistsWithIgnore('price_lists', 'id'))->whereNull('deleted_at'),
+                new ModelExists(PriceList::class),
             ],
             'price' => 'sometimes|numeric',
         ];

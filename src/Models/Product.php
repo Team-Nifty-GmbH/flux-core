@@ -36,12 +36,10 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         'time_unit_enum' => TimeUnitEnum::class,
         'is_active' => 'boolean',
         'is_highlight' => 'boolean',
-        'is_shipping_free' => 'boolean',
         'is_bundle' => 'boolean',
+        'is_service' => 'boolean',
+        'is_shipping_free' => 'boolean',
         'is_required_product_serial_number' => 'boolean',
-        'is_required_manufacturer_serial_number' => 'boolean',
-        'is_auto_create_serial_number' => 'boolean',
-        'is_product_serial_number' => 'boolean',
         'is_nos' => 'boolean',
         'is_active_export_to_web_shop' => 'boolean',
     ];
@@ -123,6 +121,11 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class);
+    }
+
+    public function suppliers(): BelongsToMany
+    {
+        return $this->belongsToMany(Contact::class, 'product_supplier');
     }
 
     public function vatRate(): BelongsTo

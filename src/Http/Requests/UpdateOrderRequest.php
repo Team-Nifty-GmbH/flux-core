@@ -2,9 +2,14 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Address;
+use FluxErp\Models\AddressType;
+use FluxErp\Models\Language;
 use FluxErp\Models\Order;
+use FluxErp\Models\PriceList;
+use FluxErp\Models\User;
 use FluxErp\Rules\ExistsWithForeign;
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\UniqueInFieldDependence;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
@@ -20,13 +25,21 @@ class UpdateOrderRequest extends BaseFormRequest
             (new Order())->hasAdditionalColumnsValidationRules(),
             Arr::prependKeysWith((new CreateAddressRequest())->postalAddressRules(), 'address_delivery.'),
             [
-                'id' => 'required|integer|exists:orders,id,deleted_at,NULL',
+                'id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(Order::class),
+                ],
                 'agent_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(User::class),
                 ],
-                'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
+                'approval_user_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(User::class),
+                ],
                 'contact_bank_connection_id' => [
                     'integer',
                     'nullable',
@@ -57,7 +70,7 @@ class UpdateOrderRequest extends BaseFormRequest
                 ],
                 'language_id' => [
                     'integer',
-                    (new ExistsWithIgnore('languages', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Language::class),
                 ],
                 'order_type_id' => [
                     'sometimes',
@@ -71,12 +84,12 @@ class UpdateOrderRequest extends BaseFormRequest
                 ],
                 'price_list_id' => [
                     'integer',
-                    (new ExistsWithIgnore('price_lists', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(PriceList::class),
                 ],
                 'unit_price_price_list_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('price_lists', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(PriceList::class),
                 ],
                 'payment_type_id' => [
                     'sometimes',
@@ -91,7 +104,7 @@ class UpdateOrderRequest extends BaseFormRequest
                 'responsible_user_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(User::class),
                 ],
 
                 'address_delivery' => [
@@ -167,19 +180,19 @@ class UpdateOrderRequest extends BaseFormRequest
                 'addresses' => 'array',
                 'addresses.*.address_id' => [
                     'integer',
-                    (new ExistsWithIgnore('addresses', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Address::class),
                 ],
                 'addresses.*.address_type_id' => [
                     'integer',
                     'distinct',
-                    (new ExistsWithIgnore('address_types', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(AddressType::class),
                 ],
 
                 'users' => 'array',
                 'users.*' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(User::class),
                 ],
             ],
         );

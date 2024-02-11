@@ -5,6 +5,9 @@ namespace FluxErp\Actions\CustomEvent;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\CustomEvent;
 
+/**
+ * @deprecated
+ */
 class DeleteCustomEvent extends FluxAction
 {
     protected function boot(array $data): void

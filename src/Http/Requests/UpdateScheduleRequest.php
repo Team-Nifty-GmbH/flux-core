@@ -3,20 +3,21 @@
 namespace FluxErp\Http\Requests;
 
 use FluxErp\Enums\FrequenciesEnum;
+use FluxErp\Models\Schedule;
 use FluxErp\Rules\Frequency;
+use FluxErp\Rules\ModelExists;
 use Illuminate\Validation\Rule;
 
 class UpdateScheduleRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:schedules,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Schedule::class),
+            ],
             'description' => 'string|nullable',
             'cron' => 'required|array',
             'cron.methods' => 'required|array',

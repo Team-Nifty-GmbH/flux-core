@@ -2,17 +2,14 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Role;
 use FluxErp\Models\TicketType;
 use FluxErp\Rules\ClassExists;
+use FluxErp\Rules\ModelExists;
 use Illuminate\Database\Eloquent\Model;
 
 class CreateTicketTypeRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
@@ -26,7 +23,11 @@ class CreateTicketTypeRequest extends BaseFormRequest
                     new ClassExists(instanceOf: Model::class),
                 ],
                 'roles' => 'array',
-                'roles.*' => 'required|integer|exists:roles,id',
+                'roles.*' => [
+                    'required',
+                    'integer',
+                    new ModelExists(Role::class),
+                ],
             ],
         );
     }

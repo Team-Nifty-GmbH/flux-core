@@ -4,7 +4,11 @@ namespace FluxErp\Http\Requests;
 
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Communication;
+use FluxErp\Models\MailAccount;
+use FluxErp\Models\MailFolder;
+use FluxErp\Models\Tag;
 use FluxErp\Rules\ClassExists;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Traits\Communicatable;
 use Illuminate\Database\Eloquent\Model;
@@ -39,8 +43,18 @@ class CreateCommunicationRequest extends BaseFormRequest
                     'integer',
                     new MorphExists('communicatable_type'),
                 ],
-                'mail_account_id' => 'exclude_unless:communication_type_enum,mail|integer|nullable|exists:mail_accounts,id',
-                'mail_folder_id' => 'exclude_unless:communication_type_enum,mail|integer|nullable|exists:mail_folders,id',
+                'mail_account_id' => [
+                    'exclude_unless:communication_type_enum,mail',
+                    'integer',
+                    'nullable',
+                    new ModelExists(MailAccount::class),
+                ],
+                'mail_folder_id' => [
+                    'exclude_unless:communication_type_enum,mail',
+                    'integer',
+                    'nullable',
+                    new ModelExists(MailFolder::class),
+                ],
                 'message_id' => 'string|nullable|max:255',
                 'message_uid' => 'integer',
                 'from' => 'nullable|string|max:255',
@@ -57,7 +71,11 @@ class CreateCommunicationRequest extends BaseFormRequest
                 'attachments' => 'array',
 
                 'tags' => 'array',
-                'tags.*' => 'required|integer|exists:tags,id,type,' . Communication::class,
+                'tags.*' => [
+                    'required',
+                    'integer',
+                    (new ModelExists(Tag::class))->where('type', Communication::class),
+                ],
             ]
         );
     }

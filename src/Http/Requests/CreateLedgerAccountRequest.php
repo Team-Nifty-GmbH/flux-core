@@ -7,11 +7,6 @@ use Illuminate\Validation\Rules\Enum;
 
 class CreateLedgerAccountRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [

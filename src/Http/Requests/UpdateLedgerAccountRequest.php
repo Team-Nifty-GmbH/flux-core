@@ -3,19 +3,20 @@
 namespace FluxErp\Http\Requests;
 
 use FluxErp\Enums\LedgerAccountTypeEnum;
+use FluxErp\Models\LedgerAccount;
+use FluxErp\Rules\ModelExists;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateLedgerAccountRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:ledger_accounts,id',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(LedgerAccount::class),
+            ],
             'name' => 'sometimes|required|string|max:255',
             'number' => 'sometimes|required|numeric|unique:ledger_accounts,number',
             'description' => 'nullable|string|max:255',

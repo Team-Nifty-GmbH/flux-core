@@ -2,22 +2,23 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\ProductOption;
+use FluxErp\Models\ProductOptionGroup;
+use FluxErp\Rules\ModelExists;
 
 class UpdateProductOptionRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:product_options,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(ProductOption::class),
+            ],
             'product_option_group_id' => [
                 'integer',
-                (new ExistsWithIgnore('product_option_groups', 'id'))->whereNull('deleted_at'),
+                new ModelExists(ProductOptionGroup::class),
             ],
             'name' => 'sometimes|required|string',
         ];

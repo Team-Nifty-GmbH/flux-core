@@ -45,6 +45,7 @@ class UpdateProduct extends FluxAction
         );
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
         $prices = Arr::pull($this->data, 'prices', false);
+        $suppliers = Arr::pull($this->data, 'suppliers');
         $tags = Arr::pull($this->data, 'tags');
 
         $product = Product::query()
@@ -69,6 +70,10 @@ class UpdateProduct extends FluxAction
 
         if (! is_null($productProperties)) {
             $product->productProperties()->sync($productProperties);
+        }
+
+        if (! is_null($suppliers)) {
+            $product->suppliers()->sync($suppliers);
         }
 
         if ($prices) {

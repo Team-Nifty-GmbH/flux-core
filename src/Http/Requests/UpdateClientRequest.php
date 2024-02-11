@@ -2,23 +2,25 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\BankConnection;
+use FluxErp\Models\Client;
+use FluxErp\Models\Country;
+use FluxErp\Rules\ModelExists;
 
 class UpdateClientRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:clients,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Client::class),
+            ],
             'country_id' => [
                 'integer',
                 'nullable',
-                (new ExistsWithIgnore('countries', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Country::class),
             ],
             'name' => 'sometimes|required|string',
             'client_code' => 'sometimes|required|string|unique:clients,client_code',
@@ -39,7 +41,7 @@ class UpdateClientRequest extends BaseFormRequest
             'bank_connections' => 'array|nullable',
             'bank_connections.*' => [
                 'integer',
-                'exists:bank_connections,id',
+                new ModelExists(BankConnection::class),
             ],
         ];
     }

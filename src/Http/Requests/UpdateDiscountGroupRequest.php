@@ -2,21 +2,27 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Discount;
+use FluxErp\Models\DiscountGroup;
+use FluxErp\Rules\ModelExists;
+
 class UpdateDiscountGroupRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:discount_groups,id',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(DiscountGroup::class),
+            ],
             'name' => 'sometimes|required|string',
             'is_active' => 'boolean',
             'discounts' => 'array',
-            'discounts.*' => 'integer|exists:discounts,id,deleted_at,NULL',
+            'discounts.*' => [
+                'integer',
+                new ModelExists(Discount::class),
+            ],
         ];
     }
 }

@@ -2,26 +2,28 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\Country;
+use FluxErp\Models\Currency;
+use FluxErp\Models\Language;
+use FluxErp\Rules\ModelExists;
 
 class UpdateCountryRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:countries,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Country::class),
+            ],
             'language_id' => [
                 'integer',
-                (new ExistsWithIgnore('languages', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Language::class),
             ],
             'currency_id' => [
                 'integer',
-                (new ExistsWithIgnore('currencies', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Currency::class),
             ],
             'name' => 'string',
             'iso_alpha2' => 'sometimes|required|string|unique:countries,iso_alpha2',
