@@ -2,17 +2,19 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\WorkTimeType;
+use FluxErp\Rules\ModelExists;
+
 class UpdateWorkTimeTypeRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:work_time_types,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(WorkTimeType::class),
+            ],
             'name' => 'sometimes|required|string',
             'is_billable' => 'boolean',
         ];

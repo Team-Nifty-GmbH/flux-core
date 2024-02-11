@@ -4,6 +4,9 @@ namespace FluxErp\Http\Requests;
 
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Communication;
+use FluxErp\Models\MailFolder;
+use FluxErp\Models\Tag;
+use FluxErp\Rules\ModelExists;
 use Illuminate\Validation\Rule;
 
 class UpdateCommunicationRequest extends BaseFormRequest
@@ -11,8 +14,17 @@ class UpdateCommunicationRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:communications,id,deleted_at,NULL',
-            'mail_folder_id' => 'exclude_unless:communication_type_enum,mail|integer|nullable|exists:mail_folders,id',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Communication::class),
+            ],
+            'mail_folder_id' => [
+                'exclude_unless:communication_type_enum,mail',
+                'integer',
+                'nullable',
+                new ModelExists(MailFolder::class),
+            ],
             'message_uid' => 'integer|nullable',
             'from' => 'string|max:255|nullable',
             'to' => 'array',
@@ -26,7 +38,11 @@ class UpdateCommunicationRequest extends BaseFormRequest
             'is_seen' => 'boolean',
 
             'tags' => 'array',
-            'tags.*' => 'required|integer|exists:tags,id,type,' . Communication::class,
+            'tags.*' => [
+                'required',
+                'integer',
+                (new ModelExists(Tag::class))->where('type', Communication::class),
+            ],
         ];
     }
 }

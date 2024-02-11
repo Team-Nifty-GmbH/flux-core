@@ -2,12 +2,19 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\MailAccount;
+use FluxErp\Rules\ModelExists;
+
 class UpdateMailAccountRequest extends BaseFormRequest
 {
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:mail_accounts,id',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(MailAccount::class),
+            ],
             'protocol' => 'sometimes|required|string|max:255|in:imap,pop3,nntp',
             'password' => 'nullable|string|max:255',
             'host' => 'sometimes|required|string|max:255',

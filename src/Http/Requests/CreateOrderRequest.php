@@ -2,8 +2,16 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Address;
+use FluxErp\Models\AddressType;
+use FluxErp\Models\Client;
+use FluxErp\Models\Currency;
+use FluxErp\Models\Language;
 use FluxErp\Models\Order;
+use FluxErp\Models\PriceList;
+use FluxErp\Models\User;
 use FluxErp\Rules\ExistsWithForeign;
+use FluxErp\Rules\ModelExists;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\PaymentState\PaymentState;
 use Illuminate\Support\Arr;
@@ -18,10 +26,26 @@ class CreateOrderRequest extends BaseFormRequest
             Arr::prependKeysWith((new CreateAddressRequest())->postalAddressRules(), 'address_delivery.'),
             [
                 'uuid' => 'string|uuid|unique:orders,uuid',
-                'approval_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
-                'parent_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
-                'client_id' => 'required_without_all:contact_id,address_invoice_id|integer|exists:clients,id,deleted_at,NULL',
-                'agent_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
+                'approval_user_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(User::class),
+                ],
+                'parent_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(Order::class),
+                ],
+                'client_id' => [
+                    'required_without_all:contact_id,address_invoice_id',
+                    'integer',
+                    new ModelExists(Client::class),
+                ],
+                'agent_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(User::class),
+                ],
                 'contact_id' => [
                     'required_without:address_invoice_id',
                     'integer',
@@ -33,7 +57,11 @@ class CreateOrderRequest extends BaseFormRequest
                     'nullable',
                     new ExistsWithForeign(foreignAttribute: 'contact_id', table: 'contact_bank_connections'),
                 ],
-                'currency_id' => 'integer|exists:currencies,id,deleted_at,NULL',
+                'currency_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(Currency::class),
+                ],
                 'address_invoice_id' => [
                     'required_without:contact_id',
                     'integer',
@@ -45,20 +73,36 @@ class CreateOrderRequest extends BaseFormRequest
                     'nullable',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'addresses'),
                 ],
-                'language_id' => 'integer|nullable|exists:languages,id,deleted_at,NULL',
+                'language_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(Language::class),
+                ],
                 'order_type_id' => [
                     'required',
                     'integer',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'order_types'),
                 ],
-                'price_list_id' => 'integer|nullable|exists:price_lists,id,deleted_at,NULL',
-                'unit_price_price_list_id' => 'integer|nullable|exists:price_lists,id,deleted_at,NULL',
+                'price_list_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(PriceList::class),
+                ],
+                'unit_price_price_list_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(PriceList::class),
+                ],
                 'payment_type_id' => [
                     'integer',
                     'nullable',
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'payment_types'),
                 ],
-                'responsible_user_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
+                'responsible_user_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(User::class),
+                ],
 
                 'address_delivery' => [
                     'array',
@@ -128,16 +172,20 @@ class CreateOrderRequest extends BaseFormRequest
                 'addresses.*.address_id' => [
                     'required',
                     'integer',
-                    'exists:addresses,id,deleted_at,NULL',
+                    new ModelExists(Address::class),
                 ],
                 'addresses.*.address_type_id' => [
                     'required',
                     'integer',
-                    'exists:address_types,id,deleted_at,NULL',
+                    new ModelExists(AddressType::class),
                 ],
 
                 'users' => 'array',
-                'users.*' => 'required|integer|exists:users,id,deleted_at,NULL',
+                'users.*' => [
+                    'required',
+                    'integer',
+                    new ModelExists(User::class),
+                ],
             ]
         );
     }

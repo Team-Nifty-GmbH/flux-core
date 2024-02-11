@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Product;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\Price\CreatePrice;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Http\Requests\CreateProductRequest;
 use FluxErp\Models\Product;
@@ -10,7 +11,6 @@ use FluxErp\Models\Tag;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class CreateProduct extends FluxAction
 {
@@ -34,7 +34,8 @@ class CreateProduct extends FluxAction
             fn ($item, $key) => [$item['id'] => $item['value']]
         );
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
-        $prices = Arr::pull($this->data, 'prices', false);
+        $prices = Arr::pull($this->data, 'prices', []);
+        $suppliers = Arr::pull($this->data, 'suppliers', false);
         $tags = Arr::pull($this->data, 'tags', []);
 
         $product = new Product($this->data);
@@ -42,7 +43,10 @@ class CreateProduct extends FluxAction
 
         $product->productOptions()->attach($productOptions);
         $product->productProperties()->attach($productProperties);
-        $product->prices()->createMany($this->data['prices'] ?? []);
+
+        if ($suppliers) {
+            $product->suppliers()->attach($suppliers);
+        }
 
         if ($tags) {
             $product->attachTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
@@ -58,12 +62,17 @@ class CreateProduct extends FluxAction
                 );
         }
 
-        if ($prices) {
-            $product->prices()->createMany($prices);
+        if (CreatePrice::canPerformAction(false)) {
+            foreach ($prices as $price) {
+                $price['product_id'] = $product->id;
+                try {
+                    CreatePrice::make($price)->validate()->execute();
+                } catch (ValidationException) {
+                }
+            }
         }
 
-        try {
-            CreateProductCrossSelling::canPerformAction();
+        if (CreateProductCrossSelling::canPerformAction(false)) {
             foreach ($productCrossSellings as $productCrossSelling) {
                 $productCrossSelling['product_id'] = $product->id;
                 try {
@@ -71,7 +80,6 @@ class CreateProduct extends FluxAction
                 } catch (ValidationException) {
                 }
             }
-        } catch (UnauthorizedException) {
         }
 
         return $product->refresh();

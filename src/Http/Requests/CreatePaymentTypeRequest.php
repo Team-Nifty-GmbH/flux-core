@@ -2,13 +2,20 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Client;
+use FluxErp\Rules\ModelExists;
+
 class CreatePaymentTypeRequest extends BaseFormRequest
 {
     public function rules(): array
     {
         return [
             'uuid' => 'string|uuid|unique:payment_types,uuid',
-            'client_id' => 'required|integer|exists:clients,id,deleted_at,NULL',
+            'client_id' => [
+                'required',
+                'integer',
+                new ModelExists(Client::class),
+            ],
             'name' => 'required|string',
             'description' => 'string|nullable',
             'payment_reminder_days_1' => 'integer|nullable',

@@ -2,17 +2,23 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\Client;
+use FluxErp\Models\PaymentType;
+use FluxErp\Rules\ModelExists;
 
 class UpdatePaymentTypeRequest extends BaseFormRequest
 {
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:payment_types,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(PaymentType::class),
+            ],
             'client_id' => [
                 'integer',
-                (new ExistsWithIgnore('clients', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Client::class),
             ],
             'name' => 'string',
             'description' => 'string|nullable',

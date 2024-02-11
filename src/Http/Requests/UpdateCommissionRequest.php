@@ -2,15 +2,19 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Commission;
+use FluxErp\Rules\ModelExists;
+
 class UpdateCommissionRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:commissions,id',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Commission::class),
+            ],
             'commission' => 'required|numeric',
         ];
     }

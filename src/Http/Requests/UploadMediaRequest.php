@@ -2,9 +2,10 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Media;
 use FluxErp\Rules\ClassExists;
-use FluxErp\Rules\ExistsWithIgnore;
 use FluxErp\Rules\MediaUploadType;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Traits\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Model;
@@ -20,11 +21,6 @@ class UploadMediaRequest extends BaseFormRequest
         ]);
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
@@ -41,7 +37,7 @@ class UploadMediaRequest extends BaseFormRequest
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ExistsWithIgnore('media', 'id'),
+                new ModelExists(Media::class),
             ],
             'name' => 'sometimes|required|string',
             'file_name' => 'sometimes|required|string',

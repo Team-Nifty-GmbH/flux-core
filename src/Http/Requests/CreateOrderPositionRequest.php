@@ -2,43 +2,69 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Client;
+use FluxErp\Models\Contact;
+use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Models\Price;
+use FluxErp\Models\PriceList;
+use FluxErp\Models\Product;
+use FluxErp\Models\Tag;
+use FluxErp\Models\VatRate;
+use FluxErp\Models\Warehouse;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use Illuminate\Support\Fluent;
 use Illuminate\Validation\Rule;
 
 class CreateOrderPositionRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
             (new OrderPosition())->hasAdditionalColumnsValidationRules(),
             [
                 'uuid' => 'string|uuid|unique:order_positions,uuid',
-                'client_id' => 'required_without:order_id|integer|exists:clients,id,deleted_at,NULL',
-                'ledger_account_id' => 'integer|nullable|exists:ledger_accounts,id',
-                'order_id' => 'required|integer|exists:orders,id,deleted_at,NULL',
-                'origin_position_id' => 'integer|nullable|exists:order_positions,id,deleted_at,NULL',
-                'parent_id' => 'sometimes|integer|nullable|exists:order_positions,id,deleted_at,NULL',
+                'client_id' => [
+                    'required_without:order_id',
+                    'integer',
+                    new ModelExists(Client::class),
+                ],
+                'ledger_account_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(LedgerAccount::class),
+                ],
+                'order_id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(Order::class),
+                ],
+                'origin_position_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(OrderPosition::class),
+                ],
+                'parent_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(OrderPosition::class),
+                ],
                 'price_id' => [
                     'exclude_if:is_free_text,true',
                     'exclude_if:is_bundle_position,true',
                     'exclude_without:product_id',
                     'integer',
                     'nullable',
-                    'exists:prices,id,deleted_at,NULL',
+                    new ModelExists(Price::class),
                 ],
                 'price_list_id' => [
                     'exclude_if:is_free_text,true',
                     'exclude_if:is_bundle_position,true',
                     'integer',
                     'nullable',
-                    'exists:price_lists,id,deleted_at,NULL',
+                    new ModelExists(PriceList::class),
                 ],
                 'product_id' => [
                     Rule::when(
@@ -48,9 +74,13 @@ class CreateOrderPositionRequest extends BaseFormRequest
                     ),
                     'integer',
                     'nullable',
-                    'exists:products,id,deleted_at,NULL',
+                    new ModelExists(Product::class),
                 ],
-                'supplier_contact_id' => 'integer|nullable|exists:contacts,id,deleted_at,NULL',
+                'supplier_contact_id' => [
+                    'integer',
+                    'nullable',
+                    new ModelExists(Contact::class),
+                ],
                 'vat_rate_id' => [
                     'exclude_if:is_free_text,true',
                     'exclude_if:is_bundle_position,true',
@@ -58,13 +88,13 @@ class CreateOrderPositionRequest extends BaseFormRequest
                     'required_if:is_bundle_position,false',
                     'integer',
                     'nullable',
-                    'exists:vat_rates,id,deleted_at,NULL',
+                    new ModelExists(VatRate::class),
                 ],
                 'warehouse_id' => [
                     'exclude_if:is_free_text,true',
                     'integer',
                     'nullable',
-                    'exists:warehouses,id,deleted_at,NULL',
+                    new ModelExists(Warehouse::class),
                 ],
 
                 'amount' => [
@@ -141,7 +171,11 @@ class CreateOrderPositionRequest extends BaseFormRequest
                 ],
 
                 'tags' => 'array',
-                'tags.*' => 'string',
+                'tags.*' => [
+                    'required',
+                    'integer',
+                    (new ModelExists(Tag::class))->where('type', OrderPosition::class),
+                ],
             ],
         );
     }

@@ -3,22 +3,24 @@
 namespace FluxErp\Http\Requests;
 
 use FluxErp\Models\Address;
+use FluxErp\Models\Country;
+use FluxErp\Models\Language;
+use FluxErp\Models\Tag;
 use FluxErp\Rules\ExistsWithForeign;
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Rules\ModelExists;
 
 class UpdateAddressRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
             (new Address())->hasAdditionalColumnsValidationRules(),
             [
-                'id' => 'required|integer|exists:addresses,id,deleted_at,NULL',
+                'id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(Address::class),
+                ],
                 'contact_id' => [
                     'integer',
                     new ExistsWithForeign(
@@ -30,12 +32,12 @@ class UpdateAddressRequest extends BaseFormRequest
                 'country_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('countries', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Country::class),
                 ],
                 'language_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('languages', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Language::class),
                 ],
                 'company' => 'string|nullable',
                 'title' => 'string|nullable',
@@ -87,7 +89,11 @@ class UpdateAddressRequest extends BaseFormRequest
                 'contact_options.*.is_primary' => 'boolean',
 
                 'tags' => 'array',
-                'tags.*' => 'required|integer|exists:tags,id,type,' . Address::class,
+                'tags.*' => [
+                    'required',
+                    'integer',
+                    (new ModelExists(Tag::class))->where('type', Address::class),
+                ],
             ],
         );
     }

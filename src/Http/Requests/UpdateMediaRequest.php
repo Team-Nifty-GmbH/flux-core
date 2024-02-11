@@ -2,23 +2,23 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\Media;
+use FluxErp\Rules\ModelExists;
 
 class UpdateMediaRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:media,id',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Media::class),
+            ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                (new ExistsWithIgnore('media', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Media::class),
             ],
             'name' => 'sometimes|required|string',
             'collection' => 'sometimes|required|string',

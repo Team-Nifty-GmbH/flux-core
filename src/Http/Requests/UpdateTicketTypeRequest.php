@@ -2,24 +2,29 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Role;
 use FluxErp\Models\TicketType;
+use FluxErp\Rules\ModelExists;
 
 class UpdateTicketTypeRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
             (new TicketType())->hasAdditionalColumnsValidationRules(),
             [
-                'id' => 'required|integer|exists:ticket_types,id,deleted_at,NULL',
+                'id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(TicketType::class),
+                ],
                 'name' => 'required|string',
                 'roles' => 'array',
-                'roles.*' => 'required|integer|exists:roles,id',
+                'roles.*' => [
+                    'required',
+                    'integer',
+                    new ModelExists(Role::class),
+                ],
             ],
         );
     }

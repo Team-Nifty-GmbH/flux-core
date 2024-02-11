@@ -6,13 +6,11 @@ use FluxErp\Rules\ClassExists;
 use FluxErp\Rules\MorphExists;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @deprecated
+ */
 class CreateCustomEventRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [

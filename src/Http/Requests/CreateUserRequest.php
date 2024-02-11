@@ -2,21 +2,28 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Language;
+use FluxErp\Models\MailAccount;
+use FluxErp\Models\User;
+use FluxErp\Rules\ModelExists;
 use Illuminate\Validation\Rules\Password;
 
 class CreateUserRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
             'uuid' => 'string|uuid|unique:users,uuid',
-            'language_id' => 'nullable|integer|exists:languages,id,deleted_at,NULL',
-            'parent_id' => 'integer|nullable|exists:users,id,deleted_at,NULL',
+            'language_id' => [
+                'nullable',
+                'integer',
+                new ModelExists(Language::class),
+            ],
+            'parent_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(User::class),
+            ],
             'email' => 'required|email|unique:users,email',
             'firstname' => 'required|string',
             'lastname' => 'required|string',
@@ -24,7 +31,11 @@ class CreateUserRequest extends BaseFormRequest
             'user_code' => 'required|string|unique:users,user_code',
             'is_active' => 'sometimes|boolean',
             'mail_accounts' => 'array',
-            'mail_accounts.*' => 'integer|exists:mail_accounts,id',
+            'mail_accounts.*' => [
+                'required',
+                'integer',
+                new ModelExists(MailAccount::class),
+            ],
         ];
     }
 }

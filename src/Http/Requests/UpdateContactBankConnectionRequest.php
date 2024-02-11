@@ -2,15 +2,26 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Contact;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Rules\Iban;
+use FluxErp\Rules\ModelExists;
 
 class UpdateContactBankConnectionRequest extends BaseFormRequest
 {
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:contact_bank_connections,id,deleted_at,NULL',
-            'contact_id' => 'integer|nullable|exists:contacts,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(ContactBankConnection::class),
+            ],
+            'contact_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(Contact::class),
+            ],
             'iban' => ['string', new Iban()],
             'account_holder' => 'string|nullable',
             'bank_name' => 'string|nullable',

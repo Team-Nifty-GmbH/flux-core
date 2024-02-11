@@ -2,18 +2,21 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\BankConnection;
+use FluxErp\Models\Country;
+use FluxErp\Rules\ModelExists;
+
 class CreateClientRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
             'uuid' => 'string|uuid|unique:clients,uuid',
-            'country_id' => 'nullable|integer|exists:countries,id,deleted_at,NULL',
+            'country_id' => [
+                'nullable',
+                'integer',
+                new ModelExists(Country::class),
+            ],
             'name' => 'required|string',
             'client_code' => 'required|string|unique:clients,client_code',
             'ceo' => 'string|nullable',
@@ -31,7 +34,10 @@ class CreateClientRequest extends BaseFormRequest
             'is_active' => 'boolean',
             'is_default' => 'boolean',
             'bank_connections' => 'array|nullable',
-            'bank_connections.*' => 'integer|exists:bank_connections,id',
+            'bank_connections.*' => [
+                'integer',
+                new ModelExists(BankConnection::class),
+            ],
         ];
     }
 }

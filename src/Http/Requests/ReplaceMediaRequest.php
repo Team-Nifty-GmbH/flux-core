@@ -4,6 +4,7 @@ namespace FluxErp\Http\Requests;
 
 use FluxErp\Models\Media;
 use FluxErp\Rules\MediaUploadType;
+use FluxErp\Rules\ModelExists;
 use Illuminate\Validation\Rule;
 
 class ReplaceMediaRequest extends BaseFormRequest
@@ -17,18 +18,20 @@ class ReplaceMediaRequest extends BaseFormRequest
         ]);
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|exists:media',
+            'id' => [
+                'required',
+                new ModelExists(Media::class),
+            ],
             'media' => 'required',
             'media_type' => ['sometimes', new MediaUploadType()],
-            'parent_id' => 'integer|nullable|exists:media,id,deleted_at,NULL',
+            'parent_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(Media::class),
+            ],
             'name' => 'sometimes|required|string',
             'file_name' => 'sometimes|required|string',
             'disk' => [

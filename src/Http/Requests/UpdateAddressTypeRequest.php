@@ -3,19 +3,19 @@
 namespace FluxErp\Http\Requests;
 
 use FluxErp\Models\AddressType;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\UniqueInFieldDependence;
 
 class UpdateAddressTypeRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:address_types,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(AddressType::class),
+            ],
             'address_type_code' => [
                 'string',
                 'nullable',

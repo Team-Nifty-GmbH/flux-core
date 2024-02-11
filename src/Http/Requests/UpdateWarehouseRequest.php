@@ -2,23 +2,24 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\Address;
+use FluxErp\Models\Warehouse;
+use FluxErp\Rules\ModelExists;
 
 class UpdateWarehouseRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:warehouses,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Warehouse::class),
+            ],
             'address_id' => [
                 'integer',
                 'nullable',
-                (new ExistsWithIgnore('addresses', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Address::class),
             ],
             'name' => 'sometimes|required|string',
             'is_default' => 'boolean',

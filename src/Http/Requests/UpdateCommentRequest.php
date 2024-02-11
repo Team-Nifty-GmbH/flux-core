@@ -2,6 +2,9 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Comment;
+use FluxErp\Rules\ModelExists;
+
 class UpdateCommentRequest extends BaseFormRequest
 {
     /**
@@ -12,7 +15,11 @@ class UpdateCommentRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:comments,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Comment::class),
+            ],
             'is_internal' => 'required_without:is_sticky|boolean',
             'is_sticky' => 'required_without:is_internal|boolean',
         ];

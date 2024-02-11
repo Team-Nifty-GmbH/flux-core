@@ -2,20 +2,21 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Address;
 use FluxErp\Models\Setting;
+use FluxErp\Rules\ModelExists;
 use Illuminate\Validation\Rule;
 
 class CreateContactOptionRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'address_id' => 'required|integer|exists:addresses,id,deleted_at,NULL',
+            'address_id' => [
+                'required',
+                'integer',
+                new ModelExists(Address::class),
+            ],
             'type' => [
                 'required',
                 'string',
