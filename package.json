@@ -34,7 +34,7 @@
     "dependencies": {
         "@alpinejs/collapse": "^3.13.5",
         "@tiptap/core": "^2.2.0",
-        "@tiptap/pm": "^2.2.1",
+        "@tiptap/pm": "^2.2.2",
         "@tiptap/starter-kit": "^2.2.0",
         "@wireui/alpinejs-hold-directive": "^1.0.1",
         "apexcharts": "^3.45.2",
