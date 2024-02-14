@@ -18,10 +18,6 @@ class CreatePurchaseInvoice extends FluxAction
     {
         parent::boot($data);
         $this->rules = resolve_silently(CreatePurchaseInvoiceRequest::class)->rules();
-
-        $fileHash = md5_file(data_get($this->data, 'media')?->getRealPath());
-        $this->data['hash'] = $fileHash;
-        $this->rules['hash'] = ['required', 'string', 'unique:purchase_invoices,hash'];
     }
 
     public static function models(): array
@@ -31,7 +27,7 @@ class CreatePurchaseInvoice extends FluxAction
 
     public function performAction(): PurchaseInvoice
     {
-        $media = Arr::pull($this->data, 'media');
+        $file = Arr::pull($this->data, 'media');
         $positions = Arr::pull($this->data, 'purchase_invoice_positions', []);
         $this->data['invoice_date'] = data_get($this->data, 'invoice_date') ?? now()->format('Y-m-d');
 
@@ -47,7 +43,7 @@ class CreatePurchaseInvoice extends FluxAction
         $media = UploadMedia::make([
             'model_type' => PurchaseInvoice::class,
             'model_id' => $purchaseInvoice->id,
-            'media' => $media,
+            'media' => $file,
             'collection_name' => 'purchase_invoice',
         ])->validate()->execute();
 
@@ -59,27 +55,43 @@ class CreatePurchaseInvoice extends FluxAction
 
     public function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(PurchaseInvoice::class));
+        parent::validateData();
 
-        $this->data = $validator->validate();
+        $errors = [];
+        try {
+            $this->data['hash'] = md5_file(data_get($this->data, 'media')->getRealPath());
+
+            Validator::make($this->data, ['hash' => 'required|string|unique:purchase_invoices,hash'])
+                ->validate();
+        } catch (\Exception|ValidationException $e) {
+            if ($e instanceof ValidationException) {
+                $errors += $e->errors();
+            } else {
+                $errors += [
+                    'media' => ['media is no valid file'],
+                ];
+            }
+        }
 
         if (
             data_get($this->data, 'invoice_number')
             && data_get($this->data, 'contact_id')
             && data_get($this->data, 'client_id')
         ) {
-
             if (Order::query()
                 ->where('client_id', $this->data['client_id'])
                 ->where('invoice_number', $this->data['invoice_number'])
                 ->where('contact_id', $this->data['contact_id'])
                 ->exists()
             ) {
-                throw ValidationException::withMessages([
+                $errors += [
                     'invoice_number' => [__('validation.unique', ['attribute' => 'invoice_number'])],
-                ])->errorBag('createOrder');
+                ];
             }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)->errorBag('createPurchaseInvoice');
         }
     }
 }

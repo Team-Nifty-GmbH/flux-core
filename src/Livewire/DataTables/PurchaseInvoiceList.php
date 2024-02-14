@@ -121,6 +121,7 @@ class PurchaseInvoiceList extends DataTable
     public function edit(?PurchaseInvoice $purchaseInvoice = null): void
     {
         $this->purchaseInvoiceForm->reset();
+        $this->mediaForm->reset();
 
         if ($purchaseInvoice) {
             $purchaseInvoice->loadMissing('purchaseInvoicePositions');
@@ -144,7 +145,6 @@ class PurchaseInvoiceList extends DataTable
             return false;
         }
 
-        $this->mediaForm->reset();
         $this->loadData();
 
         return true;

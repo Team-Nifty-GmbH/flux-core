@@ -16,7 +16,7 @@ class DeletePurchaseInvoicePosition extends FluxAction
                 'required',
                 'integer',
                 new ModelExists(PurchaseInvoicePosition::class),
-            ]
+            ],
         ];
     }
 

@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('purchase_invoice_positions', function (Blueprint $table) {
             $table->id();
             $table->uuid();
-            $table->foreignId('ledger_account_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('purchase_invoice_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('ledger_account_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('vat_rate_id')->nullable()->constrained()->nullOnDelete();
             $table->string('name')->nullable();

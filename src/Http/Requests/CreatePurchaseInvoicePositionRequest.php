@@ -7,6 +7,7 @@ use FluxErp\Models\Product;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 
 class CreatePurchaseInvoicePositionRequest extends BaseFormRequest
 {
@@ -14,15 +15,15 @@ class CreatePurchaseInvoicePositionRequest extends BaseFormRequest
     {
         return [
             'uuid' => 'string|uuid|unique:purchase_invoice_positions,uuid',
+            'purchase_invoice_id' => [
+                'required',
+                'integer',
+                new ModelExists(PurchaseInvoice::class),
+            ],
             'ledger_account_id' => [
                 'nullable',
                 'integer',
                 new ModelExists(LedgerAccount::class),
-            ],
-            'purchase_invoice_id' => [
-                'nullable',
-                'integer',
-                new ModelExists(PurchaseInvoice::class),
             ],
             'product_id' => [
                 'nullable',
@@ -35,9 +36,18 @@ class CreatePurchaseInvoicePositionRequest extends BaseFormRequest
                 new ModelExists(VatRate::class),
             ],
             'name' => 'nullable|string',
-            'amount' => 'required|numeric',
-            'unit_price' => 'required|numeric',
-            'total_price' => 'required|numeric',
+            'amount' => [
+                'required',
+                new Numeric(min: 0),
+            ],
+            'unit_price' => [
+                'required',
+                new Numeric(min: 0),
+            ],
+            'total_price' => [
+                'required',
+                new Numeric(min: 0),
+            ],
         ];
     }
 }

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('order_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('order_type_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('payment_type_id')->nullable()->constrained()->nullOnDelete();
-            $table->date('invoice_date')->default(now());
+            $table->date('invoice_date');
             $table->string('invoice_number')->nullable();
             $table->string('hash')->unique();
             $table->boolean('is_net')->default(true);

@@ -35,7 +35,7 @@ class PurchaseInvoiceForm extends FluxForm
     public bool $is_net = true;
 
     #[Locked]
-    public mixed $media = null;
+    public $media = null;
 
     public ?array $purchase_invoice_positions = null;
 

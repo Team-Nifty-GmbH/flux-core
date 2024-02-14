@@ -174,7 +174,7 @@
                         <x-button
                             positive
                             :label="__('Add Position')"
-                            x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.push({ vat_rate_id: null, product_id: null, name: '', amount: 1, unit_price: 0, total_price: 0 })"
+                            x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.push({ vat_rate_id: null, product_id: null, name: null, amount: 1, unit_price: 0, total_price: 0 })"
                         />
                     </div>
                 </div>

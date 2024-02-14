@@ -46,15 +46,19 @@ class CreatePurchaseInvoiceRequest extends BaseFormRequest
                 'invoice_date' => 'nullable|date',
                 'invoice_number' => 'nullable|string',
                 'is_net' => 'boolean',
-                'media' => 'required',
+
+                'media' => 'required|mimetypes:application/pdf,image/png,image/jpeg',
                 'media_type' => ['sometimes', new MediaUploadType()],
-                'purchase_invoice_positions' => 'nullable|array',
-                'purchase_invoice_positions.*' => 'required|array',
+
+                'purchase_invoice_positions' => 'array',
             ],
             Arr::prependKeysWith(
                 (new CreatePurchaseInvoicePositionRequest())->rules(),
                 'purchase_invoice_positions.*.'
-            )
+            ),
+            [
+                'purchase_invoice_positions.*.purchase_invoice_id' => 'exclude',
+            ]
         );
     }
 }

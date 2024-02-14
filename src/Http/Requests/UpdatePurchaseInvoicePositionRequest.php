@@ -7,6 +7,7 @@ use FluxErp\Models\Product;
 use FluxErp\Models\PurchaseInvoicePosition;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 
 class UpdatePurchaseInvoicePositionRequest extends BaseFormRequest
 {
@@ -29,14 +30,14 @@ class UpdatePurchaseInvoicePositionRequest extends BaseFormRequest
                 new ModelExists(Product::class),
             ],
             'vat_rate_id' => [
-                'sometimes',
+                'nullable',
                 'integer',
                 new ModelExists(VatRate::class),
             ],
             'name' => 'nullable|string',
-            'amount' => 'numeric',
-            'unit_price' => 'numeric',
-            'total_price' => 'numeric',
+            'amount' => new Numeric(min: 0),
+            'unit_price' => new Numeric(min: 0),
+            'total_price' => new Numeric(min: 0),
         ];
     }
 }

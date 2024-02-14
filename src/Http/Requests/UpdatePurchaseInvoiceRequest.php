@@ -48,9 +48,10 @@ class UpdatePurchaseInvoiceRequest extends BaseFormRequest
                     'integer',
                     new ModelExists(PaymentType::class),
                 ],
-                'invoice_date' => 'nullable|date',
+                'invoice_date' => 'date',
                 'invoice_number' => 'nullable|string',
                 'is_net' => 'boolean',
+
                 'purchase_invoice_positions' => 'array',
             ],
             Arr::prependKeysWith(
@@ -59,10 +60,9 @@ class UpdatePurchaseInvoiceRequest extends BaseFormRequest
             ),
             [
                 'purchase_invoice_positions.*.id' => [
-                    'sometimes',
                     'integer',
                     new ModelExists(PurchaseInvoicePosition::class),
-                ]
+                ],
             ]
         );
     }

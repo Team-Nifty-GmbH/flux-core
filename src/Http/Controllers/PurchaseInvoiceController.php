@@ -22,14 +22,23 @@ class PurchaseInvoiceController extends BaseController
 
     public function create(CreatePurchaseInvoiceRequest $request): JsonResponse
     {
-        $purchaseInvoice = CreatePurchaseInvoice::make($request->validated())
-            ->execute();
+        try {
+            $purchaseInvoice = CreatePurchaseInvoice::make($request->validated())
+                ->validate()
+                ->execute();
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 201,
+                data: $purchaseInvoice,
+                statusMessage: 'purchase invoice created'
+            );
+        } catch (ValidationException $e) {
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 422,
+                data: $e->errors()
+            );
+        }
 
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 201,
-            data: $purchaseInvoice,
-            statusMessage: 'purchase invoice created'
-        );
+        return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
     public function update(Request $request): JsonResponse
@@ -79,7 +88,7 @@ class PurchaseInvoiceController extends BaseController
             );
         } catch (ValidationException $e) {
             $response = ResponseHelper::createArrayResponse(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                statusCode: 404,
                 data: $e->errors()
             );
         }
