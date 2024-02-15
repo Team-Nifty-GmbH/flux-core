@@ -2,11 +2,15 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Contact;
+use FluxErp\Models\User;
+use FluxErp\Models\WorkTime;
+use FluxErp\Models\WorkTimeType;
 use FluxErp\Rules\ClassExists;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Validation\Rule;
 
 class CreateWorkTimeRequest extends BaseFormRequest
 {
@@ -17,31 +21,32 @@ class CreateWorkTimeRequest extends BaseFormRequest
         ]);
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
             'uuid' => 'string|uuid|unique:work_times,uuid',
-            'contact_id' => 'nullable|integer|exists:contacts,id,deleted_at,NULL',
+            'contact_id' => [
+                'nullable',
+                'integer',
+                new ModelExists(Contact::class),
+            ],
             'user_id' => [
                 'required',
                 'integer',
-                Rule::exists('users', 'id')
-                    ->where('is_active', true)
-                    ->whereNull('deleted_at'),
+                (new ModelExists(User::class))->where('is_active', true),
             ],
             'parent_id' => [
                 'required_if:is_pause,true',
                 'required_if:is_daily_work_time,false',
                 'nullable',
                 'integer',
-                'exists:work_times,id,deleted_at,NULL',
+                new ModelExists(WorkTime::class),
             ],
-            'work_time_type_id' => 'nullable|integer|exists:work_time_types,id,deleted_at,NULL',
+            'work_time_type_id' => [
+                'nullable',
+                'integer',
+                new ModelExists(WorkTimeType::class),
+            ],
             'trackable_type' => [
                 'required_with:trackable_id',
                 'string',

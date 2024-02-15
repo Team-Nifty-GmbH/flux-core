@@ -2,50 +2,57 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Category;
+use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\DiscountGroup;
+use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
+use FluxErp\Models\User;
+use FluxErp\Models\VatRate;
+use FluxErp\Rules\ModelExists;
 
 class UpdateContactRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
             (new Contact())->hasAdditionalColumnsValidationRules(),
             [
-                'id' => 'required|integer|exists:contacts,id,deleted_at,NULL',
+                'id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(Contact::class),
+                ],
                 'client_id' => [
                     'integer',
-                    (new ExistsWithIgnore('clients', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Client::class),
                 ],
                 'agent_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(User::class),
                 ],
                 'payment_type_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('payment_types', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(PaymentType::class),
                 ],
                 'price_list_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('price_lists', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(PriceList::class),
                 ],
                 'expense_ledger_account_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('ledger_accounts', 'id')),
+                    new ModelExists(LedgerAccount::class),
                 ],
                 'vat_rate_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('vat_rates', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(VatRate::class),
                 ],
                 'customer_number' => 'sometimes|string',
                 'creditor_number' => 'string|nullable',
@@ -63,10 +70,17 @@ class UpdateContactRequest extends BaseFormRequest
                 'has_delivery_lock' => 'sometimes|boolean',
 
                 'discount_groups' => 'array',
-                'discount_groups.*' => 'integer|exists:discount_groups,id',
+                'discount_groups.*' => [
+                    'integer',
+                    new ModelExists(DiscountGroup::class),
+                ],
 
                 'categories' => 'array',
-                'categories.*' => 'required|integer|exists:categories,id,model_type,' . Contact::class,
+                'categories.*' => [
+                    'required',
+                    'integer',
+                    (new ModelExists(Category::class))->where('model_type', Contact::class),
+                ],
             ]
         );
     }

@@ -2,26 +2,27 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Client;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Rules\ClassExists;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Traits\HasSerialNumberRange;
 use Illuminate\Database\Eloquent\Model;
 
 class CreateSerialNumberRangeRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
             (new SerialNumber())->hasAdditionalColumnsValidationRules(),
             [
                 'uuid' => 'string|uuid|unique:serial_number_ranges,uuid',
-                'client_id' => 'required|integer|exists:clients,id',
+                'client_id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(Client::class),
+                ],
                 'model_type' => [
                     'required',
                     'string',

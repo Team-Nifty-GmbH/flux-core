@@ -6,6 +6,9 @@ use FluxErp\Models\CustomEvent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
+/**
+ * @deprecated
+ */
 class CustomEventFactory extends Factory
 {
     protected $model = CustomEvent::class;

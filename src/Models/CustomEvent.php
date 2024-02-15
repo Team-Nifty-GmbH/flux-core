@@ -7,6 +7,9 @@ use FluxErp\Traits\HasUserModification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @deprecated
+ */
 class CustomEvent extends Model
 {
     use HasPackageFactory, HasUserModification;

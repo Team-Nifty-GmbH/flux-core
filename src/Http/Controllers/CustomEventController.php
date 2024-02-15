@@ -11,6 +11,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 
+/**
+ * @deprecated
+ */
 class CustomEventController extends BaseController
 {
     public function __construct()

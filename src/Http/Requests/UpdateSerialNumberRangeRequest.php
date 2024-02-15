@@ -3,20 +3,21 @@
 namespace FluxErp\Http\Requests;
 
 use FluxErp\Models\SerialNumber;
+use FluxErp\Models\SerialNumberRange;
+use FluxErp\Rules\ModelExists;
 
 class UpdateSerialNumberRangeRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
             (new SerialNumber())->hasAdditionalColumnsValidationRules(),
             [
-                'id' => 'required|integer|exists:serial_number_ranges,id,deleted_at,NULL',
+                'id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(SerialNumberRange::class),
+                ],
                 'type' => 'sometimes|required|string',
                 'current_number' => 'integer|min:1',
                 'prefix' => 'string|nullable',

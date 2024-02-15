@@ -2,32 +2,37 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Category;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Product;
+use FluxErp\Models\User;
+use FluxErp\Rules\ModelExists;
 
 class CreateCommissionRateRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
         return [
-            'user_id' => 'required|integer|exists:users,id,deleted_at,NULL',
+            'user_id' => [
+                'required',
+                'integer',
+                new ModelExists(User::class),
+            ],
             'contact_id' => [
                 'integer',
                 'nullable',
-                'exists:contacts,id,deleted_at,NULL',
+                new ModelExists(Contact::class),
             ],
             'category_id' => [
                 'exclude_unless:product_id,null',
                 'integer',
                 'nullable',
-                'exists:categories,id,model_type,' . Product::class,
+                (new ModelExists(Category::class))->where('model_type', Product::class),
             ],
             'product_id' => [
                 'integer',
                 'nullable',
-                'exists:products,id,deleted_at,NULL',
+                new ModelExists(Product::class),
             ],
             'commission_rate' => 'required|numeric|lt:1|min:0',
         ];

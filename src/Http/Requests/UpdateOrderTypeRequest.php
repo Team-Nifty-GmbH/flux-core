@@ -2,22 +2,23 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\Client;
+use FluxErp\Models\OrderType;
+use FluxErp\Rules\ModelExists;
 
 class UpdateOrderTypeRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:order_types,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(OrderType::class),
+            ],
             'client_id' => [
                 'integer',
-                (new ExistsWithIgnore('clients', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Client::class),
             ],
             'name' => 'string',
             'description' => 'string|nullable',

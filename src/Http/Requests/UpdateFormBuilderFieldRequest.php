@@ -3,6 +3,8 @@
 namespace FluxErp\Http\Requests;
 
 use FluxErp\Enums\FormBuilderTypeEnum;
+use FluxErp\Models\FormBuilderField;
+use FluxErp\Rules\ModelExists;
 use Illuminate\Validation\Rule;
 
 class UpdateFormBuilderFieldRequest extends BaseFormRequest
@@ -10,7 +12,11 @@ class UpdateFormBuilderFieldRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:form_builder_fields,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(FormBuilderField::class),
+            ],
             'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'type' => [

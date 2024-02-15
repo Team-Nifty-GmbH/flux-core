@@ -4,9 +4,6 @@ namespace FluxErp\Http\Requests;
 
 class CreatePermissionRequest extends BaseFormRequest
 {
-    /**
-     * Prepare the data for validation.
-     */
     protected function prepareForValidation(): void
     {
         $this->merge([
@@ -14,11 +11,6 @@ class CreatePermissionRequest extends BaseFormRequest
         ]);
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [

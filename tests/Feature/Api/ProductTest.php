@@ -150,16 +150,14 @@ class ProductTest extends BaseSetup
         $this->assertNull($dbProduct->min_purchase);
         $this->assertNull($dbProduct->max_purchase);
         $this->assertNull($dbProduct->seo_keywords);
-        $this->assertNull($dbProduct->manufacturer_product_number);
         $this->assertNull($dbProduct->posting_account);
         $this->assertNull($dbProduct->warning_stock_amount);
         $this->assertTrue($dbProduct->is_active);
+        $this->assertFalse($dbProduct->is_highlight);
         $this->assertFalse($dbProduct->is_bundle);
+        $this->assertFalse($dbProduct->is_service);
         $this->assertFalse($dbProduct->is_shipping_free);
         $this->assertFalse($dbProduct->is_required_product_serial_number);
-        $this->assertFalse($dbProduct->is_required_manufacturer_serial_number);
-        $this->assertFalse($dbProduct->is_auto_create_serial_number);
-        $this->assertFalse($dbProduct->is_product_serial_number);
         $this->assertFalse($dbProduct->is_nos);
         $this->assertFalse($dbProduct->is_active_export_to_web_shop);
     }
@@ -188,16 +186,14 @@ class ProductTest extends BaseSetup
             'min_purchase' => rand(1, 999),
             'max_purchase' => rand(1, 999),
             'seo_keywords' => Str::random(),
-            'manufacturer_product_number' => Str::random(),
             'posting_account' => Str::random(),
             'warning_stock_amount' => rand(1, 999),
             'is_active' => rand(0, 1),
+            'is_highlight' => rand(0, 1),
             'is_bundle' => true,
+            'is_service' => false,
             'is_shipping_free' => rand(0, 1),
             'is_required_product_serial_number' => rand(0, 1),
-            'is_required_manufacturer_serial_number' => rand(0, 1),
-            'is_auto_create_serial_number' => rand(0, 1),
-            'is_product_serial_number' => rand(0, 1),
             'is_nos' => rand(0, 1),
             'is_active_export_to_web_shop' => rand(0, 1),
             'bundle_products' => [
@@ -244,22 +240,17 @@ class ProductTest extends BaseSetup
         $this->assertEquals($product['min_purchase'], $dbProduct->min_purchase);
         $this->assertEquals($product['max_purchase'], $dbProduct->max_purchase);
         $this->assertEquals($product['seo_keywords'], $dbProduct->seo_keywords);
-        $this->assertEquals($product['manufacturer_product_number'], $dbProduct->manufacturer_product_number);
         $this->assertEquals($product['posting_account'], $dbProduct->posting_account);
         $this->assertEquals($product['warning_stock_amount'], $dbProduct->warning_stock_amount);
         $this->assertEquals($product['is_active'], $dbProduct->is_active);
-        $this->assertEquals($product['is_shipping_free'], $dbProduct->is_shipping_free);
+        $this->assertEquals($product['is_highlight'], $dbProduct->is_highlight);
         $this->assertEquals($product['is_bundle'], $dbProduct->is_bundle);
+        $this->assertEquals($product['is_service'], $dbProduct->is_service);
+        $this->assertEquals($product['is_shipping_free'], $dbProduct->is_shipping_free);
         $this->assertEquals(
             $product['is_required_product_serial_number'],
             $dbProduct->is_required_product_serial_number
         );
-        $this->assertEquals(
-            $product['is_required_manufacturer_serial_number'],
-            $dbProduct->is_required_manufacturer_serial_number
-        );
-        $this->assertEquals($product['is_auto_create_serial_number'], $dbProduct->is_auto_create_serial_number);
-        $this->assertEquals($product['is_product_serial_number'], $dbProduct->is_product_serial_number);
         $this->assertEquals($product['is_nos'], $dbProduct->is_nos);
         $this->assertEquals($product['is_active_export_to_web_shop'], $dbProduct->is_active_export_to_web_shop);
 
@@ -315,16 +306,14 @@ class ProductTest extends BaseSetup
             'min_purchase' => rand(1, 999),
             'max_purchase' => rand(1, 999),
             'seo_keywords' => Str::random(),
-            'manufacturer_product_number' => Str::random(),
             'posting_account' => Str::random(),
             'warning_stock_amount' => rand(1, 999),
             'is_active' => rand(0, 1),
-            'is_shipping_free' => rand(0, 1),
+            'is_highlight' => rand(0, 1),
             'is_bundle' => false,
+            'is_service' => false,
+            'is_shipping_free' => rand(0, 1),
             'is_required_product_serial_number' => rand(0, 1),
-            'is_required_manufacturer_serial_number' => rand(0, 1),
-            'is_auto_create_serial_number' => rand(0, 1),
-            'is_product_serial_number' => rand(0, 1),
             'is_nos' => rand(0, 1),
             'is_active_export_to_web_shop' => rand(0, 1),
         ];
@@ -360,18 +349,15 @@ class ProductTest extends BaseSetup
         $this->assertEquals($product['min_purchase'], $dbProduct->min_purchase);
         $this->assertEquals($product['max_purchase'], $dbProduct->max_purchase);
         $this->assertEquals($product['seo_keywords'], $dbProduct->seo_keywords);
-        $this->assertEquals($product['manufacturer_product_number'], $dbProduct->manufacturer_product_number);
         $this->assertEquals($product['posting_account'], $dbProduct->posting_account);
         $this->assertEquals($product['warning_stock_amount'], $dbProduct->warning_stock_amount);
         $this->assertEquals($product['is_active'], $dbProduct->is_active);
-        $this->assertEquals($product['is_shipping_free'], $dbProduct->is_shipping_free);
+        $this->assertEquals($product['is_highlight'], $dbProduct->is_highlight);
         $this->assertEquals($product['is_bundle'], $dbProduct->is_bundle);
+        $this->assertEquals($product['is_service'], $dbProduct->is_service);
+        $this->assertEquals($product['is_shipping_free'], $dbProduct->is_shipping_free);
         $this->assertEquals($product['is_required_product_serial_number'],
             $dbProduct->is_required_product_serial_number);
-        $this->assertEquals($product['is_required_manufacturer_serial_number'],
-            $dbProduct->is_required_manufacturer_serial_number);
-        $this->assertEquals($product['is_auto_create_serial_number'], $dbProduct->is_auto_create_serial_number);
-        $this->assertEquals($product['is_product_serial_number'], $dbProduct->is_product_serial_number);
         $this->assertEquals($product['is_nos'],
             $dbProduct->is_nos);
         $this->assertEquals($product['is_active_export_to_web_shop'], $dbProduct->is_active_export_to_web_shop);
@@ -417,20 +403,14 @@ class ProductTest extends BaseSetup
         $this->assertEquals($this->products[0]->min_purchase, $responses[0]->data->min_purchase);
         $this->assertEquals($this->products[0]->max_purchase, $responses[0]->data->max_purchase);
         $this->assertEquals($this->products[0]->seo_keywords, $responses[0]->data->seo_keywords);
-        $this->assertEquals($this->products[0]->manufacturer_product_number,
-            $responses[0]->data->manufacturer_product_number);
         $this->assertEquals($this->products[0]->posting_account, $responses[0]->data->posting_account);
         $this->assertEquals($this->products[0]->warning_stock_amount, $responses[0]->data->warning_stock_amount);
-        $this->assertEquals($this->products[0]->is_shipping_free, $responses[0]->data->is_shipping_free);
+        $this->assertEquals($this->products[0]->is_highlight, $responses[0]->data->is_highlight);
         $this->assertEquals($this->products[0]->is_bundle, $responses[0]->data->is_bundle);
+        $this->assertEquals($this->products[0]->is_service, $responses[0]->data->is_service);
+        $this->assertEquals($this->products[0]->is_shipping_free, $responses[0]->data->is_shipping_free);
         $this->assertEquals($this->products[0]->is_required_product_serial_number,
             $responses[0]->data->is_required_product_serial_number);
-        $this->assertEquals($this->products[0]->is_required_manufacturer_serial_number,
-            $responses[0]->data->is_required_manufacturer_serial_number);
-        $this->assertEquals($this->products[0]->is_auto_create_serial_number,
-            $responses[0]->data->is_auto_create_serial_number);
-        $this->assertEquals($this->products[0]->is_product_serial_number,
-            $responses[0]->data->is_product_serial_number);
         $this->assertEquals($this->products[0]->is_nos,
             $responses[0]->data->is_nos);
         $this->assertEquals($this->products[0]->is_active_export_to_web_shop,
@@ -452,20 +432,14 @@ class ProductTest extends BaseSetup
         $this->assertEquals($this->products[1]->min_purchase, $responses[1]->data->min_purchase);
         $this->assertEquals($this->products[1]->max_purchase, $responses[1]->data->max_purchase);
         $this->assertEquals($this->products[1]->seo_keywords, $responses[1]->data->seo_keywords);
-        $this->assertEquals($this->products[1]->manufacturer_product_number,
-            $responses[1]->data->manufacturer_product_number);
         $this->assertEquals($this->products[1]->posting_account, $responses[1]->data->posting_account);
         $this->assertEquals($this->products[1]->warning_stock_amount, $responses[1]->data->warning_stock_amount);
-        $this->assertEquals($this->products[1]->is_shipping_free, $responses[1]->data->is_shipping_free);
+        $this->assertEquals($this->products[1]->is_highlight, $responses[1]->data->is_highlight);
         $this->assertEquals($this->products[1]->is_bundle, $responses[1]->data->is_bundle);
+        $this->assertEquals($this->products[1]->is_service, $responses[1]->data->is_service);
+        $this->assertEquals($this->products[1]->is_shipping_free, $responses[1]->data->is_shipping_free);
         $this->assertEquals($this->products[1]->is_required_product_serial_number,
             $responses[1]->data->is_required_product_serial_number);
-        $this->assertEquals($this->products[1]->is_required_manufacturer_serial_number,
-            $responses[1]->data->is_required_manufacturer_serial_number);
-        $this->assertEquals($this->products[1]->is_auto_create_serial_number,
-            $responses[1]->data->is_auto_create_serial_number);
-        $this->assertEquals($this->products[1]->is_product_serial_number,
-            $responses[1]->data->is_product_serial_number);
         $this->assertEquals($this->products[1]->is_nos,
             $responses[1]->data->is_nos);
         $this->assertEquals($this->products[1]->is_active_export_to_web_shop,

@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Event;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
+/**
+ * @deprecated
+ */
 class CustomEvents extends Component
 {
     use Actions;

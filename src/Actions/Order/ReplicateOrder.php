@@ -118,6 +118,16 @@ class ReplicateOrder extends FluxAction
         }
 
         if ($orderPositions) {
+            if (OrderPosition::query()
+                ->whereIntegerInRaw('id', $ids)
+                ->where('order_id', '!=', $this->data['id'])
+                ->exists()
+            ) {
+                throw ValidationException::withMessages([
+                    'order_positions' => ['Only order positions from given order allowed.'],
+                ])->errorBag('replicateOrder');
+            }
+
             $siblings = OrderPosition::query()
                 ->whereIntegerInRaw('order_positions.id', $ids)
                 ->siblings()

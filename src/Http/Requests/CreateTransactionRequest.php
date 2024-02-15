@@ -2,7 +2,12 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\BankConnection;
+use FluxErp\Models\Currency;
+use FluxErp\Models\Order;
+use FluxErp\Models\Transaction;
 use FluxErp\Rules\Iban;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 
 class CreateTransactionRequest extends BaseFormRequest
@@ -11,10 +16,26 @@ class CreateTransactionRequest extends BaseFormRequest
     {
         return [
             'uuid' => 'string|uuid|unique:transactions,uuid',
-            'bank_connection_id' => 'required|integer|exists:bank_connections,id',
-            'currency_id' => 'integer|nullable|exists:currencies,id,deleted_at,NULL',
-            'parent_id' => 'integer|nullable|exists:transactions,id',
-            'order_id' => 'integer|nullable|exists:orders,id,deleted_at,NULL',
+            'bank_connection_id' => [
+                'required',
+                'integer',
+                new ModelExists(BankConnection::class),
+            ],
+            'currency_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(Currency::class),
+            ],
+            'parent_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(Transaction::class),
+            ],
+            'order_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(Order::class),
+            ],
             'value_date' => 'required|date_format:Y-m-d',
             'booking_date' => 'required|date_format:Y-m-d',
             'amount' => [

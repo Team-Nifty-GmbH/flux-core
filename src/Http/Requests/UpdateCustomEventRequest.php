@@ -2,17 +2,22 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\CustomEvent;
+use FluxErp\Rules\ModelExists;
+
+/**
+ * @deprecated
+ */
 class UpdateCustomEventRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:custom_events,id',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(CustomEvent::class),
+            ],
             'name' => 'required|alpha|unique:custom_events,name',
         ];
     }

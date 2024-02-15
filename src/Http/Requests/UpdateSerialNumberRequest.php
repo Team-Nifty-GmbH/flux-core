@@ -2,33 +2,36 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\Address;
+use FluxErp\Models\OrderPosition;
+use FluxErp\Models\Product;
+use FluxErp\Models\SerialNumber;
+use FluxErp\Rules\ModelExists;
 
 class UpdateSerialNumberRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:serial_numbers,id',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(SerialNumber::class),
+            ],
             'product_id' => [
                 'integer',
                 'nullable',
-                (new ExistsWithIgnore('products', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Product::class),
             ],
             'address_id' => [
                 'integer',
                 'nullable',
-                (new ExistsWithIgnore('addresses', 'id'))->whereNull('deleted_at'),
+                new ModelExists(Address::class),
             ],
             'order_position_id' => [
                 'integer',
                 'nullable',
-                (new ExistsWithIgnore('order_positions', 'id'))->whereNull('deleted_at'),
+                new ModelExists(OrderPosition::class),
             ],
             'serial_number' => 'sometimes|required|string',
         ];

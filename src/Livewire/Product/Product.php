@@ -6,6 +6,7 @@ use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProductForm;
+use FluxErp\Models\Contact;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
@@ -214,5 +215,25 @@ class Product extends Component
         }
 
         return false;
+    }
+
+    #[Renderless]
+    public function addSupplier(Contact $contact): void
+    {
+        if (in_array($contact->id, array_column($this->product->suppliers, 'contact_id'))) {
+            return;
+        }
+
+        $this->product->suppliers[] = [
+            'contact_id' => $contact->id,
+            'customer_number' => $contact->customer_number,
+            'manufacturer_product_number' => null,
+            'purchase_price' => null,
+            'main_address' => [
+                'name' => $contact->mainAddress->name,
+            ],
+        ];
+
+        $this->product->suppliers = array_values($this->product->suppliers);
     }
 }

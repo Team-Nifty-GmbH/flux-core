@@ -2,17 +2,19 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\ProductProperty;
+use FluxErp\Rules\ModelExists;
+
 class UpdateProductPropertyRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:product_properties,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(ProductProperty::class),
+            ],
             'name' => 'required|string',
         ];
     }

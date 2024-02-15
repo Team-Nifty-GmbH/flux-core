@@ -2,19 +2,26 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Role;
+use FluxErp\Models\User;
+use FluxErp\Rules\ModelExists;
+
 class EditRoleUserRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:roles,id',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Role::class),
+            ],
             'users' => 'required|array',
-            'users.*' => 'required|integer|exists:users,id,deleted_at,NULL',
+            'users.*' => [
+                'required',
+                'integer',
+                new ModelExists(User::class),
+            ],
         ];
     }
 }

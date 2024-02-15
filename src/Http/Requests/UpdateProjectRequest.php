@@ -2,38 +2,40 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Contact;
+use FluxErp\Models\Order;
 use FluxErp\Models\Project;
-use FluxErp\Rules\ExistsWithIgnore;
+use FluxErp\Models\User;
+use FluxErp\Rules\ModelExists;
 use FluxErp\States\Project\ProjectState;
 use Spatie\ModelStates\Validation\ValidStateRule;
 
 class UpdateProjectRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return array_merge(
             (new Project())->hasAdditionalColumnsValidationRules(),
             [
-                'id' => 'required|integer|exists:projects,id,deleted_at,NULL',
+                'id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(Project::class),
+                ],
                 'contact_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('contacts', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Contact::class),
                 ],
                 'order_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('orders', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(Order::class),
                 ],
                 'responsible_user_id' => [
                     'integer',
                     'nullable',
-                    (new ExistsWithIgnore('users', 'id'))->whereNull('deleted_at'),
+                    new ModelExists(User::class),
                 ],
                 'project_number' => 'sometimes|required|string',
                 'name' => 'sometimes|required|string',

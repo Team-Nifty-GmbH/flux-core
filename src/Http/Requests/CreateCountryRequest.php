@@ -2,19 +2,26 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Models\Currency;
+use FluxErp\Models\Language;
+use FluxErp\Rules\ModelExists;
+
 class CreateCountryRequest extends BaseFormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
             'uuid' => 'string|uuid|unique:countries,uuid',
-            'language_id' => 'required|integer|exists:languages,id,deleted_at,NULL',
-            'currency_id' => 'required|integer|exists:currencies,id,deleted_at,NULL',
+            'language_id' => [
+                'required',
+                'integer',
+                new ModelExists(Language::class),
+            ],
+            'currency_id' => [
+                'required',
+                'integer',
+                new ModelExists(Currency::class),
+            ],
             'name' => 'required|string',
             'iso_alpha2' => 'required|string|unique:countries,iso_alpha2',
             'iso_alpha3' => 'string',
