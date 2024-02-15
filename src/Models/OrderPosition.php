@@ -234,4 +234,30 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
     {
         return $this->product?->getAvatarUrl();
     }
+
+    public function scopeDescendants(Builder $query): void
+    {
+        $query->leftJoin('order_positions AS descendants', 'order_positions.id', '=', 'descendants.origin_position_id')
+            ->selectRaw(
+                'order_positions.id' .
+                ', order_positions.amount' .
+                ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount'
+            )
+            ->groupBy('order_positions.id')
+            ->where('order_positions.is_bundle_position', false);
+    }
+
+    public function scopeSiblings(Builder $query): void
+    {
+        $query->leftJoin('order_positions AS siblings', 'order_positions.id', '=', 'siblings.origin_position_id')
+            ->selectRaw(
+                'order_positions.id' .
+                ', order_positions.amount' .
+                ', SUM(COALESCE(siblings.amount, 0)) AS siblingAmount' .
+                ', order_positions.amount - SUM(COALESCE(siblings.amount, 0)) AS totalAmount'
+            )
+            ->groupBy('order_positions.id')
+            ->where('order_positions.is_bundle_position', false)
+            ->havingRaw('order_positions.amount > siblingAmount');
+    }
 }

@@ -166,6 +166,39 @@ class UpdateOrderPosition extends FluxAction
                 }
             }
 
+            // If order position has origin_position_id or is their parent, validate amount
+            if (! data_get($this->data, 'is_free_text', $orderPosition->is_free_text)) {
+                if ($orderPosition->origin_position_id) {
+                    $maxAmount = $orderPosition->origin()
+                        ->siblings()
+                        ->where('siblings.id', '!=', $orderPosition->id)
+                        ->pluck('totalAmount')
+                        ->first();
+
+                    if (bccomp(data_get($this->data, 'amount', $orderPosition->amount), $maxAmount)) {
+                        throw ValidationException::withMessages([
+                            'amount' => [
+                                __('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount]),
+                            ],
+                        ])->errorBag('updateOrderPosition');
+                    }
+                }
+
+                if ($orderPosition->ancestors()->exists()) {
+                    $minAmount = $orderPosition->descendants()
+                        ->pluck('descendantAmount')
+                        ->first();
+
+                    if (bccomp($minAmount, data_get($this->data, 'amount', $orderPosition->amount))) {
+                        throw ValidationException::withMessages([
+                            'amount' => [
+                                __('validation.min.numeric', ['attribute' => __('amount'), 'min' => $minAmount]),
+                            ],
+                        ])->errorBag('updateOrderPosition');
+                    }
+                }
+            }
+
             if ($errors) {
                 throw ValidationException::withMessages($errors)->errorBag('updateOrderPosition');
             }

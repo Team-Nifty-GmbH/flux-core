@@ -95,6 +95,25 @@ class FillOrderPositions extends FluxAction
             throw ValidationException::withMessages($errors)->errorBag('fillOrderPositions');
         }
 
+        $deletedOrderPositions = OrderPosition::query()
+            ->whereIntegerNotInRaw('order_positions.id', array_column($orderPositions, 'id'))
+            ->where('order_positions.order_id', $this->data['order_id'])
+            ->descendants()
+            ->where('descendants.is_free_text', false)
+            ->pluck('order_positions.id')
+            ->toArray();
+
+        if ($deletedOrderPositions) {
+            throw ValidationException::withMessages([
+                'deleted_order_positions' => [
+                    __(
+                        'Unable to delete order positions with id \':ids\'. They have descendants.',
+                        ['ids' => implode(', ', $deletedOrderPositions)]
+                    ),
+                ],
+            ]);
+        }
+
         $this->data['order_positions'] = $orderPositions;
     }
 

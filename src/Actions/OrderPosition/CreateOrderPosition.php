@@ -151,5 +151,42 @@ class CreateOrderPosition extends FluxAction
         $validator->addModel(new OrderPosition());
 
         $this->data = $validator->validate();
+
+        // Only allow creation of order_position if exists in parent order and amount not greater than totalAmount
+        if (! ($this->data['is_free_text'] ?? false)) {
+            $order = Order::query()
+                ->whereKey($this->data['order_id'])
+                ->first();
+
+            if ($order?->parent_id) {
+                if (! $originPositionId = data_get($this->data, 'origin_position_id')) {
+                    throw ValidationException::withMessages([
+                        'origin_position_id' => [__('validation.required', ['attribute' => 'origin_position_id'])],
+                    ])->errorBag('createOrderPosition');
+                }
+
+                if (! OrderPosition::query()
+                    ->whereKey($originPositionId)
+                    ->where('order_id', $order->parent_id)
+                    ->exists()
+                ) {
+                    throw ValidationException::withMessages([
+                        'origin_position_id' => ['Order position does not exists in parent order.'],
+                    ]);
+                }
+
+                $maxAmount = OrderPosition::query()
+                    ->whereKey($originPositionId)
+                    ->siblings()
+                    ->pluck('totalAmount')
+                    ->first();
+
+                if (bccomp($this->data['amount'] ?? 1, $maxAmount)) {
+                    throw ValidationException::withMessages([
+                        'amount' => [__('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount])],
+                    ])->errorBag('createOrderPosition');
+                }
+            }
+        }
     }
 }

@@ -197,6 +197,59 @@
                 </x-slot:footer>
             </x-card>
         </x-modal>
+        <x-modal name="create-child-order" max-width="7xl">
+            <x-card>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <div class="flex flex-col gap-1.5">
+                        <x-select
+                            :label="__('Order Type')"
+                            wire:model="replicateOrder.order_type_id"
+                            :options="$replicateOrderTypes"
+                            option-value="id"
+                            option-label="name"
+                            :clearable="false"
+                        />
+                    </div>
+                    <div class="overflow-auto">
+                        <template x-for="(position, index) in $wire.replicateOrder.order_positions">
+                            <x-list-item :item="[]">
+                                <x-slot:value>
+                                    <span x-text="position.name"></span>
+                                </x-slot:value>
+                                <x-slot:sub-value>
+                                    <div class="flex flex-col">
+                                        <span x-text="position.description"></span>
+                                    </div>
+                                </x-slot:sub-value>
+                                <x-slot:actions>
+                                    <x-inputs.number x-model="position.amount" :min="0" />
+                                    <x-button
+                                        negative
+                                        icon="trash"
+                                        x-on:click="$wire.replicateOrder.order_positions.splice(index, 1); $wire.recalculateReplicateOrderPositions();"
+                                    />
+                                </x-slot:actions>
+                            </x-list-item>
+                        </template>
+                    </div>
+                </div>
+                <div class="pt-4">
+                    <livewire:order.replicate-order-position-list :id="$order->id" />
+                </div>
+                <x-slot:footer>
+                    <div class="flex justify-end gap-1.5">
+                        <x-button :label="__('Cancel')" x-on:click="close"/>
+                        <x-button
+                            x-cloak
+                            x-show="$wire.replicateOrder.order_positions.length"
+                            primary
+                            :label="__('Save')"
+                            wire:click="saveReplicate()"
+                        />
+                    </div>
+                </x-slot:footer>
+            </x-card>
+        </x-modal>
     @show
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
@@ -543,6 +596,9 @@
                                             </x-dropdown>
                                         </div>
                                     @endif
+                                    @foreach($additionalModelActions as $modelAction)
+                                        {{$modelAction}}
+                                    @endforeach
                                 @show
                             </div>
                         </x-card>

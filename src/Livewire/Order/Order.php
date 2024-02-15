@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Order;
 
 use FluxErp\Actions\Order\DeleteOrder;
+use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Actions\Printing;
@@ -20,12 +21,14 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Media;
+use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\VatRate;
+use FluxErp\States\Order\DeliveryState\Open;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Builder;
@@ -91,6 +94,8 @@ class Order extends OrderPositionList
     public bool $isFilterable = false;
 
     public array $selectedOrderPositions = [];
+
+    public array $replicateOrderTypes = [];
 
     #[Url]
     public string $tab = 'order.order-positions';
@@ -177,6 +182,57 @@ class Order extends OrderPositionList
                 ->icon('trash')
                 ->color('negative')
                 ->wireClick('deleteSelectedOrderPositions(); showSelectedActions = false;'),
+        ];
+    }
+
+    public function getAdditionalModelActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('Create Retoure'))
+                ->color('negative')
+                ->when(function () {
+                    return ReplicateOrder::canPerformAction(false)
+                        && $this->order->invoice_date
+                        && $this->order->delivery_state !== Open::$name
+                        && OrderType::query()
+                            ->whereKey($this->order->order_type_id)
+                            ->whereIn('order_type_enum', [
+                                OrderTypeEnum::Order->value,
+                                OrderTypeEnum::SplitOrder->value,
+                            ])
+                            ->exists()
+                        && OrderType::query()
+                            ->where('order_type_enum', OrderTypeEnum::Retoure->value)
+                            ->where('is_active', true)
+                            ->where('is_hidden', false)
+                            ->exists();
+                })
+                ->attributes([
+                    'class' => 'w-full',
+                    'x-on:click' => '$wire.replicate(\'' . OrderTypeEnum::Retoure->value . '\')',
+                ]),
+            DataTableButton::make()
+                ->label(__('Create Split-Order'))
+                ->icon('shopping-bag')
+                ->color('primary')
+                ->when(function () {
+                    return ReplicateOrder::canPerformAction(false)
+                        && ! $this->order->invoice_date
+                        && OrderType::query()
+                            ->whereKey($this->order->order_type_id)
+                            ->where('order_type_enum', OrderTypeEnum::Order->value)
+                            ->exists()
+                        && OrderType::query()
+                            ->where('order_type_enum', OrderTypeEnum::SplitOrder->value)
+                            ->where('is_active', true)
+                            ->where('is_hidden', false)
+                            ->exists();
+                })
+                ->attributes([
+                    'class' => 'w-full',
+                    'x-on:click' => '$wire.replicate(\'' . OrderTypeEnum::SplitOrder->value . '\')',
+                ]),
         ];
     }
 
@@ -283,13 +339,10 @@ class Order extends OrderPositionList
 
     public function getViewData(): array
     {
-        $orderType = OrderType::query()
-            ->whereKey($this->order->order_type_id)
-            ->first();
-
         return array_merge(
             parent::getViewData(),
             [
+                'additionalModelActions' => $this->getAdditionalModelActions(),
                 'vatRates' => VatRate::query()
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
@@ -460,15 +513,37 @@ class Order extends OrderPositionList
         }
     }
 
-    #[Renderless]
-    public function replicate(): void
+    public function replicate(?string $orderTypeEnum = null): void
     {
         $this->replicateOrder->fill($this->order->toArray());
+        $this->replicateOrder->order_positions = [];
         $this->fetchContactData();
 
-        $this->js(<<<'JS'
-            $openModal('replicate-order');
-        JS);
+        $this->replicateOrderTypes = OrderType::query()
+            ->where('order_type_enum', $orderTypeEnum)
+            ->where('is_active', true)
+            ->where('is_hidden', false)
+            ->get(['id', 'name'])
+            ->toArray();
+
+        if ($this->replicateOrderTypes) {
+            $this->replicateOrder->parent_id = $this->order->id;
+            if (count($this->replicateOrderTypes) === 1) {
+                $this->replicateOrder->order_type_id = $this->replicateOrderTypes[0]['id'];
+            }
+
+            $this->forceRender();
+
+            $this->js(<<<'JS'
+                $openModal('create-child-order');
+            JS);
+        } else {
+            $this->skipRender();
+
+            $this->js(<<<'JS'
+                $openModal('replicate-order');
+            JS);
+        }
     }
 
     #[Renderless]
@@ -852,6 +927,32 @@ class Order extends OrderPositionList
         $this->js(<<<JS
             \$openDetailModal('{$product->getUrl()}');
         JS);
+    }
+
+    public function takeOrderPositions(array $positionIds): void
+    {
+        $orderPositions = OrderPosition::query()
+            ->whereIntegerInRaw('order_positions.id', $positionIds)
+            ->where('order_positions.order_id', $this->order->id)
+            ->whereNull('order_positions.parent_id')
+            ->siblings()
+            ->addSelect(['order_positions.name', 'order_positions.description'])
+            ->get();
+
+        foreach ($orderPositions as $orderPosition) {
+            $this->replicateOrder->order_positions[] = [
+                'id' => $orderPosition->id,
+                'amount' => $orderPosition->totalAmount,
+                'name' => $orderPosition->name,
+                'description' => $orderPosition->description,
+            ];
+        }
+    }
+
+    #[Renderless]
+    public function recalculateReplicateOrderPositions(): void
+    {
+        $this->replicateOrder->order_positions = array_values($this->replicateOrder->order_positions);
     }
 
     private function getAvailableStates(array|string $fieldNames): void
