@@ -3,6 +3,7 @@
 namespace FluxErp;
 
 use FluxErp\Actions\ActionManager;
+use FluxErp\Assets\AssetManager;
 use FluxErp\Console\Commands\Init\InitEnv;
 use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\Console\Scheduling\RepeatableManager;
@@ -18,6 +19,7 @@ use FluxErp\DataType\Registry;
 use FluxErp\DataType\SerializableHandler;
 use FluxErp\DataType\StringHandler;
 use FluxErp\Facades\Action;
+use FluxErp\Facades\Asset;
 use FluxErp\Facades\Menu;
 use FluxErp\Facades\Repeatable;
 use FluxErp\Facades\Widget;
@@ -120,10 +122,18 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->app->alias(Registry::class, 'datatype.registry');
 
-        $this->app->singleton('flux.widget_manager', fn ($app) => new WidgetManager());
-        $this->app->singleton('flux.action_manager', fn ($app) => new ActionManager());
-        $this->app->singleton('flux.menu_manager', fn ($app) => new MenuManager());
-        $this->app->singleton('flux.repeatable_manager', fn ($app) => new RepeatableManager());
+        $this->app->singleton('flux.asset_manager', fn ($app) => app(AssetManager::class));
+        $this->app->singleton('flux.widget_manager', fn ($app) => app(WidgetManager::class));
+        $this->app->singleton('flux.action_manager', fn ($app) => app(ActionManager::class));
+        $this->app->singleton('flux.menu_manager', fn ($app) => app(MenuManager::class));
+        $this->app->singleton('flux.repeatable_manager', fn ($app) => app(RepeatableManager::class));
+
+        Asset::vite(flux_path('public/build'), [
+            'resources/js/app.js',
+            'resources/js/alpine.js',
+            'resources/js/apex-charts.js',
+            'resources/css/app.css',
+        ]);
 
         $this->app->extend(Builder::class, function (Builder $scoutBuilder) {
             if (($user = auth()->user()) instanceof User
@@ -145,6 +155,12 @@ class FluxServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (auth()->check()) {
+            Asset::vite(flux_path('public/build'), [
+                'resources/js/web-push.js',
+            ]);
+        }
+
         bcscale(9);
 
         $this->registerCommands();

@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use RecursiveDirectoryIterator;
@@ -95,10 +96,17 @@ class RepeatableManager
                 continue;
             }
 
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
-                RecursiveIteratorIterator::SELF_FIRST
-            );
+            $cacheKey = md5(($directory ?? '') . implode('', $namespaces));
+
+            if (! is_null($repeatables = Cache::get('flux.actions.' . $cacheKey)) && ! app()->runningInConsole()) {
+                $iterator = [];
+            } else {
+                $repeatables = [];
+                $iterator = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
+                    RecursiveIteratorIterator::SELF_FIRST
+                );
+            }
 
             foreach ($iterator as $file) {
                 if ($file->isFile() && $file->getExtension() === 'php') {
@@ -115,13 +123,19 @@ class RepeatableManager
                         continue;
                     }
 
-                    try {
-                        $this->register($class::name(), $class);
-                    } catch (InvalidArgumentException) {
-                        // Ignore exceptions during auto-discovery
-                    }
+                    $repeatables[$class::name()] = $class;
                 }
             }
+
+            foreach ($repeatables as $name => $class) {
+                try {
+                    $this->register($name, $class);
+                } catch (InvalidArgumentException) {
+                    // Ignore exceptions during auto-discovery
+                }
+            }
+
+            Cache::put('flux.actions.' . $cacheKey, $repeatables);
         }
     }
 

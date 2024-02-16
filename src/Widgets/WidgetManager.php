@@ -3,6 +3,7 @@
 namespace FluxErp\Widgets;
 
 use FluxErp\Traits\Widgetable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
@@ -73,10 +74,17 @@ class WidgetManager
             return;
         }
 
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
+        $cacheKey = md5(($path ?? '') . ($namespace ?? ''));
+
+        if (! is_null($widgets = Cache::get('flux.widgets.' . $cacheKey)) && ! app()->runningInConsole()) {
+            $iterator = [];
+        } else {
+            $widgets = [];
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+        }
 
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === 'php') {
@@ -100,13 +108,19 @@ class WidgetManager
                         continue;
                     }
 
-                    try {
-                        $this->register($componentName, $componentName);
-                    } catch (\Exception $e) {
-                        // Don't throw exceptions on auto discovery
-                    }
+                    $widgets[$componentName] = $class;
                 }
             }
         }
+
+        foreach ($widgets as $name => $class) {
+            try {
+                $this->register($name, $name);
+            } catch (\Exception $e) {
+                // Don't throw exceptions on auto discovery
+            }
+        }
+
+        Cache::put('flux.widgets.' . $cacheKey, $widgets);
     }
 }
