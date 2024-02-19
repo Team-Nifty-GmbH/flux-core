@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Address;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Address;
+use FluxErp\Rules\ModelExists;
 
 class DeleteAddress extends FluxAction
 {
@@ -11,7 +12,11 @@ class DeleteAddress extends FluxAction
     {
         parent::boot($data);
         $this->rules = [
-            'id' => 'required|integer|exists:addresses,id,deleted_at,NULL',
+            'id' => [
+                'required',
+                'integer',
+                new ModelExists(Address::class),
+            ],
         ];
     }
 
@@ -22,7 +27,7 @@ class DeleteAddress extends FluxAction
 
     public function performAction(): ?bool
     {
-        $address = Address::query()
+        $address = app(Address::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

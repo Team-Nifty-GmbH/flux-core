@@ -13,7 +13,7 @@ class UpdateValueList extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateValueListRequest())->rules();
+        $this->rules = resolve_silently(UpdateValueListRequest::class)->rules();
     }
 
     public static function models(): array
@@ -23,7 +23,7 @@ class UpdateValueList extends FluxAction
 
     public function performAction(): Model
     {
-        $valueList = AdditionalColumn::query()
+        $valueList = app(AdditionalColumn::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -38,7 +38,7 @@ class UpdateValueList extends FluxAction
         parent::validateData();
 
         $errors = [];
-        $valueList = AdditionalColumn::query()
+        $valueList = app(AdditionalColumn::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -57,7 +57,7 @@ class UpdateValueList extends FluxAction
         $this->data['name'] = $this->data['name'] ?? $valueList->name;
         $this->data['model_type'] = $this->data['model_type'] ?? $valueList->model_type;
 
-        if (AdditionalColumn::query()
+        if (app(AdditionalColumn::class)->query()
             ->where('id', '!=', $this->data['id'])
             ->where('name', $this->data['name'])
             ->where('model_type', $this->data['model_type'])

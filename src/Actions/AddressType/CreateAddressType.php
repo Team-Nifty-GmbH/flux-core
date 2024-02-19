@@ -12,7 +12,7 @@ class CreateAddressType extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateAddressTypeRequest())->rules();
+        $this->rules = resolve_silently(CreateAddressTypeRequest::class)->rules();
     }
 
     public static function models(): array
@@ -22,7 +22,7 @@ class CreateAddressType extends FluxAction
 
     public function performAction(): AddressType
     {
-        $addressType = new AddressType($this->data);
+        $addressType = app(AddressType::class, ['attributes' => $this->data]);
         $addressType->save();
 
         return $addressType->fresh();
@@ -31,7 +31,7 @@ class CreateAddressType extends FluxAction
     public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new AddressType());
+        $validator->addModel(app(AddressType::class));
 
         $this->data = $validator->validate();
     }

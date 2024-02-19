@@ -22,7 +22,7 @@ class UpdateAddress extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateAddressRequest())->rules();
+        $this->rules = resolve_silently(UpdateAddressRequest::class)->rules();
     }
 
     public static function models(): array
@@ -32,7 +32,7 @@ class UpdateAddress extends FluxAction
 
     public function performAction(): Model
     {
-        $address = Address::query()
+        $address = app(Address::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -41,7 +41,7 @@ class UpdateAddress extends FluxAction
         $canLogin = $address->can_login;
 
         if (! data_get($this->data, 'is_main_address', false)
-            && ! Address::query()
+            && ! app(Address::class)->query()
                 ->where('contact_id', $this->data['contact_id'] ?? $address->contact_id)
                 ->where('is_main_address', true)
                 ->exists()
@@ -50,7 +50,7 @@ class UpdateAddress extends FluxAction
         }
 
         if (! data_get($this->data, 'is_invoice_address', false)
-            && ! Address::query()
+            && ! app(Address::class)->query()
                 ->where('contact_id', $this->data['contact_id'] ?? $address->contact_id)
                 ->where('is_invoice_address', true)
                 ->exists()
@@ -59,7 +59,7 @@ class UpdateAddress extends FluxAction
         }
 
         if (! data_get($this->data, 'is_delivery_address', false)
-            && ! Address::query()
+            && ! app(Address::class)->query()
                 ->where('contact_id', $this->data['contact_id'] ?? $address->contact_id)
                 ->where('is_delivery_address', true)
                 ->exists()
@@ -73,7 +73,7 @@ class UpdateAddress extends FluxAction
         $address->save();
 
         if (! is_null($tags)) {
-            $address->syncTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
+            $address->syncTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
         }
 
         if (! is_null($contactOptions)) {
@@ -89,7 +89,7 @@ class UpdateAddress extends FluxAction
         }
 
         if ($this->data['address_types'] ?? false) {
-            $addressTypes = AddressType::query()
+            $addressTypes = app(AddressType::class)->query()
                 ->whereIntegerInRaw('id', $this->data['address_types'])
                 ->where('is_unique', true)
                 ->whereHas('addresses', fn (Builder $query) => $query->where('contact_id', $this->data['contact_id'])
@@ -114,12 +114,12 @@ class UpdateAddress extends FluxAction
     public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Address());
+        $validator->addModel(app(Address::class));
 
         $this->data = $validator->validate();
 
         $errors = [];
-        $address = Address::query()
+        $address = app(Address::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

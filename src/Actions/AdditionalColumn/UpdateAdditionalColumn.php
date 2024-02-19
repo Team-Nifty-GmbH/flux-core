@@ -13,7 +13,7 @@ class UpdateAdditionalColumn extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateAdditionalColumnRequest())->rules();
+        $this->rules = resolve_silently(UpdateAdditionalColumnRequest::class)->rules();
     }
 
     public static function models(): array
@@ -35,7 +35,7 @@ class UpdateAdditionalColumn extends FluxAction
             $this->data['validations'] = null;
         }
 
-        $additionalColumn = AdditionalColumn::query()
+        $additionalColumn = app(AdditionalColumn::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -49,7 +49,7 @@ class UpdateAdditionalColumn extends FluxAction
     {
         parent::validateData();
 
-        $additionalColumn = AdditionalColumn::query()
+        $additionalColumn = app(AdditionalColumn::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

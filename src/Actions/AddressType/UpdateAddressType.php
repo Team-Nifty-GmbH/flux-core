@@ -13,7 +13,7 @@ class UpdateAddressType extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateAddressTypeRequest())->rules();
+        $this->rules = resolve_silently(UpdateAddressTypeRequest::class)->rules();
     }
 
     public static function models(): array
@@ -23,7 +23,7 @@ class UpdateAddressType extends FluxAction
 
     public function performAction(): Model
     {
-        $addressType = AddressType::query()
+        $addressType = app(AddressType::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -36,7 +36,7 @@ class UpdateAddressType extends FluxAction
     public function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new AddressType());
+        $validator->addModel(app(AddressType::class));
 
         $this->data = $validator->validate();
     }

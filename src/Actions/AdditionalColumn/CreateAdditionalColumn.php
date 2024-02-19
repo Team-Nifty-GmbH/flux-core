@@ -11,7 +11,7 @@ class CreateAdditionalColumn extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateAdditionalColumnRequest())->rules();
+        $this->rules = resolve_silently(CreateAdditionalColumnRequest::class)->rules();
     }
 
     public static function models(): array
@@ -29,7 +29,7 @@ class CreateAdditionalColumn extends FluxAction
             $this->data['values'] = null;
         }
 
-        $additionalColumn = new AdditionalColumn($this->data);
+        $additionalColumn = app(AdditionalColumn::class, ['attributes' => $this->data]);
         $additionalColumn->save();
 
         return $additionalColumn->fresh();

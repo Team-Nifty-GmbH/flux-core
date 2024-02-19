@@ -16,7 +16,7 @@ class ModelExists extends Builder implements ValidationRule
     public function __construct(Model|string $model, ?string $key = null)
     {
         if (is_string($model)) {
-            $model = new $model;
+            $model = app($model);
         }
 
         $this->key = $key ?: $model->getKeyName();

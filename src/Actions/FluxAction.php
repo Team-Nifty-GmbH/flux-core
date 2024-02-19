@@ -3,7 +3,6 @@
 namespace FluxErp\Actions;
 
 use FluxErp\Models\Permission;
-use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Support\Arrayable;
@@ -15,8 +14,6 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class FluxAction
 {
-    use Makeable;
-
     protected array $data;
 
     protected array $rules = [];
@@ -62,6 +59,11 @@ abstract class FluxAction
     protected function boot(array $data): void
     {
         $this->setData($data[0] ?? [], $data[1] ?? false);
+    }
+
+    public static function make(...$data): static
+    {
+        return app(static::class, ['data' => $data]);
     }
 
     public static function canPerformAction(bool $throwException = true): bool
