@@ -29,6 +29,12 @@ class ViewServiceProvider extends ServiceProvider
                 'resources/js/apex-charts.js',
                 'resources/css/app.css',
             ]);
+
+            if (auth()->check()) {
+                Asset::vite(flux_path('public/build'), [
+                    'resources/js/web-push.js',
+                ]);
+            }
         }
 
         /** use @extendFlux() at the end of the component, not the beginning */

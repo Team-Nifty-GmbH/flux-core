@@ -148,12 +148,6 @@ class FluxServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (auth()->check()) {
-            Asset::vite(flux_path('public/build'), [
-                'resources/js/web-push.js',
-            ]);
-        }
-
         bcscale(9);
 
         $this->registerCommands();
