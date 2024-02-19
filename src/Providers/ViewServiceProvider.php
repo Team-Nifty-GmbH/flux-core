@@ -30,7 +30,7 @@ class ViewServiceProvider extends ServiceProvider
                 'resources/css/app.css',
             ]);
 
-            if (auth()->check()) {
+            if (auth()->guard('web')->check()) {
                 Asset::vite(flux_path('public/build'), [
                     'resources/js/web-push.js',
                 ]);
