@@ -62,18 +62,19 @@ class ViewServiceProvider extends ServiceProvider
                 $migrated = false;
             }
 
-            if (
-                $migrated &&
-                (! $this->app->runningInConsole() || $this->app->runningUnitTests())
-            ) {
-
+            if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
                 Asset::vite(flux_path('public/build'), [
                     'resources/js/app.js',
                     'resources/js/alpine.js',
                     'resources/js/apex-charts.js',
                     'resources/css/app.css',
                 ]);
+            }
 
+            if (
+                $migrated &&
+                (! $this->app->runningInConsole() || $this->app->runningUnitTests())
+            ) {
                 View::share(
                     'defaultCurrency',
                     Cache::remember('defaultCurrency', 60 * 60 * 24, function () {
