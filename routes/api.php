@@ -69,6 +69,7 @@ use FluxErp\Http\Controllers\UserController;
 use FluxErp\Http\Controllers\ValueListController;
 use FluxErp\Http\Controllers\VatRateController;
 use FluxErp\Http\Controllers\WarehouseController;
+use FluxErp\Http\Middleware\SetAcceptHeaders;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
@@ -280,7 +281,8 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::delete('/mail-accounts/{id}', [MailAccountController::class, 'delete']);
 
         //Media
-        Route::get('/media/private/{id}', [MediaController::class, 'download']);
+        Route::get('/media/private/{id}', [MediaController::class, 'download'])
+            ->withoutMiddleware(SetAcceptHeaders::class);
         Route::post('/media/{id}', [MediaController::class, 'replace']);
         Route::post('/media', [MediaController::class, 'upload']);
         Route::put('/media', [MediaController::class, 'update']);

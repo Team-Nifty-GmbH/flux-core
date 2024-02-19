@@ -52,11 +52,17 @@ class PurchaseInvoiceTest extends BaseSetup
 
         $this->clients = Client::factory()->count(2)->create();
 
+        $this->paymentTypes = PaymentType::factory()->count(2)->create([
+            'client_id' => $this->dbClient->id,
+        ]);
+
         $this->contacts = Contact::factory()->count(2)
             ->has(Address::factory()->set('client_id', $this->dbClient->id))
             ->for(PriceList::factory())
             ->create([
                 'client_id' => $this->dbClient->id,
+                'payment_type_id' => $this->paymentTypes->random()->id,
+                'discount_target' => 0,
             ]);
 
         $this->currencies = Currency::factory()->count(3)->create();
@@ -67,10 +73,6 @@ class PurchaseInvoiceTest extends BaseSetup
         $this->orderTypes = OrderType::factory()->count(3)->create([
             'client_id' => $this->dbClient->id,
             'order_type_enum' => OrderTypeEnum::Purchase,
-        ]);
-
-        $this->paymentTypes = PaymentType::factory()->count(2)->create([
-            'client_id' => $this->dbClient->id,
         ]);
 
         $vatRates = VatRate::factory()->count(3)->create();
@@ -380,7 +382,12 @@ class PurchaseInvoiceTest extends BaseSetup
         $this->assertEquals($dbPurchaseInvoice->order_id, $dbOrder->id);
         $this->assertEquals($dbPurchaseInvoice->order_type_id, $dbOrder->order_type_id);
         $this->assertEquals($dbPurchaseInvoice->payment_type_id, $dbOrder->payment_type_id);
-        $this->assertEquals($dbPurchaseInvoice->invoice_date, $dbOrder->invoice_date);
+        $this->assertEquals(
+            is_null($dbPurchaseInvoice->invoice_date)
+                ? now()->toDateString()
+                : $dbPurchaseInvoice->invoice_date->toDateString(),
+            $dbOrder->invoice_date->toDateString()
+        );
         $this->assertEquals($dbPurchaseInvoice->invoice_number, $dbOrder->invoice_number);
     }
 

@@ -36,8 +36,6 @@ class BaseSetup extends TestCase
         $this->user->password = 'password';
         $this->user->save();
 
-        $this->withHeader('Accept', 'application/json');
-
         $this->user->clients()->attach($this->dbClient->id);
     }
 }
