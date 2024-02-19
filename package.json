@@ -35,7 +35,7 @@
         "@alpinejs/collapse": "^3.13.5",
         "@tiptap/core": "^2.2.0",
         "@tiptap/pm": "^2.2.3",
-        "@tiptap/starter-kit": "^2.2.0",
+        "@tiptap/starter-kit": "^2.2.3",
         "@wireui/alpinejs-hold-directive": "^1.0.1",
         "apexcharts": "^3.46.0",
         "dayjs": "^1.11.10"
