@@ -128,13 +128,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->singleton('flux.menu_manager', fn ($app) => app(MenuManager::class));
         $this->app->singleton('flux.repeatable_manager', fn ($app) => app(RepeatableManager::class));
 
-        Asset::vite(flux_path('public/build'), [
-            'resources/js/app.js',
-            'resources/js/alpine.js',
-            'resources/js/apex-charts.js',
-            'resources/css/app.css',
-        ]);
-
         $this->app->extend(Builder::class, function (Builder $scoutBuilder) {
             if (($user = auth()->user()) instanceof User
                 && in_array(HasClientAssignment::class, class_uses_recursive($scoutBuilder->model))

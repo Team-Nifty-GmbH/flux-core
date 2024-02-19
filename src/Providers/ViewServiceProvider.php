@@ -2,6 +2,7 @@
 
 namespace FluxErp\Providers;
 
+use FluxErp\Facades\Asset;
 use FluxErp\Models\Currency;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
@@ -65,6 +66,14 @@ class ViewServiceProvider extends ServiceProvider
                 $migrated &&
                 (! $this->app->runningInConsole() || $this->app->runningUnitTests())
             ) {
+
+                Asset::vite(flux_path('public/build'), [
+                    'resources/js/app.js',
+                    'resources/js/alpine.js',
+                    'resources/js/apex-charts.js',
+                    'resources/css/app.css',
+                ]);
+
                 View::share(
                     'defaultCurrency',
                     Cache::remember('defaultCurrency', 60 * 60 * 24, function () {
