@@ -62,7 +62,8 @@ class PurchaseInvoiceTest extends BaseSetup
             ->create([
                 'client_id' => $this->dbClient->id,
                 'payment_type_id' => $this->paymentTypes->random()->id,
-                'discount_target' => 0,
+                'payment_target_days' => 0,
+                'discount_days' => 0,
             ]);
 
         $this->currencies = Currency::factory()->count(3)->create();
@@ -382,12 +383,7 @@ class PurchaseInvoiceTest extends BaseSetup
         $this->assertEquals($dbPurchaseInvoice->order_id, $dbOrder->id);
         $this->assertEquals($dbPurchaseInvoice->order_type_id, $dbOrder->order_type_id);
         $this->assertEquals($dbPurchaseInvoice->payment_type_id, $dbOrder->payment_type_id);
-        $this->assertEquals(
-            is_null($dbPurchaseInvoice->invoice_date)
-                ? now()->toDateString()
-                : $dbPurchaseInvoice->invoice_date->toDateString(),
-            $dbOrder->invoice_date->toDateString()
-        );
+        $this->assertEquals($dbPurchaseInvoice->invoice_date->toDateString(), $dbOrder->invoice_date->toDateString());
         $this->assertEquals($dbPurchaseInvoice->invoice_number, $dbOrder->invoice_number);
     }
 
