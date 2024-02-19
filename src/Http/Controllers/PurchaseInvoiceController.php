@@ -2,10 +2,12 @@
 
 namespace FluxErp\Http\Controllers;
 
+use FluxErp\Actions\PurchaseInvoice\CreateOrderFromPurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoice\DeletePurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoice\UpdatePurchaseInvoice;
 use FluxErp\Helpers\ResponseHelper;
+use FluxErp\Http\Requests\CreateOrderFromPurchaseInvoiceRequest;
 use FluxErp\Http\Requests\CreatePurchaseInvoiceRequest;
 use FluxErp\Models\PurchaseInvoice;
 use Illuminate\Http\JsonResponse;
@@ -94,5 +96,14 @@ class PurchaseInvoiceController extends BaseController
         }
 
         return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
+    public function finish(CreateOrderFromPurchaseInvoiceRequest $request): JsonResponse
+    {
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: CreateOrderFromPurchaseInvoice::make($request->validated())->validate()->execute(),
+            statusMessage: 'order from purchase invoice created'
+        );
     }
 }

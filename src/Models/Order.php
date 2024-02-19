@@ -315,7 +315,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('invoice')
-            ->acceptsMimeTypes(['application/pdf', 'image/*'])
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png'])
             ->singleFile();
 
         $this->addMediaCollection('payment-reminders')

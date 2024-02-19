@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition;
 use FluxErp\Http\Requests\CreatePurchaseInvoiceRequest;
+use FluxErp\Models\Client;
 use FluxErp\Models\Order;
 use FluxErp\Models\PurchaseInvoice;
 use Illuminate\Support\Arr;
@@ -17,6 +18,7 @@ class CreatePurchaseInvoice extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
+        $this->data['client_id'] ??= Client::default()->id;
         $this->rules = resolve_silently(CreatePurchaseInvoiceRequest::class)->rules();
     }
 

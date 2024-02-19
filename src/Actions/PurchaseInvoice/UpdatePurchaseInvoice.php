@@ -58,15 +58,15 @@ class UpdatePurchaseInvoice extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
-        if (
-            data_get($this->data, 'invoice_number', $purchaseInvoice->invoice_number)
-            && data_get($this->data, 'contact_id', $purchaseInvoice->contact_id)
-            && data_get($this->data, 'client_id', $purchaseInvoice->client_id)
-        ) {
+        $invoiceNumber = data_get($this->data, 'invoice_number', $purchaseInvoice->invoice_number);
+        $contactId = data_get($this->data, 'contact_id', $purchaseInvoice->contact_id);
+        $clientId = data_get($this->data, 'client_id', $purchaseInvoice->client_id);
+
+        if ($invoiceNumber && $contactId && $clientId) {
             if (Order::query()
-                ->where('client_id', $this->data['client_id'])
-                ->where('invoice_number', $this->data['invoice_number'])
-                ->where('contact_id', $this->data['contact_id'])
+                ->where('client_id', $clientId)
+                ->where('invoice_number', $invoiceNumber)
+                ->where('contact_id', $contactId)
                 ->when($purchaseInvoice->order_id, fn ($query) => $query->whereKeyNot($purchaseInvoice->order_id))
                 ->exists()
             ) {

@@ -418,6 +418,7 @@ Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission
         Route::post('/purchase-invoices', [PurchaseInvoiceController::class, 'create']);
         Route::put('/purchase-invoices', [PurchaseInvoiceController::class, 'update']);
         Route::delete('/purchase-invoices/{id}', [PurchaseInvoiceController::class, 'delete']);
+        Route::post('/purchase-invoices/finish', [PurchaseInvoiceController::class, 'finish']);
 
         //PurchaseInvoicePositions
         Route::get('/purchase-invoice-positions/{id}', [PurchaseInvoicePositionController::class, 'show']);

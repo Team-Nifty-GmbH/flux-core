@@ -41,10 +41,10 @@ class CreateOrder extends FluxAction
         ) {
             $contact = Contact::query()
                 ->whereKey($contactId)
-                ->with('invoiceAddress')
+                ->with(['invoiceAddress', 'mainAddress', 'addresses'])
                 ->first();
 
-            $addressInvoice = $contact->invoiceAddress;
+            $addressInvoice = $contact->invoiceAddress ?? $contact->mainAddress ?? $contact->addresses->first();
             $this->data['address_invoice_id'] = $addressInvoice->id;
         } elseif (! data_get($this->data, 'contact_id', false)
             && $addressInvoiceId = data_get($this->data, 'address_invoice_id', false)

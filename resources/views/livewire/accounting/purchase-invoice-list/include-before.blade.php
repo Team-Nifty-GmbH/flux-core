@@ -10,7 +10,7 @@
                 />
             </div>
             <div x-cloak x-show="$wire.purchaseInvoiceForm.id">
-                <embed height="100%" lazy class="w-full h-full" x-bind:src="$wire.purchaseInvoiceForm.mediaUrl" type="application/pdf">
+                <embed width="100%" height="100%" lazy class="w-full h-full" x-bind:src="$wire.purchaseInvoiceForm.mediaUrl" type="application/pdf">
             </div>
             <div class="flex flex-col gap-4 overflow-auto">
                 <x-select
