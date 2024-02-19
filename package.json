@@ -18,7 +18,7 @@
         "@tailwindcss/typography": "^0.5.10",
         "autoprefixer": "10.4.17",
         "axios": "^1.6",
-        "dotenv": "^16.4.3",
+        "dotenv": "^16.4.4",
         "dotenv-expand": "^10.0.0",
         "laravel-echo": "^1.15.3",
         "laravel-vite-plugin": "^0.8.0",
