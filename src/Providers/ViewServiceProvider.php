@@ -22,6 +22,15 @@ class ViewServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
+            Asset::vite(flux_path('public/build'), [
+                'resources/js/app.js',
+                'resources/js/alpine.js',
+                'resources/js/apex-charts.js',
+                'resources/css/app.css',
+            ]);
+        }
+
         /** use @extendFlux() at the end of the component, not the beginning */
         Blade::directive('extendFlux', function (string $expression) {
             $expression = trim($expression, '\'');
@@ -60,15 +69,6 @@ class ViewServiceProvider extends ServiceProvider
                 $migrated = app('migrator')->repositoryExists();
             } catch (QueryException) {
                 $migrated = false;
-            }
-
-            if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
-                Asset::vite(flux_path('public/build'), [
-                    'resources/js/app.js',
-                    'resources/js/alpine.js',
-                    'resources/js/apex-charts.js',
-                    'resources/css/app.css',
-                ]);
             }
 
             if (
