@@ -40,7 +40,9 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 ->execute();
         }
 
-        $order->calculatePrices()->calculatePaymentState()->save();
+        $order->calculatePrices()
+            ->calculatePaymentState()
+            ->save();
 
         $invoice = $this->purchaseInvoice->getFirstMedia('purchase_invoice')->move($order, 'invoice');
 

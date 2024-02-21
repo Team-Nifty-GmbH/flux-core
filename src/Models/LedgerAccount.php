@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\LedgerAccountTypeEnum;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,7 +11,7 @@ use Laravel\Scout\Searchable;
 
 class LedgerAccount extends Model
 {
-    use HasUuid, Searchable;
+    use HasPackageFactory, HasUuid, Searchable;
 
     protected $casts = [
         'ledger_account_type_enum' => LedgerAccountTypeEnum::class,

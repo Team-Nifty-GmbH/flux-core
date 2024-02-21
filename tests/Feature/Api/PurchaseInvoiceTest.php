@@ -9,11 +9,13 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
+use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Product;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
 use FluxErp\Models\VatRate;
@@ -66,12 +68,12 @@ class PurchaseInvoiceTest extends BaseSetup
                 'discount_days' => 0,
             ]);
 
-        $this->currencies = Currency::factory()->count(3)->create();
+        $this->currencies = Currency::factory()->count(2)->create();
         Currency::query()->first()->update(['is_default' => true]);
 
-        $languages = Language::factory()->count(3)->create();
+        $language = Language::factory()->create();
 
-        $this->orderTypes = OrderType::factory()->count(3)->create([
+        $this->orderTypes = OrderType::factory()->count(2)->create([
             'client_id' => $this->dbClient->id,
             'order_type_enum' => OrderTypeEnum::Purchase,
         ]);
@@ -92,19 +94,19 @@ class PurchaseInvoiceTest extends BaseSetup
                 'contact_id' => $this->contacts->random()->id,
             ]);
 
-        $this->orders = Order::factory()->count(3)->create([
+        $this->order = Order::factory()->create([
             'client_id' => $this->clients[0]->id,
             'currency_id' => $this->currencies->random()->id,
             'order_type_id' => $this->orderTypes[0]->id,
             'payment_type_id' => $this->paymentTypes[0]->id,
             'contact_id' => $this->contacts->random()->id,
             'address_invoice_id' => $this->contacts->random()->addresses->first()->id,
-            'language_id' => $languages->random()->id,
+            'language_id' => $language->id,
             'is_locked' => true,
         ]);
 
-        $this->orders[0]->invoice_number = Str::uuid()->toString();
-        $this->orders[0]->save();
+        $this->order->invoice_number = Str::uuid()->toString();
+        $this->order->save();
 
         $this->user->clients()->attach($this->clients->pluck('id')->toArray());
 
@@ -128,8 +130,7 @@ class PurchaseInvoiceTest extends BaseSetup
         $response = $this->actingAs($this->user)->get('/api/purchase-invoices/' . $this->purchaseInvoices[0]->id);
         $response->assertStatus(200);
 
-        $json = json_decode($response->getContent());
-        $purchaseInvoice = $json->data;
+        $purchaseInvoice = json_decode($response->getContent())->data;
         $this->assertNotEmpty($purchaseInvoice);
         $this->assertEquals($this->purchaseInvoices[0]->id, $purchaseInvoice->id);
         $this->assertEquals($this->purchaseInvoices[0]->client_id, $purchaseInvoice->client_id);
@@ -139,8 +140,10 @@ class PurchaseInvoiceTest extends BaseSetup
         $this->assertEquals($this->purchaseInvoices[0]->order_id, $purchaseInvoice->order_id);
         $this->assertEquals($this->purchaseInvoices[0]->order_type_id, $purchaseInvoice->order_type_id);
         $this->assertEquals($this->purchaseInvoices[0]->payment_type_id, $purchaseInvoice->payment_type_id);
-        $this->assertEquals($this->purchaseInvoices[0]->invoice_date,
-            ! is_null($purchaseInvoice->invoice_date) ? Carbon::parse($purchaseInvoice->invoice_date) : null);
+        $this->assertEquals(
+            $this->purchaseInvoices[0]->invoice_date->toDateString(),
+            Carbon::parse($purchaseInvoice->invoice_date)->toDateString()
+        );
         $this->assertEquals($this->purchaseInvoices[0]->invoice_number, $purchaseInvoice->invoice_number);
         $this->assertEquals($this->purchaseInvoices[0]->hash, $purchaseInvoice->hash);
         $this->assertEquals($this->purchaseInvoices[0]->is_net, $purchaseInvoice->is_net);
@@ -167,11 +170,16 @@ class PurchaseInvoiceTest extends BaseSetup
         $response = $this->actingAs($this->user)->get('/api/purchase-invoices');
         $response->assertStatus(200);
 
-        $json = json_decode($response->getContent());
-        $purchaseInvoices = $json->data->data;
-        $referencePurchaseInvoice = PurchaseInvoice::query()->first();
+        $purchaseInvoices = json_decode($response->getContent())->data->data;
 
         $this->assertNotEmpty($purchaseInvoices);
+        $this->assertGreaterThanOrEqual(3, count($purchaseInvoices));
+        $this->assertObjectHasProperty('id', $purchaseInvoices[0]);
+        $referencePurchaseInvoice = PurchaseInvoice::query()
+            ->whereKey($purchaseInvoices[0]->id)
+            ->first();
+
+        $this->assertNotNull($referencePurchaseInvoice);
         $this->assertEquals($referencePurchaseInvoice->id, $this->purchaseInvoices[0]->id);
         $this->assertEquals($referencePurchaseInvoice->client_id, $this->purchaseInvoices[0]->client_id);
         $this->assertEquals($referencePurchaseInvoice->contact_id, $this->purchaseInvoices[0]->contact_id);
@@ -180,8 +188,10 @@ class PurchaseInvoiceTest extends BaseSetup
         $this->assertEquals($referencePurchaseInvoice->order_id, $this->purchaseInvoices[0]->order_id);
         $this->assertEquals($referencePurchaseInvoice->order_type_id, $this->purchaseInvoices[0]->order_type_id);
         $this->assertEquals($referencePurchaseInvoice->payment_type_id, $this->purchaseInvoices[0]->payment_type_id);
-        $this->assertEquals(Carbon::parse($referencePurchaseInvoice->invoice_date),
-            ! is_null($this->purchaseInvoices[0]->invoice_date) ? Carbon::parse($this->purchaseInvoices[0]->invoice_date) : null);
+        $this->assertEquals(
+            $referencePurchaseInvoice->invoice_date->toDateString(),
+            Carbon::parse($this->purchaseInvoices[0]->invoice_date)->toDateString()
+        );
         $this->assertEquals($referencePurchaseInvoice->invoice_number, $this->purchaseInvoices[0]->invoice_number);
         $this->assertEquals($referencePurchaseInvoice->hash, $this->purchaseInvoices[0]->hash);
         $this->assertEquals($referencePurchaseInvoice->is_net, $this->purchaseInvoices[0]->is_net);
@@ -209,9 +219,115 @@ class PurchaseInvoiceTest extends BaseSetup
             ->first();
 
         $this->assertNotEmpty($dbPurchaseInvoice);
-
+        $this->assertEquals(Client::default()?->id, $dbPurchaseInvoice->client_id);
+        $this->assertNull($dbPurchaseInvoice->contact_id);
+        $this->assertNull($dbPurchaseInvoice->currency_id);
+        $this->assertNotNull($dbPurchaseInvoice->media_id);
+        $this->assertNull($dbPurchaseInvoice->order_id);
+        $this->assertNull($dbPurchaseInvoice->order_type_id);
+        $this->assertNull($dbPurchaseInvoice->payment_type_id);
+        $this->assertEquals(
+            Carbon::now()->toDateString(),
+            Carbon::parse($dbPurchaseInvoice->invoice_date)->toDateString()
+        );
+        $this->assertNull($dbPurchaseInvoice->invoice_number);
+        $this->assertTrue($dbPurchaseInvoice->is_net);
         $this->assertEquals($this->user->id, $dbPurchaseInvoice->created_by->id);
         $this->assertEquals($this->user->id, $dbPurchaseInvoice->updated_by->id);
+        $this->assertEmpty($dbPurchaseInvoice->purchaseInvoicePositions);
+    }
+
+    public function test_create_purchase_invoice_maximum()
+    {
+        $ledgerAccount = LedgerAccount::factory()->create();
+        $product = Product::factory()->create([
+            'client_id' => $this->dbClient->id,
+        ]);
+        $vatRate = VatRate::factory()->create();
+
+        $purchaseInvoice = [
+            'uuid' => Str::uuid()->toString(),
+            'client_id' => $this->dbClient->id,
+            'contact_id' => $this->contacts->random()->id,
+            'currency_id' => $this->currencies->random()->id,
+            'order_type_id' => $this->orderTypes->random()->id,
+            'payment_type_id' => $this->paymentTypes->random()->id,
+            'invoice_date' => Carbon::yesterday()->toDateString(),
+            'invoice_number' => Str::random(),
+            'is_net' => false,
+            'media' => UploadedFile::fake()->image('test_purchase_invoice.jpeg'),
+            'purchase_invoice_positions' => [
+                [
+                    'ledger_account_id' => $ledgerAccount->id,
+                    'product_id' => $product->id,
+                    'vat_rate_id' => $vatRate->id,
+                    'name' => Str::random(),
+                    'amount' => $amount = rand(1, 100),
+                    'unit_price' => $unitPrice = rand(0, 10000) / 100,
+                    'total_price' => $amount * $unitPrice,
+                ],
+            ],
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/purchase-invoices', $purchaseInvoice);
+        $response->assertStatus(201);
+
+        $responsePurchaseInvoice = json_decode($response->getContent())->data;
+        $dbPurchaseInvoice = PurchaseInvoice::query()
+            ->whereKey($responsePurchaseInvoice->id)
+            ->first();
+
+        $this->assertNotEmpty($dbPurchaseInvoice);
+        $this->assertEquals($purchaseInvoice['uuid'], $dbPurchaseInvoice->uuid);
+        $this->assertEquals($purchaseInvoice['client_id'], $dbPurchaseInvoice->client_id);
+        $this->assertEquals($purchaseInvoice['contact_id'], $dbPurchaseInvoice->contact_id);
+        $this->assertEquals($purchaseInvoice['currency_id'], $dbPurchaseInvoice->currency_id);
+        $this->assertNotNull($dbPurchaseInvoice->media_id);
+        $this->assertNull($dbPurchaseInvoice->order_id);
+        $this->assertEquals($purchaseInvoice['order_type_id'], $dbPurchaseInvoice->order_type_id);
+        $this->assertEquals($purchaseInvoice['payment_type_id'], $dbPurchaseInvoice->payment_type_id);
+        $this->assertEquals(
+            $purchaseInvoice['invoice_date'],
+            Carbon::parse($dbPurchaseInvoice->invoice_date)->toDateString()
+        );
+        $this->assertEquals($purchaseInvoice['invoice_number'], $dbPurchaseInvoice->invoice_number);
+        $this->assertEquals($purchaseInvoice['is_net'], $dbPurchaseInvoice->is_net);
+        $this->assertEquals($this->user->id, $dbPurchaseInvoice->created_by->id);
+        $this->assertEquals($this->user->id, $dbPurchaseInvoice->updated_by->id);
+
+        $dbPurchaseInvoicePositions = $dbPurchaseInvoice->purchaseInvoicePositions;
+        $this->assertCount(count($purchaseInvoice['purchase_invoice_positions']), $dbPurchaseInvoicePositions);
+        $this->assertEquals(
+            $purchaseInvoice['purchase_invoice_positions'][0]['ledger_account_id'],
+            $dbPurchaseInvoicePositions[0]->ledger_account_id
+        );
+        $this->assertEquals(
+            $purchaseInvoice['purchase_invoice_positions'][0]['product_id'],
+            $dbPurchaseInvoicePositions[0]->product_id
+        );
+        $this->assertEquals(
+            $purchaseInvoice['purchase_invoice_positions'][0]['vat_rate_id'],
+            $dbPurchaseInvoicePositions[0]->vat_rate_id
+        );
+        $this->assertEquals(
+            $purchaseInvoice['purchase_invoice_positions'][0]['name'],
+            $dbPurchaseInvoicePositions[0]->name
+        );
+        $this->assertEquals(
+            $purchaseInvoice['purchase_invoice_positions'][0]['amount'],
+            $dbPurchaseInvoicePositions[0]->amount
+        );
+        $this->assertEquals(
+            $purchaseInvoice['purchase_invoice_positions'][0]['unit_price'],
+            $dbPurchaseInvoicePositions[0]->unit_price
+        );
+        $this->assertEquals(
+            $purchaseInvoice['purchase_invoice_positions'][0]['total_price'],
+            $dbPurchaseInvoicePositions[0]->total_price
+        );
     }
 
     public function test_create_purchase_invoice_validation_fails()
@@ -300,12 +416,21 @@ class PurchaseInvoiceTest extends BaseSetup
 
         $this->assertNotEmpty($dbPurchaseInvoice);
         $this->assertEquals($purchaseInvoice['id'], $dbPurchaseInvoice->id);
+        $this->assertEquals($this->purchaseInvoices[0]->uuid, $dbPurchaseInvoice->uuid);
+        $this->assertEquals($this->purchaseInvoices[0]->client_id, $dbPurchaseInvoice->client_id);
         $this->assertEquals($purchaseInvoice['contact_id'], $dbPurchaseInvoice->contact_id);
         $this->assertEquals($purchaseInvoice['currency_id'], $dbPurchaseInvoice->currency_id);
+        $this->assertEquals($this->purchaseInvoices[0]->media_id, $dbPurchaseInvoice->media_id);
+        $this->assertEquals($this->purchaseInvoices[0]->order_id, $dbPurchaseInvoice->order_id);
         $this->assertEquals($purchaseInvoice['order_type_id'], $dbPurchaseInvoice->order_type_id);
         $this->assertEquals($purchaseInvoice['payment_type_id'], $dbPurchaseInvoice->payment_type_id);
-        $this->assertEquals($purchaseInvoice['invoice_date'], Carbon::parse($dbPurchaseInvoice->invoice_date)->toDateString());
+        $this->assertEquals(
+            $purchaseInvoice['invoice_date'],
+            Carbon::parse($dbPurchaseInvoice->invoice_date)->toDateString()
+        );
         $this->assertEquals($purchaseInvoice['invoice_number'], $dbPurchaseInvoice->invoice_number);
+        $this->assertEquals($this->purchaseInvoices[0]->hash, $dbPurchaseInvoice->hash);
+        $this->assertEquals($this->purchaseInvoices[0]->is_net, $dbPurchaseInvoice->is_net);
         $this->assertEquals($this->user->id, $dbPurchaseInvoice->updated_by->id);
         $this->assertCount(
             count($purchaseInvoice['purchase_invoice_positions']),
@@ -317,9 +442,9 @@ class PurchaseInvoiceTest extends BaseSetup
     {
         $purchaseInvoice = [
             'id' => $this->purchaseInvoices[0]->id,
-            'invoice_number' => $this->orders[0]->invoice_number,
-            'contact_id' => $this->orders[0]->contact_id,
-            'client_id' => $this->orders[0]->client_id,
+            'invoice_number' => $this->order->invoice_number,
+            'contact_id' => $this->order->contact_id,
+            'client_id' => $this->order->client_id,
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
@@ -338,7 +463,8 @@ class PurchaseInvoiceTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/purchase-invoices/' . $this->purchaseInvoices[1]->id);
+        $response = $this->actingAs($this->user)
+            ->delete('/api/purchase-invoices/' . $this->purchaseInvoices[1]->id);
         $response->assertStatus(204);
 
         $purchaseInvoice = $this->purchaseInvoices[1]->fresh();
@@ -351,7 +477,8 @@ class PurchaseInvoiceTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/purchase-invoices/' . ++$this->purchaseInvoices[2]->id);
+        $response = $this->actingAs($this->user)
+            ->delete('/api/purchase-invoices/' . ++$this->purchaseInvoices[2]->id);
         $response->assertStatus(404);
     }
 
@@ -389,11 +516,12 @@ class PurchaseInvoiceTest extends BaseSetup
 
     public function test_finish_purchase_invoice_validation_fails()
     {
-        $this->purchaseInvoices[1]->client_id = null;
-        $this->purchaseInvoices[1]->contact_id = null;
-        $this->purchaseInvoices[1]->order_type_id = null;
-        $this->purchaseInvoices[1]->invoice_number = null;
-        $this->purchaseInvoices[1]->save();
+        $this->purchaseInvoices[1]->update([
+            'client_id' => null,
+            'contact_id' => null,
+            'order_type_id' => null,
+            'invoice_number' => null,
+        ]);
 
         $purchaseInvoice = [
             'id' => $this->purchaseInvoices[1]->id,
@@ -407,10 +535,10 @@ class PurchaseInvoiceTest extends BaseSetup
         $response->assertStatus(422);
 
         $response->assertJsonValidationErrors([
-            'invoice_number',
             'client_id',
             'contact_id',
             'order_type_id',
+            'invoice_number',
         ]);
     }
 }

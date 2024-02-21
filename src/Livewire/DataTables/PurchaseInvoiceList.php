@@ -42,6 +42,21 @@ class PurchaseInvoiceList extends DataTable
 
     public MediaForm $mediaForm;
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        if (! $this->userFilters) {
+            $this->userFilters = [
+                [
+                    'column' => 'order_id',
+                    'operator' => 'is null',
+                    'value' => null,
+                ],
+            ];
+        }
+    }
+
     public function getBuilder(Builder $builder): Builder
     {
         return $builder->with('media');

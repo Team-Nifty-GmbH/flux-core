@@ -100,9 +100,13 @@ class PurchaseInvoiceController extends BaseController
 
     public function finish(CreateOrderFromPurchaseInvoiceRequest $request): JsonResponse
     {
+        $order = CreateOrderFromPurchaseInvoice::make($request->validated())
+            ->validate()
+            ->execute();
+
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
-            data: CreateOrderFromPurchaseInvoice::make($request->validated())->validate()->execute(),
+            data: $order,
             statusMessage: 'order from purchase invoice created'
         );
     }

@@ -18,7 +18,6 @@ class CreatePurchaseInvoice extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->data['client_id'] ??= Client::default()->id;
         $this->rules = resolve_silently(CreatePurchaseInvoiceRequest::class)->rules();
     }
 
@@ -55,7 +54,12 @@ class CreatePurchaseInvoice extends FluxAction
         return $purchaseInvoice->fresh();
     }
 
-    public function validateData(): void
+    protected function prepareForValidation(): void
+    {
+        $this->data['client_id'] ??= Client::default()->id;
+    }
+
+    protected function validateData(): void
     {
         parent::validateData();
 

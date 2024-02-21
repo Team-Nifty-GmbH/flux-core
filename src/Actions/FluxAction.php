@@ -190,14 +190,14 @@ abstract class FluxAction
         return $this;
     }
 
-    protected function validateData(): void
-    {
-        $this->data = Validator::validate($this->data, $this->rules);
-    }
-
     protected function prepareForValidation(): void
     {
         //
+    }
+
+    protected function validateData(): void
+    {
+        $this->data = Validator::validate($this->data, $this->rules);
     }
 
     final public function when(callable|bool $condition, callable $callback): static
