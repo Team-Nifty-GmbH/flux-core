@@ -51,8 +51,6 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
         $this->purchaseInvoice->order_id = $order->id;
         $this->purchaseInvoice->save();
 
-        $this->purchaseInvoice->delete();
-
         return $order->fresh();
     }
 

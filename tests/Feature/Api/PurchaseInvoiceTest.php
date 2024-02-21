@@ -502,12 +502,11 @@ class PurchaseInvoiceTest extends BaseSetup
         $dbPurchaseInvoice = $this->purchaseInvoices[0]->fresh();
 
         $this->assertNotEmpty($dbOrder);
-        $this->assertSoftDeleted($dbPurchaseInvoice);
         $this->assertEquals($dbPurchaseInvoice->client_id, $dbOrder->client_id);
         $this->assertEquals($dbPurchaseInvoice->contact_id, $dbOrder->contact_id);
         $this->assertEquals($dbPurchaseInvoice->currency_id, $dbOrder->currency_id);
         $this->assertEquals($dbPurchaseInvoice->media_id, $dbOrder->getFirstMedia('invoice')->id);
-        $this->assertEquals($dbPurchaseInvoice->order_id, $dbOrder->id);
+        $this->assertEquals($dbOrder->id, $dbPurchaseInvoice->order_id);
         $this->assertEquals($dbPurchaseInvoice->order_type_id, $dbOrder->order_type_id);
         $this->assertEquals($dbPurchaseInvoice->payment_type_id, $dbOrder->payment_type_id);
         $this->assertEquals($dbPurchaseInvoice->invoice_date->toDateString(), $dbOrder->invoice_date->toDateString());
