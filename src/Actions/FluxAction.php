@@ -178,6 +178,9 @@ abstract class FluxAction
 
     final public function validate(): static
     {
+        $this->fireActionEvent(event: 'preparingForValidation');
+        $this->prepareForValidation();
+
         if ($this->fireActionEvent(event: 'validating') !== false) {
             $this->validateData();
 
@@ -185,6 +188,11 @@ abstract class FluxAction
         }
 
         return $this;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        //
     }
 
     protected function validateData(): void

@@ -177,7 +177,7 @@ class OrderDetail extends Component
 
     public function render(): mixed
     {
-        return view('flux::livewire.portal.order-detail')->layout('flux::components.layouts.portal');
+        return view('flux::livewire.portal.order-detail');
     }
 
     public function updated(): void

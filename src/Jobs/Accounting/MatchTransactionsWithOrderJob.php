@@ -109,7 +109,7 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
             }
 
             // try to match counterpart name
-            if (! $order) {
+            if (! $order && $transaction->counterpart_name) {
                 $order = Order::query()
                     ->whereNotNull('invoice_number')
                     ->whereHas(

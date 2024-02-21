@@ -29,11 +29,15 @@ class Numeric implements InvokableRule
             bcmul($value, '1', 9);
         } catch (\Throwable $e) {
             $fail('validation.numeric')->translate();
+
+            return;
         }
 
         // 0 = equal, 1 = $value > $min, -1 $value < $min
         if (! is_null($this->min) && bccomp($value, $this->min, 9) === -1) {
             $fail('The :attribute must be at least ' . $this->min . '.')->translate();
+
+            return;
         }
 
         // 0 = equal, 1 = $value > $max, -1 $value < $max
