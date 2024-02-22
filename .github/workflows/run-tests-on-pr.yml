@@ -11,7 +11,7 @@ jobs:
     name: Laravel (PHP ${{ matrix.php-versions }})
     runs-on: test_runner
     env:
-      DB_DATABASE: laravel
+      DB_DATABASE: testing
       DB_USERNAME: root
       DB_PASSWORD: password
       BROADCAST_DRIVER: log
@@ -26,7 +26,7 @@ jobs:
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: false
           MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: laravel
+          MYSQL_DATABASE: testing
         ports:
           - 33306:3306/tcp
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3

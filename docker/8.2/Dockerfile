@@ -57,6 +57,9 @@ RUN sed -i 's/user www-data;/user sail;/g' /etc/nginx/nginx.conf
 RUN sed -i 's/user = www-data/user = sail/g' /etc/php/8.2/fpm/pool.d/www.conf
 RUN sed -i 's/group = www-data/group = sail/g' /etc/php/8.2/fpm/pool.d/www.conf
 
+# Allow all types to ghostscript
+RUN sed -i 's/rights="none" pattern="PDF"/rights="read | write" pattern="PDF"/g' /etc/ImageMagick-6/policy.xml
+
 COPY start-container /usr/local/bin/start-container
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY nginx /etc/nginx/sites-available/default

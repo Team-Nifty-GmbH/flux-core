@@ -14,15 +14,17 @@
                             <livewire:is :component="$ticket['model_type']::getLivewireComponentWidget()" :modelId="$ticket['model_id']" />
                         </x-card>
                     @endif
-                    <template x-for="additionalColumn in additionalColumns">
-                        <div>
-                            <x-label
-                                x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
-                                x-bind:for="additionalColumn.name"
-                            />
-                            <x-input x-bind:type="additionalColumn.field_type" x-model="ticket[additionalColumn.name]" :disabled="true"/>
-                        </div>
-                    </template>
+                    @section('additional-columns')
+                        <template x-for="additionalColumn in additionalColumns">
+                            <div>
+                                <x-label
+                                    x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
+                                    x-bind:for="additionalColumn.name"
+                                />
+                                <x-input x-bind:type="additionalColumn.field_type" x-model="ticket[additionalColumn.name]" :disabled="true"/>
+                            </div>
+                        </template>
+                    @show
                     <h2 class="pt-10 pb-8 text-base font-bold uppercase dark:text-gray-50">{{ __('Attachments') }}</h2>
                     <livewire:folder-tree :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
                 </div>

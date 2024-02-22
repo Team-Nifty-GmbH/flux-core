@@ -34,12 +34,6 @@ class Media extends BaseMedia
         return $this->morphToMany(Category::class, 'categorizable');
     }
 
-    public function getThumbnailAttribute(): ?string
-    {
-        return $this->hasGeneratedConversion('thumb') ?
-            $this->getUrl() . '&thumb=true' : null;
-    }
-
     public function temporaryUpload(): BelongsTo
     {
         // When using the base method from spatie media this method throws an exception.

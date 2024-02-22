@@ -2,6 +2,8 @@
 
 namespace FluxErp\Providers;
 
+use FluxErp\Http\Middleware\Portal;
+use FluxErp\Http\Middleware\SetAcceptHeaders;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -40,7 +42,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->routes(function () {
             Route::prefix('api')
-                ->middleware('throttle:api')
+                ->middleware(['throttle:api', SetAcceptHeaders::class])
                 ->namespace($this->namespace)
                 ->group(__DIR__ . '/../../routes/api.php');
 
@@ -69,7 +71,7 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapWebRoutes(): void
     {
         // Load the subdomain routes first.
-        Route::middleware('web')
+        Route::middleware(['web', Portal::class])
             ->domain(config('flux.portal_domain'))
             ->group(__DIR__ . '/../../routes/frontend/portal.php');
 
