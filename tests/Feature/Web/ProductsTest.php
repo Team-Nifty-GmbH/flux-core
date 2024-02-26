@@ -5,6 +5,7 @@ namespace FluxErp\Tests\Feature\Web;
 use FluxErp\Models\Category;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Permission;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -28,6 +29,7 @@ class ProductsTest extends BaseSetup
         ]);
 
         Currency::factory()->create(['is_default' => true]);
+        PriceList::factory()->create(['is_default' => true]);
 
         $this->product->categories()->attach($category->id);
     }
