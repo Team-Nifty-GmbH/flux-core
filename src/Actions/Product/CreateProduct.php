@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Price\CreatePrice;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Http\Requests\CreateProductRequest;
+use FluxErp\Models\Price;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tag;
 use Illuminate\Support\Arr;
@@ -68,7 +69,7 @@ class CreateProduct extends FluxAction
                 $price['product_id'] = $product->id;
                 try {
                     CreatePrice::make($price)->validate()->execute();
-                } catch (ValidationException $e) {
+                } catch (ValidationException) {
                 }
             }
         }
@@ -97,11 +98,9 @@ class CreateProduct extends FluxAction
     public function prepareForValidation(): void
     {
         if (! data_get($this->data, 'prices') && data_get($this->data, 'parent_id')) {
-            $this->data['prices'] = Product::query()
-                ->whereKey(data_get($this->data, 'parent_id'))
-                ->with('prices')
-                ->first()
-                ->prices
+            $this->data['prices'] = Price::query()
+                ->where('product_id', data_get($this->data, 'parent_id'))
+                ->get()
                 ->toArray();
         }
     }

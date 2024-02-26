@@ -30,7 +30,7 @@ class ProductList extends BaseProductList
         parent::mount();
 
         $this->vatRates = VatRate::all(['id', 'name', 'rate_percentage'])->toArray();
-        $priceList = PriceList::default()->toArray();
+        $priceList = PriceList::default()?->toArray() ?? [];
         $priceList['is_editable'] = true;
 
         $this->priceLists = [$priceList];
@@ -81,10 +81,10 @@ class ProductList extends BaseProductList
     {
         $this->product->prices = [
             [
-                'price_list_id' => $this->priceLists[0]['id'],
-                'price' => $this->priceLists[0]['is_net']
-                    ? $this->priceLists[0]['price_net']
-                    : $this->priceLists[0]['price_gross'],
+                'price_list_id' => data_get($this->priceLists, '0.id'),
+                'price' => data_get($this->priceLists, '0.is_net')
+                    ? data_get($this->priceLists, '0.price_net')
+                    : data_get($this->priceLists, '0.price_gross'),
             ],
         ];
 
