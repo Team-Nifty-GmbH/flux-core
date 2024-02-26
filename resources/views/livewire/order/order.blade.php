@@ -218,11 +218,11 @@
                                 </x-slot:value>
                                 <x-slot:sub-value>
                                     <div class="flex flex-col">
-                                        <span x-text="position.description"></span>
+                                        <span x-html="position.description"></span>
                                     </div>
                                 </x-slot:sub-value>
                                 <x-slot:actions>
-                                    <x-inputs.number x-model="position.amount" :min="0" />
+                                    <x-inputs.number x-model.number="position.amount" min="0" />
                                     <x-button
                                         negative
                                         icon="trash"
@@ -241,7 +241,7 @@
                         <x-button :label="__('Cancel')" x-on:click="close"/>
                         <x-button
                             x-cloak
-                            x-show="$wire.replicateOrder.order_positions.length"
+                            x-show="$wire.replicateOrder.order_positions?.length"
                             primary
                             :label="__('Save')"
                             wire:click="saveReplicate()"
@@ -253,22 +253,27 @@
     @show
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
-        <div class="flex items-center space-x-5">
+        <div class="flex items-center gap-5">
             <x-avatar xl :src="$order->contact['avatar_url'] ?? ''"></x-avatar>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
-                        <x-heroicons x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
-                        <x-heroicons x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
+                        <x-heroicons x-cloak x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
+                        <x-heroicons x-cloak x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
                         <div class="pl-2">
-                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.order_type.name">
-                            </span>
-                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.invoice_number ? $wire.order.invoice_number : ($wire.order.order_number || $wire.order.id)">
-                            </span>
+                            <div>
+                                <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.order_type.name">
+                                </span>
+                                <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.invoice_number ? $wire.order.invoice_number : ($wire.order.order_number || $wire.order.id)">
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <span x-text="$wire.order.address_invoice.description"></span>
                 </h1>
+                <a wire:navigate class="flex gap-1.5 font-semibold opacity-40 dark:text-gray-200" x-bind:href="$wire.order.parent?.url" x-cloak x-show="$wire.order.parent?.url">
+                    <x-heroicons name="link" class="w-4 h-4" />
+                    <span x-text="$wire.order.parent?.label"></span>
+                </a>
             </div>
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">

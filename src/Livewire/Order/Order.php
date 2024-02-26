@@ -194,7 +194,6 @@ class Order extends OrderPositionList
                 ->when(function () {
                     return ReplicateOrder::canPerformAction(false)
                         && $this->order->invoice_date
-                        && $this->order->delivery_state !== Open::$name
                         && OrderType::query()
                             ->whereKey($this->order->order_type_id)
                             ->whereIn('order_type_enum', [
@@ -205,7 +204,6 @@ class Order extends OrderPositionList
                         && OrderType::query()
                             ->where('order_type_enum', OrderTypeEnum::Retoure->value)
                             ->where('is_active', true)
-                            ->where('is_hidden', false)
                             ->exists();
                 })
                 ->attributes([
