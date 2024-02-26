@@ -28,7 +28,6 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\VatRate;
-use FluxErp\States\Order\DeliveryState\Open;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Builder;
