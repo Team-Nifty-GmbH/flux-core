@@ -15,7 +15,7 @@ class Tickets extends Component
 
     public function render(): View
     {
-        return view('flux::livewire.portal.ticket.tickets')->layout('flux::components.layouts.portal');
+        return view('flux::livewire.portal.ticket.tickets');
     }
 
     public function show(): void

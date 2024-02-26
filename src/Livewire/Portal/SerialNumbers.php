@@ -51,8 +51,7 @@ class SerialNumbers extends Component
 
     public function render(): mixed
     {
-        return view('flux::livewire.portal.serial-numbers')
-            ->layout('flux::components.layouts.portal');
+        return view('flux::livewire.portal.serial-numbers');
     }
 
     public function updatedSearch(): void

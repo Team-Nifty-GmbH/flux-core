@@ -443,3 +443,17 @@ if (! function_exists('model')) {
         return app($class);
     }
 }
+
+if (! function_exists('resolve_silently')) {
+    // This function uses the container to resolve a class to an instance.
+    // Dependency injection is triggered but no events are fired.
+    // This allows to resolve a form request class without triggering the validation.
+    function resolve_silently(string $class, array $parameters = []): mixed
+    {
+        try {
+            return \Livewire\invade(app())->resolve($class, $parameters, false);
+        } catch (Throwable) {
+            return null;
+        }
+    }
+}

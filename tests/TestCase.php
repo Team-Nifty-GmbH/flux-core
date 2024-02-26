@@ -40,10 +40,6 @@ abstract class TestCase extends BaseTestCase
 
         parent::setUp();
 
-        config([
-            'auth.defaults.guard' => 'sanctum',
-        ]);
-
         if (! file_exists(public_path('flux'))) {
             symlink(package_path('public'), public_path('flux'));
         }
@@ -76,18 +72,11 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    public function getEnvironmentSetUp($app): void
-    {
-        if (file_exists(base_path('../../../../../../.env'))) {
-            $dotenv = Dotenv::createImmutable(base_path('../../../../../../'));
-            $dotenv->load();
-        }
-    }
-
     protected function defineEnvironment($app): void
     {
         $app['config']->set('database.default', 'mysql');
         $app['config']->set('database.connections.mysql.collation', 'utf8mb4_unicode_ci');
         $app['config']->set('flux.install_done', true);
+        $app['config']->set('auth.defaults.guard', 'sanctum');
     }
 }

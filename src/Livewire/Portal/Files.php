@@ -32,8 +32,7 @@ class Files extends Component
 
     public function render(): mixed
     {
-        return view('flux::livewire.portal.files')
-            ->layout('flux::components.layouts.portal');
+        return view('flux::livewire.portal.files');
     }
 
     public function updatedFilterSlug(): void

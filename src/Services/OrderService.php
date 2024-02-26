@@ -13,7 +13,7 @@ class OrderService
 {
     public function create(array $data): Order
     {
-        return CreateOrder::make($data)->execute();
+        return CreateOrder::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

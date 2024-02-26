@@ -54,8 +54,7 @@ class Service extends Component
 
     public function render(): mixed
     {
-        return view('flux::livewire.portal.service')
-            ->layout('flux::components.layouts.portal');
+        return view('flux::livewire.portal.service');
     }
 
     public function save(): false|Redirector

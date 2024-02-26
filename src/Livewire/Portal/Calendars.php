@@ -14,8 +14,7 @@ class Calendars extends CalendarComponent
 {
     public function render(): Factory|View|Application
     {
-        return view('flux::livewire.portal.calendar-view')
-            ->layout('flux::components.layouts.portal');
+        return view('flux::livewire.portal.calendar-view');
     }
 
     public function getCalendars(): array
