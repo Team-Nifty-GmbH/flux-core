@@ -197,25 +197,83 @@
                 </x-slot:footer>
             </x-card>
         </x-modal>
+        <x-modal name="create-child-order" max-width="7xl">
+            <x-card>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <div class="flex flex-col gap-1.5">
+                        <x-select
+                            :label="__('Order Type')"
+                            wire:model="replicateOrder.order_type_id"
+                            :options="$replicateOrderTypes"
+                            option-value="id"
+                            option-label="name"
+                            :clearable="false"
+                        />
+                    </div>
+                    <div class="overflow-auto">
+                        <template x-for="(position, index) in $wire.replicateOrder.order_positions">
+                            <x-list-item :item="[]">
+                                <x-slot:value>
+                                    <span x-text="position.name"></span>
+                                </x-slot:value>
+                                <x-slot:sub-value>
+                                    <div class="flex flex-col">
+                                        <span x-html="position.description"></span>
+                                    </div>
+                                </x-slot:sub-value>
+                                <x-slot:actions>
+                                    <x-inputs.number x-model.number="position.amount" min="0" />
+                                    <x-button
+                                        negative
+                                        icon="trash"
+                                        x-on:click="$wire.replicateOrder.order_positions.splice(index, 1); $wire.recalculateReplicateOrderPositions();"
+                                    />
+                                </x-slot:actions>
+                            </x-list-item>
+                        </template>
+                    </div>
+                </div>
+                <div class="pt-4">
+                    <livewire:order.replicate-order-position-list :id="$order->id" />
+                </div>
+                <x-slot:footer>
+                    <div class="flex justify-end gap-1.5">
+                        <x-button :label="__('Cancel')" x-on:click="close"/>
+                        <x-button
+                            x-cloak
+                            x-show="$wire.replicateOrder.order_positions?.length"
+                            primary
+                            :label="__('Save')"
+                            wire:click="saveReplicate()"
+                        />
+                    </div>
+                </x-slot:footer>
+            </x-card>
+        </x-modal>
     @show
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
-        <div class="flex items-center space-x-5">
+        <div class="flex items-center gap-5">
             <x-avatar xl :src="$order->contact['avatar_url'] ?? ''"></x-avatar>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
-                        <x-heroicons x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
-                        <x-heroicons x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
+                        <x-heroicons x-cloak x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
+                        <x-heroicons x-cloak x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
                         <div class="pl-2">
-                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.order_type.name">
-                            </span>
-                            <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.invoice_number ? $wire.order.invoice_number : ($wire.order.order_number || $wire.order.id)">
-                            </span>
+                            <div>
+                                <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.order_type.name">
+                                </span>
+                                <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.invoice_number ? $wire.order.invoice_number : ($wire.order.order_number || $wire.order.id)">
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <span x-text="$wire.order.address_invoice.description"></span>
                 </h1>
+                <a wire:navigate class="flex gap-1.5 font-semibold opacity-40 dark:text-gray-200" x-bind:href="$wire.order.parent?.url" x-cloak x-show="$wire.order.parent?.url">
+                    <x-heroicons name="link" class="w-4 h-4" />
+                    <span x-text="$wire.order.parent?.label"></span>
+                </a>
             </div>
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
@@ -543,6 +601,9 @@
                                             </x-dropdown>
                                         </div>
                                     @endif
+                                    @foreach($additionalModelActions as $modelAction)
+                                        {{$modelAction}}
+                                    @endforeach
                                 @show
                             </div>
                         </x-card>

@@ -4,8 +4,10 @@ namespace FluxErp\Http\Requests;
 
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
+use FluxErp\Models\OrderPosition;
 use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 
 class ReplicateOrderRequest extends BaseFormRequest
 {
@@ -25,6 +27,16 @@ class ReplicateOrderRequest extends BaseFormRequest
                     'nullable',
                     new ModelExists(Contact::class),
                     new ExistsWithForeign(foreignAttribute: 'client_id', table: 'contacts'),
+                ],
+                'order_positions' => 'nullable|array',
+                'order_positions.*.id' => [
+                    'required',
+                    'integer',
+                    new ModelExists(OrderPosition::class),
+                ],
+                'order_positions.*.amount' => [
+                    'required',
+                    new Numeric(min: 0),
                 ],
             ]
         );
