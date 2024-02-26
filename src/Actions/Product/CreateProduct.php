@@ -35,6 +35,7 @@ class CreateProduct extends FluxAction
         );
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
         $prices = Arr::pull($this->data, 'prices', []);
+
         $suppliers = Arr::pull($this->data, 'suppliers', false);
         $tags = Arr::pull($this->data, 'tags', []);
 
@@ -67,7 +68,7 @@ class CreateProduct extends FluxAction
                 $price['product_id'] = $product->id;
                 try {
                     CreatePrice::make($price)->validate()->execute();
-                } catch (ValidationException) {
+                } catch (ValidationException $e) {
                 }
             }
         }
@@ -91,5 +92,17 @@ class CreateProduct extends FluxAction
         $validator->addModel(new Product());
 
         $this->data = $validator->validate();
+    }
+
+    public function prepareForValidation(): void
+    {
+        if (! data_get($this->data, 'prices') && data_get($this->data, 'parent_id')) {
+            $this->data['prices'] = Product::query()
+                ->whereKey(data_get($this->data, 'parent_id'))
+                ->with('prices')
+                ->first()
+                ->prices
+                ->toArray();
+        }
     }
 }
