@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Spatie\Tags\HasTags;
@@ -238,27 +239,33 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
 
     public function scopeDescendants(Builder $query): void
     {
-        $query->leftJoin('order_positions AS descendants', 'order_positions.id', '=', 'descendants.origin_position_id')
-            ->selectRaw(
-                'order_positions.id' .
-                ', order_positions.amount' .
-                ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount'
-            )
-            ->groupBy('order_positions.id')
-            ->where('order_positions.is_bundle_position', false);
+        $subQuery = DB::table('order_positions as op')
+            ->select('op.id', 'op.amount')
+            ->selectRaw('SUM(COALESCE(descendants.amount, 0)) AS descendantAmount')
+            ->leftJoin('order_positions AS descendants', 'op.id', '=', 'descendants.origin_position_id')
+            ->where('op.is_bundle_position', false)
+            ->groupBy('op.id');
+
+        $query->joinSub($subQuery, 'sub', function ($join) {
+            $join->on('order_positions.id', '=', 'sub.id');
+        })
+            ->select('order_positions.*', 'sub.descendantAmount');
     }
 
     public function scopeSiblings(Builder $query): void
     {
-        $query->leftJoin('order_positions AS siblings', 'order_positions.id', '=', 'siblings.origin_position_id')
-            ->selectRaw(
-                'order_positions.id' .
-                ', order_positions.amount' .
-                ', SUM(COALESCE(siblings.amount, 0)) AS siblingAmount' .
-                ', order_positions.amount - SUM(COALESCE(siblings.amount, 0)) AS totalAmount'
-            )
-            ->groupBy('order_positions.id')
-            ->where('order_positions.is_bundle_position', false)
-            ->havingRaw('order_positions.amount > siblingAmount');
+        $subQuery = DB::table('order_positions as op')
+            ->select('op.id')
+            ->selectRaw('SUM(COALESCE(siblings.amount, 0)) AS siblingAmount')
+            ->selectRaw('op.amount - SUM(COALESCE(siblings.amount, 0)) AS totalAmount')
+            ->leftJoin('order_positions AS siblings', 'op.id', '=', 'siblings.origin_position_id')
+            ->where('op.is_bundle_position', false)
+            ->groupBy('op.id');
+
+        $query->joinSub($subQuery, 'sub', function ($join) {
+            $join->on('order_positions.id', '=', 'sub.id');
+        })
+            ->select('order_positions.*', 'sub.siblingAmount', 'sub.totalAmount')
+            ->whereRaw('order_positions.amount > sub.siblingAmount');
     }
 }
