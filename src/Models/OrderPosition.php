@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Query\JoinClause;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Spatie\Tags\HasTags;
@@ -239,33 +239,39 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
 
     public function scopeDescendants(Builder $query): void
     {
-        $subQuery = DB::table('order_positions as op')
-            ->select('op.id', 'op.amount')
+        $tableName = $this->getTable();
+        $subQuery = $this->newQuery()
+            ->select([$tableName . '.id', $tableName . '.amount'])
             ->selectRaw('SUM(COALESCE(descendants.amount, 0)) AS descendantAmount')
-            ->leftJoin('order_positions AS descendants', 'op.id', '=', 'descendants.origin_position_id')
-            ->where('op.is_bundle_position', false)
-            ->groupBy('op.id');
+            ->leftJoin($tableName . ' AS descendants', function (JoinClause $join) use ($tableName) {
+                $join->on($tableName . '.id', '=', 'descendants.parent_id')
+                    ->whereNull('descendants.deleted_at');
+            })
+            ->where($tableName . '.is_bundle_position', false)
+            ->groupBy($tableName . '.id');
 
-        $query->joinSub($subQuery, 'sub', function ($join) {
-            $join->on('order_positions.id', '=', 'sub.id');
-        })
-            ->select('order_positions.*', 'sub.descendantAmount');
+        $query->leftJoinSub($subQuery, 'sub', fn (JoinClause $join) => $join->on($tableName . '.id', '=', 'sub.id'))
+            ->addSelect('sub.descendantAmount');
     }
 
     public function scopeSiblings(Builder $query): void
     {
-        $subQuery = DB::table('order_positions as op')
-            ->select('op.id')
+        $tableName = $this->getTable();
+        $subQuery = $this->newQuery()
+            ->select($tableName . '.id')
             ->selectRaw('SUM(COALESCE(siblings.amount, 0)) AS siblingAmount')
-            ->selectRaw('op.amount - SUM(COALESCE(siblings.amount, 0)) AS totalAmount')
-            ->leftJoin('order_positions AS siblings', 'op.id', '=', 'siblings.origin_position_id')
-            ->where('op.is_bundle_position', false)
-            ->groupBy('op.id');
+            ->selectRaw('SUM(COALESCE(' . $tableName . '.amount, 0)) - SUM(COALESCE(siblings.amount, 0))
+                AS totalAmount'
+            )
+            ->leftJoin($tableName . ' AS siblings', function (JoinClause $join) use ($tableName) {
+                $join->on($tableName . '.id', '=', 'siblings.origin_position_id')
+                    ->whereNull('siblings.deleted_at');
+            })
+            ->where($tableName . '.is_bundle_position', false)
+            ->groupBy($tableName . '.id');
 
-        $query->joinSub($subQuery, 'sub', function ($join) {
-            $join->on('order_positions.id', '=', 'sub.id');
-        })
-            ->select('order_positions.*', 'sub.siblingAmount', 'sub.totalAmount')
-            ->whereRaw('order_positions.amount > sub.siblingAmount');
+        $query->leftJoinSub($subQuery, 'sub', fn ($join) => $join->on($tableName . '.id', '=', 'sub.id'))
+            ->addSelect(['sub.siblingAmount', 'sub.totalAmount', $tableName . '.id'])
+            ->whereRaw($tableName . '.amount > sub.siblingAmount');
     }
 }

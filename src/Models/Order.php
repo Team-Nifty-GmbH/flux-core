@@ -154,6 +154,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                 $order->calculateBalance();
             }
         });
+
+        static::deleted(function (Order $order) {
+            $order->orderPositions()->delete();
+        });
     }
 
     public function addresses(): BelongsToMany

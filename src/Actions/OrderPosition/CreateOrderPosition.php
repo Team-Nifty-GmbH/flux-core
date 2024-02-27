@@ -181,7 +181,7 @@ class CreateOrderPosition extends FluxAction
                     ->pluck('totalAmount')
                     ->first();
 
-                if (bccomp($this->data['amount'] ?? 1, $maxAmount)) {
+                if (bccomp($this->data['amount'] ?? 1, $maxAmount) > 0) {
                     throw ValidationException::withMessages([
                         'amount' => [__('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount])],
                     ])->errorBag('createOrderPosition');
