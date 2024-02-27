@@ -2,7 +2,7 @@ name: tests
 
 on:
   push:
-    branches: [ dev, add-x86-self-hosted-runner ]
+    branches: [ dev ]
   pull_request:
     branches: [ main, dev ]
 
