@@ -98,9 +98,8 @@ class FillOrderPositions extends FluxAction
         $deletedOrderPositions = OrderPosition::query()
             ->whereIntegerNotInRaw('order_positions.id', array_column($orderPositions, 'id'))
             ->where('order_positions.order_id', $this->data['order_id'])
-            ->descendants()
-            ->where('descendants.is_free_text', false)
-            ->pluck('order_positions.id')
+            ->whereHas('descendants')
+            ->pluck('id')
             ->toArray();
 
         if ($deletedOrderPositions) {

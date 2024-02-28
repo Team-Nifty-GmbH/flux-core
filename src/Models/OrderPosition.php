@@ -115,7 +115,7 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
         );
     }
 
-    public function ancestors(): HasMany
+    public function descendants(): HasMany
     {
         return $this->hasMany(OrderPosition::class, 'origin_position_id');
     }
@@ -237,41 +237,51 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
         return $this->product?->getAvatarUrl();
     }
 
-    public function scopeDescendants(Builder $query): void
+    //    public function scopeDescendants(Builder $query): void
+    //    {
+    //        $tableName = $this->getTable();
+    //        $subQuery = $this->newQuery()
+    //            ->select($tableName . '.id')
+    //            ->selectRaw('SUM(' . $tableName . '.amount) AS amount')
+    //            ->selectRaw('SUM(COALESCE(descendants.amount, 0)) AS descendantAmount')
+    //            ->leftJoin($tableName . ' AS descendants', function (JoinClause $join) use ($tableName) {
+    //                $join->on($tableName . '.id', '=', 'descendants.parent_id')
+    //                    ->whereNull('descendants.deleted_at');
+    //            })
+    //            ->where($tableName . '.is_bundle_position', false)
+    //            ->groupBy($tableName . '.id');
+    //
+    //        $query->leftJoinSub($subQuery, 'sub', fn (JoinClause $join) => $join->on($tableName . '.id', '=', 'sub.id'))
+    //            ->addSelect('sub.descendantAmount');
+    //    }
+
+    //    public function scopeSiblings(Builder $query): void
+    //    {
+    //        $tableName = $this->getTable();
+    //        $subQuery = $this->newQuery()
+    //            ->select($tableName . '.id')
+    //            ->selectRaw('SUM(COALESCE(siblings.amount, 0)) AS siblingAmount')
+    //            ->selectRaw('SUM(COALESCE(' . $tableName . '.amount, 0)) - SUM(COALESCE(siblings.amount, 0))
+    //                AS totalAmount'
+    //            )
+    //            ->leftJoin($tableName . ' AS siblings', function (JoinClause $join) use ($tableName) {
+    //                $join->on($tableName . '.id', '=', 'siblings.origin_position_id')
+    //                    ->whereNull('siblings.deleted_at');
+    //            })
+    //            ->where($tableName . '.is_bundle_position', false)
+    //            ->groupBy($tableName . '.id');
+    //
+    //        $query->leftJoinSub($subQuery, 'sub', fn ($join) => $join->on($tableName . '.id', '=', 'sub.id'))
+    //            ->addSelect(['sub.siblingAmount', 'sub.totalAmount', $tableName . '.id'])
+    //            ->whereRaw($tableName . '.amount > sub.siblingAmount');
+    //    }
+
+    public function siblings(): HasMany
     {
-        $tableName = $this->getTable();
-        $subQuery = $this->newQuery()
-            ->select([$tableName . '.id', $tableName . '.amount'])
-            ->selectRaw('SUM(COALESCE(descendants.amount, 0)) AS descendantAmount')
-            ->leftJoin($tableName . ' AS descendants', function (JoinClause $join) use ($tableName) {
-                $join->on($tableName . '.id', '=', 'descendants.parent_id')
-                    ->whereNull('descendants.deleted_at');
-            })
-            ->where($tableName . '.is_bundle_position', false)
-            ->groupBy($tableName . '.id');
-
-        $query->leftJoinSub($subQuery, 'sub', fn (JoinClause $join) => $join->on($tableName . '.id', '=', 'sub.id'))
-            ->addSelect('sub.descendantAmount');
-    }
-
-    public function scopeSiblings(Builder $query): void
-    {
-        $tableName = $this->getTable();
-        $subQuery = $this->newQuery()
-            ->select($tableName . '.id')
-            ->selectRaw('SUM(COALESCE(siblings.amount, 0)) AS siblingAmount')
-            ->selectRaw('SUM(COALESCE(' . $tableName . '.amount, 0)) - SUM(COALESCE(siblings.amount, 0))
-                AS totalAmount'
-            )
-            ->leftJoin($tableName . ' AS siblings', function (JoinClause $join) use ($tableName) {
-                $join->on($tableName . '.id', '=', 'siblings.origin_position_id')
-                    ->whereNull('siblings.deleted_at');
-            })
-            ->where($tableName . '.is_bundle_position', false)
-            ->groupBy($tableName . '.id');
-
-        $query->leftJoinSub($subQuery, 'sub', fn ($join) => $join->on($tableName . '.id', '=', 'sub.id'))
-            ->addSelect(['sub.siblingAmount', 'sub.totalAmount', $tableName . '.id'])
-            ->whereRaw($tableName . '.amount > sub.siblingAmount');
+        return $this->hasMany(
+            OrderPosition::class,
+            'origin_position_id',
+            'origin_position_id'
+        );
     }
 }

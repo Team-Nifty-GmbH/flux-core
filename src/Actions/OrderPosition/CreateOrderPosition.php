@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Http\Requests\CreateOrderPositionRequest;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
@@ -158,7 +159,12 @@ class CreateOrderPosition extends FluxAction
                 ->whereKey($this->data['order_id'])
                 ->first();
 
-            if ($order?->parent_id) {
+            if ($order?->parent_id
+                && (
+                    $order->orderType->order_type_enum === OrderTypeEnum::Retoure
+                    || $order->orderType->order_type_enum === OrderTypeEnum::SplitOrder
+                )
+            ) {
                 if (! $originPositionId = data_get($this->data, 'origin_position_id')) {
                     throw ValidationException::withMessages([
                         'origin_position_id' => [__('validation.required', ['attribute' => 'origin_position_id'])],
@@ -175,11 +181,14 @@ class CreateOrderPosition extends FluxAction
                     ]);
                 }
 
-                $maxAmount = OrderPosition::query()
+                $originPosition = OrderPosition::query()
                     ->whereKey($originPositionId)
-                    ->siblings()
-                    ->pluck('totalAmount')
+                    ->withSum('descendants as descendantsAmount', 'amount')
                     ->first();
+                $maxAmount = bcsub(
+                    $originPosition->amount,
+                    $originPosition->descendantsAmount ?? 0,
+                );
 
                 if (bccomp($this->data['amount'] ?? 1, $maxAmount) > 0) {
                     throw ValidationException::withMessages([
