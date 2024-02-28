@@ -160,10 +160,7 @@ class CreateOrderPosition extends FluxAction
                 ->first();
 
             if ($order?->parent_id
-                && (
-                    $order->orderType->order_type_enum === OrderTypeEnum::Retoure
-                    || $order->orderType->order_type_enum === OrderTypeEnum::SplitOrder
-                )
+                && in_array($order->orderType->order_type_enum, [OrderTypeEnum::Retoure, OrderTypeEnum::SplitOrder])
             ) {
                 if (! $originPositionId = data_get($this->data, 'origin_position_id')) {
                     throw ValidationException::withMessages([

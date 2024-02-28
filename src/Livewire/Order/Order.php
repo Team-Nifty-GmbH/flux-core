@@ -935,12 +935,17 @@ class Order extends OrderPositionList
             ->selectRaw(
                 'order_positions.id' .
                 ', order_positions.amount' .
-                ', ANY_VALUE(order_positions.name) AS name' .
-                ', ANY_VALUE(order_positions.description) AS description' .
+                ', order_positions.name' .
+                ', order_positions.description' .
                 ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount' .
                 ', order_positions.amount - SUM(COALESCE(descendants.amount, 0)) AS totalAmount'
             )
-            ->groupBy(['order_positions.id', 'order_positions.amount'])
+            ->groupBy([
+                'order_positions.id',
+                'order_positions.amount',
+                'order_positions.name',
+                'order_positions.description',
+            ])
             ->where('order_positions.is_bundle_position', false)
             ->havingRaw('order_positions.amount > descendantAmount')
             ->get();

@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Query\JoinClause;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Spatie\Tags\HasTags;
@@ -115,11 +114,6 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
         );
     }
 
-    public function descendants(): HasMany
-    {
-        return $this->hasMany(OrderPosition::class, 'origin_position_id');
-    }
-
     public function children(): HasMany
     {
         return $this->hasMany(OrderPosition::class, 'parent_id');
@@ -140,6 +134,11 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
             'order_id',
             'currency_id'
         );
+    }
+
+    public function descendants(): HasMany
+    {
+        return $this->hasMany(OrderPosition::class, 'origin_position_id');
     }
 
     public function discounts(): MorphMany
@@ -185,6 +184,15 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
     public function serialNumbers(): HasMany
     {
         return $this->hasMany(SerialNumber::class);
+    }
+
+    public function siblings(): HasMany
+    {
+        return $this->hasMany(
+            OrderPosition::class,
+            'origin_position_id',
+            'origin_position_id'
+        );
     }
 
     public function vatRate(): BelongsTo
@@ -235,53 +243,5 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
     public function getAvatarUrl(): ?string
     {
         return $this->product?->getAvatarUrl();
-    }
-
-    //    public function scopeDescendants(Builder $query): void
-    //    {
-    //        $tableName = $this->getTable();
-    //        $subQuery = $this->newQuery()
-    //            ->select($tableName . '.id')
-    //            ->selectRaw('SUM(' . $tableName . '.amount) AS amount')
-    //            ->selectRaw('SUM(COALESCE(descendants.amount, 0)) AS descendantAmount')
-    //            ->leftJoin($tableName . ' AS descendants', function (JoinClause $join) use ($tableName) {
-    //                $join->on($tableName . '.id', '=', 'descendants.parent_id')
-    //                    ->whereNull('descendants.deleted_at');
-    //            })
-    //            ->where($tableName . '.is_bundle_position', false)
-    //            ->groupBy($tableName . '.id');
-    //
-    //        $query->leftJoinSub($subQuery, 'sub', fn (JoinClause $join) => $join->on($tableName . '.id', '=', 'sub.id'))
-    //            ->addSelect('sub.descendantAmount');
-    //    }
-
-    //    public function scopeSiblings(Builder $query): void
-    //    {
-    //        $tableName = $this->getTable();
-    //        $subQuery = $this->newQuery()
-    //            ->select($tableName . '.id')
-    //            ->selectRaw('SUM(COALESCE(siblings.amount, 0)) AS siblingAmount')
-    //            ->selectRaw('SUM(COALESCE(' . $tableName . '.amount, 0)) - SUM(COALESCE(siblings.amount, 0))
-    //                AS totalAmount'
-    //            )
-    //            ->leftJoin($tableName . ' AS siblings', function (JoinClause $join) use ($tableName) {
-    //                $join->on($tableName . '.id', '=', 'siblings.origin_position_id')
-    //                    ->whereNull('siblings.deleted_at');
-    //            })
-    //            ->where($tableName . '.is_bundle_position', false)
-    //            ->groupBy($tableName . '.id');
-    //
-    //        $query->leftJoinSub($subQuery, 'sub', fn ($join) => $join->on($tableName . '.id', '=', 'sub.id'))
-    //            ->addSelect(['sub.siblingAmount', 'sub.totalAmount', $tableName . '.id'])
-    //            ->whereRaw($tableName . '.amount > sub.siblingAmount');
-    //    }
-
-    public function siblings(): HasMany
-    {
-        return $this->hasMany(
-            OrderPosition::class,
-            'origin_position_id',
-            'origin_position_id'
-        );
     }
 }
