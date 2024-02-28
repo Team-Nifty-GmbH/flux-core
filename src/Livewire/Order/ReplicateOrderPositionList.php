@@ -118,7 +118,7 @@ class ReplicateOrderPositionList extends OrderPositionList
 
         foreach ($tree as $key => &$item) {
             $totalAmount = bcsub($item['amount'], $item['descendantsAmount'] ?? 0, 2);
-            if (bccomp($totalAmount, 0) === 1) {
+            if (bccomp($totalAmount, 0) !== 1) {
                 unset($tree[$key]);
                 continue;
             }
