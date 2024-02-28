@@ -120,6 +120,7 @@ class ReplicateOrderPositionList extends OrderPositionList
             $totalAmount = bcsub($item['amount'], $item['descendantsAmount'] ?? 0, 2);
             if (bccomp($totalAmount, 0) !== 1) {
                 unset($tree[$key]);
+
                 continue;
             }
 
