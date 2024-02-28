@@ -116,9 +116,15 @@ class ReplicateOrderPositionList extends OrderPositionList
         $tree = to_flat_tree($query->get()->toArray());
         $returnKeys = $this->getReturnKeys();
 
-        foreach ($tree as &$item) {
+        foreach ($tree as $key => &$item) {
+            $totalAmount = bcsub($item['amount'], $item['descendantsAmount'] ?? 0, 2);
+            if (bccomp($totalAmount, 0) === 1) {
+                unset($tree[$key]);
+                continue;
+            }
+
             $item = Arr::only(Arr::dot($item), $returnKeys);
-            $item['totalAmount'] = bcsub($item['amount'], $item['descendantsAmount'] ?? 0, 2);
+            $item['totalAmount'] = $totalAmount;
             $item['indentation'] = '';
             $item['unit_price'] = $item['is_net'] ? ($item['unit_net_price'] ?? 0) : ($item['unit_gross_price'] ?? 0);
             $item['alternative_tag'] = $item['is_alternative'] ? __('Alternative') : '';
@@ -132,7 +138,7 @@ class ReplicateOrderPositionList extends OrderPositionList
             }
         }
 
-        return array_filter($tree, fn ($item) => bccomp($item['totalAmount'], 0) === 1);
+        return $tree;
     }
 
     public function getLeftAppends(): array
