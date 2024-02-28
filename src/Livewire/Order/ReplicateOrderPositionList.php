@@ -75,7 +75,6 @@ class ReplicateOrderPositionList extends OrderPositionList
     {
         return $builder
             ->withSum('descendants as descendantsAmount', 'amount')
-            ->havingRaw('order_positions.amount > COALESCE(descendantsAmount, 0)')
             ->whereNull('parent_id')
             ->orderBy('sort_number');
     }
@@ -133,7 +132,7 @@ class ReplicateOrderPositionList extends OrderPositionList
             }
         }
 
-        return $tree;
+        return array_filter($tree, fn ($item) => bccomp($item['totalAmount'], 0) === 1);
     }
 
     public function getLeftAppends(): array
