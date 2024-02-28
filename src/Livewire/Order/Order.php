@@ -931,9 +931,23 @@ class Order extends OrderPositionList
         $orderPositions = OrderPosition::query()
             ->whereIntegerInRaw('order_positions.id', $positionIds)
             ->where('order_positions.order_id', $this->order->id)
-            ->whereNull('order_positions.parent_id')
-            ->siblings()
-            ->addSelect(['order_positions.name', 'order_positions.description'])
+            ->leftJoin('order_positions AS descendants', 'order_positions.id', '=', 'descendants.origin_position_id')
+            ->selectRaw(
+                'order_positions.id' .
+                ', order_positions.amount' .
+                ', order_positions.name' .
+                ', order_positions.description' .
+                ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount' .
+                ', order_positions.amount - SUM(COALESCE(descendants.amount, 0)) AS totalAmount'
+            )
+            ->groupBy([
+                'order_positions.id',
+                'order_positions.amount',
+                'order_positions.name',
+                'order_positions.description',
+            ])
+            ->where('order_positions.is_bundle_position', false)
+            ->havingRaw('order_positions.amount > descendantAmount')
             ->get();
 
         foreach ($orderPositions as $orderPosition) {

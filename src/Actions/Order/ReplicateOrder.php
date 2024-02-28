@@ -127,30 +127,6 @@ class ReplicateOrder extends FluxAction
                     'order_positions' => ['Only order positions from given order allowed.'],
                 ])->errorBag('replicateOrder');
             }
-
-            $siblings = OrderPosition::query()
-                ->whereIntegerInRaw('order_positions.id', $ids)
-                ->siblings()
-                ->get();
-
-            $errors = [];
-            foreach ($orderPositions as $key => $orderPosition) {
-                if ($item = $siblings
-                    ->where('id', $orderPosition['id'])
-                    ->where('totalAmount', '<', $orderPosition['amount'])
-                    ->first()
-                ) {
-                    $errors += [
-                        'order_positions.' . $key . '.amount' => [
-                            __('validation.max.numeric', ['attribute' => __('amount'), 'max' => $item['totalAmount']]),
-                        ],
-                    ];
-                }
-            }
-
-            if ($errors) {
-                throw ValidationException::withMessages($errors)->errorBag('replicateOrder');
-            }
         }
     }
 }

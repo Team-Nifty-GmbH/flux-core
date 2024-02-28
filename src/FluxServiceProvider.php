@@ -180,8 +180,8 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerMarcos(): void
     {
         if (! Str::hasMacro('iban')) {
-            Str::macro('iban', function (string $iban) {
-                return trim(chunk_split($iban, 4, ' '));
+            Str::macro('iban', function (?string $iban) {
+                return trim(chunk_split($iban ?? '', 4, ' '));
             });
         }
 

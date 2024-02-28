@@ -8,6 +8,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Events\NullDispatcher;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
@@ -169,7 +170,9 @@ abstract class FluxAction
             return false;
         }
 
-        $this->result = $this->performAction();
+        DB::transaction(function () {
+            $this->result = $this->performAction();
+        });
 
         $this->fireActionEvent(event: 'executed', halt: false);
 

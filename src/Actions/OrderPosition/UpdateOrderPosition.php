@@ -169,13 +169,14 @@ class UpdateOrderPosition extends FluxAction
             // If order position has origin_position_id or is their parent, validate amount
             if (! data_get($this->data, 'is_free_text', $orderPosition->is_free_text)) {
                 if ($orderPosition->origin_position_id) {
-                    $maxAmount = $orderPosition->origin()
-                        ->siblings()
-                        ->where('siblings.id', '!=', $orderPosition->id)
-                        ->pluck('totalAmount')
-                        ->first();
+                    $maxAmount = bcsub(
+                        $orderPosition->origin->amount,
+                        $orderPosition->siblings()
+                            ->where('id', '!=', $orderPosition->id)
+                            ->sum('amount')
+                    );
 
-                    if (bccomp(data_get($this->data, 'amount', $orderPosition->amount), $maxAmount)) {
+                    if (bccomp(data_get($this->data, 'amount', $orderPosition->amount), $maxAmount) > 0) {
                         throw ValidationException::withMessages([
                             'amount' => [
                                 __('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount]),
@@ -184,12 +185,10 @@ class UpdateOrderPosition extends FluxAction
                     }
                 }
 
-                if ($orderPosition->ancestors()->exists()) {
-                    $minAmount = $orderPosition->descendants()
-                        ->pluck('descendantAmount')
-                        ->first();
+                if ($orderPosition->descendants()->exists()) {
+                    $minAmount = $orderPosition->descendants()->sum('amount');
 
-                    if (bccomp($minAmount, data_get($this->data, 'amount', $orderPosition->amount))) {
+                    if (bccomp($minAmount, data_get($this->data, 'amount', $orderPosition->amount)) > 0) {
                         throw ValidationException::withMessages([
                             'amount' => [
                                 __('validation.min.numeric', ['attribute' => __('amount'), 'min' => $minAmount]),

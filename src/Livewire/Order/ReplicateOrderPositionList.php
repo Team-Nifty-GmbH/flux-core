@@ -74,9 +74,10 @@ class ReplicateOrderPositionList extends OrderPositionList
     public function getBuilder(Builder $builder): Builder
     {
         return $builder
-            ->siblings()
-            ->whereNull('order_positions.parent_id')
-            ->orderBy('order_positions.sort_number');
+            ->withSum('descendants as descendantsAmount', 'amount')
+            ->havingRaw('order_positions.amount > COALESCE(descendantsAmount, 0)')
+            ->whereNull('parent_id')
+            ->orderBy('sort_number');
     }
 
     public function getFormatters(): array
@@ -95,11 +96,13 @@ class ReplicateOrderPositionList extends OrderPositionList
         return array_merge(
             parent::getReturnKeys(),
             [
+                'amount',
                 'is_alternative',
                 'is_net',
                 'is_free_text',
                 'is_bundle_position',
                 'totalAmount',
+                'descendantsAmount',
                 'depth',
                 'has_children',
                 'unit_price',
@@ -116,6 +119,7 @@ class ReplicateOrderPositionList extends OrderPositionList
 
         foreach ($tree as &$item) {
             $item = Arr::only(Arr::dot($item), $returnKeys);
+            $item['totalAmount'] = bcsub($item['amount'], $item['descendantsAmount'] ?? 0, 2);
             $item['indentation'] = '';
             $item['unit_price'] = $item['is_net'] ? ($item['unit_net_price'] ?? 0) : ($item['unit_gross_price'] ?? 0);
             $item['alternative_tag'] = $item['is_alternative'] ? __('Alternative') : '';
