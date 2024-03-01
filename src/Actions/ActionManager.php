@@ -2,8 +2,8 @@
 
 namespace FluxErp\Actions;
 
-use FilesystemIterator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use RecursiveDirectoryIterator;
@@ -61,10 +61,17 @@ class ActionManager
             return;
         }
 
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
+        $cacheKey = md5($path . $namespace);
+
+        if (! is_null($actions = Cache::get('flux.actions.' . $cacheKey)) && ! app()->runningInConsole()) {
+            $iterator = [];
+        } else {
+            $actions = [];
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+        }
 
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === 'php') {
@@ -78,12 +85,18 @@ class ActionManager
                     continue;
                 }
 
-                try {
-                    $this->register($class::name(), $class);
-                } catch (\Exception) {
-                    // Ignore exceptions during auto-discovery
-                }
+                $actions[$class::name()] = $class;
             }
         }
+
+        foreach ($actions as $name => $class) {
+            try {
+                $this->register($name, $class);
+            } catch (\Exception) {
+                // Ignore exceptions during auto-discovery
+            }
+        }
+
+        Cache::put('flux.actions.' . $cacheKey, $actions);
     }
 }

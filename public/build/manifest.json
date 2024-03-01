@@ -41,7 +41,6 @@
   },
   "resources/js/alpine.js": {
     "file": "assets/alpine-DetahARy.js",
-    "src": "resources/js/alpine.js",
     "isEntry": true,
     "imports": [
       "__commonjsHelpers-Cpj98o6Y.js"

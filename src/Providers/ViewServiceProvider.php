@@ -2,6 +2,7 @@
 
 namespace FluxErp\Providers;
 
+use FluxErp\Facades\Asset;
 use FluxErp\Models\Currency;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
@@ -21,6 +22,21 @@ class ViewServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
+            Asset::vite(flux_path('public/build'), [
+                'resources/js/app.js',
+                'resources/js/alpine.js',
+                'resources/js/apex-charts.js',
+                'resources/css/app.css',
+            ]);
+
+            if (auth()->guard('web')->check()) {
+                Asset::vite(flux_path('public/build'), [
+                    'resources/js/web-push.js',
+                ]);
+            }
+        }
+
         /** use @extendFlux() at the end of the component, not the beginning */
         Blade::directive('extendFlux', function (string $expression) {
             $expression = trim($expression, '\'');

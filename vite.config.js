@@ -3,7 +3,7 @@ import laravel from 'laravel-vite-plugin';
 import livewire from '@defstudio/vite-livewire-plugin';
 
 export default defineConfig({
-    base: "/flux/build",
+    base: "/flux-assets/",
     plugins: [
         laravel({
             input: [

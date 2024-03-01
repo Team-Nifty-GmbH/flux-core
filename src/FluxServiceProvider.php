@@ -3,6 +3,7 @@
 namespace FluxErp;
 
 use FluxErp\Actions\ActionManager;
+use FluxErp\Assets\AssetManager;
 use FluxErp\Console\Commands\Init\InitEnv;
 use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\Console\Scheduling\RepeatableManager;
@@ -120,10 +121,11 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->app->alias(Registry::class, 'datatype.registry');
 
-        $this->app->singleton('flux.widget_manager', fn ($app) => new WidgetManager());
-        $this->app->singleton('flux.action_manager', fn ($app) => new ActionManager());
-        $this->app->singleton('flux.menu_manager', fn ($app) => new MenuManager());
-        $this->app->singleton('flux.repeatable_manager', fn ($app) => new RepeatableManager());
+        $this->app->singleton('flux.asset_manager', fn ($app) => app(AssetManager::class));
+        $this->app->singleton('flux.widget_manager', fn ($app) => app(WidgetManager::class));
+        $this->app->singleton('flux.action_manager', fn ($app) => app(ActionManager::class));
+        $this->app->singleton('flux.menu_manager', fn ($app) => app(MenuManager::class));
+        $this->app->singleton('flux.repeatable_manager', fn ($app) => app(RepeatableManager::class));
 
         $this->app->extend(Builder::class, function (Builder $scoutBuilder) {
             if (($user = auth()->user()) instanceof User

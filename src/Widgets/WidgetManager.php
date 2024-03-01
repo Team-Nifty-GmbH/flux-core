@@ -3,6 +3,7 @@
 namespace FluxErp\Widgets;
 
 use FluxErp\Traits\Widgetable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
@@ -29,16 +30,24 @@ class WidgetManager
         }
 
         if (! is_subclass_of($componentClass, Component::class)) {
-            throw new \Exception("The provided widget class '{$componentClass}' does not extend Livewire\\Component.");
+            throw new \Exception(
+                "The provided widget class '{$componentClass}' does not extend Livewire\\Component."
+            );
         }
 
         $reflection = new ReflectionClass($componentClass);
-        if (method_exists($componentClass, 'mount') && $reflection->getMethod('mount')->getNumberOfParameters() !== 0) {
-            throw new \Exception("The provided widget class '{$componentClass}' must not have any parameters in the mount method.");
+        if (method_exists($componentClass, 'mount')
+            && $reflection->getMethod('mount')->getNumberOfParameters() !== 0
+        ) {
+            throw new \Exception(
+                "The provided widget class '{$componentClass}' must not have any parameters in the mount method."
+            );
         }
 
         if (! in_array(Widgetable::class, class_uses_recursive($componentClass))) {
-            throw new \Exception("The provided widget class '{$componentClass}' does not use the Widgetable trait.");
+            throw new \Exception(
+                "The provided widget class '{$componentClass}' does not use the Widgetable trait."
+            );
         }
 
         $this->widgets[$name] = [
@@ -73,10 +82,17 @@ class WidgetManager
             return;
         }
 
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
+        $cacheKey = md5($path . $namespace);
+
+        if (! is_null($widgets = Cache::get('flux.widgets.' . $cacheKey)) && ! app()->runningInConsole()) {
+            $iterator = [];
+        } else {
+            $widgets = [];
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+        }
 
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === 'php') {
@@ -100,13 +116,19 @@ class WidgetManager
                         continue;
                     }
 
-                    try {
-                        $this->register($componentName, $componentName);
-                    } catch (\Exception $e) {
-                        // Don't throw exceptions on auto discovery
-                    }
+                    $widgets[$componentName] = $class;
                 }
             }
         }
+
+        foreach ($widgets as $name => $class) {
+            try {
+                $this->register($name, $name);
+            } catch (\Exception $e) {
+                // Don't throw exceptions on auto discovery
+            }
+        }
+
+        Cache::put('flux.widgets.' . $cacheKey, $widgets);
     }
 }
