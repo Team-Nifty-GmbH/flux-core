@@ -6,7 +6,6 @@ use FluxErp\Actions\WorkTimeType\CreateWorkTimeType;
 use FluxErp\Actions\WorkTimeType\DeleteWorkTimeType;
 use FluxErp\Actions\WorkTimeType\UpdateWorkTimeType;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateWorkTimeTypeRequest;
 use FluxErp\Models\WorkTimeType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,12 +16,14 @@ class TimeTrackingTypeController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new WorkTimeType();
+        $this->model = app(WorkTimeType::class);
     }
 
-    public function create(CreateWorkTimeTypeRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        $workTimeType = CreateWorkTimeType::make($request->validated())->execute();
+        $workTimeType = CreateWorkTimeType::make($request->all())
+            ->validate()
+            ->execute();
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

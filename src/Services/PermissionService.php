@@ -13,17 +13,17 @@ class PermissionService
 {
     public function create(array $data): Model
     {
-        return CreatePermission::make($data)->execute();
+        return CreatePermission::make($data)->validate()->execute();
     }
 
     public function editUserPermissions(array $data, bool $give): array
     {
-        return UpdateUserPermissions::make(array_merge($data, ['give' => $give]))->execute();
+        return UpdateUserPermissions::make(array_merge($data, ['give' => $give]))->validate()->execute();
     }
 
     public function syncUserPermissions(array $data): array
     {
-        return UpdateUserPermissions::make(array_merge($data, ['sync' => true]))->execute();
+        return UpdateUserPermissions::make(array_merge($data, ['sync' => true]))->validate()->execute();
     }
 
     public function delete(string $id): array

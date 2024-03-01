@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Order;
+use FluxErp\Rulesets\Order\DeleteOrderRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteOrder extends FluxAction
@@ -11,9 +12,7 @@ class DeleteOrder extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:orders,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteOrderRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,18 +22,18 @@ class DeleteOrder extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Order::query()
+        return app(Order::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
         $errors = [];
-        $order = Order::query()
+        $order = app(Order::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

@@ -43,7 +43,7 @@ class Product extends Component
 
     public function mount(int $id): void
     {
-        $product = ProductModel::query()
+        $product = app(ProductModel::class)->query()
             ->whereKey($id)
             ->with([
                 'categories:id',
@@ -72,7 +72,7 @@ class Product extends Component
     #[Computed]
     public function vatRates(): array
     {
-        return VatRate::all(['id', 'name', 'rate_percentage'])->toArray();
+        return app(VatRate::class)->all(['id', 'name', 'rate_percentage'])->toArray();
     }
 
     #[Renderless]
@@ -81,7 +81,7 @@ class Product extends Component
         try {
             $tag = CreateTag::make([
                 'name' => $name,
-                'type' => ProductModel::class,
+                'type' => app(ProductModel::class)->getMorphClass(),
             ])
                 ->checkPermission()
                 ->validate()
@@ -169,10 +169,10 @@ class Product extends Component
     #[Renderless]
     public function getPriceLists(): void
     {
-        $priceLists = PriceList::query()
+        $priceLists = app(PriceList::class)->query()
             ->with('parent')
             ->get(['id', 'parent_id', 'name', 'price_list_code', 'is_net', 'is_default']);
-        $product = ProductModel::query()->whereKey($this->product->id)->first();
+        $product = app(ProductModel::class)->query()->whereKey($this->product->id)->first();
         $priceListHelper = PriceHelper::make($product)->useDefault(false);
 
         $priceLists->map(function (PriceList $priceList) use ($priceListHelper) {
@@ -192,7 +192,7 @@ class Product extends Component
     #[Renderless]
     public function getProductCrossSellings(): void
     {
-        $this->productCrossSellings = ProductCrossSelling::query()
+        $this->productCrossSellings = app(ProductCrossSelling::class)->query()
             ->where('product_id', $this->product->id)
             ->with('products:id,name,product_number')
             ->get()

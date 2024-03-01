@@ -26,7 +26,7 @@ class EventSubscriptionTest extends BaseSetup
         parent::setUp();
 
         $this->comments = Comment::factory()->count(3)->create([
-            'model_type' => User::class,
+            'model_type' => app(User::class)->getMorphClass(),
             'model_id' => $this->user->id,
             'comment' => 'User Comment from a Test!',
         ]);
@@ -34,7 +34,7 @@ class EventSubscriptionTest extends BaseSetup
         $this->eventSubscriptions = EventSubscription::factory()->count(3)->create([
             'user_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => Comment::class,
+            'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[0]->id,
         ]);
 
@@ -84,7 +84,7 @@ class EventSubscriptionTest extends BaseSetup
         $subscription = [
             'user_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => Comment::class,
+            'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[2]->id,
             'is_broadcast' => true,
             'is_notifiable' => false,
@@ -100,10 +100,7 @@ class EventSubscriptionTest extends BaseSetup
 
         $this->assertEquals($subscription['user_id'], $dbEventSubscription->user_id);
         $this->assertEquals(class_basename($subscription['event']), class_basename($dbEventSubscription->event));
-        $this->assertEquals(
-            class_basename($subscription['model_type']),
-            class_basename($dbEventSubscription->model_type)
-        );
+        $this->assertEquals($subscription['model_type'], $dbEventSubscription->model_type);
         $this->assertEquals($subscription['model_id'], $dbEventSubscription->model_id);
         $this->assertEquals($subscription['is_broadcast'], $dbEventSubscription->is_broadcast);
         $this->assertEquals($subscription['is_notifiable'], $dbEventSubscription->is_notifiable);
@@ -117,7 +114,7 @@ class EventSubscriptionTest extends BaseSetup
         $subscription = [
             'user_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => Comment::class,
+            'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[0]->id,
         ];
 
@@ -133,7 +130,7 @@ class EventSubscriptionTest extends BaseSetup
         $subscription = [
             'user_id' => $this->user->id,
             'event' => 'InvalidEvent',
-            'model_type' => class_basename(Comment::class),
+            'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => null,
             'is_broadcast' => true,
             'is_notifiable' => false,
@@ -169,7 +166,7 @@ class EventSubscriptionTest extends BaseSetup
         $subscription = [
             'user_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => Comment::class,
+            'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => ++$this->comments[2]->id,
             'is_broadcast' => true,
             'is_notifiable' => false,
@@ -187,7 +184,7 @@ class EventSubscriptionTest extends BaseSetup
         $subscription = [
             'user_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => Comment::class,
+            'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[0]->id,
             'is_broadcast' => true,
             'is_notifiable' => false,
@@ -209,7 +206,7 @@ class EventSubscriptionTest extends BaseSetup
             'id' => $this->eventSubscriptions[0]->id,
             'user_id' => $this->user->id,
             'event' => 'eloquent.deleted: FluxErp\Models\Comment',
-            'model_type' => Comment::class,
+            'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[1]->id,
             'is_broadcast' => true,
             'is_notifiable' => false,
@@ -226,10 +223,7 @@ class EventSubscriptionTest extends BaseSetup
         $this->assertEquals($subscription['id'], $dbEventSubscription->id);
         $this->assertEquals($subscription['user_id'], $dbEventSubscription->user_id);
         $this->assertEquals(class_basename($subscription['event']), class_basename($dbEventSubscription->event));
-        $this->assertEquals(
-            class_basename($subscription['model_type']),
-            class_basename($dbEventSubscription->model_type)
-        );
+        $this->assertEquals($subscription['model_type'], $dbEventSubscription->model_type);
         $this->assertEquals($subscription['model_id'], $dbEventSubscription->model_id);
         $this->assertEquals($subscription['is_broadcast'], $dbEventSubscription->is_broadcast);
         $this->assertEquals($subscription['is_notifiable'], $dbEventSubscription->is_notifiable);
@@ -243,7 +237,7 @@ class EventSubscriptionTest extends BaseSetup
         $subscription = [
             'user_id' => $this->user->id,
             'event' => class_basename('eloquent.created: FluxErp\Models\Comment'),
-            'model_type' => class_basename(Comment::class),
+            'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[1]->id,
             'is_broadcast' => true,
             'is_notifiable' => false,
@@ -262,7 +256,7 @@ class EventSubscriptionTest extends BaseSetup
             'id' => ++$this->eventSubscriptions[2]->id,
             'user_id' => $this->user->id,
             'event' => class_basename('eloquent.created: FluxErp\Models\Comment'),
-            'model_type' => class_basename(Comment::class),
+            'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[1]->id,
             'is_broadcast' => true,
             'is_notifiable' => false,

@@ -4,6 +4,7 @@ namespace FluxErp\Actions\MailFolder;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\MailFolder;
+use FluxErp\Rulesets\MailFolder\DeleteMailFolderRuleset;
 
 class DeleteMailFolder extends FluxAction
 {
@@ -12,9 +13,7 @@ class DeleteMailFolder extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:mail_folders,id',
-        ];
+        $this->rules = resolve_static(DeleteMailFolderRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,7 +23,7 @@ class DeleteMailFolder extends FluxAction
 
     public function performAction(): ?bool
     {
-        return MailFolder::query()
+        return app(MailFolder::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

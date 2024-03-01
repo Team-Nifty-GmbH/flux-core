@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\VatRate;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateVatRateRequest;
 use FluxErp\Models\VatRate;
+use FluxErp\Rulesets\VatRate\CreateVatRateRuleset;
 
 class CreateVatRate extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateVatRateRequest())->rules();
+        $this->rules = resolve_static(CreateVatRateRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class CreateVatRate extends FluxAction
 
     public function performAction(): VatRate
     {
-        $vatRate = new VatRate($this->data);
+        $vatRate = app(VatRate::class, ['attributes' => $this->data]);
         $vatRate->save();
 
         return $vatRate->fresh();

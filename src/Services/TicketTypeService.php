@@ -13,7 +13,9 @@ class TicketTypeService
 {
     public function create(array $data): TicketType
     {
-        return CreateTicketType::make($data)->execute();
+        return CreateTicketType::make($data)
+            ->validate()
+            ->execute();
     }
 
     public function update(array $data): array

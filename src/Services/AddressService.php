@@ -13,7 +13,7 @@ class AddressService
 {
     public function create(array $data): Address
     {
-        return CreateAddress::make($data)->execute();
+        return CreateAddress::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

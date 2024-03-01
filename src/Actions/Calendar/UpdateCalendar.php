@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Calendar;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateCalendarRequest;
 use FluxErp\Models\Calendar;
+use FluxErp\Rulesets\Calendar\UpdateCalendarRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateCalendar extends FluxAction
@@ -12,7 +12,7 @@ class UpdateCalendar extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateCalendarRequest())->rules();
+        $this->rules = resolve_static(UpdateCalendarRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +22,7 @@ class UpdateCalendar extends FluxAction
 
     public function performAction(): Model
     {
-        $calendar = Calendar::query()
+        $calendar = app(Calendar::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

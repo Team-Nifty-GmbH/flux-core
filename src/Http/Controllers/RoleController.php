@@ -3,14 +3,10 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateRoleRequest;
-use FluxErp\Http\Requests\EditRolePermissionRequest;
-use FluxErp\Http\Requests\EditRoleUserRequest;
-use FluxErp\Http\Requests\EditUserRoleRequest;
-use FluxErp\Http\Requests\UpdateRoleRequest;
 use FluxErp\Models\User;
 use FluxErp\Services\RoleService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends BaseController
@@ -18,12 +14,12 @@ class RoleController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Role();
+        $this->model = app(Role::class);
     }
 
     public function showUserRoles(string $id): JsonResponse
     {
-        $user = User::query()
+        $user = app(User::class)->query()
             ->whereKey($id)
             ->first();
 
@@ -40,9 +36,9 @@ class RoleController extends BaseController
         );
     }
 
-    public function create(CreateRoleRequest $request, RoleService $roleService): JsonResponse
+    public function create(Request $request, RoleService $roleService): JsonResponse
     {
-        $role = $roleService->create($request->validated());
+        $role = $roleService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
@@ -51,16 +47,16 @@ class RoleController extends BaseController
         );
     }
 
-    public function update(UpdateRoleRequest $request, RoleService $roleService): JsonResponse
+    public function update(Request $request, RoleService $roleService): JsonResponse
     {
         $response = $roleService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function give(EditRolePermissionRequest $request, RoleService $roleService): JsonResponse
+    public function give(Request $request, RoleService $roleService): JsonResponse
     {
-        $permissions = $roleService->editRolePermissions($request->validated(), true);
+        $permissions = $roleService->editRolePermissions($request->all(), true);
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
@@ -69,9 +65,9 @@ class RoleController extends BaseController
         );
     }
 
-    public function revoke(EditRolePermissionRequest $request, RoleService $roleService): JsonResponse
+    public function revoke(Request $request, RoleService $roleService): JsonResponse
     {
-        $permissions = $roleService->editRolePermissions($request->validated(), false);
+        $permissions = $roleService->editRolePermissions($request->all(), false);
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
@@ -80,9 +76,9 @@ class RoleController extends BaseController
         );
     }
 
-    public function syncUserRoles(EditUserRoleRequest $request, RoleService $roleService): JsonResponse
+    public function syncUserRoles(Request $request, RoleService $roleService): JsonResponse
     {
-        $roles = $roleService->syncUserRoles($request->validated());
+        $roles = $roleService->syncUserRoles($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
@@ -91,9 +87,9 @@ class RoleController extends BaseController
         );
     }
 
-    public function assignUsers(EditRoleUserRequest $request, RoleService $roleService): JsonResponse
+    public function assignUsers(Request $request, RoleService $roleService): JsonResponse
     {
-        $users = $roleService->editRoleUsers($request->validated(), true);
+        $users = $roleService->editRoleUsers($request->all(), true);
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
@@ -102,9 +98,9 @@ class RoleController extends BaseController
         );
     }
 
-    public function revokeUsers(EditRoleUserRequest $request, RoleService $roleService): JsonResponse
+    public function revokeUsers(Request $request, RoleService $roleService): JsonResponse
     {
-        $users = $roleService->editRoleUsers($request->validated(), false);
+        $users = $roleService->editRoleUsers($request->all(), false);
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,

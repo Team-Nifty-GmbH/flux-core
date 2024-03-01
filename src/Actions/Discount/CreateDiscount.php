@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Discount;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateDiscountRequest;
 use FluxErp\Models\Discount;
+use FluxErp\Rulesets\Discount\CreateDiscountRuleset;
 use Illuminate\Validation\ValidationException;
 
 class CreateDiscount extends FluxAction
@@ -12,7 +12,7 @@ class CreateDiscount extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateDiscountRequest())->rules();
+        $this->rules = resolve_static(CreateDiscountRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +22,7 @@ class CreateDiscount extends FluxAction
 
     public function performAction(): Discount
     {
-        $discount = new Discount($this->data);
+        $discount = app(Discount::class, ['attributes' => $this->data]);
         $discount->save();
 
         return $discount->fresh();

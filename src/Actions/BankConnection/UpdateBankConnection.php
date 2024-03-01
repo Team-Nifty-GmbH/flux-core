@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\BankConnection;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateBankConnectionRequest;
 use FluxErp\Models\BankConnection;
+use FluxErp\Rulesets\BankConnection\UpdateBankConnectionRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateBankConnection extends FluxAction
@@ -12,7 +12,7 @@ class UpdateBankConnection extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateBankConnectionRequest())->rules();
+        $this->rules = resolve_static(UpdateBankConnectionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +22,7 @@ class UpdateBankConnection extends FluxAction
 
     public function performAction(): Model
     {
-        $bankConnection = BankConnection::query()
+        $bankConnection = app(BankConnection::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

@@ -7,7 +7,7 @@
             </div>
             <x-slot:footer>
                 <div class="flex justify-between gap-x-4">
-                    @if(\FluxErp\Actions\WorkTimeType\DeleteWorkTimeType::canPerformAction(false))
+                    @if(resolve_static(\FluxErp\Actions\WorkTimeType\DeleteWorkTimeType::class, 'canPerformAction', [false]))
                         <div x-bind:class="$wire.workTimeType.id > 0 || 'invisible'">
                             <x-button
                                 flat

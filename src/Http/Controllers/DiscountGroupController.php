@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateDiscountGroupRequest;
 use FluxErp\Models\DiscountGroup;
 use FluxErp\Services\DiscountGroupService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class DiscountGroupController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new DiscountGroup();
+        $this->model = app(DiscountGroup::class);
     }
 
-    public function create(CreateDiscountGroupRequest $request, DiscountGroupService $discountGroupService): JsonResponse
+    public function create(Request $request, DiscountGroupService $discountGroupService): JsonResponse
     {
-        $discountGroup = $discountGroupService->create($request->validated());
+        $discountGroup = $discountGroupService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

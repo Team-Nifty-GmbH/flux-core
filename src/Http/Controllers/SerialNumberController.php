@@ -3,37 +3,25 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateSerialNumberRequest;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Services\SerialNumberService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class SerialNumberController extends BaseController
 {
     public function __construct()
     {
         parent::__construct();
-        $this->model = new SerialNumber();
+        $this->model = app(SerialNumber::class);
     }
 
     /**
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function create(CreateSerialNumberRequest $request, SerialNumberService $serialNumberService): JsonResponse
+    public function create(Request $request, SerialNumberService $serialNumberService): JsonResponse
     {
-        $validator = Validator::make($request->all(), (new CreateSerialNumberRequest())->rules());
-        $validator->addModel($this->model);
-
-        if ($validator->fails()) {
-            return ResponseHelper::createResponseFromBase(
-                statusCode: 422,
-                data: $validator->errors()->toArray()
-            );
-        }
-
-        $serialNumber = $serialNumberService->create($validator->validated());
+        $serialNumber = $serialNumberService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

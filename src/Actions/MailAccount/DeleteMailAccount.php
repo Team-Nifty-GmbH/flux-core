@@ -4,15 +4,14 @@ namespace FluxErp\Actions\MailAccount;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\MailAccount;
+use FluxErp\Rulesets\MailAccount\DeleteMailAccountRuleset;
 
 class DeleteMailAccount extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:mail_accounts,id',
-        ];
+        $this->rules = resolve_static(DeleteMailAccountRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteMailAccount extends FluxAction
 
     public function performAction(): ?bool
     {
-        return MailAccount::query()
+        return app(MailAccount::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

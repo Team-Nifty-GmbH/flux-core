@@ -4,15 +4,14 @@ namespace FluxErp\Actions\Tag;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Tag;
+use FluxErp\Rulesets\Tag\DeleteTagRuleset;
 
 class DeleteTag extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:tags,id',
-        ];
+        $this->rules = resolve_static(DeleteTagRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteTag extends FluxAction
 
     public function performAction(): mixed
     {
-        return Tag::query()
+        return app(Tag::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

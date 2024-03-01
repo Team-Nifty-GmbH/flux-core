@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Warehouse;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateWarehouseRequest;
 use FluxErp\Models\Warehouse;
+use FluxErp\Rulesets\Warehouse\UpdateWarehouseRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateWarehouse extends FluxAction
@@ -12,7 +12,7 @@ class UpdateWarehouse extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateWarehouseRequest())->rules();
+        $this->rules = resolve_static(UpdateWarehouseRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,10 +23,10 @@ class UpdateWarehouse extends FluxAction
     public function performAction(): Model
     {
         if ($this->data['is_default'] ?? false) {
-            Warehouse::query()->update(['is_default' => false]);
+            app(Warehouse::class)->query()->update(['is_default' => false]);
         }
 
-        $warehouse = Warehouse::query()
+        $warehouse = app(Warehouse::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -36,17 +36,15 @@ class UpdateWarehouse extends FluxAction
         return $warehouse->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function prepareForValidation(): void
     {
         if (($this->data['is_default'] ?? false)
-            && ! Warehouse::query()
+            && ! app(Warehouse::class)->query()
                 ->whereKeyNot($this->data['id'] ?? 0)
                 ->where('is_default', true)
                 ->exists()
         ) {
             $this->rules['is_default'] .= '|accepted';
         }
-
-        parent::validateData();
     }
 }

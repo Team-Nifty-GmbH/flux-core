@@ -32,7 +32,7 @@ class Contact extends Component
 
     public function mount(?int $id = null): void
     {
-        $contact = ContactModel::query()
+        $contact = app(ContactModel::class)->query()
             ->with(['mainAddress', 'categories:id'])
             ->whereKey($id)
             ->firstOrFail();
@@ -44,7 +44,7 @@ class Contact extends Component
     #[Renderless]
     public function getListeners(): array
     {
-        $model = new ContactModel();
+        $model = app(ContactModel::class);
         $model->id = $this->contact->id;
         $channel = $model->broadcastChannel(false);
 
@@ -57,7 +57,7 @@ class Contact extends Component
     #[Renderless]
     public function contactUpdated(): void
     {
-        $this->contact->fill(ContactModel::query()->whereKey($this->contact->id)->first());
+        $this->contact->fill(app(ContactModel::class)->query()->whereKey($this->contact->id)->first());
     }
 
     #[Renderless]
@@ -140,7 +140,7 @@ class Contact extends Component
     #[Renderless]
     public function reloadContact(): void
     {
-        $contact = ContactModel::query()
+        $contact = app(ContactModel::class)->query()
             ->with(['mainAddress', 'categories:id'])
             ->whereKey($this->contact->id)
             ->firstOrFail();
@@ -152,10 +152,10 @@ class Contact extends Component
     {
         $this->collection = 'avatar';
         try {
-            $response = $this->saveFileUploadsToMediaLibrary(
+            $this->saveFileUploadsToMediaLibrary(
                 'avatar',
                 $this->contact->id,
-                ContactModel::class
+                app(ContactModel::class)->getMorphClass()
             );
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
@@ -163,7 +163,7 @@ class Contact extends Component
             return;
         }
 
-        $this->avatar = ContactModel::query()
+        $this->avatar = app(ContactModel::class)->query()
             ->whereKey($this->contact->id)
             ->first()
             ->getAvatarUrl();

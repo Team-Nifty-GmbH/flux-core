@@ -4,15 +4,14 @@ namespace FluxErp\Actions\Communication;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Communication;
+use FluxErp\Rulesets\Communication\DeleteCommunicationRuleset;
 
 class DeleteCommunication extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:communications,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteCommunicationRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteCommunication extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Communication::query()
+        return app(Communication::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

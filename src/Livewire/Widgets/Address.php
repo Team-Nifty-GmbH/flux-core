@@ -2,6 +2,8 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Models\Address as AddressModel;
+use FluxErp\Models\Order;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -13,7 +15,7 @@ class Address extends Component
 
     public function mount(int $modelId): void
     {
-        $address = \FluxErp\Models\Address::query()
+        $address = app(AddressModel::class)->query()
             ->whereKey($modelId)
             ->with([
                 'contact.media',
@@ -26,7 +28,7 @@ class Address extends Component
         $this->address['label'] = $address->getLabel();
         $this->address['description'] = $address->getDescription();
 
-        $this->address['total_net'] = \FluxErp\Models\Order::query()
+        $this->address['total_net'] = app(Order::class)->query()
             ->whereNotNull('invoice_number')
             ->where('contact_id', $this->address['contact_id'])
             ->sum('total_net_price');

@@ -13,7 +13,7 @@ class CalendarEventService
 {
     public function create(array $data): CalendarEvent
     {
-        return CreateCalendarEvent::make($data)->execute();
+        return CreateCalendarEvent::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

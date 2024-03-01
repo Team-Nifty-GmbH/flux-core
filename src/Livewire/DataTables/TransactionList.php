@@ -44,7 +44,7 @@ class TransactionList extends DataTable
                 ->label(__('Add'))
                 ->color('primary')
                 ->wireClick('editTransaction')
-                ->when(fn () => CreateTransaction::canPerformAction(false)),
+                ->when(fn () => resolve_static(CreateTransaction::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -53,7 +53,7 @@ class TransactionList extends DataTable
         return array_merge(
             parent::getViewData(),
             [
-                'bankConnections' => BankConnection::query()->get(['bank_connections.id', 'name', 'iban']),
+                'bankConnections' => app(BankConnection::class)->query()->get(['bank_connections.id', 'name', 'iban']),
             ]
         );
     }
@@ -65,7 +65,7 @@ class TransactionList extends DataTable
                 ->label(__('Edit'))
                 ->color('primary')
                 ->wireClick('editTransaction(record.id)')
-                ->when(fn () => UpdateTransaction::canPerformAction(false)),
+                ->when(fn () => resolve_static(UpdateTransaction::class, 'canPerformAction', [false])),
         ];
     }
 

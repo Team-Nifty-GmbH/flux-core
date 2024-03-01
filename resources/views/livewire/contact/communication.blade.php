@@ -173,7 +173,7 @@
                             [
                                 'type',
                                 '=',
-                                \FluxErp\Models\Communication::class,
+                                app(\FluxErp\Models\Communication::class)->getMorphClass(),
                             ],
                         ],
                     ],

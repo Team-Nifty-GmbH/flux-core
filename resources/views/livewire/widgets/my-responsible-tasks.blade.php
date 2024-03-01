@@ -2,7 +2,7 @@
     <x-slot:title>
         <div>{{ __('My Responsible Tasks') }}</div>
     </x-slot:title>
-    <div class="w-full max-h-96 overflow-auto" x-data="{formatter: @js(\FluxErp\Models\Ticket::typeScriptAttributes())}">
+    <div class="w-full max-h-96 overflow-auto" x-data="{formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes'))}">
         @foreach($tasks as $task)
             <x-list-item :item="$task">
                 <x-slot:avatar>

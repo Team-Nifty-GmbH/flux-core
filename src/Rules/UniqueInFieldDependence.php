@@ -32,7 +32,7 @@ class UniqueInFieldDependence implements DataAwareRule, Rule
         $this->dependingFields = is_array($dependingField) ? $dependingField : [$dependingField];
         $this->ignoreSelf = $ignoreSelf;
         $this->model = $model;
-        $this->key = $key ?: (new $model)->getKeyName();
+        $this->key = $key ?: (app($model))->getKeyName();
     }
 
     /**
@@ -41,7 +41,7 @@ class UniqueInFieldDependence implements DataAwareRule, Rule
     public function passes($attribute, $value): bool
     {
         /** @var Model $model */
-        $model = $this->model;
+        $model = app($this->model);
 
         $explodedDependingFields = [];
         foreach ($this->dependingFields as $dependingField) {
@@ -56,7 +56,7 @@ class UniqueInFieldDependence implements DataAwareRule, Rule
                 if (array_key_exists($field, $dependingFieldData)) {
                     $dependingFieldData = $dependingFieldData[$field];
                 } else {
-                    $dependingFieldData = $model::query()
+                    $dependingFieldData = $model->query()
                         ->select($field, $this->key)
                         ->where($this->key, $dependingFieldData[$this->key] ?? null)
                         ->first();
@@ -86,7 +86,7 @@ class UniqueInFieldDependence implements DataAwareRule, Rule
             }
         }
 
-        return ! $model::query()
+        return ! $model->query()
             ->where(array_pop($explodedAttribute), $value)
             ->where(function (Builder $query) use ($explodedDependingFields, $dependingFieldValues) {
                 foreach ($explodedDependingFields as $key => $explodedDependingField) {

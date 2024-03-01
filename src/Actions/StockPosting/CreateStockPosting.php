@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\StockPosting;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateStockPostingRequest;
 use FluxErp\Models\StockPosting;
+use FluxErp\Rulesets\StockPosting\CreateStockPostingRuleset;
 
 class CreateStockPosting extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateStockPostingRequest())->rules();
+        $this->rules = resolve_static(CreateStockPostingRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class CreateStockPosting extends FluxAction
 
     public function performAction(): StockPosting
     {
-        $stockPosting = new StockPosting($this->data);
+        $stockPosting = app(StockPosting::class, ['attributes' => $this->data]);
         $stockPosting->save();
 
         return $stockPosting->fresh();

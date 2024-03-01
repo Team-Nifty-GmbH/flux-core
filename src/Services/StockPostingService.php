@@ -12,7 +12,7 @@ class StockPostingService
 {
     public function create(array $data): StockPosting
     {
-        return CreateStockPosting::make($data)->execute();
+        return CreateStockPosting::make($data)->validate()->execute();
     }
 
     public function delete(string $id): array

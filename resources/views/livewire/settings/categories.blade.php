@@ -31,6 +31,8 @@
                         placeholder="{{ __('Model') }}"
                         wire:model="category.model_type"
                         :options="$models"
+                        option-label="label"
+                        option-value="value"
                         :clearable="false"
                 />
                 <x-select
@@ -56,7 +58,7 @@
             </div>
             <x-slot:footer>
                 <div class="flex justify-between gap-x-4">
-                    @if(\FluxErp\Actions\Category\DeleteCategory::canPerformAction(false))
+                    @if(resolve_static(\FluxErp\Actions\Category\DeleteCategory::class, 'canPerformAction', [false]))
                         <div x-bind:class="$wire.category.id > 0 || 'invisible'">
                             <x-button
                                 flat

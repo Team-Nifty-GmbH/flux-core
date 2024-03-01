@@ -5,9 +5,9 @@ namespace FluxErp\Http\Controllers;
 use FluxErp\Actions\FormBuilderResponse\CreateFormBuilderResponse;
 use FluxErp\Actions\FormBuilderResponse\DeleteFormBuilderResponse;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateFormBuilderResponseRequest;
 use FluxErp\Models\FormBuilderResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class FormBuilderResponseController extends BaseController
@@ -15,15 +15,18 @@ class FormBuilderResponseController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new FormBuilderResponse();
+        $this->model = app(FormBuilderResponse::class);
     }
 
-    public function create(CreateFormBuilderResponseRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
+        $formBuilderResponse = CreateFormBuilderResponse::make($request->all())
+            ->validate()
+            ->execute();
+
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
-            data: CreateFormBuilderResponse::make($request->validated())
-                ->execute()
+            data: $formBuilderResponse
         );
     }
 

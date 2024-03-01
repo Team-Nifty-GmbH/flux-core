@@ -19,7 +19,7 @@ class PaymentTypeFactory extends Factory
             'payment_reminder_days_3' => $this->faker->numberBetween(3, 23),
             'payment_target' => $paymentTarget = $this->faker->numberBetween(13, 42),
             'payment_discount_target' => $this->faker->numberBetween(0, $paymentTarget),
-            'payment_discount_percentage' => $this->faker->numberBetween(10, 50),
+            'payment_discount_percentage' => $this->faker->numberBetween(10, 50) / 100,
             'is_active' => $this->faker->boolean(90),
         ];
     }

@@ -6,10 +6,9 @@ use FluxErp\Actions\FormBuilderSection\CreateFormBuilderSection;
 use FluxErp\Actions\FormBuilderSection\DeleteFormBuilderSection;
 use FluxErp\Actions\FormBuilderSection\UpdateFormBuilderSection;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateFormBuilderSectionRequest;
-use FluxErp\Http\Requests\UpdateFormBuilderSectionRequest;
 use FluxErp\Models\FormBuilderSection;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class FormBuilderSectionController extends BaseController
@@ -17,24 +16,30 @@ class FormBuilderSectionController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new FormBuilderSection();
+        $this->model = app(FormBuilderSection::class);
     }
 
-    public function create(CreateFormBuilderSectionRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
+        $formBuilderSection = CreateFormBuilderSection::make($request->all())
+            ->validate()
+            ->execute();
+
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
-            data: CreateFormBuilderSection::make($request->validated())
-                ->execute()
+            data: $formBuilderSection
         );
     }
 
-    public function update(UpdateFormBuilderSectionRequest $request): JsonResponse
+    public function update(Request $request): JsonResponse
     {
+        $formBuilderSection = UpdateFormBuilderSection::make($request->all())
+            ->validate()
+            ->execute();
+
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
-            data: UpdateFormBuilderSection::make($request->validated())
-                ->execute()
+            data: $formBuilderSection
         );
     }
 

@@ -29,7 +29,7 @@
             </div>
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-            @if(\FluxErp\Actions\Product\DeleteProduct::canPerformAction(false))
+            @if(resolve_static(\FluxErp\Actions\Product\DeleteProduct::class, 'canPerformAction', [false]))
                 <x-button
                     negative
                     label="{{ __('Delete') }}"
@@ -37,7 +37,7 @@
                     wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Product')]) }}"
                 />
             @endif
-            @if(\FluxErp\Actions\Product\UpdateProduct::canPerformAction(false))
+            @if(resolve_static(\FluxErp\Actions\Product\UpdateProduct::class, 'canPerformAction', [false]))
                 <x-button
                     primary
                     x-show="!edit"

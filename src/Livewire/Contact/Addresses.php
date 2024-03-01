@@ -47,7 +47,7 @@ class Addresses extends Component
 
         $this->address->fill(
             $this->addressId
-                ? Address::query()->whereKey($this->addressId)->with('contactOptions')->first()
+                ? app(Address::class)->query()->whereKey($this->addressId)->with('contactOptions')->first()
                     ?? $this->contact->main_address
                 : $this->contact->main_address
         );
@@ -58,7 +58,7 @@ class Addresses extends Component
     #[Renderless]
     public function getListeners(): array
     {
-        $model = new Address();
+        $model = app(Address::class);
 
         $listeners = [];
         foreach ($this->addresses as $address) {
@@ -68,7 +68,7 @@ class Addresses extends Component
             $listeners[$channel . ',.AddressDeleted'] = 'addressDeleted';
         }
 
-        $contactModel = new Contact();
+        $contactModel = app(Contact::class);
         $contactModel->id = $this->contact->id;
         $listeners['echo-private:' . $contactModel->broadcastChannel() . ',.AddressCreated'] = 'loadAddresses';
 
@@ -107,12 +107,12 @@ class Addresses extends Component
         return view(
             'flux::livewire.contact.addresses',
             [
-                'countries' => Country::query()
+                'countries' => app(Country::class)->query()
                     ->where('is_active', true)
                     ->orderByDesc('is_default')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'languages' => Language::query()
+                'languages' => app(Language::class)->query()
                     ->get(['id', 'name'])
                     ->toArray(),
             ]
@@ -169,7 +169,7 @@ class Addresses extends Component
             fn ($address) => $address['id'] !== $this->addressId
         ));
 
-        $address = Address::query()
+        $address = app(Address::class)->query()
             ->whereKey($this->addresses[0]['id'])
             ->first();
         $this->select($address);
@@ -239,7 +239,7 @@ class Addresses extends Component
     #[Renderless]
     public function permissions(): array
     {
-        return Permission::query()
+        return app(Permission::class)->query()
             ->where('guard_name', 'address')
             ->get(['id', 'name'])
             ->toArray();
@@ -250,7 +250,7 @@ class Addresses extends Component
     {
         if (! $this->address->id) {
             $this->select(
-                Address::query()
+                app(Address::class)->query()
                     ->whereKey($this->addresses[0]['id'])
                     ->with('contactOptions')
                     ->first()
@@ -259,7 +259,7 @@ class Addresses extends Component
             return;
         }
 
-        $address = Address::query()
+        $address = app(Address::class)->query()
             ->whereKey($this->address->id)
             ->with('contactOptions')
             ->first();
@@ -272,7 +272,7 @@ class Addresses extends Component
 
     public function loadAddresses(): void
     {
-        $addresses = Address::query()
+        $addresses = app(Address::class)->query()
             ->where('contact_id', $this->contact->id)
             ->get([
                 'id',
@@ -307,7 +307,7 @@ class Addresses extends Component
         try {
             $tag = CreateTag::make([
                 'name' => $name,
-                'type' => Address::class,
+                'type' => app(Address::class)->getMorphClass(),
             ])
                 ->checkPermission()
                 ->validate()

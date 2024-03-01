@@ -173,7 +173,7 @@ class PaymentTypeTest extends BaseSetup
             'payment_reminder_days_3' => 42,
             'payment_target' => 42,
             'payment_discount_target' => 42,
-            'payment_discount_percentage' => 42,
+            'payment_discount_percentage' => 42 / 100,
             'is_active' => true,
         ];
 
@@ -260,7 +260,7 @@ class PaymentTypeTest extends BaseSetup
             'payment_reminder_days_3' => 42,
             'payment_target' => 42,
             'payment_discount_target' => 42,
-            'payment_discount_percentage' => 42,
+            'payment_discount_percentage' => 42 / 100,
             'is_active' => true,
         ];
 

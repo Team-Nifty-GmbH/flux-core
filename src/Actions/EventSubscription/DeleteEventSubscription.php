@@ -4,21 +4,14 @@ namespace FluxErp\Actions\EventSubscription;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\EventSubscription;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
+use FluxErp\Rulesets\EventSubscription\DeleteEventSubscriptionRuleset;
 
 class DeleteEventSubscription extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => [
-                'required',
-                'integer',
-                Rule::exists('event_subscriptions', 'id')->where('user_id', Auth::id()),
-            ],
-        ];
+        $this->rules = resolve_static(DeleteEventSubscriptionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -28,7 +21,7 @@ class DeleteEventSubscription extends FluxAction
 
     public function performAction(): ?bool
     {
-        return EventSubscription::query()
+        return app(EventSubscription::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

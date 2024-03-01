@@ -4,15 +4,14 @@ namespace FluxErp\Actions\Transaction;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Transaction;
+use FluxErp\Rulesets\Transaction\DeleteTransactionRuleset;
 
 class DeleteTransaction extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:transactions,id',
-        ];
+        $this->rules = resolve_static(DeleteTransactionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteTransaction extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Transaction::query()
+        return app(Transaction::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

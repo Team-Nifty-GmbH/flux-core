@@ -3,24 +3,23 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreatePermissionRequest;
-use FluxErp\Http\Requests\EditUserPermissionRequest;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use FluxErp\Services\PermissionService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class PermissionController extends BaseController
 {
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Permission();
+        $this->model = app(Permission::class);
     }
 
     public function showUserPermissions(string $id): JsonResponse
     {
-        $user = User::query()
+        $user = app(User::class)->query()
             ->whereKey($id)
             ->first();
 
@@ -37,9 +36,9 @@ class PermissionController extends BaseController
         );
     }
 
-    public function create(CreatePermissionRequest $request, PermissionService $permissionService): JsonResponse
+    public function create(Request $request, PermissionService $permissionService): JsonResponse
     {
-        $permission = $permissionService->create($request->validated());
+        $permission = $permissionService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
@@ -48,9 +47,9 @@ class PermissionController extends BaseController
         );
     }
 
-    public function give(EditUserPermissionRequest $request, PermissionService $permissionService): JsonResponse
+    public function give(Request $request, PermissionService $permissionService): JsonResponse
     {
-        $permissions = $permissionService->editUserPermissions($request->validated(), true);
+        $permissions = $permissionService->editUserPermissions($request->all(), true);
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
@@ -59,9 +58,9 @@ class PermissionController extends BaseController
         );
     }
 
-    public function revoke(EditUserPermissionRequest $request, PermissionService $permissionService): JsonResponse
+    public function revoke(Request $request, PermissionService $permissionService): JsonResponse
     {
-        $permissions = $permissionService->editUserPermissions($request->validated(), false);
+        $permissions = $permissionService->editUserPermissions($request->all(), false);
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
@@ -70,9 +69,9 @@ class PermissionController extends BaseController
         );
     }
 
-    public function sync(EditUserPermissionRequest $request, PermissionService $permissionService): JsonResponse
+    public function sync(Request $request, PermissionService $permissionService): JsonResponse
     {
-        $permissions = $permissionService->syncUserPermissions($request->validated());
+        $permissions = $permissionService->syncUserPermissions($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,

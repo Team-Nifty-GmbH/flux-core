@@ -16,7 +16,7 @@ class Tickets extends TicketList
     {
         return $builder->whereHasMorph(
             'authenticatable',
-            Address::class,
+            app(Address::class)->getMorphClass(),
             fn ($query) => $query->where('contact_id', $this->contactId)
         );
     }

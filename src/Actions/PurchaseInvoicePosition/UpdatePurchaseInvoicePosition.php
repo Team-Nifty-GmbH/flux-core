@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\PurchaseInvoicePosition;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdatePurchaseInvoicePositionRequest;
 use FluxErp\Models\PurchaseInvoicePosition;
+use FluxErp\Rulesets\PurchaseInvoicePosition\UpdatePurchaseInvoicePositionRuleset;
 
 class UpdatePurchaseInvoicePosition extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = resolve_silently(UpdatePurchaseInvoicePositionRequest::class)->rules();
+        $this->rules = resolve_static(UpdatePurchaseInvoicePositionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class UpdatePurchaseInvoicePosition extends FluxAction
 
     public function performAction(): PurchaseInvoicePosition
     {
-        $purchaseInvoicePosition = PurchaseInvoicePosition::query()
+        $purchaseInvoicePosition = app(PurchaseInvoicePosition::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

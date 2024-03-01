@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateClientRequest;
 use FluxErp\Models\Client;
 use FluxErp\Services\ClientService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class ClientController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Client();
+        $this->model = app(Client::class);
     }
 
-    public function create(CreateClientRequest $request, ClientService $clientService): JsonResponse
+    public function create(Request $request, ClientService $clientService): JsonResponse
     {
-        $client = $clientService->create($request->validated());
+        $client = $clientService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

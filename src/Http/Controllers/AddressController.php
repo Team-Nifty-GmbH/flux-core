@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Models\Address;
 use FluxErp\Services\AddressService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class AddressController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Address();
+        $this->model = app(Address::class);
     }
 
-    public function create(CreateAddressRequest $request, AddressService $addressService): JsonResponse
+    public function create(Request $request, AddressService $addressService): JsonResponse
     {
-        $address = $addressService->create($request->validated());
+        $address = $addressService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

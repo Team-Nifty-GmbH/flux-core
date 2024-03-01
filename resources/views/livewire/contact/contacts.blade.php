@@ -2,8 +2,12 @@
     @can('action.contact.create')
         <x-modal :name="'new-contact'">
             <x-card>
-                <x-select wire:model="contact.client_id" :options="\FluxErp\Models\Client::all()"
-                          label="{{ __('Client') }}" option-label="name" option-value="id"/>
+                <x-select wire:model="contact.client_id"
+                          label="{{ __('Client') }}"
+                          :options="app(\FluxErp\Models\Client::class)->all(['id', 'name'])"
+                          option-label="name"
+                          option-value="id"
+                />
                 <div class="space-y-6 sm:space-y-5">
                     <div
                         class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200 sm:pt-5">
@@ -81,7 +85,7 @@
                             <x-select
                                 wire:model="contact.main_address.country_id"
                                 searchable
-                                :options="\FluxErp\Models\Country::all(['id', 'name'])"
+                                :options="app(\FluxErp\Models\Country::class)->all(['id', 'name'])"
                                 option-label="name"
                                 option-value="id"
                             />
@@ -96,7 +100,7 @@
                             <x-select
                                 wire:model="contact.main_address.language_id"
                                 searchable
-                                :options="\FluxErp\Models\Language::all()"
+                                :options="app(\FluxErp\Models\Language::class)->all(['id', 'name'])"
                                 option-label="name"
                                 option-value="id"
                             />

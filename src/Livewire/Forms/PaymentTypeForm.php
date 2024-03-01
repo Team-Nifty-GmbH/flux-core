@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Forms;
 
+use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\PaymentType\CreatePaymentType;
 use FluxErp\Actions\PaymentType\DeletePaymentType;
 use FluxErp\Actions\PaymentType\UpdatePaymentType;
@@ -28,7 +29,7 @@ class PaymentTypeForm extends FluxForm
 
     public ?int $payment_discount_target = null;
 
-    public ?int $payment_discount_percentage = null;
+    public ?float $payment_discount_percentage = null;
 
     public ?string $payment_reminder_text = null;
 
@@ -53,5 +54,21 @@ class PaymentTypeForm extends FluxForm
             'update' => UpdatePaymentType::class,
             'delete' => DeletePaymentType::class,
         ];
+    }
+
+    protected function makeAction(string $name, ?array $data = null): FluxAction
+    {
+        if (is_null($data)) {
+            $data = $this->toArray();
+            $data['payment_discount_percentage'] = bcdiv($data['payment_discount_percentage'], 100);
+        }
+
+        return parent::makeAction($name, $data);
+    }
+
+    public function fill($values)
+    {
+        parent::fill($values);
+        $this->payment_discount_percentage = bcmul($this->payment_discount_percentage, 100);
     }
 }

@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\DiscountGroup;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateDiscountGroupRequest;
 use FluxErp\Models\DiscountGroup;
+use FluxErp\Rulesets\DiscountGroup\CreateDiscountGroupRuleset;
 use Illuminate\Support\Arr;
 
 class CreateDiscountGroup extends FluxAction
@@ -12,7 +12,7 @@ class CreateDiscountGroup extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateDiscountGroupRequest())->rules();
+        $this->rules = resolve_static(CreateDiscountGroupRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,7 +24,7 @@ class CreateDiscountGroup extends FluxAction
     {
         $discounts = Arr::pull($this->data, 'discounts', []);
 
-        $discountGroup = new DiscountGroup($this->data);
+        $discountGroup = app(DiscountGroup::class, ['attributes' => $this->data]);
         $discountGroup->save();
 
         if ($discounts) {

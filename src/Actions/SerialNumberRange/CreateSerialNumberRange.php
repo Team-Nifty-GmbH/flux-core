@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\SerialNumberRange;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateSerialNumberRangeRequest;
 use FluxErp\Models\SerialNumberRange;
+use FluxErp\Rulesets\SerialNumberRange\CreateSerialNumberRangeRuleset;
 
 class CreateSerialNumberRange extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateSerialNumberRangeRequest())->rules();
+        $this->rules = resolve_static(CreateSerialNumberRangeRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -25,7 +25,7 @@ class CreateSerialNumberRange extends FluxAction
             --$this->data['start_number'] : 0;
         unset($this->data['start_number']);
 
-        $serialNumberRange = new SerialNumberRange($this->data);
+        $serialNumberRange = app(SerialNumberRange::class, ['attributes' => $this->data]);
         $serialNumberRange->save();
 
         return $serialNumberRange->fresh();

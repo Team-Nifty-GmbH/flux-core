@@ -40,7 +40,7 @@ class OrderList extends DataTable
                 ->icon('trash')
                 ->label(__('Delete'))
                 ->color('negative')
-                ->when(fn () => DeleteOrder::canPerformAction(false))
+                ->when(fn () => resolve_static(DeleteOrder::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete',
                     'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
@@ -68,7 +68,7 @@ class OrderList extends DataTable
 
     public function delete(): void
     {
-        $orders = Order::query()
+        $orders = app(Order::class)->query()
             ->whereIntegerInRaw('id', $this->selected)
             ->where('is_locked', false)
             ->pluck('id');
@@ -76,7 +76,7 @@ class OrderList extends DataTable
         $deleted = 0;
         foreach ($orders as $orderId) {
             try {
-                $success = DeleteOrder::make(['id' => $orderId])->validate()->checkPermission()->execute();
+                $success = DeleteOrder::make(['id' => $orderId])->checkPermission()->validate()->execute();
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
 

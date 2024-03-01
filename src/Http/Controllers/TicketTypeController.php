@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateTicketTypeRequest;
 use FluxErp\Models\TicketType;
 use FluxErp\Services\TicketTypeService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class TicketTypeController extends BaseController
     public function __construct(?string $permission = null)
     {
         parent::__construct($permission);
-        $this->model = new TicketType();
+        $this->model = app(TicketType::class);
     }
 
-    public function create(CreateTicketTypeRequest $request, TicketTypeService $ticketTypeService): JsonResponse
+    public function create(Request $request, TicketTypeService $ticketTypeService): JsonResponse
     {
-        $ticketType = $ticketTypeService->create($request->validated());
+        $ticketType = $ticketTypeService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

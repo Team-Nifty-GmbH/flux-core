@@ -6,7 +6,6 @@ use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Actions\Tag\DeleteTag;
 use FluxErp\Actions\Tag\UpdateTag;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateTagRequest;
 use FluxErp\Models\Tag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,12 +16,13 @@ class TagController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Tag();
+        $this->model = app(Tag::class);
     }
 
-    public function create(CreateTagRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        $tag = CreateTag::make($request->validated())
+        $tag = CreateTag::make($request->all())
+            ->validate()
             ->execute();
 
         return ResponseHelper::createResponseFromBase(

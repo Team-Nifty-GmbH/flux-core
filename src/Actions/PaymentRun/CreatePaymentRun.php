@@ -1,0 +1,35 @@
+<?php
+
+namespace FluxErp\Actions\PaymentRun;
+
+use FluxErp\Actions\FluxAction;
+use FluxErp\Models\PaymentRun;
+use FluxErp\Rulesets\PaymentRun\CreatePaymentRunRuleset;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
+
+class CreatePaymentRun extends FluxAction
+{
+    protected function boot(array $data): void
+    {
+        parent::boot($data);
+        $this->rules = resolve_static(CreatePaymentRunRuleset::class, 'getRules');
+    }
+
+    public static function models(): array
+    {
+        return [PaymentRun::class];
+    }
+
+    public function performAction(): Model
+    {
+        $orders = Arr::pull($this->data, 'orders');
+
+        $payment = app(PaymentRun::class, ['attributes' => $this->data]);
+        $payment->save();
+
+        $payment->orders()->attach($orders);
+
+        return $payment->fresh();
+    }
+}

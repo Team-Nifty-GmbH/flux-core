@@ -3,9 +3,9 @@
 namespace FluxErp\Actions\Task;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateTaskRequest;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
+use FluxErp\Rulesets\Task\CreateTaskRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
@@ -14,7 +14,7 @@ class CreateTask extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateTaskRequest())->rules();
+        $this->rules = resolve_static(CreateTaskRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -28,7 +28,7 @@ class CreateTask extends FluxAction
         $orderPositions = Arr::pull($this->data, 'order_positions');
         $tags = Arr::pull($this->data, 'tags');
 
-        $task = new Task($this->data);
+        $task = app(Task::class, ['attributes' => $this->data]);
         $task->save();
 
         if ($users) {
@@ -45,16 +45,16 @@ class CreateTask extends FluxAction
         }
 
         if ($tags) {
-            $task->attachTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
+            $task->attachTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
         }
 
         return $task->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Task());
+        $validator->addModel(app(Task::class));
 
         $this->data = $validator->validated();
     }

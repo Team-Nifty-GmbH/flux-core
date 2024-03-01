@@ -2,20 +2,20 @@
 
 namespace FluxErp\Http\Requests;
 
+use FluxErp\Rules\MorphClassExists;
+use Spatie\MediaLibrary\HasMedia;
+
 class DownloadPublicMediaRequest extends BaseFormRequest
 {
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'model_type' => qualify_model($this->model_type),
-        ]);
-    }
-
     public function rules(): array
     {
         return [
             'model_id' => 'required|integer',
-            'model_type' => 'required|string',
+            'model_type' => [
+                'required',
+                'string',
+                new MorphClassExists(implements: HasMedia::class),
+            ],
             'conversion' => 'sometimes|required|string',
         ];
     }

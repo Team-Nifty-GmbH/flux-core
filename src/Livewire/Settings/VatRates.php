@@ -35,7 +35,7 @@ class VatRates extends VatRateList
                 ->label(__('New'))
                 ->icon('plus')
                 ->color('primary')
-                ->when(CreateVatRate::canPerformAction(false))
+                ->when(resolve_static(CreateVatRate::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
                 ]),
@@ -49,7 +49,7 @@ class VatRates extends VatRateList
                 ->label(__('Edit'))
                 ->icon('pencil')
                 ->color('primary')
-                ->when(UpdateVatRate::canPerformAction(false))
+                ->when(resolve_static(UpdateVatRate::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
                 ]),

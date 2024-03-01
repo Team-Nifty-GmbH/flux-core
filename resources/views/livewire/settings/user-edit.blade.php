@@ -51,7 +51,7 @@
                 {{ __('Commission Rates') }}
             </div>
         </nav>
-        @if(\FluxErp\Actions\Role\UpdateUserRoles::canPerformAction(false))
+        @if(resolve_static(\FluxErp\Actions\Role\UpdateUserRoles::class, 'canPerformAction', [false]))
             <div x-show="active === 'roles'">
                 <div class="max-h-96 space-y-3 overflow-y-auto">
                     @php
@@ -72,7 +72,7 @@
                 </div>
             </div>
         @endif
-        @if(\FluxErp\Actions\Permission\UpdateUserPermissions::canPerformAction(false))
+        @if(resolve_static(\FluxErp\Actions\Permission\UpdateUserPermissions::class, 'canPerformAction', [false]))
             <div x-show="active === 'permissions'">
                 <div class="pb-3">
                     <x-input wire:model.live.debounce.500ms="searchPermission" icon="search"/>
@@ -94,7 +94,7 @@
                 </div>
             </div>
         @endif
-        @if(\FluxErp\Actions\User\UpdateUserClients::canPerformAction(false))
+        @if(resolve_static(\FluxErp\Actions\User\UpdateUserClients::class, 'canPerformAction', [false]))
             <div x-cloak x-show="active === 'clients'">
                 <div class="max-h-96 space-y-3 overflow-y-auto">
                     @foreach($clients as $client)

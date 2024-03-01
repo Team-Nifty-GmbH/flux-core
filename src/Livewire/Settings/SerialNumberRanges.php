@@ -10,6 +10,7 @@ use FluxErp\Livewire\Forms\SerialNumberRangeForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Traits\HasSerialNumberRange;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\ModelInfo\ModelInfo;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -37,10 +38,14 @@ class SerialNumberRanges extends SerialNumberRangeList
             parent::getViewData(),
             [
                 'models' => model_info_all()
+                    ->unique('morphClass')
                     ->filter(fn (ModelInfo $modelInfo) => $modelInfo->traits->contains(HasSerialNumberRange::class))
-                    ->pluck('class')
+                    ->map(fn ($modelInfo) => [
+                        'label' => __(Str::headline($modelInfo->morphClass)),
+                        'value' => $modelInfo->morphClass,
+                    ])
                     ->toArray(),
-                'clients' => Client::query()
+                'clients' => app(Client::class)->query()
                     ->select('id', 'name')
                     ->get()
                     ->toArray(),
@@ -55,7 +60,7 @@ class SerialNumberRanges extends SerialNumberRangeList
                 ->label(__('New'))
                 ->icon('plus')
                 ->color('primary')
-                ->when(CreateSerialNumberRange::canPerformAction(false))
+                ->when(resolve_static(CreateSerialNumberRange::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
                 ]),
@@ -69,7 +74,7 @@ class SerialNumberRanges extends SerialNumberRangeList
                 ->label(__('Edit'))
                 ->icon('pencil')
                 ->color('primary')
-                ->when(UpdateSerialNumberRange::canPerformAction(false))
+                ->when(resolve_static(UpdateSerialNumberRange::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
                 ]),

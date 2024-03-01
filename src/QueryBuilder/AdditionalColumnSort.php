@@ -17,11 +17,11 @@ class AdditionalColumnSort implements Sort
         $direction = $descending ? 'DESC' : 'ASC';
 
         $subQuery = DB::table('additional_columns')
-            ->select('model_has_values.value')
-            ->join('model_has_values', 'additional_columns.id', '=', 'model_has_values.additional_column_id')
+            ->select('meta.value')
+            ->join('meta', 'additional_columns.id', '=', 'meta.additional_column_id')
             ->where('additional_columns.model_type', $className)
             ->where('additional_columns.name', $exploded[1])
-            ->whereColumn($table . '.id', 'model_has_values.model_id');
+            ->whereColumn($table . '.id', 'meta.model_id');
 
         $query->orderBy($subQuery, $direction);
     }

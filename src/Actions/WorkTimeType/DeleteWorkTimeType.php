@@ -5,6 +5,7 @@ namespace FluxErp\Actions\WorkTimeType;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
+use FluxErp\Rulesets\WorkTimeType\DeleteWorkTimeTypeRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteWorkTimeType extends FluxAction
@@ -12,9 +13,7 @@ class DeleteWorkTimeType extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:work_time_types,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteWorkTimeTypeRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,17 +23,17 @@ class DeleteWorkTimeType extends FluxAction
 
     public function performAction(): ?bool
     {
-        return WorkTimeType::query()
+        return app(WorkTimeType::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        if (WorkTime::query()
+        if (app(WorkTime::class)->query()
             ->whereKey($this->data['id'])
             ->whereNotNull('order_position_id')
             ->exists()

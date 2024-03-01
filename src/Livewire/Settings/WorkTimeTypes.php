@@ -35,7 +35,7 @@ class WorkTimeTypes extends WorkTimeTypeList
                 ->label(__('New'))
                 ->icon('plus')
                 ->color('primary')
-                ->when(CreateWorkTimeType::canPerformAction(false))
+                ->when(resolve_static(CreateWorkTimeType::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
                 ]),
@@ -49,7 +49,7 @@ class WorkTimeTypes extends WorkTimeTypeList
                 ->label(__('Edit'))
                 ->icon('pencil')
                 ->color('primary')
-                ->when(UpdateWorkTimeType::canPerformAction(false))
+                ->when(resolve_static(UpdateWorkTimeType::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
                 ]),

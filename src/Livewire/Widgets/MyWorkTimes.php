@@ -112,7 +112,7 @@ class MyWorkTimes extends BarChart
         $this->xaxis = null;
         $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
 
-        $baseQuery = WorkTime::query()
+        $baseQuery = app(WorkTime::class)->query()
             ->where('user_id', $this->userId)
             ->where('is_locked', true)
             ->when($timeFrame === TimeFrameEnum::Custom && $this->start, function ($query) {
@@ -179,7 +179,7 @@ class MyWorkTimes extends BarChart
                 ->where('parent_id', $day->id)
                 ->sum('total_time_ms');
 
-            $workTime = WorkTime::query()
+            $workTime = app(WorkTime::class)->query()
                 ->whereKey($day->id)
                 ->first();
 
@@ -201,7 +201,7 @@ class MyWorkTimes extends BarChart
 
         }
 
-        $activeWorkTimeTypes = WorkTimeType::query()
+        $activeWorkTimeTypes = app(WorkTimeType::class)->query()
             ->whereIntegerInRaw('id', $activeWorkTimeTypeIds)
             ->get();
 

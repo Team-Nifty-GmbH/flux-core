@@ -22,7 +22,7 @@ class ContactOption extends Model
 
     public function siblings(): HasMany
     {
-        return $this->hasMany(self::class, 'address_id', 'address_id')
+        return $this->hasMany(static::class, 'address_id', 'address_id')
             ->where('type', $this->type)
             ->where('id', '!=', $this->id);
     }

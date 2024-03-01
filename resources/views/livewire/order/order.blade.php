@@ -8,7 +8,7 @@
         },
         orderPositions: [],
         preview: null,
-        formatter: @js(\FluxErp\Models\Order::typeScriptAttributes()),
+        formatter: @js(resolve_static(\FluxErp\Models\Order::class, 'typeScriptAttributes')),
     }"
 >
     @section('modals')
@@ -277,7 +277,7 @@
             </div>
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-            @if(\FluxErp\Actions\Order\ReplicateOrder::canPerformAction(false))
+            @if(resolve_static(\FluxErp\Actions\Order\ReplicateOrder::class, 'canPerformAction', [false]))
                 <x-button
                     spinner="replicate"
                     class="w-full"
@@ -285,7 +285,7 @@
                     :label="__('Replicate')"
                 />
             @endif
-            @if(\FluxErp\Actions\Order\DeleteOrder::canPerformAction(false) && ! $order->is_locked)
+            @if(resolve_static(\FluxErp\Actions\Order\DeleteOrder::class, 'canPerformAction', [false]) && ! $order->is_locked)
                 <x-button
                     wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order')]) }}"
                     negative
@@ -293,7 +293,7 @@
                     wire:click="delete"
                 />
             @endif
-            @if(\FluxErp\Actions\Order\UpdateOrder::canPerformAction(false) && ! $order->is_locked)
+            @if(resolve_static(\FluxErp\Actions\Order\UpdateOrder::class, 'canPerformAction', [false]) && ! $order->is_locked)
                 <x-button
                     primary
                     spinner="save"

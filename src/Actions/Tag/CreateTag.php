@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\Tag;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateTagRequest;
 use FluxErp\Models\Tag;
+use FluxErp\Rulesets\Tag\CreateTagRuleset;
 
 class CreateTag extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateTagRequest())->rules();
+        $this->rules = resolve_static(CreateTagRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class CreateTag extends FluxAction
 
     public function performAction(): Tag
     {
-        $stockPosting = new Tag($this->data);
+        $stockPosting = app(Tag::class, ['attributes' => $this->data]);
         $stockPosting->save();
 
         return $stockPosting->fresh();

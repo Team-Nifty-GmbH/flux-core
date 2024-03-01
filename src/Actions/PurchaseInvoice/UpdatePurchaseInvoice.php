@@ -7,9 +7,9 @@ use FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition;
 use FluxErp\Actions\PurchaseInvoicePosition\DeletePurchaseInvoicePosition;
 use FluxErp\Actions\PurchaseInvoicePosition\UpdatePurchaseInvoicePosition;
 use FluxErp\Helpers\Helper;
-use FluxErp\Http\Requests\UpdatePurchaseInvoiceRequest;
 use FluxErp\Models\Order;
 use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Rulesets\PurchaseInvoice\UpdatePurchaseInvoiceRuleset;
 use Illuminate\Validation\ValidationException;
 
 class UpdatePurchaseInvoice extends FluxAction
@@ -17,7 +17,7 @@ class UpdatePurchaseInvoice extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = resolve_silently(UpdatePurchaseInvoiceRequest::class)->rules();
+        $this->rules = resolve_static(UpdatePurchaseInvoiceRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -28,7 +28,7 @@ class UpdatePurchaseInvoice extends FluxAction
     public function performAction(): PurchaseInvoice
     {
         $positions = data_get($this->data, 'purchase_invoice_positions');
-        $purchaseInvoice = PurchaseInvoice::query()
+        $purchaseInvoice = app(PurchaseInvoice::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -50,11 +50,11 @@ class UpdatePurchaseInvoice extends FluxAction
         return $purchaseInvoice->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        $purchaseInvoice = PurchaseInvoice::query()
+        $purchaseInvoice = app(PurchaseInvoice::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -63,7 +63,7 @@ class UpdatePurchaseInvoice extends FluxAction
         $clientId = data_get($this->data, 'client_id', $purchaseInvoice->client_id);
 
         if ($invoiceNumber && $contactId && $clientId) {
-            if (Order::query()
+            if (app(Order::class)->query()
                 ->where('client_id', $clientId)
                 ->where('invoice_number', $invoiceNumber)
                 ->where('contact_id', $contactId)

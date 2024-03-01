@@ -59,9 +59,9 @@ trait Filterable
 
     public static function getColumns(bool $showHidden = false): Collection
     {
-        $collection = collect(DB::select('DESCRIBE `' . (new self())->getTable() . '`;'));
+        $collection = collect(DB::select('DESCRIBE `' . (app(static::class))->getTable() . '`;'));
 
-        return $showHidden ? $collection : $collection->whereNotIn('Field', (new self())->getHidden());
+        return $showHidden ? $collection : $collection->whereNotIn('Field', (app(static::class))->getHidden());
     }
 
     public function scopeScope(Builder $query, $item): Builder

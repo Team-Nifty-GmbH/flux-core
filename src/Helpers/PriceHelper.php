@@ -33,7 +33,7 @@ class PriceHelper
 
     public static function make(Product $product): static
     {
-        return new static($product);
+        return app(static::class, ['product' => $product]);
     }
 
     public function setContact(Contact $contact): static
@@ -97,7 +97,7 @@ class PriceHelper
         }
 
         if (! $price && $this->useDefault) {
-            $price = Price::query()
+            $price = app(Price::class)->query()
                 ->where('product_id', $this->product->id)
                 ->whereRelation('priceList', 'is_default', true)
                 ->first();
@@ -116,7 +116,7 @@ class PriceHelper
         $this->calculateLowestDiscountedPrice($price, $productCategoriesDiscounts);
 
         if ($this->contact) {
-            $discounts = Discount::query()
+            $discounts = app(Discount::class)->query()
                 ->join('discount_discount_group AS ddg', 'discounts.id', 'ddg.discount_id')
                 ->join('contact_discount_group AS cdg', 'ddg.discount_group_id', '=', 'cdg.discount_group_id')
                 ->where('cdg.contact_id', $this->contact->id)
@@ -142,10 +142,10 @@ class PriceHelper
                 ->where(function (Builder $query) {
                     return $query
                         ->where(
-                            fn (Builder $query) => $query->where('model_type', Product::class)
+                            fn (Builder $query) => $query->where('model_type', app(Product::class)->getMorphClass())
                                 ->where('model_id', $this->product->id))
                         ->orWhere(
-                            fn (Builder $query) => $query->where('model_type', Category::class)
+                            fn (Builder $query) => $query->where('model_type', app(Category::class)->getMorphClass())
                                 ->whereIntegerInRaw(
                                     'model_id',
                                     $this->product->categories()->pluck('id')->toArray()
@@ -178,10 +178,11 @@ class PriceHelper
                     ->where(function (Builder $query) {
                         return $query
                             ->where(
-                                fn (Builder $query) => $query->where('model_type', Product::class)
+                                fn (Builder $query) => $query->where('model_type', app(Product::class)->getMorphClass())
                                     ->where('model_id', $this->product->id))
                             ->orWhere(
-                                fn (Builder $query) => $query->where('model_type', Category::class)
+                                fn (Builder $query) => $query
+                                    ->where('model_type', app(Category::class)->getMorphClass())
                                     ->whereIntegerInRaw(
                                         'model_id',
                                         $this->product->categories()->pluck('id')->toArray()
@@ -246,7 +247,7 @@ class PriceHelper
         if ($price) {
             $discounts = array_filter($discounts);
             if ($discounts) {
-                $price->basePrice = (new Price())->forceFill($price->toArray());
+                $price->basePrice = (app(Price::class))->forceFill($price->toArray());
             }
 
             $function = $this->priceList->is_net ? 'getNet' : 'getGross';
@@ -272,7 +273,7 @@ class PriceHelper
     private function calculateLowestDiscountedPrice(Price $price, Collection $discounts): void
     {
         if (! $price->basePrice && $discounts->count()) {
-            $price->basePrice = (new Price())->forceFill($price->toArray());
+            $price->basePrice = (app(Price::class))->forceFill($price->toArray());
         }
 
         $maxPercentageDiscount = $discounts->reduce(function (?Discount $carry, Discount $item) {

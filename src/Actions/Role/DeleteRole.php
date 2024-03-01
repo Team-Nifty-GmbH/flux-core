@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Role;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Role;
+use FluxErp\Rulesets\Role\DeleteRoleRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteRole extends FluxAction
@@ -11,9 +12,7 @@ class DeleteRole extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:roles,id',
-        ];
+        $this->rules = resolve_static(DeleteRoleRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,17 +22,17 @@ class DeleteRole extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Role::query()
+        return app(Role::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        if (Role::query()
+        if (app(Role::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->name === 'Super Admin'

@@ -36,7 +36,7 @@ class PaymentTypes extends PaymentTypeList
                 ->label(__('New'))
                 ->icon('plus')
                 ->color('primary')
-                ->when(CreatePaymentType::canPerformAction(false))
+                ->when(resolve_static(CreatePaymentType::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
                 ]),
@@ -48,7 +48,7 @@ class PaymentTypes extends PaymentTypeList
         return array_merge(
             parent::getViewData(),
             [
-                'clients' => Client::query()
+                'clients' => app(Client::class)->query()
                     ->select(['id', 'name'])
                     ->get()
                     ->toArray(),
@@ -63,7 +63,7 @@ class PaymentTypes extends PaymentTypeList
                 ->label(__('Edit'))
                 ->icon('pencil')
                 ->color('primary')
-                ->when(UpdatePaymentType::canPerformAction(false))
+                ->when(resolve_static(UpdatePaymentType::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
                 ]),

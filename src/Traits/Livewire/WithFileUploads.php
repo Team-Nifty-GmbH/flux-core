@@ -34,7 +34,7 @@ trait WithFileUploads
 
     public function downloadCollection(string $collection): ?BinaryFileResponse
     {
-        $media = Media::query()
+        $media = app(Media::class)->query()
             ->where('collection_name', 'like', $collection . '%')
             ->when($this->modelType ?? false,
                 fn ($query) => $query->where('model_type', $this->modelType)

@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\OrderType;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateOrderTypeRequest;
 use FluxErp\Models\OrderType;
+use FluxErp\Rulesets\OrderType\UpdateOrderTypeRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,7 +13,7 @@ class UpdateOrderType extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateOrderTypeRequest())->rules();
+        $this->rules = resolve_static(UpdateOrderTypeRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,7 +23,7 @@ class UpdateOrderType extends FluxAction
 
     public function performAction(): Model
     {
-        $orderType = OrderType::query()
+        $orderType = app(OrderType::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -33,10 +33,10 @@ class UpdateOrderType extends FluxAction
         return $orderType->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new OrderType());
+        $validator->addModel(app(OrderType::class));
 
         $this->data = $validator->validate();
     }

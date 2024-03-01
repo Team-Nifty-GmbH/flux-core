@@ -12,7 +12,7 @@
         meta.content = order.currency.iso;
         document.getElementsByTagName('head')[0].appendChild(meta);
         $watch('detail', (value) => {
-            Alpine.$data(document.getElementById('folder-tree').querySelector('[x-data]')).loadModel(@js(\FluxErp\Models\Product::class), value.product_id);
+            Alpine.$data(document.getElementById('folder-tree').querySelector('[x-data]')).loadModel(@js(\Illuminate\Support\Facades\App::getAlias(\FluxErp\Models\Product::class)), value.product_id);
         });
      }"
      class="dark:text-white"
@@ -195,9 +195,6 @@
             </div>
             @section('actions')
             @show
-            <div x-show="selected?.length > 0" class="pt-4">
-                <livewire:features.custom-events :model="\FluxErp\Models\Order::class" :id="$order['id']" :additional-data="['selected', 'order']"/>
-            </div>
             <div x-show="positionsSummary.length > 0" x-cloak>
                 <x-table>
                     <x-slot name="title">

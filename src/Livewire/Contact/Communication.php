@@ -51,7 +51,7 @@ class Communication extends CommunicationList
     {
         parent::mount();
 
-        $this->printLayouts = array_keys((new CommunicationModel())->getPrintViews());
+        $this->printLayouts = array_keys((app(CommunicationModel::class))->getPrintViews());
     }
 
     protected function getTableActions(): array
@@ -62,7 +62,7 @@ class Communication extends CommunicationList
                 ->icon('plus')
                 ->color('primary')
                 ->wireClick('edit')
-                ->when(CreateCommunication::canPerformAction(false)),
+                ->when(resolve_static(CreateCommunication::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -74,7 +74,7 @@ class Communication extends CommunicationList
                 ->icon('pencil')
                 ->color('primary')
                 ->wireClick('edit(record.id)')
-                ->when(UpdateCommunication::canPerformAction(false)),
+                ->when(resolve_static(UpdateCommunication::class, 'canPerformAction', [false])),
             DataTableButton::make()
                 ->label(__('Preview'))
                 ->icon('document-text')
@@ -91,7 +91,7 @@ class Communication extends CommunicationList
                         ['model' => __('Communication')]
                     ),
                 ])
-                ->when(DeleteCommunication::canPerformAction(false)),
+                ->when(resolve_static(DeleteCommunication::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -121,7 +121,7 @@ class Communication extends CommunicationList
     #[Renderless]
     public function save(): bool
     {
-        $this->communication->communicatable_type = Contact::class;
+        $this->communication->communicatable_type = app(Contact::class)->getMorphClass();
         $this->communication->communicatable_id = $this->contactId;
 
         try {
@@ -133,7 +133,7 @@ class Communication extends CommunicationList
         }
 
         $this->attachments->model_id = $this->communication->id;
-        $this->attachments->model_type = CommunicationModel::class;
+        $this->attachments->model_type = app(CommunicationModel::class)->getMorphClass();
         $this->attachments->collection_name = 'attachments';
         $this->attachments->parent_id = null;
         try {
@@ -171,7 +171,7 @@ class Communication extends CommunicationList
         $this->communication->attachments = $this->attachments->uploadedFile ?? [];
 
         if ($this->communication->mail_account_id) {
-            $mailAccount = MailAccount::query()
+            $mailAccount = app(MailAccount::class)->query()
                 ->whereKey($this->communication->mail_account_id)
                 ->first();
 
@@ -188,7 +188,7 @@ class Communication extends CommunicationList
             ]);
         }
 
-        $this->communication->communicatable_type = Contact::class;
+        $this->communication->communicatable_type = app(Contact::class)->getMorphClass();
         $this->communication->communicatable_id = $this->contactId;
 
         try {
@@ -247,7 +247,7 @@ class Communication extends CommunicationList
         try {
             $tag = CreateTag::make([
                 'name' => $name,
-                'type' => CommunicationModel::class,
+                'type' => app(CommunicationModel::class)->getMorphClass(),
             ])
                 ->checkPermission()
                 ->validate()
@@ -285,7 +285,7 @@ class Communication extends CommunicationList
     #[Renderless]
     public function createDocuments(): ?BinaryFileResponse
     {
-        $communication = CommunicationModel::query()
+        $communication = app(CommunicationModel::class)->query()
             ->whereKey($this->communication->id)
             ->with([
                 'media' => fn ($query) => $query->where('collection_name', 'attachments')
@@ -297,7 +297,7 @@ class Communication extends CommunicationList
         try {
             /** @var PrintableView $file */
             $file = Printing::make([
-                'model_type' => CommunicationModel::class,
+                'model_type' => app(CommunicationModel::class)->getMorphClass(),
                 'model_id' => $this->communication->id,
                 'view' => 'communication',
             ])->checkPermission()->validate()->execute();

@@ -98,13 +98,13 @@ class PurchaseInvoiceList extends DataTable
         return array_merge(
             parent::getViewData(),
             [
-                'clients' => Client::query()->pluck('name', 'id'),
-                'currencies' => Currency::query()->pluck('name', 'id'),
-                'orderTypes' => OrderType::query()
+                'clients' => app(Client::class)->query()->pluck('name', 'id'),
+                'currencies' => app(Currency::class)->query()->pluck('name', 'id'),
+                'orderTypes' => app(OrderType::class)->query()
                     ->whereIn('order_type_enum', $purchaseOrderTypes)
                     ->pluck('name', 'id'),
-                'paymentTypes' => PaymentType::query()->where('is_purchase', true)->pluck('name', 'id'),
-                'vatRates' => VatRate::query()->pluck('name', 'id'),
+                'paymentTypes' => app(PaymentType::class)->query()->where('is_purchase', true)->pluck('name', 'id'),
+                'vatRates' => app(VatRate::class)->query()->pluck('name', 'id'),
             ]
         );
     }

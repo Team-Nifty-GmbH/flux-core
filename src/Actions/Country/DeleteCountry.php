@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Country;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Country;
+use FluxErp\Rulesets\Country\DeleteCountryRuleset;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -13,9 +14,7 @@ class DeleteCountry extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:countries,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteCountryRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -25,7 +24,7 @@ class DeleteCountry extends FluxAction
 
     public function performAction(): ?bool
     {
-        $country = Country::query()
+        $country = app(Country::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -39,12 +38,12 @@ class DeleteCountry extends FluxAction
         return $country->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
         $errors = [];
-        $country = Country::query()
+        $country = app(Country::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

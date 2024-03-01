@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\User;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\EditUserClientRequest;
 use FluxErp\Models\User;
+use FluxErp\Rulesets\User\UpdateUserClientsRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateUserClients extends FluxAction
@@ -13,7 +13,7 @@ class UpdateUserClients extends FluxAction
     {
         parent::boot($data);
 
-        $this->rules = (new EditUserClientRequest())->rules();
+        $this->rules = resolve_static(UpdateUserClientsRuleset::class, 'getRules');
     }
 
     public static function name(): string
@@ -28,7 +28,7 @@ class UpdateUserClients extends FluxAction
 
     public function performAction(): Model
     {
-        $user = User::query()
+        $user = app(User::class)->query()
             ->whereKey($this->data['user_id'])
             ->first();
 

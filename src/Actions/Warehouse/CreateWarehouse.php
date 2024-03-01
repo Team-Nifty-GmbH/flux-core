@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\Warehouse;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateWarehouseRequest;
 use FluxErp\Models\Warehouse;
+use FluxErp\Rulesets\Warehouse\CreateWarehouseRuleset;
 
 class CreateWarehouse extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateWarehouseRequest())->rules();
+        $this->rules = resolve_static(CreateWarehouseRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,15 +21,15 @@ class CreateWarehouse extends FluxAction
 
     public function performAction(): Warehouse
     {
-        $this->data['is_default'] = ! Warehouse::query()->where('is_default', true)->exists()
+        $this->data['is_default'] = ! app(Warehouse::class)->query()->where('is_default', true)->exists()
             ? true
             : $this->data['is_default'] ?? false;
 
         if ($this->data['is_default']) {
-            Warehouse::query()->update(['is_default' => false]);
+            app(Warehouse::class)->query()->update(['is_default' => false]);
         }
 
-        $warehouse = new Warehouse($this->data);
+        $warehouse = app(Warehouse::class, ['attributes' => $this->data]);
         $warehouse->save();
 
         return $warehouse->fresh();

@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateValueListRequest;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Services\ValueListService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class ValueListController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new AdditionalColumn();
+        $this->model = app(AdditionalColumn::class);
     }
 
-    public function create(CreateValueListRequest $request, ValueListService $valueListService): JsonResponse
+    public function create(Request $request, ValueListService $valueListService): JsonResponse
     {
-        $response = $valueListService->create($request->validated());
+        $response = $valueListService->create($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

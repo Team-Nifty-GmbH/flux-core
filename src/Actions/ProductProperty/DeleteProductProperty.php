@@ -4,6 +4,7 @@ namespace FluxErp\Actions\ProductProperty;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ProductProperty;
+use FluxErp\Rulesets\ProductProperty\DeleteProductPropertyRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteProductProperty extends FluxAction
@@ -11,9 +12,7 @@ class DeleteProductProperty extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:product_properties,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteProductPropertyRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,17 +22,17 @@ class DeleteProductProperty extends FluxAction
 
     public function performAction(): ?bool
     {
-        return ProductProperty::query()
+        return app(ProductProperty::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        if (ProductProperty::query()
+        if (app(ProductProperty::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->products()

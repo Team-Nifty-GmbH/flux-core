@@ -13,21 +13,11 @@ use Illuminate\Support\Facades\Auth;
 class CommentCreatedListener
 {
     /**
-     * Create the event listener.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Handle the event.
      */
     public function handle(Comment $comment): void
     {
-        if ($comment->model_type !== Ticket::class) {
+        if ($comment->model_type !== app(Ticket::class)->getMorphClass()) {
             return;
         }
 

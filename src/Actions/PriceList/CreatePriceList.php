@@ -4,8 +4,8 @@ namespace FluxErp\Actions\PriceList;
 
 use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreatePriceListRequest;
 use FluxErp\Models\PriceList;
+use FluxErp\Rulesets\PriceList\CreatePriceListRuleset;
 use Illuminate\Validation\ValidationException;
 
 class CreatePriceList extends FluxAction
@@ -13,7 +13,7 @@ class CreatePriceList extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreatePriceListRequest())->rules();
+        $this->rules = resolve_static(CreatePriceListRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,7 +23,7 @@ class CreatePriceList extends FluxAction
 
     public function performAction(): PriceList
     {
-        $priceList = new PriceList($this->data);
+        $priceList = app(PriceList::class, ['attributes' => $this->data]);
         $priceList->save();
 
         // Create Discount
@@ -32,7 +32,7 @@ class CreatePriceList extends FluxAction
                 array_merge(
                     $discount,
                     [
-                        'model_type' => PriceList::class,
+                        'model_type' => app(PriceList::class)->getMorphClass(),
                         'model_id' => $priceList->id,
                     ]
                 )

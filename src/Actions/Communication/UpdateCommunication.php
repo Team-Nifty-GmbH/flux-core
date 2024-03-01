@@ -3,9 +3,9 @@
 namespace FluxErp\Actions\Communication;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateCommunicationRequest;
 use FluxErp\Models\Communication;
 use FluxErp\Models\Tag;
+use FluxErp\Rulesets\Communication\UpdateCommunicationRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
@@ -14,7 +14,7 @@ class UpdateCommunication extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateCommunicationRequest())->rules();
+        $this->rules = resolve_static(UpdateCommunicationRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -26,7 +26,7 @@ class UpdateCommunication extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags');
 
-        $communication = Communication::query()
+        $communication = app(Communication::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -34,7 +34,7 @@ class UpdateCommunication extends FluxAction
         $communication->save();
 
         if (! is_null($tags)) {
-            $communication->syncTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
+            $communication->syncTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
         }
 
         return $communication->withoutRelations()->fresh();

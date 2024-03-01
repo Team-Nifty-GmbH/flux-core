@@ -5,10 +5,10 @@ namespace FluxErp\Livewire\Features;
 use FluxErp\Actions\CommissionRate\CreateCommissionRate;
 use FluxErp\Actions\CommissionRate\DeleteCommissionRate;
 use FluxErp\Actions\CommissionRate\UpdateCommissionRate;
-use FluxErp\Http\Requests\CreateCommissionRateRequest;
 use FluxErp\Models\Category;
 use FluxErp\Models\CommissionRate;
 use FluxErp\Models\Product;
+use FluxErp\Rulesets\CommissionRate\CreateCommissionRateRuleset;
 use Livewire\Attributes\Locked;
 use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -63,8 +63,8 @@ class CommissionRates extends DataTable
 
     public function mount(): void
     {
-        $this->categories = Category::query()
-            ->where('model_type', Product::class)
+        $this->categories = app(Category::class)->query()
+            ->where('model_type', app(Product::class)->getMorphClass())
             ->get(['id', 'name'])
             ->toArray();
 
@@ -111,7 +111,7 @@ class CommissionRates extends DataTable
     public function show(?int $id = null): void
     {
         if ($id) {
-            $this->commissionRate = CommissionRate::query()
+            $this->commissionRate = app(CommissionRate::class)->query()
                 ->whereKey($id)
                 ->first()
                 ->toArray();
@@ -120,7 +120,7 @@ class CommissionRates extends DataTable
         } else {
             $this->commissionRate =
                 array_fill_keys(
-                    array_keys((new CreateCommissionRateRequest())->rules()),
+                    array_keys(resolve_static(CreateCommissionRateRuleset::class, 'getRules')),
                     null
                 );
 

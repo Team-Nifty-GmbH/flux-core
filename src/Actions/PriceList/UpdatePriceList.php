@@ -7,8 +7,8 @@ use FluxErp\Actions\Discount\DeleteDiscount;
 use FluxErp\Actions\Discount\UpdateDiscount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
-use FluxErp\Http\Requests\UpdatePriceListRequest;
 use FluxErp\Models\PriceList;
+use FluxErp\Rulesets\PriceList\UpdatePriceListRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
@@ -17,7 +17,7 @@ class UpdatePriceList extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdatePriceListRequest())->rules();
+        $this->rules = resolve_static(UpdatePriceListRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -27,7 +27,7 @@ class UpdatePriceList extends FluxAction
 
     public function performAction(): Model
     {
-        $priceList = PriceList::query()
+        $priceList = app(PriceList::class)->query()
             ->whereKey($this->data['id'])
             ->with(['discount'])
             ->first();
@@ -42,7 +42,7 @@ class UpdatePriceList extends FluxAction
                 array_merge(
                     $this->data['discount'],
                     [
-                        'model_type' => PriceList::class,
+                        'model_type' => app(PriceList::class)->getMorphClass(),
                         'model_id' => $priceList->id,
                     ]
                 )
@@ -51,7 +51,7 @@ class UpdatePriceList extends FluxAction
             // Update existing discount
             UpdateDiscount::make(
                 array_merge(
-                    $priceList->discount,
+                    $priceList->discount->toArray(),
                     $this->data['discount']
                 )
             );
@@ -63,7 +63,7 @@ class UpdatePriceList extends FluxAction
         return $priceList->withoutRelations()->fresh($hasDiscount ? ['discount'] : []);
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
@@ -74,7 +74,7 @@ class UpdatePriceList extends FluxAction
             ($this->data['parent_id'] ?? false)
             && Helper::checkCycle(
                 model: PriceList::class,
-                item: PriceList::query()->whereKey($this->data['id'])->first(),
+                item: app(PriceList::class)->query()->whereKey($this->data['id'])->first(),
                 parentId: $this->data['parent_id']
             )
         ) {
@@ -85,7 +85,7 @@ class UpdatePriceList extends FluxAction
 
         // Check price_list_code unique
         if (($this->data['price_list_code'] ?? false)
-            && PriceList::query()
+            && app(PriceList::class)->query()
                 ->where('id', '!=', $this->data['id'])
                 ->where('price_list_code', $this->data['price_list_code'])
                 ->exists()

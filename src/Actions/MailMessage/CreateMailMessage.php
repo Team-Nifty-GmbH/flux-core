@@ -4,12 +4,11 @@ namespace FluxErp\Actions\MailMessage;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
-use FluxErp\Http\Requests\CreateCommunicationRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\Communication;
 use FluxErp\Models\ContactOption;
-use FluxErp\Models\MailMessage;
 use FluxErp\Models\Order;
+use FluxErp\Rulesets\Communication\CreateCommunicationRuleset;
 use Illuminate\Support\Arr;
 use Meilisearch\Endpoints\Indexes;
 
@@ -18,8 +17,7 @@ class CreateMailMessage extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateCommunicationRequest())->rules();
-        unset($this->rules['communicatable_type'], $this->rules['communicatable_id']);
+        $this->rules = resolve_static(CreateCommunicationRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -27,12 +25,12 @@ class CreateMailMessage extends FluxAction
         return [Communication::class];
     }
 
-    public function performAction(): MailMessage
+    public function performAction(): Communication
     {
         $tags = Arr::pull($this->data, 'tags');
         $attachments = Arr::pull($this->data, 'attachments', []);
 
-        $mailMessage = new Communication($this->data);
+        $mailMessage = app(Communication::class, ['attributes' => $this->data]);
         $mailMessage->save();
 
         if ($tags) {
@@ -50,14 +48,14 @@ class CreateMailMessage extends FluxAction
 
         if ($mailMessage->mailAccount->is_auto_assign) {
             if ($mailMessage->from_mail && $mailMessage->mailAccount->email !== $mailMessage->from_mail) {
-                $addresses = Address::query()
+                $addresses = app(Address::class)->query()
                     ->where('login_name', $mailMessage->from_mail)
                     ->get()
                     ->each(
                         fn (Address $address) => $address->mailMessages()->attach($mailMessage->id)
                     );
 
-                ContactOption::query()
+                app(ContactOption::class)->query()
                     ->where('value', $mailMessage->from_mail)
                     ->whereIntegerNotInRaw('address_id', $addresses->pluck('id')->toArray())
                     ->with('address')
@@ -70,7 +68,7 @@ class CreateMailMessage extends FluxAction
                     );
             }
 
-            Order::search(
+            app(Order::class)->search(
                 $mailMessage->subject,
                 function (Indexes $meilisearch, string $query, array $options) {
                     return $meilisearch->search(
@@ -80,10 +78,15 @@ class CreateMailMessage extends FluxAction
                 }
             )
                 ->first()
-                ?->mailMessages()
+                ?->communications()
                 ->attach($mailMessage->id);
         }
 
         return $mailMessage->withoutRelations()->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        unset($this->rules['communicatable_type'], $this->rules['communicatable_id']);
     }
 }

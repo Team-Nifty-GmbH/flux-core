@@ -98,10 +98,11 @@
             "providers": [
                 "FluxErp\\FluxServiceProvider",
                 "FluxErp\\Providers\\AuthServiceProvider",
-                "FluxErp\\Providers\\RouteServiceProvider",
-                "FluxErp\\Providers\\EventServiceProvider",
                 "FluxErp\\Providers\\BroadcastServiceProvider",
+                "FluxErp\\Providers\\EventServiceProvider",
                 "FluxErp\\Providers\\FortifyServiceProvider",
+                "FluxErp\\Providers\\MorphMapServiceProvider",
+                "FluxErp\\Providers\\RouteServiceProvider",
                 "FluxErp\\Providers\\ViewServiceProvider"
             ]
         }

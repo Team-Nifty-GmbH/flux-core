@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateWarehouseRequest;
 use FluxErp\Models\Warehouse;
 use FluxErp\Services\WarehouseService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class WarehouseController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Warehouse();
+        $this->model = app(Warehouse::class);
     }
 
-    public function create(CreateWarehouseRequest $request, WarehouseService $warehouseService): JsonResponse
+    public function create(Request $request, WarehouseService $warehouseService): JsonResponse
     {
-        $warehouse = $warehouseService->create($request->validated());
+        $warehouse = $warehouseService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

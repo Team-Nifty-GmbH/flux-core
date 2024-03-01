@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Project;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateProjectRequest;
 use FluxErp\Models\Project;
+use FluxErp\Rulesets\Project\CreateProjectRuleset;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -13,7 +13,7 @@ class CreateProject extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateProjectRequest())->rules();
+        $this->rules = resolve_static(CreateProjectRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,21 +23,21 @@ class CreateProject extends FluxAction
 
     public function performAction(): Project
     {
-        $project = new Project($this->data);
+        $project = app(Project::class, ['attributes' => $this->data]);
         $project->save();
 
         return $project->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Project());
+        $validator->addModel(app(Project::class));
 
         $this->data = $validator->validate();
 
         if ($this->data['parent_id'] ?? false) {
-            $parentProject = Project::query()
+            $parentProject = app(Project::class)->query()
                 ->whereKey($this->data['parent_id'])
                 ->first();
 

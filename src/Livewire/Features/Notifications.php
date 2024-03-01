@@ -46,7 +46,7 @@ class Notifications extends Component
         $this->notification()->confirm($notify);
 
         $this->notifications[] = $notify;
-        Notification::query()->whereKey($notify['id'])->first()?->markAsRead();
+        app(Notification::class)->query()->whereKey($notify['id'])->first()?->markAsRead();
 
         $this->skipRender();
     }
@@ -84,7 +84,7 @@ class Notifications extends Component
 
     public function markAsRead(string $id): void
     {
-        Notification::query()->whereKey($id)->first()?->markAsRead();
+        app(Notification::class)->query()->whereKey($id)->first()?->markAsRead();
         $index = array_search($id, array_column($this->notifications, 'id'));
         unset($this->notifications[$index]);
 

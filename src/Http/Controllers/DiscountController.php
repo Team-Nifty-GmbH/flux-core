@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateDiscountRequest;
 use FluxErp\Models\Discount;
 use FluxErp\Services\DiscountService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class DiscountController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Discount();
+        $this->model = app(Discount::class);
     }
 
-    public function create(CreateDiscountRequest $request, DiscountService $discountService): JsonResponse
+    public function create(Request $request, DiscountService $discountService): JsonResponse
     {
-        $discount = $discountService->create($request->validated());
+        $discount = $discountService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

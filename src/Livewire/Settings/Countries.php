@@ -2,13 +2,14 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Http\Requests\CreateCountryRequest;
-use FluxErp\Http\Requests\UpdateCountryRequest;
+use FluxErp\Actions\Country\CreateCountry;
+use FluxErp\Actions\Country\UpdateCountry;
 use FluxErp\Livewire\DataTables\CountryList;
 use FluxErp\Models\Country;
 use FluxErp\Services\CountryService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
 
@@ -27,11 +28,11 @@ class Countries extends CountryList
 
     public function getRules(): array
     {
-        $countryRequest = ($this->selectedCountry['id'] ?? false)
-            ? new UpdateCountryRequest()
-            : new CreateCountryRequest();
+        $countryAction = ($this->selectedCountry['id'] ?? false)
+            ? UpdateCountry::make([])
+            : CreateCountry::make([]);
 
-        return Arr::prependKeysWith($countryRequest->getRules($this->selectedCountry), 'selectedCountry.');
+        return Arr::prependKeysWith($countryAction->getRules(), 'selectedCountry.');
     }
 
     public function getTableActions(): array
@@ -62,7 +63,7 @@ class Countries extends CountryList
 
     public function showEditModal(?int $countryId = null): void
     {
-        $this->selectedCountry = Country::query()->whereKey($countryId)->first()?->toArray() ?: [
+        $this->selectedCountry = app(Country::class)->query()->whereKey($countryId)->first()?->toArray() ?: [
             'language_id' => null,
             'currency_id' => null,
             'is_active' => true,
@@ -74,17 +75,19 @@ class Countries extends CountryList
 
     public function save(): void
     {
-        if (! user_can('api.countries.post')) {
+        if (! resolve_static(CreateCountry::class, 'canPerformAction', [false])) {
             return;
         }
 
-        $validated = $this->validate();
+        $function = ($this->selectedCountry['id'] ?? false) ? 'update' : 'create';
 
-        $country = Country::query()->whereKey($this->selectedCountry['id'] ?? false)->firstOrNew();
+        try {
+            $response = (new CountryService())->{$function}($this->selectedCountry);
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
 
-        $function = $country->exists ? 'update' : 'create';
-
-        $response = (new CountryService())->{$function}($validated['selectedCountry']);
+            return;
+        }
 
         if (($response['status'] ?? false) === 200 || $response instanceof Model) {
             $this->notification()->success(__('Successfully saved'));
@@ -99,7 +102,7 @@ class Countries extends CountryList
             return;
         }
 
-        Country::query()
+        app(Country::class)->query()
             ->whereKey($this->selectedCountry['id'])
             ->first()
             ->delete();

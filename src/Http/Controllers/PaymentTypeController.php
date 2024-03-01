@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreatePaymentTypeRequest;
 use FluxErp\Models\PaymentType;
 use FluxErp\Services\PaymentTypeService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class PaymentTypeController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new PaymentType();
+        $this->model = app(PaymentType::class);
     }
 
-    public function create(CreatePaymentTypeRequest $request, PaymentTypeService $paymentTypeService): JsonResponse
+    public function create(Request $request, PaymentTypeService $paymentTypeService): JsonResponse
     {
-        $paymentType = $paymentTypeService->create($request->validated());
+        $paymentType = $paymentTypeService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

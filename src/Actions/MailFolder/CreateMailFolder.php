@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\MailFolder;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateMailFolderRequest;
 use FluxErp\Models\MailFolder;
+use FluxErp\Rulesets\MailFolder\CreateMailFolderRuleset;
 
 class CreateMailFolder extends FluxAction
 {
@@ -13,7 +13,7 @@ class CreateMailFolder extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateMailFolderRequest())->rules();
+        $this->rules = resolve_static(CreateMailFolderRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,7 +23,7 @@ class CreateMailFolder extends FluxAction
 
     public function performAction(): MailFolder
     {
-        $mailFolder = new MailFolder($this->data);
+        $mailFolder = app(MailFolder::class, ['attributes' => $this->data]);
         $mailFolder->save();
 
         return $mailFolder->refresh();

@@ -115,7 +115,7 @@ class OrderPositionForm extends Form
             $this->product_id = $product->id;
         }
 
-        $product = $product ?: Product::query()
+        $product = $product ?: app(Product::class)->query()
             ->whereKey($this->product_id)
             ->first();
 
@@ -128,7 +128,7 @@ class OrderPositionForm extends Form
 
         $this->calculate();
 
-        $this->warehouse_id = $this->warehouse_id ?: Warehouse::query()->first()?->id;
+        $this->warehouse_id = $this->warehouse_id ?: app(Warehouse::class)->query()->first()?->id;
     }
 
     public function validate($rules = null, $messages = [], $attributes = []): void

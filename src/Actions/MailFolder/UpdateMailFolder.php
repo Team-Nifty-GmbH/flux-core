@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\MailFolder;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateMailFolderRequest;
 use FluxErp\Models\MailFolder;
+use FluxErp\Rulesets\MailFolder\UpdateMailFolderRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateMailFolder extends FluxAction
@@ -14,7 +14,7 @@ class UpdateMailFolder extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateMailFolderRequest())->rules();
+        $this->rules = resolve_static(UpdateMailFolderRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,7 +24,7 @@ class UpdateMailFolder extends FluxAction
 
     public function performAction(): Model
     {
-        $mailFolder = MailFolder::query()
+        $mailFolder = app(MailFolder::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

@@ -4,9 +4,9 @@ namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
-use FluxErp\Http\Requests\ReplicateOrderRequest;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Rulesets\Order\ReplicateOrderRuleset;
 use Illuminate\Validation\ValidationException;
 
 class ReplicateOrder extends FluxAction
@@ -14,7 +14,7 @@ class ReplicateOrder extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new ReplicateOrderRequest())->rules();
+        $this->rules = resolve_static(ReplicateOrderRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -26,7 +26,7 @@ class ReplicateOrder extends FluxAction
     {
         $getOrderPositionsFromOrigin = is_null(data_get($this->data, 'order_positions'));
 
-        $originalOrder = Order::query()
+        $originalOrder = app(Order::class)->query()
             ->whereKey($this->data['id'])
             ->when($getOrderPositionsFromOrigin, fn ($query) => $query->with('orderPositions'))
             ->first()
@@ -68,7 +68,7 @@ class ReplicateOrder extends FluxAction
 
         if (! $getOrderPositionsFromOrigin) {
             $replicateOrderPositions = collect($this->data['order_positions']);
-            $orderPositions = OrderPosition::query()
+            $orderPositions = app(OrderPosition::class)->query()
                 ->whereIntegerInRaw('id', array_column($this->data['order_positions'], 'id'))
                 ->get()
                 ->map(function (OrderPosition $orderPosition) use ($replicateOrderPositions) {
@@ -118,7 +118,7 @@ class ReplicateOrder extends FluxAction
         }
 
         if ($orderPositions) {
-            if (OrderPosition::query()
+            if (app(OrderPosition::class)->query()
                 ->whereIntegerInRaw('id', $ids)
                 ->where('order_id', '!=', $this->data['id'])
                 ->exists()

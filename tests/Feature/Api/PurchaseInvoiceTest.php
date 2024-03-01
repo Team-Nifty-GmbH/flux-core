@@ -263,8 +263,8 @@ class PurchaseInvoiceTest extends BaseSetup
                     'vat_rate_id' => $vatRate->id,
                     'name' => Str::random(),
                     'amount' => $amount = rand(1, 100),
-                    'unit_price' => $unitPrice = rand(0, 10000) / 100,
-                    'total_price' => $amount * $unitPrice,
+                    'unit_price' => $unitPrice = bcdiv(rand(0, 10000), 100),
+                    'total_price' => bcmul($amount, $unitPrice),
                 ],
             ],
         ];
@@ -321,12 +321,12 @@ class PurchaseInvoiceTest extends BaseSetup
             $dbPurchaseInvoicePositions[0]->amount
         );
         $this->assertEquals(
-            $purchaseInvoice['purchase_invoice_positions'][0]['unit_price'],
-            $dbPurchaseInvoicePositions[0]->unit_price
+            bcround($purchaseInvoice['purchase_invoice_positions'][0]['unit_price'], 2),
+            bcround($dbPurchaseInvoicePositions[0]->unit_price, 2)
         );
         $this->assertEquals(
-            $purchaseInvoice['purchase_invoice_positions'][0]['total_price'],
-            $dbPurchaseInvoicePositions[0]->total_price
+            bcround($purchaseInvoice['purchase_invoice_positions'][0]['total_price'], 2),
+            bcround($dbPurchaseInvoicePositions[0]->total_price, 2)
         );
     }
 

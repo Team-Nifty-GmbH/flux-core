@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateOrderTypeRequest;
 use FluxErp\Models\OrderType;
 use FluxErp\Services\OrderTypeService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class OrderTypeController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new OrderType();
+        $this->model = app(OrderType::class);
     }
 
-    public function create(CreateOrderTypeRequest $request, OrderTypeService $orderTypeService): JsonResponse
+    public function create(Request $request, OrderTypeService $orderTypeService): JsonResponse
     {
-        $orderType = $orderTypeService->create($request->validated());
+        $orderType = $orderTypeService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

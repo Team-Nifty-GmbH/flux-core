@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\CalendarEvent;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateCalendarEventRequest;
 use FluxErp\Models\CalendarEvent;
+use FluxErp\Rulesets\CalendarEvent\CreateCalendarEventRuleset;
 
 class CreateCalendarEvent extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateCalendarEventRequest())->rules();
+        $this->rules = resolve_static(CreateCalendarEventRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class CreateCalendarEvent extends FluxAction
 
     public function performAction(): CalendarEvent
     {
-        $calendarEvent = new CalendarEvent($this->data);
+        $calendarEvent = app(CalendarEvent::class, ['attributes' => $this->data]);
         $calendarEvent->save();
 
         SyncCalendarEventInvites::make(array_merge($this->data, ['id' => $calendarEvent->id]))->execute();

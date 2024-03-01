@@ -34,7 +34,7 @@ class Warehouses extends WarehouseList
                 ->label(__('New'))
                 ->icon('plus')
                 ->color('primary')
-                ->when(CreateWarehouse::canPerformAction(false))
+                ->when(resolve_static(CreateWarehouse::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
                 ]),
@@ -48,7 +48,7 @@ class Warehouses extends WarehouseList
                 ->label(__('Edit'))
                 ->icon('pencil')
                 ->color('primary')
-                ->when(UpdateWarehouse::canPerformAction(false))
+                ->when(resolve_static(UpdateWarehouse::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
                 ]),

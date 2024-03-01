@@ -15,8 +15,12 @@ class Role extends SpatieRole
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class,
-            'model_has_roles', 'role_id', 'model_id'
-        )->withPivotValue('model_type', User::class);
+        return $this->morphedByMany(
+            User::class,
+            'model',
+            config('permission.table_names.model_has_roles'),
+            config('permission.column_names.role_pivot_key'),
+            config('permission.column_names.model_morph_key')
+        );
     }
 }

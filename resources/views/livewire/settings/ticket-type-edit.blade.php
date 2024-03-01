@@ -14,6 +14,8 @@
                             placeholder="{{ __('Model') }}"
                             wire:model="ticketType.model_type"
                             :options="$models"
+                            option-label="label"
+                            option-value="value"
                         />
                     </div>
                     <div class="sm:col-span-6">

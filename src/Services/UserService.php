@@ -13,7 +13,7 @@ class UserService
 {
     public function create(array $data): User
     {
-        return CreateUser::make($data)->execute();
+        return CreateUser::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

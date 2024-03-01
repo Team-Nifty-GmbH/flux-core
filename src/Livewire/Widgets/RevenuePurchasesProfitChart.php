@@ -13,7 +13,7 @@ class RevenuePurchasesProfitChart extends BarChart
 
     public function calculateChart(): void
     {
-        $baseQuery = Order::query()
+        $baseQuery = app(Order::class)->query()
             ->whereNotNull('invoice_date')
             ->whereNotNull('invoice_number');
 

@@ -15,12 +15,12 @@ class TicketService
 {
     public function create(array $data): Ticket
     {
-        return CreateTicket::make($data)->execute();
+        return CreateTicket::make($data)->validate()->execute();
     }
 
     public function update(array $data): Model
     {
-        return UpdateTicket::make($data)->execute();
+        return UpdateTicket::make($data)->validate()->execute();
     }
 
     public function delete(string $id): array
@@ -44,7 +44,9 @@ class TicketService
     {
         return ResponseHelper::createArrayResponse(
             statusCode: 200,
-            statusMessage: 'user ' . (ToggleTicketUser::make($data)->execute()['attached'] ? 'attached' : 'detached')
+            statusMessage: 'user ' . (
+                ToggleTicketUser::make($data)->validate()->execute()['attached'] ? 'attached' : 'detached'
+            )
         );
     }
 }

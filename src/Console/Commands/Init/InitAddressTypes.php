@@ -8,23 +8,10 @@ use Illuminate\Console\Command;
 
 class InitAddressTypes extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'init:address-types';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Initializes a default set of address types.';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): void
     {
         $path = resource_path() . '/init-files/address-types.json';
@@ -38,7 +25,7 @@ class InitAddressTypes extends Command
             $jsonAddressTypes = $json['data'];
 
             if ($jsonAddressTypes) {
-                foreach (Client::all() as $client) {
+                foreach (app(Client::class)->all() as $client) {
                     foreach ($jsonAddressTypes as $jsonAddressType) {
                         $data = array_map(function ($value) {
                             return __($value);
@@ -46,7 +33,7 @@ class InitAddressTypes extends Command
                         $data['client_id'] = $client->id;
 
                         // Gather necessary foreign keys.
-                        $addressType = AddressType::query()
+                        $addressType = app(AddressType::class)->query()
                             ->where('address_type_code', $data['address_type_code'])
                             ->where('client_id', $client->id)
                             ->firstOrNew();

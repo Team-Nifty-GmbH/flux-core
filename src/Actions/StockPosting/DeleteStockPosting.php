@@ -4,15 +4,14 @@ namespace FluxErp\Actions\StockPosting;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\StockPosting;
+use FluxErp\Rulesets\StockPosting\DeleteStockPostingRuleset;
 
 class DeleteStockPosting extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:stock_postings,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteStockPostingRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteStockPosting extends FluxAction
 
     public function performAction(): ?bool
     {
-        return StockPosting::query()
+        return app(StockPosting::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

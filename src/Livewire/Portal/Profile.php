@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\Portal;
 
-use FluxErp\Http\Requests\CreateAddressRequest;
-use FluxErp\Http\Requests\UpdateAddressRequest;
+use FluxErp\Actions\Address\CreateAddress;
+use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Models\Address;
 use FluxErp\Models\Permission;
 use FluxErp\Services\AddressService;
@@ -37,7 +37,7 @@ class Profile extends Component
         if ($id === null || ! auth()->user()->can('profiles.{id?}.get')) {
             $user = auth()->user();
         } elseif ($id === 'new') {
-            $user = new Address();
+            $user = app(Address::class);
             $user->contact_id = auth()->user()->contact_id;
             $user->client_id = auth()->user()->client_id;
             $user->company = auth()->user()->company;
@@ -45,7 +45,7 @@ class Profile extends Component
             $user->country_id = null;
             $user->contact_options = [];
         } else {
-            $user = Address::query()->whereKey($id)->first();
+            $user = app(Address::class)->query()->whereKey($id)->first();
             if ($user->contact_id !== auth()->user()->contact_id) {
                 abort(404);
             }
@@ -58,7 +58,7 @@ class Profile extends Component
             $user->getAllPermissions()->pluck('id')->toArray()
         );
 
-        $this->permissions = Permission::query()
+        $this->permissions = app(Permission::class)->query()
             ->where('guard_name', 'address')
             ->get()
             ->toArray();
@@ -75,9 +75,9 @@ class Profile extends Component
 
     public function getRules(): array
     {
-        $addressRequest = ($this->address['id'] ?? false) ? new UpdateAddressRequest() : new CreateAddressRequest();
+        $rules = (($this->address['id'] ?? false) ? UpdateAddress::make([]) : CreateAddress::make([]))->getRules();
 
-        return Arr::prependKeysWith($addressRequest->rules(), 'address.');
+        return Arr::prependKeysWith($rules, 'address.');
     }
 
     public function render(): View|Factory|Application
@@ -91,7 +91,7 @@ class Profile extends Component
             return;
         }
 
-        $this->addresses = Address::query()
+        $this->addresses = app(Address::class)->query()
             ->where('contact_id', auth()->user()->contact_id)
             ->get()
             ->toArray();
@@ -122,7 +122,7 @@ class Profile extends Component
         $response = (new AddressService())->{$function}($validated['address']);
 
         if (auth()->user()->can('profiles.{id?}.get') && auth()->id() !== ($this->address['id'] ?? false)) {
-            $address = Address::query()->whereKey($response['data']?->id ?: $response->id)->first();
+            $address = app(Address::class)->query()->whereKey($response['data']?->id ?: $response->id)->first();
             $address->syncPermissions($this->address['permissions']);
         }
 

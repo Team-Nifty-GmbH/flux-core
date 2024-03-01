@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\ContactOption;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateContactOptionRequest;
 use FluxErp\Models\ContactOption;
+use FluxErp\Rulesets\ContactOption\CreateContactOptionRuleset;
 
 class CreateContactOption extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateContactOptionRequest())->rules();
+        $this->rules = resolve_static(CreateContactOptionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class CreateContactOption extends FluxAction
 
     public function performAction(): ContactOption
     {
-        $contactOption = new ContactOption($this->data);
+        $contactOption = app(ContactOption::class, ['attributes' => $this->data]);
         $contactOption->save();
 
         return $contactOption->fresh();

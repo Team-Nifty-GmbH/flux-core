@@ -19,7 +19,7 @@ class RelatedColumnSort implements Sort
         $direction = $descending ? 'DESC' : 'ASC';
 
         $exploded = explode('.', $property);
-        $baseModel = new $exploded[0];
+        $baseModel = app($exploded[0]);
         $method = $exploded[1];
         $select = $exploded[2];
 
@@ -59,7 +59,7 @@ class RelatedColumnSort implements Sort
             return;
         }
 
-        $subQuery->when(in_array(SoftDeletes::class, class_uses($related)), function ($query) {
+        $subQuery->when(in_array(SoftDeletes::class, class_uses_recursive($related)), function ($query) {
             return $query->whereNull('deleted_at');
         });
 

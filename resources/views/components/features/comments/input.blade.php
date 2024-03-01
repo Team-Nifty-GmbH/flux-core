@@ -53,8 +53,8 @@
                         <x-button
                             x-on:click="saveComment($refs.textarea, $refs.fileUpload, $refs.sticky, true); files = [];"
                             primary
-                            wire:loading.attr="disabled" :label="auth()->user()->getMorphClass() === \FluxErp\Models\User::class && $this->isPublic === true ? __('Save internal') : __('Save')"/>
-                        @if(auth()->user()->getMorphClass() === \FluxErp\Models\User::class && $this->isPublic === true)
+                            wire:loading.attr="disabled" :label="auth()->user()->getMorphClass() === app(\FluxErp\Models\User::class)->getMorphClass() && $this->isPublic === true ? __('Save internal') : __('Save')"/>
+                        @if(auth()->user()->getMorphClass() === app(\FluxErp\Models\User::class)->getMorphClass() && $this->isPublic === true)
                             <x-button
                                 x-on:click="saveComment($refs.textarea, $refs.fileUpload, $refs.sticky, false)"
                                 primary

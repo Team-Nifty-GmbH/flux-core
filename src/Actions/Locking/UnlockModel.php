@@ -38,7 +38,7 @@ class UnlockModel extends FluxAction
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 

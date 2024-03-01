@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\SerialNumber;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateSerialNumberRequest;
 use FluxErp\Models\SerialNumber;
+use FluxErp\Rulesets\SerialNumber\CreateSerialNumberRuleset;
 use Illuminate\Support\Facades\Validator;
 
 class CreateSerialNumber extends FluxAction
@@ -12,7 +12,7 @@ class CreateSerialNumber extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateSerialNumberRequest())->rules();
+        $this->rules = resolve_static(CreateSerialNumberRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,16 +22,16 @@ class CreateSerialNumber extends FluxAction
 
     public function performAction(): SerialNumber
     {
-        $serialNumber = new SerialNumber($this->data);
+        $serialNumber = app(SerialNumber::class, ['attributes' => $this->data]);
         $serialNumber->save();
 
         return $serialNumber->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new SerialNumber());
+        $validator->addModel(app(SerialNumber::class));
 
         $this->data = $validator->validate();
     }

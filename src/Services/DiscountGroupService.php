@@ -13,7 +13,7 @@ class DiscountGroupService
 {
     public function create(array $data): DiscountGroup
     {
-        return CreateDiscountGroup::make($data)->execute();
+        return CreateDiscountGroup::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Country;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateCountryRequest;
 use FluxErp\Models\Country;
+use FluxErp\Rulesets\Country\UpdateCountryRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,9 +13,7 @@ class UpdateCountry extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateCountryRequest())->rules();
-
-        $this->rules['iso_alpha2'] = $this->rules['iso_alpha2'] . ',' . $this->data['id'];
+        $this->rules = resolve_static(UpdateCountryRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -25,7 +23,7 @@ class UpdateCountry extends FluxAction
 
     public function performAction(): Model
     {
-        $country = Country::query()
+        $country = app(Country::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -35,10 +33,15 @@ class UpdateCountry extends FluxAction
         return $country->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function prepareForValidation(): void
+    {
+        $this->rules['iso_alpha2'] = $this->rules['iso_alpha2'] . ',' . ($this->data['id'] ?? 0);
+    }
+
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Country());
+        $validator->addModel(app(Country::class));
 
         $this->data = $validator->validate();
     }

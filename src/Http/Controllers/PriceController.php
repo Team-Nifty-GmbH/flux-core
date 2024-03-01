@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreatePriceRequest;
 use FluxErp\Models\Price;
 use FluxErp\Services\PriceService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class PriceController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Price();
+        $this->model = app(Price::class);
     }
 
-    public function create(CreatePriceRequest $request, PriceService $priceService): JsonResponse
+    public function create(Request $request, PriceService $priceService): JsonResponse
     {
-        $price = $priceService->create($request->validated());
+        $price = $priceService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

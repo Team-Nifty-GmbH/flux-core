@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-6" wire:ignore>
         <div class="min-w-96 overflow-auto max-h-56 md:max-h-none">
             <x-card :title="__('Addresses')">
-                @if(\FluxErp\Actions\Address\CreateAddress::canPerformAction(false))
+                @if(resolve_static(\FluxErp\Actions\Address\CreateAddress::class, 'canPerformAction', [false]))
                     <x-slot:action>
                         <x-button
                             wire:click="new()"
@@ -54,7 +54,7 @@
                                 [
                                     'model_type',
                                     '=',
-                                    \FluxErp\Models\Contact::class,
+                                    app(\FluxErp\Models\Contact::class)->getMorphClass(),
                                 ],
                             ],
                         ],
@@ -67,7 +67,7 @@
         <x-card :title="__('Details')">
             <x-slot:action>
                 <div class="flex gap-1.5">
-                    @if(\FluxErp\Actions\Address\UpdateAddress::canPerformAction(false))
+                    @if(resolve_static(\FluxErp\Actions\Address\UpdateAddress::class, 'canPerformAction', [false]))
                         <div x-cloak x-show="$wire.edit">
                             <x-button
                                 x-on:click="$wire.edit = false; $wire.reloadAddress()"
@@ -93,7 +93,7 @@
                             />
                         </div>
                     @endif
-                    @if(\FluxErp\Actions\Address\DeleteAddress::canPerformAction(false))
+                    @if(resolve_static(\FluxErp\Actions\Address\DeleteAddress::class, 'canPerformAction', [false]))
                         <div x-cloak x-show="! $wire.address.is_main_address">
                             <x-button
                                 wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Address')]) }}"

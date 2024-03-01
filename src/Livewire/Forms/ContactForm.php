@@ -67,8 +67,8 @@ class ContactForm extends FluxForm
     {
         parent::reset(...$properties);
 
-        $this->main_address['client_id'] = Client::query()->where('is_active', true)->count() === 1
-            ? Client::query()->where('is_active', true)->first()->id
+        $this->main_address['client_id'] = app(Client::class)->query()->where('is_active', true)->count() === 1
+            ? app(Client::class)->query()->where('is_active', true)->first()->id
             : null;
     }
 

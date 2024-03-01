@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire\Accounting;
 
-use FluxErp\Actions\Payment\CreatePaymentRun;
+use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Livewire\DataTables\OrderList;
 use FluxErp\Models\OrderType;
@@ -36,13 +36,13 @@ class DirectDebit extends OrderList
                     'wire:click' => 'createPaymentRun',
                     'wire:confirm' => __('Create Payment Run|Do you really want to create the Payment Run?|Cancel|Yes'),
                 ])
-                ->when(CreatePaymentRun::canPerformAction(false)),
+                ->when(resolve_static(CreatePaymentRun::class, 'canPerformAction', [false])),
         ];
     }
 
     public function getBuilder(Builder $builder): Builder
     {
-        $orderTypes = OrderType::query()
+        $orderTypes = app(OrderType::class)->query()
             ->where('is_active', true)
             ->get(['id', 'order_type_enum'])
             ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase()

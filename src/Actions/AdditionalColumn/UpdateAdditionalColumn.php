@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\AdditionalColumn;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateAdditionalColumnRequest;
 use FluxErp\Models\AdditionalColumn;
+use FluxErp\Rulesets\AdditionalColumn\UpdateAdditionalColumnRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
@@ -13,7 +13,7 @@ class UpdateAdditionalColumn extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateAdditionalColumnRequest())->rules();
+        $this->rules = resolve_static(UpdateAdditionalColumnRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -35,7 +35,7 @@ class UpdateAdditionalColumn extends FluxAction
             $this->data['validations'] = null;
         }
 
-        $additionalColumn = AdditionalColumn::query()
+        $additionalColumn = app(AdditionalColumn::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -45,11 +45,11 @@ class UpdateAdditionalColumn extends FluxAction
         return $additionalColumn->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        $additionalColumn = AdditionalColumn::query()
+        $additionalColumn = app(AdditionalColumn::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Role;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\EditRolePermissionRequest;
 use FluxErp\Models\Role;
+use FluxErp\Rulesets\Role\UpdateRolePermissionsRuleset;
 
 class UpdateRolePermissions extends FluxAction
 {
@@ -12,7 +12,7 @@ class UpdateRolePermissions extends FluxAction
     {
         parent::boot($data);
         $this->setData($this->data ? array_merge(['give' => true], $this->data) : []);
-        $this->rules = (new EditRolePermissionRequest())->rules();
+        $this->rules = resolve_static(UpdateRolePermissionsRuleset::class, 'getRules');
     }
 
     public static function name(): string
@@ -27,7 +27,7 @@ class UpdateRolePermissions extends FluxAction
 
     public function performAction(): array
     {
-        $role = Role::query()
+        $role = app(Role::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

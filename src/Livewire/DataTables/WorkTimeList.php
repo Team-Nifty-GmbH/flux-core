@@ -17,6 +17,7 @@ use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\ModelInfo\ModelInfo;
@@ -90,7 +91,7 @@ class WorkTimeList extends DataTable
                 ->xOnClick(<<<'JS'
                     $openModal('create-orders');
                 JS)
-                ->when(fn () => CreateOrder::canPerformAction(false)),
+                ->when(fn () => resolve_static(CreateOrder::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -98,7 +99,7 @@ class WorkTimeList extends DataTable
     {
         try {
             $this->createOrdersFromWorkTimes->validate();
-            $product = Product::query()
+            $product = app(Product::class)->query()
                 ->whereKey($this->createOrdersFromWorkTimes->product_id)
                 ->firstOrFail();
         } catch (ValidationException|ModelNotFoundException $e) {
@@ -112,12 +113,12 @@ class WorkTimeList extends DataTable
         $selectedIds = $this->getSelectedValues();
 
         // get all contact_ids from selected work times
-        $contactIds = WorkTime::query()
+        $contactIds = app(WorkTime::class)->query()
             ->whereIntegerInRaw('id', $selectedIds)
             ->whereNotNull('contact_id')
             ->distinct('contact_id')
             ->pluck('contact_id');
-        $contacts = Contact::query()
+        $contacts = app(Contact::class)->query()
             ->whereIntegerInRaw('id', $contactIds)
             ->with('client')
             ->get();
@@ -125,7 +126,7 @@ class WorkTimeList extends DataTable
         $orderIds = [];
         $billedWorkTimes = 0;
         foreach ($contacts as $contact) {
-            $workTimes = WorkTime::query()
+            $workTimes = app(WorkTime::class)->query()
                 ->whereIntegerInRaw('id', $selectedIds)
                 ->where('contact_id', $contact->id)
                 ->where('is_locked', true)
@@ -192,7 +193,7 @@ class WorkTimeList extends DataTable
                     $orderPosition = CreateOrderPosition::make([
                         'name' => $workTime->name,
                         'description' => $description,
-                        'warehouse_id' => Warehouse::default()?->id,
+                        'warehouse_id' => resolve_static(Warehouse::class, 'default')?->id,
                         'order_id' => $order->id,
                         'product_id' => $product->id,
                         'amount' => $billingAmount,
@@ -258,12 +259,12 @@ class WorkTimeList extends DataTable
                 ->icon('pencil')
                 ->color('primary')
                 ->wireClick('edit(record.id)')
-                ->when(UpdateLockedWorkTime::canPerformAction(false)),
+                ->when(resolve_static(UpdateLockedWorkTime::class, 'canPerformAction', [false])),
             DataTableButton::make()
                 ->label(__('Delete'))
                 ->icon('trash')
                 ->color('negative')
-                ->when(DeleteWorkTime::canPerformAction(false))
+                ->when(resolve_static(DeleteWorkTime::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
                     'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Work Time')]),
@@ -276,16 +277,20 @@ class WorkTimeList extends DataTable
         return array_merge(
             parent::getViewData(),
             [
-                'workTimeTypes' => WorkTimeType::query()
+                'workTimeTypes' => app(WorkTimeType::class)->query()
                     ->get(['id', 'name', 'is_billable'])
                     ->toArray(),
                 'trackableTypes' => model_info_all()
+                    ->unique('morphClass')
                     ->filter(
                         fn (ModelInfo $modelInfo) => in_array(Trackable::class, $modelInfo->traits->toArray())
                     )
-                    ->map(fn (ModelInfo $modelInfo) => $modelInfo->class)
+                    ->map(fn ($modelInfo) => [
+                        'label' => __(Str::headline($modelInfo->morphClass)),
+                        'value' => $modelInfo->morphClass,
+                    ])
                     ->toArray(),
-                'orderTypes' => OrderType::query()
+                'orderTypes' => app(OrderType::class)->query()
                     ->where('is_hidden', false)
                     ->where('is_active', true)
                     ->get(['id', 'name', 'order_type_enum'])

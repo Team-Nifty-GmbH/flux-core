@@ -1,6 +1,6 @@
 <div>
     @php
-        $client = \FluxErp\Models\Client::first();
+        $client = app(\FluxErp\Models\Client::class)->first();
     @endphp
 
     <x-slot:title>

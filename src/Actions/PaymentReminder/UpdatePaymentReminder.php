@@ -3,10 +3,10 @@
 namespace FluxErp\Actions\PaymentReminder;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdatePaymentReminderRequest;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentReminder;
+use FluxErp\Rulesets\PaymentReminder\UpdatePaymentReminderRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
@@ -15,12 +15,12 @@ class UpdatePaymentReminder extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdatePaymentReminderRequest())->rules();
+        $this->rules = resolve_static(UpdatePaymentReminderRuleset::class, 'getRules');
     }
 
     public static function name(): string
     {
-        return CreatePaymentReminder::name();
+        return resolve_static(CreatePaymentReminder::class, 'name');
     }
 
     public static function models(): array
@@ -30,7 +30,7 @@ class UpdatePaymentReminder extends FluxAction
 
     public function performAction(): Model
     {
-        $paymentReminder = PaymentReminder::query()
+        $paymentReminder = app(PaymentReminder::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -44,13 +44,13 @@ class UpdatePaymentReminder extends FluxAction
     {
         parent::validateData();
 
-        $paymentReminder = PaymentReminder::query()
+        $paymentReminder = app(PaymentReminder::class)->query()
             ->whereKey($this->data['id'])
             ->first(['id', 'order_id']);
 
-        if (! Media::query()
+        if (! app(Media::class)->query()
             ->whereKey($this->data['media_id'])
-            ->where('model_type', Order::class)
+            ->where('model_type', app(Order::class)->getMorphClass())
             ->where('model_id', $paymentReminder->order_id)
             ->exists()
         ) {

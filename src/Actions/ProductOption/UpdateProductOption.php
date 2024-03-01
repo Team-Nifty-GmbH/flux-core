@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\ProductOption;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateProductOptionRequest;
 use FluxErp\Models\ProductOption;
+use FluxErp\Rulesets\ProductOption\UpdateProductOptionRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,7 +13,7 @@ class UpdateProductOption extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateProductOptionRequest())->rules();
+        $this->rules = resolve_static(UpdateProductOptionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,7 +23,7 @@ class UpdateProductOption extends FluxAction
 
     public function performAction(): Model
     {
-        $productOption = ProductOption::query()
+        $productOption = app(ProductOption::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -33,10 +33,10 @@ class UpdateProductOption extends FluxAction
         return $productOption->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new ProductOption());
+        $validator->addModel(app(ProductOption::class));
 
         $this->data = $validator->validate();
     }

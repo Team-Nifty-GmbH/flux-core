@@ -13,7 +13,7 @@ class ContactOptionService
 {
     public function create(array $data): ContactOption
     {
-        return CreateContactOption::make($data)->execute();
+        return CreateContactOption::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

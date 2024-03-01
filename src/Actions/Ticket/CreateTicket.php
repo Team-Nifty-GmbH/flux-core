@@ -3,11 +3,11 @@
 namespace FluxErp\Actions\Ticket;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateTicketRequest;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Client;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
+use FluxErp\Rulesets\Ticket\CreateTicketRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -17,17 +17,7 @@ class CreateTicket extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateTicketRequest())->rules();
-
-        if ($this->data['ticket_type_id'] ?? false) {
-            $this->rules = array_merge(
-                $this->rules,
-                TicketType::query()
-                    ->whereKey($this->data['ticket_type_id'])
-                    ->first()
-                    ?->hasAdditionalColumnsValidationRules() ?? []
-            );
-        }
+        $this->rules = resolve_static(CreateTicketRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -39,14 +29,14 @@ class CreateTicket extends FluxAction
     {
         $users = Arr::pull($this->data, 'users');
 
-        $ticket = new Ticket($this->data);
+        $ticket = app(Ticket::class, ['attributes' => $this->data]);
 
         if ($ticket->ticket_type_id) {
             $meta = $ticket->getDirtyMeta();
 
             $additionalColumns = Arr::keyBy(
-                AdditionalColumn::query()
-                    ->where('model_type', TicketType::class)
+                app(AdditionalColumn::class)->query()
+                    ->where('model_type', app(TicketType::class)->getMorphClass())
                     ->where('model_id', $ticket->ticket_type_id)
                     ->select(['id', 'name'])
                     ->get()
@@ -68,7 +58,7 @@ class CreateTicket extends FluxAction
 
         $ticket->getSerialNumber(
             'ticket_number',
-            Auth::user()?->client_id ?? Client::query()->where('is_active', true)->first()?->id
+            Auth::user()?->client_id ?? app(Client::class)->query()->where('is_active', true)->first()?->id
         );
 
         $ticket->save();
@@ -80,10 +70,23 @@ class CreateTicket extends FluxAction
         return $ticket->refresh();
     }
 
-    public function validateData(): void
+    protected function prepareForValidation(): void
+    {
+        if ($this->data['ticket_type_id'] ?? false) {
+            $this->rules = array_merge(
+                $this->rules,
+                app(TicketType::class)->query()
+                    ->whereKey($this->data['ticket_type_id'])
+                    ->first()
+                    ?->hasAdditionalColumnsValidationRules() ?? []
+            );
+        }
+    }
+
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Ticket());
+        $validator->addModel(app(Ticket::class));
 
         $this->data = $validator->validate();
     }

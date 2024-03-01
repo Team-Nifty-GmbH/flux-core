@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateTransactionRequest;
 use FluxErp\Models\Transaction;
 use FluxErp\Services\TransactionService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class TransactionController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Transaction();
+        $this->model = app(Transaction::class);
     }
 
-    public function create(CreateTransactionRequest $request, TransactionService $transactionService): JsonResponse
+    public function create(Request $request, TransactionService $transactionService): JsonResponse
     {
-        $transaction = $transactionService->create($request->validated());
+        $transaction = $transactionService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

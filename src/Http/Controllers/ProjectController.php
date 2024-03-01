@@ -7,7 +7,6 @@ use FluxErp\Actions\Project\DeleteProject;
 use FluxErp\Actions\Project\FinishProject;
 use FluxErp\Actions\Project\UpdateProject;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\FinishProjectRequest;
 use FluxErp\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,7 +17,7 @@ class ProjectController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Project();
+        $this->model = app(Project::class);
     }
 
     public function create(Request $request): JsonResponse
@@ -103,12 +102,16 @@ class ProjectController extends BaseController
         );
     }
 
-    public function finish(FinishProjectRequest $request): JsonResponse
+    public function finish(Request $request): JsonResponse
     {
+        $project = FinishProject::make($request->all())
+            ->validate()
+            ->execute();
+
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
-            data: FinishProject::make($request->validated())->execute(),
-            statusMessage: 'project ' . ($request->validated()['finish'] ? 'finished' : 'reopened')
+            data: $project,
+            statusMessage: 'project ' . ($request->finish ? 'finished' : 'reopened')
         );
     }
 }

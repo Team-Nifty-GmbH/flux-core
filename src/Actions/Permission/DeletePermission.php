@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Permission;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Permission;
+use FluxErp\Rulesets\Permission\DeletePermissionRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeletePermission extends FluxAction
@@ -11,9 +12,7 @@ class DeletePermission extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:permissions,id',
-        ];
+        $this->rules = resolve_static(DeletePermissionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,17 +22,17 @@ class DeletePermission extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Permission::query()
+        return app(Permission::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        if (Permission::query()
+        if (app(Permission::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->is_locked

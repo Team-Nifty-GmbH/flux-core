@@ -5,10 +5,10 @@ namespace FluxErp\Actions\PurchaseInvoice;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition;
-use FluxErp\Http\Requests\CreatePurchaseInvoiceRequest;
 use FluxErp\Models\Client;
 use FluxErp\Models\Order;
 use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Rulesets\PurchaseInvoice\CreatePurchaseInvoiceRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -18,7 +18,7 @@ class CreatePurchaseInvoice extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = resolve_silently(CreatePurchaseInvoiceRequest::class)->rules();
+        $this->rules = resolve_static(CreatePurchaseInvoiceRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -42,7 +42,7 @@ class CreatePurchaseInvoice extends FluxAction
         }
 
         $media = UploadMedia::make([
-            'model_type' => PurchaseInvoice::class,
+            'model_type' => app(PurchaseInvoice::class)->getMorphClass(),
             'model_id' => $purchaseInvoice->id,
             'media' => $file,
             'collection_name' => 'purchase_invoice',
@@ -56,7 +56,7 @@ class CreatePurchaseInvoice extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['client_id'] ??= Client::default()->id;
+        $this->data['client_id'] ??= resolve_static(Client::class, 'default')->id;
     }
 
     protected function validateData(): void
@@ -84,7 +84,7 @@ class CreatePurchaseInvoice extends FluxAction
             && data_get($this->data, 'contact_id')
             && data_get($this->data, 'client_id')
         ) {
-            if (Order::query()
+            if (app(Order::class)->query()
                 ->where('client_id', $this->data['client_id'])
                 ->where('invoice_number', $this->data['invoice_number'])
                 ->where('contact_id', $this->data['contact_id'])

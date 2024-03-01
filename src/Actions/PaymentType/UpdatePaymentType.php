@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\PaymentType;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdatePaymentTypeRequest;
 use FluxErp\Models\PaymentType;
+use FluxErp\Rulesets\PaymentType\UpdatePaymentTypeRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,7 +13,7 @@ class UpdatePaymentType extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdatePaymentTypeRequest())->rules();
+        $this->rules = resolve_static(UpdatePaymentTypeRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,10 +24,10 @@ class UpdatePaymentType extends FluxAction
     public function performAction(): Model
     {
         if ($this->data['is_default'] ?? false) {
-            PaymentType::query()->update(['is_default' => false]);
+            app(PaymentType::class)->query()->update(['is_default' => false]);
         }
 
-        $paymentType = PaymentType::query()
+        $paymentType = app(PaymentType::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -37,10 +37,10 @@ class UpdatePaymentType extends FluxAction
         return $paymentType->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         if (($this->data['is_default'] ?? false)
-            && ! PaymentType::query()
+            && ! app(PaymentType::class)->query()
                 ->whereKeyNot($this->data['id'] ?? 0)
                 ->where('is_default', true)
                 ->exists()
@@ -49,7 +49,7 @@ class UpdatePaymentType extends FluxAction
         }
 
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new PaymentType());
+        $validator->addModel(app(PaymentType::class));
 
         $this->data = $validator->validate();
     }

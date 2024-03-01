@@ -3,9 +3,9 @@
 namespace FluxErp\Actions\Ticket;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateTicketRequest;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
+use FluxErp\Rulesets\Ticket\UpdateTicketRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -15,17 +15,7 @@ class UpdateTicket extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateTicketRequest())->rules();
-
-        if ($this->data['ticket_type_id'] ?? false) {
-            $this->rules = array_merge(
-                $this->rules,
-                TicketType::query()
-                    ->whereKey($this->data['ticket_type_id'])
-                    ->first()
-                    ?->hasAdditionalColumnsValidationRules() ?? []
-            );
-        }
+        $this->rules = resolve_static(UpdateTicketRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -37,7 +27,7 @@ class UpdateTicket extends FluxAction
     {
         $users = Arr::pull($this->data, 'users');
 
-        $ticket = Ticket::query()
+        $ticket = app(Ticket::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -51,10 +41,23 @@ class UpdateTicket extends FluxAction
         return $ticket->refresh();
     }
 
-    public function validateData(): void
+    protected function prepareForValidation(): void
+    {
+        if ($this->data['ticket_type_id'] ?? false) {
+            $this->rules = array_merge(
+                $this->rules,
+                app(TicketType::class)->query()
+                    ->whereKey($this->data['ticket_type_id'])
+                    ->first()
+                    ?->hasAdditionalColumnsValidationRules() ?? []
+            );
+        }
+    }
+
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Ticket());
+        $validator->addModel(app(Ticket::class));
 
         $this->data = $validator->validate();
     }

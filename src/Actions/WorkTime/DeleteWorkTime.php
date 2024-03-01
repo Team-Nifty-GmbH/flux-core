@@ -4,6 +4,7 @@ namespace FluxErp\Actions\WorkTime;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\WorkTime;
+use FluxErp\Rulesets\WorkTime\DeleteWorkTimeRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteWorkTime extends FluxAction
@@ -11,9 +12,7 @@ class DeleteWorkTime extends FluxAction
     public function __construct(array $data)
     {
         parent::__construct($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:work_times,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteWorkTimeRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,17 +22,17 @@ class DeleteWorkTime extends FluxAction
 
     public function performAction(): ?bool
     {
-        return WorkTime::query()
+        return app(WorkTime::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        if (WorkTime::query()
+        if (app(WorkTime::class)->query()
             ->whereKey($this->data['id'])
             ->whereNotNull('order_position_id')
             ->exists()

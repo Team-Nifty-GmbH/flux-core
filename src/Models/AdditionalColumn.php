@@ -30,11 +30,9 @@ class AdditionalColumn extends Model
         'pivot',
     ];
 
-    public static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
-        self::created(function (AdditionalColumn $additionalColumn) {
+        static::created(function (AdditionalColumn $additionalColumn) {
             Cache::store('array')->forget('meta_casts_' . $additionalColumn->model_type);
             Cache::store('array')->forget('meta_additional_columns_' . $additionalColumn->model_type);
         });

@@ -4,15 +4,14 @@ namespace FluxErp\Actions\Address;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Address;
+use FluxErp\Rulesets\Address\DeleteAddressRuleset;
 
 class DeleteAddress extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:addresses,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteAddressRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteAddress extends FluxAction
 
     public function performAction(): ?bool
     {
-        $address = Address::query()
+        $address = app(Address::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

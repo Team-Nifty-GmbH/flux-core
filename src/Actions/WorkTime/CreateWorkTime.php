@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\WorkTime;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateWorkTimeRequest;
 use FluxErp\Models\WorkTime;
+use FluxErp\Rulesets\WorkTime\CreateWorkTimeRuleset;
 
 class CreateWorkTime extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateWorkTimeRequest())->rules();
+        $this->rules = resolve_static(CreateWorkTimeRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class CreateWorkTime extends FluxAction
 
     public function performAction(): WorkTime
     {
-        $workTime = new WorkTime($this->data);
+        $workTime = app(WorkTime::class, ['attributes' => $this->data]);
 
         if (is_null(data_get($this->data, 'is_billable'))) {
             $workTime->is_billable = $workTime->workTimeType?->is_billable ?? false;
@@ -30,5 +30,10 @@ class CreateWorkTime extends FluxAction
         $workTime->save();
 
         return $workTime->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->data['user_id'] = auth()->user()->id;
     }
 }

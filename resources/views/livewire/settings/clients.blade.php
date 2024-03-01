@@ -22,7 +22,7 @@
             <x-slot:footer>
                 <div class="w-full">
                     <div class="flex justify-between gap-x-4">
-                        @if(\FluxErp\Actions\Client\DeleteClient::canPerformAction(false))
+                        @if(resolve_static(\FluxErp\Actions\Client\DeleteClient::class, 'canPerformAction', [false]))
                             <x-button
                                 wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Client')]) }}"
                                 x-bind:class="$wire.client.id > 0 || 'invisible'"

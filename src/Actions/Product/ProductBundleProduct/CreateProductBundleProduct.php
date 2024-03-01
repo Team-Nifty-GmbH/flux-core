@@ -3,9 +3,9 @@
 namespace FluxErp\Actions\Product\ProductBundleProduct;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateProductBundleProductRequest;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Product;
+use FluxErp\Rulesets\Product\ProductBundleProduct\CreateProductBundleProductRuleset;
 use Illuminate\Validation\Rule;
 
 class CreateProductBundleProduct extends FluxAction
@@ -13,12 +13,7 @@ class CreateProductBundleProduct extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateProductBundleProductRequest())->rules();
-
-        $this->rules['bundle_product_id'] = [
-            Rule::unique('product_bundle_product', 'bundle_product_id')
-                ->where('product_id', $this->data['product_id'] ?? 0),
-        ];
+        $this->rules = resolve_static(CreateProductBundleProductRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -28,12 +23,10 @@ class CreateProductBundleProduct extends FluxAction
 
     public function performAction(): ProductBundleProduct
     {
-        $productBundleProduct = new ProductBundleProduct();
-        $productBundleProduct->fill($this->data);
-
+        $productBundleProduct = app(ProductBundleProduct::class, ['attributes' => $this->data]);
         $productBundleProduct->save();
 
-        Product::query()
+        app(Product::class)->query()
             ->whereKey($this->data['product_id'])
             ->first()
             ->update([
@@ -41,5 +34,13 @@ class CreateProductBundleProduct extends FluxAction
             ]);
 
         return $productBundleProduct->refresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->rules['bundle_product_id'] = [
+            Rule::unique('product_bundle_product', 'bundle_product_id')
+                ->where('product_id', $this->data['product_id'] ?? 0),
+        ];
     }
 }

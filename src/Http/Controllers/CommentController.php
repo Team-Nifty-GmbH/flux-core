@@ -4,7 +4,6 @@ namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\Helper;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateCommentRequest;
 use FluxErp\Services\CommentService;
 use FluxErp\Traits\Commentable;
 use Illuminate\Http\JsonResponse;
@@ -21,12 +20,12 @@ class CommentController extends Controller
     {
         $model = Helper::classExists(classString: $modelType, isModel: $modelType);
 
-        $traits = $model ? class_uses($model) : [];
+        $traits = $model ? class_uses_recursive($model) : [];
         if (! $model || ! array_key_exists(Commentable::class, $traits)) {
             return ResponseHelper::createResponseFromBase(statusCode: 404, data: ['route' => 'route not found']);
         }
 
-        $modelInstance = new $model();
+        $modelInstance = app($model);
         $modelInstance = $modelInstance::query()
             ->whereKey($id)
             ->first();
@@ -41,9 +40,9 @@ class CommentController extends Controller
         );
     }
 
-    public function create(CreateCommentRequest $request, CommentService $commentService): JsonResponse
+    public function create(Request $request, CommentService $commentService): JsonResponse
     {
-        $response = $commentService->create($request->validated());
+        $response = $commentService->create($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

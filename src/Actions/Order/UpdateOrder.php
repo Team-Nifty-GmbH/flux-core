@@ -4,9 +4,9 @@ namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Http\Requests\UpdateOrderRequest;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Rulesets\Order\UpdateOrderRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -18,7 +18,7 @@ class UpdateOrder extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateOrderRequest())->rules();
+        $this->rules = resolve_static(UpdateOrderRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -31,7 +31,7 @@ class UpdateOrder extends FluxAction
         $addresses = Arr::pull($this->data, 'addresses', []);
         $users = Arr::pull($this->data, 'users');
 
-        $order = Order::query()
+        $order = app(Order::class)->query()
             ->whereKey($this->data['id'])
             ->first();
         if ($order->shipping_costs_net_price) {
@@ -66,14 +66,14 @@ class UpdateOrder extends FluxAction
         return $order->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Order());
+        $validator->addModel(app(Order::class));
 
         $this->data = $validator->validate();
 
-        $order = Order::query()
+        $order = app(Order::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -86,12 +86,12 @@ class UpdateOrder extends FluxAction
         if (($this->data['invoice_number'] ?? false)
             || $updatedOrderType
         ) {
-            $isPurchase = OrderType::query()
+            $isPurchase = app(OrderType::class)->query()
                 ->whereKey($updatedOrderType ?: $order->order_type_id)
                 ->whereIn('order_type_enum', [OrderTypeEnum::Purchase->value, OrderTypeEnum::PurchaseRefund->value])
                 ->exists();
 
-            if (Order::query()
+            if (app(Order::class)->query()
                 ->where('id', '!=', $this->data['id'])
                 ->where('client_id', $order->client_id)
                 ->where('invoice_number', $this->data['invoice_number'] ?? $order->invoice_number)

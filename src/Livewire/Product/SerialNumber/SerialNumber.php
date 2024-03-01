@@ -6,10 +6,11 @@ use FluxErp\Actions\SerialNumber\CreateSerialNumber;
 use FluxErp\Actions\SerialNumber\DeleteSerialNumber;
 use FluxErp\Actions\SerialNumber\UpdateSerialNumber;
 use FluxErp\Htmlables\TabButton;
-use FluxErp\Http\Requests\CreateSerialNumberRequest;
-use FluxErp\Http\Requests\UpdateSerialNumberRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\Product;
+use FluxErp\Models\SerialNumber as SerialNumberModel;
+use FluxErp\Rulesets\SerialNumber\CreateSerialNumberRuleset;
+use FluxErp\Rulesets\SerialNumber\UpdateSerialNumberRuleset;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -43,17 +44,16 @@ class SerialNumber extends Component
     public function getRules(): array
     {
         $rules = ($this->serialNumber['id'] ?? false) ?
-            (new UpdateSerialNumberRequest())->rules() :
-            (new CreateSerialNumberRequest())->rules();
-        $additionalColumnRules = (new \FluxErp\Models\SerialNumber())->hasAdditionalColumnsValidationRules();
+            resolve_static(UpdateSerialNumberRuleset::class, 'getRules') :
+            resolve_static(CreateSerialNumberRuleset::class, 'getRules');
 
-        return Arr::prependKeysWith(array_merge($rules, $additionalColumnRules), 'serialNumber.');
+        return Arr::prependKeysWith($rules, 'serialNumber.');
     }
 
     public function mount(int $id): void
     {
         if ($id > 0) {
-            $serialNumber = \FluxErp\Models\SerialNumber::query()
+            $serialNumber = app(SerialNumberModel::class)->query()
                 ->whereKey($id)
                 ->with('product')
                 ->firstOrFail();
@@ -68,7 +68,7 @@ class SerialNumber extends Component
         }
 
         if (request('addressId')) {
-            $address = Address::query()
+            $address = app(Address::class)->query()
                 ->whereKey(request('addressId'))
                 ->firstOrFail();
 
@@ -110,7 +110,7 @@ class SerialNumber extends Component
 
     public function updatedSerialNumberProductId(int $id): void
     {
-        $this->serialNumber['product'] = Product::query()
+        $this->serialNumber['product'] = app(Product::class)->query()
             ->whereKey($id)
             ->first()
             ?->toArray();

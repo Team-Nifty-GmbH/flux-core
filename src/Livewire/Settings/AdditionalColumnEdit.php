@@ -2,16 +2,18 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use FluxErp\Actions\AdditionalColumn\CreateAdditionalColumn;
+use FluxErp\Actions\AdditionalColumn\UpdateAdditionalColumn;
 use FluxErp\Helpers\Helper;
-use FluxErp\Http\Requests\CreateAdditionalColumnRequest;
-use FluxErp\Http\Requests\UpdateAdditionalColumnRequest;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Rules\AvailableValidationRule;
 use FluxErp\Rules\UniqueInFieldDependence;
+use FluxErp\Rulesets\AdditionalColumn\CreateAdditionalColumnRuleset;
 use FluxErp\Services\AdditionalColumnService;
 use FluxErp\Traits\HasAdditionalColumns;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use WireUi\Traits\Actions;
@@ -40,8 +42,7 @@ class AdditionalColumnEdit extends Component
 
     public function getRules(): array
     {
-        $rules = $this->isNew ?
-            (new CreateAdditionalColumnRequest())->rules() : (new UpdateAdditionalColumnRequest())->rules();
+        $rules = ($this->isNew ? CreateAdditionalColumn::make([]) : UpdateAdditionalColumn::make([]))->getRules();
 
         foreach ($rules['name'] as $key => $rule) {
             if ($rule instanceof UniqueInFieldDependence) {
@@ -66,7 +67,7 @@ class AdditionalColumnEdit extends Component
     public function mount(): void
     {
         $this->additionalColumn = array_fill_keys(
-            array_keys((new CreateAdditionalColumnRequest())->rules()),
+            array_keys(resolve_static(CreateAdditionalColumnRuleset::class, 'getRules')),
             null
         );
 
@@ -75,9 +76,13 @@ class AdditionalColumnEdit extends Component
         $this->additionalColumn['is_customer_editable'] = false;
 
         $this->models = model_info_all()
+            ->unique('morphClass')
             ->filter(fn ($model) => in_array(HasAdditionalColumns::class, $model->traits->toArray()))
-            ->map(fn ($model) => $model->class)
-            ->sort()
+            ->map(fn ($modelInfo) => [
+                'label' => __(Str::headline($modelInfo->morphClass)),
+                'value' => $modelInfo->morphClass,
+            ])
+            ->sortBy('label')
             ->toArray();
 
         $this->fieldTypes = Helper::getHtmlInputFieldTypes();
@@ -98,7 +103,7 @@ class AdditionalColumnEdit extends Component
     {
         $this->additionalColumn = $additionalColumn ?:
             array_fill_keys(
-                array_keys((new CreateAdditionalColumnRequest())->rules()),
+                array_keys(resolve_static(CreateAdditionalColumnRuleset::class, 'getRules')),
                 null
             );
 

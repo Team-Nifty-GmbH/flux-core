@@ -34,8 +34,8 @@ class SearchBar extends Component
         }
 
         $component = method_exists($model, 'getLivewireComponentWidget')
-            ? livewire_component_exists($model::getLivewireComponentWidget())
-                ? $model::getLivewireComponentWidget()
+            ? livewire_component_exists(resolve_static($model, 'getLivewireComponentWidget'))
+                ? resolve_static($model, 'getLivewireComponentWidget')
                 : null
             : null;
 

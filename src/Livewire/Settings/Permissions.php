@@ -41,12 +41,12 @@ class Permissions extends Component
 
     public function boot(): void
     {
-        $this->roles = Role::query()
+        $this->roles = app(Role::class)->query()
             ->orderBy('name')
             ->get()
             ->toArray();
 
-        $this->users = User::query()
+        $this->users = app(User::class)->query()
             ->where('is_active', true)
             ->get()
             ->toArray();
@@ -76,7 +76,8 @@ class Permissions extends Component
 
     public function getPermissions(): void
     {
-        $query = $this->searchPermission ? Permission::search($this->searchPermission) : Permission::query();
+        $query = $this->searchPermission ?
+            app(Permission::class)->search($this->searchPermission) : app(Permission::class)->query();
 
         $this->permissions = $query
             ->where('guard_name', $this->selectedRole['guard_name'])
@@ -109,7 +110,10 @@ class Permissions extends Component
     public function toggleUsers(int $roleId): void
     {
         $this->showToggleUsers = true;
-        $role = Role::query()->whereKey($roleId)->first();
+        $role = app(Role::class)->query()
+            ->whereKey($roleId)
+            ->first();
+
         $userHasPermissionOnRole = $role->users;
         $this->selectedUsers = $userHasPermissionOnRole->pluck('id')->toArray();
         $this->selectedRole = $role->toArray();
@@ -117,7 +121,10 @@ class Permissions extends Component
 
     public function saveToggleUsers(): void
     {
-        $role = Role::query()->whereKey($this->selectedRole['id'])->first();
+        $role = app(Role::class)->query()
+            ->whereKey($this->selectedRole['id'])
+            ->first();
+
         $role->users()?->sync($this->selectedUsers);
         $this->showToggleUsers = false;
     }

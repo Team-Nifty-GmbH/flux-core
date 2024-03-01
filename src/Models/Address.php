@@ -113,11 +113,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             }
 
             if ($contactUpdates) {
-                Contact::query()
+                app(Contact::class)->query()
                     ->whereKey($address->contact_id)
                     ->update($contactUpdates);
 
-                Address::query()
+                app(Address::class)->query()
                     ->where('contact_id', $address->contact_id)
                     ->where('id', '!=', $address->id)
                     ->update($addressesUpdates);
@@ -197,7 +197,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     {
         return [
             new PrivateChannel($this->broadcastChannel()),
-            new PrivateChannel((new Contact())->broadcastChannel() . $this->contact_id),
+            new PrivateChannel((app(Contact::class))->broadcastChannel() . $this->contact_id),
         ];
     }
 

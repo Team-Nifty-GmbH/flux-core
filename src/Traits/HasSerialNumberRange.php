@@ -10,9 +10,6 @@ use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 trait HasSerialNumberRange
 {
-    /**
-     * @return $this
-     */
     public function getSerialNumber(string|array $types, ?int $clientId = null): static
     {
         $types = (array) $types;
@@ -23,9 +20,9 @@ trait HasSerialNumberRange
                 continue;
             }
 
-            $query = SerialNumberRange::query()
+            $query = app(SerialNumberRange::class)->query()
                 ->where('type', $type)
-                ->where('model_type', self::class)
+                ->where('model_type', app(static::class)->getMorphClass())
                 ->where('client_id', $clientId);
 
             $store = false;
@@ -43,7 +40,7 @@ trait HasSerialNumberRange
                     $serialNumberRange->fill([
                         'client_id' => $clientId,
                         'type' => $type,
-                        'model_type' => self::class,
+                        'model_type' => app(static::class)->getMorphClass(),
                         'stores_serial_numbers' => $store,
                     ])->save();
                 } catch (\Exception) {
@@ -53,7 +50,7 @@ trait HasSerialNumberRange
 
             if (! $serialNumberRange->is_pre_filled && ! $serialNumberRange->is_randomized) {
                 $serialNumberRange = DB::transaction(function () use ($serialNumberRange) {
-                    $serialNumberRange = SerialNumberRange::query()
+                    $serialNumberRange = app(SerialNumberRange::class)->query()
                         ->whereKey($serialNumberRange->id)
                         ->lockForUpdate()
                         ->first();
@@ -69,12 +66,12 @@ trait HasSerialNumberRange
             $styled = $serialNumberRange->getCurrentStyled();
 
             if ($serialNumberRange->stores_serial_numbers) {
-                $serialNumber = new SerialNumber(
-                    [
+                $serialNumber = app(SerialNumber::class, [
+                    'attributes' => [
                         'serial_number_range_id' => $serialNumberRange->id,
                         'serial_number' => $styled,
-                    ]
-                );
+                    ],
+                ]);
                 $serialNumber->save();
             }
 

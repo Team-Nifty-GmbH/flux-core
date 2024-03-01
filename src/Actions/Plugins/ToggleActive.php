@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Plugins;
 
-use FluxErp\Http\Requests\PluginToggleActiveRequest;
+use FluxErp\Rulesets\Plugin\TogglePluginRuleset;
 
 class ToggleActive extends BasePluginAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new PluginToggleActiveRequest())->rules();
+        $this->rules = resolve_static(TogglePluginRuleset::class, 'getRules');
     }
 
     public function performAction(): true

@@ -16,7 +16,7 @@ class RoleService
 {
     public function create(array $data): Model
     {
-        return CreateRole::make($data)->execute();
+        return CreateRole::make($data)->validate()->execute();
     }
 
     public function update(array $data): array
@@ -58,17 +58,17 @@ class RoleService
 
     public function editRolePermissions(array $data, bool $give): array
     {
-        return UpdateRolePermissions::make(array_merge($data, ['give' => $give]))->execute();
+        return UpdateRolePermissions::make(array_merge($data, ['give' => $give]))->validate()->execute();
     }
 
     public function editRoleUsers(array $data, bool $assign): array
     {
-        return UpdateRoleUsers::make(array_merge($data, ['assign' => $assign]))->execute();
+        return UpdateRoleUsers::make(array_merge($data, ['assign' => $assign]))->validate()->execute();
     }
 
     public function syncUserRoles(array $data): array
     {
-        return UpdateUserRoles::make(array_merge($data, ['sync' => true]))->execute();
+        return UpdateUserRoles::make(array_merge($data, ['sync' => true]))->validate()->execute();
     }
 
     public function delete(string $id): array

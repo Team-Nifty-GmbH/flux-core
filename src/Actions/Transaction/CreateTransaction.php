@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\Transaction;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateTransactionRequest;
 use FluxErp\Models\Transaction;
+use FluxErp\Rulesets\Transaction\CreateTransactionRuleset;
 
 class CreateTransaction extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateTransactionRequest())->rules();
+        $this->rules = resolve_static(CreateTransactionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class CreateTransaction extends FluxAction
 
     public function performAction(): Transaction
     {
-        $transaction = new Transaction($this->data);
+        $transaction = app(Transaction::class, ['attributes' => $this->data]);
         $transaction->save();
 
         return $transaction->fresh();

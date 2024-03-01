@@ -29,8 +29,8 @@ class ProductList extends BaseProductList
     {
         parent::mount();
 
-        $this->vatRates = VatRate::all(['id', 'name', 'rate_percentage'])->toArray();
-        $priceList = PriceList::default()?->toArray() ?? [];
+        $this->vatRates = app(VatRate::class)->all(['id', 'name', 'rate_percentage'])->toArray();
+        $priceList = resolve_static(PriceList::class, 'default')?->toArray() ?? [];
         $priceList['is_editable'] = true;
 
         $this->priceLists = [$priceList];
@@ -41,7 +41,7 @@ class ProductList extends BaseProductList
     {
         $this->product->reset();
 
-        $this->product->client_id = Client::default()?->id;
+        $this->product->client_id = resolve_static(Client::class, 'default')?->id;
     }
 
     public function getTableActions(): array
@@ -62,10 +62,10 @@ class ProductList extends BaseProductList
         return array_merge(
             parent::getViewData(),
             [
-                'clients' => Client::query()
+                'clients' => app(Client::class)->query()
                     ->get(['id', 'name'])
                     ->toArray(),
-                'vatRates' => VatRate::query()
+                'vatRates' => app(VatRate::class)->query()
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
             ]

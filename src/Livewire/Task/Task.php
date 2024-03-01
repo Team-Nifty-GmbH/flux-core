@@ -29,7 +29,7 @@ class Task extends Component
 
     public function mount(string $id): void
     {
-        $task = TaskModel::query()
+        $task = app(TaskModel::class)->query()
             ->whereKey($id)
             ->firstOrFail();
 
@@ -43,7 +43,7 @@ class Task extends Component
             )
         );
 
-        $this->availableStates = TaskModel::getStatesFor('state')->map(function ($state) {
+        $this->availableStates = app(TaskModel::class)->getStatesFor('state')->map(function ($state) {
             return [
                 'label' => __(ucfirst(str_replace('_', ' ', $state))),
                 'name' => $state,
@@ -89,7 +89,7 @@ class Task extends Component
 
     public function resetForm(): void
     {
-        $task = TaskModel::query()
+        $task = app(TaskModel::class)->query()
             ->whereKey($this->task->id)
             ->firstOrFail();
 
@@ -126,7 +126,7 @@ class Task extends Component
         try {
             $tag = CreateTag::make([
                 'name' => $name,
-                'type' => TaskModel::class,
+                'type' => app(TaskModel::class)->getMorphClass(),
             ])
                 ->checkPermission()
                 ->validate()

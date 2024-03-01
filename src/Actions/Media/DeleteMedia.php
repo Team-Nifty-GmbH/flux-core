@@ -4,15 +4,14 @@ namespace FluxErp\Actions\Media;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Media;
+use FluxErp\Rulesets\Media\DeleteMediaRuleset;
 
 class DeleteMedia extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:media,id',
-        ];
+        $this->rules = resolve_static(DeleteMediaRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteMedia extends FluxAction
 
     public function performAction(): ?bool
     {
-        $mediaItem = Media::query()
+        $mediaItem = app(Media::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

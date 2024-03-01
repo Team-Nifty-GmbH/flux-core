@@ -68,7 +68,7 @@ class DashboardTest extends BaseSetup
         };
 
         Widget::query()->create([
-            'widgetable_type' => User::class,
+            'widgetable_type' => app(User::class)->getMorphClass(),
             'widgetable_id' => $this->user->id,
             'component_name' => 'sample-component',
             'name' => 'Widget 1',

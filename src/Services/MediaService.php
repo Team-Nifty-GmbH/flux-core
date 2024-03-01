@@ -20,7 +20,7 @@ class MediaService
      */
     public function downloadPublic(string $filename, array $data): array
     {
-        $mediaItem = Media::query()
+        $mediaItem = app(Media::class)->query()
             ->where('model_type', $data['model_type'])
             ->where('model_id', $data['model_id'])
             ->where('file_name', $filename)
@@ -55,7 +55,7 @@ class MediaService
      */
     public function download(string $id, array $data): array
     {
-        $mediaItem = Media::query()
+        $mediaItem = app(Media::class)->query()
             ->whereKey($id)
             ->first();
 
@@ -129,7 +129,7 @@ class MediaService
 
     public function update(array $data): Model
     {
-        return UpdateMedia::make($data)->execute();
+        return UpdateMedia::make($data)->validate()->execute();
     }
 
     public function delete(string $id): array

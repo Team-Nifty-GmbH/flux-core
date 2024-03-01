@@ -3,10 +3,10 @@
 namespace FluxErp\Livewire\Portal\Ticket;
 
 use FluxErp\Actions\Ticket\CreateTicket;
-use FluxErp\Http\Requests\CreateTicketRequest;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
+use FluxErp\Rulesets\Ticket\CreateTicketRuleset;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -42,6 +42,12 @@ class TicketCreate extends Component
 
     public function mount(?string $modelType = null, ?int $modelId = null): void
     {
+        try {
+            $modelType = $modelType ? app($modelType)->getMorphClass() : null;
+        } catch (\Exception) {
+            $modelType = null;
+        }
+
         $this->ticket = [
             'title' => null,
             'description' => null,
@@ -49,7 +55,7 @@ class TicketCreate extends Component
             'model_id' => $modelId,
         ];
 
-        $this->ticketTypes = TicketType::query()
+        $this->ticketTypes = app(TicketType::class)->query()
             ->with('additionalModelColumns:id,name,model_type,model_id,field_type,values')
             ->when(
                 $modelType,
@@ -63,8 +69,8 @@ class TicketCreate extends Component
             ->get()
             ->toArray();
 
-        $this->additionalColumns = AdditionalColumn::query()
-            ->where('model_type', Ticket::class)
+        $this->additionalColumns = app(AdditionalColumn::class)->query()
+            ->where('model_type', app(Ticket::class)->getMorphClass())
             ->whereNull('model_id')
             ->select(['id', 'name', 'model_type', 'model_id', 'field_type', 'values'])
             ->get()
@@ -73,7 +79,7 @@ class TicketCreate extends Component
 
     public function getRules(): array
     {
-        return Arr::prependKeysWith((new CreateTicketRequest())->rules(), 'ticket.');
+        return Arr::prependKeysWith(resolve_static(CreateTicketRuleset::class, 'getRules'), 'ticket.');
     }
 
     public function render(): View
@@ -122,7 +128,7 @@ class TicketCreate extends Component
         }
 
         try {
-            $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, Ticket::class);
+            $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, app(Ticket::class)->getMorphClass());
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
         }

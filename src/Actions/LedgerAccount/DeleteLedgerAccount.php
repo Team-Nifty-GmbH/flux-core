@@ -4,15 +4,14 @@ namespace FluxErp\Actions\LedgerAccount;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Rulesets\LedgerAccount\DeleteLedgerAccountRuleset;
 
 class DeleteLedgerAccount extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:ledger_accounts,id',
-        ];
+        $this->rules = resolve_static(DeleteLedgerAccountRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteLedgerAccount extends FluxAction
 
     public function performAction(): mixed
     {
-        return LedgerAccount::query()
+        return app(LedgerAccount::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

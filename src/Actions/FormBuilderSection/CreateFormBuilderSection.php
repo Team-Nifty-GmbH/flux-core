@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\FormBuilderSection;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateFormBuilderSectionRequest;
 use FluxErp\Models\FormBuilderSection;
+use FluxErp\Rulesets\FormBuilderSection\CreateFormBuilderSectionRuleset;
 
 class CreateFormBuilderSection extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateFormBuilderSectionRequest())->rules();
+        $this->rules = resolve_static(CreateFormBuilderSectionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,9 +21,7 @@ class CreateFormBuilderSection extends FluxAction
 
     public function performAction(): FormBuilderSection
     {
-        $formBuilderSection = new FormBuilderSection();
-
-        $formBuilderSection->fill($this->data);
+        $formBuilderSection = app(FormBuilderSection::class, ['attributes' => $this->data]);
         $formBuilderSection->save();
 
         return $formBuilderSection->refresh();

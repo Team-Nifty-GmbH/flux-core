@@ -67,8 +67,8 @@
                 option-label="label"
                 option-description="description"
                 :async-data="[
-                'api' => route('search', \FluxErp\Models\Order::class),
-            ]"
+                    'api' => route('search', \FluxErp\Models\Order::class),
+                ]"
             />
             <x-inputs.number :label="__('Budget')" x-bind:readonly="!edit" wire:model="project.budget" step="0.01" />
             <x-input
