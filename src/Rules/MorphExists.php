@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class MorphExists implements DataAwareRule, ValidationRule
 {
@@ -30,21 +31,21 @@ class MorphExists implements DataAwareRule, ValidationRule
             return;
         }
 
-        if (! class_exists($model) || ! new $model() instanceof Model) {
+        $morphClass = Relation::getMorphedModel($model);
+        if (! $morphClass && (! class_exists($model) || ! app($model) instanceof Model)) {
             $fail(sprintf('%s is not a valid model.', $model))->translate();
 
             return;
         }
 
-        if (! $model::query()->whereKey($value)->exists()) {
+        $model = $morphClass ?: $model;
+
+        if (! app($model)->query()->whereKey($value)->exists()) {
             $fail(sprintf('Record with id %s doesnt exist in %s.', $value, $model))->translate();
         }
     }
 
-    /**
-     * @return MediaUploadType|$this
-     */
-    public function setData($data): MediaUploadType|static
+    public function setData($data): static
     {
         $this->data = $data;
 

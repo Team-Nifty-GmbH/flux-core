@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Media;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\ReplaceMediaRequest;
 use FluxErp\Models\Media;
+use FluxErp\Rulesets\Media\ReplaceMediaRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
@@ -16,7 +16,7 @@ class ReplaceMedia extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new ReplaceMediaRequest())->rules();
+        $this->rules = resolve_static(ReplaceMediaRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -26,7 +26,7 @@ class ReplaceMedia extends FluxAction
 
     public function performAction(): Model
     {
-        $mediaItem = Media::query()
+        $mediaItem = app(Media::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -91,16 +91,20 @@ class ReplaceMedia extends FluxAction
         return $media->withoutRelations();
     }
 
-    public function validateData(): void
+    protected function prepareForValidation(): void
     {
-        $this->data['model_type'] = Media::query()
+        $this->data['media_type'] = data_get($this->data, 'media_type');
+        $this->data['model_type'] = app(Media::class)->query()
             ->whereKey($this->data['id'] ?? null)
             ->first()
             ?->model_type;
+    }
 
+    protected function validateData(): void
+    {
         parent::validateData();
 
-        $mediaItem = Media::query()
+        $mediaItem = app(Media::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -112,7 +116,7 @@ class ReplaceMedia extends FluxAction
         $this->data['name'] = $this->data['name'] ?? $this->data['file_name'];
         $this->data['collection_name'] ??= 'default';
 
-        if (Media::query()
+        if (app(Media::class)->query()
             ->where('model_type', $mediaItem->model_type)
             ->where('model_id', $mediaItem->model_id)
             ->where('collection_name', $mediaItem->collection_name)

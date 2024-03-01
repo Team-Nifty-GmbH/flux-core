@@ -13,7 +13,7 @@ class CurrencyService
 {
     public function create(array $data): Currency
     {
-        return CreateCurrency::make($data)->execute();
+        return CreateCurrency::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

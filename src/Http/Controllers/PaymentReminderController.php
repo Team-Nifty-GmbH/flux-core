@@ -6,10 +6,9 @@ use FluxErp\Actions\PaymentReminder\CreatePaymentReminder;
 use FluxErp\Actions\PaymentReminder\DeletePaymentReminder;
 use FluxErp\Actions\PaymentReminder\UpdatePaymentReminder;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreatePaymentReminderRequest;
-use FluxErp\Http\Requests\UpdatePaymentReminderRequest;
 use FluxErp\Models\PaymentReminder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class PaymentReminderController extends BaseController
@@ -17,13 +16,13 @@ class PaymentReminderController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new PaymentReminder();
+        $this->model = app(PaymentReminder::class);
     }
 
-    public function create(CreatePaymentReminderRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
         try {
-            $paymentReminder = CreatePaymentReminder::make($request->validated())
+            $paymentReminder = CreatePaymentReminder::make($request->all())
                 ->validate()
                 ->execute();
 
@@ -42,10 +41,10 @@ class PaymentReminderController extends BaseController
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function update(UpdatePaymentReminderRequest $request): JsonResponse
+    public function update(Request $request): JsonResponse
     {
         try {
-            $paymentReminder = UpdatePaymentReminder::make($request->validated())
+            $paymentReminder = UpdatePaymentReminder::make($request->all())
                 ->validate()
                 ->execute();
 

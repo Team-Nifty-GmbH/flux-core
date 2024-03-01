@@ -3,8 +3,9 @@
 namespace FluxErp\Actions\Category;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateCategoryRequest;
 use FluxErp\Models\Category;
+use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\Category\CreateCategoryRuleset;
 use Illuminate\Support\Facades\Validator;
 
 class CreateCategory extends FluxAction
@@ -12,7 +13,7 @@ class CreateCategory extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateCategoryRequest())->rules();
+        $this->rules = resolve_static(CreateCategoryRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,25 +23,32 @@ class CreateCategory extends FluxAction
 
     public function performAction(): Category
     {
-        $category = new Category($this->data);
+        $category = app(Category::class, ['attributes' => $this->data]);
         $category->save();
 
         return $category->refresh();
     }
 
-    public function validateData(): void
+    protected function prepareForValidation(): void
     {
         $this->data['sort_number'] = $this->data['sort_number'] ?? 0;
         $this->rules = array_merge(
             $this->rules,
             [
-                'parent_id' => 'integer|nullable|exists:categories,id,model_type,' . $this->data['model_type'],
-                'sort_number' => 'required|integer',
+                'parent_id' => [
+                    'integer',
+                    'nullable',
+                    (new ModelExists(Category::class))
+                        ->where('model_type', $this->data['model_type'] ?? null),
+                ],
             ]
         );
+    }
 
+    protected function validateData(): void
+    {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Category());
+        $validator->addModel(app(Category::class));
 
         $this->data = $validator->validate();
     }

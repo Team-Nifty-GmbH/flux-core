@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Currency;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Currency;
+use FluxErp\Rulesets\Currency\DeleteCurrencyRuleset;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -13,9 +14,7 @@ class DeleteCurrency extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:currencies,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteCurrencyRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -25,7 +24,7 @@ class DeleteCurrency extends FluxAction
 
     public function performAction(): ?bool
     {
-        $currency = Currency::query()
+        $currency = app(Currency::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -35,11 +34,11 @@ class DeleteCurrency extends FluxAction
         return $currency->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        if (Currency::query()
+        if (app(Currency::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->countries()

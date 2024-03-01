@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\CalendarEvent;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateCalendarEventRequest;
 use FluxErp\Models\CalendarEvent;
+use FluxErp\Rulesets\CalendarEvent\SyncCalendarEventInvitesRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
@@ -13,11 +13,7 @@ class SyncCalendarEventInvites extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = array_filter(
-            (new UpdateCalendarEventRequest())->rules(),
-            fn ($key) => str_starts_with($key, 'invited_') || $key === 'id',
-            ARRAY_FILTER_USE_KEY
-        );
+        $this->rules = resolve_static(SyncCalendarEventInvitesRuleset::class, 'getRules');
     }
 
     public static function name(): string
@@ -32,7 +28,7 @@ class SyncCalendarEventInvites extends FluxAction
 
     public function performAction(): Model
     {
-        $calendarEvent = CalendarEvent::query()
+        $calendarEvent = app(CalendarEvent::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

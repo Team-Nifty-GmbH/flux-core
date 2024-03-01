@@ -4,10 +4,10 @@ namespace FluxErp\Actions\Address;
 
 use FluxErp\Actions\ContactOption\CreateContactOption;
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateAddressRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Tag;
+use FluxErp\Rulesets\Address\CreateAddressRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -18,7 +18,7 @@ class CreateAddress extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = resolve_silently(CreateAddressRequest::class)->rules();
+        $this->rules = resolve_static(CreateAddressRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -66,7 +66,7 @@ class CreateAddress extends FluxAction
             $address->attachTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
         }
 
-        if (app(CreateContactOption::class)->canPerformAction(false)) {
+        if (resolve_static(CreateContactOption::class, 'canPerformAction', [false])) {
             foreach ($contactOptions as $contactOption) {
                 $contactOption['address_id'] = $address->id;
                 try {
@@ -98,7 +98,7 @@ class CreateAddress extends FluxAction
         return $address->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(app(Address::class));

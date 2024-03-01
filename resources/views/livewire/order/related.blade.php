@@ -11,6 +11,14 @@
         <livewire:data-tables.order-list cache-key="order.related.order-list.children" :filters="[['parent_id', '=', $order->id]]" />
     </x-card>
     <x-card :title="__('Tickets')">
-        <livewire:data-tables.ticket-list cache-key="order.related.ticket-list" :filters="[['model_id', '=', $order->id], ['model_type', '=', \FluxErp\Models\Order::class]]" :model-type="\FluxErp\Models\Order::class" :model-id="$order->id" />
+        <livewire:data-tables.ticket-list
+            cache-key="order.related.ticket-list"
+            :filters="[
+                ['model_id', '=', $order->id],
+                ['model_type', '=', app(\FluxErp\Models\Order::class)->getMorphClass()]
+            ]"
+            :model-type="\FluxErp\Models\Order::class"
+            :model-id="$order->id"
+        />
     </x-card>
 </div>

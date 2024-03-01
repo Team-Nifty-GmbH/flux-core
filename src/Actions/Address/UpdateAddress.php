@@ -7,10 +7,10 @@ use FluxErp\Actions\ContactOption\DeleteContactOption;
 use FluxErp\Actions\ContactOption\UpdateContactOption;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
-use FluxErp\Http\Requests\UpdateAddressRequest;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Tag;
+use FluxErp\Rulesets\Address\UpdateAddressRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -22,7 +22,7 @@ class UpdateAddress extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = resolve_silently(UpdateAddressRequest::class)->rules();
+        $this->rules = resolve_static(UpdateAddressRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -111,7 +111,7 @@ class UpdateAddress extends FluxAction
         return $address->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(app(Address::class));
@@ -132,7 +132,6 @@ class UpdateAddress extends FluxAction
                     'login_name' => [__('Unable to clear login name while \'can_login\' = \'true\'')],
                 ];
             }
-
             if ($address->login_password &&
                 array_key_exists('login_password', $this->data) &&
                 ! $this->data['login_password']

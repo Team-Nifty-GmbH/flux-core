@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\AdditionalColumn;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateAdditionalColumnRequest;
 use FluxErp\Models\AdditionalColumn;
+use FluxErp\Rulesets\AdditionalColumn\CreateAdditionalColumnRuleset;
 
 class CreateAdditionalColumn extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = resolve_silently(CreateAdditionalColumnRequest::class)->rules();
+        $this->rules = resolve_static(CreateAdditionalColumnRuleset::class, 'getRules');
     }
 
     public static function models(): array

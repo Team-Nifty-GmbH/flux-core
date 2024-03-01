@@ -39,7 +39,7 @@ class AdditionalColumns extends AdditionalColumnList
                 ->color('primary')
                 ->icon('pencil')
                 ->attributes([
-                    'x-on:click' => '$wire.show(record)',
+                    'x-on:click' => '$wire.show(record.id)',
                 ]),
         ];
     }

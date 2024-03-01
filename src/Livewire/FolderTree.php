@@ -5,6 +5,7 @@ namespace FluxErp\Livewire;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\DeleteMediaCollection;
 use FluxErp\Actions\Media\UpdateMedia;
+use FluxErp\Models\Media as MediaModel;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -29,10 +30,7 @@ class FolderTree extends Component
 
     public array $latestUploads = [];
 
-    /**
-     * @return array|mixed
-     */
-    public function getRules(): mixed
+    public function getRules(): array
     {
         return [
             'files.*' => 'required|file|max:10240',
@@ -42,7 +40,7 @@ class FolderTree extends Component
     public function updatedFiles(): void
     {
         try {
-            UpdateMedia::canPerformAction();
+            resolve_static(UpdateMedia::class, 'canPerformAction');
         } catch (UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -55,7 +53,7 @@ class FolderTree extends Component
             $media = $this->saveFileUploadsToMediaLibrary(
                 name: 'files',
                 modelId: $this->modelId,
-                modelType: $this->modelType
+                modelType: app($this->modelType)->getMorphClass(),
             );
 
             $this->latestUploads = $media;
@@ -81,13 +79,13 @@ class FolderTree extends Component
             return [];
         }
 
-        return $this->modelType::query()->whereKey($this->modelId)->first()?->getMediaAsTree() ?: [];
+        return app($this->modelType)->query()->whereKey($this->modelId)->first()?->getMediaAsTree() ?: [];
     }
 
     public function save(array $item): bool
     {
         try {
-            UpdateMedia::canPerformAction();
+            resolve_static(UpdateMedia::class, 'canPerformAction');
         } catch (UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -106,14 +104,14 @@ class FolderTree extends Component
             ->snake();
         $newCollectionName = implode('.', $newCollectionName);
 
-        $model = $this->modelType::query()->whereKey($this->modelId)->first();
+        $model = app($this->modelType)->query()->whereKey($this->modelId)->first();
 
-        \FluxErp\Models\Media::query()
-            ->where('model_type', $this->modelType)
+        app(MediaModel::class)->query()
+            ->where('model_type', app($this->modelType)->getMorphClass())
             ->where('model_id', $this->modelId)
             ->where('collection_name', 'LIKE', $collection['collection_name'] . '%')
             ->get()
-            ->each(function (\FluxErp\Models\Media $media) use ($newCollectionName, $model, $collection) {
+            ->each(function (MediaModel $media) use ($newCollectionName, $model, $collection) {
                 $collectionName = $media->collection_name;
                 $collectionName = str_replace($collection['collection_name'], $newCollectionName, $collectionName);
 
@@ -123,7 +121,7 @@ class FolderTree extends Component
         return true;
     }
 
-    public function delete(\FluxErp\Models\Media $media): bool
+    public function delete(MediaModel $media): bool
     {
         try {
             DeleteMedia::make($media->toArray())
@@ -143,7 +141,7 @@ class FolderTree extends Component
     {
         try {
             DeleteMediaCollection::make([
-                'model_type' => $this->modelType,
+                'model_type' => app($this->modelType)->getMorphClass(),
                 'model_id' => $this->modelId,
                 'collection_name' => $collection,
             ])
@@ -158,7 +156,10 @@ class FolderTree extends Component
     private function saveFile(array $media): bool
     {
         try {
-            $response = UpdateMedia::make($media)->checkPermission()->validate()->execute();
+            $response = UpdateMedia::make($media)
+                ->checkPermission()
+                ->validate()
+                ->execute();
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
 

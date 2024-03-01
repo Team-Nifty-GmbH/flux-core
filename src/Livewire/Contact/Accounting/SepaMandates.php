@@ -53,7 +53,7 @@ class SepaMandates extends SepaMandateList
     protected function getViewData(): array
     {
         return array_merge(parent::getViewData(), [
-            'contactBankConnections' => ContactBankConnection::query()
+            'contactBankConnections' => app(ContactBankConnection::class)->query()
                 ->where('contact_id', $this->contact->id)
                 ->get(['id', 'iban', 'bank_name']),
         ]);
@@ -72,7 +72,7 @@ class SepaMandates extends SepaMandateList
                 ->icon('plus')
                 ->color('primary')
                 ->wireClick('edit')
-                ->when(CreateSepaMandate::canPerformAction(false)),
+                ->when(resolve_static(CreateSepaMandate::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -84,7 +84,7 @@ class SepaMandates extends SepaMandateList
                 ->icon('pencil')
                 ->color('primary')
                 ->wireClick('edit(record.id)')
-                ->when(UpdateSepaMandate::canPerformAction(false)),
+                ->when(resolve_static(UpdateSepaMandate::class, 'canPerformAction', [false])),
             DataTableButton::make()
                 ->label(__('Create Template'))
                 ->icon('document-text')
@@ -98,7 +98,7 @@ class SepaMandates extends SepaMandateList
                     'wire:click' => 'delete(record.id)',
                     'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Sepa Mandate')]),
                 ])
-                ->when(DeleteSepaMandate::canPerformAction(false)),
+                ->when(resolve_static(DeleteSepaMandate::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -115,7 +115,7 @@ class SepaMandates extends SepaMandateList
             return false;
         }
 
-        $this->signedMandate->model_type = SepaMandate::class;
+        $this->signedMandate->model_type = app(SepaMandate::class)->getMorphClass();
         $this->signedMandate->model_id = $this->sepaMandate->id;
         $this->signedMandate->collection_name = 'signed_mandate';
 
@@ -172,7 +172,7 @@ class SepaMandates extends SepaMandateList
     #[Renderless]
     public function createDocuments(): ?BinaryFileResponse
     {
-        $sepaMandate = SepaMandate::query()
+        $sepaMandate = app(SepaMandate::class)->query()
             ->whereKey($this->sepaMandate->id)
             ->with([
                 'contact.mainAddress',
@@ -183,7 +183,7 @@ class SepaMandates extends SepaMandateList
         try {
             /** @var PrintableView $file */
             $file = Printing::make([
-                'model_type' => SepaMandate::class,
+                'model_type' => app(SepaMandate::class)->getMorphClass(),
                 'model_id' => $this->sepaMandate->id,
                 'view' => 'sepa-mandate',
             ])->checkPermission()->validate()->execute();

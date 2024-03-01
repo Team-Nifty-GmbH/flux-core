@@ -10,9 +10,6 @@ use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 trait HasSerialNumberRange
 {
-    /**
-     * @return $this
-     */
     public function getSerialNumber(string|array $types, ?int $clientId = null): static
     {
         $types = (array) $types;
@@ -23,7 +20,7 @@ trait HasSerialNumberRange
                 continue;
             }
 
-            $query = SerialNumberRange::query()
+            $query = app(SerialNumberRange::class)->query()
                 ->where('type', $type)
                 ->where('model_type', self::class)
                 ->where('client_id', $clientId);
@@ -53,7 +50,7 @@ trait HasSerialNumberRange
 
             if (! $serialNumberRange->is_pre_filled && ! $serialNumberRange->is_randomized) {
                 $serialNumberRange = DB::transaction(function () use ($serialNumberRange) {
-                    $serialNumberRange = SerialNumberRange::query()
+                    $serialNumberRange = app(SerialNumberRange::class)->query()
                         ->whereKey($serialNumberRange->id)
                         ->lockForUpdate()
                         ->first();
@@ -69,12 +66,12 @@ trait HasSerialNumberRange
             $styled = $serialNumberRange->getCurrentStyled();
 
             if ($serialNumberRange->stores_serial_numbers) {
-                $serialNumber = new SerialNumber(
-                    [
+                $serialNumber = app(SerialNumber::class, [
+                    'attributes' => [
                         'serial_number_range_id' => $serialNumberRange->id,
                         'serial_number' => $styled,
-                    ]
-                );
+                    ],
+                ]);
                 $serialNumber->save();
             }
 

@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Portal\Ticket;
 
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Models\AdditionalColumn;
+use FluxErp\Models\Ticket as TicketModel;
 use FluxErp\Models\TicketType;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
@@ -25,18 +26,18 @@ class Ticket extends Component
 
     public function mount(int $id): void
     {
-        $ticket = \FluxErp\Models\Ticket::query()
+        $ticket = app(TicketModel::class)->query()
             ->whereKey($id)
             ->where('authenticatable_type', Auth::user()->getMorphClass())
             ->where('authenticatable_id', Auth::id())
             ->firstOrFail();
 
-        $this->additionalColumns = AdditionalColumn::query()
+        $this->additionalColumns = app(AdditionalColumn::class)->query()
             ->where(function (Builder $query) use ($ticket) {
-                $query->where('model_type', \FluxErp\Models\Ticket::class)
+                $query->where('model_type', app(TicketModel::class)->getMorphClass())
                     ->when($ticket->ticket_type_id, function (Builder $query) use ($ticket) {
                         $query->orWhere(function (Builder $query) use ($ticket) {
-                            $query->where('model_type', TicketType::class)
+                            $query->where('model_type', app(TicketType::class)->getMorphClass())
                                 ->where('model_id', $ticket->ticket_type_id);
                         });
                     });

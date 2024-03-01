@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Discount;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateDiscountRequest;
 use FluxErp\Models\Discount;
+use FluxErp\Rulesets\Discount\UpdateDiscountRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
@@ -13,7 +13,7 @@ class UpdateDiscount extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateDiscountRequest())->rules();
+        $this->rules = resolve_static(UpdateDiscountRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,7 +23,7 @@ class UpdateDiscount extends FluxAction
 
     public function performAction(): Model
     {
-        $discount = Discount::query()
+        $discount = app(Discount::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

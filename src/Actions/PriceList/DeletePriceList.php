@@ -4,6 +4,7 @@ namespace FluxErp\Actions\PriceList;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\PriceList;
+use FluxErp\Rulesets\PriceList\DeletePriceListRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeletePriceList extends FluxAction
@@ -11,9 +12,7 @@ class DeletePriceList extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:price_lists,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeletePriceListRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,17 +22,17 @@ class DeletePriceList extends FluxAction
 
     public function performAction(): ?bool
     {
-        return PriceList::query()
+        return app(PriceList::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        if (PriceList::query()
+        if (app(PriceList::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->prices()

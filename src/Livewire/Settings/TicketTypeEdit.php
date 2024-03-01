@@ -2,13 +2,17 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Http\Requests\CreateTicketTypeRequest;
-use FluxErp\Http\Requests\UpdateTicketTypeRequest;
+use FluxErp\Actions\TicketType\CreateTicketType;
+use FluxErp\Actions\TicketType\DeleteTicketType;
+use FluxErp\Actions\TicketType\UpdateTicketType;
 use FluxErp\Models\Role;
 use FluxErp\Models\TicketType;
+use FluxErp\Rulesets\TicketType\CreateTicketTypeRuleset;
+use FluxErp\Rulesets\TicketType\UpdateTicketTypeRuleset;
 use FluxErp\Services\TicketTypeService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use TeamNiftyGmbH\DataTable\Helpers\ModelFinder;
 use WireUi\Traits\Actions;
@@ -33,8 +37,7 @@ class TicketTypeEdit extends Component
 
     public function getRules(): array
     {
-        $rules = $this->isNew ?
-            (new CreateTicketTypeRequest())->rules() : (new UpdateTicketTypeRequest())->getRules($this->ticketType);
+        $rules = ($this->isNew ? CreateTicketType::make([]) : UpdateTicketType::make($this->ticketType))->getRules();
 
         return Arr::prependKeysWith($rules, 'ticketType.');
     }
@@ -42,19 +45,21 @@ class TicketTypeEdit extends Component
     public function mount(): void
     {
         $this->ticketType = array_fill_keys(
-            array_keys((new CreateTicketTypeRequest())->rules()),
+            array_keys(resolve_static(CreateTicketTypeRuleset::class, 'getRules')),
             null
         );
 
-        $this->models = array_values(
-            ModelFinder::all(flux_path('src/Models'), flux_path('src'), 'FluxErp')
-                ->merge(ModelFinder::all())
-                ->unique()
-                ->sort()
-                ->toArray()
-        );
+        $this->models = model_info_all()
+            ->unique('morphClass')
+            ->map(fn ($modelInfo) => [
+                'label' => __(Str::headline($modelInfo->morphClass)),
+                'value' => $modelInfo->morphClass,
+            ])
+            ->sortBy('label')
+            ->toArray();
 
-        $this->roles = Role::query()
+
+        $this->roles = app(Role::class)->query()
             ->where('guard_name', 'web')
             ->get(['id', 'name'])
             ->toArray();
@@ -69,7 +74,7 @@ class TicketTypeEdit extends Component
     {
         $this->ticketType = $ticketType ?:
             array_fill_keys(
-                array_keys((new CreateTicketTypeRequest())->rules()),
+                array_keys(resolve_static(CreateTicketTypeRuleset::class, 'getRules')),
                 null
             );
 
@@ -77,7 +82,7 @@ class TicketTypeEdit extends Component
 
         $this->isNew = ! array_key_exists('id', $this->ticketType);
 
-        $this->ticketType['roles'] = $this->isNew ? [] : TicketType::query()
+        $this->ticketType['roles'] = $this->isNew ? [] : app(TicketType::class)->query()
             ->join('role_ticket_type AS rtt', 'ticket_types.id', '=', 'rtt.ticket_type_id')
             ->whereKey($this->ticketType['id'])
             ->pluck('rtt.role_id')
@@ -121,7 +126,7 @@ class TicketTypeEdit extends Component
 
     public function delete(): void
     {
-        if (! user_can('api.ticket-types.{id}.delete')) {
+        if (! resolve_static(DeleteTicketType::class, 'canPerformAction', [false])) {
             return;
         }
 

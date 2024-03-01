@@ -4,15 +4,14 @@ namespace FluxErp\Actions\ContactOption;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ContactOption;
+use FluxErp\Rulesets\ContactOption\DeleteContactOptionRuleset;
 
 class DeleteContactOption extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:contact_options,id',
-        ];
+        $this->rules = resolve_static(DeleteContactOptionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteContactOption extends FluxAction
 
     public function performAction(): ?bool
     {
-        return ContactOption::query()
+        return app(ContactOption::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

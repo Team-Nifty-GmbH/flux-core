@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Language;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateLanguageRequest;
 use FluxErp\Models\Language;
+use FluxErp\Rulesets\Language\UpdateLanguageRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,10 +13,7 @@ class UpdateLanguage extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateLanguageRequest())->rules();
-
-        $this->rules['language_code'] .= ',' . $this->data['id'];
-        $this->rules['iso_name'] .= ',' . $this->data['id'];
+        $this->rules = resolve_static(UpdateLanguageRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -27,12 +24,12 @@ class UpdateLanguage extends FluxAction
     public function performAction(): Model
     {
         if ($this->data['is_default'] ?? false) {
-            Language::query()
+            app(Language::class)->query()
                 ->whereKeyNot($this->data['id'])
                 ->update(['is_default' => false]);
         }
 
-        $language = Language::query()
+        $language = app(Language::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -42,19 +39,25 @@ class UpdateLanguage extends FluxAction
         return $language->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function prepareForValidation(): void
     {
+        $this->rules['language_code'] .= ',' . ($this->data['id'] ?? 0);
+        $this->rules['iso_name'] .= ',' . ($this->data['id'] ?? 0);
+
         if (($this->data['is_default'] ?? false)
-            && ! Language::query()
+            && ! app(Language::class)->query()
                 ->whereKeyNot($this->data['id'] ?? 0)
                 ->where('is_default', true)
                 ->exists()
         ) {
             $this->rules['is_default'] .= '|accepted';
         }
+    }
 
+    protected function validateData(): void
+    {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Language());
+        $validator->addModel(app(Language::class));
 
         $this->data = $validator->validate();
     }

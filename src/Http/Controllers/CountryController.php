@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateCountryRequest;
 use FluxErp\Models\Country;
 use FluxErp\Services\CountryService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class CountryController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Country();
+        $this->model = app(Country::class);
     }
 
-    public function create(CreateCountryRequest $request, CountryService $countryService): JsonResponse
+    public function create(Request $request, CountryService $countryService): JsonResponse
     {
-        $country = $countryService->create($request->validated());
+        $country = $countryService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

@@ -13,7 +13,7 @@ class ContactBankConnectionService
 {
     public function create(array $data): ContactBankConnection
     {
-        return CreateContactBankConnection::make($data)->execute();
+        return CreateContactBankConnection::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

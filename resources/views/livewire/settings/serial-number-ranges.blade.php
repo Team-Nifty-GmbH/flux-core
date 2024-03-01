@@ -7,6 +7,8 @@
                         wire:model="serialNumberRange.model_type"
                         :label="__('Model')"
                         :options="$models"
+                        option-label="label"
+                        option-value="value"
                     />
                     <x-select
                         wire:model="serialNumberRange.client_id"
@@ -27,7 +29,7 @@
             </div>
             <x-slot:footer>
                 <div class="flex justify-between gap-x-4">
-                    @if(\FluxErp\Actions\SerialNumberRange\DeleteSerialNumberRange::canPerformAction(false))
+                    @if(resolve_static(\FluxErp\Actions\SerialNumberRange\DeleteSerialNumberRange::class, 'canPerformAction', [false]))
                         <div x-bind:class="$wire.serialNumberRange.id > 0 || 'invisible'">
                             <x-button
                                 flat

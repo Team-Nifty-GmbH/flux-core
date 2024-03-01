@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\ProductProperty;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateProductPropertyRequest;
 use FluxErp\Models\ProductProperty;
+use FluxErp\Rulesets\ProductProperty\CreateProductPropertyRuleset;
 use Illuminate\Support\Facades\Validator;
 
 class CreateProductProperty extends FluxAction
@@ -12,7 +12,7 @@ class CreateProductProperty extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateProductPropertyRequest())->rules();
+        $this->rules = resolve_static(CreateProductPropertyRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,16 +22,16 @@ class CreateProductProperty extends FluxAction
 
     public function performAction(): ProductProperty
     {
-        $productProperty = new ProductProperty($this->data);
+        $productProperty = app(ProductProperty::class, ['attributes' => $this->data]);
         $productProperty->save();
 
         return $productProperty->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new ProductProperty());
+        $validator->addModel(app(ProductProperty::class));
 
         $this->data = $validator->validate();
     }

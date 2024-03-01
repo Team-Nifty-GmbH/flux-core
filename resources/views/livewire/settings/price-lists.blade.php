@@ -41,8 +41,13 @@
                     <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                         <div class="space-y-3 sm:col-span-6">
                             <x-input wire:model="selectedPriceList.name" :label="__('Name')"/>
-                            <x-select wire:model="selectedPriceList.parent_id" :label="__('Parent')"
-                                :options="$priceLists" option-value="id" option-label="name" />
+                            <x-select
+                                wire:model="selectedPriceList.parent_id"
+                                :label="__('Parent')"
+                                :options="$priceLists"
+                                option-value="id"
+                                option-label="name"
+                            />
                             <div x-show="priceList.parent_id > 0 " class="grid grid-cols-1 gap-y-6">
                                 <x-input wire:model="selectedPriceList.discount.discount" :label="__('Discount')"/>
                                 <x-toggle wire:model="selectedPriceList.discount.is_percentage" lg :label="__('Is Percentage')"/>

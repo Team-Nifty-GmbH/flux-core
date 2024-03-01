@@ -61,7 +61,7 @@ class TransactionList extends BaseTransactionList
                             'x-show' => '!record.order_id',
                         ]
                     )
-                    ->when(fn () => UpdateTransaction::canPerformAction(false)),
+                    ->when(fn () => resolve_static(UpdateTransaction::class, 'canPerformAction', [false])),
             ]
         );
     }
@@ -73,7 +73,7 @@ class TransactionList extends BaseTransactionList
                 ->label(__('Start automatic assignment'))
                 ->color('primary')
                 ->wireClick('matchTransactions()')
-                ->when(fn () => UpdateTransaction::canPerformAction(false)),
+                ->when(fn () => resolve_static(UpdateTransaction::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -140,7 +140,7 @@ class TransactionList extends BaseTransactionList
 
     public function assignOrders(array $orderIds): void
     {
-        $orders = Order::query()
+        $orders = app(Order::class)->query()
             ->whereIntegerInRaw('id', $orderIds)
             ->with('contact.invoiceAddress:id,name')
             ->get(['id', 'invoice_number', 'invoice_date', 'balance', 'contact_id', 'total_gross_price'])
@@ -192,7 +192,7 @@ class TransactionList extends BaseTransactionList
         }
 
         // First remove all deleted children
-        $children = Transaction::query()
+        $children = app(Transaction::class)->query()
             ->whereKey($this->transactionForm->id)
             ->first()
             ->children()

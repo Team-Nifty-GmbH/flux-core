@@ -2,7 +2,7 @@
 
 namespace FluxErp\Actions\Plugins;
 
-use FluxErp\Http\Requests\PluginUninstallRequest;
+use FluxErp\Rulesets\Plugin\UninstallPluginRuleset;
 use Illuminate\Validation\ValidationException;
 
 class Uninstall extends BasePluginAction
@@ -10,7 +10,7 @@ class Uninstall extends BasePluginAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new PluginUninstallRequest())->rules();
+        $this->rules = resolve_static(UninstallPluginRuleset::class, 'getRules');
     }
 
     public function performAction(): bool

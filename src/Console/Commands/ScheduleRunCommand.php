@@ -22,7 +22,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
         $dispatcher->dispatch(new ScheduleTasksRegistering($schedule));
 
         $overdueEvents = [];
-        $repeatables = ScheduleModel::query()
+        $repeatables = app(ScheduleModel::class)->query()
             ->where(fn (Builder $query) => $query->where('ends_at', '>', now()->toDateTimeString())
                 ->orWhereNull('ends_at')
             )

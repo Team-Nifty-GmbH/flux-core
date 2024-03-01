@@ -4,20 +4,14 @@ namespace FluxErp\Actions\PurchaseInvoice;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\PurchaseInvoice;
-use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\PurchaseInvoice\DeletePurchaseInvoiceRuleset;
 
 class DeletePurchaseInvoice extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => [
-                'required',
-                'integer',
-                new ModelExists(PurchaseInvoice::class),
-            ],
-        ];
+        $this->rules = resolve_static(DeletePurchaseInvoiceRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -27,7 +21,7 @@ class DeletePurchaseInvoice extends FluxAction
 
     public function performAction(): ?bool
     {
-        return PurchaseInvoice::query()
+        return app(PurchaseInvoice::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

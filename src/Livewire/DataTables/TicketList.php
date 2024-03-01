@@ -63,9 +63,9 @@ class TicketList extends DataTable
             'ticket_type_id' => null,
         ];
 
-        $modelType = $this->modelType;
+        $modelType = $this->modelType ? app($this->modelType)->getMorphClass() : null;
 
-        $this->ticketTypes = TicketType::query()
+        $this->ticketTypes = app(TicketType::class)->query()
             ->with('additionalModelColumns:id,name,model_type,model_id,field_type,values')
             ->when(
                 $modelType,
@@ -79,8 +79,8 @@ class TicketList extends DataTable
             ->get()
             ->toArray();
 
-        $this->additionalColumns = AdditionalColumn::query()
-            ->where('model_type', Ticket::class)
+        $this->additionalColumns = app(AdditionalColumn::class)->query()
+            ->where('model_type', app(Ticket::class)->getMorphClass())
             ->whereNull('model_id')
             ->select(['id', 'name', 'model_type', 'model_id', 'field_type', 'values'])
             ->get()
@@ -149,7 +149,7 @@ class TicketList extends DataTable
         ]);
 
         if ($this->modelType && $this->modelId) {
-            $this->ticket['model_type'] = $this->modelType;
+            $this->ticket['model_type'] = app($this->modelType)->getMorphClass();
             $this->ticket['model_id'] = $this->modelId;
         }
 
@@ -165,7 +165,7 @@ class TicketList extends DataTable
         }
 
         try {
-            $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, Ticket::class);
+            $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, app(Ticket::class)->getMorphClass());
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
         }

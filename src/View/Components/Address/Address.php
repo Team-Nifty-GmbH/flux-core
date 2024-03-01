@@ -26,8 +26,8 @@ class Address extends Component
     public function render()
     {
         return view('flux::components.address.address', [
-            'languages' => Language::all(['id', 'name'])->toArray(),
-            'countries' => Country::all(['id', 'name'])->toArray(),
+            'languages' => app(Language::class)->all(['id', 'name'])->toArray(),
+            'countries' => app(Country::class)->all(['id', 'name'])->toArray(),
         ]);
     }
 }

@@ -2,9 +2,9 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use FluxErp\Actions\Payment\CreatePaymentRun;
-use FluxErp\Actions\Payment\DeletePaymentRun;
-use FluxErp\Actions\Payment\UpdatePaymentRun;
+use FluxErp\Actions\PaymentRun\CreatePaymentRun;
+use FluxErp\Actions\PaymentRun\DeletePaymentRun;
+use FluxErp\Actions\PaymentRun\UpdatePaymentRun;
 use Livewire\Attributes\Locked;
 
 class PaymentRunForm extends FluxForm

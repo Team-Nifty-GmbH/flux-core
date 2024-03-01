@@ -4,20 +4,14 @@ namespace FluxErp\Actions\AdditionalColumn;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\AdditionalColumn;
-use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\AdditionalColumn\DeleteAdditionalColumnRuleset;
 
 class DeleteAdditionalColumn extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => [
-                'required',
-                'integer',
-                new ModelExists(AdditionalColumn::class),
-            ],
-        ];
+        $this->rules = resolve_static(DeleteAdditionalColumnRuleset::class, 'getRules');
     }
 
     public static function models(): array

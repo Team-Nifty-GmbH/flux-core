@@ -83,8 +83,10 @@
                 />
                 <x-select
                     :label="__('Model')"
-                    :options="$trackableTypes"
                     wire:model="workTime.trackable_type"
+                    :options="$trackableTypes"
+                    option-label="label"
+                    option-value="value"
                 />
                 <div id="trackable-id-edit" x-show="$wire.workTime.trackable_type">
                     <x-select

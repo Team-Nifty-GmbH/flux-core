@@ -21,10 +21,10 @@ use FluxErp\Models\ContactOption;
 use FluxErp\Models\Country;
 use FluxErp\Models\CountryRegion;
 use FluxErp\Models\Currency;
+use FluxErp\Models\CustomEvent;
 use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
-use FluxErp\Models\Email;
-use FluxErp\Models\EmailTemplate;
+use FluxErp\Models\DocumentType;
 use FluxErp\Models\Favorite;
 use FluxErp\Models\FormBuilderField;
 use FluxErp\Models\FormBuilderFieldResponse;
@@ -56,6 +56,8 @@ use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Project;
+use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Models\PurchaseInvoicePosition;
 use FluxErp\Models\Role;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
@@ -86,13 +88,13 @@ class MorphMapServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Relation::enforceMorphMap([
-//            'activity' = Activity::class,
-//            'additional_column' => AdditionalColumn::class,
+            'activity' => Activity::class,
+            'additional_column' => AdditionalColumn::class,
             'address' => Address::class,
             'address_type' => AddressType::class,
             'bank_connection' => BankConnection::class,
-//            'calendar' => Calendar::class,
-//            'calendar_event' => CalendarEvent::class,
+            'calendar' => Calendar::class,
+            'calendar_event' => CalendarEvent::class,
             'category' => Category::class,
             'client' => Client::class,
             'comment' => Comment::class,
@@ -105,10 +107,10 @@ class MorphMapServiceProvider extends ServiceProvider
             'country' => Country::class,
             'country_region' => CountryRegion::class,
             'currency' => Currency::class,
+            'custom_event' => CustomEvent::class,
             'discount' => Discount::class,
             'discount_group' => DiscountGroup::class,
-//            'email' => Email::class,
-//            'email_template' => EmailTemplate::class,
+            'document_type' => DocumentType::class,
             'favorite' => Favorite::class,
             'form_builder_field' => FormBuilderField::class,
             'form_builder_field_response' => FormBuilderFieldResponse::class,
@@ -117,9 +119,9 @@ class MorphMapServiceProvider extends ServiceProvider
             'form_builder_section' => FormBuilderSection::class,
             'interface_user' => InterfaceUser::class,
             'language' => Language::class,
-//            'language_line' => LanguageLine::class,
+            'translation' => LanguageLine::class,
             'ledger_account' => LedgerAccount::class,
-//            'log' => Log::class,
+            'log' => Log::class,
             'mail_account' => MailAccount::class,
             'mail_folder' => MailFolder::class,
             'media' => Media::class,
@@ -140,20 +142,21 @@ class MorphMapServiceProvider extends ServiceProvider
             'product_option_group' => ProductOptionGroup::class,
             'product_property' => ProductProperty::class,
             'project' => Project::class,
+            'purchase_invoice' => PurchaseInvoice::class,
+            'purchase_invoice_position' => PurchaseInvoicePosition::class,
             'role' => Role::class,
             'schedule' => Schedule::class,
             'sepa_mandate' => SepaMandate::class,
             'serial_number' => SerialNumber::class,
             'serial_number_range' => SerialNumberRange::class,
-//            'setting' => Setting::class,
-//            'snapshot' => Snapshot::class,
-//            'state_setting' => StateSetting::class,
+            'setting' => Setting::class,
+            'snapshot' => Snapshot::class,
             'stock_posting' => StockPosting::class,
             'tag' => Tag::class,
             'task' => Task::class,
             'ticket' => Ticket::class,
             'ticket_type' => TicketType::class,
-//            'token' => Token::class,
+            'token' => Token::class,
             'transaction' => Transaction::class,
             'unit' => Unit::class,
             'user' => User::class,

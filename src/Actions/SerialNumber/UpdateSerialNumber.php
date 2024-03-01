@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\SerialNumber;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateSerialNumberRequest;
 use FluxErp\Models\SerialNumber;
+use FluxErp\Rulesets\SerialNumber\UpdateSerialNumberRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -14,7 +14,7 @@ class UpdateSerialNumber extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateSerialNumberRequest())->rules();
+        $this->rules = resolve_static(UpdateSerialNumberRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,7 +24,7 @@ class UpdateSerialNumber extends FluxAction
 
     public function performAction(): Model
     {
-        $serialNumber = SerialNumber::query()
+        $serialNumber = app(SerialNumber::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -34,14 +34,14 @@ class UpdateSerialNumber extends FluxAction
         return $serialNumber->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new SerialNumber());
+        $validator->addModel(app(SerialNumber::class));
 
         $this->data = $validator->validate();
 
-        $serialNumber = SerialNumber::query()
+        $serialNumber = app(SerialNumber::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

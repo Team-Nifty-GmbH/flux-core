@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Product;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Product;
+use FluxErp\Rulesets\Product\DeleteProductRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteProduct extends FluxAction
@@ -11,9 +12,7 @@ class DeleteProduct extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:products,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteProductRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,17 +22,17 @@ class DeleteProduct extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Product::query()
+        return app(Product::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        if (Product::query()
+        if (app(Product::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->children()

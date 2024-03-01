@@ -3,11 +3,7 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\DeleteMediaCollectionRequest;
 use FluxErp\Http\Requests\DownloadPublicMediaRequest;
-use FluxErp\Http\Requests\ReplaceMediaRequest;
-use FluxErp\Http\Requests\UpdateMediaRequest;
-use FluxErp\Http\Requests\UploadMediaRequest;
 use FluxErp\Services\MediaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,25 +32,25 @@ class MediaController extends Controller
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function upload(UploadMediaRequest $request, MediaService $mediaService): JsonResponse
+    public function upload(Request $request, MediaService $mediaService): JsonResponse
     {
-        $response = $mediaService->upload($request->validated());
+        $response = $mediaService->upload($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response)
             ->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 
-    public function replace(string $id, ReplaceMediaRequest $request, MediaService $mediaService): JsonResponse
+    public function replace(string $id, Request $request, MediaService $mediaService): JsonResponse
     {
-        $response = $mediaService->replace($id, $request->validated());
+        $response = $mediaService->replace($id, $request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response)
             ->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 
-    public function update(UpdateMediaRequest $request, MediaService $mediaService): JsonResponse
+    public function update(Request $request, MediaService $mediaService): JsonResponse
     {
-        $media = $mediaService->update($request->validated());
+        $media = $mediaService->update($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
@@ -70,9 +66,9 @@ class MediaController extends Controller
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function deleteCollection(DeleteMediaCollectionRequest $request, MediaService $mediaService): JsonResponse
+    public function deleteCollection(Request $request, MediaService $mediaService): JsonResponse
     {
-        $response = $mediaService->deleteCollection($request->validated());
+        $response = $mediaService->deleteCollection($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

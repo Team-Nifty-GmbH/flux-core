@@ -3,9 +3,9 @@
 namespace FluxErp\Actions\SerialNumberRange;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateSerialNumberRangeRequest;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
+use FluxErp\Rulesets\SerialNumberRange\UpdateSerialNumberRangeRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
@@ -14,7 +14,7 @@ class UpdateSerialNumberRange extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateSerialNumberRangeRequest())->rules();
+        $this->rules = resolve_static(UpdateSerialNumberRangeRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,7 +24,7 @@ class UpdateSerialNumberRange extends FluxAction
 
     public function performAction(): Model
     {
-        $serialNumberRange = SerialNumberRange::query()
+        $serialNumberRange = app(SerialNumberRange::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -34,12 +34,12 @@ class UpdateSerialNumberRange extends FluxAction
         return $serialNumberRange->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
         if ((array_key_exists('prefix', $this->data) || array_key_exists('affix', $this->data))
-            && SerialNumber::query()
+            && app(SerialNumber::class)->query()
                 ->where('serial_number_range_id', $this->data['id'])
                 ->exists()
         ) {

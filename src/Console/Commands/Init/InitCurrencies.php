@@ -7,33 +7,10 @@ use Illuminate\Console\Command;
 
 class InitCurrencies extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'init:currencies';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Initiates Currencies and fills table with data.';
 
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     */
     public function handle(): void
     {
         $path = resource_path() . '/init-files/currencies.json';
@@ -51,7 +28,7 @@ class InitCurrencies extends Command
                 foreach ($jsonCurrencies as $jsonCurrency) {
                     // Save to database.
                     $isDefault = $isDefault ? false : $jsonCurrency->is_default;
-                    Currency::query()
+                    app(Currency::class)->query()
                         ->updateOrCreate([
                             'iso' => $jsonCurrency->iso,
                         ], [
@@ -62,8 +39,8 @@ class InitCurrencies extends Command
                 }
             }
 
-            if (! Currency::query()->where('is_default')->exists()) {
-                Currency::query()
+            if (! app(Currency::class)->query()->where('is_default')->exists()) {
+                app(Currency::class)->query()
                     ->first()
                     ->update(['is_default' => true]);
             }

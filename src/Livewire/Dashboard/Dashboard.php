@@ -56,7 +56,7 @@ class Dashboard extends Component
         }
 
         $sortedIds = array_filter($sortedIds, 'is_numeric');
-        WidgetModel::setNewOrder($sortedIds);
+        app(WidgetModel::class)->setNewOrder($sortedIds);
 
         $this->widgets();
     }
@@ -69,7 +69,7 @@ class Dashboard extends Component
                 $name = $widget['component_name'];
 
                 try {
-                    $permissionExists = Permission::findByName('widget.' . $name)->exists;
+                    $permissionExists = app(Permission::class)->findByName('widget.' . $name)->exists;
                 } catch (PermissionDoesNotExist) {
                     $permissionExists = false;
                 }

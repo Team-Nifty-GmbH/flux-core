@@ -4,7 +4,7 @@ namespace FluxErp\Actions\AddressType;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\AddressType;
-use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\AddressType\DeleteAddressTypeRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteAddressType extends FluxAction
@@ -12,13 +12,7 @@ class DeleteAddressType extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => [
-                'required',
-                'integer',
-                new ModelExists(AddressType::class),
-            ],
-        ];
+        $this->rules = resolve_static(DeleteAddressTypeRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -34,7 +28,7 @@ class DeleteAddressType extends FluxAction
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 

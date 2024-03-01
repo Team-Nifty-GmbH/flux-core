@@ -7,14 +7,14 @@ use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Actions\ProductCrossSelling\DeleteProductCrossSelling;
 use FluxErp\Actions\ProductCrossSelling\UpdateProductCrossSelling;
 use FluxErp\Helpers\Helper;
-use FluxErp\Http\Requests\UpdateProductRequest;
-use FluxErp\Models\Price;
+use FluxErp\Models\Media;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tag;
+use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\Product\UpdateProductRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\ValidationException;
 
 class UpdateProduct extends FluxAction
@@ -22,11 +22,7 @@ class UpdateProduct extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateProductRequest())->rules();
-
-        $this->rules['cover_media_id'][] = (new Exists('media', 'id'))
-            ->where('model_type', Product::class)
-            ->where('model_id', $this->data['id'] ?? null);
+        $this->rules = resolve_static(UpdateProductRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -48,7 +44,7 @@ class UpdateProduct extends FluxAction
         $suppliers = Arr::pull($this->data, 'suppliers');
         $tags = Arr::pull($this->data, 'tags');
 
-        $product = Product::query()
+        $product = app(Product::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -61,7 +57,7 @@ class UpdateProduct extends FluxAction
         $product->save();
 
         if (! is_null($tags)) {
-            $product->syncTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
+            $product->syncTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
         }
 
         if (! is_null($productOptions)) {
@@ -79,7 +75,7 @@ class UpdateProduct extends FluxAction
         if ($prices) {
             $priceCollection = collect($prices)->keyBy('price_list_id');
             $product->prices
-                ?->each(function (Price $price) use ($priceCollection) {
+                ?->each(function ($price) use ($priceCollection) {
                     if ($priceCollection->has($price->price_list_id)) {
                         $price->update($priceCollection->get($price->price_list_id));
                         $priceCollection->forget($price->price_list_id);
@@ -116,15 +112,22 @@ class UpdateProduct extends FluxAction
         return $product->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function prepareForValidation(): void
+    {
+        $this->rules['cover_media_id'][] = (new ModelExists(Media::class))
+            ->where('model_type', app(Product::class)->getMorphClass())
+            ->where('model_id', $this->data['id'] ?? null);
+    }
+
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Product());
+        $validator->addModel(app(Product::class));
 
         $this->data = $validator->validate();
 
         if ($this->data['parent_id'] ?? false) {
-            $product = Product::query()
+            $product = app(Product::class)->query()
                 ->whereKey($this->data['id'])
                 ->first();
 

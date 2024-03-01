@@ -55,7 +55,7 @@ class OrderPositionList extends DataTable
 
     public function mount(): void
     {
-        $this->isLocked = Order::query()
+        $this->isLocked = app(Order::class)->query()
             ->select('is_locked')
             ->whereKey($this->orderId)
             ->value('is_locked');

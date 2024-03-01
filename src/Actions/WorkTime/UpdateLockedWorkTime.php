@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\WorkTime;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateLockedWorkTimeRequest;
 use FluxErp\Models\WorkTime;
+use FluxErp\Rulesets\WorkTime\UpdateLockedWorkTimeRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -14,7 +14,7 @@ class UpdateLockedWorkTime extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateLockedWorkTimeRequest())->rules();
+        $this->rules = resolve_static(UpdateLockedWorkTimeRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,7 +24,7 @@ class UpdateLockedWorkTime extends FluxAction
 
     public function performAction(): Model
     {
-        $workTime = WorkTime::query()
+        $workTime = app(WorkTime::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -50,7 +50,7 @@ class UpdateLockedWorkTime extends FluxAction
         parent::validateData();
 
         if ($endedAt = data_get($this->data, 'ended_at')) {
-            $workTime = WorkTime::query()
+            $workTime = app(WorkTime::class)->query()
                 ->whereKey($this->data['id'])
                 ->first();
 

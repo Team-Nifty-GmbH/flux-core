@@ -58,7 +58,7 @@ class MediaGrid extends MediaList
                     'x-on:click' => '$wire.product.cover_media_id = record.id; edit = true;',
                     'x-show' => 'record.id !== $wire.product.cover_media_id',
                 ])
-                ->when(fn () => UpdateProduct::canPerformAction(false)),
+                ->when(fn () => resolve_static(UpdateProduct::class, 'canPerformAction', [false])),
         ]);
 
         return $rowActions;
@@ -73,7 +73,7 @@ class MediaGrid extends MediaList
                 ->attributes([
                     'wire:click' => 'uploadMedia()',
                 ])
-                ->when(fn () => UploadMedia::canPerformAction(false)),
+                ->when(fn () => resolve_static(UploadMedia::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -138,7 +138,7 @@ class MediaGrid extends MediaList
                 $media = UploadMedia::make([
                     'name' => $file->getClientOriginalName(),
                     'file_name' => $file->getClientOriginalName(),
-                    'model_type' => Product::class,
+                    'model_type' => app(Product::class)->getMorphClass(),
                     'model_id' => $this->product->id,
                     'media' => $file,
                     'collection_name' => $this->collection,

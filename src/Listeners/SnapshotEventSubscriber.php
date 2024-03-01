@@ -11,14 +11,14 @@ class SnapshotEventSubscriber
      */
     public function createSnapshot($event): void
     {
-        $snapshot = Snapshot::query()
-            ->where('model_type', get_class($event->model))
+        $snapshot = app(Snapshot::class)->query()
+            ->where('model_type', app($event->model)->getMorphClass())
             ->where('model_id', $event->model->id)
             ->exists();
 
         if (! $snapshot) {
-            $snapshot = new Snapshot();
-            $snapshot->model_type = get_class($event->model);
+            $snapshot = app(Snapshot::class);
+            $snapshot->model_type = app($event->model)->getMorhClass();
             $snapshot->model_id = $event->model->id;
             $snapshot->snapshot = method_exists($event->model, 'relationships') ?
                 $event->model->with(array_keys($event->model->relationships())) : $event->model;

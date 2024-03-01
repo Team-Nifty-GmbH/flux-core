@@ -36,7 +36,7 @@ Route::get('/mail-pixel/{communication:uuid?}', function (Communication $communi
             ->log('Mail opened');
     }
 
-    $logo = Client::default()->getFirstMedia('logo_small');
+    $logo = resolve_static(Client::class, 'default')->getFirstMedia('logo_small');
 
     return Utils::pretendResponseIsFile(
         $logo->getPath(),

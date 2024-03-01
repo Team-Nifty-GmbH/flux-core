@@ -6,7 +6,6 @@ use FluxErp\Actions\Product\ProductBundleProduct\CreateProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\DeleteProductBundleProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\UpdateProductBundleProduct;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateProductBundleProductRequest;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,13 +16,13 @@ class ProductBundleProductController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new ProductBundleProduct();
+        $this->model = app(ProductBundleProduct::class);
     }
 
-    public function create(CreateProductBundleProductRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
         try {
-            $productBundleProduct = CreateProductBundleProduct::make($request->validated())
+            $productBundleProduct = CreateProductBundleProduct::make($request->all())
                 ->validate()
                 ->execute();
             $response = ResponseHelper::createArrayResponse(

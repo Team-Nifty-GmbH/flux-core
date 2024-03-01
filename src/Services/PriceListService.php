@@ -13,7 +13,7 @@ class PriceListService
 {
     public function create(array $data): PriceList
     {
-        return CreatePriceList::make($data)->execute();
+        return CreatePriceList::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

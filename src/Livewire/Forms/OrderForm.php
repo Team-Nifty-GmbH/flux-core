@@ -49,7 +49,7 @@ class OrderForm extends FluxForm
 
     public ?string $delivery_state = null;
 
-    public int $payment_target = 1;
+    public ?int $payment_target = null;
 
     public ?int $payment_discount_target = null;
 

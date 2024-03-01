@@ -30,7 +30,7 @@ class PaymentRunList extends DataTable
     {
         parent::mount();
 
-        $this->accounts = BankConnection::query()
+        $this->accounts = app(BankConnection::class)->query()
             ->get(['id', 'name', 'iban'])
             ->toArray();
     }
@@ -80,7 +80,7 @@ class PaymentRunList extends DataTable
 
     public function removeOrder(int $id): bool
     {
-        $paymentRun = PaymentRun::query()
+        $paymentRun = app(PaymentRun::class)->query()
             ->whereKey($this->paymentRunForm->id)
             ->first();
         $paymentRun->orders()->detach($id);

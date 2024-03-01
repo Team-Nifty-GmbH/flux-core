@@ -2,7 +2,7 @@
     <div id="new-project-modal">
         <x-modal x-on:create-project.window="$wire.resetForm(); open();">
             <x-card>
-                <div x-data="{edit: true, project: $wire.$entangle('project', false), formatter: @js(\FluxErp\Models\Project::typeScriptAttributes()),}">
+                <div x-data="{edit: true, project: $wire.$entangle('project', false), formatter: @js(resolve_static(\FluxErp\Models\Project::class, 'typeScriptAttributes')),}">
                     <x-project.edit/>
                 </div>
                 <x-slot:footer>

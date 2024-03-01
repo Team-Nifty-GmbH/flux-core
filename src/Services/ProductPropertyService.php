@@ -13,7 +13,7 @@ class ProductPropertyService
 {
     public function create(array $data): ProductProperty
     {
-        return CreateProductProperty::make($data)->execute();
+        return CreateProductProperty::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

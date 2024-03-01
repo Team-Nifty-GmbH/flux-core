@@ -1,6 +1,6 @@
 <div class="space-y-5"
      x-data="{
-        formatter: @js(\FluxErp\Models\Project::typeScriptAttributes()),
+        formatter: @js(resolve_static(\FluxErp\Models\Project::class, 'typeScriptAttributes')),
      }"
 >
     <x-card

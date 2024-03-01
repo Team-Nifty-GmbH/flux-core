@@ -11,7 +11,7 @@ class NoAuth
 {
     public function handle(Request $request, Closure $next)
     {
-        Auth::guard()->setUser(new User());
+        Auth::guard()->setUser(app(User::class));
 
         return $next($request);
     }

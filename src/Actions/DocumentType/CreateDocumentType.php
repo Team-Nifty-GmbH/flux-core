@@ -7,6 +7,9 @@ use FluxErp\Http\Requests\CreateDocumentTypeRequest;
 use FluxErp\Models\DocumentType;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @deprecated
+ */
 class CreateDocumentType extends FluxAction
 {
     protected function boot(array $data): void
@@ -28,7 +31,7 @@ class CreateDocumentType extends FluxAction
         return $documentType->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new DocumentType());

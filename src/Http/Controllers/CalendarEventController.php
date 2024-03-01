@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateCalendarEventRequest;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Services\CalendarEventService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class CalendarEventController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new CalendarEvent();
+        $this->model = app(CalendarEvent::class);
     }
 
-    public function create(CreateCalendarEventRequest $request, CalendarEventService $calendarEventService): JsonResponse
+    public function create(Request $request, CalendarEventService $calendarEventService): JsonResponse
     {
-        $calendarEvent = $calendarEventService->create($request->validated());
+        $calendarEvent = $calendarEventService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

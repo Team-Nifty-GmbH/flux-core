@@ -2,6 +2,7 @@
 
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\PushSubscriptionController;
+use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
@@ -58,7 +59,6 @@ use FluxErp\Livewire\Ticket\Ticket;
 use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
-use TeamNiftyGmbH\DataTable\Controllers\SearchController;
 
 /*
 |--------------------------------------------------------------------------

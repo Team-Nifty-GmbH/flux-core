@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\MailAccount;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateMailAccountRequest;
 use FluxErp\Models\MailAccount;
+use FluxErp\Rulesets\MailAccount\UpdateMailAccountRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateMailAccount extends FluxAction
@@ -12,7 +12,7 @@ class UpdateMailAccount extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateMailAccountRequest())->rules();
+        $this->rules = resolve_static(UpdateMailAccountRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -26,7 +26,7 @@ class UpdateMailAccount extends FluxAction
             unset($this->data['password']);
         }
 
-        $mailAccount = MailAccount::query()
+        $mailAccount = app(MailAccount::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

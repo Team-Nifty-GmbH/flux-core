@@ -6,7 +6,6 @@ use FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition;
 use FluxErp\Actions\PurchaseInvoicePosition\DeletePurchaseInvoicePosition;
 use FluxErp\Actions\PurchaseInvoicePosition\UpdatePurchaseInvoicePosition;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreatePurchaseInvoicePositionRequest;
 use FluxErp\Models\PurchaseInvoice;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,12 +16,13 @@ class PurchaseInvoicePositionController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new PurchaseInvoice();
+        $this->model = app(PurchaseInvoice::class);
     }
 
-    public function create(CreatePurchaseInvoicePositionRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        $purchaseInvoicePosition = CreatePurchaseInvoicePosition::make($request->validated())
+        $purchaseInvoicePosition = CreatePurchaseInvoicePosition::make($request->all())
+            ->validate()
             ->execute();
 
         return ResponseHelper::createResponseFromBase(

@@ -3,10 +3,10 @@
 namespace FluxErp\Actions\SepaMandate;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateSepaMandateRequest;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\SepaMandate;
+use FluxErp\Rulesets\SepaMandate\CreateSepaMandateRuleset;
 use Illuminate\Validation\ValidationException;
 
 class CreateSepaMandate extends FluxAction
@@ -14,7 +14,7 @@ class CreateSepaMandate extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateSepaMandateRequest())->rules();
+        $this->rules = resolve_static(CreateSepaMandateRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,17 +24,17 @@ class CreateSepaMandate extends FluxAction
 
     public function performAction(): SepaMandate
     {
-        $sepaMandate = new SepaMandate($this->data);
+        $sepaMandate = app(SepaMandate::class, ['attributes' => $this->data]);
         $sepaMandate->save();
 
         return $sepaMandate->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        $clientContactExists = Contact::query()
+        $clientContactExists = app(Contact::class)->query()
             ->whereKey($this->data['contact_id'])
             ->where('client_id', $this->data['client_id'])
             ->exists();
@@ -44,7 +44,7 @@ class CreateSepaMandate extends FluxAction
             $errors[] = ['contact_id' => [__('Client has no such contact')]];
         }
 
-        $contactBankConnectionExists = ContactBankConnection::query()
+        $contactBankConnectionExists = app(ContactBankConnection::class)->query()
             ->whereKey($this->data['contact_bank_connection_id'])
             ->where('contact_id', $this->data['contact_id'])
             ->exists();

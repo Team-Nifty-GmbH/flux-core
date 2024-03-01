@@ -40,7 +40,7 @@ class TaskTest extends BaseSetup
         ]);
 
         $this->additionalColumns = AdditionalColumn::query()
-            ->where('model_type', Task::class)
+            ->where('model_type', app(Task::class)->getMorphClass())
             ->get();
 
         $this->permissions = [
@@ -301,10 +301,10 @@ class TaskTest extends BaseSetup
     public function test_bulk_update_tasks_with_additional_columns()
     {
         $additionalColumns[] = AdditionalColumn::factory()->create([
-            'model_type' => Task::class,
+            'model_type' => app(Task::class)->getMorphClass(),
         ]);
         $additionalColumns[] = AdditionalColumn::factory()->create([
-            'model_type' => Task::class,
+            'model_type' => app(Task::class)->getMorphClass(),
             'values' => ['a', 'b', 'c'],
         ]);
 
@@ -328,7 +328,7 @@ class TaskTest extends BaseSetup
         ];
 
         $this->additionalColumns = AdditionalColumn::query()
-            ->where('model_type', Task::class)
+            ->where('model_type', app(Task::class)->getMorphClass())
             ->get();
 
         foreach ($tasks as $key => $task) {
@@ -487,7 +487,7 @@ class TaskTest extends BaseSetup
     public function test_delete_task()
     {
         AdditionalColumn::factory()->create([
-            'model_type' => Task::class,
+            'model_type' => app(Task::class)->getMorphClass(),
         ]);
 
         $this->user->givePermissionTo($this->permissions['delete']);
@@ -513,7 +513,7 @@ class TaskTest extends BaseSetup
     public function test_finish_task()
     {
         AdditionalColumn::factory()->create([
-            'model_type' => Task::class,
+            'model_type' => app(Task::class)->getMorphClass(),
         ]);
 
         $task = [

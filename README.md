@@ -218,3 +218,38 @@ PUSHER_SCHEME=http
 ```
 
 This will not be piped through nginx and will be handled by the websocket server directly.
+
+# 3. Customization
+
+### 1. Models
+To customize the models extend the model you want to customize and add an alias in your AppServiceProvider.
+
+```php
+// AppServiceProvider.php
+public function register(): void
+{
+    $this->app->bind(\FluxErp\Models\User::class, \App\Models\User::class);
+}
+```
+
+This packages enforces MorphMaps, therefore you have to add your customized models to the morph map.
+Or you can add the `HasParentMorphClass` trait to your model.
+
+```php
+// App\Models\User.php
+class User extends \FluxErp\Models\User
+{
+    use \FluxErp\Traits\HasParentMorphClass;
+}
+```
+
+### 2. Actions
+All Flux actions are resolved via the app container, therefore you can simply add an alias in your AppServiceProvider, or do other shenanigans whilst the action class is getting resolved.
+
+```php
+// AppServiceProvider.php
+public function register(): void
+{
+    $this->app->bind(\FluxErp\Actions\CreateUser::class, \App\Actions\CreateUser::class);
+}
+```

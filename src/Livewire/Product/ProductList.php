@@ -37,10 +37,10 @@ class ProductList extends BaseProductList
         return array_merge(
             parent::getViewData(),
             [
-                'clients' => Client::query()
+                'clients' => app(Client::class)->query()
                     ->get(['id', 'name'])
                     ->toArray(),
-                'vatRates' => VatRate::query()
+                'vatRates' => app(VatRate::class)->query()
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
             ]

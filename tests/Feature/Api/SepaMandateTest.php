@@ -228,7 +228,7 @@ class SepaMandateTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
-        $response->assertStatus(409);
+        $response->assertStatus(422);
     }
 
     public function test_create_sepa_mandate_contact_bank_connection_not_exists()
@@ -244,7 +244,7 @@ class SepaMandateTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
-        $response->assertStatus(409);
+        $response->assertStatus(422);
     }
 
     public function test_update_sepa_mandate()

@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Price;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Price;
+use FluxErp\Rulesets\Price\DeletePriceRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeletePrice extends FluxAction
@@ -11,9 +12,7 @@ class DeletePrice extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:prices,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeletePriceRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,17 +22,17 @@ class DeletePrice extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Price::query()
+        return app(Price::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        if (Price::query()
+        if (app(Price::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->orderPositions()

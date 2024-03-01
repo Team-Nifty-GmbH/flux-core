@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateProductPropertyRequest;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Services\ProductPropertyService;
 use Illuminate\Http\JsonResponse;
@@ -14,13 +13,12 @@ class ProductPropertyController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new ProductProperty();
+        $this->model = app(ProductProperty::class);
     }
 
-    public function create(CreateProductPropertyRequest $request,
-        ProductPropertyService $productPropertyService): JsonResponse
+    public function create(Request $request, ProductPropertyService $productPropertyService): JsonResponse
     {
-        $productProperty = $productPropertyService->create($request->validated());
+        $productProperty = $productPropertyService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

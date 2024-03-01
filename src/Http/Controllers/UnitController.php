@@ -3,22 +3,22 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateUnitRequest;
 use FluxErp\Models\Unit;
 use FluxErp\Services\UnitService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class UnitController extends BaseController
 {
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Unit();
+        $this->model = app(Unit::class);
     }
 
-    public function create(CreateUnitRequest $request, UnitService $unitService): JsonResponse
+    public function create(Request $request, UnitService $unitService): JsonResponse
     {
-        $unit = $unitService->create($request->validated());
+        $unit = $unitService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

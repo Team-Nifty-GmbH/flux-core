@@ -3,9 +3,9 @@
 namespace FluxErp\Actions\Role;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\EditUserRoleRequest;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
+use FluxErp\Rulesets\Role\UpdateUserRolesRuleset;
 
 class UpdateUserRoles extends FluxAction
 {
@@ -14,7 +14,7 @@ class UpdateUserRoles extends FluxAction
         parent::boot($data);
         $this->data = $this->data ? array_merge(['assign' => true], $this->data) : [];
 
-        $this->rules = (new EditUserRoleRequest())->rules();
+        $this->rules = resolve_static(UpdateUserRolesRuleset::class, 'getRules');
     }
 
     public static function name(): string
@@ -29,7 +29,7 @@ class UpdateUserRoles extends FluxAction
 
     public function performAction(): array
     {
-        $user = User::query()
+        $user = app(User::class)->query()
             ->whereKey($this->data['user_id'])
             ->first();
 

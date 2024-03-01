@@ -4,8 +4,8 @@ namespace FluxErp\Actions\EventSubscription;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
-use FluxErp\Http\Requests\CreateEventSubscriptionRequest;
 use FluxErp\Models\EventSubscription;
+use FluxErp\Rulesets\EventSubscription\CreateEventSubscriptionRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -15,7 +15,7 @@ class CreateEventSubscription extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateEventSubscriptionRequest())->rules();
+        $this->rules = resolve_static(CreateEventSubscriptionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -25,13 +25,13 @@ class CreateEventSubscription extends FluxAction
 
     public function performAction(): EventSubscription
     {
-        $eventSubscription = new EventSubscription($this->data);
+        $eventSubscription = app(EventSubscription::class, ['attributes' => $this->data]);
         $eventSubscription->save();
 
         return $eventSubscription->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
@@ -54,7 +54,7 @@ class CreateEventSubscription extends FluxAction
         $this->data['event'] = $eventClass ?: $eloquentEvent;
         $this->data['user_id'] ??= Auth::id();
 
-        if (EventSubscription::query()
+        if (app(EventSubscription::class)->query()
             ->where('event', $this->data['event'])
             ->where('user_id', $this->data['user_id'])
             ->where('model_type', $this->data['model_type'])

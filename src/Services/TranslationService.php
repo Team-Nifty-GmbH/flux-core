@@ -13,7 +13,7 @@ class TranslationService
 {
     public function create(array $data): LanguageLine
     {
-        return CreateTranslation::make($data)->execute();
+        return CreateTranslation::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

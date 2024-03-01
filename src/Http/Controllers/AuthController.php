@@ -35,7 +35,7 @@ class AuthController extends Controller
 
         $abilities = [];
 
-        $user = User::query()
+        $user = app(User::class)->query()
             ->where('email', $request->email ?? $request->username)
             ->where('is_active', true)
             ->first();
@@ -45,7 +45,7 @@ class AuthController extends Controller
         }
 
         if (count($abilities) < 1) {
-            $user = Address::query()
+            $user = app(Address::class)->query()
                 ->where('login_name', $request->email)
                 ->where('can_login', true)
                 ->whereNotNull('login_name')
@@ -58,7 +58,7 @@ class AuthController extends Controller
         }
 
         if (count($abilities) < 1) {
-            $user = InterfaceUser::query()
+            $user = app(InterfaceUser::class)->query()
                 ->where('name', $request->email)
                 ->where('is_active', true)
                 ->first();

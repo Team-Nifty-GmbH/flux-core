@@ -4,15 +4,15 @@ namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
-use FluxErp\Http\Requests\ReplicateOrderRequest;
 use FluxErp\Models\Order;
+use FluxErp\Rulesets\Order\ReplicateOrderRuleset;
 
 class ReplicateOrder extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new ReplicateOrderRequest())->rules();
+        $this->rules = resolve_static(ReplicateOrderRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +22,7 @@ class ReplicateOrder extends FluxAction
 
     public function performAction(): Order
     {
-        $originalOrder = Order::query()
+        $originalOrder = app(Order::class)->query()
             ->whereKey($this->data['id'])
             ->with('orderPositions')
             ->first()

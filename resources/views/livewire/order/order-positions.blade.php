@@ -36,7 +36,9 @@
                                             wire:model="orderPosition.warehouse_id"
                                             option-value="id"
                                             option-label="name"
-                                            :async-data="route('search', \FluxErp\Models\Warehouse::class)"
+                                            :async-data="[
+                                                'api' => route('search', \FluxErp\Models\Warehouse::class)
+                                            ]"
                                     />
                                 </div>
                                 <div class="mt-2">

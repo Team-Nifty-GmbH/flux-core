@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateContactOptionRequest;
 use FluxErp\Models\ContactOption;
 use FluxErp\Services\ContactOptionService;
 use Illuminate\Http\JsonResponse;
@@ -13,7 +12,7 @@ class ContactOptionController extends Controller
 {
     public function index(string $addressId): JsonResponse
     {
-        $contactOptions = ContactOption::query()
+        $contactOptions = app(ContactOption::class)->query()
             ->where('address_id', $addressId)
             ->orderBy('type', 'ASC')
             ->orderBy('label', 'ASC')
@@ -22,11 +21,9 @@ class ContactOptionController extends Controller
         return ResponseHelper::createResponseFromBase(statusCode: 200, data: $contactOptions);
     }
 
-    public function create(
-        CreateContactOptionRequest $request,
-        ContactOptionService $contactOptionService): JsonResponse
+    public function create(Request $request, ContactOptionService $contactOptionService): JsonResponse
     {
-        $contactOption = $contactOptionService->create($request->validated());
+        $contactOption = $contactOptionService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

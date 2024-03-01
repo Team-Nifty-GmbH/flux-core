@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\FormBuilderFieldResponse;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateFormBuilderFieldResponseRequest;
 use FluxErp\Models\FormBuilderFieldResponse;
+use FluxErp\Rulesets\FormBuilderFieldResponse\UpdateFormBuilderFieldResponseRuleset;
 
 class UpdateFormBuilderFieldResponse extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateFormBuilderFieldResponseRequest())->rules();
+        $this->rules = resolve_static(UpdateFormBuilderFieldResponseRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class UpdateFormBuilderFieldResponse extends FluxAction
 
     public function performAction(): FormBuilderFieldResponse
     {
-        $formBuilderFieldResponse = FormBuilderFieldResponse::query()
+        $formBuilderFieldResponse = app(FormBuilderFieldResponse::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

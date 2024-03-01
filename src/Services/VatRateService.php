@@ -13,7 +13,7 @@ class VatRateService
 {
     public function create(array $data): VatRate
     {
-        return CreateVatRate::make($data)->execute();
+        return CreateVatRate::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

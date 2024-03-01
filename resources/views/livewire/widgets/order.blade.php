@@ -1,7 +1,7 @@
 <div x-data="{
     order: $wire.entangle('order', true),
     orderPositions: $wire.entangle('orderPositions', true),
-    formatter: @js(\FluxErp\Models\Order::typeScriptAttributes()),
+    formatter: @js(resolve_static(\FluxErp\Models\Order::class, 'typeScriptAttributes')),
 }">
     <x-slot:header>
         <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">

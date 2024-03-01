@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\FormBuilderFieldResponse;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateFormBuilderFieldResponseRequest;
 use FluxErp\Models\FormBuilderFieldResponse;
+use FluxErp\Rulesets\FormBuilderFieldResponse\CreateFormBuilderFieldResponseRuleset;
 
 class CreateFormBuilderFieldResponse extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateFormBuilderFieldResponseRequest())->rules();
+        $this->rules = resolve_static(CreateFormBuilderFieldResponseRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,9 +21,7 @@ class CreateFormBuilderFieldResponse extends FluxAction
 
     public function performAction(): FormBuilderFieldResponse
     {
-        $formBuilderFieldResponse = new FormBuilderFieldResponse();
-
-        $formBuilderFieldResponse->fill($this->data);
+        $formBuilderFieldResponse = app(FormBuilderFieldResponse::class, ['attributes' => $this->data]);
         $formBuilderFieldResponse->save();
 
         return $formBuilderFieldResponse->refresh();

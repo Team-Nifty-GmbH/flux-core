@@ -16,8 +16,18 @@
                     <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                         <div class="space-y-3 sm:col-span-6">
                             <x-input wire:model="selectedCountry.name" :label="__('Country Name')"/>
-                            <x-select wire:model="selectedCountry.language_id" :label="__('Language')" :options="\FluxErp\Models\Language::all(['id', 'name'])->toArray()" option-value="id" option-label="name"/>
-                            <x-select wire:model="selectedCountry.currency_id" :label="__('Currency')" :options="\FluxErp\Models\Currency::all(['id', 'name'])->toArray()" option-value="id" option-label="name"/>
+                            <x-select wire:model="selectedCountry.language_id"
+                                      :label="__('Language')"
+                                      :options="app(\FluxErp\Models\Language::class)->all(['id', 'name'])->toArray()"
+                                      option-value="id"
+                                      option-label="name"
+                            />
+                            <x-select wire:model="selectedCountry.currency_id"
+                                      :label="__('Currency')"
+                                      :options="app(\FluxErp\Models\Currency::class)->all(['id', 'name'])->toArray()"
+                                      option-value="id"
+                                      option-label="name"
+                            />
                             <x-input wire:model="selectedCountry.iso_alpha2" :label="__('ISO alpha2')"/>
                             <x-input wire:model="selectedCountry.iso_alpha3" :label="__('ISO alpha3')"/>
                             <x-input wire:model="selectedCountry.iso_numeric" :label="__('ISO numeric')"/>

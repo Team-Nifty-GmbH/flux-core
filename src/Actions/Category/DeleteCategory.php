@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Category;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Category;
+use FluxErp\Rulesets\Category\DeleteCategoryRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteCategory extends FluxAction
@@ -11,9 +12,7 @@ class DeleteCategory extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:categories,id',
-        ];
+        $this->rules = resolve_static(DeleteCategoryRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,18 +22,18 @@ class DeleteCategory extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Category::query()
+        return app(Category::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
         $errors = [];
-        $category = Category::query()
+        $category = app(Category::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

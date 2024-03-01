@@ -3,9 +3,9 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Models\Language;
+use FluxErp\Models\LanguageLine;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
-use Spatie\TranslationLoader\LanguageLine;
 
 class Translations extends Component
 {
@@ -27,9 +27,9 @@ class Translations extends Component
 
     public function mount(): void
     {
-        $this->translations = LanguageLine::all()->toArray();
+        $this->translations = app(LanguageLine::class)->all()->toArray();
 
-        $this->locales = Language::all('language_code')
+        $this->locales = app(Language::class)->all('language_code')
             ->pluck('language_code')
             ->toArray();
 
@@ -86,11 +86,12 @@ class Translations extends Component
     public function updatedSearch(): void
     {
         if ($this->search) {
-            $result = \FluxErp\Models\LanguageLine::search($this->search)->fastPaginate();
+            $result = app(LanguageLine::class)->search($this->search)->fastPaginate();
 
-            $this->translations = count($result->items()) ? $result->items() : LanguageLine::all()->toArray();
+            $this->translations = count($result->items()) ?
+                $result->items() : app(LanguageLine::class)->all()->toArray();
         } else {
-            $this->translations = LanguageLine::all()->toArray();
+            $this->translations = app(LanguageLine::class)->all()->toArray();
         }
 
         $this->skipRender();

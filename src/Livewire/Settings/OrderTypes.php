@@ -37,7 +37,7 @@ class OrderTypes extends OrderTypeList
                 ->label(__('New'))
                 ->icon('plus')
                 ->color('primary')
-                ->when(CreateOrderType::canPerformAction(false))
+                ->when(resolve_static(CreateOrderType::class, 'canPerformAction', [false]))
                 ->attributes(
                     ['wire:click' => 'edit']
                 ),
@@ -58,7 +58,7 @@ class OrderTypes extends OrderTypeList
             parent::getViewData(),
             [
                 'printViews' => $printViews,
-                'clients' => Client::query()
+                'clients' => app(Client::class)->query()
                     ->get(['id', 'name'])
                     ->toArray(),
                 'enum' => OrderTypeEnum::values(),

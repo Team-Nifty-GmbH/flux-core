@@ -7,8 +7,6 @@ use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoice\DeletePurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoice\UpdatePurchaseInvoice;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateOrderFromPurchaseInvoiceRequest;
-use FluxErp\Http\Requests\CreatePurchaseInvoiceRequest;
 use FluxErp\Models\PurchaseInvoice;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,15 +17,16 @@ class PurchaseInvoiceController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new PurchaseInvoice();
+        $this->model = app(PurchaseInvoice::class);
     }
 
-    public function create(CreatePurchaseInvoiceRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
         try {
-            $purchaseInvoice = CreatePurchaseInvoice::make($request->validated())
+            $purchaseInvoice = CreatePurchaseInvoice::make($request->all())
                 ->validate()
                 ->execute();
+
             $response = ResponseHelper::createArrayResponse(
                 statusCode: 201,
                 data: $purchaseInvoice,
@@ -98,9 +97,9 @@ class PurchaseInvoiceController extends BaseController
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function finish(CreateOrderFromPurchaseInvoiceRequest $request): JsonResponse
+    public function finish(Request $request): JsonResponse
     {
-        $order = CreateOrderFromPurchaseInvoice::make($request->validated())
+        $order = CreateOrderFromPurchaseInvoice::make($request->all())
             ->validate()
             ->execute();
 

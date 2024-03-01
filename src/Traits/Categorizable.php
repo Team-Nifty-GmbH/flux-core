@@ -3,6 +3,7 @@
 namespace FluxErp\Traits;
 
 use FluxErp\Models\Category;
+use FluxErp\Rules\ModelExists;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -83,7 +84,12 @@ trait Categorizable
         }
 
         $validator = Validator::make($value,
-            ['*' => 'integer|exists:' . Category::class . ',id'],
+            [
+                '*' => [
+                    'integer',
+                    new ModelExists(Category::class),
+                ],
+            ],
             [
                 'integer' => __('The category :input is no id.'),
                 'exists' => __('The category :input is invalid.'),

@@ -6,10 +6,9 @@ use FluxErp\Actions\FormBuilderForm\CreateFormBuilderForm;
 use FluxErp\Actions\FormBuilderForm\DeleteFormBuilderForm;
 use FluxErp\Actions\FormBuilderForm\UpdateFormBuilderForm;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateFormBuilderFormRequest;
-use FluxErp\Http\Requests\UpdateFormBuilderFormRequest;
 use FluxErp\Models\FormBuilderForm;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class FormBuilderFormController extends BaseController
@@ -17,24 +16,30 @@ class FormBuilderFormController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new FormBuilderForm();
+        $this->model = app(FormBuilderForm::class);
     }
 
-    public function create(CreateFormBuilderFormRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
+        $formBuilderForm = CreateFormBuilderForm::make($request->all())
+            ->validate()
+            ->execute();
+
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
-            data: CreateFormBuilderForm::make($request->validated())
-                ->execute()
+            data: $formBuilderForm
         );
     }
 
-    public function update(UpdateFormBuilderFormRequest $request): JsonResponse
+    public function update(Request $request): JsonResponse
     {
+        $formBuilderForm = UpdateFormBuilderForm::make($request->all())
+            ->validate()
+            ->execute();
+
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
-            data: UpdateFormBuilderForm::make($request->validated())
-                ->execute()
+            data: $formBuilderForm
         );
     }
 

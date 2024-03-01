@@ -23,11 +23,11 @@ class ProjectList extends BaseProjectList
         parent::mount();
 
         $this->project->additionalColumns = array_fill_keys(
-            Project::additionalColumnsQuery()->pluck('name')?->toArray() ?? [],
+            resolve_static(Project::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
             null
         );
 
-        $this->availableStates = Project::getStatesFor('state')->map(function ($state) {
+        $this->availableStates = app(Project::class)->getStatesFor('state')->map(function ($state) {
             return [
                 'label' => __(ucfirst(str_replace('_', ' ', $state))),
                 'name' => $state,
@@ -45,7 +45,7 @@ class ProjectList extends BaseProjectList
                 ->attributes([
                     'x-on:click' => "\$dispatch('create-project')",
                 ])
-                ->when(fn () => CreateProject::canPerformAction(false)),
+                ->when(fn () => resolve_static(CreateProject::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -68,7 +68,9 @@ class ProjectList extends BaseProjectList
     {
         $this->project->reset();
         $this->project->additionalColumns = array_fill_keys(
-            Project::additionalColumnsQuery()->pluck('name')?->toArray() ?? [],
+            resolve_static(Project::class, 'additionalColumnsQuery')
+                ->pluck('name')
+                ?->toArray() ?? [],
             null
         );
 

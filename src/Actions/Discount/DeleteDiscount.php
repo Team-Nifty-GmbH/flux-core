@@ -4,15 +4,14 @@ namespace FluxErp\Actions\Discount;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Discount;
+use FluxErp\Rulesets\Discount\DeleteDiscountRuleset;
 
 class DeleteDiscount extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:discounts,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteDiscountRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteDiscount extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Discount::query()
+        return app(Discount::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

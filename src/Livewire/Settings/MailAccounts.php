@@ -46,7 +46,7 @@ class MailAccounts extends MailAccountList
                 ->attributes([
                     'x-on:click' => '$wire.edit()',
                 ])
-                ->when(fn () => CreateMailAccount::canPerformAction(false)),
+                ->when(fn () => resolve_static(CreateMailAccount::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -60,7 +60,7 @@ class MailAccounts extends MailAccountList
                 ->attributes([
                     'x-on:click' => '$wire.edit(record.id)',
                 ])
-                ->when(fn () => UpdateMailAccount::canPerformAction(false)),
+                ->when(fn () => resolve_static(UpdateMailAccount::class, 'canPerformAction', [false])),
             DataTableButton::make()
                 ->label(__('Edit Folders'))
                 ->color('primary')
@@ -68,7 +68,7 @@ class MailAccounts extends MailAccountList
                 ->attributes([
                     'x-on:click' => '$wire.editFolders(record.id)',
                 ])
-                ->when(fn () => UpdateMailFolder::canPerformAction(false)),
+                ->when(fn () => resolve_static(UpdateMailFolder::class, 'canPerformAction', [false])),
             DataTableButton::make()
                 ->label(__('Delete'))
                 ->color('negative')
@@ -77,7 +77,7 @@ class MailAccounts extends MailAccountList
                     'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Mail Account')]),
                     'wire:click' => 'delete(record.id)',
                 ])
-                ->when(fn () => DeleteMailAccount::canPerformAction(false)),
+                ->when(fn () => resolve_static(DeleteMailAccount::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -147,8 +147,8 @@ class MailAccounts extends MailAccountList
     {
         try {
             DeleteMailAccount::make(['id' => $id])
-                ->validate()
                 ->checkPermission()
+                ->validate()
                 ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
@@ -195,11 +195,11 @@ class MailAccounts extends MailAccountList
 
     private function loadFolders(): void
     {
-        MailFolder::addGlobalScope('children', function (Builder $builder) {
+        app(MailFolder::class)->addGlobalScope('children', function (Builder $builder) {
             $builder->with('children')->where('mail_account_id', $this->mailAccount->id);
         });
 
-        $this->folders = MailFolder::query()
+        $this->folders = app(MailFolder::class)->query()
             ->where('parent_id', null)
             ->get()
             ->toArray();

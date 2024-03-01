@@ -40,12 +40,12 @@ class Clients extends ClientList
         return array_merge(
             parent::getViewData(),
             [
-                'bankConnections' => BankConnection::query()
+                'bankConnections' => app(BankConnection::class)->query()
                     ->where('is_active', true)
                     ->select(['bank_connections.id', 'name'])
                     ->get()
                     ->toArray(),
-                'countries' => Country::query()
+                'countries' => app(Country::class)->query()
                     ->orderBy('iso_alpha2', 'ASC')
                     ->select(['id', 'name', 'iso_alpha2'])
                     ->get()
@@ -64,7 +64,7 @@ class Clients extends ClientList
                 ->attributes([
                     'wire:click' => 'show()',
                 ])
-                ->when(CreateClient::canPerformAction(false)),
+                ->when(resolve_static(CreateClient::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -78,7 +78,7 @@ class Clients extends ClientList
                 ->attributes([
                     'wire:click' => 'show(record.id)',
                 ])
-                ->when(UpdateClient::canPerformAction(false)),
+                ->when(resolve_static(UpdateClient::class, 'canPerformAction', [false])),
             DataTableButton::make()
                 ->label(__('Customer portal'))
                 ->color('primary')
@@ -86,7 +86,7 @@ class Clients extends ClientList
                 ->attributes([
                     'wire:click' => 'showCustomerPortal(record)',
                 ])
-                ->when(UpdateClient::canPerformAction(false)),
+                ->when(resolve_static(UpdateClient::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -125,11 +125,11 @@ class Clients extends ClientList
             return false;
         }
 
-        $this->logo->model_type = Client::class;
+        $this->logo->model_type = app(Client::class)->getMorphClass();
         $this->logo->model_id = $this->client->id;
         $this->logo->collection_name = 'logo';
 
-        $this->logoSmall->model_type = Client::class;
+        $this->logoSmall->model_type = app(Client::class)->getMorphClass();
         $this->logoSmall->model_id = $this->client->id;
         $this->logoSmall->collection_name = 'logo_small';
 

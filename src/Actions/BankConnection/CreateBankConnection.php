@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\BankConnection;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateBankConnectionRequest;
 use FluxErp\Models\BankConnection;
+use FluxErp\Rulesets\BankConnection\CreateBankConnectionRuleset;
 
 class CreateBankConnection extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateBankConnectionRequest())->rules();
+        $this->rules = resolve_static(CreateBankConnectionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class CreateBankConnection extends FluxAction
 
     public function performAction(): BankConnection
     {
-        $bankConnection = new BankConnection($this->data);
+        $bankConnection = app(BankConnection::class, ['attributes' => $this->data]);
         $bankConnection->save();
 
         return $bankConnection->fresh();

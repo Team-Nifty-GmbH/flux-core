@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateSepaMandateRequest;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Services\SepaMandateService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class SepaMandateController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new SepaMandate();
+        $this->model = app(SepaMandate::class);
     }
 
-    public function create(CreateSepaMandateRequest $request, SepaMandateService $sepaMandateService): JsonResponse
+    public function create(Request $request, SepaMandateService $sepaMandateService): JsonResponse
     {
-        $response = $sepaMandateService->create($request->validated());
+        $response = $sepaMandateService->create($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

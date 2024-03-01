@@ -46,19 +46,19 @@ class PriceLists extends Component
 
     public function mount(): void
     {
-        $this->priceLists = PriceList::query()
+        $this->priceLists = app(PriceList::class)->query()
             ->get()
             ->toArray();
 
-        $this->categories = Category::query()
-            ->where('model_type', Product::class)
+        $this->categories = app(Category::class)->query()
+            ->where('model_type', app(Product::class)->getMorphClass())
             ->get(['id', 'name'])
             ->toArray();
     }
 
     public function showEditModal(?int $priceListId = null): void
     {
-        $priceList = PriceList::query()
+        $priceList = app(PriceList::class)->query()
             ->whereKey($priceListId)
             ->with('discount')
             ->first();
@@ -84,7 +84,7 @@ class PriceLists extends Component
 
         if ($priceList) {
             $this->discountedCategories = $priceList->discountedCategories()
-                ->where('model_type', Product::class)
+                ->where('model_type', app(Product::class)->getMorphClass())
                 ->orderBy('sort_number', 'DESC')
                 ->with([
                     'discounts' => fn ($query) => $query->where('category_price_list.price_list_id', $priceList->id)
@@ -142,7 +142,7 @@ class PriceLists extends Component
 
         // Create product category discounts
         $categories = $priceList->discountedCategories()
-            ->where('model_type', Product::class)
+            ->where('model_type', app(Product::class)->getMorphClass())
             ->orderBy('sort_number', 'DESC')
             ->with([
                 'discounts' => fn ($query) => $query->where('category_price_list.price_list_id', $priceList->id)
@@ -178,7 +178,7 @@ class PriceLists extends Component
                         array_merge(
                             $discountedCategory['discounts'][0],
                             [
-                                'model_type' => Category::class,
+                                'model_type' => app(Category::class)->getMorphClass(),
                                 'model_id' => $discountedCategory['id'],
                             ]
                         )
@@ -237,7 +237,7 @@ class PriceLists extends Component
 
         $this->discountedCategories[] = [
             'id' => $this->newCategoryDiscount['category_id'],
-            'name' => Category::query()
+            'name' => app(Category::class)->query()
                 ->whereKey($this->newCategoryDiscount['category_id'])
                 ->first(['name'])
                 ->name,

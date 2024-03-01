@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\AdditionalColumn;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateValueListRequest;
 use FluxErp\Models\AdditionalColumn;
+use FluxErp\Rulesets\AdditionalColumn\UpdateValueLIstRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
@@ -13,7 +13,7 @@ class UpdateValueList extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = resolve_silently(UpdateValueListRequest::class)->rules();
+        $this->rules = resolve_static(UpdateValueLIstRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -33,7 +33,7 @@ class UpdateValueList extends FluxAction
         return $valueList->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 

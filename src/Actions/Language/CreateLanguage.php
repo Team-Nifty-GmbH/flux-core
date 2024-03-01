@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Language;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateLanguageRequest;
 use FluxErp\Models\Language;
+use FluxErp\Rulesets\Language\CreateLanguageRuleset;
 use Illuminate\Support\Facades\Validator;
 
 class CreateLanguage extends FluxAction
@@ -12,7 +12,7 @@ class CreateLanguage extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateLanguageRequest())->rules();
+        $this->rules = resolve_static(CreateLanguageRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -30,16 +30,16 @@ class CreateLanguage extends FluxAction
             Language::query()->update(['is_default' => false]);
         }
 
-        $language = new Language($this->data);
+        $language = app(Language::class, ['attributes' => $this->data]);
         $language->save();
 
         return $language->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Language());
+        $validator->addModel(app(Language::class));
 
         $this->data = $validator->validate();
     }

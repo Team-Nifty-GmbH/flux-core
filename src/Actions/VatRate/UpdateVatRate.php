@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\VatRate;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateVatRateRequest;
 use FluxErp\Models\VatRate;
+use FluxErp\Rulesets\VatRate\UpdateVatRateRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateVatRate extends FluxAction
@@ -12,7 +12,7 @@ class UpdateVatRate extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateVatRateRequest())->rules();
+        $this->rules = resolve_static(UpdateVatRateRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +22,7 @@ class UpdateVatRate extends FluxAction
 
     public function performAction(): Model
     {
-        $vatRate = VatRate::query()
+        $vatRate = app(VatRate::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

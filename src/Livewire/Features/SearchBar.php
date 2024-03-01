@@ -62,14 +62,15 @@ class SearchBar extends Component
                 $return = [];
                 foreach ($this->searchModel as $model) {
                     try {
-                        $result = $model::search($this->search)
+                        $result = app($model)->search($this->search)
                             ->toEloquentBuilder()
                             ->limit(5)
                             ->get()
                             ->filter(fn ($item) => $item->detailRoute())
                             ->map(fn (Model $item) => [
                                 'id' => $item->getKey(),
-                                'label' => method_exists($item, 'getLabel') ? $item->getLabel() : $item->getAttribute('name'),
+                                'label' => method_exists($item, 'getLabel') ?
+                                    $item->getLabel() : $item->getAttribute('name'),
                                 'src' => method_exists($item, 'getAvatarUrl') ? $item->getAvatarUrl() : null,
                             ]);
 
@@ -87,7 +88,7 @@ class SearchBar extends Component
 
                 $this->return = $return;
             } else {
-                $result = $this->searchModel::search($this->search)->fastPaginate();
+                $result = app($this->searchModel)->search($this->search)->fastPaginate();
 
                 if ($this->load && $result && $result instanceof LengthAwarePaginator) {
                     $result->load($this->load);
@@ -106,7 +107,7 @@ class SearchBar extends Component
     public function showDetail(string $model, int $id): void
     {
         /** @var \Illuminate\Database\Eloquent\Model $model */
-        $modelInstance = $model::query()->whereKey($id)->first();
+        $modelInstance = app($model)->query()->whereKey($id)->first();
 
         if (! $modelInstance) {
             $this->notification()->error(__('Record not found'));

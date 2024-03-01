@@ -4,8 +4,8 @@ namespace FluxErp\Actions\Category;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
-use FluxErp\Http\Requests\UpdateCategoryRequest;
 use FluxErp\Models\Category;
+use FluxErp\Rulesets\Category\UpdateCategoryRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -15,7 +15,7 @@ class UpdateCategory extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateCategoryRequest())->rules();
+        $this->rules = resolve_static(UpdateCategoryRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -25,7 +25,7 @@ class UpdateCategory extends FluxAction
 
     public function performAction(): Model
     {
-        $category = Category::query()
+        $category = app(Category::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -35,19 +35,19 @@ class UpdateCategory extends FluxAction
         return $category->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Category());
+        $validator->addModel(app(Category::class));
 
         $this->data = $validator->validate();
 
         if ($this->data['parent_id'] ?? false) {
-            $category = Category::query()
+            $category = app(Category::class)->query()
                 ->whereKey($this->data['id'])
                 ->first();
 
-            $parentCategory = Category::query()
+            $parentCategory = app(Category::class)->query()
                 ->whereKey($this->data['parent_id'])
                 ->where('model_type', $category->model_type ?? $this->data['model_type'])
                 ->first();

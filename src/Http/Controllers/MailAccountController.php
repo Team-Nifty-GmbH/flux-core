@@ -6,7 +6,6 @@ use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateMailAccountRequest;
 use FluxErp\Models\MailAccount;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,12 +16,13 @@ class MailAccountController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new MailAccount();
+        $this->model = app(MailAccount::class);
     }
 
-    public function create(CreateMailAccountRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        $mailAccount = CreateMailAccount::make($request->validated())
+        $mailAccount = CreateMailAccount::make($request->all())
+            ->validate()
             ->execute();
 
         return ResponseHelper::createResponseFromBase(

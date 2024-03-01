@@ -15,7 +15,7 @@
                 [
                     'model_type',
                     '=',
-                    \FluxErp\Models\Product::class,
+                    app(\FluxErp\Models\Product::class)->getMorphClass(),
                 ],
                 [
                     'collection_name',
@@ -36,7 +36,7 @@
             [
                 'model_type',
                 '=',
-                \FluxErp\Models\Product::class,
+                app(\FluxErp\Models\Product::class)->getMorphClass(),
             ],
             [
                 'collection_name',

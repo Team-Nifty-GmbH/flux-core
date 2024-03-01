@@ -34,9 +34,11 @@ class Service extends Component
 
     public function mount($serialNumberId = null): void
     {
-        $ticket = new Ticket([
-            'authenticatable_type' => get_class(Auth::user()),
-            'authenticatable_id' => Auth::user()->id,
+        $ticket = app(Ticket::class, [
+            'attributes' => [
+                'authenticatable_type' => Auth::user()->getMorphClass(),
+                'authenticatable_id' => Auth::user()->id,
+            ],
         ]);
 
         $this->ticket = $ticket->toArray();
@@ -44,10 +46,10 @@ class Service extends Component
         $this->contactData = Auth::user()->toArray();
 
         if ($serialNumberId) {
-            $this->serialNumber = SerialNumber::query()->whereKey($serialNumberId)->first()->toArray();
+            $this->serialNumber = app(SerialNumber::class)->query()->whereKey($serialNumberId)->first()->toArray();
             $this->contactData['serial_number'] = $this->serialNumber['serial_number'];
 
-            $this->ticket['model_type'] = SerialNumber::class;
+            $this->ticket['model_type'] = app(SerialNumber::class)->getMorphClass();
             $this->ticket['model_id'] = $this->serialNumber['id'];
         }
     }
@@ -70,7 +72,7 @@ class Service extends Component
         }
 
         try {
-            $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id);
+            $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, app(Ticket::class)->getMorphClass());
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
         }

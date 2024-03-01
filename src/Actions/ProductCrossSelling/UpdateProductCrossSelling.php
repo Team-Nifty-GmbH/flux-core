@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\ProductCrossSelling;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateProductCrossSellingRequest;
 use FluxErp\Models\ProductCrossSelling;
+use FluxErp\Rulesets\ProductCrossSelling\UpdateProductCrossSellingRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateProductCrossSelling extends FluxAction
@@ -12,7 +12,7 @@ class UpdateProductCrossSelling extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateProductCrossSellingRequest())->rules();
+        $this->rules = resolve_static(UpdateProductCrossSellingRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -25,7 +25,7 @@ class UpdateProductCrossSelling extends FluxAction
         $products = $this->data['products'] ?? null;
         unset($this->data['products']);
 
-        $productCrossSelling = ProductCrossSelling::query()
+        $productCrossSelling = app(ProductCrossSelling::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

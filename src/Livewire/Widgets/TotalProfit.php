@@ -28,7 +28,7 @@ class TotalProfit extends Component
     {
         return view('flux::livewire.widgets.total-profit',
             [
-                'currency' => Currency::query()->where('is_default', true)->first()->toArray(),
+                'currency' => app(Currency::class)->query()->where('is_default', true)->first()->toArray(),
                 'timeFrames' => array_map(function (TimeFrameEnum $timeFrame) {
                     return [
                         'value' => $timeFrame->name,
@@ -51,7 +51,7 @@ class TotalProfit extends Component
      */
     public function calculateSum(): void
     {
-        $query = Order::query();
+        $query = app(Order::class)->query();
 
         $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
         $parameters = $timeFrame->dateQueryParameters('invoice_date');

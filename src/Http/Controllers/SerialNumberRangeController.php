@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateSerialNumberRangeRequest;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Services\SerialNumberRangeService;
 use Illuminate\Http\JsonResponse;
@@ -14,13 +13,12 @@ class SerialNumberRangeController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new SerialNumberRange();
+        $this->model = app(SerialNumberRange::class);
     }
 
-    public function create(CreateSerialNumberRangeRequest $request,
-        SerialNumberRangeService $serialNumberRangeService): JsonResponse
+    public function create(Request $request, SerialNumberRangeService $serialNumberRangeService): JsonResponse
     {
-        $serialNumberRange = $serialNumberRangeService->create($request->validated());
+        $serialNumberRange = $serialNumberRangeService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

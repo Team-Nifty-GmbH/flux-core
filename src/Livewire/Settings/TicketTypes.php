@@ -2,9 +2,9 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Http\Requests\CreateAdditionalColumnRequest;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\TicketType;
+use FluxErp\Rulesets\AdditionalColumn\CreateAdditionalColumnRuleset;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
@@ -34,7 +34,7 @@ class TicketTypes extends Component
 
     public function mount(): void
     {
-        $this->dbTicketTypes = TicketType::query()
+        $this->dbTicketTypes = app(TicketType::class)->query()
             ->orderBy('name->' . app()->getLocale(), 'ASC')
             ->get(['id', 'name', 'model_type'])
             ->toArray();
@@ -47,8 +47,8 @@ class TicketTypes extends Component
                 'model_type' => $ticketType['model_type'],
             ];
 
-            $additionalColumns = AdditionalColumn::query()
-                ->where('model_type', TicketType::class)
+            $additionalColumns = app(AdditionalColumn::class)->query()
+                ->where('model_type', app(TicketType::class)->getMorphClass())
                 ->where('model_id', $ticketType['id'])
                 ->orderBy('name', 'ASC')
                 ->get([
@@ -100,11 +100,11 @@ class TicketTypes extends Component
                 ! $newAdditionalColumn ? $this->ticketTypes[$index] :
                     array_merge(
                         array_fill_keys(
-                            array_keys((new CreateAdditionalColumnRequest())->rules()),
+                            array_keys(resolve_static(CreateAdditionalColumnRuleset::class, 'getRules')),
                             null
                         ),
                         [
-                            'model_type' => TicketType::class,
+                            'model_type' => app(TicketType::class)->getMorphClass(),
                             'model_id' => $this->ticketTypes[$index]['id'],
                         ]
                     )

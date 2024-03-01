@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\AdditionalColumn;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateValueListRequest;
 use FluxErp\Models\AdditionalColumn;
+use FluxErp\Rulesets\AdditionalColumn\CreateValueListRuleset;
 use Illuminate\Validation\ValidationException;
 
 class CreateValueList extends FluxAction
@@ -12,7 +12,7 @@ class CreateValueList extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = resolve_silently(CreateValueListRequest::class)->rules();
+        $this->rules = resolve_static(CreateValueListRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -31,7 +31,7 @@ class CreateValueList extends FluxAction
         return $valueList->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 

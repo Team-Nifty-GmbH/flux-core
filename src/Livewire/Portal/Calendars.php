@@ -19,7 +19,8 @@ class Calendars extends CalendarComponent
 
     public function getCalendars(): array
     {
-        return Calendar::where('is_public', true)
+        return app(Calendar::class)->query()
+            ->where('is_public', true)
             ->get()
             ->map(function (Calendar $calendar) {
                 return $calendar->toCalendarObject([
@@ -33,7 +34,7 @@ class Calendars extends CalendarComponent
 
     public function getEvents(array $info, array $calendarAttributes): array
     {
-        $calendar = Calendar::query()->find($calendarAttributes['id']);
+        $calendar = app(Calendar::class)->query()->find($calendarAttributes['id']);
 
         return $calendar->calendarEvents()
             ->where(function ($query) use ($info) {
@@ -60,7 +61,7 @@ class Calendars extends CalendarComponent
 
     public function attendEvent($eventId)
     {
-        $event = CalendarEvent::query()->find($eventId);
+        $event = app(CalendarEvent::class)->query()->find($eventId);
 
         $event->invites()->create([
             'inviteable_type' => auth()->user()->getMorphClass(),
@@ -71,7 +72,7 @@ class Calendars extends CalendarComponent
 
     public function notAttendEvent($eventId)
     {
-        $event = CalendarEvent::query()->find($eventId);
+        $event = app(CalendarEvent::class)->query()->find($eventId);
 
         $event->invites()
             ->where('inviteable_type', auth()->user()->getMorphClass())

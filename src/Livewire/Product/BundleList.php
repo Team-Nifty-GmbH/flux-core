@@ -9,6 +9,7 @@ use FluxErp\Livewire\DataTables\ProductBundleProductList;
 use FluxErp\Livewire\Forms\ProductBundleProductForm;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Pivots\ProductBundleProduct;
+use FluxErp\Models\Product;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -48,7 +49,9 @@ class BundleList extends ProductBundleProductList
                         $openModal('edit-bundle-product-modal')
                     JS,
                 ])
-                ->when(fn () => CreateProductBundleProduct::canPerformAction(false)),
+                ->when(
+                    fn () => resolve_static(CreateProductBundleProduct::class, 'canPerformAction', [false])
+                ),
         ];
     }
 
@@ -60,7 +63,9 @@ class BundleList extends ProductBundleProductList
                 ->label(__('Edit'))
                 ->icon('pencil')
                 ->wireClick('edit(record.id)')
-                ->when(fn () => UpdateProductBundleProduct::canPerformAction(false)),
+                ->when(
+                    fn () => resolve_static(UpdateProductBundleProduct::class, 'canPerformAction', [false])
+                ),
             DataTableButton::make()
                 ->color('negative')
                 ->label(__('Delete'))
@@ -69,7 +74,9 @@ class BundleList extends ProductBundleProductList
                     'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Bundle Product')]),
                     'wire:click' => 'delete(record.id)',
                 ])
-                ->when(fn () => DeleteProductBundleProduct::canPerformAction(false)),
+                ->when(
+                    fn () => resolve_static(DeleteProductBundleProduct::class, 'canPerformAction', [false])
+                ),
         ];
     }
 
@@ -132,7 +139,7 @@ class BundleList extends ProductBundleProductList
             return;
         }
 
-        if (\FluxErp\Models\Product::query()->whereKey($this->product->id)->first()->bundleProducts()->count() === 0) {
+        if (app(Product::class)->query()->whereKey($this->product->id)->first()->bundleProducts()->count() === 0) {
             $this->product->is_bundle = false;
             $this->js(<<<'JS'
                 Livewire.navigate(window.location.href);

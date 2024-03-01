@@ -18,7 +18,7 @@ class SepaMandateService
                 data: CreateSepaMandate::make($data)->validate()->execute()
             );
         } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(statusCode: 409, data: $e->errors());
+            return ResponseHelper::createArrayResponse(statusCode: 422, data: $e->errors());
         }
     }
 

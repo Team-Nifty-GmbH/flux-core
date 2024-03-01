@@ -39,13 +39,13 @@ class PriceCalculation
 
         $product = $orderPosition instanceof Model
             ? $orderPosition->product
-            : Product::query()
+            : app(Product::class)->query()
                 ->whereKey($orderPosition->product_id)
                 ->first();
 
         $order = $orderPosition instanceof Model
             ? $orderPosition->order
-            : Order::query()
+            : app(Order::class)->query()
                 ->whereKey($orderPosition->order_id)
                 ->first();
 
@@ -53,7 +53,7 @@ class PriceCalculation
             $priceHelper = PriceHelper::make($product);
 
             if ($contactId = data_get($data, 'contact_id')) {
-                $priceHelper->setContact(Contact::query()->whereKey($contactId)->first());
+                $priceHelper->setContact(app(Contact::class)->query()->whereKey($contactId)->first());
             }
 
             if ($priceListId = data_get(
@@ -61,7 +61,7 @@ class PriceCalculation
                 'price_list_id',
                 $orderPosition->price_list_id ?? $order->price_list_id
             )) {
-                $priceHelper->setPriceList(PriceList::query()->whereKey($priceListId)->first());
+                $priceHelper->setPriceList(app(PriceList::class)->query()->whereKey($priceListId)->first());
             }
 
             $productPrice = $priceHelper->price();
@@ -79,7 +79,7 @@ class PriceCalculation
 
         // Collect & set missing data
         $orderPosition->vat_rate_percentage = ($data['vat_rate_percentage'] ?? false)
-            ?: VatRate::query()
+            ?: app(VatRate::class)->query()
                 ->whereKey($orderPosition->vat_rate_id)
                 ->first()
                 ?->rate_percentage;
@@ -110,7 +110,7 @@ class PriceCalculation
 
         // Purchase-price dependent on stock-bookings.
         if (! $orderPosition->purchase_price) {
-            $stockPosting = StockPosting::query()
+            $stockPosting = app(StockPosting::class)->query()
                 ->where('product_id', $orderPosition->product_id)
                 ->where('warehouse_id', $orderPosition->warehouse_id)
                 ->orderByDesc('id')

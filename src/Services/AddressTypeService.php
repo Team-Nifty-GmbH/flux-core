@@ -13,7 +13,7 @@ class AddressTypeService
 {
     public function create(array $data): AddressType
     {
-        return CreateAddressType::make($data)->execute();
+        return CreateAddressType::make($data)->validate()->execute();
     }
 
     public function update(array $data): array
@@ -66,7 +66,7 @@ class AddressTypeService
 
         return ResponseHelper::createArrayResponse(
             statusCode: 204,
-            statusMessage: 'warehouse deleted'
+            statusMessage: 'address type deleted'
         );
     }
 }

@@ -45,7 +45,7 @@ class ModelFilter
             return [];
         }
 
-        $modelInstance = new $model();
+        $modelInstance = app($model);
 
         if (! is_null($allowedFilters)) {
             $modelFilter->allowedFilters($allowedFilters);
@@ -88,7 +88,7 @@ class ModelFilter
         }
 
         if (! is_null($filter)) {
-            $additionalColumns = AdditionalColumn::query()
+            $additionalColumns = app(AdditionalColumn::class)->query()
                 ->where('model_type', $model)
                 ->get()
                 ->pluck('name')
@@ -115,7 +115,7 @@ class ModelFilter
         $this->operators = array_intersect($allowedOperators, $operators);
         $this->query = null;
 
-        $model = new $subject();
+        $model = app($subject);
         $this->allowedFilters = array_values(array_diff(
             Schema::getColumnListing($model->getTable()),
             $model->getHidden()
@@ -173,68 +173,44 @@ class ModelFilter
         return $this->sorts;
     }
 
-    /**
-     * @return void
-     */
-    public function allowedFilters(array $allowedFilters)
+    public function allowedFilters(array $allowedFilters): void
     {
         $this->allowedFilters = $allowedFilters;
     }
 
-    /**
-     * @return void
-     */
-    public function allowedIncludes(array $allowedIncludes)
+    public function allowedIncludes(array $allowedIncludes): void
     {
         $this->allowedIncludes = $allowedIncludes;
     }
 
-    /**
-     * @return void
-     */
-    public function allowedSorts(array $allowedSorts)
+    public function allowedSorts(array $allowedSorts): void
     {
         $this->allowedSorts = $allowedSorts;
     }
 
-    /**
-     * @return void
-     */
-    public function addAllowedFilters(array $allowedFilters)
+    public function addAllowedFilters(array $allowedFilters): void
     {
         $this->allowedFilters(array_unique(array_merge($this->allowedFilters, $allowedFilters)));
     }
 
-    /**
-     * @return void
-     */
-    public function addAllowedIncludes(array $allowedIncludes)
+    public function addAllowedIncludes(array $allowedIncludes): void
     {
         $this->allowedIncludes(array_unique(array_merge($this->allowedIncludes, $allowedIncludes)));
     }
 
-    /**
-     * @return void
-     */
-    public function addAllowedSorts(array $allowedSorts)
+    public function addAllowedSorts(array $allowedSorts): void
     {
         $this->allowedSorts(array_unique(array_merge($this->allowedSorts, $allowedSorts)));
     }
 
-    /**
-     * @return void
-     */
-    public function addSearchString(string $searchString)
+    public function addSearchString(string $searchString): void
     {
         if ($searchString) {
             $this->searchString = $searchString;
         }
     }
 
-    /**
-     * @return void
-     */
-    public function addFilters(array|string $filters, array $additionalColumns = [])
+    public function addFilters(array|string $filters, array $additionalColumns = []): void
     {
         if (is_string($filters)) {
             $filters = [$filters];
@@ -269,10 +245,7 @@ class ModelFilter
         }
     }
 
-    /**
-     * @return void
-     */
-    public function addQueryFilters($filters)
+    public function addQueryFilters($filters): void
     {
         if (! $filters) {
             $filters = [];
@@ -288,10 +261,7 @@ class ModelFilter
         }
     }
 
-    /**
-     * @return void
-     */
-    public function addCollectionFilters($filters)
+    public function addCollectionFilters($filters): void
     {
         if (! $filters) {
             $filters = [];
@@ -307,10 +277,7 @@ class ModelFilter
         }
     }
 
-    /**
-     * @return void
-     */
-    public function addIncludes(array|string $includes)
+    public function addIncludes(array|string $includes): void
     {
         if (is_string($includes)) {
             $includes = explode(',', $includes);
@@ -319,10 +286,7 @@ class ModelFilter
         $this->includes = array_intersect($this->allowedIncludes, $includes);
     }
 
-    /**
-     * @return void
-     */
-    public function addSorts(array|string $sorts)
+    public function addSorts(array|string $sorts): void
     {
         $this->sorts = $this->sanitizeSorts(is_string($sorts) ? [$sorts] : $sorts);
     }
@@ -330,7 +294,7 @@ class ModelFilter
     public function filter(): Collection
     {
         if ($this->searchString) {
-            $collection = $this->subject::search($this->searchString);
+            $collection = app($this->subject)->search($this->searchString);
 
             if (! is_null($this->includes) && count($this->includes) > 0) {
                 $collection->query(fn ($query) => $query->with($this->includes));
@@ -338,7 +302,7 @@ class ModelFilter
 
             $collection = $collection->get();
         } else {
-            $this->query = $this->subject::query();
+            $this->query = app($this->subject)->query();
 
             if (count($this->queryFilters) > 0) {
                 $or = false;

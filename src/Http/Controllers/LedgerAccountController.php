@@ -6,7 +6,6 @@ use FluxErp\Actions\LedgerAccount\CreateLedgerAccount;
 use FluxErp\Actions\LedgerAccount\DeleteLedgerAccount;
 use FluxErp\Actions\LedgerAccount\UpdateLedgerAccount;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateLedgerAccountRequest;
 use FluxErp\Models\LedgerAccount;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,12 +16,13 @@ class LedgerAccountController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new LedgerAccount();
+        $this->model = app(LedgerAccount::class);
     }
 
-    public function create(CreateLedgerAccountRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        $ledgerAccount = CreateLedgerAccount::make($request->validated())
+        $ledgerAccount = CreateLedgerAccount::make($request->all())
+            ->validate()
             ->execute();
 
         return ResponseHelper::createResponseFromBase(

@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateVatRateRequest;
 use FluxErp\Models\VatRate;
 use FluxErp\Services\VatRateService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class VatRateController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new VatRate();
+        $this->model = app(VatRate::class);
     }
 
-    public function create(CreateVatRateRequest $request, VatRateService $vatRateService): JsonResponse
+    public function create(Request $request, VatRateService $vatRateService): JsonResponse
     {
-        $vatRate = $vatRateService->create($request->validated());
+        $vatRate = $vatRateService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

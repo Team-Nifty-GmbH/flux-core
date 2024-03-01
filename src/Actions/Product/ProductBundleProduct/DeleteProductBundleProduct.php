@@ -4,15 +4,14 @@ namespace FluxErp\Actions\Product\ProductBundleProduct;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Pivots\ProductBundleProduct;
+use FluxErp\Rulesets\Product\ProductBundleProduct\DeleteProductBundleProductRuleset;
 
 class DeleteProductBundleProduct extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:product_bundle_product,id',
-        ];
+        $this->rules = resolve_static(DeleteProductBundleProductRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteProductBundleProduct extends FluxAction
 
     public function performAction(): ?bool
     {
-        $productBundleProduct = ProductBundleProduct::query()
+        $productBundleProduct = app(ProductBundleProduct::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

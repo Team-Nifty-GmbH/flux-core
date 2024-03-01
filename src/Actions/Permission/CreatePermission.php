@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Permission;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreatePermissionRequest;
 use FluxErp\Models\Permission;
+use FluxErp\Rulesets\Permission\CreatePermissionRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class CreatePermission extends FluxAction
@@ -12,7 +12,7 @@ class CreatePermission extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreatePermissionRequest())->rules();
+        $this->rules = resolve_static(CreatePermissionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,6 +22,11 @@ class CreatePermission extends FluxAction
 
     public function performAction(): Model
     {
-        return Permission::create($this->data);
+        return resolve_static(Permission::class, 'create', [$this->data]);
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->data['guard_name'] = $this->data['guard_name'] ?? array_keys(config('auth.guards'))[0];
     }
 }

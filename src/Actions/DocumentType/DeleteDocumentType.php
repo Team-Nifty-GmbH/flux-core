@@ -5,6 +5,9 @@ namespace FluxErp\Actions\DocumentType;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\DocumentType;
 
+/**
+ * @deprecated
+ */
 class DeleteDocumentType extends FluxAction
 {
     protected function boot(array $data): void

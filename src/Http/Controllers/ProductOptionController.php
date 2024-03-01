@@ -16,7 +16,7 @@ class ProductOptionController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new ProductOption();
+        $this->model = app(ProductOption::class);
     }
 
     public function create(Request $request): JsonResponse

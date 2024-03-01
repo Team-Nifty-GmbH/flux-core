@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire\Accounting;
 
-use FluxErp\Actions\Payment\CreatePaymentRun;
+use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Models\OrderType;
 use FluxErp\States\PaymentRun\Open;
@@ -24,7 +24,7 @@ class MoneyTransfer extends DirectDebit
 
     public function getBuilder(Builder $builder): Builder
     {
-        $orderTypes = OrderType::query()
+        $orderTypes = app(OrderType::class)->query()
             ->where('is_active', true)
             ->get(['id', 'order_type_enum'])
             ->filter(fn (OrderType $orderType) => $orderType->order_type_enum->isPurchase()

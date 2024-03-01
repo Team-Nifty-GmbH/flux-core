@@ -35,7 +35,7 @@ class Activities extends Component
 
     public function loadData(): void
     {
-        $activities = $this->modelType::query()
+        $activities = app($this->modelType)->query()
             ->whereKey($this->modelId)
             ->firstOrFail()
             ->activities()

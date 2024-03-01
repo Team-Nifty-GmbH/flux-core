@@ -13,7 +13,7 @@ class CountryService
 {
     public function create(array $data): Country
     {
-        return CreateCountry::make($data)->execute();
+        return CreateCountry::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

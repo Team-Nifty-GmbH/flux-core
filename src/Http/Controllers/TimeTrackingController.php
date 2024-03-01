@@ -7,8 +7,6 @@ use FluxErp\Actions\WorkTime\DeleteWorkTime;
 use FluxErp\Actions\WorkTime\UpdateWorkTime;
 use FluxErp\Helpers\QueryBuilder;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateWorkTimeRequest;
-use FluxErp\Http\Requests\UpdateWorkTimeRequest;
 use FluxErp\Models\WorkTime;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,7 +17,7 @@ class TimeTrackingController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new WorkTime();
+        $this->model = app(WorkTime::class);
     }
 
     public function userIndex(Request $request): JsonResponse
@@ -39,9 +37,11 @@ class TimeTrackingController extends BaseController
         )->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 
-    public function create(CreateWorkTimeRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        $workTime = CreateWorkTime::make($request->validated())->execute();
+        $workTime = CreateWorkTime::make($request->all())
+            ->validate()
+            ->execute();
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
@@ -50,10 +50,10 @@ class TimeTrackingController extends BaseController
         );
     }
 
-    public function update(UpdateWorkTimeRequest $request): JsonResponse
+    public function update(Request $request): JsonResponse
     {
         try {
-            $workTime = UpdateWorkTime::make($request->validated())
+            $workTime = UpdateWorkTime::make($request->all())
                 ->validate()
                 ->execute();
         } catch (ValidationException $e) {

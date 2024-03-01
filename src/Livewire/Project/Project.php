@@ -32,7 +32,7 @@ class Project extends Component
 
     public function mount(string $id): void
     {
-        $project = ProjectModel::whereKey($id)
+        $project = app(ProjectModel::class)->whereKey($id)
             ->withCount('tasks')
             ->firstOrFail();
         $this->project->fill($project);
@@ -44,7 +44,7 @@ class Project extends Component
             )
         );
 
-        $this->availableStates = ProjectModel::getStatesFor('state')->map(function ($state) {
+        $this->availableStates = app(ProjectModel::class)->getStatesFor('state')->map(function ($state) {
             return [
                 'label' => __(ucfirst(str_replace('_', ' ', $state))),
                 'name' => $state,
@@ -84,7 +84,7 @@ class Project extends Component
 
     public function resetForm(): void
     {
-        $project = ProjectModel::query()
+        $project = app(ProjectModel::class)->query()
             ->whereKey($this->project->id)
             ->firstOrFail();
 
@@ -118,7 +118,7 @@ class Project extends Component
     public function avatarUrl(): ?string
     {
         return $this->project->id
-            ? ProjectModel::query()->whereKey($this->project->id)->first()->getAvatarUrl()
+            ? app(ProjectModel::class)->query()->whereKey($this->project->id)->first()->getAvatarUrl()
             : null;
     }
 }

@@ -202,7 +202,7 @@ trait HasAdditionalColumns
     {
         return $this->morphMany(AdditionalColumn::class, 'model')
             ->setQuery(
-                self::additionalColumnsQuery()
+                static::additionalColumnsQuery()
                     ->toBase()
                     ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
                         $query->where('model_type', $this->getMorphClass())
@@ -213,7 +213,7 @@ trait HasAdditionalColumns
 
     protected static function additionalColumnsQuery(): Builder
     {
-        return AdditionalColumn::query()
+        return app(AdditionalColumn::class)->query()
             ->where('model_type', self::class)
             ->whereNull('model_id');
     }

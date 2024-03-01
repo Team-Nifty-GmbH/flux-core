@@ -10,11 +10,11 @@
                 :clearable="false"
                 :disabled="$order->is_locked || $order->is_confirmed || auth()->user()?->id !== $order->approval_user_id"
                 :template="[
-                        'name'   => 'user-option',
-                    ]"
+                    'name'   => 'user-option',
+                ]"
                 :async-data="[
-                        'api' => route('search', \FluxErp\Models\User::class),
-                    ]"
+                    'api' => route('search', \FluxErp\Models\User::class),
+                ]"
             />
             <x-checkbox wire:model="order.is_confirmed" :label="__('Confirmed')" :disabled="auth()->user()?->id !== $order->approval_user_id || $order->is_locked" />
             <x-inputs.number min="1" step="1" wire:model="order.payment_target" :label="__('Payment target')" :disabled="$order->is_locked" class="w-full"/>

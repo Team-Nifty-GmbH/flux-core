@@ -54,7 +54,7 @@ class Scheduling extends ScheduleList
                 ->label(__('New'))
                 ->icon('plus')
                 ->color('primary')
-                ->when(CreateSchedule::canPerformAction(false))
+                ->when(resolve_static(CreateSchedule::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
                 ]),
@@ -88,7 +88,7 @@ class Scheduling extends ScheduleList
             DataTableButton::make()
                 ->icon('pencil')
                 ->color('primary')
-                ->when(UpdateSchedule::canPerformAction(false))
+                ->when(resolve_static(UpdateSchedule::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
                 ]),

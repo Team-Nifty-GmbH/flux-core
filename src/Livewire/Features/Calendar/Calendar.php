@@ -3,8 +3,8 @@
 namespace FluxErp\Livewire\Features\Calendar;
 
 use Exception;
-use FluxErp\Http\Requests\CreateCalendarEventRequest;
-use FluxErp\Http\Requests\UpdateCalendarEventRequest;
+use FluxErp\Actions\CalendarEvent\CreateCalendarEvent;
+use FluxErp\Actions\CalendarEvent\UpdateCalendarEvent;
 use FluxErp\Models\Address;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\User;
@@ -50,8 +50,8 @@ class Calendar extends Component
     {
         $rules = Arr::prependKeysWith(
             ($this->calendarEvent['id'] ?? false)
-                ? (new UpdateCalendarEventRequest())->rules()
-                : (new CreateCalendarEventRequest())->rules(),
+                ? UpdateCalendarEvent::make([])->getRules()
+                : CreateCalendarEvent::make([])->getRules(),
             'calendarEvent.');
 
         $rules['calendarEvent.model_type'][0] = 'required_without:calendarEvent.calendar_id';
@@ -62,7 +62,7 @@ class Calendar extends Component
 
     public function updatedSearch(): void
     {
-        $model = $this->tab === 'users' ? User::class : Address::class;
+        $model = app($this->tab === 'users' ? User::class : Address::class);
         $this->searchResults = $this->search ? $model::search($this->search)->get()->toArray() : [];
 
         $this->skipRender();
@@ -82,7 +82,7 @@ class Calendar extends Component
             return;
         }
 
-        $event = CalendarEvent::query()
+        $event = app(CalendarEvent::class)->query()
             ->whereKey($this->calendarEvent['id'] ?? null)
             ->firstOrFail();
 
@@ -100,7 +100,7 @@ class Calendar extends Component
 
     public function mount(bool $showPersonalCalendar = true): void
     {
-        $this->editable = user_can('api.calendar-events.put');
+        $this->editable = resolve_static(UpdateCalendarEvent::class, 'canPerformAction', [false]);
     }
 
     public function onDayClick(?string $dateString = null): void
@@ -138,38 +138,12 @@ class Calendar extends Component
         $this->resetErrorBag();
 
         // This method is called when an event is clicked
-        $calendarEventQuery = CalendarEvent::query()
-            ->whereKey($event);
-        $calendarEvent = $calendarEventQuery->first();
-        $this->calendarEvent = $calendarEvent->toArray();
-
-        //        $invite = auth()->user()->invites()->where('calendar_event_id', $calendarEvent->id)->first();
-
-        //        $this->calendarEvent = Arr::only(
-        //            $calendarEvent->toArray(),
-        //            [
-        //                'id',
-        //                'title',
-        //                'description',
-        //                'starts_at',
-        //                'ends_at',
-        //                'is_all_day',
-        //                'model_type',
-        //                'model_id',
-        //                'invited_users',
-        //                'invited_addresses',
-        //                'calendar_id',
-        //                'created_by',
-        //            ]
-        //        );
-
-        //        $this->calendarEvent['status'] = $invite?->pivot->status;
-        //        $this->calendarEvent['calendar_id'] = $invite
-        //            ? $invite->pivot->model_calendar_id
-        //            : $this->calendarEvent['calendar_id'];
+        $this->calendarEvent = app(CalendarEvent::class)->query()
+            ->whereKey($event)
+            ->first()
+            ->toArray();
 
         $this->calendarEvent['disabled'] = false;
-        //        $this->calendarEvent['disabled'] = ! $calendarEvent->createdBy?->is(auth()->user());
 
         $this->eventModal = true;
     }
@@ -187,7 +161,7 @@ class Calendar extends Component
 
     public function save(): void
     {
-        if (! user_can('api.calendar-events.post')) {
+        if (! resolve_static(CreateCalendarEvent::class, 'canPerformAction', [false])) {
             return;
         }
 
@@ -231,14 +205,16 @@ class Calendar extends Component
 
     public function updatedCalendarEventStatus($value): void
     {
-        $calendarEvent = CalendarEvent::query()->whereKey($this->calendarEvent['id'])->firstOrFail();
+        $calendarEvent = app(CalendarEvent::class)->query()
+            ->whereKey($this->calendarEvent['id'])
+            ->firstOrFail();
 
         $this->inviteStatus($calendarEvent, $value);
     }
 
     public function addInvitedRecord(int $id): void
     {
-        $model = $this->tab === 'users' ? User::class : Address::class;
+        $model = app($this->tab === 'users' ? User::class : Address::class);
 
         $this->addInvitee($model::query()->whereKey($id)->first());
         $this->skipRender();

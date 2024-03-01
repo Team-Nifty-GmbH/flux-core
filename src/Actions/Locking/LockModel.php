@@ -42,7 +42,7 @@ class LockModel extends FluxAction
         return true;
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
