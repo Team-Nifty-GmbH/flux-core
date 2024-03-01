@@ -3,9 +3,9 @@
 namespace FluxErp\Actions\User;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateUserRequest;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
+use FluxErp\Rulesets\User\CreateUserRuleset;
 use Illuminate\Support\Arr;
 
 class CreateUser extends FluxAction
@@ -13,7 +13,7 @@ class CreateUser extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateUserRequest())->rules();
+        $this->rules = resolve_static(CreateUserRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -26,9 +26,10 @@ class CreateUser extends FluxAction
         $mailAccounts = Arr::pull($this->data, 'mail_accounts');
 
         $this->data['is_active'] = $this->data['is_active'] ?? true;
-        $this->data['language_id'] = $this->data['language_id'] ?? Language::default()?->id;
+        $this->data['language_id'] = $this->data['language_id'] ??
+            resolve_static(Language::class, 'default')?->id;
 
-        $user = new User($this->data);
+        $user = app(User::class, ['attributes' => $this->data]);
         $user->save();
 
         if ($mailAccounts) {

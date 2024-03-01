@@ -4,15 +4,14 @@ namespace FluxErp\Actions\FormBuilderFieldResponse;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\FormBuilderFieldResponse;
+use FluxErp\Rulesets\FormBuilderFieldResponse\DeleteFormBuilderFieldResponseRuleset;
 
 class DeleteFormBuilderFieldResponse extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|exists:form_builder_field_responses,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteFormBuilderFieldResponseRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteFormBuilderFieldResponse extends FluxAction
 
     public function performAction(): ?bool
     {
-        return FormBuilderFieldResponse::query()
+        return app(FormBuilderFieldResponse::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

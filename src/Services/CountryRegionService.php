@@ -13,7 +13,7 @@ class CountryRegionService
 {
     public function create(array $data): CountryRegion
     {
-        return CreateCountryRegion::make($data)->execute();
+        return CreateCountryRegion::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

@@ -8,18 +8,17 @@ use FluxErp\Actions\User\CreateUser;
 use FluxErp\Actions\User\DeleteUser;
 use FluxErp\Actions\User\UpdateUser;
 use FluxErp\Actions\User\UpdateUserClients;
-use FluxErp\Http\Requests\CreateUserRequest;
 use FluxErp\Models\Client;
 use FluxErp\Models\Language;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
+use FluxErp\Rulesets\User\CreateUserRuleset;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\Actions;
@@ -53,20 +52,20 @@ class UserEdit extends Component
     public function mount(): void
     {
         $this->user = array_fill_keys(
-            array_keys((new CreateUserRequest())->rules()),
+            array_keys(resolve_static(CreateUserRuleset::class, 'getRules')),
             null
         );
-        $this->languages = Language::all(['id', 'name'])->toArray();
+        $this->languages = app(Language::class)->all(['id', 'name'])->toArray();
 
-        $this->roles = Role::query()
+        $this->roles = app(Role::class)->query()
             ->get(['id', 'name', 'guard_name'])
             ->toArray();
 
-        $this->mailAccounts = MailAccount::query()
+        $this->mailAccounts = app(MailAccount::class)->query()
             ->get(['id', 'email'])
             ->toArray();
 
-        $this->users = User::query()
+        $this->users = app(User::class)->query()
             ->get(['id', 'email', 'firstname', 'lastname', 'name'])
             ->toArray();
     }
@@ -75,11 +74,11 @@ class UserEdit extends Component
     {
         return view('flux::livewire.settings.user-edit',
             [
-                'permissions' => Permission::query()
+                'permissions' => app(Permission::class)->query()
                     ->where('guard_name', '!=', 'address')
                     ->when($this->searchPermission, fn ($query) => $query->search($this->searchPermission))
                     ->paginate(pageName: 'permissionsPage'),
-                'clients' => Client::query()
+                'clients' => app(Client::class)->query()
                     ->get(['id', 'name', 'client_code']),
             ]
         );
@@ -87,8 +86,8 @@ class UserEdit extends Component
 
     public function getRules(): array
     {
-        $request = ($this->user['id'] ?? false) ? UpdateUser::make($this->user) : CreateUser::make($this->user);
-        $rules = $request->getRules();
+        $action = ($this->user['id'] ?? false) ? UpdateUser::make($this->user) : CreateUser::make($this->user);
+        $rules = $action->getRules();
 
         $rules['password'][] = 'confirmed';
 
@@ -97,7 +96,7 @@ class UserEdit extends Component
 
     public function show(?int $id = null): void
     {
-        $user = User::query()
+        $user = app(User::class)->query()
             ->whereKey($id)
             ->with(['roles', 'mailAccounts:id', 'clients:id'])
             ->firstOrNew();
@@ -131,10 +130,10 @@ class UserEdit extends Component
         $action = ($this->user['id'] ?? false) ? UpdateUser::class : CreateUser::class;
 
         try {
-            Validator::make($this->user, $this->getRules())->validate();
-
             $user = $action::make($this->user)
                 ->checkPermission()
+                ->setRules($this->getRules())
+                ->validate()
                 ->execute();
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
@@ -215,13 +214,13 @@ class UserEdit extends Component
         $this->skipRender();
 
         if (in_array(Role::findByName('Super Admin')->id, $this->user['roles'])) {
-            $this->lockedPermissions = Permission::all(['id'])->pluck('id')->toArray();
+            $this->lockedPermissions = app(Permission::class)->all(['id'])->pluck('id')->toArray();
             $this->isSuperAdmin = true;
 
             return;
         }
 
-        $lockedPermissions = Role::query()
+        $lockedPermissions = app(Role::class)->query()
             ->whereIntegerInRaw('id', $this->user['roles'])
             ->with('permissions')
             ->get()

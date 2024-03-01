@@ -5,6 +5,7 @@ namespace FluxErp\Tests;
 use Dotenv\Dotenv;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\FortifyServiceProvider;
+use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
@@ -40,10 +41,6 @@ abstract class TestCase extends BaseTestCase
 
         parent::setUp();
 
-        config([
-            'auth.defaults.guard' => 'sanctum',
-        ]);
-
         if (! file_exists(public_path('flux'))) {
             symlink(package_path('public'), public_path('flux'));
         }
@@ -73,15 +70,8 @@ abstract class TestCase extends BaseTestCase
             RouteServiceProvider::class,
             SanctumServiceProvider::class,
             WebPushServiceProvider::class,
+            MorphMapServiceProvider::class,
         ];
-    }
-
-    public function getEnvironmentSetUp($app): void
-    {
-        if (file_exists(base_path('../../../../../../.env'))) {
-            $dotenv = Dotenv::createImmutable(base_path('../../../../../../'));
-            $dotenv->load();
-        }
     }
 
     protected function defineEnvironment($app): void
@@ -89,5 +79,6 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('database.default', 'mysql');
         $app['config']->set('database.connections.mysql.collation', 'utf8mb4_unicode_ci');
         $app['config']->set('flux.install_done', true);
+        $app['config']->set('auth.defaults.guard', 'sanctum');
     }
 }

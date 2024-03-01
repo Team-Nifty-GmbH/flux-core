@@ -13,7 +13,7 @@ class ClientService
 {
     public function create(array $data): Client
     {
-        return CreateClient::make($data)->execute();
+        return CreateClient::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

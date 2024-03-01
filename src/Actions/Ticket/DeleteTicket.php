@@ -4,15 +4,14 @@ namespace FluxErp\Actions\Ticket;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Ticket;
+use FluxErp\Rulesets\Ticket\DeleteTicketRuleset;
 
 class DeleteTicket extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:tickets,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteTicketRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteTicket extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Ticket::query()
+        return app(Ticket::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

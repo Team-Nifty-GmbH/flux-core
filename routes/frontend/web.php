@@ -2,6 +2,7 @@
 
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\PushSubscriptionController;
+use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
@@ -14,6 +15,7 @@ use FluxErp\Livewire\DataTables\CommissionList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\PaymentRunList;
 use FluxErp\Livewire\DataTables\ProductOptionGroupList;
+use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\WorkTimeList;
@@ -57,7 +59,6 @@ use FluxErp\Livewire\Ticket\Ticket;
 use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
-use TeamNiftyGmbH\DataTable\Controllers\SearchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -118,6 +119,8 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                     ->registersMenuItem(icon: 'banknotes');
                 Route::get('/work-times', WorkTimeList::class)->name('work-times')->registersMenuItem();
                 Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
+                Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices')
+                    ->registersMenuItem();
                 Route::get('/transactions', TransactionList::class)->name('transactions')->registersMenuItem();
                 Route::get('/direct-debit', DirectDebit::class)->name('direct-debit')->registersMenuItem();
                 Route::get('/money-transfer', MoneyTransfer::class)->name('money-transfer')->registersMenuItem();

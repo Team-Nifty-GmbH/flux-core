@@ -5,6 +5,7 @@ namespace FluxErp\Listeners;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Models\Communication;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Str;
 use Symfony\Component\Mime\Email;
@@ -34,9 +35,9 @@ class MessageSendingEventSubscriber
 
         $communicationForm->save();
 
-        $communication = Communication::query()->whereKey($communicationForm->id)->first();
+        $communication = app(Communication::class)->query()->whereKey($communicationForm->id)->first();
 
-        $communicatable = $communicationForm->communicatable_type::query()
+        $communicatable = Relation::getMorphedModel($communicationForm->communicatable_type)::query()
             ->whereKey($communicationForm->communicatable_id)
             ->first();
 
@@ -58,7 +59,8 @@ class MessageSendingEventSubscriber
 
     protected function injectTrackingPixel($html, Communication $communication): array|string
     {
-        $tracking_pixel = '<img border=0 width=1 alt="" height=1 src="' . route('mail-pixel', [$communication->uuid]) . '" />';
+        $tracking_pixel =
+            '<img border=0 width=1 alt="" height=1 src="' . route('mail-pixel', [$communication->uuid]) . '" />';
 
         $linebreak = app(Str::class)->random(32);
         $html = str_replace("\n", $linebreak, $html);

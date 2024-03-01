@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Transaction;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateTransactionRequest;
 use FluxErp\Models\Transaction;
+use FluxErp\Rulesets\Transaction\UpdateTransactionRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateTransaction extends FluxAction
@@ -12,7 +12,7 @@ class UpdateTransaction extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateTransactionRequest())->rules();
+        $this->rules = resolve_static(UpdateTransactionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +22,7 @@ class UpdateTransaction extends FluxAction
 
     public function performAction(): Model
     {
-        $transaction = Transaction::query()
+        $transaction = app(Transaction::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

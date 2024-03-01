@@ -212,7 +212,7 @@ class Composer extends BaseComposer
         ];
 
         if (config('flux.license_key')) {
-            $url = Str::of(config('app.url'))->after('://')->before('/')->kebab()->toString();
+            $url = Str::of(config('app.url'))->after('://')->before('/')->replace('.', '-')->kebab()->toString();
             $repoUrl = Str::start($url . '.repo.repman.team-nifty.com', 'https://');
             $defaultEnv['COMPOSER_AUTH'] = json_encode([
                 'http-basic' => [

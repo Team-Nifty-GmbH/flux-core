@@ -39,7 +39,7 @@ class NotificationEloquentEventSubscriber
         }
 
         // Anonymous subscribers.
-        $anonymousNotifiables = NotificationSetting::query()
+        $anonymousNotifiables = app(NotificationSetting::class)->query()
             ->where('notification_type', $notification)
             ->where('is_active', true)
             ->whereNull('notifiable_id')

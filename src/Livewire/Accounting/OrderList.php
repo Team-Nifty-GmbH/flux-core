@@ -36,7 +36,7 @@ class OrderList extends DataTableOrderList
                 ->attributes([
                     'x-on:click' => '$wire.$parent.assignOrders($wire.selected).then(() => {$wire.selected = [];});',
                 ])
-                ->when(fn () => CreateTransaction::canPerformAction(false)),
+                ->when(fn () => resolve_static(CreateTransaction::class, 'canPerformAction', [false])),
         ];
     }
 }

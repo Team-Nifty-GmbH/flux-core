@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Livewire\DataTables\CategoryList;
 use FluxErp\Livewire\Forms\CategoryForm;
 use FluxErp\Traits\Categorizable;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -22,8 +23,12 @@ class Categories extends CategoryList
     {
         return array_merge(parent::getViewData(), [
             'models' => model_info_all()
-                ->filter(fn ($model) => in_array(Categorizable::class, $model->traits->toArray()))
-                ->map(fn ($model) => $model->class)
+                ->unique('morphClass')
+                ->filter(fn ($modelInfo) => in_array(Categorizable::class, $modelInfo->traits->toArray()))
+                ->map(fn ($modelInfo) => [
+                    'label' => __(Str::headline($modelInfo->morphClass)),
+                    'value' => $modelInfo->morphClass,
+                ])
                 ->toArray(),
         ]);
     }
@@ -57,10 +62,12 @@ class Categories extends CategoryList
     public function edit(?array $record = null): void
     {
         if ($record) {
-            $this->category->fill($this->model::query()->whereKey($record['id'])->firstOrFail());
+            $this->category->fill(app($this->model)->query()->whereKey($record['id'])->firstOrFail());
         } else {
             $this->category->reset();
         }
+
+        $this->forceRender();
     }
 
     public function save(): bool

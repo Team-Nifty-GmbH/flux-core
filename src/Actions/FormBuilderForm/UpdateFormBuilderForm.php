@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\FormBuilderForm;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateFormBuilderFormRequest;
 use FluxErp\Models\FormBuilderForm;
+use FluxErp\Rulesets\FormBuilderForm\UpdateFormBuilderFormRuleset;
 use Illuminate\Support\Str;
 
 class UpdateFormBuilderForm extends FluxAction
@@ -12,7 +12,7 @@ class UpdateFormBuilderForm extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateFormBuilderFormRequest())->rules();
+        $this->rules = resolve_static(UpdateFormBuilderFormRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,11 +22,11 @@ class UpdateFormBuilderForm extends FluxAction
 
     public function performAction(): FormBuilderForm
     {
-        $formBuilderForm = FormBuilderForm::query()
+        $this->data['slug'] = Str::slug($this->data['slug'] ?? $this->data['name']);
+
+        $formBuilderForm = app(FormBuilderForm::class)->query()
             ->whereKey($this->data['id'])
             ->first();
-
-        $this->data['slug'] = Str::slug($this->data['slug'] ?? $this->data['name']);
 
         $formBuilderForm->fill($this->data);
         $formBuilderForm->save();

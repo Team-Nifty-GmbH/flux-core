@@ -5,8 +5,10 @@ namespace FluxErp\Livewire\Product;
 use FluxErp\Livewire\DataTables\ProductList as BaseProductList;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Client;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\VatRate;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Livewire\Features\SupportRedirects\Redirector;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -19,6 +21,29 @@ class ProductList extends BaseProductList
 
     public ProductForm $product;
 
+    public array $vatRates = [];
+
+    public array $priceLists = [];
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        $this->vatRates = app(VatRate::class)->all(['id', 'name', 'rate_percentage'])->toArray();
+        $priceList = resolve_static(PriceList::class, 'default')?->toArray() ?? [];
+        $priceList['is_editable'] = true;
+
+        $this->priceLists = [$priceList];
+    }
+
+    #[Renderless]
+    public function new(): void
+    {
+        $this->product->reset();
+
+        $this->product->client_id = resolve_static(Client::class, 'default')?->id;
+    }
+
     public function getTableActions(): array
     {
         return [
@@ -27,7 +52,7 @@ class ProductList extends BaseProductList
                 ->label(__('New'))
                 ->icon('plus')
                 ->attributes([
-                    'x-on:click' => "\$openModal('create-product')",
+                    'x-on:click' => "\$wire.new().then(() => {\$openModal('create-product');})",
                 ]),
         ];
     }
@@ -37,18 +62,32 @@ class ProductList extends BaseProductList
         return array_merge(
             parent::getViewData(),
             [
-                'clients' => Client::query()
+                'clients' => app(Client::class)->query()
                     ->get(['id', 'name'])
                     ->toArray(),
-                'vatRates' => VatRate::query()
+                'vatRates' => app(VatRate::class)->query()
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
             ]
         );
     }
 
+    public function getPriceLists(): array
+    {
+        return data_get($this->priceLists, '0', []);
+    }
+
     public function save(): false|Redirector
     {
+        $this->product->prices = [
+            [
+                'price_list_id' => data_get($this->priceLists, '0.id'),
+                'price' => data_get($this->priceLists, '0.is_net')
+                    ? data_get($this->priceLists, '0.price_net')
+                    : data_get($this->priceLists, '0.price_gross'),
+            ],
+        ];
+
         try {
             $this->product->save();
         } catch (ValidationException|UnauthorizedException $e) {

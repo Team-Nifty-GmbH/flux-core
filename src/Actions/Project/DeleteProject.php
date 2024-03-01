@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Project;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Project;
+use FluxErp\Rulesets\Project\DeleteProjectRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteProject extends FluxAction
@@ -11,9 +12,7 @@ class DeleteProject extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:projects,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteProjectRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,17 +22,17 @@ class DeleteProject extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Project::query()
+        return app(Project::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        if (Project::query()
+        if (app(Project::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->children()

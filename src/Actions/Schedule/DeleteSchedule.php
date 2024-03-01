@@ -4,15 +4,14 @@ namespace FluxErp\Actions\Schedule;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Schedule;
+use FluxErp\Rulesets\Schedule\DeleteScheduleRuleset;
 
 class DeleteSchedule extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:schedules,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteScheduleRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteSchedule extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Schedule::query()
+        return app(Schedule::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

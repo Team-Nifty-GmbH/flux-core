@@ -3,13 +3,13 @@
 namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateOrderPositionRequest;
-use FluxErp\Http\Requests\FillOrderPositionRequest;
-use FluxErp\Http\Requests\UpdateOrderPositionRequest;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Rules\Numeric;
+use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
+use FluxErp\Rulesets\OrderPosition\FillOrderPositionsRuleset;
+use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
@@ -21,7 +21,7 @@ class FillOrderPositions extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new FillOrderPositionRequest())->rules();
+        $this->rules = resolve_static(FillOrderPositionsRuleset::class, 'getRules');
     }
 
     public static function name(): string
@@ -50,14 +50,14 @@ class FillOrderPositions extends FluxAction
 
         // Delete all order positions that were not updated on given orderId
         if (! $this->data['simulate']) {
-            OrderPosition::query()
+            app(OrderPosition::class)->query()
                 ->where('order_id', $this->data['order_id'])
                 ->whereIntegerNotInRaw('id', $ids)
                 ->delete();
         }
 
         if (! $this->data['simulate']) {
-            $order = Order::query()->whereKey($this->data['order_id'])->first();
+            $order = app(Order::class)->query()->whereKey($this->data['order_id'])->first();
             Event::dispatch('order.calculating-prices', $order);
             $order->calculatePrices()->save();
             Event::dispatch('order.calculated-prices', $order);
@@ -66,7 +66,7 @@ class FillOrderPositions extends FluxAction
         return $orderPositions;
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
@@ -76,8 +76,8 @@ class FillOrderPositions extends FluxAction
             'order_id' => 'required|integer|size:' . $this->data['order_id'],
         ];
 
-        $createRules = array_merge((new CreateOrderPositionRequest())->rules(), $rules);
-        $updateRules = array_merge((new UpdateOrderPositionRequest())->rules(), $rules);
+        $createRules = array_merge(resolve_static(CreateOrderPositionRuleset::class, 'getRules'), $rules);
+        $updateRules = array_merge(resolve_static(UpdateOrderPositionRuleset::class, 'getRules'), $rules);
         unset($createRules['parent_id'], $updateRules['parent_id']);
 
         $errors = [];
@@ -93,6 +93,24 @@ class FillOrderPositions extends FluxAction
 
         if ($errors = array_filter($errors)) {
             throw ValidationException::withMessages($errors)->errorBag('fillOrderPositions');
+        }
+
+        $deletedOrderPositions = app(OrderPosition::class)->query()
+            ->whereIntegerNotInRaw('order_positions.id', array_column($orderPositions, 'id'))
+            ->where('order_positions.order_id', $this->data['order_id'])
+            ->whereHas('descendants')
+            ->pluck('id')
+            ->toArray();
+
+        if ($deletedOrderPositions) {
+            throw ValidationException::withMessages([
+                'deleted_order_positions' => [
+                    __(
+                        'Unable to delete order positions with id \':ids\'. They have descendants.',
+                        ['ids' => implode(', ', $deletedOrderPositions)]
+                    ),
+                ],
+            ]);
         }
 
         $this->data['order_positions'] = $orderPositions;
@@ -112,7 +130,7 @@ class FillOrderPositions extends FluxAction
         // Fill validated id if exists in order position or order respectively
         if (is_int($orderPosition['id'] ?? false)
             && ($validated['order_id'] ?? false)
-            && OrderPosition::query()
+            && app(OrderPosition::class)->query()
                 ->whereKey($orderPosition['id'])
                 ->where('order_id', $validated['order_id'])
                 ->exists()
@@ -272,7 +290,7 @@ class FillOrderPositions extends FluxAction
 
         // Check Bundle
         if (($validated['product_id'] ?? false)
-            && Product::query()
+            && app(Product::class)->query()
                 ->whereKey($validated['product_id'])
                 ->where('is_bundle', true)
                 ->exists()
@@ -348,13 +366,13 @@ class FillOrderPositions extends FluxAction
         unset($data['children']);
 
         if (is_int($data['id'] ?? false)) {
-            $orderPosition = OrderPosition::query()
+            $orderPosition = app(OrderPosition::class)->query()
                 ->whereKey($data['id'])
                 ->first();
 
             $orderPosition->fill($data);
         } else {
-            $orderPosition = new OrderPosition($data);
+            $orderPosition = app(OrderPosition::class, ['attributes' => $data]);
         }
 
         // If parentId !== null, set parent_id
@@ -401,20 +419,22 @@ class FillOrderPositions extends FluxAction
         // Fill bundle positions if not already exists
         if ($orderPosition->product?->is_bundle && ! $originalChildren) {
             foreach ($orderPosition->product->bundleProducts as $index => $bundleProduct) {
-                $position = new OrderPosition([
-                    'client_id' => $orderPosition->client_id,
-                    'order_id' => $orderPosition->order_id,
-                    'parent_id' => $orderPosition->id,
-                    'product_id' => $bundleProduct->id,
-                    'amount' => bcmul($bundleProduct->pivot->count, $orderPosition->amount),
-                    'ean_code' => $bundleProduct->ean,
-                    'unit_gram_weight' => $bundleProduct->weight_gram,
-                    'description' => $bundleProduct->description,
-                    'name' => $bundleProduct->name,
-                    'product_number' => $bundleProduct->product_number,
-                    'sort_number' => $orderPosition->sort_number + $index,
-                    'is_free_text' => true,
-                    'is_bundle_position' => true,
+                $position = app(OrderPosition::class, [
+                    'attributes' => [
+                        'client_id' => $orderPosition->client_id,
+                        'order_id' => $orderPosition->order_id,
+                        'parent_id' => $orderPosition->id,
+                        'product_id' => $bundleProduct->id,
+                        'amount' => bcmul($bundleProduct->pivot->count, $orderPosition->amount),
+                        'ean_code' => $bundleProduct->ean,
+                        'unit_gram_weight' => $bundleProduct->weight_gram,
+                        'description' => $bundleProduct->description,
+                        'name' => $bundleProduct->name,
+                        'product_number' => $bundleProduct->product_number,
+                        'sort_number' => $orderPosition->sort_number + $index,
+                        'is_free_text' => true,
+                        'is_bundle_position' => true,
+                    ],
                 ]);
 
                 // Save bundle position and keep track of saved ids

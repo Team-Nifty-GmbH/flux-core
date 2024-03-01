@@ -129,7 +129,7 @@ if (! function_exists('qualify_model')) {
             && class_exists($model)
             && is_a($model, \Illuminate\Database\Eloquent\Model::class, true)
         ) {
-            return get_class(new $model());
+            return get_class(app($model));
         }
 
         $model = ltrim($model, '\\/');
@@ -189,15 +189,15 @@ if (! function_exists('event_subscribers')) {
         ?string $modelType = null
     ): Illuminate\Database\Eloquent\Collection {
         if (
-            \FluxErp\Models\EventSubscription::query()
+            app(\FluxErp\Models\EventSubscription::class)->query()
                 ->where('event', $event)
                 ->whereNull('user_id')
                 ->exists()
         ) {
-            return \FluxErp\Models\User::all();
+            return app(\FluxErp\Models\User::class)->all();
         }
 
-        $subscriberIds = \FluxErp\Models\EventSubscription::query()
+        $subscriberIds = app(\FluxErp\Models\EventSubscription::class)->query()
             ->whereNot('user_id', auth()->id())
             ->where(function ($query) use ($event, $modelId, $modelType) {
                 $query->where(function ($query) use ($event) {
@@ -219,7 +219,7 @@ if (! function_exists('event_subscribers')) {
             ->pluck('user_id')
             ->toArray();
 
-        return \FluxErp\Models\User::query()->whereIntegerInRaw('id', $subscriberIds)->get();
+        return app(\FluxErp\Models\User::class)->query()->whereIntegerInRaw('id', $subscriberIds)->get();
     }
 }
 
@@ -441,5 +441,33 @@ if (! function_exists('model')) {
     function model(string $class): Illuminate\Database\Eloquent\Model
     {
         return app($class);
+    }
+}
+
+if (! function_exists('resolve_static')) {
+    function resolve_static(string $class, string $method, ?array $parameters = null): mixed
+    {
+        $abstract = \Illuminate\Support\Facades\App::getAlias($class);
+
+        if (! $abstract) {
+            throw new InvalidArgumentException('Invalid class: ' . $class);
+        }
+
+        try {
+            $reflectionClass = new ReflectionClass($abstract);
+            $reflectionMethod = $reflectionClass->getMethod($method);
+
+            if (! $reflectionMethod->isStatic()) {
+                throw new InvalidArgumentException('Method is not static: ' . $method);
+            }
+
+            if ($reflectionMethod->getParameters() && is_array($parameters)) {
+                return $abstract::$method(...$parameters);
+            } else {
+                return $abstract::$method();
+            }
+        } catch (ReflectionException) {
+            throw new InvalidArgumentException('Invalid method: ' . $method);
+        }
     }
 }

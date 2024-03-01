@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Warehouse;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Warehouse;
+use FluxErp\Rulesets\Warehouse\DeleteWarehouseRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteWarehouse extends FluxAction
@@ -11,9 +12,7 @@ class DeleteWarehouse extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:warehouses,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteWarehouseRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,17 +22,17 @@ class DeleteWarehouse extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Warehouse::query()
+        return app(Warehouse::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        if (Warehouse::query()
+        if (app(Warehouse::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->stockPostings()

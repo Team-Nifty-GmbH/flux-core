@@ -13,7 +13,7 @@ class PaymentTypeService
 {
     public function create(array $data): PaymentType
     {
-        return CreatePaymentType::make($data)->execute();
+        return CreatePaymentType::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

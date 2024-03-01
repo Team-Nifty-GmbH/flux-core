@@ -4,8 +4,8 @@ namespace FluxErp\Actions\ProductOptionGroup;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\ProductOption\CreateProductOption;
-use FluxErp\Http\Requests\CreateProductOptionGroupRequest;
 use FluxErp\Models\ProductOptionGroup;
+use FluxErp\Rulesets\ProductOptionGroup\CreateProductOptionGroupRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -15,7 +15,7 @@ class CreateProductOptionGroup extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateProductOptionGroupRequest())->rules();
+        $this->rules = resolve_static(CreateProductOptionGroupRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -27,7 +27,7 @@ class CreateProductOptionGroup extends FluxAction
     {
         $productOptions = Arr::pull($this->data, 'product_options', []);
 
-        $productOptionGroup = new ProductOptionGroup($this->data);
+        $productOptionGroup = app(ProductOptionGroup::class, ['attributes' => $this->data]);
         $productOptionGroup->save();
 
         foreach ($productOptions as $productOption) {
@@ -41,10 +41,10 @@ class CreateProductOptionGroup extends FluxAction
         return $productOptionGroup->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new ProductOptionGroup());
+        $validator->addModel(app(ProductOptionGroup::class));
 
         $this->data = $validator->validate();
     }

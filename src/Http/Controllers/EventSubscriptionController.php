@@ -3,8 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateEventSubscriptionRequest;
-use FluxErp\Http\Requests\UpdateEventSubscriptionRequest;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Services\EventSubscriptionService;
 use Illuminate\Http\JsonResponse;
@@ -15,7 +13,7 @@ class EventSubscriptionController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new EventSubscription();
+        $this->model = app(EventSubscription::class);
     }
 
     public function getEvents(): JsonResponse
@@ -27,7 +25,7 @@ class EventSubscriptionController extends BaseController
 
     public function getUserSubscriptions(Request $request): JsonResponse
     {
-        $subscriptions = EventSubscription::query()
+        $subscriptions = app(EventSubscription::class)->query()
             ->where('user_id', $request->user()->id)
             ->orderBy('event')
             ->get();
@@ -35,18 +33,16 @@ class EventSubscriptionController extends BaseController
         return ResponseHelper::createResponseFromBase(statusCode: 200, data: $subscriptions);
     }
 
-    public function create(CreateEventSubscriptionRequest $request,
-        EventSubscriptionService $eventSubscriptionService): JsonResponse
+    public function create(Request $request, EventSubscriptionService $eventSubscriptionService): JsonResponse
     {
-        $response = $eventSubscriptionService->create($request->validated());
+        $response = $eventSubscriptionService->create($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function update(UpdateEventSubscriptionRequest $request,
-        EventSubscriptionService $eventSubscriptionService): JsonResponse
+    public function update(Request $request, EventSubscriptionService $eventSubscriptionService): JsonResponse
     {
-        $response = $eventSubscriptionService->update($request->validated());
+        $response = $eventSubscriptionService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

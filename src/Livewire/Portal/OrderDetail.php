@@ -40,11 +40,11 @@ class OrderDetail extends Component
 
     public function mount(string $id): void
     {
-        $this->ticketTypes = TicketType::all()
+        $this->ticketTypes = app(TicketType::class)->all()
             ->pluck('name', 'id')
             ->toArray();
 
-        $order = Order::query()
+        $order = app(Order::class)->query()
             ->whereKey($id)
             ->with(
                 [
@@ -137,7 +137,7 @@ class OrderDetail extends Component
             ]
         ));
 
-        $positions = OrderPosition::query()
+        $positions = app(OrderPosition::class)->query()
             ->where('order_id', $order->id)
             ->whereNull('parent_id')
             ->with('tags')
@@ -177,7 +177,7 @@ class OrderDetail extends Component
 
     public function render(): mixed
     {
-        return view('flux::livewire.portal.order-detail')->layout('flux::components.layouts.portal');
+        return view('flux::livewire.portal.order-detail');
     }
 
     public function updated(): void
@@ -187,7 +187,7 @@ class OrderDetail extends Component
 
     public function selectPosition(int $id): void
     {
-        $position = OrderPosition::query()
+        $position = app(OrderPosition::class)->query()
             ->whereKey($id)
             ->first();
 
@@ -213,7 +213,7 @@ class OrderDetail extends Component
 
     public function downloadInvoice(): BinaryFileResponse
     {
-        $order = Order::query()
+        $order = app(Order::class)->query()
             ->whereKey($this->order['id'])
             ->first();
         $mediaItem = $order->invoice();
@@ -231,7 +231,7 @@ class OrderDetail extends Component
 
     public function downloadMedia(int $id): BinaryFileResponse
     {
-        $order = Order::query()
+        $order = app(Order::class)->query()
             ->whereKey($this->order['id'])
             ->first();
 

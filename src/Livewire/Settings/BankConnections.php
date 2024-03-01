@@ -49,11 +49,11 @@ class BankConnections extends BankConnectionList
     public function getViewData(): array
     {
         return array_merge(parent::getViewData(), [
-            'ledgerAccounts' => LedgerAccount::query()
+            'ledgerAccounts' => app(LedgerAccount::class)->query()
                 ->select(['id', 'name'])
                 ->get()
                 ->toArray(),
-            'currencies' => Currency::query()
+            'currencies' => app(Currency::class)->query()
                 ->select(['id', 'name'])
                 ->get()
                 ->toArray(),

@@ -37,11 +37,11 @@ class ProjectTaskList extends BaseTaskList
 
         $this->task->project_id = $this->projectId;
         $this->task->additionalColumns = array_fill_keys(
-            Task::additionalColumnsQuery()->pluck('name')?->toArray() ?? [],
+            resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
             null
         );
 
-        $this->availableStates = Task::getStatesFor('state')
+        $this->availableStates = app(Task::class)->getStatesFor('state')
             ->map(function ($state) {
                 return [
                     'label' => __(ucfirst(str_replace('_', ' ', $state))),

@@ -74,7 +74,7 @@ class MailAccountForm extends FluxForm
      */
     public function testImapConnection(): void
     {
-        (new MailAccount())->fill($this->toArray())->connect();
+        app(MailAccount::class)->fill($this->toArray())->connect();
     }
 
     /**

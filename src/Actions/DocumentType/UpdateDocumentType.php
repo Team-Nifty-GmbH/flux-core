@@ -8,6 +8,9 @@ use FluxErp\Models\DocumentType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @deprecated
+ */
 class UpdateDocumentType extends FluxAction
 {
     protected function boot(array $data): void
@@ -33,7 +36,7 @@ class UpdateDocumentType extends FluxAction
         return $documentType->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new DocumentType());

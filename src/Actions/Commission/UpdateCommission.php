@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Commission;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateCommissionRequest;
 use FluxErp\Models\Commission;
+use FluxErp\Rulesets\Commission\UpdateCommissionRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateCommission extends FluxAction
@@ -13,7 +13,7 @@ class UpdateCommission extends FluxAction
     {
         parent::boot($data);
 
-        $this->rules = (new UpdateCommissionRequest())->rules();
+        $this->rules = resolve_static(UpdateCommissionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,7 +23,7 @@ class UpdateCommission extends FluxAction
 
     public function performAction(): Model
     {
-        $commission = Commission::query()
+        $commission = app(Commission::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

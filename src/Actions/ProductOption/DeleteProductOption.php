@@ -5,6 +5,7 @@ namespace FluxErp\Actions\ProductOption;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductOption;
+use FluxErp\Rulesets\ProductOption\DeleteProductOptionRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteProductOption extends FluxAction
@@ -12,9 +13,7 @@ class DeleteProductOption extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:product_options,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteProductOptionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,7 +23,7 @@ class DeleteProductOption extends FluxAction
 
     public function performAction(): ?bool
     {
-        return ProductOption::query()
+        return app(ProductOption::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -34,7 +33,7 @@ class DeleteProductOption extends FluxAction
     {
         parent::validateData();
 
-        if (Product::query()
+        if (app(Product::class)->query()
             ->whereRelation('productOptions', 'product_option_id', $this->data['id'])
             ->exists()
         ) {

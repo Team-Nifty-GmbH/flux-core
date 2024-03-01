@@ -68,7 +68,7 @@ class OrderList extends DataTable
 
     public function getScoutSearch(): \Laravel\Scout\Builder
     {
-        return $this->model::search($this->search)->where('contact_id', auth()->user()->contact_id);
+        return app($this->model)->search($this->search)->where('contact_id', auth()->user()->contact_id);
     }
 
     public function getReturnKeys(): array

@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\AddressType;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateAddressTypeRequest;
 use FluxErp\Models\AddressType;
+use FluxErp\Rulesets\AddressType\CreateAddressTypeRuleset;
 use Illuminate\Support\Facades\Validator;
 
 class CreateAddressType extends FluxAction
@@ -12,7 +12,7 @@ class CreateAddressType extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateAddressTypeRequest())->rules();
+        $this->rules = resolve_static(CreateAddressTypeRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,16 +22,16 @@ class CreateAddressType extends FluxAction
 
     public function performAction(): AddressType
     {
-        $addressType = new AddressType($this->data);
+        $addressType = app(AddressType::class, ['attributes' => $this->data]);
         $addressType->save();
 
         return $addressType->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new AddressType());
+        $validator->addModel(app(AddressType::class));
 
         $this->data = $validator->validate();
     }

@@ -6,10 +6,9 @@ use FluxErp\Actions\FormBuilderFieldResponse\CreateFormBuilderFieldResponse;
 use FluxErp\Actions\FormBuilderFieldResponse\DeleteFormBuilderFieldResponse;
 use FluxErp\Actions\FormBuilderFieldResponse\UpdateFormBuilderFieldResponse;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateFormBuilderFieldResponseRequest;
-use FluxErp\Http\Requests\UpdateFormBuilderFieldResponseRequest;
 use FluxErp\Models\FormBuilderFieldResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class FormBuilderFieldResponseController extends BaseController
@@ -17,24 +16,30 @@ class FormBuilderFieldResponseController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new FormBuilderFieldResponse();
+        $this->model = app(FormBuilderFieldResponse::class);
     }
 
-    public function create(CreateFormBuilderFieldResponseRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
+        $formBuilderFieldResponse = CreateFormBuilderFieldResponse::make($request->all())
+            ->validate()
+            ->execute();
+
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
-            data: CreateFormBuilderFieldResponse::make($request->validated())
-                ->execute()
+            data: $formBuilderFieldResponse
         );
     }
 
-    public function update(UpdateFormBuilderFieldResponseRequest $request): JsonResponse
+    public function update(Request $request): JsonResponse
     {
+        $formBuilderFieldResponse = UpdateFormBuilderFieldResponse::make($request->all())
+            ->validate()
+            ->execute();
+
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
-            data: UpdateFormBuilderFieldResponse::make($request->validated())
-                ->execute()
+            data: $formBuilderFieldResponse
         );
     }
 

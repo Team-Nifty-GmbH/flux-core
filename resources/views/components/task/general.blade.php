@@ -1,7 +1,7 @@
 <div class="space-y-8 divide-y divide-gray-200">
     <div class="space-y-2.5"
          x-data="{
-            formatter: @js(\FluxErp\Models\Task::typeScriptAttributes()),
+            formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes')),
          }"
     >
         <x-input x-bind:readonly="!edit" wire:model="task.name" label="{{ __('Name') }}" />
@@ -27,7 +27,7 @@
                 'name'   => 'user-option',
             ]"
             :async-data="[
-                'api' =>                 route('search', \FluxErp\Models\User::class),
+                'api' => route('search', \FluxErp\Models\User::class),
                 'method' => 'POST',
                 'params' => [
                     'with' => 'media',
@@ -93,7 +93,7 @@
                             [
                                 'type',
                                 '=',
-                                \FluxErp\Models\Task::class,
+                                app(\FluxErp\Models\Task::class)->getMorphClass(),
                             ],
                         ],
                     ],

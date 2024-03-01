@@ -4,10 +4,10 @@ namespace FluxErp\Actions\Contact;
 
 use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateContactRequest;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Rulesets\Contact\CreateContactRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -17,7 +17,7 @@ class CreateContact extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateContactRequest())->rules();
+        $this->rules = resolve_static(CreateContactRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -60,7 +60,7 @@ class CreateContact extends FluxAction
         return $contact->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(new Contact());

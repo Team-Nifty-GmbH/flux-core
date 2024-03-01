@@ -2,6 +2,7 @@
 
 namespace FluxErp\View\Components;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\View\Component;
@@ -18,11 +19,6 @@ class AdditionalColumns extends Component
 
     public bool $table;
 
-    /**
-     * Create a new component instance.
-     *
-     * @return void
-     */
     public function __construct(
         string|Model $model,
         ?string $wire = null,
@@ -35,19 +31,18 @@ class AdditionalColumns extends Component
         $this->table = $table;
     }
 
-    /**
-     * Get the view / contents that represent the component.
-     *
-     * @return \Illuminate\Contracts\View\View|\Closure|string
-     */
-    public function render()
+    public function render(): View
     {
         if ($this->model instanceof Model) {
             $additionalColumns = $this->model->additionalColumns?->toArray();
         } elseif ($this->id) {
-            $additionalColumns = $this->model::query()->whereKey($this->id)->first()?->additionalColumns?->toArray();
+            $additionalColumns = app($this->model)->query()
+                ->whereKey($this->id)
+                ->first()
+                ?->additionalColumns
+                ?->toArray();
         } else {
-            $additionalColumns = $this->model::additionalColumnsQuery()->get()?->toArray();
+            $additionalColumns = resolve_static($this->model, 'additionalColumnsQuery')->get()?->toArray();
         }
         $this->additionalColumns = $additionalColumns ?: [];
 

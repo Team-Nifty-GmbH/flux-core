@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateUserRequest;
 use FluxErp\Models\User;
 use FluxErp\Services\UserService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class UserController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new User();
+        $this->model = app(User::class);
     }
 
-    public function create(CreateUserRequest $request, UserService $userService): JsonResponse
+    public function create(Request $request, UserService $userService): JsonResponse
     {
-        $user = $userService->create($request->validated());
+        $user = $userService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\MailAccount;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateMailAccountRequest;
 use FluxErp\Models\MailAccount;
+use FluxErp\Rulesets\MailAccount\CreateMailAccountRuleset;
 
 class CreateMailAccount extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateMailAccountRequest())->rules();
+        $this->rules = resolve_static(CreateMailAccountRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class CreateMailAccount extends FluxAction
 
     public function performAction(): MailAccount
     {
-        $mailAccount = new MailAccount($this->data);
+        $mailAccount = app(MailAccount::class, ['attributes' => $this->data]);
         $mailAccount->save();
 
         return $mailAccount->refresh();

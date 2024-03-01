@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\CommissionRate;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateCommissionRateRequest;
 use FluxErp\Models\CommissionRate;
+use FluxErp\Rulesets\CommissionRate\CreateCommissionRateRuleset;
 
 class CreateCommissionRate extends FluxAction
 {
@@ -12,7 +12,7 @@ class CreateCommissionRate extends FluxAction
     {
         parent::boot($data);
 
-        $this->rules = (new CreateCommissionRateRequest())->rules();
+        $this->rules = resolve_static(CreateCommissionRateRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +22,7 @@ class CreateCommissionRate extends FluxAction
 
     public function performAction(): CommissionRate
     {
-        $commissionRate = new CommissionRate($this->data);
+        $commissionRate = app(CommissionRate::class, ['attributes' => $this->data]);
         $commissionRate->save();
 
         return $commissionRate->fresh();

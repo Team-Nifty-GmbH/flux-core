@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\LedgerAccount;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateLedgerAccountRequest;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Rulesets\LedgerAccount\CreateLedgerAccountRuleset;
 
 class CreateLedgerAccount extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateLedgerAccountRequest())->rules();
+        $this->rules = resolve_static(CreateLedgerAccountRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class CreateLedgerAccount extends FluxAction
 
     public function performAction(): mixed
     {
-        $ledgerAccount = new LedgerAccount($this->data);
+        $ledgerAccount = app(LedgerAccount::class, ['attributes' => $this->data]);
         $ledgerAccount->save();
 
         return $ledgerAccount->fresh();

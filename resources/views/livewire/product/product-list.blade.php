@@ -1,13 +1,4 @@
-<div x-data="{
-        updateContactId(id) {
-            Alpine.$data(
-                document.getElementById('invoice-address-id').querySelector('[x-data]')
-            ).asyncData.params.where[0][2] = id;
-            Alpine.$data(
-                document.getElementById('delivery-address-id').querySelector('[x-data]')
-            ).asyncData.params.where[0][2] = id;
-        }
-    }">
+<div x-data="{edit: true}">
     <x-modal name="create-product">
         <x-card :title="__('New Product')">
             <section class="flex flex-col gap-4">
@@ -15,7 +6,9 @@
                 <x-input wire:model="product.name" :label="__('Name')" />
                 <x-select wire:model="product.client_id" :label="__('Client')" :options="$clients" option-value="id" option-label="name"/>
                 <x-editor wire:model="product.description" :label="__('Description')" />
-                <x-select :options="$vatRates" label="{{ __('VAT rate') }}" wire:model="product.vat_rate_id" option-label="name" option-value="id"/>
+            </section>
+            <section class="flex flex-col gap-4">
+                <x-flux::product.prices :product="$product" />
             </section>
             <x-slot name="footer">
                 <div class="flex justify-end gap-x-4">

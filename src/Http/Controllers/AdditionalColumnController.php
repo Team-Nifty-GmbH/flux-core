@@ -3,34 +3,29 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateAdditionalColumnRequest;
-use FluxErp\Http\Requests\UpdateAdditionalColumnRequest;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Services\AdditionalColumnService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class AdditionalColumnController extends BaseController
 {
     public function __construct()
     {
         parent::__construct();
-        $this->model = new AdditionalColumn();
+        $this->model = app(AdditionalColumn::class);
     }
 
-    public function create(
-        CreateAdditionalColumnRequest $request,
-        AdditionalColumnService $additionalColumnService): JsonResponse
+    public function create(Request $request, AdditionalColumnService $additionalColumnService): JsonResponse
     {
-        $response = $additionalColumnService->create($request->validated());
+        $response = $additionalColumnService->create($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function update(
-        UpdateAdditionalColumnRequest $request,
-        AdditionalColumnService $additionalColumnService): JsonResponse
+    public function update(Request $request, AdditionalColumnService $additionalColumnService): JsonResponse
     {
-        $response = $additionalColumnService->update($request->validated());
+        $response = $additionalColumnService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

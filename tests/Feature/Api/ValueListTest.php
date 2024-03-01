@@ -3,7 +3,6 @@
 namespace FluxErp\Tests\Feature\Api;
 
 use Carbon\Carbon;
-use FluxErp\Helpers\Helper;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Category;
 use FluxErp\Models\Permission;
@@ -66,7 +65,7 @@ class ValueListTest extends BaseSetup
     public function test_get_value_list_value_list_not_found()
     {
         $valueList = AdditionalColumn::factory()->create([
-            'model_type' => User::class,
+            'model_type' => app(User::class)->getMorphClass(),
         ]);
 
         $this->user->givePermissionTo($this->permissions['show']);
@@ -155,7 +154,7 @@ class ValueListTest extends BaseSetup
     {
         $valueList = [
             'name' => 'hopefullyNeverExistingName' . Str::random(),
-            'model_type' => Category::class,
+            'model_type' => app(Category::class)->getMorphClass(),
             'values' => ['test', 1, 3, 'c', 'g'],
         ];
 
@@ -172,7 +171,7 @@ class ValueListTest extends BaseSetup
 
         $this->assertNotEmpty($dbValueList);
         $this->assertEquals($valueList['name'], $dbValueList->name);
-        $this->assertEquals(Helper::classExists(classString: $valueList['model_type'], isModel: true), $dbValueList->model_type);
+        $this->assertEquals($valueList['model_type'], $dbValueList->model_type);
         $this->assertEquals($valueList['values'], $dbValueList->values);
     }
 
@@ -225,7 +224,7 @@ class ValueListTest extends BaseSetup
     {
         $valueList = [
             'name' => $this->valueLists[0]->name,
-            'model_type' => class_basename($this->valueLists[0]->model_type),
+            'model_type' => $this->valueLists[0]->model_type,
             'values' => ['test', 1, 3, 'c', 'g'],
         ];
 
@@ -336,7 +335,7 @@ class ValueListTest extends BaseSetup
     public function test_delete_value_list_value_list_not_found()
     {
         $valueList = AdditionalColumn::factory()->create([
-            'model_type' => User::class,
+            'model_type' => app(User::class)->getMorphClass(),
         ]);
 
         $this->user->givePermissionTo($this->permissions['delete']);

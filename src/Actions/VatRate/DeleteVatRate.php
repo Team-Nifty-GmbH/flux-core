@@ -4,15 +4,14 @@ namespace FluxErp\Actions\VatRate;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\VatRate;
+use FluxErp\Rulesets\VatRate\DeleteVatRateRuleset;
 
 class DeleteVatRate extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:vat_rates,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteVatRateRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteVatRate extends FluxAction
 
     public function performAction(): ?bool
     {
-        return VatRate::query()
+        return app(VatRate::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

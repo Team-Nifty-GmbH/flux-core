@@ -32,7 +32,7 @@
                 [
                     'authenticatable_type',
                     '=',
-                    \FluxErp\Models\Address::class
+                    app(\FluxErp\Models\Address::class)->getMorphClass()
                 ]
             ]"
         />

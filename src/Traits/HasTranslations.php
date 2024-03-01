@@ -57,7 +57,7 @@ trait HasTranslations
         parent::fill($attributes);
 
         if ($attributes['locales'] ?? false) {
-            $availableLocales = Language::all()
+            $availableLocales = app(Language::class)->all()
                 ->pluck('language_code')
                 ->toArray();
 
@@ -96,7 +96,7 @@ trait HasTranslations
 
     public function hasTranslationsValidationRules(array $rules, ?array $data = null): array
     {
-        $availableLocales = Language::all()
+        $availableLocales = app(Language::class)->all()
             ->pluck('language_code')
             ->toArray();
 

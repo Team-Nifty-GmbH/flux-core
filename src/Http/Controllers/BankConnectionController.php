@@ -6,7 +6,6 @@ use FluxErp\Actions\BankConnection\CreateBankConnection;
 use FluxErp\Actions\BankConnection\DeleteBankConnection;
 use FluxErp\Actions\BankConnection\UpdateBankConnection;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateBankConnectionRequest;
 use FluxErp\Models\BankConnection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,12 +16,13 @@ class BankConnectionController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new BankConnection();
+        $this->model = app(BankConnection::class);
     }
 
-    public function create(CreateBankConnectionRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        $bankConnection = CreatebankConnection::make($request->validated())
+        $bankConnection = CreateBankConnection::make($request->all())
+            ->validate()
             ->execute();
 
         return ResponseHelper::createResponseFromBase(

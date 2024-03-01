@@ -4,15 +4,14 @@ namespace FluxErp\Actions\ContactBankConnection;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ContactBankConnection;
+use FluxErp\Rulesets\ContactBankConnection\DeleteContactBankConnectionRuleset;
 
 class DeleteContactBankConnection extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:contact_bank_connections,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteContactBankConnectionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteContactBankConnection extends FluxAction
 
     public function performAction(): ?bool
     {
-        return ContactBankConnection::query()
+        return app(ContactBankConnection::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

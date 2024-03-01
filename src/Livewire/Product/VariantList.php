@@ -46,13 +46,13 @@ class VariantList extends ProductList
             ],
         ];
 
-        $groups = ProductOptionGroup::query()
+        $groups = app(ProductOptionGroup::class)->query()
             ->pluck('id')
             ->toArray();
 
         $this->selectedOptions = array_fill_keys($groups, []);
 
-        Product::query()
+        app(Product::class)->query()
             ->whereKey($this->product->id)
             ->with('children:id,parent_id')
             ->first()
@@ -80,8 +80,9 @@ class VariantList extends ProductList
                         $openModal('generate-variants-modal')
                     JS,
                 ])
-                ->when(fn () => CreateProduct::canPerformAction(false)
-                    && DeleteProduct::canPerformAction(false)
+                ->when(
+                    fn () => resolve_static(CreateProduct::class, 'canPerformAction', [false])
+                        && resolve_static(DeleteProduct::class, 'canPerformAction', [false])
                 ),
         ];
     }
@@ -108,7 +109,7 @@ class VariantList extends ProductList
 
         $this->variants = [];
         foreach ($activeProductOptionCombinations as $activeProductOption) {
-            if (! $product = Product::query()
+            if (! $product = app(Product::class)->query()
                 ->where('parent_id', $this->product->id)
                 ->whereHas('productOptions', function (Builder $query) use ($activeProductOption) {
                     return $query
@@ -125,7 +126,7 @@ class VariantList extends ProductList
             }
         }
 
-        $this->variants['delete'] = Product::query()
+        $this->variants['delete'] = app(Product::class)->query()
             ->select('id')
             ->where('parent_id', $this->product->id)
             ->whereNotIn('id', $this->variants['existing'] ?? [])
@@ -159,7 +160,7 @@ class VariantList extends ProductList
             $product['name'] = $this->product->name . ' - '
                 . implode(
                     ' ',
-                    ProductOption::query()
+                    app(ProductOption::class)->query()
                         ->whereIntegerInRaw('id', $variantCreate)
                         ->pluck('name')
                         ->toArray()

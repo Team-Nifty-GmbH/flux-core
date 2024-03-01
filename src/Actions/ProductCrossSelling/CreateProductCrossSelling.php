@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\ProductCrossSelling;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateProductCrossSellingRequest;
 use FluxErp\Models\ProductCrossSelling;
+use FluxErp\Rulesets\ProductCrossSelling\CreateProductCrossSellingRuleset;
 
 class CreateProductCrossSelling extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateProductCrossSellingRequest())->rules();
+        $this->rules = resolve_static(CreateProductCrossSellingRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,7 +24,7 @@ class CreateProductCrossSelling extends FluxAction
         $products = $this->data['products'] ?? null;
         unset($this->data['products']);
 
-        $productCrossSelling = new ProductCrossSelling($this->data);
+        $productCrossSelling = app(ProductCrossSelling::class, ['attributes' => $this->data]);
         $productCrossSelling->save();
 
         if ($products) {

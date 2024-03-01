@@ -10,6 +10,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -31,7 +32,7 @@ class WorkTime extends Component
 
     public function mount(): void
     {
-        $this->activeWorkTimes = WorkTimeModel::query()
+        $this->activeWorkTimes = app(WorkTimeModel::class)->query()
             ->with('workTimeType:id,name')
             ->where('user_id', auth()->id())
             ->where('is_daily_work_time', false)
@@ -39,14 +40,14 @@ class WorkTime extends Component
             ->get()
             ->toArray();
 
-        $this->dailyWorkTime->fill(WorkTimeModel::query()
+        $this->dailyWorkTime->fill(app(WorkTimeModel::class)->query()
             ->where('user_id', auth()->id())
             ->where('is_daily_work_time', true)
             ->where('is_pause', false)
             ->where('is_locked', false)
             ->first() ?? []);
 
-        $this->dailyWorkTimePause->fill(WorkTimeModel::query()
+        $this->dailyWorkTimePause->fill(app(WorkTimeModel::class)->query()
             ->where('user_id', auth()->id())
             ->where('is_daily_work_time', true)
             ->where('is_pause', true)
@@ -57,13 +58,17 @@ class WorkTime extends Component
     public function render(): Factory|Application|View
     {
         return view('flux::livewire.work-time', [
-            'workTimeTypes' => WorkTimeType::query()
+            'workTimeTypes' => app(WorkTimeType::class)->query()
                 ->select(['id', 'name', 'is_billable'])
                 ->get()
                 ->toArray(),
             'trackableTypes' => model_info_all()
+                ->unique('morphClass')
                 ->filter(fn (ModelInfo $modelInfo) => in_array(Trackable::class, $modelInfo->traits->toArray()))
-                ->map(fn (ModelInfo $modelInfo) => $modelInfo->class)
+                ->map(fn ($modelInfo) => [
+                    'label' => __(Str::headline($modelInfo->morphClass)),
+                    'value' => $modelInfo->morphClass,
+                ])
                 ->toArray(),
         ]);
     }

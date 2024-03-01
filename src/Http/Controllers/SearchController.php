@@ -2,9 +2,8 @@
 
 namespace FluxErp\Http\Controllers;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Event;
 use Laravel\Scout\Searchable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -14,25 +13,26 @@ class SearchController extends Controller
     {
         $model = qualify_model(str_replace('/', '\\', $model));
 
-        if (! class_exists($model) || ! in_array(Searchable::class, class_uses($model))) {
+        if (! class_exists($model) || ! in_array(Searchable::class, class_uses_recursive(app($model)))) {
             abort(404);
         }
 
+        Event::dispatch('tall-datatables-searching', $request);
+
         if ($request->has('selected')) {
             $selected = $request->get('selected');
-            $optionValue = $request->get('option-value') ?: 'id';
-            $selected = $request->has('option-value')
-                ? Arr::pluck($selected, $optionValue)
-                : $selected;
+            $optionValue = $request->get('option-value') ?: (app($model))->getKeyName();
 
-            $query = $model::query();
+            $query = app($model)->query();
             is_array($selected)
                 ? $query->whereIn($optionValue, $selected)
                 : $query->where($optionValue, $selected);
+        } elseif ($request->has('search')) {
+            $query = ! is_string($request->get('search'))
+                ? app($model)->query()->limit(20)
+                : app($model)->search($request->get('search'))->toEloquentBuilder();
         } else {
-            $query = ! is_string($request->search)
-                ? $model::query()
-                : $model::search($request->search)->toEloquentBuilder();
+            $query = app($model)->query();
         }
 
         if ($request->has('with')) {
@@ -105,27 +105,38 @@ class SearchController extends Controller
             $query->select($request->get('fields'));
         }
 
-        /** @var \Illuminate\Database\Eloquent\Collection $result */
+        if ($request->has('whereDoesntHave')) {
+            $query->whereDoesntHave($request->get('whereDoesntHave'));
+        }
+
+        if ($request->has('whereHas')) {
+            $query->whereHas($request->get('whereHas'));
+        }
+
         $result = $query->get();
 
         if ($request->has('appends')) {
-            $result->each(function (Model $item) use ($request) {
-                $item->append($request->get('appends'));
+            $result->each(function ($item) use ($request) {
+                $item->append(array_intersect($item->getAppends(), $request->get('appends')));
             });
         }
 
-        if (in_array(InteractsWithDataTables::class, class_implements($model))
-            && ! $request->has('fields')
-            && ! $request->has('appends')
-        ) {
-            $result = $result->map(fn ($item) => [
-                'id' => $item->getKey(),
-                'label' => $item->getLabel(),
-                'description' => $item->getDescription(),
-                'src' => $item->getAvatarUrl(),
-            ]
-            );
+        if (is_a(app($model), InteractsWithDataTables::class)) {
+            $result = $result->map(function ($item) use ($request) {
+                return array_merge(
+                    [
+                        'id' => $item->getKey(),
+                        'label' => $item->getLabel(),
+                        'description' => $item->getDescription(),
+                        'src' => $item->getAvatarUrl(),
+                    ],
+                    $item->only($request->get('fields', [])),
+                    $item->only($request->get('appends', []))
+                );
+            });
         }
+
+        Event::dispatch('tall-datatables-searched', [$request, $result]);
 
         return $result;
     }

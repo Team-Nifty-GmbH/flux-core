@@ -4,15 +4,14 @@ namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Rulesets\OrderPosition\DeleteOrderPositionRuleset;
 
 class DeleteOrderPosition extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:order_positions,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteOrderPositionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteOrderPosition extends FluxAction
 
     public function performAction(): ?bool
     {
-        $orderPosition = OrderPosition::query()
+        $orderPosition = app(OrderPosition::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

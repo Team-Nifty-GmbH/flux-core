@@ -2,11 +2,10 @@
 
 namespace FluxErp\Http\Controllers;
 
-use FluxErp\Actions\Payment\CreatePaymentRun;
-use FluxErp\Actions\Payment\DeletePaymentRun;
-use FluxErp\Actions\Payment\UpdatePaymentRun;
+use FluxErp\Actions\PaymentRun\CreatePaymentRun;
+use FluxErp\Actions\PaymentRun\DeletePaymentRun;
+use FluxErp\Actions\PaymentRun\UpdatePaymentRun;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreatePaymentRunRequest;
 use FluxErp\Models\PaymentRun;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,12 +16,13 @@ class PaymentRunController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new PaymentRun();
+        $this->model = app(PaymentRun::class);
     }
 
-    public function create(CreatePaymentRunRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        $paymentRun = CreatePaymentRun::make($request->validated())
+        $paymentRun = CreatePaymentRun::make($request->all())
+            ->validate()
             ->execute();
 
         return ResponseHelper::createResponseFromBase(

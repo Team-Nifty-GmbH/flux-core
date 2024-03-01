@@ -13,7 +13,7 @@ class PriceService
 {
     public function create(array $data): Price
     {
-        return CreatePrice::make($data)->execute();
+        return CreatePrice::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

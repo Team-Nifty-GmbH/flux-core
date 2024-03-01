@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Plugins;
 
-use FluxErp\Http\Requests\PluginUpdateRequest;
+use FluxErp\Rulesets\Plugin\UpdatePluginRuleset;
 
 class Update extends BasePluginAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new PluginUpdateRequest())->rules();
+        $this->rules = resolve_static(UpdatePluginRuleset::class, 'getRules');
     }
 
     public function performAction(): mixed

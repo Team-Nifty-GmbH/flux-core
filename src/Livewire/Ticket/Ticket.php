@@ -7,6 +7,7 @@ use FluxErp\Actions\Ticket\UpdateTicket;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
+use FluxErp\Models\Ticket as TicketModel;
 use FluxErp\Models\TicketType;
 use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\WithTabs;
@@ -36,7 +37,7 @@ class Ticket extends Component
 
     public function mount(int $id): void
     {
-        $states = \FluxErp\Models\Ticket::getStatesFor('state');
+        $states = app(TicketModel::class)->getStatesFor('state');
         $this->states = array_map(function ($item) {
             return [
                 'label' => __($item),
@@ -44,12 +45,12 @@ class Ticket extends Component
             ];
         }, $states->toArray());
 
-        $this->ticketTypes = TicketType::query()
+        $this->ticketTypes = app(TicketType::class)->query()
             ->select(['id', 'name'])
             ->get()
             ->toArray();
 
-        $ticketModel = \FluxErp\Models\Ticket::query()
+        $ticketModel = app(TicketModel::class)->query()
             ->with([
                 'users:id',
                 'users.media',
@@ -59,15 +60,16 @@ class Ticket extends Component
             ->whereKey($id)
             ->firstOrFail();
 
-        $ticketModel->state = $ticketModel->state ?: \FluxErp\Models\Ticket::getDefaultStateFor('state');
+        $ticketModel->state = $ticketModel->state ?:
+            resolve_static(TicketModel::class, 'getDefaultStateFor', ['state']);
 
-        $this->additionalColumns = AdditionalColumn::query()
+        $this->additionalColumns = app(AdditionalColumn::class)->query()
             ->where('is_frontend_visible', true)
             ->where(function (Builder $query) use ($ticketModel) {
-                $query->where('model_type', \FluxErp\Models\Ticket::class)
+                $query->where('model_type', app(TicketModel::class)->getMorphClass())
                     ->when($ticketModel->ticket_type_id, function (Builder $query) use ($ticketModel) {
                         $query->orWhere(function (Builder $query) use ($ticketModel) {
-                            $query->where('model_type', TicketType::class)
+                            $query->where('model_type', app(TicketType::class)->getMorphClass())
                                 ->where('model_id', $ticketModel->ticket_type_id);
                         });
                     });
@@ -80,7 +82,7 @@ class Ticket extends Component
         $this->ticket['authenticatable']['name'] = $ticketModel->authenticatable?->getLabel();
         $this->ticket['users'] = $ticketModel->users->pluck('id')->toArray();
 
-        $this->authorTypeContact = $this->ticket['authenticatable_type'] === Address::class;
+        $this->authorTypeContact = $this->ticket['authenticatable_type'] === app(Address::class)->getMorphClass();
 
         $this->availableStates = collect($this->states)
             ->whereIn(
@@ -108,13 +110,13 @@ class Ticket extends Component
 
     public function updateAdditionalColumns(?int $id): void
     {
-        $this->additionalColumns = AdditionalColumn::query()
+        $this->additionalColumns = app(AdditionalColumn::class)->query()
             ->where('is_frontend_visible', true)
             ->where(function (Builder $query) use ($id) {
-                $query->where('model_type', \FluxErp\Models\Ticket::class)
+                $query->where('model_type', app(TicketModel::class)->getMorphClass())
                     ->when($id, function (Builder $query) use ($id) {
                         $query->orWhere(function (Builder $query) use ($id) {
-                            $query->where('model_type', TicketType::class)
+                            $query->where('model_type', app(TicketType::class)->getMorphClass())
                                 ->where('model_id', $id);
                         });
                     });
@@ -175,7 +177,7 @@ class Ticket extends Component
 
     public function updatedAuthorTypeContact(): void
     {
-        $this->ticket['authenticatable_type'] = $this->authorTypeContact ? Address::class : User::class;
+        $this->ticket['authenticatable_type'] = app($this->authorTypeContact ? Address::class : User::class);
         $this->ticket['authenticatable_id'] = null;
 
         $this->skipRender();

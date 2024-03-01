@@ -2,6 +2,8 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Models\Address;
+use FluxErp\Models\Order as OrderModel;
 use FluxErp\Models\OrderPosition;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -16,7 +18,7 @@ class Order extends Component
 
     public function mount(int $modelId): void
     {
-        $order = \FluxErp\Models\Order::query()
+        $order = app(OrderModel::class)->query()
             ->whereKey($modelId)
             ->with([
                 'contact.media',
@@ -25,7 +27,7 @@ class Order extends Component
             ])
             ->first();
 
-        $invoiceAddress = new \FluxErp\Models\Address($order->address_invoice);
+        $invoiceAddress = app(Address::class, ['attributes' => $order->address_invoice]);
 
         $this->order = $order->toArray();
         $this->order['avatar'] = $order->contact?->getAvatarUrl();
@@ -39,7 +41,7 @@ class Order extends Component
 
     public function loadOrderPositions(): void
     {
-        $positions = OrderPosition::query()
+        $positions = app(OrderPosition::class)->query()
             ->where('order_id', $this->order['id'])
             ->whereNull('parent_id')
             ->with('currency')

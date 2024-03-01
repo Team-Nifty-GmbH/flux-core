@@ -80,7 +80,7 @@ class MenuManager
                 // first check if a permission exists
                 if (($value['permission'] ?? false) && ! $ignorePermissions) {
                     try {
-                        Permission::findByName($value['permission'], $guard);
+                        app(Permission::class)->findByName($value['permission'], $guard);
                     } catch (PermissionDoesNotExist) {
                         return true;
                     }

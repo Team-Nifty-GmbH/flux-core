@@ -4,15 +4,14 @@ namespace FluxErp\Actions\DiscountGroup;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\DiscountGroup;
+use FluxErp\Rulesets\DiscountGroup\DeleteDiscountGroupRuleset;
 
 class DeleteDiscountGroup extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:discount_groups,id',
-        ];
+        $this->rules = resolve_static(DeleteDiscountGroupRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteDiscountGroup extends FluxAction
 
     public function performAction(): ?bool
     {
-        return DiscountGroup::query()
+        return app(DiscountGroup::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

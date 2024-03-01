@@ -13,7 +13,7 @@ class SerialNumberService
 {
     public function create(array $data): SerialNumber
     {
-        return CreateSerialNumber::make($data)->execute();
+        return CreateSerialNumber::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

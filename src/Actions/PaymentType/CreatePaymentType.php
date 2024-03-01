@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\PaymentType;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreatePaymentTypeRequest;
 use FluxErp\Models\PaymentType;
+use FluxErp\Rulesets\PaymentType\CreatePaymentTypeRuleset;
 use Illuminate\Support\Facades\Validator;
 
 class CreatePaymentType extends FluxAction
@@ -12,7 +12,7 @@ class CreatePaymentType extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreatePaymentTypeRequest())->rules();
+        $this->rules = resolve_static(CreatePaymentTypeRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,24 +22,24 @@ class CreatePaymentType extends FluxAction
 
     public function performAction(): PaymentType
     {
-        $this->data['is_default'] = ! PaymentType::query()->where('is_default', true)->exists()
+        $this->data['is_default'] = ! app(PaymentType::class)->query()->where('is_default', true)->exists()
             ? true
             : $this->data['is_default'] ?? false;
 
         if ($this->data['is_default']) {
-            PaymentType::query()->update(['is_default' => false]);
+            app(PaymentType::class)->query()->update(['is_default' => false]);
         }
 
-        $paymentType = new PaymentType($this->data);
+        $paymentType = app(PaymentType::class, ['attributes' => $this->data]);
         $paymentType->save();
 
         return $paymentType->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new PaymentType());
+        $validator->addModel(app(PaymentType::class));
 
         $this->data = $validator->validate();
     }

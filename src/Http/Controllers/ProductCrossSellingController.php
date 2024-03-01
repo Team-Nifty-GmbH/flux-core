@@ -6,7 +6,6 @@ use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Actions\ProductCrossSelling\DeleteProductCrossSelling;
 use FluxErp\Actions\ProductCrossSelling\UpdateProductCrossSelling;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateProductCrossSellingRequest;
 use FluxErp\Models\ProductCrossSelling;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,12 +16,13 @@ class ProductCrossSellingController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new ProductCrossSelling();
+        $this->model = app(ProductCrossSelling::class);
     }
 
-    public function create(CreateProductCrossSellingRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
         $productCrossSelling = CreateProductCrossSelling::make($request->all())
+            ->validate()
             ->execute();
 
         return ResponseHelper::createResponseFromBase(

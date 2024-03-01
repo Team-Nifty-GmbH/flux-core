@@ -3,9 +3,9 @@
 namespace FluxErp\Actions\SepaMandate;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateSepaMandateRequest;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\SepaMandate;
+use FluxErp\Rulesets\SepaMandate\UpdateSepaMandateRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
@@ -14,7 +14,7 @@ class UpdateSepaMandate extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateSepaMandateRequest())->rules();
+        $this->rules = resolve_static(UpdateSepaMandateRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,7 +24,7 @@ class UpdateSepaMandate extends FluxAction
 
     public function performAction(): Model
     {
-        $sepaMandate = SepaMandate::query()
+        $sepaMandate = app(SepaMandate::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -34,16 +34,16 @@ class UpdateSepaMandate extends FluxAction
         return $sepaMandate->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
         if ($this->data['contact_bank_connection_id'] ?? false) {
-            $sepaMandate = SepaMandate::query()
+            $sepaMandate = app(SepaMandate::class)->query()
                 ->whereKey($this->data['id'])
                 ->first();
 
-            $contactBankConnectionExists = ContactBankConnection::query()
+            $contactBankConnectionExists = app(ContactBankConnection::class)->query()
                 ->whereKey($this->data['contact_bank_connection_id'])
                 ->where('contact_id', $sepaMandate->contact_id)
                 ->exists();

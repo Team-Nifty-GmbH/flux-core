@@ -13,7 +13,7 @@ class TransactionService
 {
     public function create(array $data): Transaction
     {
-        return CreateTransaction::make($data)->execute();
+        return CreateTransaction::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

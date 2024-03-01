@@ -79,7 +79,7 @@
                     <x-select
                         wire:model="address.country_id"
                         searchable
-                        :options="\FluxErp\Models\Country::all(['id', 'name'])"
+                        :options="app(\FluxErp\Models\Country::class)->all(['id', 'name'])"
                         option-label="name"
                         option-value="id"
                     ></x-select>
@@ -110,7 +110,7 @@
                     <x-select
                         wire:model="address.language_id"
                         searchable
-                        :options="\FluxErp\Models\Language::all()"
+                        :options="app(\FluxErp\Models\Language::class)->all(['id', 'name'])"
                         option-label="name"
                         option-value="id"
                     ></x-select>

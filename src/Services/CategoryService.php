@@ -13,7 +13,7 @@ class CategoryService
 {
     public function create(array $data): Category
     {
-        return CreateCategory::make($data)->execute();
+        return CreateCategory::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

@@ -13,7 +13,7 @@ class OrderTypeService
 {
     public function create(array $data): OrderType
     {
-        return CreateOrderType::make($data)->execute();
+        return CreateOrderType::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

@@ -17,7 +17,7 @@ class ContactAllDiscountsList extends DiscountList
     {
         $this->initialized = true;
 
-        $this->setData(Contact::query()
+        $this->setData(app(Contact::class)->query()
             ->whereKey($this->contactId)
             ->firstOrFail()
             ->getAllDiscounts()

@@ -33,6 +33,11 @@ class ProductProperty extends Model
 
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, 'product_product_property', 'product_prop_id', 'product_id');
+        return $this->belongsToMany(
+            Product::class,
+            'product_product_property',
+            'product_prop_id',
+            'product_id'
+        );
     }
 }

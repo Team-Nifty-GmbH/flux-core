@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\DiscountGroup;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateDiscountGroupRequest;
 use FluxErp\Models\DiscountGroup;
+use FluxErp\Rulesets\DiscountGroup\UpdateDiscountGroupRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
@@ -13,7 +13,7 @@ class UpdateDiscountGroup extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateDiscountGroupRequest())->rules();
+        $this->rules = resolve_static(UpdateDiscountGroupRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -25,7 +25,7 @@ class UpdateDiscountGroup extends FluxAction
     {
         $discounts = Arr::pull($this->data, 'discounts');
 
-        $discountGroup = DiscountGroup::query()
+        $discountGroup = app(DiscountGroup::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

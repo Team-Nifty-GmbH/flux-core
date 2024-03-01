@@ -31,6 +31,7 @@ use FluxErp\Menu\MenuManager;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
+use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Order;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
@@ -180,8 +181,8 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerMarcos(): void
     {
         if (! Str::hasMacro('iban')) {
-            Str::macro('iban', function (string $iban) {
-                return trim(chunk_split($iban, 4, ' '));
+            Str::macro('iban', function (?string $iban) {
+                return trim(chunk_split($iban ?? '', 4, ' '));
             });
         }
 
@@ -300,6 +301,13 @@ class FluxServiceProvider extends ServiceProvider
                     'filterableAttributes' => [
                         'model_type',
                     ],
+                ],
+                LedgerAccount::class => [
+                    'filterableAttributes' => [
+                        'ledger_account_type_enum',
+                        'is_automatic',
+                    ],
+                    'sortableAttributes' => ['*'],
                 ],
                 Order::class => [
                     'filterableAttributes' => [

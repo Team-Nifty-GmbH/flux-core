@@ -2,9 +2,10 @@
 
 namespace FluxErp\Rules;
 
-use Illuminate\Contracts\Validation\InvokableRule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class ClassExists implements InvokableRule
+class ClassExists implements ValidationRule
 {
     private array|string $uses;
 
@@ -19,27 +20,18 @@ class ClassExists implements InvokableRule
         $this->implements = $implements;
     }
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
-     */
-    public function __invoke($attribute, $value, $fail): void
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! class_exists($value)) {
             $fail(sprintf('%s is no valid class.', $value))->translate();
-
-            return;
         }
 
         if ($this->uses || $this->instanceOf || $this->implements) {
-            $instance = new $value();
+            $instance = app($value);
         }
 
         foreach ($this->uses as $use) {
-            if (! in_array($use, class_uses($instance))) {
+            if (! in_array($use, class_uses_recursive($instance))) {
                 $fail(sprintf('%s doesnt use %s.', $value, $use))->translate();
             }
         }
@@ -48,7 +40,7 @@ class ClassExists implements InvokableRule
             $fail(sprintf('%s is not a %s.', $value, $this->instanceOf))->translate();
         }
 
-        if ($this->implements && ! in_array($this->implements, class_implements($instance))) {
+        if ($this->implements && ! is_a($instance, $this->implements, true)) {
             $fail(sprintf('%s doesnt implement %s.', $value, $this->implements))->translate();
         }
     }

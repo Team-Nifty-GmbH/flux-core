@@ -7,8 +7,6 @@ use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateOrderPositionRequest;
-use FluxErp\Http\Requests\FillOrderPositionRequest;
 use FluxErp\Models\OrderPosition;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,12 +17,13 @@ class OrderPositionController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new OrderPosition();
+        $this->model = app(OrderPosition::class);
     }
 
-    public function create(CreateOrderPositionRequest $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        $orderPosition = CreateOrderPosition::make($request->validated())
+        $orderPosition = CreateOrderPosition::make($request->all())
+            ->validate()
             ->execute();
 
         return ResponseHelper::createResponseFromBase(
@@ -89,10 +88,10 @@ class OrderPositionController extends BaseController
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function fill(FillOrderPositionRequest $request): JsonResponse
+    public function fill(Request $request): JsonResponse
     {
         try {
-            $orderPositions = FillOrderPositions::make($request->validated())
+            $orderPositions = FillOrderPositions::make($request->all())
                 ->validate()
                 ->execute();
         } catch (ValidationException $e) {

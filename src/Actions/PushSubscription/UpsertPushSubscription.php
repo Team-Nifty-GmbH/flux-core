@@ -3,7 +3,7 @@
 namespace FluxErp\Actions\PushSubscription;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpsertPushSubscriptionRequest;
+use FluxErp\Rulesets\PushSubscription\UpsertPushSubscriptionRuleset;
 use NotificationChannels\WebPush\PushSubscription;
 
 class UpsertPushSubscription extends FluxAction
@@ -11,7 +11,7 @@ class UpsertPushSubscription extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpsertPushSubscriptionRequest())->rules();
+        $this->rules = resolve_static(UpsertPushSubscriptionRuleset::class, 'getRules');
     }
 
     public static function models(): array

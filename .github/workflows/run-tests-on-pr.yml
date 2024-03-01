@@ -9,9 +9,9 @@ on:
 jobs:
   laravel:
     name: Laravel (PHP ${{ matrix.php-versions }})
-    runs-on: test_runner
+    runs-on: flux
     env:
-      DB_DATABASE: laravel
+      DB_DATABASE: testing
       DB_USERNAME: root
       DB_PASSWORD: password
       BROADCAST_DRIVER: log
@@ -26,7 +26,7 @@ jobs:
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: false
           MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: laravel
+          MYSQL_DATABASE: testing
         ports:
           - 33306:3306/tcp
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -47,7 +47,7 @@ jobs:
         browser: [ 'chrome' ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
@@ -87,7 +87,7 @@ jobs:
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: ${{ matrix.browser }}

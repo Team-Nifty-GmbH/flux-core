@@ -38,7 +38,7 @@ class Mail extends CommunicationList
             ->get(['mail_accounts.id', 'uuid', 'email'])
             ?->toArray() ?? [];
 
-        MailFolder::addGlobalScope('children', function (Builder $builder) {
+        app(MailFolder::class)->addGlobalScope('children', function (Builder $builder) {
             $builder->with('children')->where('is_active', true);
         });
 
@@ -49,7 +49,7 @@ class Mail extends CommunicationList
         ];
 
         foreach ($this->mailAccounts as $mailAccount) {
-            $mailFolders = MailFolder::query()
+            $mailFolders = app(MailFolder::class)->query()
                 ->where('parent_id', null)
                 ->where('mail_account_id', $mailAccount['id'])
                 ->get(['id', 'name', 'parent_id']);
@@ -108,7 +108,7 @@ class Mail extends CommunicationList
 
     public function getNewMessages(): void
     {
-        $mailAccounts = MailAccount::query()
+        $mailAccounts = app(MailAccount::class)->query()
             ->whereIntegerInRaw('id', array_column($this->mailAccounts, 'id'))
             ->get();
 

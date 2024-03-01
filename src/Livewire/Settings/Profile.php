@@ -37,7 +37,7 @@ class Profile extends Component
     {
         $this->user = auth()->user()->toArray();
         $this->avatar = auth()->user()->getFirstMediaUrl('avatar');
-        $this->languages = Language::all(['id', 'name'])->toArray();
+        $this->languages = app(Language::class)->all(['id', 'name'])->toArray();
 
         $this->notificationChannels = config('notifications.channels');
         $this->notifications = config('notifications.model_notifications');
@@ -103,7 +103,11 @@ class Profile extends Component
     {
         $this->collection = 'avatar';
         try {
-            $response = $this->saveFileUploadsToMediaLibrary('avatar', auth()->id(), User::class);
+            $response = $this->saveFileUploadsToMediaLibrary(
+                'avatar',
+                auth()->id(),
+                app(User::class)->getMorphClass()
+            );
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
 

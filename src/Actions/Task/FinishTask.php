@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Task;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\FinishTaskRequest;
 use FluxErp\Models\Task;
+use FluxErp\Rulesets\Task\FinishTaskRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class FinishTask extends FluxAction
@@ -12,7 +12,7 @@ class FinishTask extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new FinishTaskRequest())->rules();
+        $this->rules = resolve_static(FinishTaskRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +22,7 @@ class FinishTask extends FluxAction
 
     public function performAction(): Model
     {
-        $task = Task::query()
+        $task = app(Task::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

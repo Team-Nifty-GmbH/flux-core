@@ -4,15 +4,14 @@ namespace FluxErp\Actions\SerialNumber;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\SerialNumber;
+use FluxErp\Rulesets\SerialNumber\DeleteSerialNumberRuleset;
 
 class DeleteSerialNumber extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:serial_numbers,id',
-        ];
+        $this->rules = resolve_static(DeleteSerialNumberRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteSerialNumber extends FluxAction
 
     public function performAction(): ?bool
     {
-        return SerialNumber::query()
+        return app(SerialNumber::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

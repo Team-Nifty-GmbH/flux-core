@@ -3,11 +3,13 @@
 namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateOrderPositionRequest;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
+use FluxErp\Rules\Numeric;
+use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -19,7 +21,7 @@ class CreateOrderPosition extends FluxAction
     {
         parent::boot($data);
         $this->rules = array_merge(
-            (new CreateOrderPositionRequest())->rules(),
+            resolve_static(CreateOrderPositionRuleset::class, 'getRules'),
             [
                 'vat_rate_percentage' => [
                     Rule::excludeIf(
@@ -33,7 +35,7 @@ class CreateOrderPosition extends FluxAction
                         && ! data_get($this->data, 'vat_rate_id', false)
                         && ! data_get($this->data, 'product_id', false)
                     ),
-                    'numeric',
+                    new Numeric(),
                 ],
             ]
         );
@@ -47,23 +49,23 @@ class CreateOrderPosition extends FluxAction
     public function performAction(): OrderPosition
     {
         $tags = Arr::pull($this->data, 'tags', []);
-        $order = Order::query()
+        $order = app(Order::class)->query()
             ->with('orderType:id,order_type_enum')
             ->whereKey($this->data['order_id'])
             ->first();
-        $orderPosition = new OrderPosition();
+        $orderPosition = app(OrderPosition::class);
 
         $this->data['client_id'] = data_get($this->data, 'client_id', $order->client_id);
         $this->data['price_list_id'] = data_get($this->data, 'price_list_id', $order->price_list_id);
 
         if (is_int($this->data['sort_number'] ?? false)) {
-            $currentHighestSortNumber = OrderPosition::query()
+            $currentHighestSortNumber = app(OrderPosition::class)->query()
                 ->where('order_id', $this->data['order_id'])
                 ->max('sort_number');
             $this->data['sort_number'] = min($this->data['sort_number'], $currentHighestSortNumber + 1);
 
             $orderPosition->sortable['sort_when_creating'] = false;
-            OrderPosition::query()->where('order_id', $this->data['order_id'])
+            app(OrderPosition::class)->query()->where('order_id', $this->data['order_id'])
                 ->where('sort_number', '>=', $this->data['sort_number'])
                 ->increment('sort_number');
         }
@@ -74,7 +76,7 @@ class CreateOrderPosition extends FluxAction
 
         $product = null;
         if (data_get($this->data, 'product_id', false)) {
-            $product = Product::query()
+            $product = app(Product::class)->query()
                 ->whereKey($this->data['product_id'])
                 ->with([
                     'bundleProducts:id,name',
@@ -89,7 +91,7 @@ class CreateOrderPosition extends FluxAction
             data_set($this->data, 'unit_gram_weight', $product->weight_gram, false);
 
             if (! ($this->data['warehouse_id'] ?? false)) {
-                $this->data['warehouse_id'] = Warehouse::default()?->id;
+                $this->data['warehouse_id'] = resolve_static(Warehouse::class, 'default')?->id;
             }
         }
 
@@ -145,11 +147,53 @@ class CreateOrderPosition extends FluxAction
         return $orderPosition->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new OrderPosition());
+        $validator->addModel(app(OrderPosition::class));
 
         $this->data = $validator->validate();
+
+        // Only allow creation of order_position if exists in parent order and amount not greater than totalAmount
+        if (! ($this->data['is_free_text'] ?? false)) {
+            $order = app(Order::class)->query()
+                ->whereKey($this->data['order_id'])
+                ->first();
+
+            if ($order?->parent_id
+                && in_array($order->orderType->order_type_enum, [OrderTypeEnum::Retoure, OrderTypeEnum::SplitOrder])
+            ) {
+                if (! $originPositionId = data_get($this->data, 'origin_position_id')) {
+                    throw ValidationException::withMessages([
+                        'origin_position_id' => [__('validation.required', ['attribute' => 'origin_position_id'])],
+                    ])->errorBag('createOrderPosition');
+                }
+
+                if (! app(OrderPosition::class)->query()
+                    ->whereKey($originPositionId)
+                    ->where('order_id', $order->parent_id)
+                    ->exists()
+                ) {
+                    throw ValidationException::withMessages([
+                        'origin_position_id' => ['Order position does not exists in parent order.'],
+                    ]);
+                }
+
+                $originPosition = app(OrderPosition::class)->query()
+                    ->whereKey($originPositionId)
+                    ->withSum('descendants as descendantsAmount', 'amount')
+                    ->first();
+                $maxAmount = bcsub(
+                    $originPosition->amount,
+                    $originPosition->descendantsAmount ?? 0,
+                );
+
+                if (bccomp($this->data['amount'] ?? 1, $maxAmount) > 0) {
+                    throw ValidationException::withMessages([
+                        'amount' => [__('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount])],
+                    ])->errorBag('createOrderPosition');
+                }
+            }
+        }
     }
 }

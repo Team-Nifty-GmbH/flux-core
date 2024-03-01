@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire\Portal;
 
-use FluxErp\Http\Requests\UpdateSerialNumberRequest;
+use FluxErp\Actions\SerialNumber\UpdateSerialNumber;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Services\CommentService;
@@ -31,22 +31,16 @@ class Product extends Component
 
     public function boot(): void
     {
-        $this->additionalColumns = AdditionalColumn::query()
-            ->where('model_type', SerialNumber::class)
+        $this->additionalColumns = app(AdditionalColumn::class)->query()
+            ->where('model_type', app(SerialNumber::class)->getMorphClass())
             ->get()
             ->toArray();
     }
 
-    /**
-     * @return array|mixed
-     */
-    public function getRules(): mixed
+    public function getRules(): array
     {
         return Arr::prependKeysWith(
-            array_merge(
-                (new UpdateSerialNumberRequest())->getRules($this->serialNumber),
-                (new SerialNumber())->hasAdditionalColumnsValidationRules()
-            ),
+            UpdateSerialNumber::make([])->getRules(),
             'serialNumber.'
         );
     }
@@ -59,7 +53,7 @@ class Product extends Component
             ->pluck('id')
             ->toArray();
 
-        $serialNumber = SerialNumber::query()
+        $serialNumber = app(SerialNumber::class)->query()
             ->whereKey($id)
             ->whereIn('address_id', $addresses)
             ->with('product')
@@ -74,8 +68,7 @@ class Product extends Component
 
     public function render(): View
     {
-        return view('flux::livewire.portal.product')
-            ->layout('flux::components.layouts.portal');
+        return view('flux::livewire.portal.product');
     }
 
     public function save(): void
@@ -86,7 +79,7 @@ class Product extends Component
 
         (new CommentService())->create([
             'model_id' => $this->serialNumber['id'],
-            'model_type' => SerialNumber::class,
+            'model_type' => app(SerialNumber::class)->getMorphClass(),
             'comment' => $this->comment,
         ]);
 

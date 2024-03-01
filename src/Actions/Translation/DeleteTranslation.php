@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Translation;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Rulesets\Translation\DeleteTranslationRuleset;
 use Spatie\TranslationLoader\LanguageLine;
 
 class DeleteTranslation extends FluxAction
@@ -10,9 +11,7 @@ class DeleteTranslation extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:language_lines,id',
-        ];
+        $this->rules = resolve_static(DeleteTranslationRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteTranslation extends FluxAction
 
     public function performAction(): ?bool
     {
-        return LanguageLine::query()
+        return app(LanguageLine::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

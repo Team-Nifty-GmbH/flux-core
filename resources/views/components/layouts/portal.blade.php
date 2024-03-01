@@ -1,5 +1,5 @@
 @php
-    $client = auth()->user()?->contact->client ?? \FluxErp\Models\Client::first();
+    $client = auth()->user()?->contact->client ?? app(\FluxErp\Models\Client::class)->first();
     $setting = $client?->settings()->where('key', 'customerPortal')->first()?->toArray() ?? [];
 @endphp
 <!DOCTYPE html>

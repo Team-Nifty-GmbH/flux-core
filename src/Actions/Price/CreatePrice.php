@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\Price;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreatePriceRequest;
 use FluxErp\Models\Price;
+use FluxErp\Rulesets\Price\CreatePriceRuleset;
 
 class CreatePrice extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreatePriceRequest())->rules();
+        $this->rules = resolve_static(CreatePriceRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class CreatePrice extends FluxAction
 
     public function performAction(): Price
     {
-        $price = new Price($this->data);
+        $price = app(Price::class, ['attributes' => $this->data]);
         $price->save();
 
         return $price->fresh();

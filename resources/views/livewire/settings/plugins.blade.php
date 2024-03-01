@@ -10,12 +10,12 @@
         }
      }"
 >
-    @if(\FluxErp\Actions\Plugins\Uninstall::canPerformAction(false))
+    @if(resolve_static(\FluxErp\Actions\Plugins\Uninstall::class, 'canPerformAction', [false]))
         <x-dialog id="uninstall">
             <x-checkbox id="delete-data" label="{{ __('Delete all data') }}" />
         </x-dialog>
     @endif
-    @if(\FluxErp\Actions\Plugins\Update::canPerformAction(false))
+    @if(resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
         <x-modal name="update" max-width="7xl">
             <x-card>
                 <x-slot:title>
@@ -43,7 +43,7 @@
             </x-slot:footer>
         </x-card>
     </x-modal>
-    @if(\FluxErp\Actions\Plugins\Install::canPerformAction(false))
+    @if(resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
         <x-modal name="install" max-width="7xl">
             <x-card :title="__('Install packages')">
                 <div class="flex flex-col gap-4">
@@ -118,10 +118,10 @@
     <div class="flex justify-between gap-1.5 items-center">
         <x-toggle :label="__('Show only Flux Plugins')" x-model="showOnlyFluxPlugins" />
         <div class="flex gap-1.5">
-            @if(\FluxErp\Actions\Plugins\Install::canPerformAction(false))
+            @if(resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
                 <x-button primary :label="__('Install')" x-on:click="$openModal('install')" />
             @endif
-            @if(\FluxErp\Actions\Plugins\Update::canPerformAction(false))
+            @if(resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
                 <div x-transition x-show="$wire.outdated === 0">
                     <x-button positive :label="__('Check for Updates')" spinner="checkForUpdates" wire:click="checkForUpdates()" />
                 </div>
@@ -135,7 +135,7 @@
         <x-card>
             <div class="flex justify-between gap-4">
                 <div class="flex-none flex gap-1.5 items-center">
-                    @if(\FluxErp\Actions\Plugins\ToggleActive::canPerformAction(false))
+                    @if(resolve_static(\FluxErp\Actions\Plugins\ToggleActive::class, 'canPerformAction', [false]))
                         <div x-cloak x-bind:class="! (plugin.can_uninstall && ! plugin.offer_install) && 'invisible'">
                             <x-toggle x-model="entangledInstalled[key].is_active" />
                         </div>
@@ -165,17 +165,17 @@
                 <div>
                     <div class="flex-none flex gap-1.5">
                         <x-button primary :label="__('More')" wire:click="more(key)" />
-                        @if(\FluxErp\Actions\Plugins\Install::canPerformAction(false))
+                        @if(resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
                             <div x-cloak x-show="plugin.offer_install">
                                 <x-button positive :label="__('Install')" wire:click="install(key, $promptValue('delete-data'))" />
                             </div>
                         @endif
-                        @if(\FluxErp\Actions\Plugins\Uninstall::canPerformAction(false))
+                        @if(resolve_static(\FluxErp\Actions\Plugins\Uninstall::class, 'canPerformAction', [false]))
                             <div x-cloak x-show="plugin.can_uninstall">
                                 <x-button negative :label="__('Uninstall')" wire:click="uninstall(key, $promptValue('delete-data'))" wire:confirm.icon.error.id.uninstall="{{ __('wire:confirm.uninstall-plugin') }}" />
                             </div>
                         @endif
-                        @if(\FluxErp\Actions\Plugins\Update::canPerformAction(false))
+                        @if(resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
                             <div x-cloak x-show="plugin.latest">
                                 <x-button positive :label="__('Update')" wire:click="showChangeLog(key, plugin.latest)">
                                     <x-slot:label>

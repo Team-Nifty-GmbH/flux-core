@@ -6,7 +6,7 @@ trait HasEnums
 {
     public static function getEnums(): array
     {
-        $model = new static();
+        $model = app(static::class);
 
         return $model->getEnumConfigs();
     }

@@ -8,7 +8,7 @@
             <x-card>
                 <div class="space-y-8 divide-y divide-gray-200"
                     x-data="{
-                        formatter: @js(\FluxErp\Models\Task::typeScriptAttributes())
+                        formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes'))
                     }"
                 >
                     <div class="space-y-2.5">

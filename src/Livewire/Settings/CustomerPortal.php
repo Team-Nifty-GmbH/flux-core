@@ -2,11 +2,11 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Http\Requests\CreateSettingRequest;
-use FluxErp\Http\Requests\UpdateSettingRequest;
 use FluxErp\Livewire\Portal\Dashboard;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\Client;
+use FluxErp\Rulesets\Setting\CreateSettingRuleset;
+use FluxErp\Rulesets\Setting\UpdateSettingRuleset;
 use FluxErp\Services\SettingService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -29,8 +29,8 @@ class CustomerPortal extends Component
     {
         return Arr::prependKeysWith(
             ($this->setting['id'] ?? false)
-            ? (new UpdateSettingRequest())->rules()
-            : (new CreateSettingRequest())->rules(),
+            ? resolve_static(UpdateSettingRuleset::class, 'getRules')
+            : resolve_static(CreateSettingRuleset::class, 'getRules'),
             'setting.'
         );
     }
@@ -42,14 +42,19 @@ class CustomerPortal extends Component
             return $value !== Dashboard::class;
         });
 
-        $this->calendars = Calendar::query()->where('is_public', true)->get()->toArray();
+        $this->calendars = app(Calendar::class)->query()
+            ->where('is_public', true)
+            ->get()
+            ->toArray();
 
-        $setting = $client->settings()->where('key', 'customerPortal')->first();
+        $setting = $client->settings()
+            ->where('key', 'customerPortal')
+            ->first();
 
         $this->setting = $setting?->toArray() ??
             [
                 'key' => 'customerPortal',
-                'model_type' => Client::class,
+                'model_type' => app(Client::class)->getMorphClass(),
                 'model_id' => $client->id,
                 'settings' => [
                     'nav' => [

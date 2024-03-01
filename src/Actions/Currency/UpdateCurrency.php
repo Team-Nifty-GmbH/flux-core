@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Currency;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateCurrencyRequest;
 use FluxErp\Models\Currency;
+use FluxErp\Rulesets\Currency\UpdateCurrencyRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateCurrency extends FluxAction
@@ -12,9 +12,7 @@ class UpdateCurrency extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateCurrencyRequest())->rules();
-
-        $this->rules['iso'] .= ',' . $this->data['id'];
+        $this->rules = resolve_static(UpdateCurrencyRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -25,12 +23,12 @@ class UpdateCurrency extends FluxAction
     public function performAction(): Model
     {
         if ($this->data['is_default'] ?? false) {
-            Currency::query()
+            app(Currency::class)->query()
                 ->whereKeyNot($this->data['id'])
                 ->update(['is_default' => false]);
         }
 
-        $currency = Currency::query()
+        $currency = app(Currency::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -40,17 +38,17 @@ class UpdateCurrency extends FluxAction
         return $currency->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function prepareForValidation(): void
     {
+        $this->rules['iso'] .= ',' . ($this->data['id'] ?? 0);
+
         if (($this->data['is_default'] ?? false)
-            && ! Currency::query()
+            && ! app(Currency::class)->query()
                 ->whereKeyNot($this->data['id'] ?? 0)
                 ->where('is_default', true)
                 ->exists()
         ) {
             $this->rules['is_default'] .= '|accepted';
         }
-
-        parent::validateData();
     }
 }

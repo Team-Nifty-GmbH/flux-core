@@ -13,7 +13,7 @@ class WarehouseService
 {
     public function create(array $data): Warehouse
     {
-        return CreateWarehouse::make($data)->execute();
+        return CreateWarehouse::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

@@ -4,8 +4,8 @@ namespace FluxErp\Actions\EventSubscription;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
-use FluxErp\Http\Requests\UpdateEventSubscriptionRequest;
 use FluxErp\Models\EventSubscription;
+use FluxErp\Rulesets\EventSubscription\UpdateEventSubscriptionRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +16,7 @@ class UpdateEventSubscription extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateEventSubscriptionRequest())->rules();
+        $this->rules = resolve_static(UpdateEventSubscriptionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -26,7 +26,7 @@ class UpdateEventSubscription extends FluxAction
 
     public function performAction(): Model
     {
-        $eventSubscription = EventSubscription::query()
+        $eventSubscription = app(EventSubscription::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -36,7 +36,7 @@ class UpdateEventSubscription extends FluxAction
         return $eventSubscription->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
@@ -59,7 +59,7 @@ class UpdateEventSubscription extends FluxAction
         $this->data['event'] = $eventClass ?: $eloquentEvent;
         $this->data['user_id'] ??= Auth::id();
 
-        if (EventSubscription::query()
+        if (app(EventSubscription::class)->query()
             ->whereKeyNot($this->data['id'])
             ->where('event', $this->data['event'])
             ->where('user_id', $this->data['user_id'])

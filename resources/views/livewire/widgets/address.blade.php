@@ -1,6 +1,6 @@
 <div x-data="{
     address: $wire.entangle('address', true),
-    formatter: @js(\FluxErp\Models\Address::typeScriptAttributes()),
+    formatter: @js(resolve_static(\FluxErp\Models\Address::class, 'typeScriptAttributes')),
 }">
     <x-slot:header>
         <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">

@@ -55,20 +55,20 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         return array_merge(
             parent::getViewData(),
             [
-                'priceLists' => PriceList::query()
+                'priceLists' => app(PriceList::class)->query()
                     ->get(['id', 'name'])
                     ->toArray(),
-                'paymentTypes' => PaymentType::query()
+                'paymentTypes' => app(PaymentType::class)->query()
                     ->get(['id', 'name'])
                     ->toArray(),
-                'languages' => Language::query()
+                'languages' => app(Language::class)->query()
                     ->get(['id', 'name'])
                     ->toArray(),
-                'clients' => Client::query()
+                'clients' => app(Client::class)->query()
                     ->where('is_active', true)
                     ->get(['id', 'name'])
                     ->toArray(),
-                'orderTypes' => OrderType::query()
+                'orderTypes' => app(OrderType::class)->query()
                     ->where('is_hidden', false)
                     ->where('is_active', true)
                     ->get(['id', 'name'])
@@ -89,7 +89,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                 ->icon('trash')
                 ->label(__('Delete'))
                 ->color('negative')
-                ->when(fn () => DeleteOrder::canPerformAction(false))
+                ->when(fn () => resolve_static(DeleteOrder::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete',
                     'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
@@ -100,7 +100,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     #[Renderless]
     public function fetchContactData(): void
     {
-        $contact = Contact::query()
+        $contact = app(Contact::class)->query()
             ->whereKey($this->order->contact_id)
             ->first();
 
@@ -129,7 +129,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
     public function openCreateDocumentsModal(): void
     {
-        $this->orders = Order::query()
+        $this->orders = app(Order::class)->query()
             ->whereIntegerInRaw('id', $this->selected)
             ->get(['id', 'order_type_id']);
 
@@ -149,7 +149,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $printIds = [];
         $mailMessages = [];
         foreach ($this->orders as $order) {
-            $order = Order::query()
+            $order = app(Order::class)->query()
                 ->whereKey($order->id)
                 ->first();
 
@@ -181,7 +181,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                     try {
                         /** @var PrintableView $file */
                         $file = Printing::make([
-                            'model_type' => Order::class,
+                            'model_type' => app(Order::class)->getMorphClass(),
                             'model_id' => $order->id,
                             'view' => $createDocument,
                         ])->checkPermission()->validate()->execute();
@@ -234,7 +234,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                     'html_body' => html_entity_decode($order->orderType->mail_body),
                     'blade_parameters_serialized' => true,
                     'blade_parameters' => serialize(['order' => $order]),
-                    'communicatable_type' => Order::class,
+                    'communicatable_type' => app(Order::class)->getMorphClass(),
                     'communicatable_id' => $order->id,
                 ];
             }
@@ -245,7 +245,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         }
 
         if ($downloadIds) {
-            $files = Media::query()
+            $files = app(Media::class)->query()
                 ->whereIntegerInRaw('id', $downloadIds)
                 ->get();
 

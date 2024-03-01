@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Client;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateClientRequest;
 use FluxErp\Models\Client;
+use FluxErp\Rulesets\Client\UpdateClientRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -14,9 +14,7 @@ class UpdateClient extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateClientRequest())->rules();
-
-        $this->rules['client_code'] .= ',' . $this->data['id'];
+        $this->rules = resolve_static(UpdateClientRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -27,13 +25,13 @@ class UpdateClient extends FluxAction
     public function performAction(): Model
     {
         if ($this->data['is_default'] ?? false) {
-            Client::query()
+            app(Client::class)->query()
                 ->whereKeyNot($this->data['id'])
                 ->update(['is_default' => false]);
         }
 
         $bankConnections = Arr::pull($this->data, 'bank_connections');
-        $client = Client::query()
+        $client = app(Client::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -47,19 +45,24 @@ class UpdateClient extends FluxAction
         return $client->withoutRelations()->refresh();
     }
 
-    public function validateData(): void
+    protected function prepareForValidation(): void
     {
+        $this->rules['client_code'] .= ',' . ($this->data['id'] ?? 0);
+
         if (($this->data['is_default'] ?? false)
-            && ! Client::query()
+            && ! app(Client::class)->query()
                 ->whereKeyNot($this->data['id'] ?? 0)
                 ->where('is_default', true)
                 ->exists()
         ) {
             $this->rules['is_default'] .= '|accepted';
         }
+    }
 
+    protected function validateData(): void
+    {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Client());
+        $validator->addModel(app(Client::class));
 
         $this->data = $validator->validate();
     }

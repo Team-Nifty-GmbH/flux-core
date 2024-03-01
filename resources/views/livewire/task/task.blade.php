@@ -20,7 +20,7 @@
             </div>
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-            @if(\FluxErp\Actions\Task\DeleteTask::canPerformAction(false))
+            @if(resolve_static(\FluxErp\Actions\Task\DeleteTask::class, 'canPerformAction', [false]))
                 <x-button
                     wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Task')]) }}"
                     negative

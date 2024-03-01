@@ -13,7 +13,7 @@ class ProductService
 {
     public function create(array $data): Product
     {
-        return CreateProduct::make($data)->execute();
+        return CreateProduct::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

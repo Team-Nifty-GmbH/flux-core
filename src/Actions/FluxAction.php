@@ -3,11 +3,11 @@
 namespace FluxErp\Actions;
 
 use FluxErp\Models\Permission;
-use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Events\NullDispatcher;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
@@ -15,8 +15,6 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class FluxAction
 {
-    use Makeable;
-
     protected array $data;
 
     protected array $rules = [];
@@ -62,6 +60,11 @@ abstract class FluxAction
     protected function boot(array $data): void
     {
         $this->setData($data[0] ?? [], $data[1] ?? false);
+    }
+
+    public static function make(...$data): static
+    {
+        return app(static::class, ['data' => $data]);
     }
 
     public static function canPerformAction(bool $throwException = true): bool
@@ -169,7 +172,9 @@ abstract class FluxAction
             return false;
         }
 
-        $this->result = $this->performAction();
+        DB::transaction(function () {
+            $this->result = $this->performAction();
+        });
 
         $this->fireActionEvent(event: 'executed', halt: false);
 
@@ -178,6 +183,9 @@ abstract class FluxAction
 
     final public function validate(): static
     {
+        $this->fireActionEvent(event: 'preparingForValidation');
+        $this->prepareForValidation();
+
         if ($this->fireActionEvent(event: 'validating') !== false) {
             $this->validateData();
 
@@ -185,6 +193,11 @@ abstract class FluxAction
         }
 
         return $this;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        //
     }
 
     protected function validateData(): void

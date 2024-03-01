@@ -3,9 +3,9 @@
 namespace FluxErp\Actions\NotificationSetting;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateNotificationSettingsRequest;
-use FluxErp\Http\Requests\UpdateUserNotificationSettingsRequest;
 use FluxErp\Models\NotificationSetting;
+use FluxErp\Rulesets\NotificationSetting\UpdateNotificationSettingRuleset;
+use FluxErp\Rulesets\NotificationSetting\UpdateUserNotificationSettingRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +16,8 @@ class UpdateNotificationSetting extends FluxAction
         parent::boot($data);
         $this->setData(array_merge(['is_anonymous' => false], $this->data));
         $this->rules = $this->data['is_anonymous'] ?
-            (new UpdateNotificationSettingsRequest())->rules() : (new UpdateUserNotificationSettingsRequest())->rules();
+            resolve_static(UpdateNotificationSettingRuleset::class, 'getRules') :
+            resolve_static(UpdateUserNotificationSettingRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -26,7 +27,7 @@ class UpdateNotificationSetting extends FluxAction
 
     public function performAction(): Model
     {
-        $notificationSetting = NotificationSetting::query()
+        $notificationSetting = app(NotificationSetting::class)->query()
             ->firstOrNew([
                 'notifiable_type' => ! $this->data['is_anonymous'] ? Auth::user()->getMorphClass() : null,
                 'notifiable_id' => ! $this->data['is_anonymous'] ? Auth::id() : null,

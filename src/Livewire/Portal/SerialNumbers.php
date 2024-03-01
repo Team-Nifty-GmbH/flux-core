@@ -21,7 +21,7 @@ class SerialNumbers extends Component
 
     protected function getListeners(): array
     {
-        $addresses = Address::query()
+        $addresses = app(Address::class)->query()
             ->where('contact_id', Auth::user()->contact_id)
             ->get();
 
@@ -51,13 +51,12 @@ class SerialNumbers extends Component
 
     public function render(): mixed
     {
-        return view('flux::livewire.portal.serial-numbers')
-            ->layout('flux::components.layouts.portal');
+        return view('flux::livewire.portal.serial-numbers');
     }
 
     public function updatedSearch(): void
     {
-        $this->serialNumbers = SerialNumber::search($this->search)
+        $this->serialNumbers = app(SerialNumber::class)->search($this->search)
             ->whereIn('address_id', $this->addresses)
             ->get()
             ->load('product');

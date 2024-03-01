@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Language;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Language;
+use FluxErp\Rulesets\Language\DeleteLanguageRuleset;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -13,9 +14,7 @@ class DeleteLanguage extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:languages,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteLanguageRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -25,7 +24,7 @@ class DeleteLanguage extends FluxAction
 
     public function performAction(): ?bool
     {
-        $language = Language::query()
+        $language = app(Language::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -35,12 +34,12 @@ class DeleteLanguage extends FluxAction
         return $language->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
         $errors = [];
-        $language = Language::query()
+        $language = app(Language::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

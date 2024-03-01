@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Role;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateRoleRequest;
 use FluxErp\Models\Role;
+use FluxErp\Rulesets\Role\UpdateRoleRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateRole extends FluxAction
@@ -12,7 +12,7 @@ class UpdateRole extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateRoleRequest())->rules();
+        $this->rules = resolve_static(UpdateRoleRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +22,7 @@ class UpdateRole extends FluxAction
 
     public function performAction(): Model
     {
-        $role = Role::query()
+        $role = app(Role::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

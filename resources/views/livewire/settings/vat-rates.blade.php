@@ -8,7 +8,7 @@
             </div>
             <x-slot:footer>
                 <div class="flex justify-between gap-x-4">
-                    @if(\FluxErp\Actions\VatRate\DeleteVatRate::canPerformAction(false))
+                    @if(resolve_static(\FluxErp\Actions\VatRate\DeleteVatRate::class, 'canPerformAction', [false]))
                         <div x-bind:class="$wire.vatRate.id > 0 || 'invisible'">
                             <x-button
                                 flat

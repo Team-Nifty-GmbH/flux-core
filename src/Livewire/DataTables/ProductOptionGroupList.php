@@ -36,7 +36,9 @@ class ProductOptionGroupList extends DataTable
                 ->icon('plus')
                 ->color('primary')
                 ->wireClick('edit')
-                ->when(fn () => CreateProductOptionGroup::canPerformAction(false)),
+                ->when(
+                    fn () => resolve_static(CreateProductOptionGroup::class, 'canPerformAction', [false])
+                ),
         ];
     }
 
@@ -48,7 +50,9 @@ class ProductOptionGroupList extends DataTable
                 ->icon('pencil')
                 ->color('primary')
                 ->wireClick('edit(record.id)')
-                ->when(fn () => UpdateProductOptionGroup::canPerformAction(false)),
+                ->when(
+                    fn () => resolve_static(UpdateProductOptionGroup::class, 'canPerformAction', [false])
+                ),
             DataTableButton::make()
                 ->label(__('Delete'))
                 ->icon('trash')
@@ -57,7 +61,9 @@ class ProductOptionGroupList extends DataTable
                     'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Product Option Group')]),
                     'wire:click' => 'delete(record.id)',
                 ])
-                ->when(fn () => DeleteProductOptionGroup::canPerformAction(false)),
+                ->when(
+                    fn () => resolve_static(DeleteProductOptionGroup::class, 'canPerformAction', [false])
+                ),
         ];
     }
 

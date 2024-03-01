@@ -58,7 +58,7 @@ class Comments extends Component
      */
     public function getListeners(): array
     {
-        $channel = (new $this->modelType)->broadcastChannel() . $this->modelId;
+        $channel = app($this->modelType)->broadcastChannel() . $this->modelId;
 
         return [
             'echo-private:' . $channel . ',.CommentCreated' => 'commentCreatedEvent',
@@ -73,10 +73,10 @@ class Comments extends Component
             return;
         }
 
-        $record = $this->modelType::query()->whereKey($this->modelId)->firstOrFail();
+        $record = app($this->modelType)->query()->whereKey($this->modelId)->firstOrFail();
         $this->loadComments($record);
 
-        Comment::addGlobalScope('sticky', function (Builder $builder) {
+        app(Comment::class)->addGlobalScope('sticky', function (Builder $builder) {
             $builder->where('is_sticky', true);
         });
 
@@ -98,12 +98,12 @@ class Comments extends Component
 
     public function saveComment(string $comment, bool $sticky, bool $internal = true): void
     {
-        if (Auth::user()->getMorphClass() !== User::class) {
+        if (Auth::user()->getMorphClass() !== app(User::class)->getMorphClass()) {
             $internal = false;
         }
 
         $comment = [
-            'model_type' => $this->modelType,
+            'model_type' => app($this->modelType)->getMorphClass(),
             'model_id' => $this->modelId,
             'comment' => $comment,
             'is_sticky' => $sticky,
@@ -121,7 +121,7 @@ class Comments extends Component
 
         if ($this->filesArray) {
             try {
-                $this->saveFileUploadsToMediaLibrary('files', $comment->id, Comment::class);
+                $this->saveFileUploadsToMediaLibrary('files', $comment->id, app(Comment::class)->getMorphClass());
                 $comment->load('media:id,name,model_type,model_id,disk');
             } catch (\Exception $e) {
                 exception_to_notifications($e, $this);
@@ -152,7 +152,7 @@ class Comments extends Component
 
     public function toggleSticky(int $id): void
     {
-        $comment = Comment::query()->whereKey($id)->first();
+        $comment = app(Comment::class)->query()->whereKey($id)->first();
 
         try {
             UpdateComment::make([
@@ -182,11 +182,11 @@ class Comments extends Component
 
     public function loadComments(?Model $record = null): void
     {
-        $record = $record ?: $this->modelType::query()
+        $record = $record ?: app($this->modelType)->query()
             ->whereKey($this->modelId)
             ->firstOrFail();
 
-        Comment::addGlobalScope('media', function (Builder $query) {
+        app(Comment::class)->addGlobalScope('media', function (Builder $query) {
             $query->with('media:id,name,model_type,model_id,disk');
         });
 
@@ -247,7 +247,7 @@ class Comments extends Component
 
     public function updatedFiles(): void
     {
-        $this->prepareForMediaLibrary('files', $this->modelId, $this->modelType);
+        $this->prepareForMediaLibrary('files', $this->modelId, app($this->modelType)->getMorphClass());
 
         $this->skipRender();
     }
@@ -259,11 +259,11 @@ class Comments extends Component
 
     private function loadUsersAndRoles(): void
     {
-        if (! auth()->user()?->getMorphClass() === User::class) {
+        if (! auth()->user()?->getMorphClass() === app(User::class)->getMorphClass()) {
             return;
         }
 
-        $this->users = User::query()
+        $this->users = app(User::class)->query()
             ->select('id', 'name')
             ->where('is_active', true)
             ->orderBy('firstname')
@@ -272,12 +272,12 @@ class Comments extends Component
                 return [
                     'key' => $user->name,
                     'value' => $user->id,
-                    'type' => User::class,
+                    'type' => app(User::class)->getMorphClass(),
                 ];
             })
             ->toArray();
 
-        $this->roles = Role::query()
+        $this->roles = app(Role::class)->query()
             ->select(['id', 'name'])
             ->whereRelation('users', 'is_active', true)
             ->orderBy('name')
@@ -286,7 +286,7 @@ class Comments extends Component
                 return [
                     'key' => $role->name,
                     'value' => $role->id,
-                    'type' => Role::class,
+                    'type' => app(Role::class)->getMorphClass(),
                 ];
             })
             ->toArray();

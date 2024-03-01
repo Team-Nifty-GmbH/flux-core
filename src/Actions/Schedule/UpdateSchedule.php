@@ -4,8 +4,8 @@ namespace FluxErp\Actions\Schedule;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Facades\Repeatable;
-use FluxErp\Http\Requests\UpdateScheduleRequest;
 use FluxErp\Models\Schedule;
+use FluxErp\Rulesets\Schedule\UpdateScheduleRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateSchedule extends FluxAction
@@ -13,7 +13,7 @@ class UpdateSchedule extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateScheduleRequest())->rules();
+        $this->rules = resolve_static(UpdateScheduleRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -23,7 +23,7 @@ class UpdateSchedule extends FluxAction
 
     public function performAction(): Model
     {
-        $schedule = Schedule::query()
+        $schedule = app(Schedule::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

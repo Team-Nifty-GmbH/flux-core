@@ -12,7 +12,7 @@ class UnitService
 {
     public function create(array $data): Unit
     {
-        return CreateUnit::make($data)->execute();
+        return CreateUnit::make($data)->validate()->execute();
     }
 
     public function delete(string $id): array

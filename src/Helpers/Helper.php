@@ -11,7 +11,7 @@ class Helper
 {
     public static function checkCycle(string $model, object $item, int $parentId): bool
     {
-        $model = new $model();
+        $model = app($model);
         $children[] = $item;
         for ($i = 0; $i < count($children); $i++) {
             $child = $model->query()
@@ -38,15 +38,6 @@ class Helper
             }
 
             $namespaces[] = $isModel ? 'FluxErp\\Models' : 'FluxErp\\Events';
-            $modules = file_exists(base_path('modules_statuses.json')) ?
-                (array) json_decode(file_get_contents(base_path('modules_statuses.json'))) :
-                [];
-
-            foreach ($modules as $key => $module) {
-                if ($module) {
-                    $namespaces[] = 'Modules\\' . $key . ($isModel ? '\\Models' : '\\Events');
-                }
-            }
 
             foreach ($namespaces as $namespace) {
                 $class = $namespace . '\\' . ucfirst($classString);
@@ -107,8 +98,8 @@ class Helper
         $existing = $model->$relation()->pluck($relatedKeyName)->toArray();
         $model->$relation()->whereNotIn($relatedKeyName, Arr::pluck($related, $relatedKeyName))->delete();
 
-        $canCreate = $createAction::canPerformAction(false);
-        $canUpdate = $updateAction::canPerformAction(false);
+        $canCreate = resolve_static($createAction, 'canPerformAction', [false]);
+        $canUpdate = resolve_static($updateAction, 'canPerformAction', [false]);
         $updated = [];
         foreach ($related as $item) {
             $item = array_merge($item, [$foreignKey => $model->getKey()]);
@@ -130,7 +121,7 @@ class Helper
             }
         }
 
-        if ($deleteAction::canPerformAction(false)) {
+        if (resolve_static($deleteAction, 'canPerformAction', [false])) {
             foreach (array_diff($existing, $updated) as $deleted) {
                 try {
                     $deleteAction::make(['id' => $deleted])->validate()->execute();

@@ -39,7 +39,7 @@ class BankConnections extends BaseContactBankConnectionList
                 ->icon('plus')
                 ->color('primary')
                 ->wireClick('edit')
-                ->when(CreateContactBankConnection::canPerformAction(false)),
+                ->when(resolve_static(CreateContactBankConnection::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -51,7 +51,7 @@ class BankConnections extends BaseContactBankConnectionList
                 ->icon('pencil')
                 ->color('primary')
                 ->wireClick('edit(record.id)')
-                ->when(UpdateContactBankConnection::canPerformAction(false)),
+                ->when(resolve_static(UpdateContactBankConnection::class, 'canPerformAction', [false])),
             DataTableButton::make()
                 ->label(__('Delete'))
                 ->icon('trash')
@@ -60,7 +60,7 @@ class BankConnections extends BaseContactBankConnectionList
                     'wire:click' => 'delete(record.id)',
                     'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Bank connection')]),
                 ])
-                ->when(DeleteContactBankConnection::canPerformAction(false)),
+                ->when(resolve_static(DeleteContactBankConnection::class, 'canPerformAction', [false])),
         ];
     }
 

@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\ContactBankConnection;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateContactBankConnectionRequest;
 use FluxErp\Models\ContactBankConnection;
+use FluxErp\Rulesets\ContactBankConnection\CreateContactBankConnectionRuleset;
 
 class CreateContactBankConnection extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateContactBankConnectionRequest())->rules();
+        $this->rules = resolve_static(CreateContactBankConnectionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -21,7 +21,7 @@ class CreateContactBankConnection extends FluxAction
 
     public function performAction(): ContactBankConnection
     {
-        $contactBankConnection = new ContactBankConnection($this->data);
+        $contactBankConnection = app(ContactBankConnection::class, ['attributes' => $this->data]);
         $contactBankConnection->save();
 
         return $contactBankConnection->refresh();

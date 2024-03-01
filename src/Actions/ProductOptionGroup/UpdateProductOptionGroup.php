@@ -7,8 +7,8 @@ use FluxErp\Actions\ProductOption\CreateProductOption;
 use FluxErp\Actions\ProductOption\DeleteProductOption;
 use FluxErp\Actions\ProductOption\UpdateProductOption;
 use FluxErp\Helpers\Helper;
-use FluxErp\Http\Requests\UpdateProductOptionGroupRequest;
 use FluxErp\Models\ProductOptionGroup;
+use FluxErp\Rulesets\ProductOptionGroup\UpdateProductOptionGroupRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -18,7 +18,7 @@ class UpdateProductOptionGroup extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateProductOptionGroupRequest())->rules();
+        $this->rules = resolve_static(UpdateProductOptionGroupRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -28,11 +28,11 @@ class UpdateProductOptionGroup extends FluxAction
 
     public function performAction(): Model
     {
-        $productOptionGroup = ProductOptionGroup::query()
+        $productOptions = Arr::pull($this->data, 'product_options');
+
+        $productOptionGroup = app(ProductOptionGroup::class)->query()
             ->whereKey($this->data['id'])
             ->first();
-
-        $productOptions = Arr::pull($this->data, 'product_options');
 
         $productOptionGroup->fill($this->data);
         $productOptionGroup->save();
@@ -52,10 +52,10 @@ class UpdateProductOptionGroup extends FluxAction
         return $productOptionGroup->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new ProductOptionGroup());
+        $validator->addModel(app(ProductOptionGroup::class));
 
         $this->data = $validator->validate();
     }

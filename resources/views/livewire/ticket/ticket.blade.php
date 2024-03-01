@@ -1,6 +1,6 @@
 <div class="min-h-full"
      x-data="{
-        formatter: @js(\FluxErp\Models\Ticket::typeScriptAttributes()),
+        formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes')),
         additionalColumns: $wire.entangle('additionalColumns'),
         ticket: $wire.entangle('ticket')
     }"
@@ -70,9 +70,11 @@
                                 </div>
                             </x-card>
                         </div>
-                        @if($ticket['model_type'] && $ticket['model_type']::getLivewireComponentWidget())
+                        @if($ticket['model_type']
+                            && $component = resolve_static(\Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($ticket['model_type']), 'getLivewireComponentWidget')
+                        )
                             <x-card>
-                                <livewire:is :component="$ticket['model_type']::getLivewireComponentWidget()" :modelId="$ticket['model_id']" />
+                                <livewire:is :component="$component" :modelId="$ticket['model_id']" />
                             </x-card>
                         @endif
                         <x-card>
@@ -113,7 +115,6 @@
                     </x-slot:header>
                     <div class="space-y-4">
                         <x-state wire:model="ticket.state" formatters="formatter.state" available="availableStates"/>
-                        <livewire:features.custom-events :model="\FluxErp\Models\Ticket::class" :id="$ticket['id']" />
                         <x-select
                             :disabled="! user_can('action.ticket.update')"
                             x-on:selected="$wire.updateAdditionalColumns($event.detail.value)"
@@ -166,10 +167,13 @@
                                     'name'   => 'user-option',
                                 ]"
                                 :async-data="[
-                                    'api' => route('search', $ticket['authenticatable_type'] ?: \FluxErp\Models\Address::class),
+                                    'api' => route('search', $ticket['authenticatable_type'] ?
+                                        \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($ticket['authenticatable_type']) :
+                                        \FluxErp\Models\Address::class
+                                    ),
                                     'method' => 'POST',
                                     'params' => [
-                                        'with' => $ticket['authenticatable_type'] === \FluxErp\Models\Address::class ? 'contact.media' : 'media',
+                                        'with' => $ticket['authenticatable_type'] === app(\FluxErp\Models\Address::class)->getMorphClass() ? 'contact.media' : 'media',
                                     ]
                                 ]"
                             />

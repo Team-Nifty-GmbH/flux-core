@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\AdditionalColumn;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateValueListRequest;
 use FluxErp\Models\AdditionalColumn;
+use FluxErp\Rulesets\AdditionalColumn\CreateValueListRuleset;
 use Illuminate\Validation\ValidationException;
 
 class CreateValueList extends FluxAction
@@ -12,7 +12,7 @@ class CreateValueList extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateValueListRequest())->rules();
+        $this->rules = resolve_static(CreateValueListRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +22,7 @@ class CreateValueList extends FluxAction
 
     public function performAction(): AdditionalColumn
     {
-        $valueList = new AdditionalColumn();
+        $valueList = app(AdditionalColumn::class);
         $valueList->name = $this->data['name'];
         $valueList->model_type = $this->data['model_type'];
         $valueList->values = $this->data['values'];
@@ -31,7 +31,7 @@ class CreateValueList extends FluxAction
         return $valueList->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
@@ -41,7 +41,7 @@ class CreateValueList extends FluxAction
             ])->errorBag('createValueList');
         }
 
-        if (AdditionalColumn::query()
+        if (app(AdditionalColumn::class)->query()
             ->where('name', $this->data['name'])
             ->where('model_type', $this->data['model_type'])
             ->exists()

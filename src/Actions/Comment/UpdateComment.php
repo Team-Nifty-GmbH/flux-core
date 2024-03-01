@@ -3,8 +3,8 @@
 namespace FluxErp\Actions\Comment;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateCommentRequest;
 use FluxErp\Models\Comment;
+use FluxErp\Rulesets\Comment\UpdateCommentRuleset;
 use Illuminate\Database\Eloquent\Model;
 
 class UpdateComment extends FluxAction
@@ -12,7 +12,7 @@ class UpdateComment extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateCommentRequest())->rules();
+        $this->rules = resolve_static(UpdateCommentRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +22,7 @@ class UpdateComment extends FluxAction
 
     public function performAction(): Model
     {
-        $comment = Comment::query()
+        $comment = app(Comment::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 

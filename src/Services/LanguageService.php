@@ -13,7 +13,7 @@ class LanguageService
 {
     public function create(array $data): Language
     {
-        return CreateLanguage::make($data)->execute();
+        return CreateLanguage::make($data)->validate()->execute();
     }
 
     public function update(array $data): array

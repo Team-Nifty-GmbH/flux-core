@@ -4,6 +4,7 @@ namespace FluxErp\Actions\User;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\User;
+use FluxErp\Rulesets\User\DeleteUserRuleset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -12,9 +13,7 @@ class DeleteUser extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:users,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteUserRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,7 +23,7 @@ class DeleteUser extends FluxAction
 
     public function performAction(): ?bool
     {
-        $user = User::query()
+        $user = app(User::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -36,7 +35,7 @@ class DeleteUser extends FluxAction
         return $user->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 

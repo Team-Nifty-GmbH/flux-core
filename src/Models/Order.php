@@ -154,6 +154,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                 $order->calculateBalance();
             }
         });
+
+        static::deleted(function (Order $order) {
+            $order->orderPositions()->delete();
+        });
     }
 
     public function addresses(): BelongsToMany
@@ -244,6 +248,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->belongsTo(PriceList::class);
     }
 
+    public function purchaseInvoice(): HasMany
+    {
+        return $this->hasMany(PurchaseInvoice::class);
+    }
+
     public function responsibleUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_user_id');
@@ -261,7 +270,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
     public function newCollection(array $models = []): Collection
     {
-        return new OrderCollection($models);
+        return app(OrderCollection::class, ['items' => $models]);
     }
 
     public function calculatePaymentState(): static
@@ -310,7 +319,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('invoice')
-            ->acceptsMimeTypes(['application/pdf'])
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png'])
             ->singleFile();
 
         $this->addMediaCollection('payment-reminders')
@@ -394,6 +403,16 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function calculateBalance(): static
     {
         $this->balance = bcsub($this->total_gross_price, $this->transactions()->sum('amount'), 2);
+
+        $tree = [];
+        foreach ($tree as $key => &$item) {
+            $totalAmount = bcsub($item['amount'], $item['descendantsAmount'] ?? 0, 2);
+            if (bccomp($totalAmount, 0) === 1) {
+                unset($tree[$key]);
+
+                continue;
+            }
+        }
 
         return $this;
     }

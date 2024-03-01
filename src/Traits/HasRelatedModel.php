@@ -5,6 +5,7 @@ namespace FluxErp\Traits;
 use FluxErp\Relations\MorphToMorph;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -147,20 +148,18 @@ trait HasRelatedModel
 
     /**
      * Define a polymorphic many-to-many relationship with polymorphic related records.
-     *
-     * @return MorphToMorph
      */
     protected function morphToMorph(
         string $related, string $name, string $relatedMorph, string $table, ?string $foreignPivotKey = null,
         ?string $relatedPivotKey = null, ?string $parentKey = null, ?string $relatedKey = null,
-        bool $inverse = false)
+        bool $inverse = false): MorphToMorph
     {
         $caller = $this->guessBelongsToManyRelation();
 
         // First, we will need to determine the foreign key and "other key" for the
         // relationship. Once we have determined the keys we will make the query
         // instances, as well as the relationship instances we need for these.
-        $instance = $this->newRelatedInstance($related);
+        $instance = $this->newRelatedInstance(Relation::getMorphedModel($related) ?? $related);
 
         $foreignPivotKey = $foreignPivotKey ?: $name . '_id';
 
@@ -179,13 +178,11 @@ trait HasRelatedModel
 
     /**
      * Instantiate a new MorphToMorph relationship.
-     *
-     * @return MorphToMorph
      */
     protected function newMorphToMorph(
         Builder $query, Model $parent, string $name, string $related, string $table, string $foreignPivotKey,
         string $relatedPivotKey, string $parentKey, string $relatedKey, ?string $relationName = null,
-        bool $inverse = false)
+        bool $inverse = false): MorphToMorph
     {
         return new MorphToMorph(
             $query, $parent, $name, $related, $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey,
@@ -195,13 +192,11 @@ trait HasRelatedModel
 
     /**
      * Define a polymorphic, inverse many-to-many relationship with polymorphic related records.
-     *
-     * @return MorphToMorph
      */
     protected function morphedByMorph(
         string $related, string $name, string $relatedMorph, ?string $table = null,
         ?string $foreignPivotKey = null, ?string $relatedPivotKey = null, ?string $parentKey = null,
-        ?string $relatedKey = null)
+        ?string $relatedKey = null): MorphToMorph
     {
         $foreignPivotKey = $foreignPivotKey ?: $relatedMorph . '_id';
 

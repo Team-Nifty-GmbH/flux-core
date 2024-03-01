@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateTranslationRequest;
 use FluxErp\Services\TranslationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,12 +13,12 @@ class TranslationController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new LanguageLine();
+        $this->model = app(LanguageLine::class);
     }
 
-    public function create(CreateTranslationRequest $request, TranslationService $languageLineService): JsonResponse
+    public function create(Request $request, TranslationService $languageLineService): JsonResponse
     {
-        $languageLine = $languageLineService->create($request->validated());
+        $languageLine = $languageLineService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

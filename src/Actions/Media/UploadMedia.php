@@ -3,9 +3,10 @@
 namespace FluxErp\Actions\Media;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UploadMediaRequest;
 use FluxErp\Models\Media;
+use FluxErp\Rulesets\Media\UploadMediaRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -16,7 +17,7 @@ class UploadMedia extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UploadMediaRequest())->rules();
+        $this->rules = resolve_static(UploadMediaRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -26,7 +27,7 @@ class UploadMedia extends FluxAction
 
     public function performAction(): Model
     {
-        $modelInstance = $this->data['model_type']::query()
+        $modelInstance = app(Relation::getMorphedModel($this->data['model_type']))->query()
             ->whereKey($this->data['model_id'])
             ->first();
 
@@ -83,7 +84,7 @@ class UploadMedia extends FluxAction
         return $media->withoutRelations();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
@@ -95,7 +96,7 @@ class UploadMedia extends FluxAction
         $this->data['name'] = $this->data['name'] ?? $this->data['file_name'];
         $this->data['collection_name'] ??= 'default';
 
-        if (Media::query()
+        if (app(Media::class)->query()
             ->where('model_type', $this->data['model_type'])
             ->where('model_id', $this->data['model_id'])
             ->where('collection_name', $this->data['collection_name'])

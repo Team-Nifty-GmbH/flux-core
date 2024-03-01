@@ -2,14 +2,14 @@
 
 namespace FluxErp\Actions\Plugins;
 
-use FluxErp\Http\Requests\PluginInstallRequest;
+use FluxErp\Rulesets\Plugin\InstallPluginRuleset;
 
 class Install extends BasePluginAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new PluginInstallRequest())->rules();
+        $this->rules = resolve_static(InstallPluginRuleset::class, 'getRules');
     }
 
     public function performAction(): true

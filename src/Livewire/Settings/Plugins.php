@@ -65,8 +65,8 @@ class Plugins extends Component
     {
         /** @var \FluxErp\Helpers\Composer $composer */
         $composer = app('composer');
-        $available = Arr::keyBy($composer->showAvailable()['available'], 'name');
-        $this->installed = $composer->installed(true)['installed'] ?? [];
+        $available = Arr::keyBy(data_get($composer->showAvailable(), 'available', []), 'name');
+        $this->installed = data_get($composer->installed(true), 'installed', []);
 
         foreach ($available as $key => $package) {
             if (! array_key_exists($key, $this->installed)) {
@@ -201,7 +201,7 @@ class Plugins extends Component
         $packages = is_array($packages) ? $packages : [$packages];
 
         try {
-            Update::make([$packages])
+            Update::make(['packages' => $packages])
                 ->checkPermission()
                 ->validate()
                 ->execute();

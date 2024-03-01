@@ -3,10 +3,10 @@
 namespace FluxErp\Actions\Commission;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\CreateCommissionRequest;
 use FluxErp\Models\Commission;
 use FluxErp\Models\CommissionRate;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Rulesets\Commission\CreateCommissionRuleset;
 
 class CreateCommission extends FluxAction
 {
@@ -14,7 +14,7 @@ class CreateCommission extends FluxAction
     {
         parent::boot($data);
 
-        $this->rules = (new CreateCommissionRequest())->rules();
+        $this->rules = resolve_static(CreateCommissionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -25,7 +25,7 @@ class CreateCommission extends FluxAction
     public function performAction(): Commission
     {
         if (! array_key_exists('commission_rate', $this->data)) {
-            $commissionRateModel = CommissionRate::query()
+            $commissionRateModel = app(CommissionRate::class)->query()
                 ->whereKey($this->data['commission_rate_id'])
                 ->first();
 
@@ -40,7 +40,7 @@ class CreateCommission extends FluxAction
         }
 
         if (! array_key_exists('total_net_price', $this->data)) {
-            $orderPosition = OrderPosition::query()
+            $orderPosition = app(OrderPosition::class)->query()
                 ->whereKey($this->data['order_position_id'])
                 ->first();
 
@@ -53,7 +53,7 @@ class CreateCommission extends FluxAction
             2
         );
 
-        $commission = new Commission($this->data);
+        $commission = app(Commission::class, ['attributes' => $this->data]);
         $commission->save();
 
         return $commission->fresh();

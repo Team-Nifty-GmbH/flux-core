@@ -9,33 +9,10 @@ use Illuminate\Console\Command;
 
 class InitCountries extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'init:countries';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Initiates Countries and fills table with data.';
 
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     */
     public function handle(): void
     {
         $path = resource_path() . '/init-files/countries.json';
@@ -51,24 +28,24 @@ class InitCountries extends Command
             if ($jsonCountries) {
                 foreach ($jsonCountries as $jsonCountry) {
                     // Gather necessary foreign keys.
-                    $languageId = Language::query()
+                    $languageId = app(Language::class)->query()
                         ->where('language_code', $jsonCountry->language_code)
                         ->first()
                         ?->id;
-                    $currencyId = Currency::query()
+                    $currencyId = app(Currency::class)->query()
                         ->where('iso', $jsonCountry->currency_iso)
                         ->first()
                         ?->id;
 
                     // Check for default country according to env 'DEFAULT_LOCALE'.
                     $isDefault = $jsonCountry->language_code === config('app.locale') &&
-                        count(Country::query()
+                        count(app(Country::class)->query()
                             ->where('is_default', true)
                             ->get()) === 0;
 
                     // Save to database, if all foreign keys are found.
                     if ($languageId && $currencyId) {
-                        Country::query()
+                        app(Country::class)->query()
                             ->updateOrCreate([
                                 'iso_alpha2' => $jsonCountry->iso_alpha2,
                             ], [

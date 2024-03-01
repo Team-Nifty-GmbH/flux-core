@@ -3,8 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateSettingRequest;
-use FluxErp\Http\Requests\UpdateSettingRequest;
 use FluxErp\Models\Setting;
 use FluxErp\Services\SettingService;
 use Illuminate\Http\JsonResponse;
@@ -16,12 +14,12 @@ class SettingController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Setting();
+        $this->model = app(Setting::class);
     }
 
-    public function create(CreateSettingRequest $request, SettingService $settingService): JsonResponse
+    public function create(Request $request, SettingService $settingService): JsonResponse
     {
-        $setting = $settingService->create($request->validated());
+        $setting = $settingService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,
@@ -40,9 +38,9 @@ class SettingController extends BaseController
     /**
      * @throws ValidationException
      */
-    public function update(UpdateSettingRequest $request, SettingService $settingService): JsonResponse
+    public function update(Request $request, SettingService $settingService): JsonResponse
     {
-        $response = $settingService->update($request->validated());
+        $response = $settingService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

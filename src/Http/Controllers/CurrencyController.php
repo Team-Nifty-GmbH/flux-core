@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\CreateCurrencyRequest;
 use FluxErp\Models\Currency;
 use FluxErp\Services\CurrencyService;
 use Illuminate\Http\JsonResponse;
@@ -14,12 +13,12 @@ class CurrencyController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Currency();
+        $this->model = app(Currency::class);
     }
 
-    public function create(CreateCurrencyRequest $request, CurrencyService $currencyService): JsonResponse
+    public function create(Request $request, CurrencyService $currencyService): JsonResponse
     {
-        $currency = $currencyService->create($request->validated());
+        $currency = $currencyService->create($request->all());
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 201,

@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Order;
 
 use FluxErp\Actions\Order\DeleteOrder;
+use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Actions\Printing;
@@ -20,6 +21,8 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Media;
+use FluxErp\Models\Order as OrderModel;
+use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
@@ -92,6 +95,8 @@ class Order extends OrderPositionList
 
     public array $selectedOrderPositions = [];
 
+    public array $replicateOrderTypes = [];
+
     #[Url]
     public string $tab = 'order.order-positions';
 
@@ -109,7 +114,7 @@ class Order extends OrderPositionList
 
         $this->fetchOrder($id);
 
-        $orderType = OrderType::query()
+        $orderType = app(OrderType::class)->query()
             ->whereKey($this->order->order_type_id)
             ->first();
 
@@ -177,6 +182,55 @@ class Order extends OrderPositionList
                 ->icon('trash')
                 ->color('negative')
                 ->wireClick('deleteSelectedOrderPositions(); showSelectedActions = false;'),
+        ];
+    }
+
+    public function getAdditionalModelActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('Create Retoure'))
+                ->color('negative')
+                ->when(function () {
+                    return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
+                        && $this->order->invoice_date
+                        && app(OrderType::class)->query()
+                            ->whereKey($this->order->order_type_id)
+                            ->whereIn('order_type_enum', [
+                                OrderTypeEnum::Order->value,
+                                OrderTypeEnum::SplitOrder->value,
+                            ])
+                            ->exists()
+                        && app(OrderType::class)->query()
+                            ->where('order_type_enum', OrderTypeEnum::Retoure->value)
+                            ->where('is_active', true)
+                            ->exists();
+                })
+                ->attributes([
+                    'class' => 'w-full',
+                    'x-on:click' => '$wire.replicate(\'' . OrderTypeEnum::Retoure->value . '\')',
+                ]),
+            DataTableButton::make()
+                ->label(__('Create Split-Order'))
+                ->icon('shopping-bag')
+                ->color('primary')
+                ->when(function () {
+                    return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
+                        && ! $this->order->invoice_date
+                        && app(OrderType::class)->query()
+                            ->whereKey($this->order->order_type_id)
+                            ->where('order_type_enum', OrderTypeEnum::Order->value)
+                            ->exists()
+                        && app(OrderType::class)->query()
+                            ->where('order_type_enum', OrderTypeEnum::SplitOrder->value)
+                            ->where('is_active', true)
+                            ->where('is_hidden', false)
+                            ->exists();
+                })
+                ->attributes([
+                    'class' => 'w-full',
+                    'x-on:click' => '$wire.replicate(\'' . OrderTypeEnum::SplitOrder->value . '\')',
+                ]),
         ];
     }
 
@@ -283,30 +337,27 @@ class Order extends OrderPositionList
 
     public function getViewData(): array
     {
-        $orderType = OrderType::query()
-            ->whereKey($this->order->order_type_id)
-            ->first();
-
         return array_merge(
             parent::getViewData(),
             [
-                'vatRates' => VatRate::query()
+                'additionalModelActions' => $this->getAdditionalModelActions(),
+                'vatRates' => app(VatRate::class)->query()
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
-                'priceLists' => PriceList::query()
+                'priceLists' => app(PriceList::class)->query()
                     ->get(['id', 'name'])
                     ->toArray(),
-                'paymentTypes' => PaymentType::query()
+                'paymentTypes' => app(PaymentType::class)->query()
                     ->where('client_id', $this->order->client_id)
                     ->get(['id', 'name'])
                     ->toArray(),
-                'languages' => Language::query()
+                'languages' => app(Language::class)->query()
                     ->get(['id', 'name'])
                     ->toArray(),
-                'clients' => Client::query()
+                'clients' => app(Client::class)->query()
                     ->get(['id', 'name'])
                     ->toArray(),
-                'orderTypes' => OrderType::query()
+                'orderTypes' => app(OrderType::class)->query()
                     ->where('is_hidden', false)
                     ->where('is_active', true)
                     ->get(['id', 'name'])
@@ -331,7 +382,7 @@ class Order extends OrderPositionList
                         ]
                     )
                 ),
-                'contactBankConnections' => Contact::query()
+                'contactBankConnections' => app(Contact::class)->query()
                     ->whereKey($this->order->contact_id)
                     ->with('contactBankConnections')
                     ->first('id')
@@ -389,7 +440,7 @@ class Order extends OrderPositionList
 
     public function updatedOrderAddressInvoiceId(): void
     {
-        $this->order->address_invoice = Address::query()
+        $this->order->address_invoice = app(Address::class)->query()
             ->whereKey($this->order->address_invoice_id)
             ->with('contact')
             ->first()
@@ -404,7 +455,7 @@ class Order extends OrderPositionList
 
     public function updatedOrderAddressDeliveryId(): void
     {
-        $this->order->address_delivery = Address::query()
+        $this->order->address_delivery = app(Address::class)->query()
             ->whereKey($this->order->address_delivery_id)
             ->first()
             ->toArray();
@@ -460,15 +511,37 @@ class Order extends OrderPositionList
         }
     }
 
-    #[Renderless]
-    public function replicate(): void
+    public function replicate(?string $orderTypeEnum = null): void
     {
         $this->replicateOrder->fill($this->order->toArray());
+        $this->replicateOrder->order_positions = [];
         $this->fetchContactData();
 
-        $this->js(<<<'JS'
-            $openModal('replicate-order');
-        JS);
+        $this->replicateOrderTypes = app(OrderType::class)->query()
+            ->where('order_type_enum', $orderTypeEnum)
+            ->where('is_active', true)
+            ->where('is_hidden', false)
+            ->get(['id', 'name'])
+            ->toArray();
+
+        if ($this->replicateOrderTypes) {
+            $this->replicateOrder->parent_id = $this->order->id;
+            if (count($this->replicateOrderTypes) === 1) {
+                $this->replicateOrder->order_type_id = $this->replicateOrderTypes[0]['id'];
+            }
+
+            $this->forceRender();
+
+            $this->js(<<<'JS'
+                $openModal('create-child-order');
+            JS);
+        } else {
+            $this->skipRender();
+
+            $this->js(<<<'JS'
+                $openModal('replicate-order');
+            JS);
+        }
     }
 
     #[Renderless]
@@ -490,7 +563,7 @@ class Order extends OrderPositionList
     {
         $orderVariable = ! $replicate ? 'order' : 'replicateOrder';
 
-        $contact = Contact::query()
+        $contact = app(Contact::class)->query()
             ->whereKey($this->{$orderVariable}->contact_id)
             ->with('mainAddress:id,contact_id')
             ->first();
@@ -503,7 +576,7 @@ class Order extends OrderPositionList
         $this->{$orderVariable}->payment_type_id = $contact->payment_type_id;
 
         if (! $replicate) {
-            $this->order->address_invoice = Address::query()
+            $this->order->address_invoice = app(Address::class)->query()
                 ->whereKey($this->order->address_invoice_id)
                 ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
                 ->first()
@@ -516,7 +589,7 @@ class Order extends OrderPositionList
     {
         try {
             $pdf = Printing::make([
-                'model_type' => \FluxErp\Models\Order::class,
+                'model_type' => app(OrderModel::class)->getMorphClass(),
                 'model_id' => $this->order->id,
                 'view' => $view,
                 'preview' => true,
@@ -543,7 +616,7 @@ class Order extends OrderPositionList
             return null;
         }
 
-        $order = \FluxErp\Models\Order::query()
+        $order = app(OrderModel::class)->query()
             ->whereKey($this->order->id)
             ->with('addresses')
             ->first();
@@ -576,7 +649,7 @@ class Order extends OrderPositionList
                 try {
                     /** @var PrintableView $file */
                     $file = Printing::make([
-                        'model_type' => \FluxErp\Models\Order::class,
+                        'model_type' => app(OrderModel::class)->getMorphClass(),
                         'model_id' => $this->order->id,
                         'view' => $createDocument,
                     ])->checkPermission()->validate()->execute();
@@ -637,14 +710,14 @@ class Order extends OrderPositionList
                         html_entity_decode($this->order->order_type['mail_body']),
                         ['order' => $order]
                     ),
-                    'communicatable_type' => \FluxErp\Models\Order::class,
+                    'communicatable_type' => app(OrderModel::class)->getMorphClass(),
                     'communicatable_id' => $this->order->id,
                 ]
             )->to('edit-mail');
         }
 
         if ($downloadIds) {
-            $files = Media::query()
+            $files = app(Media::class)->query()
                 ->whereIntegerInRaw('id', $downloadIds)
                 ->get();
 
@@ -708,10 +781,10 @@ class Order extends OrderPositionList
 
             // if product has bundle products, add them to the order
             if ($this->orderPosition->product_id) {
-                Product::addGlobalScope('bundleProducts', function (Builder $builder) {
+                app(Product::class)->addGlobalScope('bundleProducts', function (Builder $builder) {
                     $builder->with('bundleProducts');
                 });
-                $product = Product::query()
+                $product = app(Product::class)->query()
                     ->whereHas('bundleProducts')
                     ->whereKey($this->orderPosition->product_id)
                     ->first();
@@ -804,7 +877,7 @@ class Order extends OrderPositionList
 
     public function fillSchedule(): void
     {
-        $schedule = Schedule::query()
+        $schedule = app(Schedule::class)->query()
             ->where('class', ProcessSubscriptionOrderJob::class)
             ->whereJsonContains('parameters->order', $this->order->id)
             ->first();
@@ -812,13 +885,13 @@ class Order extends OrderPositionList
         if ($schedule) {
             $this->schedule->fill($schedule->toArray());
         } else {
-            $defaultOrderType = OrderType::query()
+            $defaultOrderType = app(OrderType::class)->query()
                 ->whereKey($this->order->order_type_id)
                 ->first()
                 ->order_type_enum === OrderTypeEnum::PurchaseSubscription ?
                 OrderTypeEnum::Purchase->value : OrderTypeEnum::Order->value;
 
-            $this->schedule->parameters['orderType'] = OrderType::query()
+            $this->schedule->parameters['orderType'] = app(OrderType::class)->query()
                 ->where('order_type_enum', $defaultOrderType)
                 ->where('is_active', true)
                 ->where('is_hidden', false)
@@ -854,14 +927,54 @@ class Order extends OrderPositionList
         JS);
     }
 
+    public function takeOrderPositions(array $positionIds): void
+    {
+        $orderPositions = app(OrderPosition::class)->query()
+            ->whereIntegerInRaw('order_positions.id', $positionIds)
+            ->where('order_positions.order_id', $this->order->id)
+            ->leftJoin('order_positions AS descendants', 'order_positions.id', '=', 'descendants.origin_position_id')
+            ->selectRaw(
+                'order_positions.id' .
+                ', order_positions.amount' .
+                ', order_positions.name' .
+                ', order_positions.description' .
+                ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount' .
+                ', order_positions.amount - SUM(COALESCE(descendants.amount, 0)) AS totalAmount'
+            )
+            ->groupBy([
+                'order_positions.id',
+                'order_positions.amount',
+                'order_positions.name',
+                'order_positions.description',
+            ])
+            ->where('order_positions.is_bundle_position', false)
+            ->havingRaw('order_positions.amount > descendantAmount')
+            ->get();
+
+        foreach ($orderPositions as $orderPosition) {
+            $this->replicateOrder->order_positions[] = [
+                'id' => $orderPosition->id,
+                'amount' => $orderPosition->totalAmount,
+                'name' => $orderPosition->name,
+                'description' => $orderPosition->description,
+            ];
+        }
+    }
+
+    #[Renderless]
+    public function recalculateReplicateOrderPositions(): void
+    {
+        $this->replicateOrder->order_positions = array_values($this->replicateOrder->order_positions);
+    }
+
     private function getAvailableStates(array|string $fieldNames): void
     {
         $fieldNames = (array) $fieldNames;
-        $model = new \FluxErp\Models\Order();
+        $model = app(OrderModel::class);
 
         foreach ($fieldNames as $fieldName) {
             $model->{$fieldName} = $this->order->{$fieldName};
-            $states = \FluxErp\Models\Order::getStatesFor($fieldName)
+            $states = app(OrderModel::class)->getStatesFor($fieldName)
                 ->map(function ($item) {
                     return [
                         'label' => __($item),
@@ -934,7 +1047,7 @@ class Order extends OrderPositionList
 
     protected function fetchOrder(int $id): void
     {
-        $order = \FluxErp\Models\Order::query()
+        $order = app(OrderModel::class)->query()
             ->whereKey($id)
             ->with([
                 'priceList:id,name,is_net',

@@ -4,11 +4,11 @@ namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
-use FluxErp\Http\Requests\UpdateOrderPositionRequest;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
 use FluxErp\Models\Product;
+use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -19,7 +19,7 @@ class UpdateOrderPosition extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateOrderPositionRequest())->rules();
+        $this->rules = resolve_static(UpdateOrderPositionRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -31,11 +31,11 @@ class UpdateOrderPosition extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags', []);
 
-        $orderPosition = OrderPosition::query()
+        $orderPosition = app(OrderPosition::class)->query()
             ->whereKey($this->data['id'] ?? null)
             ->firstOrNew();
 
-        $order = Order::query()
+        $order = app(Order::class)->query()
             ->whereKey(data_get($this->data, 'order_id', $orderPosition->order_id))
             ->select(['id', 'client_id', 'price_list_id'])
             ->first();
@@ -46,12 +46,12 @@ class UpdateOrderPosition extends FluxAction
         if (is_int($this->data['sort_number'] ?? false)
             && $orderPosition->sort_number !== $this->data['sort_number']
         ) {
-            $currentHighestSortNumber = OrderPosition::query()
+            $currentHighestSortNumber = app(OrderPosition::class)->query()
                 ->where('order_id', $this->data['order_id'])
                 ->max('sort_number');
             $this->data['sort_number'] = min($this->data['sort_number'], $currentHighestSortNumber + 1);
 
-            OrderPosition::query()->where('order_id', $this->data['order_id'])
+            app(OrderPosition::class)->query()->where('order_id', $this->data['order_id'])
                 ->where('sort_number', '>=', $this->data['sort_number'])
                 ->increment('sort_number');
         }
@@ -60,7 +60,7 @@ class UpdateOrderPosition extends FluxAction
 
         $product = null;
         if ($orderPosition->isDirty('product_id') && $orderPosition->product_id) {
-            $product = Product::query()
+            $product = app(Product::class)->query()
                 ->whereKey($this->data['product_id'])
                 ->with([
                     'bundleProducts:id,name',
@@ -126,16 +126,16 @@ class UpdateOrderPosition extends FluxAction
         return $orderPosition->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new OrderPosition());
+        $validator->addModel(app(OrderPosition::class));
 
         $this->data = $validator->validate();
 
         if ($this->data['id'] ?? false) {
             $errors = [];
-            $orderPosition = OrderPosition::query()
+            $orderPosition = app(OrderPosition::class)->query()
                 ->whereKey($this->data['id'])
                 ->first();
 
@@ -151,7 +151,7 @@ class UpdateOrderPosition extends FluxAction
             if ($this->data['price_id'] ?? false) {
                 // Check if the new price exists in the current price list
 
-                if (Price::query()
+                if (app(Price::class)->query()
                     ->whereKey($this->data['price_id'])
                     ->where(
                         'price_list_id',
@@ -163,6 +163,38 @@ class UpdateOrderPosition extends FluxAction
                     $errors += [
                         'price_id' => [__('Price not found in price list')],
                     ];
+                }
+            }
+
+            // If order position has origin_position_id or is their parent, validate amount
+            if (! data_get($this->data, 'is_free_text', $orderPosition->is_free_text)) {
+                if ($orderPosition->origin_position_id) {
+                    $maxAmount = bcsub(
+                        $orderPosition->origin->amount,
+                        $orderPosition->siblings()
+                            ->where('id', '!=', $orderPosition->id)
+                            ->sum('amount')
+                    );
+
+                    if (bccomp(data_get($this->data, 'amount', $orderPosition->amount), $maxAmount) > 0) {
+                        throw ValidationException::withMessages([
+                            'amount' => [
+                                __('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount]),
+                            ],
+                        ])->errorBag('updateOrderPosition');
+                    }
+                }
+
+                if ($orderPosition->descendants()->exists()) {
+                    $minAmount = $orderPosition->descendants()->sum('amount');
+
+                    if (bccomp($minAmount, data_get($this->data, 'amount', $orderPosition->amount)) > 0) {
+                        throw ValidationException::withMessages([
+                            'amount' => [
+                                __('validation.min.numeric', ['attribute' => __('amount'), 'min' => $minAmount]),
+                            ],
+                        ])->errorBag('updateOrderPosition');
+                    }
                 }
             }
 

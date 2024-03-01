@@ -47,7 +47,7 @@ class AddressList extends DataTable
                 ->attributes([
                     'x-on:click' => '$wire.show()',
                 ])
-                ->when(fn () => CreateContact::canPerformAction(false)),
+                ->when(fn () => resolve_static(CreateContact::class, 'canPerformAction', [false])),
         ];
     }
 

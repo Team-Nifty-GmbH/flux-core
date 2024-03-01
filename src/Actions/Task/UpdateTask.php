@@ -3,9 +3,9 @@
 namespace FluxErp\Actions\Task;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\UpdateTaskRequest;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
+use FluxErp\Rulesets\Task\UpdateTaskRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -15,7 +15,7 @@ class UpdateTask extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateTaskRequest())->rules();
+        $this->rules = resolve_static(UpdateTaskRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -25,7 +25,7 @@ class UpdateTask extends FluxAction
 
     public function performAction(): Model
     {
-        $task = Task::query()
+        $task = app(Task::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -50,16 +50,16 @@ class UpdateTask extends FluxAction
         }
 
         if (! is_null($tags)) {
-            $task->syncTags(Tag::query()->whereIntegerInRaw('id', $tags)->get());
+            $task->syncTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
         }
 
         return $task->withoutRelations()->fresh();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Task());
+        $validator->addModel(app(Task::class));
 
         $this->data = $validator->validated();
     }

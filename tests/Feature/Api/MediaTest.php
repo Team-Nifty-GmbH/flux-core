@@ -47,9 +47,8 @@ class MediaTest extends BaseSetup
 
     public function test_upload_media_to_task()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
             'collection_name' => 'files',
@@ -68,9 +67,8 @@ class MediaTest extends BaseSetup
 
     public function test_upload_media_public_media()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
             'collection_name' => 'files',
@@ -91,9 +89,8 @@ class MediaTest extends BaseSetup
 
     public function test_upload_media_validation_fails()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
             'disk' => uniqid(),
@@ -108,9 +105,8 @@ class MediaTest extends BaseSetup
 
     public function test_upload_media_model_type_not_found()
     {
-        $modelType = 'ProjectTak';
         $media = [
-            'model_type' => $modelType,
+            'model_type' => 'ProjectTak',
             'model_id' => $this->task->id,
             'media' => $this->file,
         ];
@@ -124,9 +120,8 @@ class MediaTest extends BaseSetup
 
     public function test_upload_media_not_allowed_model_type()
     {
-        $modelType = 'Media';
         $media = [
-            'model_type' => $modelType,
+            'model_type' => app(Media::class)->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
         ];
@@ -140,9 +135,8 @@ class MediaTest extends BaseSetup
 
     public function test_upload_media_file_already_exists()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
             'is_public' => false,
@@ -160,9 +154,8 @@ class MediaTest extends BaseSetup
 
     public function test_upload_media_task_not_found()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => ++$this->task->id,
             'media' => $this->file,
         ];
@@ -176,9 +169,8 @@ class MediaTest extends BaseSetup
 
     public function test_upload_media_media_field_missing()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
         ];
 
@@ -191,9 +183,8 @@ class MediaTest extends BaseSetup
 
     public function test_upload_media_invalid_file()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => ' ',
         ];
@@ -207,7 +198,7 @@ class MediaTest extends BaseSetup
 
     public function test_download_media()
     {
-        $modelType = class_basename($this->task);
+        $modelType = $this->task->getMorphClass();
         $media = [
             'model_type' => $modelType,
             'model_id' => $this->task->id,
@@ -245,12 +236,12 @@ class MediaTest extends BaseSetup
 
         $queryParams = '?model_type=notExistingModelType' . Str::random() . '&model_id=' . $this->task->id;
         $response = $this->actingAs($this->user)->get('/api/media/filename' . $queryParams);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_download_media_thumbnail_not_generated()
     {
-        $modelType = class_basename($this->task);
+        $modelType = $this->task->getMorphClass();
         $media = [
             'model_type' => $modelType,
             'model_id' => $this->task->id,
@@ -278,9 +269,8 @@ class MediaTest extends BaseSetup
 
     public function test_download_media_private_media()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
         ];
@@ -300,7 +290,7 @@ class MediaTest extends BaseSetup
 
     public function test_download_media_file_not_found()
     {
-        $modelType = class_basename($this->task);
+        $modelType = $this->task->getMorphClass();
         $media = [
             'model_type' => $modelType,
             'model_id' => $this->task->id,
@@ -323,7 +313,7 @@ class MediaTest extends BaseSetup
 
     public function test_download_media_unauthenticated_private_media()
     {
-        $modelType = class_basename($this->task);
+        $modelType = $this->task->getMorphClass();
         $media = [
             'model_type' => $modelType,
             'model_id' => $this->task->id,
@@ -347,9 +337,8 @@ class MediaTest extends BaseSetup
 
     public function test_download_private_media_media_not_found()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
         ];
@@ -369,9 +358,8 @@ class MediaTest extends BaseSetup
 
     public function test_download_private_media_thumbnail_not_generated()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
         ];
@@ -397,7 +385,7 @@ class MediaTest extends BaseSetup
 
     public function test_download_media_with_categories()
     {
-        $modelType = class_basename($this->task);
+        $modelType = $this->task->getMorphClass();
         $media = [
             'model_type' => $modelType,
             'model_id' => $this->task->id,
@@ -422,9 +410,8 @@ class MediaTest extends BaseSetup
 
     public function test_replace_media()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
             'disk' => 'public',
@@ -448,9 +435,8 @@ class MediaTest extends BaseSetup
 
     public function test_replace_media_validation_fails()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
             'disk' => 'public',
@@ -473,9 +459,8 @@ class MediaTest extends BaseSetup
 
     public function test_replace_media_invalid_file()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
             'is_public' => true,
@@ -498,9 +483,8 @@ class MediaTest extends BaseSetup
 
     public function test_replace_media_media_not_found()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
             'disk' => 'public',
@@ -523,9 +507,8 @@ class MediaTest extends BaseSetup
 
     public function test_replace_media_file_name_already_exists()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
         ];
@@ -552,9 +535,8 @@ class MediaTest extends BaseSetup
 
     public function test_update_media()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
             'is_public' => false,
@@ -580,9 +562,8 @@ class MediaTest extends BaseSetup
 
     public function test_update_media_validation_fails()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
             'is_public' => false,
@@ -607,9 +588,8 @@ class MediaTest extends BaseSetup
 
     public function test_delete_media()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
         ];
@@ -631,7 +611,7 @@ class MediaTest extends BaseSetup
         $this->assertFalse(DB::table('media')->where('id', $uploadedMedia->id)->exists());
         $this->assertTrue(
             DB::table('activity_log')
-                ->where('subject_type', Media::class)
+                ->where('subject_type', app(Media::class)->getMorphClass())
                 ->where('subject_id', $uploadedMedia->id)
                 ->where('event', 'deleted')
                 ->exists()
@@ -640,9 +620,8 @@ class MediaTest extends BaseSetup
 
     public function test_delete_media_media_not_found()
     {
-        $modelType = class_basename($this->task);
         $media = [
-            'model_type' => $modelType,
+            'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
         ];

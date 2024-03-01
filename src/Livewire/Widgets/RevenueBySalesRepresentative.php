@@ -39,7 +39,7 @@ class RevenueBySalesRepresentative extends CircleChart
     {
         $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
 
-        $baseQuery = Order::query()
+        $baseQuery = app(Order::class)->query()
             ->whereNotNull('invoice_date')
             ->whereNotNull('invoice_number')
             ->whereNotNull('agent_id')

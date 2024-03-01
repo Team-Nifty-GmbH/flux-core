@@ -4,15 +4,14 @@ namespace FluxErp\Actions\FormBuilderForm;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\FormBuilderForm;
+use FluxErp\Rulesets\FormBuilderForm\DeleteFormBuilderFormRuleset;
 
 class DeleteFormBuilderForm extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:form_builder_forms,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteFormBuilderFormRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteFormBuilderForm extends FluxAction
 
     public function performAction(): ?bool
     {
-        return FormBuilderForm::query()
+        return app(FormBuilderForm::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

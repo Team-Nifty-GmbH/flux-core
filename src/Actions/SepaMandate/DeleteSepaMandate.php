@@ -4,15 +4,14 @@ namespace FluxErp\Actions\SepaMandate;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\SepaMandate;
+use FluxErp\Rulesets\SepaMandate\DeleteSepaMandateRuleset;
 
 class DeleteSepaMandate extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:sepa_mandates,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteSepaMandateRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeleteSepaMandate extends FluxAction
 
     public function performAction(): ?bool
     {
-        return SepaMandate::query()
+        return app(SepaMandate::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

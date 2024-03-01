@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Comment;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Comment;
+use FluxErp\Rulesets\Comment\DeleteCommentRuleset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -12,9 +13,7 @@ class DeleteComment extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:comments,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeleteCommentRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -24,24 +23,24 @@ class DeleteComment extends FluxAction
 
     public function performAction(): ?bool
     {
-        return Comment::query()
+        return app(Comment::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        $comment = Comment::query()
+        $comment = app(Comment::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
         // only super admins can delete other users comments
         if (
             ! (
-                $comment->created_by instanceof (Auth::user()->getMorphClass())
+                $comment->created_by?->getMorphClass() === (Auth::user()->getMorphClass())
                 && $comment->created_by->id === Auth::id()
             ) && ! Auth::user()->hasRole('Super Admin')
         ) {

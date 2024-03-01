@@ -4,15 +4,14 @@ namespace FluxErp\Actions\PaymentReminder;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\PaymentReminder;
+use FluxErp\Rulesets\PaymentReminder\DeletePaymentReminderRuleset;
 
 class DeletePaymentReminder extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => 'required|integer|exists:payment_reminders,id,deleted_at,NULL',
-        ];
+        $this->rules = resolve_static(DeletePaymentReminderRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -22,7 +21,7 @@ class DeletePaymentReminder extends FluxAction
 
     public function performAction(): ?bool
     {
-        return PaymentReminder::query()
+        return app(PaymentReminder::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

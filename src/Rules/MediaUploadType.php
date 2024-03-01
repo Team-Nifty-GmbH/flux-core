@@ -4,6 +4,7 @@ namespace FluxErp\Rules;
 
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\InvokableRule;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
@@ -30,9 +31,10 @@ class MediaUploadType implements DataAwareRule, InvokableRule
             return;
         }
 
-        if (class_exists($model)
+        $modelClass = Relation::getMorphedModel($model);
+        if ($modelClass
             && $value
-            && ! method_exists(new $model(), $method)
+            && ! method_exists(app($modelClass), $method)
         ) {
             $fail(':input is not a valid :attribute.')->translate();
         }

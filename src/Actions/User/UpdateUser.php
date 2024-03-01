@@ -4,8 +4,8 @@ namespace FluxErp\Actions\User;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
-use FluxErp\Http\Requests\UpdateUserRequest;
 use FluxErp\Models\User;
+use FluxErp\Rulesets\User\UpdateUserRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -15,16 +15,7 @@ class UpdateUser extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-
-        $rules = (new UpdateUserRequest())->rules();
-
-        $this->rules = array_merge(
-            $rules,
-            [
-                'user_code' => $rules['user_code'] . ',' . $this->data['id'],
-                'email' => $rules['email'] . ',' . $this->data['id'],
-            ]
-        );
+        $this->rules = resolve_static(UpdateUserRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -36,7 +27,7 @@ class UpdateUser extends FluxAction
     {
         $mailAccounts = Arr::pull($this->data, 'mail_accounts');
 
-        $user = User::query()
+        $user = app(User::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
@@ -56,12 +47,23 @@ class UpdateUser extends FluxAction
         return $user->withoutRelations()->fresh();
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->rules = array_merge(
+            $this->rules,
+            [
+                'user_code' => $this->rules['user_code'] . ',' . ($this->data['id'] ?? 0),
+                'email' => $this->rules['email'] . ',' . ($this->data['id'] ?? 0),
+            ]
+        );
+    }
+
     protected function validateData(): void
     {
         parent::validateData();
 
         if ($this->data['parent_id'] ?? false) {
-            $user = User::query()
+            $user = app(User::class)->query()
                 ->whereKey($this->data['id'])
                 ->first();
 

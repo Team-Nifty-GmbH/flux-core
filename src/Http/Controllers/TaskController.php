@@ -7,7 +7,6 @@ use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Actions\Task\FinishTask;
 use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Helpers\ResponseHelper;
-use FluxErp\Http\Requests\FinishTaskRequest;
 use FluxErp\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,7 +17,7 @@ class TaskController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Task();
+        $this->model = app(Task::class);
     }
 
     public function create(Request $request): JsonResponse
@@ -103,12 +102,16 @@ class TaskController extends BaseController
         );
     }
 
-    public function finish(FinishTaskRequest $request): JsonResponse
+    public function finish(Request $request): JsonResponse
     {
+        $task = FinishTask::make($request->all())
+            ->validate()
+            ->execute();
+
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
-            data: FinishTask::make($request->validated())->execute(),
-            statusMessage: 'task ' . $request->validated()['finish'] ? 'finished' : 'reopened'
+            data: $task,
+            statusMessage: 'task ' . $request->finish ? 'finished' : 'reopened'
         );
     }
 }

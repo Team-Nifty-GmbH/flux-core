@@ -14,7 +14,7 @@ class AdditionalColumnService
     {
         return ResponseHelper::createArrayResponse(
             statusCode: 201,
-            data: CreateAdditionalColumn::make($data)->execute(),
+            data: CreateAdditionalColumn::make($data)->validate()->execute(),
             statusMessage: 'additional column created'
         );
     }

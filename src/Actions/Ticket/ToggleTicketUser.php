@@ -3,15 +3,15 @@
 namespace FluxErp\Actions\Ticket;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Http\Requests\ToggleTicketUserAssignmentRequest;
 use FluxErp\Models\Ticket;
+use FluxErp\Rulesets\Ticket\ToggleTicketUserRuleset;
 
 class ToggleTicketUser extends FluxAction
 {
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new ToggleTicketUserAssignmentRequest())->rules();
+        $this->rules = resolve_static(ToggleTicketUserRuleset::class, 'getRules');
     }
 
     public static function name(): string
@@ -26,7 +26,7 @@ class ToggleTicketUser extends FluxAction
 
     public function performAction(): array
     {
-        $ticket = Ticket::query()
+        $ticket = app(Ticket::class)->query()
             ->whereKey($this->data['ticket_id'])
             ->first();
 

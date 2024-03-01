@@ -31,7 +31,7 @@ class AddressAddressTypeOrder extends Pivot
         $address = $this->fromJson($this->attributes['address'] ?? null);
 
         return $address
-            ? (Address::query()->whereKey($address['id'])->firstOrNew())->fill($address)
+            ? (app(Address::class)->query()->whereKey($address['id'])->firstOrNew())->fill($address)
             : $this->address()->first();
     }
 

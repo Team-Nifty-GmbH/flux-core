@@ -3,7 +3,7 @@
 namespace FluxErp\Actions\Plugins;
 
 use FluxErp\Enums\ComposerRepositoryTypeEnum;
-use FluxErp\Http\Requests\PluginUploadRequest;
+use FluxErp\Rulesets\Plugin\UploadPluginRuleset;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
@@ -12,7 +12,7 @@ class Upload extends BasePluginAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new PluginUploadRequest())->rules();
+        $this->rules = resolve_static(UploadPluginRuleset::class, 'getRules');
     }
 
     public function performAction(): true

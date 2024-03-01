@@ -4,7 +4,7 @@ namespace FluxErp\Actions\AdditionalColumn;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\AdditionalColumn;
-use Illuminate\Validation\Rule;
+use FluxErp\Rulesets\AdditionalColumn\DeleteValueListRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteValueList extends FluxAction
@@ -12,13 +12,7 @@ class DeleteValueList extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = [
-            'id' => [
-                'required',
-                'integer',
-                Rule::exists('additional_columns', 'id')->whereNotNull('values'),
-            ],
-        ];
+        $this->rules = resolve_static(DeleteValueListRuleset::class, 'getRules');
     }
 
     public static function models(): array
@@ -28,17 +22,17 @@ class DeleteValueList extends FluxAction
 
     public function performAction(): ?bool
     {
-        return AdditionalColumn::query()
+        return app(AdditionalColumn::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
-        if (AdditionalColumn::query()
+        if (app(AdditionalColumn::class)->query()
             ->whereKey($this->data['id'])
             ->first()
             ->modelValues()

@@ -139,7 +139,13 @@
                     ]
                 ]"
             />
-            <x-select :label="__('Model')" :options="$trackableTypes" wire:model="workTime.trackable_type" />
+            <x-select
+                :label="__('Model')"
+                wire:model="workTime.trackable_type"
+                :options="$trackableTypes"
+                option-label="label"
+                option-value="value"
+            />
             <div id="trackable-id" x-show="$wire.workTime.trackable_type">
                 <x-select :label="__('Record')"
                     x-on:selected="recordSelected($event.detail)"
