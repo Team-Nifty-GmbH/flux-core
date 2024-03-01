@@ -16,7 +16,7 @@ use Illuminate\Support\HtmlString;
  * @method static void unregister(string $name)
  * @method static string url(string $path, bool|null $secure)
  * @method static Collection all()
- * @method static string path(string $filename)
+ * @method static string|null path(string $filename)
  * @method static void clear()
  * @method static void vite(string $path, string|array $files, string $manifestFilename = 'manifest.json')
  *

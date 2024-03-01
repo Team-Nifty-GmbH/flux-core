@@ -16,9 +16,14 @@ class AssetManager implements Htmlable
 {
     use Macroable;
 
-    protected static ?Collection $assets = null;
+    protected static Collection $assets;
 
     protected static array $viteManifests = [];
+
+    public function __construct()
+    {
+        static::$assets = collect();
+    }
 
     public function toHtml(): HtmlString
     {
@@ -36,7 +41,7 @@ class AssetManager implements Htmlable
         }
 
         foreach (static::$viteManifests as $vite) {
-            $vite->entryPoints = array_intersect($vite->entryPoints, array_keys(static::$assets->toArray()));
+            $vite->entryPoints = array_intersect($vite->entryPoints, static::$assets->keys()->toArray());
             $html .= $vite->toHtml();
         }
 
@@ -47,10 +52,6 @@ class AssetManager implements Htmlable
     {
         if (! is_file($path) || ! file_exists($path)) {
             throw new \Exception("Unable to locate asset file: {$path}");
-        }
-
-        if (static::$assets === null) {
-            static::$assets = collect();
         }
 
         static::$assets[$name] = array_merge($attributes, ['path' => $path, 'name' => $name]);
@@ -82,13 +83,14 @@ class AssetManager implements Htmlable
 
     public static function clear(): void
     {
-        static::$assets = null;
+        static::$assets = collect();
     }
 
     public function vite(string $path, string|array $files, string $manifestFilename = 'manifest.json'): void
     {
         $buildDirectory = is_dir($path) ? $path : Str::finish($path, '/') . $manifestFilename;
         $vite = invade(app(Vite::class));
+        $files = Arr::wrap($files);
 
         $vite
             ->useBuildDirectory($buildDirectory)
@@ -98,7 +100,7 @@ class AssetManager implements Htmlable
                     $secure
                 )
             )
-            ->withEntryPoints(Arr::wrap($files));
+            ->withEntryPoints($files);
 
         static::$viteManifests[$path] = $vite;
 

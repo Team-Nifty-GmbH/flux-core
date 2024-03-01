@@ -61,7 +61,7 @@ class ActionManager
             return;
         }
 
-        $cacheKey = md5(($path ?? '') . ($namespace ?? ''));
+        $cacheKey = md5($path . $namespace);
 
         if (! is_null($actions = Cache::get('flux.actions.' . $cacheKey)) && ! app()->runningInConsole()) {
             $iterator = [];

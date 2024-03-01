@@ -30,16 +30,24 @@ class WidgetManager
         }
 
         if (! is_subclass_of($componentClass, Component::class)) {
-            throw new \Exception("The provided widget class '{$componentClass}' does not extend Livewire\\Component.");
+            throw new \Exception(
+                "The provided widget class '{$componentClass}' does not extend Livewire\\Component."
+            );
         }
 
         $reflection = new ReflectionClass($componentClass);
-        if (method_exists($componentClass, 'mount') && $reflection->getMethod('mount')->getNumberOfParameters() !== 0) {
-            throw new \Exception("The provided widget class '{$componentClass}' must not have any parameters in the mount method.");
+        if (method_exists($componentClass, 'mount')
+            && $reflection->getMethod('mount')->getNumberOfParameters() !== 0
+        ) {
+            throw new \Exception(
+                "The provided widget class '{$componentClass}' must not have any parameters in the mount method."
+            );
         }
 
         if (! in_array(Widgetable::class, class_uses_recursive($componentClass))) {
-            throw new \Exception("The provided widget class '{$componentClass}' does not use the Widgetable trait.");
+            throw new \Exception(
+                "The provided widget class '{$componentClass}' does not use the Widgetable trait."
+            );
         }
 
         $this->widgets[$name] = [
@@ -74,7 +82,7 @@ class WidgetManager
             return;
         }
 
-        $cacheKey = md5(($path ?? '') . ($namespace ?? ''));
+        $cacheKey = md5($path . $namespace);
 
         if (! is_null($widgets = Cache::get('flux.widgets.' . $cacheKey)) && ! app()->runningInConsole()) {
             $iterator = [];

@@ -96,9 +96,9 @@ class RepeatableManager
                 continue;
             }
 
-            $cacheKey = md5(($directory ?? '') . implode('', $namespaces));
+            $cacheKey = md5($directory . implode($namespaces));
 
-            if (! is_null($repeatables = Cache::get('flux.actions.' . $cacheKey)) && ! app()->runningInConsole()) {
+            if (! is_null($repeatables = Cache::get('flux.repeatable.' . $cacheKey)) && ! app()->runningInConsole()) {
                 $iterator = [];
             } else {
                 $repeatables = [];
@@ -135,7 +135,7 @@ class RepeatableManager
                 }
             }
 
-            Cache::put('flux.actions.' . $cacheKey, $repeatables);
+            Cache::put('flux.repeatable.' . $cacheKey, $repeatables);
         }
     }
 
