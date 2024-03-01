@@ -73,7 +73,6 @@ class SerialNumberRange extends Model
         if (! $this->model_type) {
             return $defaultAttributes;
         }
-        dd($this->model_type, Relation::getMorphedModel($this->model_type));
 
         $modelAttributes = array_fill_keys(
             ModelInfo::forModel(Relation::getMorphedModel($this->model_type))->attributes->pluck('name')->toArray(),
