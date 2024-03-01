@@ -63,7 +63,7 @@ trait HasSerialNumberRange
             }
 
             $serialNumberRange->model_id = $this->getKey();
-            $styled = $serialNumberRange->getCurrentStyled();
+            $styled = $serialNumberRange->model_type ? $serialNumberRange->getCurrentStyled() : null;
 
             if ($serialNumberRange->stores_serial_numbers) {
                 $serialNumber = app(SerialNumber::class, [
