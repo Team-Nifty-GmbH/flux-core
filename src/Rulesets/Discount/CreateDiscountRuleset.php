@@ -3,8 +3,8 @@
 namespace FluxErp\Rulesets\Discount;
 
 use FluxErp\Models\Discount;
-use FluxErp\Rules\MorphExists;
 use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateDiscountRuleset extends FluxRuleset

@@ -3,8 +3,8 @@
 namespace FluxErp\Rulesets\Setting;
 
 use FluxErp\Models\Setting;
-use FluxErp\Rules\MorphExists;
 use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateSettingRuleset extends FluxRuleset

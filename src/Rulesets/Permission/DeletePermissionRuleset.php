@@ -2,7 +2,6 @@
 
 namespace FluxErp\Rulesets\Permission;
 
-use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;

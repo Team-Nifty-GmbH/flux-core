@@ -183,8 +183,7 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
             })
             ->getQuery();
 
-        return Discount::query()
-            ->withoutGlobalScopes()
+        return app(Discount::class)->newModelQuery()
             ->fromSub($directDiscountsQuery->union($discountsThroughGroupsQuery), 'union_sub');
     }
 

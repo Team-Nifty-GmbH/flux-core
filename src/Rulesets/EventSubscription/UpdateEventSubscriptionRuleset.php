@@ -4,8 +4,8 @@ namespace FluxErp\Rulesets\EventSubscription;
 
 use FluxErp\Models\EventSubscription;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rules\MorphExists;
 use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
 
 class UpdateEventSubscriptionRuleset extends FluxRuleset

@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateOrder;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 
 class OrderForm extends FluxForm
@@ -116,6 +117,9 @@ class OrderForm extends FluxForm
     #[Locked]
     public ?array $invoice = null;
 
+    #[Locked]
+    public ?array $parent = null;
+
     protected function getActions(): array
     {
         return [
@@ -123,6 +127,22 @@ class OrderForm extends FluxForm
             'update' => UpdateOrder::class,
             'delete' => DeleteOrder::class,
         ];
+    }
+
+    public function fill($values): void
+    {
+        if ($values instanceof Model) {
+            $values->loadMissing('parent');
+        }
+
+        parent::fill($values);
+
+        $this->parent = $this->parent
+            ? [
+                'label' => $values->parent->getLabel(),
+                'url' => $values->parent->getUrl(),
+            ]
+            : null;
     }
 
     protected function makeAction(string $name, ?array $data = null): FluxAction

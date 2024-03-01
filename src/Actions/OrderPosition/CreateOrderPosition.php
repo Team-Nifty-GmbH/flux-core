@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
@@ -152,5 +153,47 @@ class CreateOrderPosition extends FluxAction
         $validator->addModel(app(OrderPosition::class));
 
         $this->data = $validator->validate();
+
+        // Only allow creation of order_position if exists in parent order and amount not greater than totalAmount
+        if (! ($this->data['is_free_text'] ?? false)) {
+            $order = app(Order::class)->query()
+                ->whereKey($this->data['order_id'])
+                ->first();
+
+            if ($order?->parent_id
+                && in_array($order->orderType->order_type_enum, [OrderTypeEnum::Retoure, OrderTypeEnum::SplitOrder])
+            ) {
+                if (! $originPositionId = data_get($this->data, 'origin_position_id')) {
+                    throw ValidationException::withMessages([
+                        'origin_position_id' => [__('validation.required', ['attribute' => 'origin_position_id'])],
+                    ])->errorBag('createOrderPosition');
+                }
+
+                if (! app(OrderPosition::class)->query()
+                    ->whereKey($originPositionId)
+                    ->where('order_id', $order->parent_id)
+                    ->exists()
+                ) {
+                    throw ValidationException::withMessages([
+                        'origin_position_id' => ['Order position does not exists in parent order.'],
+                    ]);
+                }
+
+                $originPosition = app(OrderPosition::class)->query()
+                    ->whereKey($originPositionId)
+                    ->withSum('descendants as descendantsAmount', 'amount')
+                    ->first();
+                $maxAmount = bcsub(
+                    $originPosition->amount,
+                    $originPosition->descendantsAmount ?? 0,
+                );
+
+                if (bccomp($this->data['amount'] ?? 1, $maxAmount) > 0) {
+                    throw ValidationException::withMessages([
+                        'amount' => [__('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount])],
+                    ])->errorBag('createOrderPosition');
+                }
+            }
+        }
     }
 }

@@ -36,7 +36,8 @@ class ReplicateOrderRuleset extends FluxRuleset
     {
         return array_merge(
             resolve_static(UpdateOrderRuleset::class, 'getRules'),
-            parent::getRules()
+            parent::getRules(),
+            resolve_static(OrderPositionRuleset::class, 'getRules')
         );
     }
 }

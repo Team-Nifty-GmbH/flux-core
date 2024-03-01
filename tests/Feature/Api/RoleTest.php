@@ -6,7 +6,6 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 

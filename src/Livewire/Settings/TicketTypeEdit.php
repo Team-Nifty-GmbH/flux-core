@@ -8,13 +8,11 @@ use FluxErp\Actions\TicketType\UpdateTicketType;
 use FluxErp\Models\Role;
 use FluxErp\Models\TicketType;
 use FluxErp\Rulesets\TicketType\CreateTicketTypeRuleset;
-use FluxErp\Rulesets\TicketType\UpdateTicketTypeRuleset;
 use FluxErp\Services\TicketTypeService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Livewire\Component;
-use TeamNiftyGmbH\DataTable\Helpers\ModelFinder;
 use WireUi\Traits\Actions;
 
 class TicketTypeEdit extends Component
@@ -57,7 +55,6 @@ class TicketTypeEdit extends Component
             ])
             ->sortBy('label')
             ->toArray();
-
 
         $this->roles = app(Role::class)->query()
             ->where('guard_name', 'web')

@@ -8,8 +8,8 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\User;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rules\MorphExists;
 use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Trackable;
 

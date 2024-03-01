@@ -3,8 +3,8 @@
 namespace FluxErp\Rulesets\Media;
 
 use FluxErp\Models\Media;
-use FluxErp\Rules\MorphExists;
 use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteMediaCollectionRuleset extends FluxRuleset

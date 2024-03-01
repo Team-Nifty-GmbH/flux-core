@@ -5,8 +5,8 @@ namespace FluxErp\Rulesets\CalendarEvent;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rules\MorphExists;
 use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\HasCalendarEvents;
 

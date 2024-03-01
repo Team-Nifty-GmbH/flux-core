@@ -6,8 +6,6 @@ use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Models\Address;
 use FluxErp\Models\Permission;
-use FluxErp\Rulesets\Address\CreateAddressRuleset;
-use FluxErp\Rulesets\Address\UpdateAddressRuleset;
 use FluxErp\Services\AddressService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;

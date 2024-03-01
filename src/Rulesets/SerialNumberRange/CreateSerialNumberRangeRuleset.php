@@ -5,8 +5,8 @@ namespace FluxErp\Rulesets\SerialNumberRange;
 use FluxErp\Models\Client;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rules\MorphExists;
 use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\HasSerialNumberRange;
 

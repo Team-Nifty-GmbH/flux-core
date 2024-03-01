@@ -9,7 +9,7 @@ on:
 jobs:
   laravel:
     name: Laravel (PHP ${{ matrix.php-versions }})
-    runs-on: test_runner
+    runs-on: flux
     env:
       DB_DATABASE: testing
       DB_USERNAME: root
@@ -47,7 +47,7 @@ jobs:
         browser: [ 'chrome' ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
@@ -87,7 +87,7 @@ jobs:
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: ${{ matrix.browser }}

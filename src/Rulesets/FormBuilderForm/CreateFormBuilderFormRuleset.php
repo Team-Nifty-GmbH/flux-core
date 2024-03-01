@@ -3,8 +3,8 @@
 namespace FluxErp\Rulesets\FormBuilderForm;
 
 use FluxErp\Models\FormBuilderForm;
-use FluxErp\Rules\MorphExists;
 use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateFormBuilderFormRuleset extends FluxRuleset

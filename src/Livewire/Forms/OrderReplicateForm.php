@@ -30,6 +30,8 @@ class OrderReplicateForm extends FluxForm
 
     public ?int $payment_type_id = null;
 
+    public ?array $order_positions = null;
+
     protected function getActions(): array
     {
         return [

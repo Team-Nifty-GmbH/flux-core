@@ -114,11 +114,6 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
         );
     }
 
-    public function ancestors(): HasMany
-    {
-        return $this->hasMany(OrderPosition::class, 'origin_position_id');
-    }
-
     public function children(): HasMany
     {
         return $this->hasMany(OrderPosition::class, 'parent_id');
@@ -139,6 +134,11 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
             'order_id',
             'currency_id'
         );
+    }
+
+    public function descendants(): HasMany
+    {
+        return $this->hasMany(OrderPosition::class, 'origin_position_id');
     }
 
     public function discounts(): MorphMany
@@ -184,6 +184,15 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
     public function serialNumbers(): HasMany
     {
         return $this->hasMany(SerialNumber::class);
+    }
+
+    public function siblings(): HasMany
+    {
+        return $this->hasMany(
+            OrderPosition::class,
+            'origin_position_id',
+            'origin_position_id'
+        );
     }
 
     public function vatRate(): BelongsTo

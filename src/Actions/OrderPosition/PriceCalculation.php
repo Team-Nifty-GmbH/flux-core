@@ -49,7 +49,7 @@ class PriceCalculation
                 ->whereKey($orderPosition->order_id)
                 ->first();
 
-        if (! $price && $product) {
+        if (is_null($price) && $product) {
             $priceHelper = PriceHelper::make($product);
 
             if ($contactId = data_get($data, 'contact_id')) {

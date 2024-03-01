@@ -154,6 +154,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                 $order->calculateBalance();
             }
         });
+
+        static::deleted(function (Order $order) {
+            $order->orderPositions()->delete();
+        });
     }
 
     public function addresses(): BelongsToMany
@@ -405,6 +409,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             $totalAmount = bcsub($item['amount'], $item['descendantsAmount'] ?? 0, 2);
             if (bccomp($totalAmount, 0) === 1) {
                 unset($tree[$key]);
+
                 continue;
             }
         }

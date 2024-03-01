@@ -2,7 +2,6 @@
 
 namespace FluxErp\Rulesets\Price;
 
-use FluxErp\Models\PaymentType;
 use FluxErp\Models\Price;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;

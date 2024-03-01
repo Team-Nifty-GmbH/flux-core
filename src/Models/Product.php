@@ -68,8 +68,12 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
 
     public function bundleProducts(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, 'product_bundle_product', 'product_id', 'bundle_product_id')
-            ->withPivot('count');
+        return $this->belongsToMany(
+            Product::class,
+            'product_bundle_product',
+            'product_id',
+            'bundle_product_id'
+        )->withPivot('count');
     }
 
     public function children(): HasMany
@@ -109,7 +113,12 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
 
     public function productProperties(): BelongsToMany
     {
-        return $this->belongsToMany(ProductProperty::class, 'product_product_property', 'product_id', 'product_prop_id');
+        return $this->belongsToMany(
+            ProductProperty::class,
+            'product_product_property',
+            'product_id',
+            'product_prop_id'
+        );
     }
 
     public function purchasePrice(): float

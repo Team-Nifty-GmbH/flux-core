@@ -65,7 +65,6 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Models\Setting;
 use FluxErp\Models\Snapshot;
-use FluxErp\Models\StateSetting;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
