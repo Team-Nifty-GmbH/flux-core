@@ -70,6 +70,10 @@ class SerialNumberRange extends Model
             'current_year' => date('Y'),
         ];
 
+        if (! $this->model_type) {
+            return $defaultAttributes;
+        }
+
         $modelAttributes = array_fill_keys(
             ModelInfo::forModel(Relation::getMorphedModel($this->model_type))->attributes->pluck('name')->toArray(),
             null
