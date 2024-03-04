@@ -96,4 +96,34 @@ public function register(): void
 }
 ```
 
+## Customizing states
+
+To customize the states of a model you can register your own state config in your AppServiceProvider.
+For more information about the state machine see [spatie/laravel-model-states](https://spatie.be/docs/laravel-model-states/v2/working-with-states/01-configuring-states#content-manually-registering-states)
+
+```php
+// App\Providers\AppServiceProvider.php
+
+public function register(): void
+{
+    \FluxErp\States\OrderState::$config = \FluxErp\States\State::config()
+    ->default(App\States\MyNewState::class)
+        ->allowedTransition(App\States\MyNewState::class, \FluxErp\States\Order\Open::class)
+        ->registerState(App\States\MyNewState::class);
+}
+```
+
+If you just want to extend the existing state you can set the static property `$config`.
+
+```php
+// App\Providers\AppServiceProvider.php
+
+public function register(): void
+{
+    \FluxErp\States\OrderState::$config = \FluxErp\States\OrderState::config()
+        ->allowedTransition(App\States\MyNewState::class, \FluxErp\States\Order\Open::class)
+        ->registerState(App\States\MyNewState::class);
+}
+```
+
 

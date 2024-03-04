@@ -2,14 +2,12 @@
 
 namespace FluxErp\States\Order;
 
-use FluxErp\Models\StateSetting;
-
 class Done extends OrderState
 {
     public static $name = 'done';
 
     public function color(): string
     {
-        return StateSetting::query()->where('model', self::class)->first()?->color ?: 'positive';
+        return static::$color ?? 'positive';
     }
 }

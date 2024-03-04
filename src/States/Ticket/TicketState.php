@@ -12,7 +12,7 @@ abstract class TicketState extends State implements HasFrontendFormatter
 
     public static function config(): StateConfig
     {
-        return parent::config()
+        return static::$config ?? parent::config()
             ->default(WaitingForSupport::class)
             ->allowTransitions([
                 [

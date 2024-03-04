@@ -15,4 +15,9 @@ abstract class PaymentRunState extends State implements HasFrontendFormatter
                 ->map(fn ($key) => (new $key(''))->color()),
         ];
     }
+
+    public static function config(): \Spatie\ModelStates\StateConfig
+    {
+        return static::$config ?? parent::config();
+    }
 }
