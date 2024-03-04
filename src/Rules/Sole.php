@@ -12,20 +12,23 @@ class Sole implements ValidationRule
 {
     public bool $implicit = false;
 
-    public Model $model;
+    protected string $column;
 
-    public function __construct(Model|string $model)
+    protected Model $model;
+
+    public function __construct(Model|string $model, ?string $column = null)
     {
         if (is_string($model)) {
             $model = app($model);
         }
 
         $this->model = $model;
+        $this->column = $column;
     }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $attribute = Str::afterLast($attribute, '.');
+        $attribute = $this->column ?? Str::afterLast($attribute, '.');
 
         try {
             $this->model->query()->where($attribute, $value)->sole($attribute);
