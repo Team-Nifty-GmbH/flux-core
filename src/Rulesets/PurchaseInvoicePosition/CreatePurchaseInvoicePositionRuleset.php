@@ -9,6 +9,7 @@ use FluxErp\Models\PurchaseInvoicePosition;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
+use FluxErp\Rules\Sole;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreatePurchaseInvoicePositionRuleset extends FluxRuleset
@@ -18,7 +19,10 @@ class CreatePurchaseInvoicePositionRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:purchase_invoice_positions,uuid',
+            'uuid' => [
+                'string',
+                new Sole(PurchaseInvoicePosition::class),
+            ],
             'purchase_invoice_id' => [
                 'required',
                 'integer',

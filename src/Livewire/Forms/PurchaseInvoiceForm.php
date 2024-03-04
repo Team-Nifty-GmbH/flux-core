@@ -37,7 +37,7 @@ class PurchaseInvoiceForm extends FluxForm
     #[Locked]
     public $media = null;
 
-    public ?array $purchase_invoice_positions = null;
+    public array $purchase_invoice_positions = [];
 
     public ?string $mediaUrl = null;
 

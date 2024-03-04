@@ -13,70 +13,93 @@
                 <embed width="100%" height="100%" lazy class="w-full h-full" x-bind:src="$wire.purchaseInvoiceForm.mediaUrl" type="application/pdf">
             </div>
             <div class="flex flex-col gap-4 overflow-auto">
-                <x-select
-                    wire:model="purchaseInvoiceForm.client_id"
-                    option-key-value
-                    :options="$clients"
-                    :label="__('Client')"
-                />
-                <x-select
-                    :label="__('Supplier')"
-                    wire:model="purchaseInvoiceForm.contact_id"
-                    option-value="contact_id"
-                    option-label="label"
-                    option-description="description"
-                    template="user-option"
-                    :async-data="[
-                        'api' => route('search', \FluxErp\Models\Address::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'option-value' => 'contact_id',
-                            'fields' => [
-                                'name',
-                                'contact_id',
-                                'firstname',
-                                'lastname',
-                                'company',
-                            ],
-                            'where' => [
-                                [
-                                    'is_main_address',
-                                    '=',
-                                    true,
-                                ]
-                            ],
-                            'with' => 'contact.media',
-                        ]
-                    ]"
-                />
-                <x-select
-                    wire:model="purchaseInvoiceForm.currency_id"
-                    option-key-value
-                    :options="$currencies"
-                    :label="__('Currency')"
-                />
-                <x-select
-                    wire:model="purchaseInvoiceForm.order_type_id"
-                    option-key-value
-                    :options="$orderTypes"
-                    :label="__('Order Type')"
-                />
-                <x-select
-                    wire:model="purchaseInvoiceForm.payment_type_id"
-                    option-key-value
-                    :options="$paymentTypes"
-                    :label="__('Payment Type')"
-                />
+                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                    <x-select
+                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                        wire:model="purchaseInvoiceForm.client_id"
+                        option-key-value
+                        :options="$clients"
+                        :label="__('Client')"
+                    />
+                </div>
+                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                    <x-select
+                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                        :label="__('Supplier')"
+                        wire:model="purchaseInvoiceForm.contact_id"
+                        option-value="contact_id"
+                        option-label="label"
+                        option-description="description"
+                        template="user-option"
+                        :async-data="[
+                            'api' => route('search', \FluxErp\Models\Address::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'option-value' => 'contact_id',
+                                'fields' => [
+                                    'name',
+                                    'contact_id',
+                                    'firstname',
+                                    'lastname',
+                                    'company',
+                                ],
+                                'where' => [
+                                    [
+                                        'is_main_address',
+                                        '=',
+                                        true,
+                                    ]
+                                ],
+                                'with' => 'contact.media',
+                            ]
+                        ]"
+                    />
+                </div>
+                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                    <x-select
+                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                        wire:model="purchaseInvoiceForm.currency_id"
+                        option-key-value
+                        :options="$currencies"
+                        :label="__('Currency')"
+                    />
+                </div>
+                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                    <x-select
+                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                        wire:model="purchaseInvoiceForm.order_type_id"
+                        option-key-value
+                        :options="$orderTypes"
+                        :label="__('Order Type')"
+                    />
+                </div>
+                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                    <x-select
+                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                        wire:model="purchaseInvoiceForm.payment_type_id"
+                        option-key-value
+                        :options="$paymentTypes"
+                        :label="__('Payment Type')"
+                    />
+                </div>
                 <x-input
+                    x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                     wire:model="purchaseInvoiceForm.invoice_number"
                     :label="__('Invoice Number')"
                 />
-                <x-datetime-picker
-                    without-time
-                    wire:model="purchaseInvoiceForm.invoice_date"
-                    :label="__('Invoice Date')"
+                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                    <x-datetime-picker
+                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                        without-time
+                        wire:model="purchaseInvoiceForm.invoice_date"
+                        :label="__('Invoice Date')"
+                    />
+                </div>
+                <x-toggle
+                    x-bind:disabled="$wire.purchaseInvoiceForm.order_id"
+                    wire:model="purchaseInvoiceForm.is_net"
+                    :label="__('Is Net')"
                 />
-                <x-toggle wire:model="purchaseInvoiceForm.is_net" :label="__('Is Net')" />
                 <div x-data="{
                     recalculatePrices(position, $event) {
                         const attribute = $event.target.getAttribute('x-model.number');
@@ -93,75 +116,90 @@
                     <template x-for="(position, index) in $wire.purchaseInvoiceForm.purchase_invoice_positions">
                         <x-card>
                             <div class="flex flex-col gap-4">
-                                <x-select
-                                    :label="__('Product')"
-                                    x-on:selected="position.name = $event.detail.label; position.product_id = $event.detail.id"
-                                    option-value="id"
-                                    option-label="label"
-                                    option-description="product_number"
-                                    :clearable="false"
-                                    :template="[
-                                        'name'   => 'user-option',
-                                    ]"
-                                    :async-data="[
-                                        'api' => route('search', \FluxErp\Models\Product::class),
-                                        'params' => [
-                                            'whereDoesntHave' => 'children',
-                                            'fields' => ['id', 'name', 'product_number'],
-                                            'with' => 'media',
-                                        ]
-                                    ]"
-                                />
+                                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                                    <x-select
+                                        :label="__('Product')"
+                                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                                        x-on:selected="position.name = $event.detail.label; position.product_id = $event.detail.id"
+                                        option-value="id"
+                                        option-label="label"
+                                        option-description="product_number"
+                                        :clearable="false"
+                                        :template="[
+                                            'name'   => 'user-option',
+                                        ]"
+                                        :async-data="[
+                                            'api' => route('search', \FluxErp\Models\Product::class),
+                                            'params' => [
+                                                'whereDoesntHave' => 'children',
+                                                'fields' => ['id', 'name', 'product_number'],
+                                                'with' => 'media',
+                                            ]
+                                        ]"
+                                    />
+                                </div>
                                 <x-input
+                                    x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                     x-model="position.name"
                                     :label="__('Name')"
                                 />
-                                <div class="flex gap-1.5">
+                                <div class="flex flex-col md:flex-row gap-1.5">
                                     <x-input
+                                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                         x-on:keyup="recalculatePrices(position, $event)"
                                         x-model.number="position.amount"
                                         :label="__('Amount')"
                                     />
-                                    <x-select
-                                        :options="$vatRates"
-                                        option-key-value
-                                        :label="__('Vat Rate')"
-                                        x-on:selected="position.vat_rate_id = $event.detail.value"
-                                    />
+                                    <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'" class="w-full">
+                                        <x-select
+                                            x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                                            :options="$vatRates"
+                                            option-key-value
+                                            :label="__('Vat Rate')"
+                                            x-on:selected="position.vat_rate_id = $event.detail.value"
+                                        />
+                                    </div>
                                     <x-input
+                                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                         x-on:keyup="recalculatePrices(position, $event)"
                                         x-model.number="position.unit_price"
                                         :label="__('Unit Price')"
                                     />
                                     <x-input
+                                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                         x-on:keyup="recalculatePrices(position, $event)"
                                         x-model.number="position.total_price"
                                         :label="__('Total Price')"
                                     />
-                                    <x-select
-                                        :label="__('Ledger Account')"
-                                        option-value="id"
-                                        option-label="name"
-                                        option-description="description"
-                                        x-model.number="position.ledger_account_id"
-                                        :async-data="[
-                                            'api' => route('search', \FluxErp\Models\LedgerAccount::class),
-                                            'params' => [
-                                                'where' => [
-                                                    [
-                                                        'ledger_account_type_enum',
-                                                        '=',
-                                                        \FluxErp\Enums\LedgerAccountTypeEnum::Expense,
-                                                    ],
+                                    <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'" class="w-full">
+                                        <x-select
+                                            x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                                            :label="__('Ledger Account')"
+                                            option-value="id"
+                                            option-label="name"
+                                            option-description="description"
+                                            x-model.number="position.ledger_account_id"
+                                            :async-data="[
+                                                'api' => route('search', \FluxErp\Models\LedgerAccount::class),
+                                                'params' => [
+                                                    'where' => [
+                                                        [
+                                                            'ledger_account_type_enum',
+                                                            '=',
+                                                            \FluxErp\Enums\LedgerAccountTypeEnum::Expense,
+                                                        ],
+                                                    ]
                                                 ]
-                                            ]
-                                        ]"
-                                    />
+                                            ]"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <x-slot:footer>
                                 <div class="flex justify-end">
                                     <x-button
+                                        x-cloak
+                                        x-show="! $wire.purchaseInvoiceForm.order_id"
                                         negative
                                         :label="__('Delete')"
                                         x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.splice(index, 1)"
@@ -172,6 +210,8 @@
                     </template>
                     <div class="flex justify-center pt-4">
                         <x-button
+                            x-cloak
+                            x-show="! $wire.purchaseInvoiceForm.order_id"
                             positive
                             :label="__('Add Position')"
                             x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.push({ vat_rate_id: null, product_id: null, name: null, amount: 1, unit_price: 0, total_price: 0 })"
@@ -186,7 +226,7 @@
                     <x-button
                         negative
                         x-cloak
-                        x-show="$wire.purchaseInvoiceForm.id"
+                        x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                         :label="__('Delete')"
                         wire:click="delete().then((success) => { if (success) close(); })"
                         wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Purchase Invoice')]) }}"
@@ -199,13 +239,15 @@
                     />
                     <x-button
                         primary
+                        x-cloak
+                        x-show="! $wire.purchaseInvoiceForm.order_id"
                         :label="__('Save')"
                         wire:click="save().then((success) => { if (success) close(); })"
                     />
                     <x-button
                         primary
                         x-cloak
-                        x-show="$wire.purchaseInvoiceForm.id"
+                        x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                         :label="__('Finish')"
                         wire:click="finish().then((success) => { if (success) close(); })"
                     />
