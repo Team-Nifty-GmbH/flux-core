@@ -20,7 +20,7 @@ class PurchaseInvoicePositionRuleset extends FluxRuleset
                     'purchase_invoice_id'
                 ),
                 'purchase_invoice_positions.*.'
-            )
+            ),
         );
     }
 }

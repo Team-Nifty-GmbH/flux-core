@@ -24,6 +24,8 @@ class ClassExists implements ValidationRule
     {
         if (! class_exists($value)) {
             $fail(sprintf('%s is no valid class.', $value))->translate();
+
+            return;
         }
 
         if ($this->uses || $this->instanceOf || $this->implements) {

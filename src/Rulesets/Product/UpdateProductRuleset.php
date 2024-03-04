@@ -113,7 +113,7 @@ class UpdateProductRuleset extends FluxRuleset
                 array_merge(
                     Arr::except(
                         resolve_static(CreateProductCrossSellingRuleset::class, 'getRules'),
-                        ['uuid', 'product_id']
+                        ['product_id']
                     ),
                     [
                         'id' => [

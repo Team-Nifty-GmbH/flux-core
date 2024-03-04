@@ -165,7 +165,7 @@ abstract class PrintableView extends Component
         rewind($resource);
 
         $data = [
-            'model_type' => get_class($model),
+            'model_type' => $model->getMorphClass(),
             'model_id' => $model->getKey(),
             'collection_name' => $this->getCollectionName(),
             'file_name' => now()->format('Y-m-d_H-i-s') . '_' . Str::finish($this->getFileName(), '.pdf'),

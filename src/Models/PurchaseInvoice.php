@@ -45,6 +45,11 @@ class PurchaseInvoice extends Model implements HasMedia
         return $this->belongsTo(Currency::class);
     }
 
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'media_id');
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);

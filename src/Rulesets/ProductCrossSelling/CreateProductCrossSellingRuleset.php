@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\ProductCrossSelling;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Sole;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateProductCrossSellingRuleset extends FluxRuleset
@@ -14,7 +15,10 @@ class CreateProductCrossSellingRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:product_cross_sellings,uuid',
+            'uuid' => [
+                'string',
+                new Sole(ProductCrossSelling::class),
+            ],
             'product_id' => [
                 'required',
                 'integer',

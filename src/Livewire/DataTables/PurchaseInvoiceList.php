@@ -16,6 +16,7 @@ use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\DataTable;
@@ -42,16 +43,18 @@ class PurchaseInvoiceList extends DataTable
 
     public MediaForm $mediaForm;
 
-    public function mount(): void
+    public function mountSupportsCache(): void
     {
-        parent::mount();
+        parent::mountSupportsCache();
 
         if (! $this->userFilters) {
             $this->userFilters = [
                 [
-                    'column' => 'order_id',
-                    'operator' => 'is null',
-                    'value' => null,
+                    [
+                        'column' => 'order_id',
+                        'operator' => 'is null',
+                        'value' => null,
+                    ],
                 ],
             ];
         }
@@ -59,7 +62,7 @@ class PurchaseInvoiceList extends DataTable
 
     public function getBuilder(Builder $builder): Builder
     {
-        return $builder->with('media');
+        return $builder->with(['media', 'invoice']);
     }
 
     public function downloadMedia(Media $media): false|BinaryFileResponse
@@ -124,24 +127,30 @@ class PurchaseInvoiceList extends DataTable
     public function itemToArray($item): array
     {
         $itemArray = parent::itemToArray($item);
-        if ($item->media->first()?->hasGeneratedConversion('thumb_400x400')) {
-            $itemArray['url'] = $item->media->first()?->getUrl('thumb_400x400');
+
+        $media = $item->media->first() ?? $item->invoice;
+        if ($media?->hasGeneratedConversion('thumb_400x400')) {
+            $itemArray['url'] = $media?->getUrl('thumb_400x400');
         } else {
-            $itemArray['url'] = $item->media->first()?->getUrl();
+            $itemArray['url'] = $media?->getUrl();
         }
+
+        $itemArray['media.file_name'] = $media?->file_name;
 
         return $itemArray;
     }
 
+    #[Renderless]
     public function edit(?PurchaseInvoice $purchaseInvoice = null): void
     {
         $this->purchaseInvoiceForm->reset();
         $this->mediaForm->reset();
 
-        if ($purchaseInvoice) {
-            $purchaseInvoice->loadMissing('purchaseInvoicePositions');
+        if ($purchaseInvoice->exists) {
+            $purchaseInvoice->loadMissing(['purchaseInvoicePositions', 'invoice']);
             $this->purchaseInvoiceForm->fill($purchaseInvoice);
-            $this->purchaseInvoiceForm->mediaUrl = $purchaseInvoice->getFirstMediaUrl('purchase_invoice');
+            $this->purchaseInvoiceForm->mediaUrl = $purchaseInvoice->getFirstMediaUrl('purchase_invoice')
+                ?: $purchaseInvoice->invoice->getUrl();
         }
 
         $this->js(<<<'JS'

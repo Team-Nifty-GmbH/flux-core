@@ -6,6 +6,7 @@ use FluxErp\Http\Requests\PrintingRequest;
 use FluxErp\Printing\Printable;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\View\Factory;
 use Illuminate\View\View;
 
@@ -21,7 +22,7 @@ class Printing extends FluxAction
         $this->rules = (new PrintingRequest())->rules();
 
         $this->validate();
-        $this->model = $this->data['model_type']::query()
+        $this->model = app(Relation::getMorphedModel($this->data['model_type']))::query()
             ->whereKey($this->data['model_id'])
             ->first();
     }
