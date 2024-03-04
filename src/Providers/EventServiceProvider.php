@@ -4,6 +4,7 @@ namespace FluxErp\Providers;
 
 use FluxErp\Listeners\Auth\LoginListener;
 use FluxErp\Listeners\Auth\LogoutListener;
+use FluxErp\Listeners\AutomationEventSubscriber;
 use FluxErp\Listeners\BroadcastEventSubscriber;
 use FluxErp\Listeners\CacheKeyWrittenListener;
 use FluxErp\Listeners\MessageSendingEventSubscriber;
@@ -52,6 +53,7 @@ class EventServiceProvider extends ServiceProvider
         WebhookEventSubscriber::class,
         OrderInvoiceAddedSubscriber::class,
         MessageSendingEventSubscriber::class,
+        AutomationEventSubscriber::class,
     ];
 
     /**
