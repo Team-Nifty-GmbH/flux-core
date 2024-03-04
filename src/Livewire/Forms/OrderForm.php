@@ -24,7 +24,7 @@ class OrderForm extends FluxForm
 
     public ?int $contact_id = null;
 
-    public ?int $bank_connection_id = null;
+    public ?int $contact_bank_connection_id = null;
 
     public ?int $address_invoice_id = null;
 
