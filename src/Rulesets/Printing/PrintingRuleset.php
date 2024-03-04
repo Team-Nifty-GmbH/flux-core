@@ -1,14 +1,14 @@
 <?php
 
-namespace FluxErp\Http\Requests;
+namespace FluxErp\Rulesets\Printing;
 
 use FluxErp\Contracts\OffersPrinting;
-use FluxErp\Rules\ClassExists;
+use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
+use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Printable;
-use Illuminate\Database\Eloquent\Model;
 
-class PrintingRequest extends BaseFormRequest
+class PrintingRuleset extends FluxRuleset
 {
     public function rules(): array
     {
@@ -16,7 +16,7 @@ class PrintingRequest extends BaseFormRequest
             'model_type' => [
                 'required',
                 'string',
-                new ClassExists(uses: Printable::class, instanceOf: Model::class, implements: OffersPrinting::class),
+                new MorphClassExists(uses: Printable::class, implements: OffersPrinting::class),
             ],
             'model_id' => [
                 'required',

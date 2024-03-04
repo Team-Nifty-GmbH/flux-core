@@ -2,10 +2,9 @@
 
 namespace FluxErp\Http\Requests;
 
-use FluxErp\Rules\ClassExists;
+use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Traits\Printable;
-use Illuminate\Database\Eloquent\Model;
 
 class GetPrintViewsRequest extends BaseFormRequest
 {
@@ -15,7 +14,7 @@ class GetPrintViewsRequest extends BaseFormRequest
             'model_type' => [
                 'required',
                 'string',
-                new ClassExists(uses: Printable::class, instanceOf: Model::class),
+                new MorphClassExists(uses: Printable::class),
             ],
             'model_id' => [
                 'integer',

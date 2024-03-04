@@ -2,8 +2,8 @@
 
 namespace FluxErp\Actions;
 
-use FluxErp\Http\Requests\PrintingRequest;
 use FluxErp\Printing\Printable;
+use FluxErp\Rulesets\Printing\PrintingRuleset;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -19,10 +19,10 @@ class Printing extends FluxAction
     public function boot($data): void
     {
         parent::boot($data);
-        $this->rules = (new PrintingRequest())->rules();
+        $this->rules = resolve_static(PrintingRuleset::class, 'getRules');
 
         $this->validate();
-        $this->model = app(Relation::getMorphedModel($this->data['model_type']))::query()
+        $this->model = app(Relation::getMorphedModel($this->data['model_type']))->query()
             ->whereKey($this->data['model_id'])
             ->first();
     }

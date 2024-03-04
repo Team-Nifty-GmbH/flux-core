@@ -5,10 +5,11 @@ namespace FluxErp\Http\Controllers;
 use FluxErp\Actions\Printing;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\GetPrintViewsRequest;
-use FluxErp\Http\Requests\PrintingRequest;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class PrintController extends Controller
@@ -17,36 +18,41 @@ class PrintController extends Controller
     {
         $validated = $request->validated();
 
-        $modelType = $validated['model_type'];
+        $modelType = Relation::getMorphedModel($validated['model_type']);
         if ($validated['model_id'] ?? false) {
             $views = array_keys(
-                $modelType::query()
+                app($modelType)->query()
                     ->whereKey($validated['model_id'])
                     ->first()
                     ->resolvePrintViews()
             );
         } else {
-            $views = (new $modelType())->getAvailableViews();
+            $views = app($modelType)->getAvailableViews();
         }
 
         return ResponseHelper::createResponseFromBase(statusCode: 200, data: $views)
             ->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 
-    public function render(PrintingRequest $request): View|Factory|Response
+    public function render(Request $request): View|Factory|Response
     {
-        $data = $request->validated();
+        $data = $request->all();
         $data['html'] = true;
         $data['preview'] = false;
 
-        return Printing::make($data)->execute();
+        return Printing::make($data)
+            ->validate()
+            ->execute();
     }
 
-    public function renderPdf(PrintingRequest $request): Response
+    public function renderPdf(Request $request): Response
     {
-        $data = $request->validated();
+        $data = $request->all();
         $data['html'] = false;
 
-        return Printing::make($data)->execute()->streamPDF();
+        return Printing::make($data)
+            ->validate()
+            ->execute()
+            ->streamPDF();
     }
 }
