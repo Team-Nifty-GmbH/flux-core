@@ -594,7 +594,7 @@
                                                 </x-slot>
                                                 @foreach($printLayouts as $printLayout)
                                                     <x-dropdown.item
-                                                        x-on:click="const previewNode = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['model_id' => $order->id, 'view' => $printLayout, 'model_type' => \FluxErp\Models\Order::class, '']) }}'; $openModal(previewNode); preview = '{{ $printLayout }}';">
+                                                        x-on:click="const previewNode = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['model_id' => $order->id, 'view' => $printLayout, 'model_type' => app(\FluxErp\Models\Order::class)->getMorphClass()]) }}'; $openModal(previewNode); preview = '{{ $printLayout }}';">
                                                         {{ __($printLayout) }}
                                                     </x-dropdown.item>
                                                 @endforeach

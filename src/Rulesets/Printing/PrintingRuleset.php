@@ -1,13 +1,14 @@
 <?php
 
-namespace FluxErp\Http\Requests;
+namespace FluxErp\Rulesets\Printing;
 
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
+use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Printable;
 
-class PrintingRequest extends BaseFormRequest
+class PrintingRuleset extends FluxRuleset
 {
     public function rules(): array
     {

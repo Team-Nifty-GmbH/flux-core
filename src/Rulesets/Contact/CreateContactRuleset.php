@@ -2,10 +2,8 @@
 
 namespace FluxErp\Rulesets\Contact;
 
-use FluxErp\Models\Category;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
-use FluxErp\Models\DiscountGroup;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
@@ -66,20 +64,6 @@ class CreateContactRuleset extends FluxRuleset
             'vendor_customer_number' => 'sometimes|string|nullable',
             'has_sensitive_reminder' => 'sometimes|boolean',
             'has_delivery_lock' => 'sometimes|boolean',
-
-            'discount_groups' => 'array',
-            'discount_groups.*' => [
-                'required',
-                'integer',
-                new ModelExists(DiscountGroup::class),
-            ],
-
-            'categories' => 'array',
-            'categories.*' => [
-                'required',
-                'integer',
-                (new ModelExists(Category::class))->where('model_type', Contact::class),
-            ],
         ];
     }
 
