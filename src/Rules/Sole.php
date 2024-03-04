@@ -12,7 +12,7 @@ class Sole implements ValidationRule
 {
     public bool $implicit = false;
 
-    protected string $column;
+    protected ?string $column;
 
     protected Model $model;
 
