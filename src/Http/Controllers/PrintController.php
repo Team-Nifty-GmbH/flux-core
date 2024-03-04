@@ -5,7 +5,6 @@ namespace FluxErp\Http\Controllers;
 use FluxErp\Actions\Printing;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\GetPrintViewsRequest;
-use FluxErp\Http\Requests\PrintingRequest;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\Relation;
