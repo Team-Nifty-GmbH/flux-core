@@ -516,7 +516,7 @@
                                 />
                                 @if($contactBankConnections)
                                     <x-select
-                                        wire:model="order.bank_connection_id"
+                                        wire:model="order.contact_bank_connection_id"
                                         :label="__('Bank connection')"
                                         :disabled="$order->is_locked"
                                         :options="$contactBankConnections"
