@@ -18,10 +18,8 @@ class ProductBundleProduct extends Pivot
 
     public $incrementing = true;
 
-    public static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
         static::created(function (ProductBundleProduct $model) {
             if (! $model->siblings()->whereKeyNot($model->id)->exists()) {
                 $model->product->update([

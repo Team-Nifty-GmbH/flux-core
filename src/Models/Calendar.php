@@ -20,9 +20,9 @@ class Calendar extends BaseCalendar
         'is_public' => 'boolean',
     ];
 
-    public static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
+        parent::booted();
 
         static::deleting(function ($calendar) {
             $calendar->calendarEvents()->delete();

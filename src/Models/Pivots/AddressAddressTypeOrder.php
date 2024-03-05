@@ -15,10 +15,8 @@ class AddressAddressTypeOrder extends Pivot
         'address' => 'array',
     ];
 
-    public static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
-
         static::saving(function (AddressAddressTypeOrder $model) {
             if ($model->isDirty('address_id')) {
                 $model->address = $model->address()->first();

@@ -48,7 +48,7 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
 
     public static string $iconName = 'users';
 
-    public static function booted(): void
+    protected static function booted(): void
     {
         static::saving(function (Contact $contact) {
             // reset to original
