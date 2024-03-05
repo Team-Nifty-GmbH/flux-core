@@ -40,7 +40,7 @@ class Communication extends Model implements HasMedia, OffersPrinting
         'is_seen' => 'boolean',
     ];
 
-    public static function booted(): void
+    protected static function booted(): void
     {
         static::saving(function (Communication $message) {
             if ($message->isDirty('text_body')) {

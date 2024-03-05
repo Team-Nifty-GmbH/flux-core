@@ -45,7 +45,7 @@ class Task extends Model implements HasMedia, InteractsWithDataTables
 
     public string $detailRouteName = 'tasks.id';
 
-    public static function booted(): void
+    protected static function booted(): void
     {
         static::saving(function (Task $task) {
             if ($task->state::$isEndState) {
