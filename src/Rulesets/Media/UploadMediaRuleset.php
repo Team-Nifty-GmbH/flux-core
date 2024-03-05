@@ -35,6 +35,7 @@ class UploadMediaRuleset extends FluxRuleset
             ],
             'name' => 'sometimes|required|string',
             'file_name' => 'sometimes|required|string',
+            'mime_type' => 'nullable|string',
             'disk' => [
                 'sometimes',
                 'required',

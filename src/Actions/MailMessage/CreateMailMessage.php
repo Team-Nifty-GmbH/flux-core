@@ -39,11 +39,14 @@ class CreateMailMessage extends FluxAction
 
         foreach ($attachments as $attachment) {
             $attachment['model_id'] = $mailMessage->id;
-            $attachment['model_type'] = Communication::class;
+            $attachment['model_type'] = 'communication';
             $attachment['collection_name'] = 'attachments';
             $attachment['media_type'] = 'string';
 
-            UploadMedia::make($attachment)->execute();
+            try {
+                UploadMedia::make($attachment)->validate()->execute();
+            } catch (\Throwable) {
+            }
         }
 
         if ($mailMessage->mailAccount->is_auto_assign) {

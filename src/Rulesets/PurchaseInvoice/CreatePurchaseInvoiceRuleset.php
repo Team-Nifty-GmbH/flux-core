@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\PurchaseInvoice;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
+use FluxErp\Models\Media;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
@@ -50,6 +51,11 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
             'is_net' => 'boolean',
 
             'media' => 'required',
+            'media.id' => [
+                'sometimes',
+                'integer',
+                new ModelExists(Media::class),
+            ],
             'media_type' => ['sometimes', new MediaUploadType()],
         ];
     }

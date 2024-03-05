@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition;
 use FluxErp\Models\Client;
+use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Rulesets\PurchaseInvoice\CreatePurchaseInvoiceRuleset;
@@ -41,12 +42,20 @@ class CreatePurchaseInvoice extends FluxAction
                 ->execute();
         }
 
-        $media = UploadMedia::make([
-            'model_type' => app(PurchaseInvoice::class)->getMorphClass(),
-            'model_id' => $purchaseInvoice->id,
-            'media' => $file,
-            'collection_name' => 'purchase_invoice',
-        ])->validate()->execute();
+        if (data_get($file, 'id')) {
+            $media = app(Media::class)
+                ->query()
+                ->whereKey(data_get($file, 'id'))
+                ->first()
+                ->copy($purchaseInvoice, 'purchase_invoice');
+        } else {
+            $media = UploadMedia::make([
+                'model_type' => app(PurchaseInvoice::class)->getMorphClass(),
+                'model_id' => $purchaseInvoice->id,
+                'media' => $file,
+                'collection_name' => 'purchase_invoice',
+            ])->validate()->execute();
+        }
 
         $purchaseInvoice->media_id = $media->id;
         $purchaseInvoice->save();
@@ -64,8 +73,26 @@ class CreatePurchaseInvoice extends FluxAction
         parent::validateData();
 
         $errors = [];
+        $media = data_get($this->data, 'media');
+        $filePath = (
+            is_string($media) && is_file($media)
+                ? $media
+                : null
+        ) ?? (
+            is_a($media, \SplFileInfo::class)
+                ? $media->getRealPath()
+                : null
+        ) ?? (
+            data_get($this->data, 'media.id')
+                ? app(Media::class)->query()
+                    ->whereKey(data_get($this->data, 'media.id'))
+                    ->first()
+                    ->getPath()
+                : null
+        );
+
         try {
-            $this->data['hash'] = md5_file(data_get($this->data, 'media')->getRealPath());
+            $this->data['hash'] = md5_file($filePath);
 
             Validator::make($this->data, ['hash' => 'required|string|unique:purchase_invoices,hash'])
                 ->validate();

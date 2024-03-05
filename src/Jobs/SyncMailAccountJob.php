@@ -8,10 +8,12 @@ use FluxErp\Actions\MailFolder\CreateMailFolder;
 use FluxErp\Actions\MailFolder\DeleteMailFolder;
 use FluxErp\Actions\MailFolder\UpdateMailFolder;
 use FluxErp\Actions\MailMessage\CreateMailMessage;
+use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Console\Scheduling\Repeatable;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
+use FluxErp\Models\Tag;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -60,15 +62,13 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             ->where('mail_account_id', $this->mailAccount->id)
             ->whereIntegerNotInRaw('id', array_values($this->folderIds))
             ->get('id')
-            ->each(
-                fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->id])->validate()->execute()
-            );
+            ->each(fn (MailFolder $folder) => DeleteMailFolder::make(['id' => $folder->id])->validate()->execute());
 
         if ($this->onlyFolders) {
             return;
         }
 
-        foreach ($folders as $folder) {
+        foreach ($folders->reverse() as $folder) {
             if (! MailFolder::query()
                 ->where('mail_account_id', $this->mailAccount->id)
                 ->where('slug', $folder->path)
@@ -126,8 +126,8 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 ->get()
                 ->first()
                 ?->getUid() - 1
-            ?? ($folder->examine()['uidnext'] ?? 0) - 1
-            ?: 0;
+            ?: ($folder->examine()['uidnext'] ?? 0) - 1
+                ?: 0;
 
         try {
             $query = $folder->messages()
@@ -207,13 +207,29 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             foreach ($message->getAttachments() as $attachment) {
                 /** @var Attachment $attachment */
                 $attachments[] = [
-                    'model_type' => Communication::class,
                     'file_name' => $attachment->getName(),
                     'mime_type' => $attachment->getMimeType(),
                     'name' => $attachment->getName(),
                     'media_type' => 'string',
                     'media' => $attachment->getContent(),
                 ];
+            }
+
+            $tags = $message->getFlags()->toArray();
+            $tagIds = [];
+            $type = app(Communication::class)->getMorphClass();
+            $existingTags = app(Tag::class)->query()
+                ->whereIn('name', $tags)
+                ->where('type', $type)
+                ->pluck('id', 'name')
+                ->toArray();
+
+            foreach ($tags as $tag) {
+                if ($existingTag = data_get($existingTags, $tag)) {
+                    $tagIds[] = $existingTag;
+                } else {
+                    $tagIds[] = CreateTag::make(['name' => $tag, 'type' => $type])->validate()->execute()->id;
+                }
             }
 
             CreateMailMessage::make([
@@ -231,7 +247,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 'text_body' => $message->getTextBody(),
                 'html_body' => $message->getHtmlBody(),
                 'is_seen' => $message->hasFlag('seen'),
-                'tags' => $message->getFlags()->toArray(),
+                'tags' => $tagIds,
                 'attachments' => $attachments,
             ])
                 ->validate()
@@ -242,7 +258,6 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 'mail_folder_id' => $folderId,
                 'message_uid' => $message->getUid(),
                 'communication_type_enum' => 'mail',
-                'tags' => $message->getFlags()->toArray(),
                 'is_seen' => $message->hasFlag('seen'),
             ])
                 ->validate()
