@@ -39,7 +39,7 @@ class CreateMailMessage extends FluxAction
 
         foreach ($attachments as $attachment) {
             $attachment['model_id'] = $mailMessage->id;
-            $attachment['model_type'] = 'communication';
+            $attachment['model_type'] = app(Communication::class)->getMorphClass();
             $attachment['collection_name'] = 'attachments';
             $attachment['media_type'] = 'string';
 

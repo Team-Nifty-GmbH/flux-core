@@ -74,22 +74,16 @@ class CreatePurchaseInvoice extends FluxAction
 
         $errors = [];
         $media = data_get($this->data, 'media');
-        $filePath = (
-            is_string($media) && is_file($media)
-                ? $media
-                : null
-        ) ?? (
-            is_a($media, \SplFileInfo::class)
-                ? $media->getRealPath()
-                : null
-        ) ?? (
-            data_get($this->data, 'media.id')
-                ? app(Media::class)->query()
-                    ->whereKey(data_get($this->data, 'media.id'))
-                    ->first()
-                    ->getPath()
-                : null
-        );
+        $filePath = match (true) {
+            is_string($media) && is_file($media) => $media,
+            is_a($media, \SplFileInfo::class) => $media->getRealPath(),
+            data_get($this->data, 'media.id') => app(Media::class)
+                ->query()
+                ->whereKey(data_get($this->data, 'media.id'))
+                ->first()
+                ?->getPath(),
+            default => null,
+        };
 
         try {
             $this->data['hash'] = md5_file($filePath);

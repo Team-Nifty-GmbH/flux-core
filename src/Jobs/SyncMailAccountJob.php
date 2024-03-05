@@ -36,7 +36,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
     public function __construct(MailAccount|string $email, public readonly bool $onlyFolders = false)
     {
         if (is_string($email)) {
-            $this->mailAccount = MailAccount::query()
+            $this->mailAccount = app(MailAccount::class)->query()
                 ->where('email', $email)
                 ->firstOrFail();
         } else {
@@ -58,7 +58,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             $this->folderIds = array_merge($this->folderIds, $this->createFolder($folder));
         }
 
-        MailFolder::query()
+        app(MailFolder::class)->query()
             ->where('mail_account_id', $this->mailAccount->id)
             ->whereIntegerNotInRaw('id', array_values($this->folderIds))
             ->get('id')
@@ -69,7 +69,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         }
 
         foreach ($folders->reverse() as $folder) {
-            if (! MailFolder::query()
+            if (! app(MailFolder::class)->query()
                 ->where('mail_account_id', $this->mailAccount->id)
                 ->where('slug', $folder->path)
                 ->first()
@@ -86,7 +86,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
     private function createFolder(Folder $folder, ?int $parentId = null): array
     {
         $folderIds = [];
-        $mailFolder = MailFolder::query()
+        $mailFolder = app(MailFolder::class)->query()
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('slug', $folder->path)
             ->first();
@@ -116,18 +116,17 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
 
     private function getNewMessages(Folder $folder): void
     {
-        $startUid = Communication::query()
+        $startUid = app(Communication::class)->query()
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('mail_folder_id', $this->folderIds[$folder->path])
             ->max('message_uid')
-            ?? $folder->messages()->all()
+            ?? max(($folder->messages()->all()
                 ->since($this->mailAccount->created_at)
                 ->limit(1)
                 ->get()
-                ->first()
-                ?->getUid() - 1
-            ?: ($folder->examine()['uidnext'] ?? 0) - 1
-                ?: 0;
+                ?->first()
+                ?->getUid() ?? 0) - 1, 0)
+            ?: max(($folder->examine()['uidnext'] ?? 0) - 1, 0);
 
         try {
             $query = $folder->messages()
@@ -170,7 +169,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             $unreadUids[] = $messages->map(fn (Message $message) => $message->getUid())->toArray();
         } while ($page !== $messages->lastPage());
 
-        Communication::query()
+        app(Communication::class)->query()
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('mail_folder_id', $this->folderIds[$folder->path])
             ->where('is_seen', false)
@@ -181,7 +180,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                     ->execute()
             );
 
-        Communication::query()
+        app(Communication::class)->query()
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('mail_folder_id', $this->folderIds[$folder->path])
             ->where('is_seen', true)
@@ -195,7 +194,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
 
     private function storeMessage(Message $message, int $folderId): void
     {
-        $messageModel = Communication::query()
+        $messageModel = app(Communication::class)->query()
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('message_id', $message->getMessageId())
             ->first();

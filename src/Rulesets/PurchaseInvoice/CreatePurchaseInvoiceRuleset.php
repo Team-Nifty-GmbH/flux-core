@@ -52,7 +52,6 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
 
             'media' => 'required',
             'media.id' => [
-                'sometimes',
                 'integer',
                 new ModelExists(Media::class),
             ],
