@@ -10,6 +10,7 @@ use FluxErp\Models\ContactOption;
 use FluxErp\Models\Order;
 use FluxErp\Rulesets\Communication\CreateCommunicationRuleset;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Meilisearch\Endpoints\Indexes;
 
 class CreateMailMessage extends FluxAction
@@ -29,6 +30,13 @@ class CreateMailMessage extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags');
         $attachments = Arr::pull($this->data, 'attachments', []);
+        $this->data['html_body'] = is_string(data_get($this->data, 'html_body'))
+            ? iconv_mime_decode(data_get($this->data, 'html_body'), 2, 'UTF-8')
+            : data_get($this->data, 'html_body');
+        $this->data['subject'] = is_string(data_get($this->data, 'subject'))
+            ? iconv_mime_decode(data_get($this->data, 'subject'), 2, 'UTF-8')
+            : data_get($this->data, 'subject');
+        $this->data['from'] = Str::replace('"', '', data_get($this->data, 'from'));
 
         $mailMessage = app(Communication::class, ['attributes' => $this->data]);
         $mailMessage->save();
