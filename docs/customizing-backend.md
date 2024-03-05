@@ -107,7 +107,7 @@ For more information about the state machine see [spatie/laravel-model-states](h
 public function register(): void
 {
     \FluxErp\States\OrderState::$config = \FluxErp\States\State::config()
-    ->default(App\States\MyNewState::class)
+        ->default(App\States\MyNewState::class)
         ->allowedTransition(App\States\MyNewState::class, \FluxErp\States\Order\Open::class)
         ->registerState(App\States\MyNewState::class);
 }
