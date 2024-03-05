@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::dropIfExists('state_settings');
+    }
+
+    public function down(): void
+    {
         Schema::create('state_settings', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
@@ -15,10 +20,5 @@ return new class extends Migration
             $table->string('color');
             $table->timestamps();
         });
-    }
-
-    public function down(): void
-    {
-        Schema::dropIfExists('state_settings');
     }
 };

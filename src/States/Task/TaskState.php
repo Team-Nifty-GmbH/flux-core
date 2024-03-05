@@ -14,7 +14,7 @@ abstract class TaskState extends State implements HasFrontendFormatter
 
     public static function config(): StateConfig
     {
-        return parent::config()
+        return static::$config ?? parent::config()
             ->default(Open::class)
             ->allowTransitions([
                 [

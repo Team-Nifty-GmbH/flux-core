@@ -2,8 +2,6 @@
 
 namespace FluxErp\States\Task;
 
-use FluxErp\Models\StateSetting;
-
 class Canceled extends TaskState
 {
     public static $name = 'canceled';
@@ -12,6 +10,6 @@ class Canceled extends TaskState
 
     public function color(): string
     {
-        return StateSetting::query()->where('model', self::class)->first()?->color ?: 'negative';
+        return static::$color ?? 'negative';
     }
 }

@@ -6,9 +6,14 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
 use Spatie\ModelStates\State as BaseState;
+use Spatie\ModelStates\StateConfig;
 
 abstract class State extends BaseState implements Arrayable
 {
+    protected static ?StateConfig $config = null;
+
+    protected static ?string $color = null;
+
     public function toArray(): array|string
     {
         return $this->__toString();
