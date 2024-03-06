@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\PriceList;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class PriceListList extends DataTable
+class PriceListList extends BaseDataTable
 {
     protected string $model = PriceList::class;
 

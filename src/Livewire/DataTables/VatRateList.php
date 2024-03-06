@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\VatRate;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class VatRateList extends DataTable
+class VatRateList extends BaseDataTable
 {
     protected string $model = VatRate::class;
 

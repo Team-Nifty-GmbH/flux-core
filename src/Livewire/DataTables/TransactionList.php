@@ -10,11 +10,10 @@ use FluxErp\Models\Transaction;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
-class TransactionList extends DataTable
+class TransactionList extends BaseDataTable
 {
     use HasEloquentListeners;
 

@@ -10,10 +10,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class AddressList extends DataTable
+class AddressList extends BaseDataTable
 {
     protected string $view = 'flux::livewire.contact.contacts';
 

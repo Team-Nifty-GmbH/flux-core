@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Language;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class LanguageList extends DataTable
+class LanguageList extends BaseDataTable
 {
     protected string $model = Language::class;
 

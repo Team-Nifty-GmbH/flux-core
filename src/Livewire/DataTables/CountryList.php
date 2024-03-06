@@ -4,9 +4,8 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Country;
 use Illuminate\Database\Eloquent\Builder;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class CountryList extends DataTable
+class CountryList extends BaseDataTable
 {
     protected string $model = Country::class;
 

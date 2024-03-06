@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Currency;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class CurrencyList extends DataTable
+class CurrencyList extends BaseDataTable
 {
     protected string $model = Currency::class;
 

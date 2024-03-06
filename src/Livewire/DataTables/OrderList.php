@@ -6,11 +6,10 @@ use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Models\Order;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
-class OrderList extends DataTable
+class OrderList extends BaseDataTable
 {
     use HasEloquentListeners;
 

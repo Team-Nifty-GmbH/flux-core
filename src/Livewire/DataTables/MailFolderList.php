@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\MailFolder;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class MailFolderList extends DataTable
+class MailFolderList extends BaseDataTable
 {
     protected string $model = MailFolder::class;
 

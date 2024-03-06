@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\DiscountGroup;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class DiscountGroupList extends DataTable
+class DiscountGroupList extends BaseDataTable
 {
     protected string $model = DiscountGroup::class;
 

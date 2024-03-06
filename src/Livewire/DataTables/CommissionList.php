@@ -3,10 +3,9 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Commission;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class CommissionList extends DataTable
+class CommissionList extends BaseDataTable
 {
     protected string $model = Commission::class;
 

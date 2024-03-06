@@ -38,7 +38,7 @@
                             $dispatch(
                                 'start-time-tracking',
                                 {
-                                    trackable_type: 'task',
+                                    trackable_type: 'FluxErp\\\Models\\\Task',
                                     trackable_id: {{ $task->id }},
                                     name: '{{ $task->name }}',
                                     description: {{ json_encode($task->description) }}

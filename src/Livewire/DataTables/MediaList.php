@@ -4,10 +4,9 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Media;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class MediaList extends DataTable
+class MediaList extends BaseDataTable
 {
     protected string $model = Media::class;
 

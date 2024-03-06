@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\SepaMandate;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class SepaMandateList extends DataTable
+class SepaMandateList extends BaseDataTable
 {
     protected string $model = SepaMandate::class;
 

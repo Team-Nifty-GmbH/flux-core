@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\StockPosting;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class StockPostingList extends DataTable
+class StockPostingList extends BaseDataTable
 {
     protected string $model = StockPosting::class;
 

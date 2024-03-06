@@ -19,10 +19,9 @@ use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class PurchaseInvoiceList extends DataTable
+class PurchaseInvoiceList extends BaseDataTable
 {
     use WithFileUploads;
 

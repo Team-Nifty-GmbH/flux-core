@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\ProductCrossSelling;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class ProductCrossSellingList extends DataTable
+class ProductCrossSellingList extends BaseDataTable
 {
     protected string $model = ProductCrossSelling::class;
 

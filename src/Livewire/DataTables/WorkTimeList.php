@@ -22,11 +22,10 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\ModelInfo\ModelInfo;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
-class WorkTimeList extends DataTable
+class WorkTimeList extends BaseDataTable
 {
     use HasEloquentListeners;
 

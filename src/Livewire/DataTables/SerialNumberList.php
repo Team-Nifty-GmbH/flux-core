@@ -4,9 +4,8 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\SerialNumber;
 use Illuminate\Database\Eloquent\Builder;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class SerialNumberList extends DataTable
+class SerialNumberList extends BaseDataTable
 {
     protected string $model = SerialNumber::class;
 

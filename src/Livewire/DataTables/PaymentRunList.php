@@ -7,10 +7,9 @@ use FluxErp\Models\BankConnection;
 use FluxErp\Models\PaymentRun;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class PaymentRunList extends DataTable
+class PaymentRunList extends BaseDataTable
 {
     protected string $model = PaymentRun::class;
 

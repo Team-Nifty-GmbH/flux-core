@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\SerialNumberRange;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class SerialNumberRangeList extends DataTable
+class SerialNumberRangeList extends BaseDataTable
 {
     protected string $model = SerialNumberRange::class;
 

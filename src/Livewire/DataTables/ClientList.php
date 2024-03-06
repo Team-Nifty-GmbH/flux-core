@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Client;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class ClientList extends DataTable
+class ClientList extends BaseDataTable
 {
     protected string $model = Client::class;
 
