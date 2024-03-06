@@ -9,11 +9,10 @@ use FluxErp\Livewire\Forms\ProductOptionGroupForm;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
 
-class ProductOptionGroupList extends DataTable
+class ProductOptionGroupList extends BaseDataTable
 {
     use Actions;
 

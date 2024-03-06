@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Pivots\ProductBundleProduct;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class ProductBundleProductList extends DataTable
+class ProductBundleProductList extends BaseDataTable
 {
     protected string $model = ProductBundleProduct::class;
 

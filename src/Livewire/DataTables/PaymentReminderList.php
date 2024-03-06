@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\PaymentReminder;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class PaymentReminderList extends DataTable
+class PaymentReminderList extends BaseDataTable
 {
     protected string $model = PaymentReminder::class;
 

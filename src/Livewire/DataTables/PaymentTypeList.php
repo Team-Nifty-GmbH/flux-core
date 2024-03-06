@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\PaymentType;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class PaymentTypeList extends DataTable
+class PaymentTypeList extends BaseDataTable
 {
     protected string $model = PaymentType::class;
 

@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\WorkTimeType;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class WorkTimeTypeList extends DataTable
+class WorkTimeTypeList extends BaseDataTable
 {
     protected string $model = WorkTimeType::class;
 

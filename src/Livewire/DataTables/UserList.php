@@ -4,9 +4,8 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class UserList extends DataTable
+class UserList extends BaseDataTable
 {
     protected string $model = User::class;
 

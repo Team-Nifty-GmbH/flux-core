@@ -4,9 +4,8 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\OrderPosition;
 use Illuminate\Database\Eloquent\Builder;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class OrderPositionList extends DataTable
+class OrderPositionList extends BaseDataTable
 {
     protected string $model = OrderPosition::class;
 

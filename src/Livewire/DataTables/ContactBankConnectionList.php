@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\ContactBankConnection;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class ContactBankConnectionList extends DataTable
+class ContactBankConnectionList extends BaseDataTable
 {
     protected string $model = ContactBankConnection::class;
 

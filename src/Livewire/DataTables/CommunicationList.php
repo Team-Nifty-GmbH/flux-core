@@ -4,10 +4,9 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Communication;
 use Illuminate\Support\Str;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
-class CommunicationList extends DataTable
+class CommunicationList extends BaseDataTable
 {
     use HasEloquentListeners;
 

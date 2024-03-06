@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Warehouse;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class WarehouseList extends DataTable
+class WarehouseList extends BaseDataTable
 {
     protected string $model = Warehouse::class;
 

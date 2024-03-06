@@ -5,9 +5,8 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Models\Category;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class CategoryList extends DataTable
+class CategoryList extends BaseDataTable
 {
     protected string $model = Category::class;
 

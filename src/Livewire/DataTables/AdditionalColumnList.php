@@ -3,9 +3,8 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\AdditionalColumn;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class AdditionalColumnList extends DataTable
+class AdditionalColumnList extends BaseDataTable
 {
     protected string $model = AdditionalColumn::class;
 
