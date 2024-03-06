@@ -9,6 +9,7 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rulesets\PurchaseInvoicePosition\UpdatePurchaseInvoicePositionRuleset;
 use Illuminate\Support\Arr;
@@ -50,6 +51,7 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
             ],
             'invoice_number' => 'required|string',
             'invoice_date' => 'required|date',
+            'is_net' => 'boolean',
         ];
     }
 
@@ -57,6 +59,7 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
             [
                 'purchase_invoice_positions' => 'array',
             ],

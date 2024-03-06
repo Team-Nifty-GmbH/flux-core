@@ -22,9 +22,14 @@ class CreateContactBankConnectionRuleset extends FluxRuleset
                 new ModelExists(Contact::class),
             ],
             'iban' => ['required', 'string', new Iban()],
-            'account_holder' => 'string|nullable',
-            'bank_name' => 'string|nullable',
-            'bic' => 'string|nullable',
         ];
+    }
+
+    public static function getRules(): array
+    {
+        return array_merge(
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
+            parent::getRules()
+        );
     }
 }

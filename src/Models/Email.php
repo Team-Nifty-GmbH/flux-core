@@ -9,6 +9,9 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @deprecated
+ */
 class Email extends Model
 {
     use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;

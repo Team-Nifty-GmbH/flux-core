@@ -16,7 +16,7 @@
         <div>
             <div class="flex flex-1 flex-col pt-0">
                 <div class="whitespace-nowrap pb-8 pt-4">
-                    <x-dropdown>
+                    <x-dropdown align="left">
                         <x-slot name="trigger">
                             <div class="-ml-2 flex cursor-pointer px-4">
                                 <div class="flex w-16 flex-none justify-center">

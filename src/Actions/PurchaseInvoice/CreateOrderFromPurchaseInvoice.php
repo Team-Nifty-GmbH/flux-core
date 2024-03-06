@@ -29,7 +29,15 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
         $order = CreateOrder::make($this->data)->validate()->execute();
 
         foreach (data_get($this->data, 'purchase_invoice_positions', []) as $position) {
-            CreateOrderPosition::make(array_merge($position, ['order_id' => $order->id]))
+            CreateOrderPosition::make(
+                array_merge(
+                    $position,
+                    [
+                        'order_id' => $order->id,
+                        'is_net' => data_get($this->data, 'is_net', true),
+                    ]
+                )
+            )
                 ->validate()
                 ->execute();
         }

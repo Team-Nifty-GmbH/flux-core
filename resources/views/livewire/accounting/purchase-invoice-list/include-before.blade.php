@@ -12,16 +12,18 @@
             <div x-cloak x-show="$wire.purchaseInvoiceForm.id">
                 <embed width="100%" height="100%" lazy class="w-full h-full" x-bind:src="$wire.purchaseInvoiceForm.mediaUrl" type="application/pdf">
             </div>
-            <div class="flex flex-col gap-4 overflow-auto">
-                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
-                    <x-select
-                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                        wire:model="purchaseInvoiceForm.client_id"
-                        option-key-value
-                        :options="$clients"
-                        :label="__('Client')"
-                    />
-                </div>
+            <div class="flex flex-col gap-1.5 overflow-auto">
+                @if(count($clients ?? []) > 1)
+                    <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                        <x-select
+                            x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                            wire:model="purchaseInvoiceForm.client_id"
+                            option-key-value
+                            :options="$clients"
+                            :label="__('Client')"
+                        />
+                    </div>
+                @endif
                 <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
                     <x-select
                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
@@ -55,15 +57,17 @@
                         ]"
                     />
                 </div>
-                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
-                    <x-select
-                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                        wire:model="purchaseInvoiceForm.currency_id"
-                        option-key-value
-                        :options="$currencies"
-                        :label="__('Currency')"
-                    />
-                </div>
+                @if(count($currencies ?? []) > 1)
+                    <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                        <x-select
+                            x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                            wire:model="purchaseInvoiceForm.currency_id"
+                            option-key-value
+                            :options="$currencies"
+                            :label="__('Currency')"
+                        />
+                    </div>
+                @endif
                 <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
                     <x-select
                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
@@ -82,18 +86,65 @@
                         :label="__('Payment Type')"
                     />
                 </div>
-                <x-input
-                    x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                    wire:model="purchaseInvoiceForm.invoice_number"
-                    :label="__('Invoice Number')"
-                />
-                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
-                    <x-datetime-picker
+                <div class="flex gap-1.5 w-full">
+                    <x-input
                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                        without-time
-                        wire:model="purchaseInvoiceForm.invoice_date"
-                        :label="__('Invoice Date')"
+                        wire:model="purchaseInvoiceForm.invoice_number"
+                        :label="__('Invoice Number')"
                     />
+                    <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                        <x-datetime-picker
+                            x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                            without-time
+                            wire:model="purchaseInvoiceForm.invoice_date"
+                            :label="__('Invoice Date')"
+                        />
+                    </div>
+                </div>
+                <div class="flex gap-1.5 w-full">
+                    <div class="flex-1" x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                        <x-datetime-picker
+                            x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                            without-time
+                            wire:model="purchaseInvoiceForm.system_delivery_date"
+                            :label="__('Performance/Delivery date')"
+                        />
+                    </div>
+                    <div class="flex-1" x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                        <x-datetime-picker
+                            x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                            without-time
+                            wire:model="purchaseInvoiceForm.system_delivery_date_end"
+                            :label="__('Performance/Delivery date end')"
+                        />
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <div class="col-span-2">
+                        <x-select
+                            :label="__('Lay out user')"
+                            option-value="id"
+                            option-label="label"
+                            autocomplete="off"
+                            x-on:selected="$wire.purchaseInvoiceForm.iban = $event.detail?.iban; $wire.purchaseInvoiceForm.bic = $event.detail?.bic; $wire.purchaseInvoiceForm.bank_name = $event.detail?.bank_name; $wire.purchaseInvoiceForm.account_holder = $event.detail?.account_holder"
+                            wire:model="purchaseInvoiceForm.lay_out_user_id"
+                            :template="[
+                                'name'   => 'user-option',
+                            ]"
+                            :async-data="[
+                                'api' => route('search', \FluxErp\Models\User::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'with' => 'media',
+                                    'fields' => ['id', 'name', 'email', 'iban', 'bic', 'bank_name', 'account_holder']
+                                ]
+                            ]"
+                        />
+                    </div>
+                    <x-input wire:model="purchaseInvoiceForm.account_holder" :label="__('Account Holder')"/>
+                    <x-input wire:model="purchaseInvoiceForm.iban" :label="__('IBAN')"/>
+                    <x-input wire:model="purchaseInvoiceForm.bic" :label="__('BIC')"/>
+                    <x-input wire:model="purchaseInvoiceForm.bank_name" :label="__('Bank Name')"/>
                 </div>
                 <x-toggle
                     x-bind:disabled="$wire.purchaseInvoiceForm.order_id"
@@ -144,7 +195,8 @@
                                     :label="__('Name')"
                                 />
                                 <div class="flex flex-col md:flex-row gap-1.5">
-                                    <x-input
+                                    <x-inputs.number
+                                        step="0.01"
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                         x-on:keyup="recalculatePrices(position, $event)"
                                         x-model.number="position.amount"
@@ -159,13 +211,15 @@
                                             x-on:selected="position.vat_rate_id = $event.detail.value"
                                         />
                                     </div>
-                                    <x-input
+                                    <x-inputs.number
+                                        step="0.01"
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                         x-on:keyup="recalculatePrices(position, $event)"
                                         x-model.number="position.unit_price"
                                         :label="__('Unit Price')"
                                     />
-                                    <x-input
+                                    <x-inputs.number
+                                        step="0.01"
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                         x-on:keyup="recalculatePrices(position, $event)"
                                         x-model.number="position.total_price"

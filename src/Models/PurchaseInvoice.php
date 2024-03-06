@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -14,7 +15,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class PurchaseInvoice extends Model implements HasMedia
 {
-    use HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, SoftDeletes;
+    use Commentable, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, SoftDeletes;
 
     protected $guarded = ['id'];
 
@@ -27,6 +28,12 @@ class PurchaseInvoice extends Model implements HasMedia
     {
         static::creating(function (PurchaseInvoice $model) {
             $model->invoice_date = $model->invoice_date ?: now()->toDateString();
+        });
+
+        static::saving(function (PurchaseInvoice $model) {
+            if ($model->isDirty('iban')) {
+                $model->iban = str_replace(' ', '', strtoupper($model->iban));
+            }
         });
     }
 
@@ -48,6 +55,11 @@ class PurchaseInvoice extends Model implements HasMedia
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Media::class, 'media_id');
+    }
+
+    public function layOutUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'lay_out_user_id');
     }
 
     public function order(): BelongsTo

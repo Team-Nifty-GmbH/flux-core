@@ -9,7 +9,9 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
+use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 
 class UpdatePurchaseInvoiceRuleset extends FluxRuleset
@@ -34,6 +36,11 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
                 'integer',
                 new ModelExists(Contact::class),
             ],
+            'lay_out_user_id' => [
+                'nullable',
+                'integer',
+                (new ModelExists(User::class))->where('is_active', true),
+            ],
             'currency_id' => [
                 'nullable',
                 'integer',
@@ -50,6 +57,8 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
                 new ModelExists(PaymentType::class),
             ],
             'invoice_date' => 'date',
+            'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
+            'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
             'invoice_number' => 'nullable|string',
             'is_net' => 'boolean',
 
@@ -61,6 +70,7 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
             resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules'),
             [
                 'purchase_invoice_positions.*.id' => [

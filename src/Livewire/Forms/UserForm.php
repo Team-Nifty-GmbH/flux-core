@@ -28,6 +28,14 @@ class UserForm extends FluxForm
 
     public ?string $user_code = null;
 
+    public ?string $iban = null;
+
+    public ?string $account_holder = null;
+
+    public ?string $bank_name = null;
+
+    public ?string $bic = null;
+
     protected function getActions(): array
     {
         return [

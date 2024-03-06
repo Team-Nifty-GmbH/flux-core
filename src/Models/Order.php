@@ -37,6 +37,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
@@ -153,10 +154,32 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             if ($order->isDirty('invoice_number')) {
                 $order->calculateBalance();
             }
+
+            if ($order->isDirty('iban')
+                && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
+            ) {
+                $order->contact_bank_connection_id = null;
+            }
+
+            if (
+                $order->contact_bank_connection_id
+                && $order->isDirty('contact_bank_connection_id')
+                && ! $order->isDirty('iban')
+            ) {
+                $order->iban = $order->contactBankConnection->iban;
+                $order->account_holder = $order->contactBankConnection->account_holder;
+                $order->bank_name = $order->contactBankConnection->bank_name;
+                $order->bic = $order->contactBankConnection->bic;
+            }
+
+            if ($order->isDirty('iban')) {
+                $order->iban = str_replace(' ', '', strtoupper($order->iban));
+            }
         });
 
         static::deleted(function (Order $order) {
             $order->orderPositions()->delete();
+            $order->purchaseInvoice()->update(['order_id' => null]);
         });
     }
 
@@ -248,9 +271,9 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->belongsTo(PriceList::class);
     }
 
-    public function purchaseInvoice(): HasMany
+    public function purchaseInvoice(): HasOne
     {
-        return $this->hasMany(PurchaseInvoice::class);
+        return $this->hasOne(PurchaseInvoice::class);
     }
 
     public function responsibleUser(): BelongsTo

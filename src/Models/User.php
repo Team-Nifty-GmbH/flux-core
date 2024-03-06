@@ -62,6 +62,10 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
             if ($user->isDirty('lastname') || $user->isDirty('firstname')) {
                 $user->name = trim($user->firstname . ' ' . $user->lastname);
             }
+
+            if ($user->isDirty('iban')) {
+                $user->iban = str_replace(' ', '', strtoupper($user->iban));
+            }
         });
     }
 

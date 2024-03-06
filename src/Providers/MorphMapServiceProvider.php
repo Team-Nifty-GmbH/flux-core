@@ -24,7 +24,11 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\CustomEvent;
 use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
+use FluxErp\Models\DocumentGenerationSetting;
 use FluxErp\Models\DocumentType;
+use FluxErp\Models\Email;
+use FluxErp\Models\EmailTemplate;
+use FluxErp\Models\EventSubscription;
 use FluxErp\Models\Favorite;
 use FluxErp\Models\FormBuilderField;
 use FluxErp\Models\FormBuilderFieldResponse;
@@ -35,15 +39,18 @@ use FluxErp\Models\InterfaceUser;
 use FluxErp\Models\Language;
 use FluxErp\Models\LanguageLine;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Lock;
 use FluxErp\Models\Log;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\Media;
+use FluxErp\Models\Meta;
 use FluxErp\Models\Notification;
 use FluxErp\Models\NotificationSetting;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
+use FluxErp\Models\PaymentNotice;
 use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentType;
@@ -109,7 +116,11 @@ class MorphMapServiceProvider extends ServiceProvider
             'custom_event' => CustomEvent::class,
             'discount' => Discount::class,
             'discount_group' => DiscountGroup::class,
+            'document_generation_setting' => DocumentGenerationSetting::class,
             'document_type' => DocumentType::class,
+            'email' => Email::class,
+            'email_template' => EmailTemplate::class,
+            'event_subscription' => EventSubscription::class,
             'favorite' => Favorite::class,
             'form_builder_field' => FormBuilderField::class,
             'form_builder_field_response' => FormBuilderFieldResponse::class,
@@ -120,7 +131,9 @@ class MorphMapServiceProvider extends ServiceProvider
             'language' => Language::class,
             'translation' => LanguageLine::class,
             'ledger_account' => LedgerAccount::class,
+            'lock' => Lock::class,
             'log' => Log::class,
+            'meta' => Meta::class,
             'mail_account' => MailAccount::class,
             'mail_folder' => MailFolder::class,
             'media' => Media::class,
@@ -129,6 +142,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'order' => Order::class,
             'order_position' => OrderPosition::class,
             'order_type' => OrderType::class,
+            'payment_notice' => PaymentNotice::class,
             'payment_reminder' => PaymentReminder::class,
             'payment_run' => PaymentRun::class,
             'payment_type' => PaymentType::class,

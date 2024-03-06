@@ -61,6 +61,14 @@
             </div>
         </div>
     </x-card>
+    <x-card :title="__('Bank Connection')">
+        <div class="flex flex-col gap-4">
+            <x-input x-model="$wire.$parent.order.account_holder" :label="__('Account Holder')"/>
+            <x-input x-model="$wire.$parent.order.iban" :label="__('IBAN')"/>
+            <x-input x-model="$wire.$parent.order.bic" :label="__('BIC')"/>
+            <x-input x-model="$wire.$parent.order.bank_name" :label="__('Bank Name')"/>
+        </div>
+    </x-card>
     <div wire:ignore>
         @include('tall-datatables::livewire.data-table')
     </div>
