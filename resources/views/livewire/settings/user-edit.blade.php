@@ -24,6 +24,10 @@
         <x-checkbox :label="__('Active')" wire:model="user.is_active"/>
         <x-inputs.password :label="__('New password')" wire:model="user.password"/>
         <x-inputs.password :label="__('Repeat password')" wire:model="user.password_confirmation"/>
+        <x-input wire:model="user.account_holder" :label="__('Account Holder')"/>
+        <x-input wire:model="user.iban" :label="__('IBAN')"/>
+        <x-input wire:model="user.bic" :label="__('BIC')"/>
+        <x-input wire:model="user.bank_name" :label="__('Bank Name')"/>
         <x-select :options="$mailAccounts" option-label="email" option-value="id" multiselect :label="__('Mail Accounts')" wire:model="user.mail_accounts" />
     </form>
     <div class="border-b border-gray-200" x-data="{active: 'roles', user: $wire.entangle('user')}">
@@ -65,7 +69,7 @@
                             <div class="flex-1 text-sm">{{ __($role['name']) }}</div>
                             <div class="flex-1 text-sm">{{ __($role['guard_name']) }}</div>
                             <div class="">
-                                <x-checkbox wire:model.live.number="user.roles" :value="$role['id']" />
+                                <x-checkbox wire:model.number.live="user.roles" :value="$role['id']" />
                             </div>
                         </div>
                     @endforeach

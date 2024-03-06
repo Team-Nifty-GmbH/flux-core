@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\User;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rules\Password;
 
@@ -39,6 +40,7 @@ class CreateUserRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
             resolve_static(MailAccountRuleset::class, 'getRules')
         );
     }

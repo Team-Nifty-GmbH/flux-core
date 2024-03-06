@@ -13,6 +13,7 @@ use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\Address\PostalAddressRuleset;
+use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\PaymentState\PaymentState;
@@ -177,6 +178,7 @@ class CreateOrderRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
             Arr::prependKeysWith(
                 resolve_static(PostalAddressRuleset::class, 'getRules'),
                 'address_delivery.'

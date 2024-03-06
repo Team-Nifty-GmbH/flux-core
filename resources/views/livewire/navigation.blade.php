@@ -25,6 +25,7 @@
                 document.addEventListener('livewire:navigating', () => {
                     this.closeMenu(true);
                 });
+                this.activeItem = window.location.pathname.split('/')[1] || 'dashboard';
             },
             activeItem: 'dashboard',
             activeSubItem: window.location.pathname,

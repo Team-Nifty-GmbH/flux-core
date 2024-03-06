@@ -8,6 +8,9 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @deprecated
+ */
 class EmailTemplate extends Model
 {
     use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;

@@ -22,6 +22,8 @@ class PurchaseInvoiceForm extends FluxForm
 
     public ?int $currency_id = null;
 
+    public ?int $lay_out_user_id = null;
+
     public ?int $order_id = null;
 
     public ?int $order_type_id = null;
@@ -30,7 +32,19 @@ class PurchaseInvoiceForm extends FluxForm
 
     public ?string $invoice_date = null;
 
+    public ?string $system_delivery_date = null;
+
+    public ?string $system_delivery_date_end = null;
+
     public ?string $invoice_number = null;
+
+    public ?string $iban = null;
+
+    public ?string $account_holder = null;
+
+    public ?string $bank_name = null;
+
+    public ?string $bic = null;
 
     public bool $is_net = true;
 

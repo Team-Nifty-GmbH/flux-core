@@ -80,6 +80,14 @@ class OrderForm extends FluxForm
 
     public ?string $commission = null;
 
+    public ?string $iban = null;
+
+    public ?string $account_holder = null;
+
+    public ?string $bank_name = null;
+
+    public ?string $bic = null;
+
     public ?string $header = null;
 
     public ?string $footer = null;
