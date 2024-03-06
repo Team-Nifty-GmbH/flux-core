@@ -7,6 +7,7 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Rules\Iban;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateBankConnectionRuleset extends FluxRuleset
@@ -28,12 +29,17 @@ class CreateBankConnectionRuleset extends FluxRuleset
                 new ModelExists(LedgerAccount::class),
             ],
             'name' => 'required|string|max:255',
-            'account_holder' => 'string|nullable',
-            'bank_name' => 'string|nullable',
             'iban' => ['nullable', 'string', new Iban(), 'unique:bank_connections,iban'],
-            'bic' => 'string|nullable',
             'credit_limit' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
         ];
+    }
+
+    public static function getRules(): array
+    {
+        return array_merge(
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
+            parent::getRules()
+        );
     }
 }
