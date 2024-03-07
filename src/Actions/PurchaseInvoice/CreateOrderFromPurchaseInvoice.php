@@ -90,7 +90,6 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
     {
         parent::validateData();
 
-        $errors = [];
         if (
             ! data_get($this->data, 'iban')
             && app(PaymentType::class)->query()
@@ -98,7 +97,6 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 ->value('requires_manual_transfer')
             && app(ContactBankConnection::class)->query()
                 ->where('contact_id', $this->data['contact_id'])
-                ->whereNotNull('iban')
                 ->doesntExist()
         ) {
             throw ValidationException::withMessages([

@@ -21,6 +21,11 @@ class PaymentTypeFactory extends Factory
             'payment_discount_target' => $this->faker->numberBetween(0, $paymentTarget),
             'payment_discount_percentage' => $this->faker->numberBetween(10, 50) / 100,
             'is_active' => $this->faker->boolean(90),
+            'is_direct_debit' => $this->faker->boolean(),
+            'is_default' => $this->faker->boolean(),
+            'is_purchase' => $this->faker->boolean(),
+            'is_sales' => $this->faker->boolean(),
+            'requires_manual_transfer' => $this->faker->boolean(),
         ];
     }
 }
