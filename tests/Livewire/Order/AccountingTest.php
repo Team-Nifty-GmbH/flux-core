@@ -46,6 +46,7 @@ class AccountingTest extends BaseSetup
 
         $paymentType = PaymentType::factory()->create([
             'client_id' => $this->dbClient,
+            'is_active' => true,
         ]);
 
         $priceList = PriceList::factory()->create();

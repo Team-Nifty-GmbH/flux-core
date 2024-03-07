@@ -33,9 +33,13 @@ class ContactTest extends BaseSetup
 
         $this->paymentTypes = PaymentType::factory()->count(2)->create([
             'client_id' => $dbClients[0]->id,
+            'is_active' => true,
+            'is_sales' => true,
         ]);
         $this->paymentTypes[] = PaymentType::factory()->create([
             'client_id' => $dbClients[1]->id,
+            'is_active' => true,
+            'is_sales' => true,
         ]);
 
         $this->contacts = Contact::factory()->count(2)->create([
