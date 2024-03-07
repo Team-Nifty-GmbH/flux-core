@@ -184,7 +184,7 @@
                                     <x-select
                                         :label="__('Product')"
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                                        x-on:selected="position.name = $event.detail.label; position.product_id = $event.detail.id"
+                                        x-on:selected="position.name = $event.detail?.label; position.product_id = $event.detail?.id"
                                         option-value="id"
                                         option-label="label"
                                         option-description="product_number"
@@ -221,7 +221,7 @@
                                             :options="$vatRates"
                                             option-key-value
                                             :label="__('Vat Rate')"
-                                            x-on:selected="position.vat_rate_id = $event.detail.value"
+                                            x-on:selected="position.vat_rate_id = $event.detail?.value"
                                         />
                                     </div>
                                     <x-inputs.number
@@ -240,6 +240,7 @@
                                     />
                                     <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'" class="w-full">
                                         <x-select
+                                            x-on:selected="position.ledger_account_id = $event.detail?.value"
                                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                             :label="__('Ledger Account')"
                                             option-value="id"

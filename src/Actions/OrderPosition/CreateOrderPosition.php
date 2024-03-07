@@ -70,7 +70,7 @@ class CreateOrderPosition extends FluxAction
                 ->increment('sort_number');
         }
 
-        if ($order->orderType->order_type_enum->isPurchase() && ($this->data['ledger_account_id'] ?? false)) {
+        if ($order->orderType->order_type_enum->isPurchase() && is_null(data_get($this->data, 'ledger_account_id'))) {
             $this->data['ledger_account_id'] = $order->contact->expense_ledger_account_id;
         }
 
