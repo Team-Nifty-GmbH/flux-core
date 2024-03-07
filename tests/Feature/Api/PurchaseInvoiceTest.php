@@ -7,6 +7,7 @@ use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\LedgerAccount;
@@ -486,6 +487,10 @@ class PurchaseInvoiceTest extends BaseSetup
 
     public function test_finish_purchase_invoice()
     {
+        ContactBankConnection::factory()->create([
+            'contact_id' => $this->purchaseInvoices[0]->contact_id,
+        ]);
+
         $purchaseInvoice = [
             'id' => $this->purchaseInvoices[0]->id,
         ];
