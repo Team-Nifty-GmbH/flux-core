@@ -447,14 +447,26 @@ if (! function_exists('model')) {
 if (! function_exists('resolve_static')) {
     function resolve_static(string $class, string $method, ?array $parameters = null): mixed
     {
-        $abstract = \Illuminate\Support\Facades\App::getAlias($class);
+        $abstract = Illuminate\Support\Facades\App::getAlias($class);
+        $binding = Illuminate\Support\Facades\App::getBindings()[$abstract] ?? null;
 
-        if (! $abstract) {
+        if ($binding) {
+            $reflector = new Laravel\SerializableClosure\Support\ReflectionClosure($binding['concrete']);
+            $concrete = $reflector->getUseVariables()['concrete'] ?? null;
+        } else {
+            $concrete = $abstract;
+        }
+
+        if (! $concrete) {
             throw new InvalidArgumentException('Invalid class: ' . $class);
         }
 
+        if ($method === 'class') {
+            return $concrete;
+        }
+
         try {
-            $reflectionClass = new ReflectionClass($abstract);
+            $reflectionClass = new ReflectionClass($concrete);
             $reflectionMethod = $reflectionClass->getMethod($method);
 
             if (! $reflectionMethod->isStatic()) {
@@ -462,9 +474,9 @@ if (! function_exists('resolve_static')) {
             }
 
             if ($reflectionMethod->getParameters() && is_array($parameters)) {
-                return $abstract::$method(...$parameters);
+                return $concrete::$method(...$parameters);
             } else {
-                return $abstract::$method();
+                return $concrete::$method();
             }
         } catch (ReflectionException) {
             throw new InvalidArgumentException('Invalid method: ' . $method);
