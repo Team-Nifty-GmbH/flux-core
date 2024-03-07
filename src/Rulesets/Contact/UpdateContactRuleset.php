@@ -36,12 +36,16 @@ class UpdateContactRuleset extends FluxRuleset
             'payment_type_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(PaymentType::class),
+                (new ModelExists(PaymentType::class))
+                    ->where('is_active', true)
+                    ->where('is_sales', true),
             ],
             'purchase_payment_type_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(PaymentType::class),
+                (new ModelExists(PaymentType::class))
+                    ->where('is_active', true)
+                    ->where('is_purchase', true),
             ],
             'price_list_id' => [
                 'integer',

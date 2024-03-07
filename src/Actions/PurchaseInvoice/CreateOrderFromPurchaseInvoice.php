@@ -37,7 +37,7 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
             ! $layOutUserId
             && data_get($this->data, 'iban')
             && app(ContactBankConnection::class)->query()
-                ->where('contact_id', data_get($this->data, 'contact_id'))
+                ->where('contact_id', $this->data['contact_id'])
                 ->where('iban', data_get($this->data, 'iban'))
                 ->doesntExist()
         ) {
@@ -94,18 +94,16 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
         if (
             ! data_get($this->data, 'iban')
             && app(PaymentType::class)->query()
-                ->whereKey(data_get($this->data, 'payment_type_id'))
+                ->whereKey($this->data['payment_type_id'])
                 ->value('requires_manual_transfer')
-            && ! app(ContactBankConnection::class)->query()
-                ->where('contact_id', data_get($this->data, 'contact_id'))
+            && app(ContactBankConnection::class)->query()
+                ->where('contact_id', $this->data['contact_id'])
                 ->whereNotNull('iban')
-                ->exists()
+                ->doesntExist()
         ) {
-            $errors['iban'] = [__('validation.required', ['attribute' => 'IBAN'])];
-        }
-
-        if ($errors) {
-            throw ValidationException::withMessages($errors)->errorBag('createPurchaseInvoice');
+            throw ValidationException::withMessages([
+                'iban' => ['iban' => __('validation.required', ['attribute' => 'IBAN'])],
+            ])->errorBag('createOrderFromPurchaseInvoice');
         }
     }
 }

@@ -13,7 +13,7 @@ return new class extends Migration
                 ->nullable()
                 ->after('payment_type_id')
                 ->constrained('payment_types')
-                ->onDelete('set null');
+                ->nullOnDelete();
         });
     }
 

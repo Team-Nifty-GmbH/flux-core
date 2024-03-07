@@ -23,11 +23,13 @@ class General extends Component
             [
                 'paymentTypes' => app(PaymentType::class)->query()
                     ->where('is_sales', true)
+                    ->where('is_active', true)
                     ->orderByDesc('is_default')
                     ->get(['id', 'name'])
                     ->toArray(),
                 'purchasePaymentTypes' => app(PaymentType::class)->query()
                     ->where('is_purchase', true)
+                    ->where('is_active', true)
                     ->orderByDesc('is_default')
                     ->get(['id', 'name'])
                     ->toArray(),
