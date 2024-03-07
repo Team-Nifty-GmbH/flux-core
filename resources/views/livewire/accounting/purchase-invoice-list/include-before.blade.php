@@ -26,6 +26,7 @@
                 @endif
                 <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
                     <x-select
+                        x-on:selected="$wire.purchaseInvoiceForm.payment_type_id = $event.detail?.contact?.purchase_payment_type_id"
                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                         :label="__('Supplier')"
                         wire:model="purchaseInvoiceForm.contact_id"
@@ -44,6 +45,7 @@
                                     'firstname',
                                     'lastname',
                                     'company',
+                                    'contact',
                                 ],
                                 'where' => [
                                     [
@@ -52,7 +54,10 @@
                                         true,
                                     ]
                                 ],
-                                'with' => 'contact.media',
+                                'with' => [
+                                    'contact.media',
+                                    'contact:id,purchase_payment_type_id',
+                                ],
                             ]
                         ]"
                     />
@@ -136,7 +141,15 @@
                                 'method' => 'POST',
                                 'params' => [
                                     'with' => 'media',
-                                    'fields' => ['id', 'name', 'email', 'iban', 'bic', 'bank_name', 'account_holder']
+                                    'fields' => [
+                                        'id',
+                                        'name',
+                                        'email',
+                                        'iban',
+                                        'bic',
+                                        'bank_name',
+                                        'account_holder',
+                                    ]
                                 ]
                             ]"
                         />

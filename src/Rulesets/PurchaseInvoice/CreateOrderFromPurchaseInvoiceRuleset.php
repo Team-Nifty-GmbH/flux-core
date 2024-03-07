@@ -8,6 +8,7 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
@@ -38,6 +39,11 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
                 'required',
                 'integer',
                 new ModelExists(Currency::class),
+            ],
+            'lay_out_user_id' => [
+                'nullable',
+                'integer',
+                (new ModelExists(User::class))->where('is_active', true),
             ],
             'order_type_id' => [
                 'required',

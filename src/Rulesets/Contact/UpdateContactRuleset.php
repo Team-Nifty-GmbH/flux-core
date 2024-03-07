@@ -38,6 +38,11 @@ class UpdateContactRuleset extends FluxRuleset
                 'nullable',
                 new ModelExists(PaymentType::class),
             ],
+            'purchase_payment_type_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(PaymentType::class),
+            ],
             'price_list_id' => [
                 'integer',
                 'nullable',

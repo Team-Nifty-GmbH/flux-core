@@ -101,8 +101,8 @@ class SearchController extends Controller
             $query->whereTime($request->get('whereTime'));
         }
 
-        if ($request->has('fields')) {
-            $query->select($request->get('fields'));
+        if ($request->has('select')) {
+            $query->select($request->get('select'));
         }
 
         if ($request->has('whereDoesntHave')) {
@@ -131,7 +131,7 @@ class SearchController extends Controller
                         'src' => $item->getAvatarUrl(),
                     ],
                     $item->only($request->get('fields', [])),
-                    $item->only($request->get('appends', []))
+                    $item->only($request->get('appends', [])),
                 );
             });
         }

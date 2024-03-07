@@ -224,13 +224,12 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public function getDescription(): ?string
     {
-        return trim(
-            $this->name . ' ' .
-            ($this->street ?? '') . ' ' .
-            ($this->zip ?? '') . ' ' .
-            ($this->city ?? '') . ' ' .
-            ($this->country ?? '')
-        ) ?: '';
+        return implode(', ', array_filter([
+            $this->name,
+            $this->street,
+            trim($this->zip . ' ' . $this->city),
+            $this->country->name,
+        ]));
     }
 
     public function getUrl(): ?string
