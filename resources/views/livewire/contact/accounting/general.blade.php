@@ -21,6 +21,15 @@
             />
             <x-select
                 x-bind:disabled="! $wire.$parent.$parent.edit"
+                wire:model="contact.purchase_payment_type_id"
+                :clearable="false"
+                :label="__('Purchase Payment Type')"
+                :options="$purchasePaymentTypes"
+                option-label="name"
+                option-value="id"
+            />
+            <x-select
+                x-bind:disabled="! $wire.$parent.$parent.edit"
                 :label="__('Commission Agent')"
                 wire:model="contact.agent_id"
                 option-value="id"

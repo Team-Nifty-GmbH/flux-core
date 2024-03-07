@@ -51,7 +51,9 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
             'payment_type_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(PaymentType::class),
+                (new ModelExists(PaymentType::class))
+                    ->where('is_purchase', true)
+                    ->where('is_active', true),
             ],
             'invoice_date' => 'nullable|date',
             'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
