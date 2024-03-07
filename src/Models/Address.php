@@ -228,7 +228,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             $this->name,
             $this->street,
             trim($this->zip . ' ' . $this->city),
-            $this->country->name,
+            $this->country?->name,
         ]));
     }
 
