@@ -24,7 +24,8 @@ if (! function_exists('exception_to_notifications')) {
     function exception_to_notifications(
         Exception $exception,
         Livewire\Component $component,
-        bool $skipRender = true
+        bool $skipRender = true,
+        ?string $description = null
     ): void {
         if (! method_exists($component, 'notification')) {
             throw new InvalidArgumentException('Component does not have a notification method.');
@@ -44,14 +45,14 @@ if (! function_exists('exception_to_notifications')) {
                     );
 
                     foreach ($messages as $message) {
-                        $component->notification()->error(implode(' -> ', $title), __($message));
+                        $component->notification()->error(implode(' -> ', $title), __($message), $description);
                         $component->addError($field, __($message));
                     }
                 }
 
                 break;
             default:
-                $component->notification()->error($exception->getMessage());
+                $component->notification()->error($exception->getMessage(), $description);
                 $component->addError('', $exception->getMessage());
         }
 

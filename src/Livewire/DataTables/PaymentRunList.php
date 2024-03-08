@@ -105,6 +105,7 @@ class PaymentRunList extends BaseDataTable
                         'orders.invoice_number',
                         'orders.contact_bank_connection_id',
                         'orders.address_invoice_id',
+                        'orders.iban',
                     ])
                     ->with(['contactBankConnection:id,iban', 'addressInvoice:id,name'])
                     ->withPivot('amount'),
