@@ -128,6 +128,9 @@ class OrderForm extends FluxForm
     #[Locked]
     public ?array $parent = null;
 
+    #[Locked]
+    public bool $isPurchase = false;
+
     protected function getActions(): array
     {
         return [
@@ -141,6 +144,7 @@ class OrderForm extends FluxForm
     {
         if ($values instanceof Model) {
             $values->loadMissing('parent');
+            $this->isPurchase = $values->orderType->order_type_enum->isPurchase();
         }
 
         parent::fill($values);

@@ -35,7 +35,8 @@ class PaymentReminderView extends PrintableView
 
     public function getSubject(): string
     {
-        return __('Payment Reminder') . ' '
+        return $this->model->reminder_level . ' '
+            . __('Payment Reminder') . ' '
             . $this->model->order->orderType->name . ' '
             . $this->model->order->invoice_number;
     }

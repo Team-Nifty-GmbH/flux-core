@@ -44,9 +44,7 @@
                         :label="__('Execution Date')"
                         :min="now()->format('Y-m-d')"
                     />
-                    <div x-cloak x-show="$wire.paymentRunForm.payment_run_type_enum === 'direct_debit'">
-                        <x-toggle wire:model="paymentRunForm.is_single_booking" :label="__('Single Booking')" />
-                    </div>
+                    <x-toggle wire:model="paymentRunForm.is_single_booking" :label="__('Single Booking')" />
                     <div x-cloak x-show="$wire.paymentRunForm.payment_run_type_enum === 'money_transfer'">
                         <x-toggle wire:model="paymentRunForm.is_instant_payment" :label="__('Is Instant Payment')" />
                     </div>

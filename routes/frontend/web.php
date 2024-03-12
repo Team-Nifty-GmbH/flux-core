@@ -6,6 +6,7 @@ use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
+use FluxErp\Livewire\Accounting\PaymentReminder;
 use FluxErp\Livewire\Accounting\TransactionList;
 use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contact\Contact;
@@ -119,6 +120,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                     ->registersMenuItem(icon: 'banknotes');
                 Route::get('/work-times', WorkTimeList::class)->name('work-times')->registersMenuItem();
                 Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
+                Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminder')->registersMenuItem();
                 Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices')
                     ->registersMenuItem();
                 Route::get('/transactions', TransactionList::class)->name('transactions')->registersMenuItem();

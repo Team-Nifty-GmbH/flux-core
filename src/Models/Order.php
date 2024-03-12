@@ -256,6 +256,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->belongsTo(Order::class, 'parent_id');
     }
 
+    public function paymentReminders(): HasMany
+    {
+        return $this->hasMany(PaymentReminder::class);
+    }
+
     public function paymentRuns(): BelongsToMany
     {
         return $this->belongsToMany(PaymentRun::class, 'order_payment_run');
