@@ -15,10 +15,10 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Support\OrderCollection;
 use FluxErp\View\Printing\PrintableView;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Features\SupportRedirects\Redirector;
-use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -171,11 +171,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
             // create the documents
             foreach ($createDocuments as $createDocument) {
-                $media = $order->getMedia(
-                    $createDocument,
-                    fn (BaseMedia $media) => $media->getCustomProperty('hash') === $hash
-                )
-                    ->last();
+                $media = $order->getMedia($createDocument)->last();
 
                 if (! $media || ($this->selectedPrintLayouts['force'][$createDocument] ?? false)) {
                     try {
@@ -241,7 +237,9 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         }
 
         if ($mailMessages) {
-            $this->dispatch('createMany', mailMessages: $mailMessages)->to('edit-mail');
+            $sessionKey = 'mail_' . Str::uuid()->toString();
+            session()->put($sessionKey, $mailMessages);
+            $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
         }
 
         if ($downloadIds) {

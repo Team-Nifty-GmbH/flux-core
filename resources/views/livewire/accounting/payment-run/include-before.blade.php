@@ -1,6 +1,12 @@
 <x-modal name="execute-payment-run">
     <x-card>
-        <div class="flex flex-col gap-4 text-sm">
+        <div class="flex flex-col gap-4 text-sm"
+             x-data="{
+                getRoute(order) {
+                    return '{{ route('orders.id', ['id' => ':id']) }}'.replace(':id', order.id);
+                }
+            }"
+        >
             <div class="flex grid grid-cols-1">
                 <div class="overflow-y-auto max-h-96">
                     <template x-for="order in $wire.paymentRunForm.orders">
@@ -11,7 +17,7 @@
                             <x-slot:sub-value>
                                 <div x-html="window.formatters.coloredMoney(order.pivot.amount)"></div>
                                 <div x-text="order.address_invoice.name"></div>
-                                <div x-text="order.contact_bank_connection?.iban"></div>
+                                <div x-text="order.iban || order.contact_bank_connection?.iban"></div>
                             </x-slot:sub-value>
                             <x-slot:actions>
                                 <x-button
@@ -19,6 +25,12 @@
                                     :label="__('Delete')"
                                     wire:click="removeOrder(order.id).then((closeModal) => {if(closeModal) close();})"
                                     wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Payment position')]) }}"
+                                />
+                                <x-button
+                                    primary
+                                    :label="__('Show')"
+                                    href="#"
+                                    x-bind:href="getRoute(order)"
                                 />
                             </x-slot:actions>
                         </x-list-item>

@@ -31,10 +31,18 @@
                     <div class="font-semibold text-sm">{{ __('Download') }}</div>
                     <div class="font-semibold text-sm">{{ __('Force Create') }}</div>
                     @foreach($printLayouts as $printLayout)
-                        <x-checkbox wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}" :label="__($printLayout)" />
-                        <x-checkbox wire:model.boolean="selectedPrintLayouts.email.{{ $printLayout }}" :label="__($printLayout)" />
-                        <x-checkbox wire:model.boolean="selectedPrintLayouts.download.{{ $printLayout }}" :label="__($printLayout)" />
-                        <x-checkbox wire:model.boolean="selectedPrintLayouts.force.{{ $printLayout }}" :label="__($printLayout)" />
+                        <div class="text-ellipsis overflow-hidden">
+                            <x-checkbox wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}" :label="__($printLayout)" />
+                        </div>
+                        <div class="text-ellipsis overflow-hidden">
+                            <x-checkbox class="truncate" wire:model.boolean="selectedPrintLayouts.email.{{ $printLayout }}" :label="__($printLayout)" />
+                        </div>
+                        <div class="text-ellipsis overflow-hidden">
+                            <x-checkbox class="truncate" wire:model.boolean="selectedPrintLayouts.download.{{ $printLayout }}" :label="__($printLayout)" />
+                        </div>
+                        <div class="text-ellipsis overflow-hidden">
+                            <x-checkbox class="truncate" wire:model.boolean="selectedPrintLayouts.force.{{ $printLayout }}" :label="__($printLayout)" />
+                        </div>
                     @endforeach
                 </div>
                 <x-slot:footer>

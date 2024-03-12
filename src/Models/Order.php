@@ -430,17 +430,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
     public function calculateBalance(): static
     {
-        $this->balance = bcsub($this->total_gross_price, $this->transactions()->sum('amount'), 2);
-
-        $tree = [];
-        foreach ($tree as $key => &$item) {
-            $totalAmount = bcsub($item['amount'], $item['descendantsAmount'] ?? 0, 2);
-            if (bccomp($totalAmount, 0) === 1) {
-                unset($tree[$key]);
-
-                continue;
-            }
-        }
+        $this->balance = bcround(
+            bcsub($this->total_gross_price, $this->transactions()->sum('amount'), 9),
+            2
+        );
 
         return $this;
     }

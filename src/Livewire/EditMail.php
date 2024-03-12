@@ -9,6 +9,7 @@ use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Mail;
@@ -33,6 +34,7 @@ class EditMail extends Component
     protected $listeners = [
         'create',
         'createMany',
+        'createFromSession',
     ];
 
     public function render(): View
@@ -74,6 +76,7 @@ class EditMail extends Component
         JS);
     }
 
+    #[Renderless]
     public function createMany(Collection|array $mailMessages): void
     {
         $this->create($mailMessages[0]);
@@ -83,6 +86,17 @@ class EditMail extends Component
 
         if (count($mailMessages) > 1) {
             $this->multiple = true;
+        }
+    }
+
+    #[Renderless]
+    public function createFromSession(string $key): void
+    {
+        $data = session()->pull($key);
+        if (Arr::isAssoc($data)) {
+            $this->create($data);
+        } else {
+            $this->createMany($data);
         }
     }
 
@@ -164,7 +178,7 @@ class EditMail extends Component
                     ->bcc($bcc)
                     ->send(new GenericMail($this->mailMessage));
             } catch (\Exception $e) {
-                exception_to_notifications($e, $this);
+                exception_to_notifications($e, $this, description: $this->mailMessage->subject);
 
                 if ($this->multiple) {
                     $exceptions++;

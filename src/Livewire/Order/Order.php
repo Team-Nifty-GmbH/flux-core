@@ -39,7 +39,6 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
-use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -640,11 +639,7 @@ class Order extends OrderPositionList
         $printIds = [];
         $mailAttachments = [];
         foreach ($createDocuments as $createDocument) {
-            $media = $order->getMedia(
-                $createDocument,
-                fn (BaseMedia $media) => $media->getCustomProperty('hash') === $hash
-            )
-                ->last();
+            $media = $order->getMedia($createDocument)->last();
 
             if (! $media || ($this->selectedPrintLayouts['force'][$createDocument] ?? false)) {
                 try {
