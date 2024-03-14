@@ -20,6 +20,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Str;
 use Webklex\PHPIMAP\Attachment;
 use Webklex\PHPIMAP\Exceptions\ResponseException;
 use Webklex\PHPIMAP\Folder;
@@ -206,7 +207,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             foreach ($message->getAttachments() as $attachment) {
                 /** @var Attachment $attachment */
                 $attachments[] = [
-                    'file_name' => $attachment->getName(),
+                    'file_name' => Str::between($attachment->getName(), '=?', '=?'),
                     'mime_type' => $attachment->getMimeType(),
                     'name' => $attachment->getName(),
                     'media_type' => 'string',

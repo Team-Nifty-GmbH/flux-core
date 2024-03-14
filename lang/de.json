@@ -796,7 +796,8 @@
     "Payment Reminder 2 Days": "Zahlungserinnerung 2 Tage",
     "Payment Reminder 3 Days": "Zahlungserinnerung 3 Tage",
     "Payment Reminder Email": "Zahlungserinnerung Email",
-    "Payment Reminder Text": "Zahlungserinnerungstext",
+    "Payment Reminder Text": "Mahntext",
+    "Payment Reminder Texts": "Mahntexte",
     "Payment Run": "Zahlungslauf",
     "Payment Run created": "Zahlungslauf erstellt",
     "Payment run created.": "Zahlungslauf erstellt.",
@@ -894,6 +895,7 @@
     "Release date": "Veröffentlichungsdatum",
     "Release to upload!": "Loslassen zum Hochladen!",
     "Remember me": "Angemeldet bleiben",
+    "Reminder Level": "Mahnstufe",
     "Repeat": "Wiederhole",
     "Repeat password": "Passwort wiederholen",
     "Replicate": "Duplizieren",
@@ -1256,5 +1258,11 @@
     "Your subject": "Betreff",
     "Zip": "PLZ",
     "zip": "PLZ",
-    "Zip / City": "PLZ / Ort"
+    "Zip / City": "PLZ / Ort",
+    "Payment Reminder :level for invoice :invoice-number": ":level. Mahnung für Rechnung :invoice-number",
+    "No payment reminder text for level :level": "Kein Mahntext für Mahnstufe :level",
+    "Payment Reminders": "Mahnungen",
+    "Payment Reminder Current Level": "Aktuelle Mahnstufe",
+    "Payment Reminder Next Date": "Nächstes Mahndatum",
+    "Reminder Level :level": "Mahnstufe :level"
 }

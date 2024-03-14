@@ -41,6 +41,7 @@ use FluxErp\Livewire\Settings\Logs;
 use FluxErp\Livewire\Settings\MailAccounts;
 use FluxErp\Livewire\Settings\Notifications;
 use FluxErp\Livewire\Settings\OrderTypes;
+use FluxErp\Livewire\Settings\PaymentReminderTexts;
 use FluxErp\Livewire\Settings\PaymentTypes;
 use FluxErp\Livewire\Settings\Permissions;
 use FluxErp\Livewire\Settings\Plugins;
@@ -169,6 +170,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types')->registersMenuItem();
                 Route::get('/vat-rates', VatRates::class)->name('vat-rates')->registersMenuItem();
                 Route::get('/payment-types', PaymentTypes::class)->name('payment-types')->registersMenuItem();
+                Route::get('/payment-reminder-texts', PaymentReminderTexts::class)
+                    ->name('payment-reminder-texts')
+                    ->registersMenuItem();
                 Route::get('/warehouses', Warehouses::class)->name('warehouses')->registersMenuItem();
                 Route::get('/serial-number-ranges', SerialNumberRanges::class)
                     ->name('serial-number-ranges')

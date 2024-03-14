@@ -7,7 +7,9 @@ use FluxErp\Actions\Printing;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentReminder as PaymentReminderModel;
+use FluxErp\Models\PaymentReminderText;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -15,14 +17,15 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 class PaymentReminder extends \FluxErp\Livewire\DataTables\OrderList
 {
     public array $enabledCols = [
-        'invoice_number',
+        'payment_reminder_current_level',
+        'payment_reminder_next_date',
         'invoice_date',
+        'invoice_number',
         'contact.customer_number',
         'address_invoice.name',
         'total_gross_price',
         'balance',
         'commission',
-        'payment_reminders.reminder_level',
     ];
 
     public function getBuilder(Builder $builder): Builder
@@ -36,18 +39,7 @@ class PaymentReminder extends \FluxErp\Livewire\DataTables\OrderList
             ->pluck('id');
 
         return $builder
-            ->whereHas('paymentType', function (Builder $query) {
-                $query->where('is_direct_debit', false)
-                    ->where('requires_manual_transfer', true);
-            })
-            ->where(function (Builder $query) {
-                $query
-                    ->whereHas(
-                        'paymentRuns',
-                        fn (Builder $builder) => $builder->whereNotIn('state', ['open', 'successful', 'pending'])
-                    )
-                    ->orWhereDoesntHave('paymentRuns');
-            })
+            ->whereRelation('paymentType', 'is_direct_debit', false)
             ->where('balance', '>', 0)
             ->whereNotNull('invoice_number')
             ->whereIntegerInRaw('order_type_id', $orderTypes);
@@ -77,6 +69,26 @@ class PaymentReminder extends \FluxErp\Livewire\DataTables\OrderList
                     ->validate()
                     ->execute();
 
+                $paymentReminderText = app(PaymentReminderText::class)
+                    ->where('reminder_level', '<=', $paymentReminder->reminder_level)
+                    ->orderBy('reminder_level', 'desc')
+                    ->first();
+
+                if (! $paymentReminderText) {
+                    $this->notification()
+                        ->error(
+                            __(
+                                'No payment reminder text found for level :level',
+                                [
+                                    'level' => $paymentReminder->reminder_level,
+                                ]
+                            )
+                        );
+                    $paymentReminder->forceDelete();
+
+                    continue;
+                }
+
                 $paymentReminderPdf = Printing::make([
                     'model_type' => app(PaymentReminderModel::class)->getMorphClass(),
                     'model_id' => $paymentReminder->id,
@@ -87,22 +99,31 @@ class PaymentReminder extends \FluxErp\Livewire\DataTables\OrderList
                     ->attachToModel($order);
 
                 $mailMessages[] = [
-                    'to' => $order->contact->invoiceAddress->email,
-                    'subject' => html_entity_decode($order->orderType->mail_subject) ?:
-                        $order->orderType->name . ' ' . $order->order_number,
+                    'to' => [$paymentReminderText->mail_to ?? $order->contact->invoiceAddress->email],
+                    'cc' => $paymentReminderText->mail_cc,
+                    'subject' => html_entity_decode($paymentReminderText->mail_subject) ?:
+                        __(
+                            'Payment Reminder :level for invoice :invoice-number',
+                            [
+                                'level' => $paymentReminder->reminder_level,
+                                'invoice-number' => $order->invoice_number,
+                            ]
+                        ),
                     'attachments' => [
                         [
                             'name' => $paymentReminderPdf->file_name,
                             'id' => $paymentReminderPdf->id,
                         ],
                         [
-                            'name' => $order->invoice->file_name,
-                            'id' => $order->invoice->id,
-                        ]
+                            'name' => $order->invoice()->file_name,
+                            'id' => $order->invoice()->id,
+                        ],
                     ],
-                    'html_body' => html_entity_decode($order->orderType->mail_body),
+                    'html_body' => html_entity_decode(
+                        $paymentReminderText->mail_body ?? $paymentReminderText->reminder_body
+                    ),
                     'blade_parameters_serialized' => true,
-                    'blade_parameters' => serialize(['order' => $order]),
+                    'blade_parameters' => serialize(['paymentReminder' => $paymentReminder]),
                     'communicatable_type' => app(Order::class)->getMorphClass(),
                     'communicatable_id' => $order->id,
                 ];
@@ -111,6 +132,13 @@ class PaymentReminder extends \FluxErp\Livewire\DataTables\OrderList
             }
         }
 
+        if ($mailMessages) {
+            $sessionKey = 'mail_' . Str::uuid()->toString();
+            session()->put($sessionKey, count($mailMessages) > 1 ? $mailMessages : $mailMessages[0]);
+            $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
+        }
+
+        $this->selected = [];
         $this->loadData();
     }
 }

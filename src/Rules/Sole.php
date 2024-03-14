@@ -5,6 +5,7 @@ namespace FluxErp\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\MultipleRecordsFoundException;
 use Illuminate\Support\Str;
 
@@ -33,7 +34,9 @@ class Sole implements ValidationRule
         try {
             $this->model->query()->where($attribute, $value)->sole($attribute);
         } catch (MultipleRecordsFoundException) {
-            $fail('The selected :attribute has multiple records.')->tranlsate();
+            $fail('The selected :attribute has multiple records.')->translate();
+        } catch (ModelNotFoundException) {
+            // Do nothing
         }
     }
 }

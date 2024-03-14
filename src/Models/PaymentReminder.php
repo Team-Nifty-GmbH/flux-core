@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
@@ -23,6 +24,21 @@ class PaymentReminder extends Model implements OffersPrinting
             if (! $model->reminder_level) {
                 $model->reminder_level = $model->siblings()->max('reminder_level') + 1;
             }
+        });
+
+        static::created(function (PaymentReminder $model) {
+            UpdateOrder::make([
+                'id' => $model->order_id,
+                'payment_reminder_current_level' => $model->reminder_level,
+                'payment_reminder_next_date' => $model->created_at
+                    ->addDays(
+                        $model->order->{'payment_reminder_days_' . $model->reminder_level + 1}
+                            ?? $model->order->payment_reminder_days_2
+                    )
+                    ->toDateString(),
+            ])
+                ->validate()
+                ->execute();
         });
     }
 

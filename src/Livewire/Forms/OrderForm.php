@@ -76,6 +76,10 @@ class OrderForm extends FluxForm
 
     public ?int $payment_reminder_days_3 = null;
 
+    public ?int $payment_reminder_current_level = null;
+
+    public ?string $payment_reminder_next_date = null;
+
     public ?string $order_number = null;
 
     public ?string $commission = null;
@@ -169,7 +173,9 @@ class OrderForm extends FluxForm
                 $data['order_number'],
                 $data['order_date'],
                 $data['invoice_date'],
-                $data['invoice_number']
+                $data['invoice_number'],
+                $data['payment_reminder_current_level'],
+                $data['payment_reminder_next_date'],
             );
         }
 
