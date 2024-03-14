@@ -10,7 +10,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->integer('payment_reminder_current_level')->nullable()->after('payment_reminder_days_3');
+            $table->unsignedInteger('payment_reminder_current_level')->nullable()->after('payment_reminder_days_3');
             $table->date('payment_reminder_next_date')->nullable()->after('payment_reminder_current_level');
         });
 

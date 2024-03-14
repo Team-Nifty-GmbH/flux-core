@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('mail_body')->nullable();
             $table->string('reminder_subject')->nullable();
             $table->text('reminder_body');
-            $table->integer('reminder_level')->index();
+            $table->unsignedInteger('reminder_level')->index();
             $table->timestamps();
         });
     }
