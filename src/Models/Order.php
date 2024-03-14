@@ -154,9 +154,12 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
             if ($order->isDirty('invoice_number')) {
                 $order->calculateBalance();
-                $order->payment_reminder_next_date = $order->invoice_date->addDays(
-                    $order->payment_reminder_days_1
-                );
+
+                if (is_null($order->payment_reminder_next_date) && ! is_null($order->invoice_date)) {
+                    $order->payment_reminder_next_date = $order->invoice_date->addDays(
+                        $order->payment_reminder_days_1
+                    );
+                }
             }
 
             if ($order->isDirty('iban')
