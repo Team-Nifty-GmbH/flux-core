@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\PaymentReminderText\CreatePaymentReminderText;
 use FluxErp\Actions\PaymentReminderText\DeletePaymentReminderText;
+use FluxErp\Actions\PaymentReminderText\UpdatePaymentReminderText;
 use FluxErp\Livewire\DataTables\PaymentReminderTextList;
 use FluxErp\Livewire\Forms\PaymentReminderTextForm;
 use FluxErp\Models\PaymentReminderText;
@@ -25,9 +26,9 @@ class PaymentReminderTexts extends PaymentReminderTextList
                 ->icon('plus')
                 ->color('primary')
                 ->when(resolve_static(CreatePaymentReminderText::class, 'canPerformAction', [false]))
-                ->attributes(
-                    ['wire:click' => 'edit']
-                ),
+                ->attributes([
+                    'wire:click' => 'edit',
+                ]),
         ];
     }
 
@@ -38,7 +39,7 @@ class PaymentReminderTexts extends PaymentReminderTextList
                 ->label(__('Edit'))
                 ->icon('pencil')
                 ->color('primary')
-                ->when(resolve_static(CreatePaymentReminderText::class, 'canPerformAction', [false]))
+                ->when(resolve_static(UpdatePaymentReminderText::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
             DataTableButton::make()
                 ->label(__('Delete'))

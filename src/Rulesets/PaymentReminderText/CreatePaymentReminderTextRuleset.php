@@ -3,7 +3,6 @@
 namespace FluxErp\Rulesets\PaymentReminderText;
 
 use FluxErp\Models\PaymentReminderText;
-use FluxErp\Rules\Sole;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreatePaymentReminderTextRuleset extends FluxRuleset
@@ -14,8 +13,10 @@ class CreatePaymentReminderTextRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'string|uuid|unique:payment_reminders,uuid',
-            'mail_to' => 'nullable|string|email',
-            'mail_cc' => 'nullable|string|email',
+            'mail_to' => 'nullable|array',
+            'mail_to.*' => 'email',
+            'mail_cc' => 'nullable|array',
+            'mail_cc.*' => 'email',
             'mail_subject' => 'nullable|string',
             'mail_body' => 'nullable|string',
             'reminder_subject' => 'nullable|string',

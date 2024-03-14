@@ -33,7 +33,7 @@ class CreateContact extends FluxAction
         $this->data['price_list_id'] = $this->data['price_list_id'] ?? PriceList::default()?->id;
         $this->data['payment_type_id'] = $this->data['payment_type_id'] ?? PaymentType::default()?->id;
 
-        $contact = new Contact($this->data);
+        $contact = app(Contact::class, ['attributes' => $this->data]);
         $contact->save();
 
         if ($discountGroups) {

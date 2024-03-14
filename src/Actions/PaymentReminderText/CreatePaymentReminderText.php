@@ -19,7 +19,7 @@ class CreatePaymentReminderText extends FluxAction
         return [PaymentReminderText::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): PaymentReminderText
     {
         $paymentReminderText = app(PaymentReminderText::class, ['attributes' => $this->data]);
         $paymentReminderText->save();

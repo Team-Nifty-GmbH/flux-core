@@ -19,7 +19,7 @@ class DeletePaymentReminderText extends FluxAction
         return [PaymentReminderText::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): ?bool
     {
         return app(PaymentReminderText::class)->query()
             ->whereKey($this->data['id'])

@@ -13,4 +13,9 @@ class PaymentReminderText extends Model
     protected $guarded = [
         'id',
     ];
+
+    protected $casts = [
+        'mail_to' => 'array',
+        'mail_cc' => 'array',
+    ];
 }

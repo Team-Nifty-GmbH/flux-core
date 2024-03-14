@@ -2,7 +2,6 @@
 
 namespace FluxErp\Rulesets\PaymentReminderText;
 
-use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\PaymentReminderText;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Sole;
@@ -18,14 +17,16 @@ class UpdatePaymentReminderTextRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(PaymentReminder::class),
+                new ModelExists(PaymentReminderText::class),
             ],
-            'mail_to' => 'nullable|string|email',
-            'mail_cc' => 'nullable|string|email',
+            'mail_to' => 'nullable|array',
+            'mail_to.*' => 'email',
+            'mail_cc' => 'nullable|array',
+            'mail_cc.*' => 'email',
             'mail_subject' => 'nullable|string',
             'mail_body' => 'nullable|string',
             'reminder_subject' => 'nullable|string',
-            'reminder_body' => 'string',
+            'reminder_body' => 'sometimes|required|string',
             'reminder_level' => [
                 'required',
                 'integer',

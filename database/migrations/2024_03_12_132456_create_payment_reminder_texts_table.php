@@ -11,13 +11,13 @@ return new class extends Migration
         Schema::create('payment_reminder_texts', function (Blueprint $table) {
             $table->id();
             $table->uuid()->unique();
-            $table->string('mail_to')->nullable();
-            $table->string('mail_cc')->nullable();
+            $table->json('mail_to')->nullable();
+            $table->json('mail_cc')->nullable();
             $table->string('mail_subject')->nullable();
             $table->text('mail_body')->nullable();
             $table->string('reminder_subject')->nullable();
             $table->text('reminder_body');
-            $table->string('reminder_level')->index();
+            $table->integer('reminder_level')->index();
             $table->timestamps();
         });
     }

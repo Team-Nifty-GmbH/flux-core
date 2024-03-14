@@ -10,9 +10,9 @@ class PaymentReminderTextForm extends FluxForm
 {
     public ?int $id = null;
 
-    public ?string $mail_to = null;
+    public ?array $mail_to = null;
 
-    public ?string $mail_cc = null;
+    public ?array $mail_cc = null;
 
     public ?string $mail_subject = null;
 

@@ -4,17 +4,19 @@ namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\PaymentReminder\CreatePaymentReminder;
 use FluxErp\Actions\Printing;
+use FluxErp\Livewire\DataTables\OrderList;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentReminder as PaymentReminderModel;
 use FluxErp\Models\PaymentReminderText;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class PaymentReminder extends \FluxErp\Livewire\DataTables\OrderList
+class PaymentReminder extends OrderList
 {
     public array $enabledCols = [
         'payment_reminder_current_level',
@@ -99,8 +101,8 @@ class PaymentReminder extends \FluxErp\Livewire\DataTables\OrderList
                     ->attachToModel($order);
 
                 $mailMessages[] = [
-                    'to' => [$paymentReminderText->mail_to ?? $order->contact->invoiceAddress->email],
-                    'cc' => $paymentReminderText->mail_cc,
+                    'to' => Arr::wrap($paymentReminderText->mail_to ?: $order->contact->invoiceAddress->email),
+                    'cc' => Arr::wrap($paymentReminderText->mail_cc),
                     'subject' => html_entity_decode($paymentReminderText->mail_subject) ?:
                         __(
                             'Payment Reminder :level for invoice :invoice-number',

@@ -15,7 +15,7 @@ return new class extends Migration
         });
 
         DB::statement('UPDATE orders
-            SET payment_reminder_next_date = invoice_date + INTERVAL payment_reminder_days_1 DAY
+            SET payment_reminder_next_date = DATE_ADD(invoice_date, INTERVAL payment_reminder_days_1 DAY)
             WHERE invoice_number is not null'
         );
     }

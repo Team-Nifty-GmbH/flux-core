@@ -1,7 +1,7 @@
 <div x-data="{
     addReceiver($event, type) {
         let value = $event.target.value;
-        if ($event instanceof KeyboardEvent) {
+        if ($event instanceof KeyboardEvent && $event.which !== 13) {
             value = value.slice(0, -1);
         }
 
@@ -18,7 +18,7 @@
             <div class="flex flex-col gap-1.5">
                 <x-label>{{ __('To') }}</x-label>
                 <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
-                    <template x-for="to in $wire.mailMessage.to">
+                    <template x-for="to in $wire.mailMessage.to || []">
                         <x-badge flat primary cl>
                             <x-slot:label>
                                 <span x-text="to"></span>
@@ -52,7 +52,7 @@
             <div class="flex flex-col gap-1.5">
                 <x-label>{{ __('CC') }}</x-label>
                 <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
-                    <template x-for="cc in $wire.mailMessage.cc">
+                    <template x-for="cc in $wire.mailMessage.cc || []">
                         <x-badge flat primary cl>
                             <x-slot:label>
                                 <span x-text="cc"></span>
@@ -79,7 +79,7 @@
             <div class="flex flex-col gap-1.5">
                 <x-label>{{ __('BCC') }}</x-label>
                 <div class="flex gap-1">
-                    <template x-for="bcc in $wire.mailMessage.bcc">
+                    <template x-for="bcc in $wire.mailMessage.bcc || []">
                         <x-badge flat primary cl>
                             <x-slot:label>
                                 <span x-text="bcc"></span>

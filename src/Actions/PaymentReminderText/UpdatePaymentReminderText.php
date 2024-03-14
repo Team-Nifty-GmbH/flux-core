@@ -22,13 +22,13 @@ class UpdatePaymentReminderText extends FluxAction
 
     public function performAction(): Model
     {
-        $ledgerAccount = app(PaymentReminderText::class)->query()
+        $paymentReminderText = app(PaymentReminderText::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
-        $ledgerAccount->fill($this->data);
-        $ledgerAccount->save();
+        $paymentReminderText->fill($this->data);
+        $paymentReminderText->save();
 
-        return $ledgerAccount->withoutRelations()->fresh();
+        return $paymentReminderText->withoutRelations()->fresh();
     }
 }
