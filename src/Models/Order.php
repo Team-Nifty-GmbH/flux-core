@@ -75,6 +75,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         'total_net_price' => Money::class,
         'total_vats' => 'array',
         'balance' => Money::class,
+        'payment_reminder_next_date' => 'date',
         'payment_texts' => 'array',
         'order_date' => 'date',
         'invoice_date' => 'date',
@@ -153,6 +154,12 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
             if ($order->isDirty('invoice_number')) {
                 $order->calculateBalance();
+
+                if (is_null($order->payment_reminder_next_date) && ! is_null($order->invoice_date)) {
+                    $order->payment_reminder_next_date = $order->invoice_date->addDays(
+                        $order->payment_reminder_days_1
+                    );
+                }
             }
 
             if ($order->isDirty('iban')
@@ -254,6 +261,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'parent_id');
+    }
+
+    public function paymentReminders(): HasMany
+    {
+        return $this->hasMany(PaymentReminder::class);
     }
 
     public function paymentRuns(): BelongsToMany

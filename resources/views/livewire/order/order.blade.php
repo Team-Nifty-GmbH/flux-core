@@ -265,10 +265,10 @@
             <x-avatar xl :src="$order->contact['avatar_url'] ?? ''"></x-avatar>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
-                    <div class="flex">
+                    <div class="flex gap-1.5">
                         <x-heroicons x-cloak x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
                         <x-heroicons x-cloak x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
-                        <div class="pl-2">
+                        <div>
                             <div>
                                 <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.order_type.name">
                                 </span>
@@ -276,6 +276,30 @@
                                 </span>
                             </div>
                         </div>
+                        @if($order->payment_reminder_current_level)
+                            @switch($order->payment_reminder_current_level)
+                                @case(1)
+                                    <x-badge
+                                        :label="__('Reminder Level :level', ['level' => $order->payment_reminder_current_level])"
+                                        warning
+                                        rounded
+                                    />
+                                    @break
+                                @case(2)
+                                    <x-badge
+                                        :label="__('Reminder Level :level', ['level' => $order->payment_reminder_current_level])"
+                                        orange
+                                        rounded
+                                    />
+                                    @break
+                                @default
+                                    <x-badge
+                                        :label="__('Reminder Level :level', ['level' => $order->payment_reminder_current_level])"
+                                        negative
+                                        rounded
+                                    />
+                            @endswitch
+                        @endif
                     </div>
                 </h1>
                 <a wire:navigate class="flex gap-1.5 font-semibold opacity-40 dark:text-gray-200" x-bind:href="$wire.order.parent?.url" x-cloak x-show="$wire.order.parent?.url">
@@ -697,6 +721,11 @@
                                     <x-datetime-picker wire:model="order.system_delivery_date_end" :without-time="true" :disabled="$order->is_locked" :label="__('Performance/Delivery date end')" />
                                     <x-datetime-picker wire:model="order.order_date" :without-time="true" :disabled="$order->is_locked" :label="__('Order Date')" />
                                     <x-input wire:model="order.commission" :disabled="$order->is_locked" :label="__('Commission')" />
+                                    <x-datetime-picker
+                                        wire:model="order.payment_reminder_next_date"
+                                        :without-time="true"
+                                        :label="__('Payment Reminder Next Date')"
+                                    />
                                 @show
                             </div>
                         </x-card>

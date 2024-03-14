@@ -245,7 +245,7 @@
                                             :label="__('Ledger Account')"
                                             option-value="id"
                                             option-label="name"
-                                            option-description="description"
+                                            option-description="number"
                                             x-model.number="position.ledger_account_id"
                                             :async-data="[
                                                 'api' => route('search', \FluxErp\Models\LedgerAccount::class),

@@ -27,8 +27,6 @@
                 <x-inputs.number wire:model="paymentType.payment_discount_target" :label="__('Payment Discount Target')" />
                 <x-inputs.number wire:model="paymentType.payment_discount_percentage" :label="__('Payment Discount Percentage')" />
                 <x-editor wire:model="paymentType.description" :label="__('Description')" />
-                <x-editor wire:model="paymentType.payment_reminder_text" :label="__('Payment Reminder Text')"/>
-                <x-editor wire:model="paymentType.payment_reminder_email_text" :label="__('Payment Reminder Email')" />
             </div>
             <x-slot:footer>
                 <div class="flex justify-between gap-x-4">

@@ -64,6 +64,27 @@
                                 :label="__('Vat rate')"
                                 wire:model.live="orderPosition.vat_rate_id"
                             />
+                            <x-select
+                                :label="__('Ledger Account')"
+                                option-value="id"
+                                option-label="name"
+                                option-description="number"
+                                wire:model.number="orderPosition.ledger_account_id"
+                                :async-data="[
+                                    'api' => route('search', \FluxErp\Models\LedgerAccount::class),
+                                    'params' => [
+                                        'where' => [
+                                            [
+                                                'ledger_account_type_enum',
+                                                '=',
+                                                $order->isPurchase
+                                                    ? \FluxErp\Enums\LedgerAccountTypeEnum::Expense
+                                                    : \FluxErp\Enums\LedgerAccountTypeEnum::Revenue,
+                                            ],
+                                        ]
+                                    ]
+                                ]"
+                            />
                         </div>
                     </div>
                     <x-editor :label="__('Description')" wire:model="orderPosition.description" />

@@ -12,12 +12,9 @@ use Illuminate\Support\Facades\Auth;
 
 class CommentCreatedListener
 {
-    /**
-     * Handle the event.
-     */
     public function handle(Comment $comment): void
     {
-        if ($comment->model_type !== app(Ticket::class)->getMorphClass()) {
+        if ($comment->model_type !== app(Ticket::class)->getMorphClass() || $comment->is_internal) {
             return;
         }
 

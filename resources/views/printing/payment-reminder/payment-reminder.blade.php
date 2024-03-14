@@ -1,8 +1,8 @@
 <x-layouts.print>
-    <x-print.first-page-header :address="$model->order->addressInvoice" />
+    <x-print.first-page-header :address="$model->order->addressInvoice" :subject="$subject" />
     <main>
         <div>
-            {!! $model->order->paymentType->payment_reminder_text ?? $model->order->paymentType->payment_reminder_email_text !!}
+            {!! $text !!}
         </div>
     </main>
 </x-layouts.print>

@@ -145,6 +145,8 @@ class CreateOrderRuleset extends FluxRuleset
             'payment_reminder_days_1' => 'integer|nullable|min:1',
             'payment_reminder_days_2' => 'integer|nullable|min:1',
             'payment_reminder_days_3' => 'integer|nullable|min:1',
+            'payment_reminder_current_level' => 'integer|nullable|min:0',
+            'payment_reminder_next_date' => 'date|nullable',
 
             'order_number' => 'sometimes|required|string|unique:orders',
             'commission' => 'string|nullable',
