@@ -63,7 +63,7 @@ class CreateContact extends FluxAction
     protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new Contact());
+        $validator->addModel(app(Contact::class));
 
         $this->data = $validator->validate();
     }
