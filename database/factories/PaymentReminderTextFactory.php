@@ -12,12 +12,12 @@ class PaymentReminderTextFactory extends Factory
     public function definition(): array
     {
         return [
-            'mail_to' => $this->faker->boolean(10) ? [$this->faker->email] : null,
-            'mail_cc' => $this->faker->boolean(10) ? [$this->faker->email] : null,
-            'mail_subject' => $this->faker->sentence,
-            'mail_body' => $this->faker->paragraph,
-            'reminder_subject' => $this->faker->sentence,
-            'reminder_body' => $this->faker->paragraph,
+            'mail_to' => $this->faker->boolean(10) ? [$this->faker->email()] : null,
+            'mail_cc' => $this->faker->boolean(10) ? [$this->faker->email()] : null,
+            'mail_subject' => $this->faker->sentence(),
+            'mail_body' => $this->faker->paragraph(),
+            'reminder_subject' => $this->faker->sentence(),
+            'reminder_body' => $this->faker->paragraph(),
             'reminder_level' => $this->faker->unique()->numberBetween(1, 10),
         ];
     }
