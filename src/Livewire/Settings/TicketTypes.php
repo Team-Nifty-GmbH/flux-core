@@ -2,202 +2,67 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Models\AdditionalColumn;
+use FluxErp\Actions\TicketType\CreateTicketType;
+use FluxErp\Actions\TicketType\DeleteTicketType;
+use FluxErp\Actions\TicketType\UpdateTicketType;
+use FluxErp\Livewire\DataTables\TicketTypesList;
+use FluxErp\Livewire\Forms\TicketTypesForm;
 use FluxErp\Models\TicketType;
-use FluxErp\Rulesets\AdditionalColumn\CreateAdditionalColumnRuleset;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Arr;
-use Livewire\Attributes\Locked;
-use Livewire\Component;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use WireUi\Traits\Actions;
 
-class TicketTypes extends Component
-{
-    #[Locked]
-    public array $dbTicketTypes = [];
+class TicketTypes extends TicketTypesList {
 
-    #[Locked]
-    public array $additionalColumns = [];
+    use Actions;
 
-    public array $ticketTypes;
+    protected ?string $includeBefore = 'flux::livewire.settings.ticket-types';
 
-    public int $ticketTypeIndex = -1;
+    public TicketTypesForm $ticketType;
 
-    public int $additionalColumnIndex = -1;
-
-    public bool $showTicketTypeModal = false;
-
-    public bool $showAdditionalColumnModal = false;
-
-    protected $listeners = [
-        'closeModal',
-    ];
-
-    public function mount(): void
+    public function getTableActions(): array
     {
-        $this->dbTicketTypes = app(TicketType::class)->query()
-            ->orderBy('name->' . app()->getLocale(), 'ASC')
-            ->get(['id', 'name', 'model_type'])
-            ->toArray();
-
-        $this->ticketTypes = [];
-        foreach ($this->dbTicketTypes as $key => $ticketType) {
-            $this->ticketTypes[] = [
-                'id' => $ticketType['id'],
-                'name' => $ticketType['name'],
-                'model_type' => $ticketType['model_type'],
-            ];
-
-            $additionalColumns = app(AdditionalColumn::class)->query()
-                ->where('model_type', app(TicketType::class)->getMorphClass())
-                ->where('model_id', $ticketType['id'])
-                ->orderBy('name', 'ASC')
-                ->get([
-                    'id',
-                    'name',
-                    'model_type',
-                    'model_id',
-                    'field_type',
-                    'label',
-                    'validations',
-                    'values',
-                    'is_customer_editable',
-                ])
-                ->toArray();
-
-            $this->ticketTypes = array_merge(
-                $this->ticketTypes,
-                $additionalColumns
-            );
-
-            $this->dbTicketTypes[$key]['additional_columns'] = $additionalColumns;
-            $this->additionalColumns = array_merge($this->additionalColumns, $additionalColumns);
-        }
-
-        $this->sortTicketTypes($this->dbTicketTypes);
+        return [
+            DataTableButton::make()
+                ->label(__('Create'))
+                ->color('primary')
+                ->icon('plus')
+                ->when(resolve_static(CreateTicketType::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'edit()',
+                ]),
+        ];
     }
 
-    public function render(): View
+    public function getRowActions(): array
     {
-        return view('flux::livewire.settings.ticket-types');
+        return [
+            DataTableButton::make()
+                ->label(__('Edit'))
+                ->icon('pencil')
+                ->color('primary')
+                ->when(resolve_static(UpdateTicketType::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'edit(record.id)',
+                ]),
+            DataTableButton::make()
+                ->label(__('Delete'))
+                ->color('negative')
+                ->icon('trash')
+                ->when(resolve_static(DeleteTicketType::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Ticket Type')]),
+                ]),
+        ];
     }
 
-    public function show(?int $index = null, bool $newAdditionalColumn = false): void
+    public function edit(TicketType $ticketType): void
     {
-        if (is_null($index)) {
-            $this->ticketTypeIndex = -1;
-            $this->additionalColumnIndex = -1;
-        } elseif (array_key_exists('field_type', $this->ticketTypes[$index])) {
-            $this->ticketTypeIndex = -1;
-            $this->additionalColumnIndex = $index;
-        } else {
-            $this->ticketTypeIndex = $index;
-            $this->additionalColumnIndex = -1;
-        }
+        $this->ticketType->reset();
+        $this->ticketType->fill($ticketType);
 
-        if ($this->additionalColumnIndex !== -1 || $newAdditionalColumn) {
-            $this->dispatch(
-                'show',
-                ! $newAdditionalColumn ? $this->ticketTypes[$index] :
-                    array_merge(
-                        array_fill_keys(
-                            array_keys(resolve_static(CreateAdditionalColumnRuleset::class, 'getRules')),
-                            null
-                        ),
-                        [
-                            'model_type' => app(TicketType::class)->getMorphClass(),
-                            'model_id' => $this->ticketTypes[$index]['id'],
-                        ]
-                    )
-            )->to('settings.additional-column-edit');
-
-            $this->showAdditionalColumnModal = true;
-        } else {
-            $this->dispatch(
-                'show',
-                ! is_null($index) ? $this->ticketTypes[$index] : []
-            )->to('settings.ticket-type-edit');
-
-            $this->showTicketTypeModal = true;
-        }
-    }
-
-    public function closeModal(array $data, bool $delete = false): void
-    {
-        if ($data['field_type'] ?? false) {
-            $key = array_search($data['model_id'], array_column($this->dbTicketTypes, 'id'));
-            $additionalColumnKey = array_search($data['id'], array_column($this->additionalColumns, 'id'));
-
-            if (! $delete && $additionalColumnKey === false && $key !== false) {
-                $this->dbTicketTypes[$key]['additional_columns'][] = $data;
-            } elseif ($additionalColumnKey !== false && $key !== false) {
-                $additionalColumnId = $this->additionalColumns[$additionalColumnKey]['id'];
-
-                $index = array_search(
-                    $additionalColumnId,
-                    array_column($this->dbTicketTypes[$key]['additional_columns'], 'id')
-                );
-                if ($index !== false) {
-                    if (! $delete) {
-                        $this->dbTicketTypes[$key]['additional_columns'][$index] = $data;
-                    } else {
-                        unset($this->dbTicketTypes[$key]['additional_columns'][$index]);
-                    }
-                }
-            }
-        } else {
-            $key = array_search($data['id'], array_column($this->dbTicketTypes, 'id'));
-
-            if ($delete) {
-                unset($this->dbTicketTypes[$key]);
-            } elseif ($key === false) {
-                $this->dbTicketTypes[] = $data;
-            } else {
-                $this->dbTicketTypes[$key] = array_merge(
-                    $data,
-                    [
-                        'additional_columns' => [
-                            $this->dbTicketTypes[$key]['additional_columns'] ?? [],
-                        ],
-                    ]
-                );
-            }
-        }
-
-        $this->sortTicketTypes($this->dbTicketTypes);
-
-        $this->ticketTypeIndex = -1;
-        $this->additionalColumnIndex = -1;
-        $this->showTicketTypeModal = false;
-        $this->showAdditionalColumnModal = false;
-    }
-
-    public function delete(bool $additionalColumn = false): void
-    {
-        if ($additionalColumn) {
-            $this->dispatch('delete')->to('settings.additional-column-edit');
-        } else {
-            $this->dispatch('delete')->to('settings.ticket-type-edit');
-        }
-    }
-
-    private function sortTicketTypes(array $ticketTypes): void
-    {
-        $sorted = Arr::sort(
-            Arr::sort(
-                $ticketTypes,
-                fn ($value) => strtolower($value['name'])
-            ),
-            fn ($value) => strtolower($value['additional_columns']['name'] ?? '')
-        );
-
-        $ticketTypes = [];
-        foreach ($sorted as $ticketType) {
-            $additionalColumns = $ticketType['additional_columns'] ?? [];
-            unset($ticketType['additional_columns']);
-
-            $ticketTypes = array_merge($ticketTypes, [$ticketType], $additionalColumns);
-        }
-
-        $this->ticketTypes = array_filter($ticketTypes);
+        $this->js(<<<'JS'
+            $openModal('edit-ticket-type');
+        JS);
     }
 }
