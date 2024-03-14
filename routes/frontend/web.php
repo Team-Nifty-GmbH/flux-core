@@ -36,6 +36,7 @@ use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\CustomerPortal;
 use FluxErp\Livewire\Settings\DiscountGroups;
 use FluxErp\Livewire\Settings\Languages;
+use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Logs;
 use FluxErp\Livewire\Settings\MailAccounts;
 use FluxErp\Livewire\Settings\Notifications;
@@ -155,6 +156,8 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::get('/currencies', Currencies::class)->name('currencies')->registersMenuItem();
                 Route::get('/discount-groups', DiscountGroups::class)->name('discount-groups')->registersMenuItem();
                 Route::get('/languages', Languages::class)->name('languages')->registersMenuItem();
+                //                TODO: translate
+                Route::get('ledger-accounts', LedgerAccounts::class)->name('ledger-accounts')->registersMenuItem();
                 Route::get('/logs', Logs::class)->name('logs')->registersMenuItem();
                 Route::get('/notifications', Notifications::class)->name('notifications')->registersMenuItem();
                 Route::get('/order-types', OrderTypes::class)->name('order-types')->registersMenuItem();
