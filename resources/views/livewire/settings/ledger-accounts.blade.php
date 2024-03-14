@@ -9,7 +9,7 @@
                     wire:model="ledgerAccount.ledger_account_type_enum"
                     :clearable="false"
                     :options="$ledgerAccountTypes"
-                    label="Ledger Type"
+                    :label="__('Ledger Account Type')"
                 ></x-select>
                 <x-toggle wire:model.boolean="ledgerAccount.is_automatic" :label="__('Is Automatic')" />
                 <x-textarea wire:model="ledgerAccount.description" :label="__('Description')" />
