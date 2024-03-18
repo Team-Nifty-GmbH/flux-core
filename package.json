@@ -23,7 +23,7 @@
         "dotenv-expand": "^11.0.0",
         "laravel-echo": "^1.15.3",
         "lodash": "^4.17.19",
-        "postcss": "^8.4.35",
+        "postcss": "^8.4.36",
         "pulltorefreshjs": "^0.1.22",
         "pusher-js": "^8.2.0",
         "sortablejs": "^1.15.2",
