@@ -39,20 +39,20 @@ class TicketTypes extends TicketTypesList {
             DataTableButton::make()
                 ->label(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
-                ->when(resolve_static(UpdateTicketType::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'edit(record.id)',
-                ]),
+                ->color('primary'),
+//                ->when(resolve_static(UpdateTicketType::class, 'canPerformAction', [false]))
+//                ->attributes([
+//                    'wire:click' => 'edit(record.id)',
+//                ]),
             DataTableButton::make()
                 ->label(__('Delete'))
                 ->color('negative')
                 ->icon('trash')
                 ->when(resolve_static(DeleteTicketType::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'delete(record.id)',
-                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Ticket Type')]),
-                ]),
+//                ->attributes([
+//                    'wire:click' => 'delete(record.id)',
+//                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Ticket Type')]),
+//                ]),
         ];
     }
 

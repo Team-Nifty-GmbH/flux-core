@@ -13,5 +13,6 @@ class TicketTypesList extends BaseDataTable
 
     public array $enabledCols = [
         'name',
+        'model_type',
     ];
 }
