@@ -9,7 +9,7 @@
         "ext-pdo": "*",
         "barryvdh/laravel-dompdf": "^2.0",
         "beyondcode/laravel-websockets": "^1.13.2",
-        "laravel-notification-channels/webpush": "^7.1",
+        "laravel-notification-channels/webpush": "^8.0",
         "laravel/fortify": "^1.13",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.0",
