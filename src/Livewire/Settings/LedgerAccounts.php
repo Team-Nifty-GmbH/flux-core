@@ -30,9 +30,7 @@ class LedgerAccounts extends LedgerAccountList
                 ->color('primary')
                 ->icon('plus')
                 ->when(resolve_static(CreateLedgerAccount::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'edit()',
-                ]),
+                ->wireClick('edit')
         ];
     }
 
@@ -44,9 +42,7 @@ class LedgerAccounts extends LedgerAccountList
                 ->icon('pencil')
                 ->color('primary')
                 ->when(resolve_static(UpdateLedgerAccount::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'edit(record.id)',
-                ]),
+                ->wireClick('edit(record.id)'),
             DataTableButton::make()
                 ->label(__('Delete'))
                 ->color('negative')
