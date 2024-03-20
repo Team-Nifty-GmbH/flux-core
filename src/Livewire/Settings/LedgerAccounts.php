@@ -30,7 +30,7 @@ class LedgerAccounts extends LedgerAccountList
                 ->color('primary')
                 ->icon('plus')
                 ->when(resolve_static(CreateLedgerAccount::class, 'canPerformAction', [false]))
-                ->wireClick('edit')
+                ->wireClick('edit'),
         ];
     }
 
