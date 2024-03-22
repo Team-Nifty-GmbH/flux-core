@@ -93,12 +93,12 @@ class InitEnv extends Command
             'cache_driver' => 'redis',
             'queue_connection' => 'redis',
             'session_driver' => 'redis',
-            'pusher_app_id' => uniqid(),
-            'pusher_app_key' => uniqid(),
-            'pusher_app_secret' => uniqid(),
-            'pusher_host' => 'localhost',
-            'pusher_port' => '6001',
-            'pusher_scheme' => 'http',
+            'reverb_app_id' => random_int(100_000, 999_999),
+            'reverb_app_key' => Str::lower(Str::random(20)),
+            'reverb_app_secret' => Str::lower(Str::random(20)),
+            'reverb_host' => 'localhost',
+            'reverb_port' => '8080',
+            'reverb_scheme' => 'http',
             'scout_driver' => 'meilisearch',
         ];
     }

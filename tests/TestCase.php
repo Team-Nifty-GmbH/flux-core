@@ -9,7 +9,6 @@ use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
-use Hammerstone\FastPaginate\FastPaginateProvider;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
@@ -59,7 +58,6 @@ abstract class TestCase extends BaseTestCase
             WireUiServiceProvider::class,
             MediaLibraryServiceProvider::class,
             CalendarServiceProvider::class,
-            FastPaginateProvider::class,
             QueryBuilderServiceProvider::class,
             \Laravel\Fortify\FortifyServiceProvider::class,
             FortifyServiceProvider::class,
