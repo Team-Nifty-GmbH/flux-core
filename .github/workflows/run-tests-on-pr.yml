@@ -2,7 +2,7 @@ name: tests
 
 on:
   push:
-    branches: [ dev, update-laravel-11 ]
+    branches: [ dev ]
   pull_request:
     branches: [ main, dev ]
 
