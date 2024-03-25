@@ -12,14 +12,14 @@
         "laravel/fortify": "^1.13",
         "laravel/framework": "^10.0|^11.0",
         "laravel/reverb": "@beta",
-        "laravel/sanctum": "^4.0",
+        "laravel/sanctum": "^3.0|^4.0",
         "laravel/scout": "^10.0",
         "livewire/livewire": "^3.4.7",
         "meilisearch/meilisearch-php": "^1.3",
         "php-http/discovery": "^1.15",
         "spatie/laravel-activitylog": "^4.6",
         "spatie/laravel-medialibrary": "^11.0",
-        "spatie/laravel-model-info": "^2.0",
+        "spatie/laravel-model-info": "^1.0|^2.0",
         "spatie/laravel-model-states": "^2.4",
         "spatie/laravel-permission": "^6.0",
         "spatie/laravel-query-builder": "^5.0",
@@ -63,11 +63,17 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "FluxErp\\Tests\\": "tests/"
+            "FluxErp\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
         }
     },
     "scripts": {
         "post-autoload-dump": [
+            "@clear",
+            "@prepare",
+            "@dusk:install-chromedriver",
             "@php ./vendor/bin/testbench package:discover --ansi"
         ],
         "analyse": "vendor/bin/phpstan analyse",
@@ -82,7 +88,19 @@
         "test-livewire": "@testbench --parallel --testsuite Livewire",
         "test-coverage": "XDEBUG_MODE=coverage @testbench --parallel --coverage-html ./reports",
         "format": "vendor/bin/pint",
-        "dusk:install-chromedriver": "@php vendor/bin/dusk-updater detect --auto-update --ansi"
+        "dusk:install-chromedriver": "@php vendor/bin/dusk-updater detect --auto-update --ansi",
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve"
+        ],
+        "lint": [
+            "@php vendor/bin/pint",
+            "@php vendor/bin/phpstan analyse"
+        ]
     },
     "config": {
         "sort-packages": true,

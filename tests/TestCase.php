@@ -31,6 +31,8 @@ abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
 
+    protected $loadEnvironmentVariables = true;
+
     protected function setUp(): void
     {
         if (file_exists(__DIR__ . '/../../../.env')) {
