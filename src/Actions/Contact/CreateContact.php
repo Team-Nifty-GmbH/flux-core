@@ -51,7 +51,7 @@ class CreateContact extends FluxAction
         $mainAddress['client_id'] = $contact->client_id;
 
         try {
-            CreateAddress::make($mainAddress)
+            $mainAddress = CreateAddress::make($mainAddress)
                 ->validate()
                 ->execute();
 
