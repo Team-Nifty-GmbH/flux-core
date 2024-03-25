@@ -15,7 +15,7 @@ class CreateLanguagesTable extends Migration
     {
         Schema::create('languages', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
             $table->string('name');
             $table->timestamp('created_at')->nullable()
                 ->comment('A timestamp reflecting the time of record-creation.');

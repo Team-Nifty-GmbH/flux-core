@@ -15,7 +15,7 @@ class CreateDocumentGenerationSettingsTable extends Migration
     {
         Schema::create('document_generation_settings', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
             $table->unsignedBigInteger('client_id');
             $table->unsignedBigInteger('document_type_id');
             $table->unsignedBigInteger('order_type_id');

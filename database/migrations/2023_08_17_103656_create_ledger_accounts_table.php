@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ledger_accounts', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->string('number')->unique();
             $table->string('name');
             $table->string('description')->nullable();

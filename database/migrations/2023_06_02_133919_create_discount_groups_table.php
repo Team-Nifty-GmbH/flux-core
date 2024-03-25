@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('discount_groups', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->string('name');
             $table->boolean('is_active')->default(true);
             $table->timestamps();

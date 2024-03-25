@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('state_settings', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
+            $table->char('uuid', 36)->unique();
             $table->string('model');
             $table->string('color');
             $table->timestamps();

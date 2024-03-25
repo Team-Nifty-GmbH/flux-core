@@ -73,7 +73,6 @@
         "post-autoload-dump": [
             "@clear",
             "@prepare",
-            "@dusk:install-chromedriver",
             "@php ./vendor/bin/testbench package:discover --ansi"
         ],
         "analyse": "vendor/bin/phpstan analyse",

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('print_data', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
             $table->nullableMorphs('model');
             $table->json('data')->nullable();
             $table->string('view');

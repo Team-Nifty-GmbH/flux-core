@@ -14,7 +14,7 @@ class MakeUuidUniqueOnUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->uuid('uuid')->unique()->change();
+            $table->char('uuid', 36)->unique()->change();
         });
     }
 
