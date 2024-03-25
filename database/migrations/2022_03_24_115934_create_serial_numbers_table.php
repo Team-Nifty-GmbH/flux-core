@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('serial_numbers', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->unsignedBigInteger('serial_number_range_id')->nullable();
             $table->unsignedBigInteger('product_id')->nullable();
             $table->unsignedBigInteger('address_id')->nullable();

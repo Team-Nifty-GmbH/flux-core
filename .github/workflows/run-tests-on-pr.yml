@@ -8,7 +8,7 @@ on:
 
 jobs:
   laravel:
-    name: Laravel (PHP ${{ matrix.php-versions }})
+    name: Laravel ${{ matrix.laravel }} (PHP ${{ matrix.php-versions }}) - ${{ matrix.browser }}
     runs-on: flux
     env:
       DB_DATABASE: testing
@@ -18,6 +18,16 @@ jobs:
       CACHE_DRIVER: redis
       QUEUE_CONNECTION: redis
       SESSION_DRIVER: redis
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: [ '8.3' ]
+        browser: [ 'chrome' ]
+        laravel: [ '11.*' ]
+        include:
+          - laravel: 11.*
+            testbench: 9.*
+
 
     # Docs: https://docs.github.com/en/actions/using-containerized-services
     services:
@@ -40,11 +50,6 @@ jobs:
         ports:
           - 7700/tcp
         options: --health-cmd="wget --no-verbose --spider http://localhost:7700/health" --health-interval=10s --health-timeout=5s --health-retries=3
-    strategy:
-      fail-fast: false
-      matrix:
-        php-versions: [ '8.3' ]
-        browser: [ 'chrome' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -64,6 +69,10 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Change Laravel Version Dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
 
       - name: Install npm dependencies
         run: npm ci

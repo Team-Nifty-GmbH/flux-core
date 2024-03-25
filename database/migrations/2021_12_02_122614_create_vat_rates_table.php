@@ -15,7 +15,7 @@ class CreateVatRatesTable extends Migration
     {
         Schema::create('vat_rates', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
 
             $table->text('name');
             $table->decimal('rate', 40, 10);

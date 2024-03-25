@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('mail_accounts', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->string('protocol')->default('imap');
             $table->string('email')->unique();
             $table->text('password');

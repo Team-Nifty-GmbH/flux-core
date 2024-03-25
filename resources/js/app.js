@@ -19,9 +19,8 @@ window.Tribute = Tribute;
 window.Pusher = Pusher;
 
 window.Echo = new Echo({
-    broadcaster: 'pusher',
+    broadcaster: 'reverb',
     key: document.head.querySelector('meta[name="pusher-key"]').content,
-    cluster: document.head.querySelector('meta[name="pusher-cluster"]').content,
     wsHost: window.location.hostname, // <-- important if you dont build the js file on the prod server
     wsPort: 80, // <-- this ensures that nginx will receive the request
     wssPort: 443, // <-- this ensures that nginx will receive the request

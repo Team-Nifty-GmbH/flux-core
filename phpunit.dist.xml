@@ -4,6 +4,7 @@
     xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd"
     bootstrap="./tests/TestCase.php"
     colors="true"
+    backupGlobals="false"
 >
     <testsuites>
         <testsuite name="Feature">
@@ -19,21 +20,22 @@
     <coverage/>
     <php>
         <ini name="memory_limit" value="10G"/>
-        <server name="APP_URL" value=""/>
-        <server name="APP_KEY" value="base64:JmJwcdxmKz/kTL2+02xm6q7/sFltCaz0VNRgVQAxjbo="/>
-        <server name="APP_ENV" value="testing"/>
-        <server name="PORTAL_DOMAIN" value="http://portal.localhost"/>
-        <server name="DB_CONNECTION" value="mysql"/>
-        <server name="DB_DATABASE" value="testing"/>
-        <server name="DB_USERNAME" value="root"/>
-        <server name="BCRYPT_ROUNDS" value="4"/>
-        <server name="CACHE_DRIVER" value="array"/>
-        <server name="MAIL_MAILER" value="array"/>
-        <server name="QUEUE_CONNECTION" value="sync"/>
-        <server name="SESSION_DRIVER" value="array"/>
-        <server name="TELESCOPE_ENABLED" value="false"/>
-        <server name="SCOUT_DRIVER" value="collection"/>
-        <server name="BROADCAST_DRIVER" value="log"/>
+        <env name="APP_URL" value=""/>
+        <env name="APP_KEY" value="base64:JmJwcdxmKz/kTL2+02xm6q7/sFltCaz0VNRgVQAxjbo="/>
+        <env name="APP_ENV" value="testing"/>
+        <env name="PORTAL_DOMAIN" value="http://portal.localhost"/>
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_DATABASE" value="testing"/>
+        <env name="DB_USERNAME" value="root"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="CACHE_STORE" value="array"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="SCOUT_DRIVER" value="collection"/>
+        <env name="BROADCAST_DRIVER" value="log"/>
     </php>
     <source>
         <include>

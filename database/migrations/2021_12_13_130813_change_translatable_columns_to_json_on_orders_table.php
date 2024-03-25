@@ -7,39 +7,29 @@ use Illuminate\Support\Facades\Schema;
 
 class ChangeTranslatableColumnsToJsonOnOrdersTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->json('header')->change();
-            $table->json('footer')->change();
-            $table->json('logistic_note')->change();
+            $table->json('header')->nullable()->change();
+            $table->json('footer')->nullable()->change();
+            $table->json('logistic_note')->nullable()->change();
         });
 
         $this->migrateTranslatable();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         $this->rollbackTranslatable();
 
         Schema::table('orders', function (Blueprint $table) {
-            $table->text('header')->change();
-            $table->text('footer')->change();
-            $table->text('logistic_note')->change();
+            $table->text('header')->nullable()->change();
+            $table->text('footer')->nullable()->change();
+            $table->text('logistic_note')->nullable()->change();
         });
     }
 
-    private function migrateTranslatable()
+    private function migrateTranslatable(): void
     {
         $orders = DB::table('orders')->get()->toArray();
 
@@ -53,7 +43,7 @@ class ChangeTranslatableColumnsToJsonOnOrdersTable extends Migration
         DB::table('orders')->upsert($orders, ['id']);
     }
 
-    private function rollbackTranslatable()
+    private function rollbackTranslatable(): void
     {
         $orders = DB::table('orders')->get()->toArray();
 

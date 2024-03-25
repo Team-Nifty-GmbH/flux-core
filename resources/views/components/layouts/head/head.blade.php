@@ -4,8 +4,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/manifest.json">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<meta name="pusher-key" content="{{ config('broadcasting.connections.pusher.key') }}">
-<meta name="pusher-cluster" content="{{ config('broadcasting.connections.pusher.options.cluster', 'mt1') }}">
+<meta name="pusher-key" content="{{ config('broadcasting.connections.reverb.key') }}">
 <meta name="webpush-key" content="{{ config('webpush.vapid.public_key') }}">
 <meta name="currency-code" content="{{ $defaultCurrency?->iso }}">
 <link rel="icon" href="/favicon.svg">

@@ -16,7 +16,7 @@ class CreateAddressTypesTable extends Migration
         Schema::create('address_types', function (Blueprint $table) {
             $table->id()
                 ->comment('Id of the record.');
-            $table->uuid('uuid')
+            $table->char('uuid', 36)
                 ->comment('Uuid of the record.');
             $table->unsignedBigInteger('client_id')
                 ->comment('A unique identifier number for the table clients.');

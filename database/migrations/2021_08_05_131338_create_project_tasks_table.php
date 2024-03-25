@@ -15,7 +15,7 @@ class CreateProjectTasksTable extends Migration
     {
         Schema::create('project_tasks', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
             $table->unsignedBigInteger('project_id');
             $table->unsignedBigInteger('category_id');
             $table->unsignedBigInteger('customer_id');

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('form_builder_field_responses', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->foreignId('form_id')->constrained('form_builder_forms')->cascadeOnDelete();
             $table->foreignId('field_id')->constrained('form_builder_fields')->cascadeOnDelete();
             $table->foreignId('response_id')->constrained('form_builder_responses')->cascadeOnDelete();
