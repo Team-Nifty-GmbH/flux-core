@@ -54,6 +54,9 @@ class CreateContact extends FluxAction
             CreateAddress::make($mainAddress)
                 ->validate()
                 ->execute();
+
+            $contact->main_address_id = $mainAddress->id;
+            $contact->save();
         } catch (ValidationException) {
         }
 
