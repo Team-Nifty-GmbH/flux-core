@@ -132,8 +132,29 @@
     <div class="font-semibold text-2xl">
         <x-modal name="edit-ticket-type">
             <x-card>
-                <div class="flex flex-col gap-4">
-
+                <div class="flex flex-col mb-6">
+                <x-input label="{{ __('Name') }}"
+                         placeholder="{{ __('Name') }}"
+                         wire:model="ticketType.name"/>
+                </div>
+                <div class="flex flex-col mb-6">
+                <x-select label="{{ __('Model Type') }}"
+                          placeholder="{{ __('Model Type') }}"
+                          wire:model="ticketType.model_type"
+                          :options="$modelTypes"
+                          option-value="value"
+                          option-label="label"
+                />
+                </div>
+                <div class="flex flex-col mb-6">
+                    <x-select label="{{ __('Notifications') }}"
+                              placeholder="{{ __('Notifications') }}"
+                              wire:model="ticketType.roles"
+                              :options="$roles"
+                              :multiselect="true"
+                              option-value="id"
+                              option-label="name"
+                    />
                 </div>
                 <x-slot:footer>
                     <div class="flex justify-end gap-1.5">

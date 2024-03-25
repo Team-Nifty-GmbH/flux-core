@@ -1,5 +1,5 @@
 <?php
-//
+
 //namespace FluxErp\Livewire\Settings;
 //
 //use FluxErp\Models\AdditionalColumn;

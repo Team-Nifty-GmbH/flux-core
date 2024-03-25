@@ -7,7 +7,9 @@ use FluxErp\Actions\TicketType\DeleteTicketType;
 use FluxErp\Actions\TicketType\UpdateTicketType;
 use FluxErp\Livewire\DataTables\TicketTypesList;
 use FluxErp\Livewire\Forms\TicketTypesForm;
+use FluxErp\Models\Role;
 use FluxErp\Models\TicketType;
+use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
 
@@ -19,6 +21,29 @@ class TicketTypes extends TicketTypesList {
 
     public TicketTypesForm $ticketType;
 
+
+    public function getViewData(): array
+    {
+
+        return array_merge(
+            parent::getViewData(),
+            [
+                'modelTypes' => model_info_all()
+                    ->unique('morphClass')
+                    ->map(fn ($modelInfo) => [
+                        'label' => __(Str::headline($modelInfo->morphClass)),
+                        'value' => $modelInfo->morphClass,
+                    ])
+                    ->sortBy('label')
+                    ->toArray(),
+                'roles' =>app(Role::class)->query()
+                    ->where('guard_name', 'web')
+                    ->get(['id', 'name'])
+                    ->toArray()
+            ]
+        );
+    }
+
     public function getTableActions(): array
     {
         return [
@@ -27,9 +52,7 @@ class TicketTypes extends TicketTypesList {
                 ->color('primary')
                 ->icon('plus')
                 ->when(resolve_static(CreateTicketType::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'edit()',
-                ]),
+                ->wireClick('edit'),
         ];
     }
 
@@ -39,20 +62,12 @@ class TicketTypes extends TicketTypesList {
             DataTableButton::make()
                 ->label(__('Edit'))
                 ->icon('pencil')
-                ->color('primary'),
-//                ->when(resolve_static(UpdateTicketType::class, 'canPerformAction', [false]))
-//                ->attributes([
-//                    'wire:click' => 'edit(record.id)',
-//                ]),
-            DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
-                ->icon('trash')
-                ->when(resolve_static(DeleteTicketType::class, 'canPerformAction', [false]))
-//                ->attributes([
-//                    'wire:click' => 'delete(record.id)',
-//                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Ticket Type')]),
-//                ]),
+                ->color('primary')
+                ->when(resolve_static(UpdateTicketType::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'edit(record.id)',
+                ]),
+
         ];
     }
 
