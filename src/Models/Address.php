@@ -130,6 +130,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         return $this->login_password;
     }
 
+    public function getAuthPasswordName(): string
+    {
+        return 'login_password';
+    }
+
     protected function loginPassword(): Attribute
     {
         return Attribute::set(

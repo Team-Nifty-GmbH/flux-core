@@ -6,24 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 class AddUniqueUserCodeOnUsersTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('user_code')->unique()->change();
+            $table->string('user_code')->nullable()->unique()->change();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropUnique('users_user_code_unique');
