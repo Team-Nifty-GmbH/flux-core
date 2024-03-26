@@ -8,6 +8,7 @@ use FluxErp\Actions\TicketType\CreateTicketType;
 use FluxErp\Actions\TicketType\DeleteTicketType;
 use FluxErp\Actions\TicketType\UpdateTicketType;
 use FluxErp\Models\TicketType;
+use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 
 class TicketTypesForm extends FluxForm
@@ -28,6 +29,7 @@ class TicketTypesForm extends FluxForm
             $values->loadMissing(['roles:id,name']);
 
             $values = $values->toArray();
+            $values['roles'] = Arr::pluck($values['roles'] ?? [], 'id');
         }
 
         parent::fill($values);

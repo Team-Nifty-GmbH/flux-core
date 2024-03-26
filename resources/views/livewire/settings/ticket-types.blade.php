@@ -137,8 +137,9 @@
                          placeholder="{{ __('Name') }}"
                          wire:model="ticketType.name"/>
                 </div>
-                <div class="flex flex-col mb-6">
-                <x-select label="{{ __('Model Type') }}"
+                <div class="flex flex-col mb-6" x-show="!$wire.ticketType.id">
+                    <x-select
+                          label="{{ __('Model Type') }}"
                           placeholder="{{ __('Model Type') }}"
                           wire:model="ticketType.model_type"
                           :options="$modelTypes"
@@ -148,7 +149,7 @@
                 </div>
                 <div class="flex flex-col mb-6">
                     <x-select label="{{ __('Notifications') }}"
-                              placeholder="{{ __('Notifications') }}"
+                              placeholder="{{ __('Roles') }}"
                               wire:model="ticketType.roles"
                               :options="$roles"
                               :multiselect="true"
@@ -157,9 +158,12 @@
                     />
                 </div>
                 <x-slot:footer>
-                    <div class="flex justify-end gap-1.5">
-                        <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="save().then((success) => { if(success) close()})"/>
+                    <div class="flex justify-between gap-x-4">
+                        <x-button x-show='$wire.ticketType.id' flat negative :label="__('Delete')"/>
+                        <div class="flex w-full justify-end gap-1.5">
+                            <x-button flat :label="__('Cancel')" x-on:click="close"/>
+                            <x-button primary :label="__('Save')" wire:click="save().then((success) => { if(success) close()})"/>
+                        </div>
                     </div>
                 </x-slot:footer>
             </x-card>
