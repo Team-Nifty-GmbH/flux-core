@@ -15,7 +15,7 @@ class CreateSepaMandatesTable extends Migration
     {
         Schema::create('sepa_mandates', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
             $table->unsignedBigInteger('client_id');
             $table->unsignedBigInteger('contact_id');
             $table->unsignedBigInteger('contact_bank_connection_id');

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('work_time_types', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->json('name');
             $table->boolean('is_billable')->default(false);
             $table->timestamps();

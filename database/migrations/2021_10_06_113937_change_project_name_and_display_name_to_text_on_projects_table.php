@@ -7,25 +7,15 @@ use Illuminate\Support\Facades\Schema;
 
 class ChangeProjectNameAndDisplayNameToTextOnProjectsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('projects', function (Blueprint $table) {
             $table->json('project_name')->change();
-            $table->json('display_name')->change();
+            $table->json('display_name')->nullable()->change();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         config()->set('database.connections.mysql.strict', false);
         DB::reconnect();
@@ -33,7 +23,7 @@ class ChangeProjectNameAndDisplayNameToTextOnProjectsTable extends Migration
         try {
             Schema::table('projects', function (Blueprint $table) {
                 $table->string('project_name')->change();
-                $table->string('display_name')->change();
+                $table->string('display_name')->nullable()->change();
             });
         } catch (Exception $e) {
             echo $e;

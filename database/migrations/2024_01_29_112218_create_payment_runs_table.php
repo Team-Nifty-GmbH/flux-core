@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('payment_runs', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->foreignId('bank_connection_id')
                 ->nullable()
                 ->constrained()

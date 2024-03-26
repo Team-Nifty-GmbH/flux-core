@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('work_times', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('order_position_id')->nullable()->unique();
             $table->unsignedBigInteger('work_time_type_id')->nullable();

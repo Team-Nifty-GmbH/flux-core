@@ -25,7 +25,7 @@ return new class extends Migration
     {
         Schema::create('record_histories', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
             $table->morphs('model');
             $table->json('data');
             $table->timestamps();

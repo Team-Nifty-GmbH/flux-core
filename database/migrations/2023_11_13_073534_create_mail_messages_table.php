@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('mail_messages', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->foreignId('mail_account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('mail_folder_id')->constrained()->cascadeOnDelete();
             $table->string('message_id')->nullable()->index();

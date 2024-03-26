@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->unsignedBigInteger('bank_connection_id')->nullable();
             $table->unsignedBigInteger('currency_id')->nullable();
             $table->string('name')->nullable();

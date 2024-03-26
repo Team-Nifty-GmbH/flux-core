@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('favorites', function (Blueprint $table) {
             $table->id();
-            $table->uuid()->unique();
+            $table->char('uuid', 36)->unique();
             $table->morphs('authenticatable');
             $table->string('name');
             $table->string('url');

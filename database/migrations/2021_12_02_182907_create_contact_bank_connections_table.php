@@ -15,7 +15,7 @@ class CreateContactBankConnectionsTable extends Migration
     {
         Schema::create('contact_bank_connections', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
             $table->unsignedBigInteger('contact_id');
             $table->string('iban');
             $table->string('account_holder')->nullable();

@@ -88,7 +88,7 @@ class SearchBar extends Component
 
                 $this->return = $return;
             } else {
-                $result = app($this->searchModel)->search($this->search)->fastPaginate();
+                $result = app($this->searchModel)->search($this->search)->paginate();
 
                 if ($this->load && $result && $result instanceof LengthAwarePaginator) {
                     $result->load($this->load);

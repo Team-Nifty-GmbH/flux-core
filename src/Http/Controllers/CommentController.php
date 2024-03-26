@@ -36,7 +36,7 @@ class CommentController extends Controller
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
-            data: $modelInstance->comments()->orderBy('comments.id', 'DESC')->fastPaginate()
+            data: $modelInstance->comments()->orderBy('comments.id', 'DESC')->paginate()
         );
     }
 

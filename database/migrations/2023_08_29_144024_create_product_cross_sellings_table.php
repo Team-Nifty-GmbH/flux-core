@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('product_cross_sellings', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
             $table->string('name');
             $table->integer('order_column')->default(0);
