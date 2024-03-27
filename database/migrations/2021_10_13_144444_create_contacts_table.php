@@ -15,7 +15,7 @@ class CreateContactsTable extends Migration
     {
         Schema::create('contacts', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
             $table->timestamp('created_at')->nullable()
                 ->comment('A timestamp reflecting the time of record-creation.');
             $table->unsignedBigInteger('created_by')->nullable()

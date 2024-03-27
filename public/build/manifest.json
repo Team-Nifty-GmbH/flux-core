@@ -1,6 +1,7 @@
 {
   "__commonjsHelpers-Cpj98o6Y.js": {
-    "file": "assets/_commonjsHelpers-Cpj98o6Y.js"
+    "file": "assets/_commonjsHelpers-Cpj98o6Y.js",
+    "name": "_commonjsHelpers"
   },
   "node_modules/@fontsource/inter/files/inter-latin-300-normal.woff": {
     "file": "assets/inter-latin-300-normal-DaM40sQc.woff",
@@ -40,7 +41,8 @@
     "isEntry": true
   },
   "resources/js/alpine.js": {
-    "file": "assets/alpine-BRA0haRl.js",
+    "file": "assets/alpine-CRh3E2Bs.js",
+    "name": "alpine",
     "src": "resources/js/alpine.js",
     "isEntry": true,
     "imports": [
@@ -48,7 +50,8 @@
     ]
   },
   "resources/js/apex-charts.js": {
-    "file": "assets/apex-charts-KNtJ6wuj.js",
+    "file": "assets/apex-charts-B_c9srkW.js",
+    "name": "apex-charts",
     "src": "resources/js/apex-charts.js",
     "isEntry": true,
     "imports": [
@@ -56,7 +59,8 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CFqFdtZC.js",
+    "file": "assets/app-DwJE-9Is.js",
+    "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
@@ -65,11 +69,13 @@
   },
   "resources/js/sw.js": {
     "file": "assets/sw-hJN8GZM3.js",
+    "name": "sw",
     "src": "resources/js/sw.js",
     "isEntry": true
   },
   "resources/js/web-push.js": {
     "file": "assets/web-push-CBUsYMiv.js",
+    "name": "web-push",
     "src": "resources/js/web-push.js",
     "isEntry": true
   }

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('email_templates', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->string('name');
             $table->string('from')->nullable();
             $table->string('from_alias')->nullable();

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('commissions', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('commission_rate_id')->nullable();
             $table->unsignedBigInteger('order_id')->nullable();

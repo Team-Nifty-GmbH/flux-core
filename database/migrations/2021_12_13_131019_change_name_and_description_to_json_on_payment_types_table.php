@@ -7,37 +7,27 @@ use Illuminate\Support\Facades\Schema;
 
 class ChangeNameAndDescriptionToJsonOnPaymentTypesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('payment_types', function (Blueprint $table) {
             $table->json('name')->change();
-            $table->json('description')->change();
+            $table->json('description')->nullable()->change();
         });
 
         $this->migrateNameAndDescription();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         $this->rollbackNameAndDescription();
 
         Schema::table('payment_types', function (Blueprint $table) {
             $table->string('name')->change();
-            $table->string('description')->change();
+            $table->string('description')->nullable()->change();
         });
     }
 
-    private function migrateNameAndDescription()
+    private function migrateNameAndDescription(): void
     {
         $paymentTypes = DB::table('payment_types')->get()->toArray();
 
@@ -50,7 +40,7 @@ class ChangeNameAndDescriptionToJsonOnPaymentTypesTable extends Migration
         DB::table('payment_types')->upsert($paymentTypes, ['id']);
     }
 
-    private function rollbackNameAndDescription()
+    private function rollbackNameAndDescription(): void
     {
         $paymentTypes = DB::table('payment_types')->get()->toArray();
 

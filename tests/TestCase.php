@@ -9,7 +9,6 @@ use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
-use Hammerstone\FastPaginate\FastPaginateProvider;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
@@ -31,6 +30,8 @@ use function Orchestra\Testbench\package_path;
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
+
+    protected $loadEnvironmentVariables = true;
 
     protected function setUp(): void
     {
@@ -59,7 +60,6 @@ abstract class TestCase extends BaseTestCase
             WireUiServiceProvider::class,
             MediaLibraryServiceProvider::class,
             CalendarServiceProvider::class,
-            FastPaginateProvider::class,
             QueryBuilderServiceProvider::class,
             \Laravel\Fortify\FortifyServiceProvider::class,
             FortifyServiceProvider::class,
@@ -80,5 +80,6 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('database.connections.mysql.collation', 'utf8mb4_unicode_ci');
         $app['config']->set('flux.install_done', true);
         $app['config']->set('auth.defaults.guard', 'sanctum');
+        $app['config']->set('cache.default', 'array');
     }
 }

@@ -15,7 +15,7 @@ class CreateSnapshotsTable extends Migration
     {
         Schema::create('snapshots', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
             $table->morphs('model');
             $table->json('snapshot');
             $table->timestamp('created_at')->nullable();

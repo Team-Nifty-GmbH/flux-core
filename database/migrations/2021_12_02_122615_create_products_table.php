@@ -16,7 +16,7 @@ class CreateProductsTable extends Migration
         Schema::create('products', function (Blueprint $table) {
             // IDS
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
 
             // FOREIGNS
             $table->unsignedBigInteger('parent_id')->nullable();

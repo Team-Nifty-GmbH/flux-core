@@ -15,7 +15,7 @@ class CreatePresentationsTable extends Migration
     {
         Schema::create('presentations', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
             $table->nullableMorphs('model');
             $table->string('name');
             $table->text('notice')->nullable();

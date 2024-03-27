@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('emails', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->unsignedBigInteger('email_template_id');
             $table->nullableMorphs('model');
             $table->string('from');

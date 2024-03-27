@@ -194,13 +194,12 @@ server {
 Your .env file should look something like this:
 ```dotenv
 # .env
-PUSHER_APP_ID=local
-PUSHER_APP_KEY=local
-PUSHER_APP_SECRET=local
-PUSHER_APP_CLUSTER=mt1
-PUSHER_HOST=your.domain.com
-PUSHER_SCHEME=https
-PUSHER_PORT=443
+REVERB_APP_ID=local
+REVERB_APP_KEY=local
+REVERB_APP_SECRET=local
+REVERB_HOST=your.domain.com
+REVERB_SCHEME=https
+REVERB_PORT=443
 ```
 
 This ensures that nginx handles your request, if you have mutliple instances of websockets running on the same server nginx will handle the request to the correct instance.
@@ -208,13 +207,12 @@ This ensures that nginx handles your request, if you have mutliple instances of 
 If you have only one instance of websockets running you can use the default port 6001 and remove the `PUSHER_PORT` from your .env file.
 ```dotenv
 # .env
-PUSHER_APP_ID=local
-PUSHER_APP_KEY=local
-PUSHER_APP_SECRET=local
-PUSHER_APP_CLUSTER=mt1
-PUSHER_HOST=127.0.0.1
-PUSHER_PORT=6001
-PUSHER_SCHEME=http
+REVERB_APP_ID=local
+REVERB_APP_KEY=local
+REVERB_APP_SECRET=local
+REVERB_HOST=0.0.0.0
+REVERB_PORT=8080
+REVERB_SCHEME=http
 ```
 
 This will not be piped through nginx and will be handled by the websocket server directly.

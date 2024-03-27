@@ -15,7 +15,7 @@ class CreateStockPostingsTable extends Migration
     {
         Schema::create('stock_postings', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid');
+            $table->char('uuid', 36);
             $table->unsignedBigInteger('warehouse_id');
             $table->unsignedBigInteger('product_id');
 
