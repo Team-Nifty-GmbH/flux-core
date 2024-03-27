@@ -36,7 +36,6 @@ class OrderType extends Model
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',
         ];
-
     }
 
     public function client(): BelongsTo

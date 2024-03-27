@@ -32,7 +32,9 @@ class UpdateUserRoles extends FluxAction
         $user = app(User::class)->query()
             ->whereKey($this->data['user_id'])
             ->first();
-        $roles = Role::query()->whereIntegerInRaw('id', $this->data['roles'])->get();
+        $roles = Role::query()
+            ->whereIntegerInRaw('id', $this->data['roles'])
+            ->get();
 
         if ($this->data['sync'] ?? false) {
             $user->syncRoles($roles);
