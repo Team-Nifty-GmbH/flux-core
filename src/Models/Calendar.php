@@ -16,10 +16,6 @@ class Calendar extends BaseCalendar
         'id',
     ];
 
-    protected $casts = [
-        'is_public' => 'boolean',
-    ];
-
     protected static function booted(): void
     {
         parent::booted();
@@ -27,6 +23,13 @@ class Calendar extends BaseCalendar
         static::deleting(function ($calendar) {
             $calendar->calendarEvents()->delete();
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_public' => 'boolean',
+        ];
     }
 
     public function calendarEvents(): HasMany

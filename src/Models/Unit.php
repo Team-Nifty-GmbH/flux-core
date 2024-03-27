@@ -13,10 +13,6 @@ class Unit extends Model
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-    ];
-
     protected $guarded = [
         'id',
     ];

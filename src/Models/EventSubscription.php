@@ -16,8 +16,11 @@ class EventSubscription extends Model
         'updated_at',
     ];
 
-    protected $casts = [
-        'is_broadcast' => 'boolean',
-        'is_notifiable' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'is_broadcast' => 'boolean',
+            'is_notifiable' => 'boolean',
+        ];
+    }
 }

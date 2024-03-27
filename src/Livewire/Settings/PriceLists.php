@@ -11,6 +11,7 @@ use FluxErp\Models\Category;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -56,6 +57,7 @@ class PriceLists extends Component
             ->toArray();
     }
 
+    #[Renderless]
     public function showEditModal(?int $priceListId = null): void
     {
         $priceList = app(PriceList::class)->query()

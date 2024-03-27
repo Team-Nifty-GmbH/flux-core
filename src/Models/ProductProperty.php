@@ -19,10 +19,6 @@ class ProductProperty extends Model
         'pivot',
     ];
 
-    protected $casts = [
-        'uuid' => 'string',
-    ];
-
     protected $guarded = [
         'id',
     ];

@@ -45,11 +45,6 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
         'password',
     ];
 
-    protected $casts = [
-        'uuid' => 'string',
-        'is_active' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -67,6 +62,13 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
                 $user->iban = str_replace(' ', '', strtoupper($user->iban));
             }
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
     }
 
     protected function password(): Attribute

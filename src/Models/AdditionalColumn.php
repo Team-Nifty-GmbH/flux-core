@@ -12,14 +12,6 @@ class AdditionalColumn extends Model
 {
     use Filterable, HasPackageFactory;
 
-    protected $casts = [
-        'values' => 'array',
-        'validations' => 'array',
-        'is_translatable' => 'boolean',
-        'is_customer_editable' => 'boolean',
-        'is_frontend_visible' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
         'created_at',
@@ -36,6 +28,17 @@ class AdditionalColumn extends Model
             Cache::store('array')->forget('meta_casts_' . $additionalColumn->model_type);
             Cache::store('array')->forget('meta_additional_columns_' . $additionalColumn->model_type);
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'values' => 'array',
+            'validations' => 'array',
+            'is_translatable' => 'boolean',
+            'is_customer_editable' => 'boolean',
+            'is_frontend_visible' => 'boolean',
+        ];
     }
 
     public function modelValues(): Builder

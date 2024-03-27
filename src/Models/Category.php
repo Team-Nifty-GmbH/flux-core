@@ -25,10 +25,6 @@ class Category extends Model implements InteractsWithDataTables, Sortable
     use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification,
         HasUuid, Searchable, SortableTrait;
 
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -45,6 +41,13 @@ class Category extends Model implements InteractsWithDataTables, Sortable
         'order_column_name' => 'sort_number',
         'sort_when_creating' => true,
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
 
     public function assigned(): Attribute
     {

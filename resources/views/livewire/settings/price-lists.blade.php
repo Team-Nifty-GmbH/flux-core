@@ -11,12 +11,8 @@
                 <div class="mt-2 text-sm text-gray-300">{{ __('A list of all the price lists') }}</div>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                @if(user_can('action.price-list.create'))
-                    <button wire:click="showEditModal()"
-                            type="button"
-                            class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
-                        {{ __('New Price List') }}
-                    </button>
+                @if(resolve_static(\FluxErp\Actions\PriceList\CreatePriceList::class, 'canPerformAction', [false]))
+                    <x-button wire:click="showEditModal()" primary :label="__('New Price List')" />
                 @endif
             </div>
         </div>
@@ -30,7 +26,6 @@
             </div>
         </div>
     </div>
-
     <x-modal.card wire:model="editModal">
         <x-slot name="title" class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
             {{ ($selectedPriceList['id'] ?? false) ? __('Edit Price List') : __('New Price List') }}
@@ -49,12 +44,12 @@
                                 option-label="name"
                             />
                             <div x-show="priceList.parent_id > 0 " class="grid grid-cols-1 gap-y-6">
-                                <x-input wire:model="selectedPriceList.discount.discount" :label="__('Discount')"/>
-                                <x-toggle wire:model="selectedPriceList.discount.is_percentage" lg :label="__('Is Percentage')"/>
+                                <x-inputs.number wire:model.number="selectedPriceList.discount.discount" :label="__('Discount')"/>
+                                <x-toggle wire:model.boolean="selectedPriceList.discount.is_percentage" lg :label="__('Is Percentage')"/>
                             </div>
                             <x-input wire:model="selectedPriceList.price_list_code" :label="__('Code')"/>
-                            <x-toggle wire:model="selectedPriceList.is_net" lg :label="__('Is Net')"/>
-                            <x-toggle wire:model="selectedPriceList.is_default" lg :label="__('Is Default')"/>
+                            <x-toggle wire:model.boolean="selectedPriceList.is_net" lg :label="__('Is Net')"/>
+                            <x-toggle wire:model.boolean="selectedPriceList.is_default" lg :label="__('Is Default')"/>
                         </div>
                     </div>
                 </div>
@@ -76,20 +71,20 @@
                                 </td>
                                 <td>
                                     <div class="flex justify-center">
-                                        <x-input x-model="productCategory.discounts[0].discount"
-                                                 :disabled="! (($selectedPriceList['id'] ?? false) ? user_can('action.discount.update') : user_can('action.discount.create'))"
+                                        <x-inputs.number x-model.number="productCategory.discounts[0].discount"
+                                                 :disabled="! (($selectedPriceList['id'] ?? false) ? resolve_static(\FluxErp\Actions\PriceList\UpdatePriceList::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))"
                                         />
                                     </div>
                                 </td>
                                 <td>
                                     <div class="flex justify-center">
                                         <x-checkbox
-                                            x-model="productCategory.discounts[0].is_percentage"
-                                            :disabled="! (($selectedPriceList['id'] ?? false) ? user_can('action.discount.update') : user_can('action.discount.create'))"
+                                            x-model.boolean="productCategory.discounts[0].is_percentage"
+                                            :disabled="! (($selectedPriceList['id'] ?? false) ? resolve_static(\FluxErp\Actions\Discount\UpdateDiscount::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))"
                                         />
                                     </div>
                                 <td class="text-right">
-                                    @if(($selectedPriceList['id'] ?? false) ? user_can('action.discount.update') : user_can('action.discount.create'))
+                                    @if(($selectedPriceList['id'] ?? false) ? resolve_static(\FluxErp\Actions\Discount\UpdateDiscount::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))
                                         <x-button icon="trash" negative x-on:click="$wire.removeCategoryDiscount(index)"/>
                                     @endif
                                 </td>
@@ -97,7 +92,7 @@
                         </template>
                     </x-table>
                     <div class="flex justify-between mt-4">
-                        @if(user_can('action.discount.create') && ($selectedPriceList['id'] ?? false) ? user_can('action.price-list.update') : user_can('action.price-list.create'))
+                        @if(resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]) && ($selectedPriceList['id'] ?? false) ? resolve_static(\FluxErp\Actions\PriceList\UpdatePriceList::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\PriceList\CreatePriceList::class, 'canPerformAction', [false]))
                             <div>
                                 <x-select
                                     wire:model="newCategoryDiscount.category_id"
@@ -108,11 +103,11 @@
                                 />
                             </div>
                             <div>
-                                <x-input wire:model="newCategoryDiscount.discount"/>
+                                <x-inputs.number wire:model.number="newCategoryDiscount.discount"/>
                             </div>
                             <div class="mt-2">
                                 <x-checkbox
-                                    wire:model="newCategoryDiscount.is_percentage"
+                                    wire:model.boolean="newCategoryDiscount.is_percentage"
                                 />
                             </div>
                             <div class="">
@@ -126,13 +121,13 @@
         <x-slot name="footer">
             <div class="flex justify-between gap-x-4">
                 <div x-bind:class="priceList.id > 0 || 'invisible'">
-                    @if(user_can('action.price-list.delete'))
+                    @if(resolve_static(\FluxErp\Actions\PriceList\DeletePriceList::class, 'canPerformAction', [false]))
                         <x-button flat negative :label="__('Delete')" x-on:click="close" wire:click="delete"/>
                     @endif
                 </div>
                 <div class="flex">
                     <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                    @if(($selectedPriceList['id'] ?? false) ? user_can('action.price-list.update') : user_can('action.price-list.create'))
+                    @if(($selectedPriceList['id'] ?? false) ? resolve_static(\FluxErp\Actions\PriceList\UpdatePriceList::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\PriceList\CreatePriceList::class, 'canPerformAction', [false]))
                         <x-button primary :label="__('Save')" wire:click="save"/>
                     @endif
                 </div>

@@ -16,14 +16,17 @@ class Schedule extends Model
         'id',
     ];
 
-    protected $casts = [
-        'type' => RepeatableTypeEnum::class,
-        'cron' => 'array',
-        'parameters' => 'array',
-        'due_at' => 'datetime',
-        'ends_at' => 'datetime',
-        'last_success' => 'datetime',
-        'last_run' => 'datetime',
-        'is_active' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'type' => RepeatableTypeEnum::class,
+            'cron' => 'array',
+            'parameters' => 'array',
+            'due_at' => 'datetime',
+            'ends_at' => 'datetime',
+            'last_success' => 'datetime',
+            'last_run' => 'datetime',
+            'is_active' => 'boolean',
+        ];
+    }
 }

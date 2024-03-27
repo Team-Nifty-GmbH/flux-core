@@ -19,11 +19,6 @@ class PurchaseInvoice extends Model implements HasMedia
 
     protected $guarded = ['id'];
 
-    protected $casts = [
-        'invoice_date' => 'date',
-        'is_net' => 'boolean',
-    ];
-
     protected static function booted(): void
     {
         static::creating(function (PurchaseInvoice $model) {
@@ -35,6 +30,14 @@ class PurchaseInvoice extends Model implements HasMedia
                 $model->iban = str_replace(' ', '', strtoupper($model->iban));
             }
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'invoice_date' => 'date',
+            'is_net' => 'boolean',
+        ];
     }
 
     public function client(): BelongsTo

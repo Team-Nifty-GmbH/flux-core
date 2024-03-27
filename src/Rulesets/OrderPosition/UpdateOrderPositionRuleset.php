@@ -113,7 +113,7 @@ class UpdateOrderPositionRuleset extends FluxRuleset
             'unit_gram_weight' => 'numeric|nullable',
 
             'description' => 'string|nullable',
-            'name' => 'sometimes|required|string',
+            'name' => 'sometimes|required|string|max:255',
             'product_number' => [
                 'exclude_if:is_free_text,true',
                 'exclude_with:product_id',

@@ -20,9 +20,12 @@ class ProductCrossSelling extends Model implements Sortable
         'id',
     ];
 
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
 
     public function product(): BelongsTo
     {

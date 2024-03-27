@@ -16,9 +16,12 @@ class Commission extends Model implements InteractsWithDataTables
         'id',
     ];
 
-    protected $casts = [
-        'commission_rate' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'commission_rate' => 'array',
+        ];
+    }
 
     public function order(): BelongsTo
     {

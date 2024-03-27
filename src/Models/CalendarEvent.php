@@ -24,9 +24,12 @@ class CalendarEvent extends BaseCalendarEvent implements HasMedia
         'id',
     ];
 
-    protected $casts = [
-        'is_all_day' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'is_all_day' => 'boolean',
+        ];
+    }
 
     public function calendar(): BelongsTo
     {

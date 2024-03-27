@@ -11,7 +11,7 @@ use Illuminate\Support\HtmlString;
  *
  * The AssetManager registers css and js files to be used in the application.
  *
- * @method static HtmlString toHtml()
+ * @method static HtmlString toHtml(string|array|null $items = null)
  * @method static void register(string $name, string $path, array $attributes)
  * @method static void unregister(string $name)
  * @method static string url(string $path, bool|null $secure)

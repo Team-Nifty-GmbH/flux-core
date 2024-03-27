@@ -16,10 +16,6 @@ class CountryRegion extends Model
 {
     use Commentable, Filterable, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-    ];
-
     protected $guarded = [
         'id',
     ];

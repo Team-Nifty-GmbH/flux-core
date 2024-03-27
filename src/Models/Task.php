@@ -36,13 +36,6 @@ class Task extends Model implements HasMedia, InteractsWithDataTables
         'id',
     ];
 
-    protected $casts = [
-        'start_date' => 'date',
-        'due_date' => 'date',
-        'state' => TaskState::class,
-        'time_budget' => TimeDuration::class,
-    ];
-
     public string $detailRouteName = 'tasks.id';
 
     protected static function booted(): void
@@ -56,6 +49,16 @@ class Task extends Model implements HasMedia, InteractsWithDataTables
         static::saved(function (Task $task) {
             $task->project?->calculateProgress();
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'date',
+            'due_date' => 'date',
+            'state' => TaskState::class,
+            'time_budget' => TimeDuration::class,
+        ];
     }
 
     public function orderPosition(): BelongsTo

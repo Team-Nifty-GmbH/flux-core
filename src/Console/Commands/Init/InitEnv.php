@@ -65,18 +65,18 @@ class InitEnv extends Command
         // check if a key starting with "pusher" was changed
         $pusherChanged = false;
         foreach ($keyValues as $key => $value) {
-            if (Str::startsWith($key, 'PUSHER')) {
+            if (Str::startsWith($key, 'REVERB')) {
                 $pusherChanged = true;
                 break;
             }
         }
 
         if ($pusherChanged) {
-            Artisan::call('websockets:restart');
+            Artisan::call('reverb:restart');
 
             $restart = 0;
             while ($restart !== 0) {
-                $restart = Cache::get('beyondcode:websockets:restart', 0);
+                $restart = Cache::get('laravel:reverb:restart', 0);
             }
         }
 
@@ -89,16 +89,16 @@ class InitEnv extends Command
             'app_env' => 'production',
             'app_debug' => 'false',
             'log_channel' => 'database',
-            'broadcast_driver' => 'pusher',
-            'cache_driver' => 'redis',
+            'broadcast_connection' => 'reverb',
+            'cache_store' => 'redis',
             'queue_connection' => 'redis',
             'session_driver' => 'redis',
-            'pusher_app_id' => uniqid(),
-            'pusher_app_key' => uniqid(),
-            'pusher_app_secret' => uniqid(),
-            'pusher_host' => 'localhost',
-            'pusher_port' => '6001',
-            'pusher_scheme' => 'http',
+            'reverb_app_id' => random_int(100_000, 999_999),
+            'reverb_app_key' => Str::lower(Str::random(20)),
+            'reverb_app_secret' => Str::lower(Str::random(20)),
+            'reverb_scheme' => 'http',
+            'reverb_host' => 'localhost',
+            'reverb_port' => 8080,
             'scout_driver' => 'meilisearch',
         ];
     }

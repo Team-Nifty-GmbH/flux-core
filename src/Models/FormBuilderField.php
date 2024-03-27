@@ -17,10 +17,6 @@ class FormBuilderField extends Model
         'id',
     ];
 
-    protected $casts = [
-        'options' => 'array',
-    ];
-
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderField $field) {
@@ -28,6 +24,13 @@ class FormBuilderField extends Model
                 $item->delete();
             });
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'options' => 'array',
+        ];
     }
 
     public function fieldResponses(): HasMany

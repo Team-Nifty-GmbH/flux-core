@@ -14,11 +14,6 @@ class BankConnection extends Model
 {
     use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'is_active' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -30,6 +25,13 @@ class BankConnection extends Model
                 $model->iban = str_replace(' ', '', strtoupper($model->iban));
             }
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
     }
 
     public function clients(): BelongsToMany

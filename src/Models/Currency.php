@@ -15,15 +15,17 @@ class Currency extends Model
 {
     use Commentable, Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'symbol' => 'string',
-        'is_default' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'symbol' => 'string',
+            'is_default' => 'boolean',
+        ];
+    }
 
     public function countries(): HasMany
     {

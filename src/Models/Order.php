@@ -57,43 +57,6 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         'currency',
     ];
 
-    protected $casts = [
-        'uuid' => 'string',
-        'address_invoice' => 'array',
-        'address_delivery' => 'array',
-        'state' => OrderState::class,
-        'payment_state' => PaymentState::class,
-        'delivery_state' => DeliveryState::class,
-        'shipping_costs_net_price' => Money::class,
-        'shipping_costs_gross_price' => Money::class,
-        'shipping_costs_vat_price' => Money::class,
-        'shipping_costs_vat_rate_percentage' => Percentage::class,
-        'total_base_gross_price' => Money::class,
-        'total_base_net_price' => Money::class,
-        'margin' => Money::class,
-        'total_gross_price' => Money::class,
-        'total_net_price' => Money::class,
-        'total_vats' => 'array',
-        'balance' => Money::class,
-        'payment_reminder_next_date' => 'date',
-        'payment_texts' => 'array',
-        'order_date' => 'date',
-        'invoice_date' => 'date',
-        'system_delivery_date' => 'date',
-        'system_delivery_date_end' => 'date',
-        'customer_delivery_date' => 'date',
-        'date_of_approval' => 'date',
-        'has_logistic_notify_phone_number' => 'boolean',
-        'has_logistic_notify_number' => 'boolean',
-        'is_locked' => 'boolean',
-        'is_new_customer' => 'boolean',
-        'is_imported' => 'boolean',
-        'is_merge_invoice' => 'boolean',
-        'is_confirmed' => 'boolean',
-        'is_paid' => 'boolean',
-        'requires_approval' => 'boolean',
-    ];
-
     public string $detailRouteName = 'orders.id';
 
     protected $guarded = [
@@ -188,6 +151,45 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             $order->orderPositions()->delete();
             $order->purchaseInvoice()->update(['order_id' => null]);
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'address_invoice' => 'array',
+            'address_delivery' => 'array',
+            'state' => OrderState::class,
+            'payment_state' => PaymentState::class,
+            'delivery_state' => DeliveryState::class,
+            'shipping_costs_net_price' => Money::class,
+            'shipping_costs_gross_price' => Money::class,
+            'shipping_costs_vat_price' => Money::class,
+            'shipping_costs_vat_rate_percentage' => Percentage::class,
+            'total_base_gross_price' => Money::class,
+            'total_base_net_price' => Money::class,
+            'margin' => Money::class,
+            'total_gross_price' => Money::class,
+            'total_net_price' => Money::class,
+            'total_vats' => 'array',
+            'balance' => Money::class,
+            'payment_reminder_next_date' => 'date',
+            'payment_texts' => 'array',
+            'order_date' => 'date',
+            'invoice_date' => 'date',
+            'system_delivery_date' => 'date',
+            'system_delivery_date_end' => 'date',
+            'customer_delivery_date' => 'date',
+            'date_of_approval' => 'date',
+            'has_logistic_notify_phone_number' => 'boolean',
+            'has_logistic_notify_number' => 'boolean',
+            'is_locked' => 'boolean',
+            'is_new_customer' => 'boolean',
+            'is_imported' => 'boolean',
+            'is_merge_invoice' => 'boolean',
+            'is_confirmed' => 'boolean',
+            'is_paid' => 'boolean',
+            'requires_approval' => 'boolean',
+        ];
     }
 
     public function addresses(): BelongsToMany

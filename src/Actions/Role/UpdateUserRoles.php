@@ -32,17 +32,18 @@ class UpdateUserRoles extends FluxAction
         $user = app(User::class)->query()
             ->whereKey($this->data['user_id'])
             ->first();
+        $roles = Role::query()->whereIntegerInRaw('id', $this->data['roles'])->get();
 
         if ($this->data['sync'] ?? false) {
-            $user->syncRoles($this->data['roles']);
+            $user->syncRoles($roles);
 
             return $user->roles->toArray();
         }
 
         if ($this->data['assign']) {
-            $user->assignRole($this->data['roles']);
+            $user->assignRole($roles);
         } else {
-            foreach ($this->data['roles'] as $role) {
+            foreach ($roles as $role) {
                 $user->removeRole($role);
             }
         }

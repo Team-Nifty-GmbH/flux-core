@@ -16,12 +16,6 @@ class AddressType extends Model
 {
     use HasClientAssignment, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'is_lock' => 'boolean',
-        'is_unique' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -29,6 +23,14 @@ class AddressType extends Model
     public array $translatable = [
         'name',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_lock' => 'boolean',
+            'is_unique' => 'boolean',
+        ];
+    }
 
     public function addresses(): BelongsToMany
     {

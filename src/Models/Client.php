@@ -27,13 +27,6 @@ class Client extends Model implements HasMedia
         'logo_small_url',
     ];
 
-    protected $casts = [
-        'uuid' => 'string',
-        'is_active' => 'boolean',
-        'opening_hours' => 'array',
-        'is_default' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -41,6 +34,15 @@ class Client extends Model implements HasMedia
     protected $with = [
         'media',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+            'opening_hours' => 'array',
+            'is_default' => 'boolean',
+        ];
+    }
 
     public function getAvatarUrlAttribute(): string
     {

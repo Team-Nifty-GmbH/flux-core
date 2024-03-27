@@ -31,19 +31,6 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         HasPackageFactory, HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable,
         Searchable, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'time_unit_enum' => TimeUnitEnum::class,
-        'is_active' => 'boolean',
-        'is_highlight' => 'boolean',
-        'is_bundle' => 'boolean',
-        'is_service' => 'boolean',
-        'is_shipping_free' => 'boolean',
-        'is_required_product_serial_number' => 'boolean',
-        'is_nos' => 'boolean',
-        'is_active_export_to_web_shop' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -64,6 +51,21 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
                 $product->getSerialNumber('product_number');
             }
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'time_unit_enum' => TimeUnitEnum::class,
+            'is_active' => 'boolean',
+            'is_highlight' => 'boolean',
+            'is_bundle' => 'boolean',
+            'is_service' => 'boolean',
+            'is_shipping_free' => 'boolean',
+            'is_required_product_serial_number' => 'boolean',
+            'is_nos' => 'boolean',
+            'is_active_export_to_web_shop' => 'boolean',
+        ];
     }
 
     public function bundleProducts(): BelongsToMany

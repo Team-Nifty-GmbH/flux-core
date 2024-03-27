@@ -27,10 +27,6 @@ class Comment extends Model implements HasMedia
         'model_type',
     ];
 
-    protected $casts = [
-        'uuid' => 'string',
-    ];
-
     protected $guarded = [
         'id',
     ];

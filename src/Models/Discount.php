@@ -18,14 +18,16 @@ class Discount extends Model
         'pivot',
     ];
 
-    protected $casts = [
-        'uuid' => 'string',
-        'is_percentage' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_percentage' => 'boolean',
+        ];
+    }
 
     public function contacts(): BelongsToMany
     {

@@ -43,7 +43,7 @@ class CreatePurchaseInvoicePositionRuleset extends FluxRuleset
                 'integer',
                 new ModelExists(VatRate::class),
             ],
-            'name' => 'nullable|string',
+            'name' => 'nullable|string|max:255',
             'amount' => [
                 'required',
                 new Numeric(min: 0),

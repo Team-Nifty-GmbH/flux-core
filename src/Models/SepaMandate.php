@@ -22,11 +22,6 @@ class SepaMandate extends Model implements HasMedia, OffersPrinting
     use Filterable, HasClientAssignment, HasPackageFactory, HasSerialNumberRange, HasUserModification, HasUuid,
         InteractsWithMedia, Printable, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'signed_date' => 'date',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -43,6 +38,13 @@ class SepaMandate extends Model implements HasMedia, OffersPrinting
                 $mandate->getSerialNumber('mandate_reference_number');
             }
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'signed_date' => 'date',
+        ];
     }
 
     public function client(): BelongsTo
