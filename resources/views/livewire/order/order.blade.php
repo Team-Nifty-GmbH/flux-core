@@ -526,6 +526,42 @@
                                         ]
                                     ]"
                                 />
+                                    <x-select
+                                        :label="__('Responsible User')"
+                                        :disabled="$order->is_locked"
+                                        autocomplete="off"
+                                        option-value="id"
+                                        option-label="label"
+                                        wire:model="order.responsible_user_id"
+                                        :template="[
+                                        'name'   => 'user-option',
+                                         ]"
+                                        :async-data="[
+                                        'api' => route('search', \FluxErp\Models\User::class),
+                                        'method' => 'POST',
+                                        'params' => [
+                                            'with' => 'media',
+                                        ]
+                                    ]"
+                                    />
+                                    <x-select
+                                        :label="__('Responsible Helper')"
+                                        :disabled="$order->is_locked"
+                                        autocomplete="off"
+                                        option-value="id"
+                                        :multiselect="true"
+                                        option-label="label"
+                                        :template="[
+                                        'name'   => 'user-option',
+                                         ]"
+                                        :async-data="[
+                                        'api' => route('search', \FluxErp\Models\User::class),
+                                        'method' => 'POST',
+                                        'params' => [
+                                            'with' => 'media',
+                                        ]
+                                    ]"
+                                    />
                                 <x-select
                                     :label="__('Price list')"
                                     :options="$priceLists"
