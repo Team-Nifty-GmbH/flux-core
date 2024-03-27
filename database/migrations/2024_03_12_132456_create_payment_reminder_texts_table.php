@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('payment_reminder_texts', function (Blueprint $table) {
             $table->id();
-            $table->uuid()->unique();
+            $table->char('uuid', 36)->unique();
             $table->json('mail_to')->nullable();
             $table->json('mail_cc')->nullable();
             $table->string('mail_subject')->nullable();

@@ -13,7 +13,7 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('contact_id');
             $table->string('manufacturer_product_number')->nullable();
-            $table->unsignedDecimal('purchase_price', 40, 10)->nullable();
+            $table->decimal('purchase_price', 40, 10)->nullable();
 
             $table->unique(['product_id', 'contact_id']);
             $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();

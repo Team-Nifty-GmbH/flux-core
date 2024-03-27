@@ -16,9 +16,9 @@ class ChangeTranslatableColumnsToJsonOnDocumentTypesTable extends Migration
     {
         Schema::table('document_types', function (Blueprint $table) {
             $table->json('name')->change();
-            $table->json('description')->change();
-            $table->json('additional_header')->change();
-            $table->json('additional_footer')->change();
+            $table->json('description')->nullable()->change();
+            $table->json('additional_header')->nullable()->change();
+            $table->json('additional_footer')->nullable()->change();
         });
 
         $this->migrateTranslatable();
@@ -35,9 +35,9 @@ class ChangeTranslatableColumnsToJsonOnDocumentTypesTable extends Migration
 
         Schema::table('document_types', function (Blueprint $table) {
             $table->string('name')->change();
-            $table->string('description')->change();
-            $table->text('additional_header')->change();
-            $table->text('additional_footer')->change();
+            $table->string('description')->nullable()->change();
+            $table->text('additional_header')->nullable()->change();
+            $table->text('additional_footer')->nullable()->change();
         });
     }
 

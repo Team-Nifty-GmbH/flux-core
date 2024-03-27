@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('form_builder_forms', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->bigInteger('user_id')->nullable()->unsigned();
             $table->nullableMorphs('model');
             $table->string('name');

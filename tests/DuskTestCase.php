@@ -11,7 +11,6 @@ use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
-use Hammerstone\FastPaginate\FastPaginateProvider;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Laravel\Dusk\Browser;
@@ -78,7 +77,6 @@ abstract class DuskTestCase extends TestCase
             WireUiServiceProvider::class,
             MediaLibraryServiceProvider::class,
             CalendarServiceProvider::class,
-            FastPaginateProvider::class,
             QueryBuilderServiceProvider::class,
             \Laravel\Fortify\FortifyServiceProvider::class,
             FortifyServiceProvider::class,

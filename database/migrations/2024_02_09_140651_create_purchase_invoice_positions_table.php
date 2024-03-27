@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('purchase_invoice_positions', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->foreignId('purchase_invoice_id')->constrained()->cascadeOnDelete();
             $table->foreignId('ledger_account_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();

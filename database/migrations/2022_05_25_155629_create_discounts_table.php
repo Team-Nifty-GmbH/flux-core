@@ -17,7 +17,7 @@ class CreateDiscountsTable extends Migration
             Schema::create('discounts', function (Blueprint $table) {
                 $table->id()
                     ->comment('An incrementing number to uniquely identify a record in this table. This also is the primary key of this table.');
-                $table->uuid()
+                $table->char('uuid', 36)
                     ->comment('A 36 character long unique identifier string for a record within the whole application.');
                 $table->unsignedBigInteger('order_position_id')->nullable()
                     ->comment('A unique identifier number for the table order_positions.');

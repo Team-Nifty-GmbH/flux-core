@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ticket_types', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->json('name');
             $table->timestamp('created_at')->nullable();
             $table->unsignedBigInteger('created_by')->nullable();

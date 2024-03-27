@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('payment_reminders', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('media_id')->nullable();
             $table->unsignedInteger('reminder_level');

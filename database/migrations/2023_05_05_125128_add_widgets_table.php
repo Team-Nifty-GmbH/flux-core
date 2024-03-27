@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('widgets', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->char('uuid', 36);
             $table->morphs('widgetable');
             $table->string('component_name');
             $table->string('name')->nullable();

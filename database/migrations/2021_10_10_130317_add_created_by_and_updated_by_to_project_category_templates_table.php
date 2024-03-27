@@ -14,7 +14,7 @@ class AddCreatedByAndUpdatedByToProjectCategoryTemplatesTable extends Migration
     public function up()
     {
         Schema::table('project_category_templates', function (Blueprint $table) {
-            $table->uuid('uuid')->after('id');
+            $table->char('uuid', 36)->after('id');
             $table->unsignedBigInteger('created_by')->after('created_at')->nullable();
             $table->unsignedBigInteger('updated_by')->after('updated_at')->nullable();
         });
