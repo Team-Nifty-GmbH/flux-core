@@ -112,12 +112,9 @@ class UpdateOrderPosition extends FluxAction
                     ];
                 })
                 ->each(function (array $bundleProduct) {
-                    try {
-                        CreateOrderPosition::make($bundleProduct)
-                            ->validate()
-                            ->execute();
-                    } catch (ValidationException) {
-                    }
+                    CreateOrderPosition::make($bundleProduct)
+                        ->validate()
+                        ->execute();
                 });
         }
 

@@ -67,20 +67,18 @@ class CreateProduct extends FluxAction
         if (resolve_static(CreatePrice::class, 'canPerformAction', [false])) {
             foreach ($prices as $price) {
                 $price['product_id'] = $product->id;
-                try {
-                    CreatePrice::make($price)->validate()->execute();
-                } catch (ValidationException) {
-                }
+                CreatePrice::make($price)
+                    ->validate()
+                    ->execute();
             }
         }
 
         if (resolve_static(CreateProductCrossSelling::class, 'canPerformAction', [false])) {
             foreach ($productCrossSellings as $productCrossSelling) {
                 $productCrossSelling['product_id'] = $product->id;
-                try {
-                    CreateProductCrossSelling::make($productCrossSelling)->validate()->execute();
-                } catch (ValidationException) {
-                }
+                CreateProductCrossSelling::make($productCrossSelling)
+                    ->validate()
+                    ->execute();
             }
         }
 

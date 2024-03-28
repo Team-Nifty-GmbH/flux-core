@@ -32,10 +32,9 @@ class CreateProductOptionGroup extends FluxAction
 
         foreach ($productOptions as $productOption) {
             $productOption = array_merge($productOption, ['product_option_group_id' => $productOptionGroup->id]);
-            try {
-                CreateProductOption::make($productOption)->validate()->execute();
-            } catch (ValidationException) {
-            }
+            CreateProductOption::make($productOption)
+                ->validate()
+                ->execute();
         }
 
         return $productOptionGroup->fresh();

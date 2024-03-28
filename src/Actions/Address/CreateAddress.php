@@ -69,10 +69,9 @@ class CreateAddress extends FluxAction
         if (resolve_static(CreateContactOption::class, 'canPerformAction', [false])) {
             foreach ($contactOptions as $contactOption) {
                 $contactOption['address_id'] = $address->id;
-                try {
-                    CreateContactOption::make($contactOption)->validate()->execute();
-                } catch (ValidationException) {
-                }
+                CreateContactOption::make($contactOption)
+                    ->validate()
+                    ->execute();
             }
         }
 
