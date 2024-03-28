@@ -51,10 +51,9 @@ class CreateMailMessage extends FluxAction
             $attachment['collection_name'] = 'attachments';
             $attachment['media_type'] = 'string';
 
-            try {
-                UploadMedia::make($attachment)->validate()->execute();
-            } catch (\Throwable) {
-            }
+            UploadMedia::make($attachment)
+                ->validate()
+                ->execute();
         }
 
         if ($mailMessage->mailAccount->is_auto_assign) {
