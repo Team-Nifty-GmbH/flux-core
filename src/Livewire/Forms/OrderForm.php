@@ -126,6 +126,8 @@ class OrderForm extends FluxForm
 
     public ?array $updated_by = null;
 
+    public ?array $users = null;
+
     #[Locked]
     public ?array $invoice = null;
 
