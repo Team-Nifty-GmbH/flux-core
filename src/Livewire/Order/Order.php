@@ -1060,6 +1060,7 @@ class Order extends OrderPositionList
         $this->printLayouts = array_keys($order->resolvePrintViews());
 
         $this->order->fill($order);
+        $this->order->users = $order->users->pluck('id')->toArray();
 
         $invoice = $order->invoice();
         if ($invoice) {

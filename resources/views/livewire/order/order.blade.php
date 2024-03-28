@@ -545,11 +545,11 @@
                                     ]"
                                 />
                                 <x-select
-                                    :label="__('Responsible Helper')"
+                                    :label="__('Assigned')"
                                     :disabled="$order->is_locked"
                                     autocomplete="off"
-                                    option-value="id"
                                     :multiselect="true"
+                                    option-value="id"
                                     option-label="label"
                                     wire:model="order.users"
                                     :template="[
