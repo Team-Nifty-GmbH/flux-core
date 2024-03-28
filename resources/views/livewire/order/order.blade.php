@@ -516,7 +516,44 @@
                                     autocomplete="off"
                                     wire:model="order.agent_id"
                                     :template="[
-                                        'name'   => 'user-option',
+                                        'name' => 'user-option',
+                                    ]"
+                                    :async-data="[
+                                        'api' => route('search', \FluxErp\Models\User::class),
+                                        'method' => 'POST',
+                                        'params' => [
+                                            'with' => 'media',
+                                        ]
+                                    ]"
+                                />
+                                <x-select
+                                    :label="__('Responsible User')"
+                                    :disabled="$order->is_locked"
+                                    autocomplete="off"
+                                    option-value="id"
+                                    option-label="label"
+                                    wire:model="order.responsible_user_id"
+                                    :template="[
+                                        'name' => 'user-option',
+                                    ]"
+                                    :async-data="[
+                                        'api' => route('search', \FluxErp\Models\User::class),
+                                        'method' => 'POST',
+                                        'params' => [
+                                            'with' => 'media',
+                                        ]
+                                    ]"
+                                />
+                                <x-select
+                                    :label="__('Assigned')"
+                                    :disabled="$order->is_locked"
+                                    autocomplete="off"
+                                    :multiselect="true"
+                                    option-value="id"
+                                    option-label="label"
+                                    wire:model="order.users"
+                                    :template="[
+                                        'name' => 'user-option',
                                     ]"
                                     :async-data="[
                                         'api' => route('search', \FluxErp\Models\User::class),
