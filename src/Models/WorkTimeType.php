@@ -12,10 +12,6 @@ class WorkTimeType extends Model
 {
     use HasPackageFactory, HasTranslations, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'is_billable' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -23,4 +19,11 @@ class WorkTimeType extends Model
     public $translatable = [
         'name',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_billable' => 'boolean',
+        ];
+    }
 }

@@ -21,11 +21,6 @@ class Price extends Model
         'is_net',
     ];
 
-    protected $casts = [
-        'uuid' => 'string',
-        'price' => Money::class,
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -39,6 +34,13 @@ class Price extends Model
     public bool $isInherited = false;
 
     public ?Price $basePrice = null;
+
+    protected function casts(): array
+    {
+        return [
+            'price' => Money::class,
+        ];
+    }
 
     public function isNet(): Attribute
     {

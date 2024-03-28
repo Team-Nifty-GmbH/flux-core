@@ -14,8 +14,11 @@ class PaymentReminderText extends Model
         'id',
     ];
 
-    protected $casts = [
-        'mail_to' => 'array',
-        'mail_cc' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'mail_to' => 'array',
+            'mail_cc' => 'array',
+        ];
+    }
 }

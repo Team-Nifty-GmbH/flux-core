@@ -12,13 +12,16 @@ class ContactOption extends Model
 {
     use HasPackageFactory, HasUserModification;
 
-    protected $casts = [
-        'is_primary' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_primary' => 'boolean',
+        ];
+    }
 
     public function siblings(): HasMany
     {

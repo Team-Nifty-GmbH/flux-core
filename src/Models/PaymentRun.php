@@ -15,17 +15,19 @@ class PaymentRun extends Model
 {
     use HasFrontendAttributes, HasUserModification, HasUuid;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'state' => PaymentRunState::class,
-        'payment_run_type_enum' => PaymentRunTypeEnum::class,
-        'instructed_execution_date' => 'date',
-        'is_instant_payment' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'state' => PaymentRunState::class,
+            'payment_run_type_enum' => PaymentRunTypeEnum::class,
+            'instructed_execution_date' => 'date',
+            'is_instant_payment' => 'boolean',
+        ];
+    }
 
     public function bankConnection(): BelongsTo
     {

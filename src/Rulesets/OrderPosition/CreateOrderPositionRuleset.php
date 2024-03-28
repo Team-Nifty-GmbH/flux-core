@@ -137,7 +137,7 @@ class CreateOrderPositionRuleset extends FluxRuleset
             ],
 
             'description' => 'string|nullable',
-            'name' => 'required_without:product_id|string',
+            'name' => 'required_without:product_id|string|max:255',
             'product_number' => [
                 'exclude_if:is_free_text,true',
                 'exclude_with:product_id',

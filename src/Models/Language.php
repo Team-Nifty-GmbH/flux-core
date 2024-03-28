@@ -16,11 +16,6 @@ class Language extends Model
 {
     use Commentable, Filterable, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'is_default' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -28,6 +23,13 @@ class Language extends Model
     public $translatable = [
         'name',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_default' => 'boolean',
+        ];
+    }
 
     public function addresses(): HasMany
     {

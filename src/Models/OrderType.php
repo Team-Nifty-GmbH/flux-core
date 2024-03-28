@@ -19,14 +19,6 @@ class OrderType extends Model
     use Filterable, HasClientAssignment, HasEnums, HasPackageFactory, HasTranslations, HasUserModification, HasUuid,
         SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'print_layouts' => 'array',
-        'order_type_enum' => OrderTypeEnum::class,
-        'is_active' => 'boolean',
-        'is_hidden' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -35,6 +27,16 @@ class OrderType extends Model
         'name',
         'description',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'print_layouts' => 'array',
+            'order_type_enum' => OrderTypeEnum::class,
+            'is_active' => 'boolean',
+            'is_hidden' => 'boolean',
+        ];
+    }
 
     public function client(): BelongsTo
     {

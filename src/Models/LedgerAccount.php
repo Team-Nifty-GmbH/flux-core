@@ -13,14 +13,17 @@ class LedgerAccount extends Model
 {
     use HasPackageFactory, HasUuid, Searchable;
 
-    protected $casts = [
-        'ledger_account_type_enum' => LedgerAccountTypeEnum::class,
-        'is_automatic' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'ledger_account_type_enum' => LedgerAccountTypeEnum::class,
+            'is_automatic' => 'boolean',
+        ];
+    }
 
     public function orderPositions(): HasMany
     {

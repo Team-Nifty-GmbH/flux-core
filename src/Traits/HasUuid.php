@@ -6,7 +6,7 @@ use Ramsey\Uuid\Uuid;
 
 trait HasUuid
 {
-    protected static function bootHasUuid()
+    protected static function bootHasUuid(): void
     {
         static::creating(function ($model) {
             if (! $model->uuid) {
@@ -20,5 +20,12 @@ trait HasUuid
                 $model->uuid = $originalUuid;
             }
         });
+    }
+
+    public function initializeHasUuid(): void
+    {
+        $this->mergeCasts([
+            'uuid' => 'string',
+        ]);
     }
 }

@@ -40,10 +40,15 @@ Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function 
 });
 
 Route::get('/mail-pixel/{communication:uuid?}', function (Communication $communication) {
-    if ($communication->exists) {
+    if ($communication->exists && ! auth()->check()) {
         activity('communication')
             ->performedOn($communication)
-            ->log('Mail opened');
+            ->withProperties([
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ])
+            ->event('mail_opened')
+            ->log($communication->subject . ' Mail opened');
     }
 
     $logo = resolve_static(Client::class, 'default')->getFirstMedia('logo_small');

@@ -16,14 +16,17 @@ class PriceList extends Model
 {
     use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'is_net' => 'boolean',
-        'is_default' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_net' => 'boolean',
+            'is_default' => 'boolean',
+        ];
+    }
 
     public function categoryDiscounts(): BelongsToMany
     {

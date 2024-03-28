@@ -33,11 +33,6 @@ class Ticket extends Model implements HasMedia, InteractsWithDataTables
         HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
         InteractsWithMedia, Searchable, SoftDeletes, Trackable;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'state' => TicketState::class,
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -49,6 +44,13 @@ class Ticket extends Model implements HasMedia, InteractsWithDataTables
     ];
 
     public static string $iconName = 'chat-bubble-left-right';
+
+    protected function casts(): array
+    {
+        return [
+            'state' => TicketState::class,
+        ];
+    }
 
     public function authenticatable(): MorphTo
     {

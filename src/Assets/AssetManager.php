@@ -25,12 +25,14 @@ class AssetManager implements Htmlable
         static::$assets = collect();
     }
 
-    public function toHtml(): HtmlString
+    public function toHtml(string|array|null $items = null): HtmlString
     {
         $html = '';
+        $items = Arr::wrap($items);
+        $assets = $items ? static::$assets->only($items) : static::$assets;
 
         $vite = invade(app(Vite::class));
-        foreach (static::$assets->where('is_vite', false) as $asset) {
+        foreach ($assets->where('is_vite', false) as $asset) {
             if ($vite->isCssPath($asset['path'])) {
                 $html .= $vite->makeStyleTagWithAttributes($this->url($asset['name']), []);
 
@@ -41,7 +43,7 @@ class AssetManager implements Htmlable
         }
 
         foreach (static::$viteManifests as $vite) {
-            $vite->entryPoints = array_intersect($vite->entryPoints, static::$assets->keys()->toArray());
+            $vite->entryPoints = array_intersect($vite->entryPoints, $assets->keys()->toArray());
             $html .= $vite->toHtml();
         }
 

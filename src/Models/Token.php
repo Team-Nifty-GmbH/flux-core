@@ -12,10 +12,6 @@ class Token extends Authenticatable
 {
     use HasApiTokens, HasRoles, MassPrunable;
 
-    protected $casts = [
-        'expires_at' => 'datetime',
-    ];
-
     protected $guarded = [
         'id',
         'created_at',
@@ -29,6 +25,13 @@ class Token extends Authenticatable
         static::deleting(function (Token $model) {
             $model->tokens()->delete();
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'expires_at' => 'datetime',
+        ];
     }
 
     public function use(): bool

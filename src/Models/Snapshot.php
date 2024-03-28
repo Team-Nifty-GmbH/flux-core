@@ -14,8 +14,4 @@ class Snapshot extends Model
     protected $hidden = [
         'model_type',
     ];
-
-    protected $casts = [
-        'uuid' => 'string',
-    ];
 }

@@ -47,13 +47,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         'login_password',
     ];
 
-    protected $casts = [
-        'uuid' => 'string',
-        'is_main_address' => 'boolean',
-        'is_active' => 'boolean',
-        'can_login' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -123,6 +116,15 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
                     ->update($addressesUpdates);
             }
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_main_address' => 'boolean',
+            'is_active' => 'boolean',
+            'can_login' => 'boolean',
+        ];
     }
 
     public function getAuthPassword()

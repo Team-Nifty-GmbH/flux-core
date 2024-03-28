@@ -20,11 +20,6 @@ class DocumentType extends Model
 {
     use Filterable, HasClientAssignment, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'is_active' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -35,6 +30,13 @@ class DocumentType extends Model
         'additional_header',
         'additional_footer',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
 
     public function client(): BelongsTo
     {
