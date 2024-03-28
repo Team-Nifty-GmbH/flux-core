@@ -11,7 +11,6 @@ use FluxErp\Rulesets\Address\CreateAddressRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class CreateAddress extends FluxAction
 {

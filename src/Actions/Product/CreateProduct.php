@@ -11,7 +11,6 @@ use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Product\CreateProductRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class CreateProduct extends FluxAction
 {
