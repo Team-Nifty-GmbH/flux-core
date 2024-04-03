@@ -29,7 +29,7 @@ Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function 
     Route::get('/manifest.json', ManifestController::class)->name('manifest');
     Route::get('favicon.svg', function () {
         return response()->file(flux_path('public/pwa/images/icons-vector.svg'));
-    });
+    })->name('favicon');
     Route::get('/flux-assets/{file}', AssetController::class)
         ->where('file', '.+')
         ->name('flux-asset');
