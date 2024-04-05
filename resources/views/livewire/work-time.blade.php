@@ -1,32 +1,45 @@
 <div
     x-on:start-time-tracking.window="relatedSelected($event.detail.trackable_type); $wire.start($event.detail);"
     x-data="{
-        currentWorkTime: $wire.entangle('workTime'),
-        time: 0,
-        open: false,
-        activeWorkTimes: $wire.entangle('activeWorkTimes'),
-        trackable_type: $wire.entangle('workTime.trackable_type'),
-        init() {
+     currentWorkTime: $wire.entangle('workTime'),
+     time: 0,
+     open: false,
+     activeWorkTimes: $wire.entangle('activeWorkTimes'),
+     trackable_type: $wire.entangle('workTime.trackable_type'),
+     runningTimers: {},
+     destroy(){
+            const keys = Object.keys(this.runningTimers);
+            keys.forEach((key) => {
+                clearInterval(this.runningTimers[key]);
+            });
+        },
+     init() {
+            console.log('INIT');
             this.activeWorkTimes.forEach((workTime) => {
-                if (! workTime.interval) {
-                    this.startTimer(workTime);
+                if(workTime.ended_at) {
+                    return;
                 }
-                this.time = this.activeWorkTimes.reduce((acc, workTime) => {
-                    if (! workTime.interval) {
-                        this.startTimer(workTime);
-                    }
-                    return this.calculateTime(workTime) + acc;
-                }, 0);
+                this.startTimer(workTime);
             });
 
-            this.$watch('activeWorkTimes', (value) => {
-                this.time = value.reduce((acc, workTime) => {
-                    if (! workTime.interval) {
-                        this.startTimer(workTime);
-                    }
-
+            this.time = this.activeWorkTimes.reduce((acc, workTime) => {
                     return this.calculateTime(workTime) + acc;
                 }, 0);
+
+
+            this.$watch('activeWorkTimes', (value) => {
+                this.activeWorkTimes.forEach((workTime) => {
+                    console.log('start', workTime.started_at);
+                    if(workTime.ended_at) {
+                        if(this.runningTimers[workTime.id]) {
+                            clearInterval(this.runningTimers[workTime.id]);
+                            delete this.runningTimers[workTime.id];
+                            console.log('CLEAR', this.runningTimers);
+                        }
+                        return;
+                    }
+                    this.startTimer(workTime);
+                });
             });
 
             this.$watch('trackable_type', () => {
@@ -49,19 +62,20 @@
             data.label ? $wire.workTime.name = data.label : null;
         },
         calculateTime(workTime) {
-            let diff = (workTime.ended_at ? new Date(workTime.ended_at) : new Date()) - new Date(workTime.started_at);
-
+            const startedAt = new Date(workTime.started_at);
+            const endedAt = workTime.ended_at ? new Date(workTime.ended_at) : new Date();
+            let diff = endedAt - startedAt;
             return diff - workTime.paused_time_ms;
         },
         startTimer(workTime) {
-            if (workTime.ended_at) {
+            if(this.runningTimers[workTime.id]) {
                 return;
             }
-
-            workTime.interval = setInterval(() => {
-                this.time += 1000;
+            const intervalId = setInterval(() => {
+                this.time = this.time + 1000;
                 document.querySelector(`#active-work-times [data-id='${workTime.id}']`).innerHTML = this.msTimeToString(this.calculateTime(workTime));
             }, 1000);
+            this.runningTimers[workTime.id] = intervalId;
         },
         msTimeToString(time) {
             let seconds = Math.floor(time / 1000);
@@ -77,30 +91,28 @@
             return `${hours}:${minutes}:${seconds}`;
         },
         stopWorkDay() {
-            this.activeWorkTimes.forEach((workTime) => {
-                clearInterval(workTime.interval);
+            const keys = Object.keys(this.runningTimers);
+            keys.forEach((key) => {
+                console.log('STOP', key, 'clear interval');
+                clearInterval(this.runningTimers[key]);
             });
+            this.runningTimers = {};
             $wire.toggleWorkDay(false);
             this.time = 0;
         },
-        stopWorkTime(workTime) {
-            clearInterval(workTime.interval);
-            $wire.stop(workTime.id).then((response) => {
-                if(response) {
-                    this.time = Math.max(this.time - this.calculateTime(workTime), 0);
-                }
-            });
+        async stopWorkTime(workTime) {
+            if(this.runningTimers[workTime.id]) {
+                clearInterval(this.runningTimers[workTime.id]);
+                delete this.runningTimers[workTime.id];
+            }
+            await $wire.stop(workTime.id);
+
         },
-        pauseWorkTime(workTime) {
-            clearInterval(workTime.interval);
-            $wire.pause(workTime.id);
+        async pauseWorkTime(workTime) {
+            await $wire.pause(workTime.id);
         },
-        continueWorkTime(workTime) {
-            $wire.continue(workTime.id).then((response) => {
-                if(response) {
-                    workTime.ended_at = null;
-                }
-            });
+        async continueWorkTime(workTime) {
+            await $wire.continue(workTime.id)
         }
     }"
 >
@@ -200,7 +212,7 @@
          x-anchor.bottom-end.offset.5="$refs.button"
          class="z-10"
     >
-        <x-card id="active-work-times" class="flex flex-col gap-4" :title="__('Active Work Times')">
+        <x-card id="active-work-times" class="flex flex-col gap-4 max-w-md" :title="__('Active Work Times')">
             <x-slot:action>
                 <x-button.circle xs x-on:click="open = false" icon="x" />
             </x-slot:action>
@@ -212,10 +224,10 @@
             </div>
             <x-button x-show="$wire.dailyWorkTime.id" positive :label="__('Record new working hours')" x-on:click="$openModal('work-time')" />
             <template x-for="workTime in activeWorkTimes">
-                <div class="odd:bg-neutral-100 rounded-md p-1.5 flex flex-col gap-1.5">
+                <div class="rounded-md p-1.5 flex flex-col gap-1.5">
                     <div class="flex justify-between w-full">
                         <div class="flex flex-col w-full">
-                            <div class="text-gray-500 dark:text-gray-400 text-ellipsis" x-text="workTime.name"></div>
+                            <div class="text-gray-500 dark:text-gray-400 truncate" x-text="workTime.name"></div>
                             <div class="text-xs text-gray-500 dark:text-gray-400" x-text="workTime.work_time_type?.name"></div>
                             <div class="text-xs text-gray-500 dark:text-gray-400" x-text="formatters.datetime(workTime.started_at)"></div>
                             <x-badge primary>

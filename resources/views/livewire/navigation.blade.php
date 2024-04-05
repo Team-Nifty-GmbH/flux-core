@@ -75,7 +75,7 @@
                         />
                         <livewire:features.search-bar />
                         <div class="flex gap-1.5" wire:ignore>
-                            <livewire:work-time lazy />
+                            <livewire:work-time />
                             <livewire:features.notifications lazy />
                         </div>
                     </x-card>

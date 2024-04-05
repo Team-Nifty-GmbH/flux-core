@@ -11,6 +11,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -124,6 +125,12 @@ class WorkTime extends Component
             $this->activeWorkTimes[$this->workTime->id] = $this->workTime->toArray();
             $this->activeWorkTimes = array_values($this->activeWorkTimes);
         }
+
+        if ($this->workTime->ended_at) {
+            $this->workTime->ended_at = Carbon::parse($this->workTime->ended_at)->toISOString();
+        }
+
+        $this->workTime->started_at = Carbon::parse($this->workTime->started_at)->toISOString();
 
         return true;
     }
