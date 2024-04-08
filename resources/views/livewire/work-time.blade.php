@@ -14,7 +14,6 @@
             });
         },
      init() {
-            console.log('INIT');
             this.activeWorkTimes.forEach((workTime) => {
                 if(workTime.ended_at) {
                     return;
@@ -29,15 +28,15 @@
 
             this.$watch('activeWorkTimes', (value) => {
                 this.activeWorkTimes.forEach((workTime) => {
-                    console.log('start', workTime.started_at);
                     if(workTime.ended_at) {
                         if(this.runningTimers[workTime.id]) {
+                            // only covers pause case
                             clearInterval(this.runningTimers[workTime.id]);
                             delete this.runningTimers[workTime.id];
-                            console.log('CLEAR', this.runningTimers);
                         }
                         return;
                     }
+                    // covers start and continue case
                     this.startTimer(workTime);
                 });
             });
@@ -68,6 +67,7 @@
             return diff - workTime.paused_time_ms;
         },
         startTimer(workTime) {
+            // called on init add new edit and continue
             if(this.runningTimers[workTime.id]) {
                 return;
             }
@@ -91,9 +91,9 @@
             return `${hours}:${minutes}:${seconds}`;
         },
         stopWorkDay() {
+            // clear all the intervals and reset the time to 0
             const keys = Object.keys(this.runningTimers);
             keys.forEach((key) => {
-                console.log('STOP', key, 'clear interval');
                 clearInterval(this.runningTimers[key]);
             });
             this.runningTimers = {};
@@ -101,6 +101,8 @@
             this.time = 0;
         },
         async stopWorkTime(workTime) {
+            // clear appropriate timer - watcher will not have access to workTime
+            // since it is removed from an array
             if(this.runningTimers[workTime.id]) {
                 clearInterval(this.runningTimers[workTime.id]);
                 delete this.runningTimers[workTime.id];
@@ -109,9 +111,11 @@
 
         },
         async pauseWorkTime(workTime) {
+            // timer clean up happens in watcher
             await $wire.pause(workTime.id);
         },
         async continueWorkTime(workTime) {
+           // timer start takes place in watcher
             await $wire.continue(workTime.id)
         }
     }"

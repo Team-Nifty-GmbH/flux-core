@@ -126,12 +126,6 @@ class WorkTime extends Component
             $this->activeWorkTimes = array_values($this->activeWorkTimes);
         }
 
-        if ($this->workTime->ended_at) {
-            $this->workTime->ended_at = Carbon::parse($this->workTime->ended_at)->toISOString();
-        }
-
-        $this->workTime->started_at = Carbon::parse($this->workTime->started_at)->toISOString();
-
         return true;
     }
 

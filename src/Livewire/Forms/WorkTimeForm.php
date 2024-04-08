@@ -84,7 +84,7 @@ class WorkTimeForm extends FluxForm
     {
         parent::fill($values);
 
-        $this->started_at = $this->started_at ? Carbon::parse($this->started_at)->format('Y-m-d H:i:s') : null;
-        $this->ended_at = $this->ended_at ? Carbon::parse($this->ended_at)->format('Y-m-d H:i:s') : null;
+        $this->started_at = $this->started_at ? Carbon::parse($this->started_at)->toISOString() : null;
+        $this->ended_at = $this->ended_at ? Carbon::parse($this->ended_at)->toISOString() : null;
     }
 }

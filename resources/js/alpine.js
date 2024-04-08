@@ -1,12 +1,10 @@
 import folderTree from './components/folder-tree';
-import workTime from './components/work-time';
 import '../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
 import '../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables';
 import setupEditor from './components/tiptap';
 import PullToRefresh from "pulltorefreshjs";
 
 window.folderTree = folderTree;
-window.workTime = workTime;
 window.setupEditor = setupEditor;
 
 if (typeof window.Livewire === 'undefined') {
