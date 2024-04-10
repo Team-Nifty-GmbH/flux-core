@@ -7,6 +7,7 @@ use FluxErp\FluxServiceProvider;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use FluxErp\Providers\FortifyServiceProvider;
+use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
@@ -86,6 +87,7 @@ abstract class DuskTestCase extends TestCase
             RouteServiceProvider::class,
             SanctumServiceProvider::class,
             WebPushServiceProvider::class,
+            MorphMapServiceProvider::class,
         ]);
     }
 
