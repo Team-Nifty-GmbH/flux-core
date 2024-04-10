@@ -28,94 +28,22 @@ use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Menu\MenuManager;
-use FluxErp\Models\Activity;
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
-use FluxErp\Models\AddressType;
-use FluxErp\Models\BankConnection;
-use FluxErp\Models\Calendar;
-use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
-use FluxErp\Models\Comment;
-use FluxErp\Models\Commission;
-use FluxErp\Models\CommissionRate;
-use FluxErp\Models\Communication;
-use FluxErp\Models\Contact;
-use FluxErp\Models\ContactBankConnection;
-use FluxErp\Models\ContactOption;
-use FluxErp\Models\Country;
-use FluxErp\Models\CountryRegion;
-use FluxErp\Models\Currency;
-use FluxErp\Models\CustomEvent;
-use FluxErp\Models\Discount;
-use FluxErp\Models\DiscountGroup;
-use FluxErp\Models\DocumentGenerationSetting;
-use FluxErp\Models\DocumentType;
-use FluxErp\Models\Email;
-use FluxErp\Models\EmailTemplate;
-use FluxErp\Models\EventSubscription;
-use FluxErp\Models\Favorite;
-use FluxErp\Models\FormBuilderField;
-use FluxErp\Models\FormBuilderFieldResponse;
-use FluxErp\Models\FormBuilderForm;
-use FluxErp\Models\FormBuilderResponse;
-use FluxErp\Models\FormBuilderSection;
-use FluxErp\Models\InterfaceUser;
-use FluxErp\Models\Language;
-use FluxErp\Models\LanguageLine;
 use FluxErp\Models\LedgerAccount;
-use FluxErp\Models\Lock;
-use FluxErp\Models\Log;
-use FluxErp\Models\MailAccount;
-use FluxErp\Models\MailFolder;
-use FluxErp\Models\Media;
-use FluxErp\Models\Meta;
-use FluxErp\Models\Notification;
-use FluxErp\Models\NotificationSetting;
 use FluxErp\Models\Order;
-use FluxErp\Models\OrderPosition;
-use FluxErp\Models\OrderType;
-use FluxErp\Models\PaymentNotice;
-use FluxErp\Models\PaymentReminder;
-use FluxErp\Models\PaymentRun;
-use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
-use FluxErp\Models\Price;
-use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
-use FluxErp\Models\ProductCrossSelling;
-use FluxErp\Models\ProductOption;
-use FluxErp\Models\ProductOptionGroup;
-use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Project;
-use FluxErp\Models\PurchaseInvoice;
-use FluxErp\Models\PurchaseInvoicePosition;
-use FluxErp\Models\Role;
-use FluxErp\Models\Schedule;
-use FluxErp\Models\SepaMandate;
 use FluxErp\Models\SerialNumber;
-use FluxErp\Models\SerialNumberRange;
-use FluxErp\Models\Setting;
-use FluxErp\Models\Snapshot;
-use FluxErp\Models\StockPosting;
-use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
-use FluxErp\Models\TicketType;
-use FluxErp\Models\Token;
-use FluxErp\Models\Transaction;
-use FluxErp\Models\Unit;
 use FluxErp\Models\User;
-use FluxErp\Models\VatRate;
-use FluxErp\Models\Warehouse;
-use FluxErp\Models\WorkTime;
-use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Widgets\WidgetManager;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
@@ -261,10 +189,10 @@ class FluxServiceProvider extends ServiceProvider
         if (! Request::hasMacro('isPortal')) {
             Request::macro('isPortal', function () {
                 return $this->getHost() === preg_replace(
-                        '(^https?://)',
-                        '',
-                        config('flux.portal_domain')
-                    );
+                    '(^https?://)',
+                    '',
+                    config('flux.portal_domain')
+                );
             });
         }
 
@@ -488,10 +416,10 @@ class FluxServiceProvider extends ServiceProvider
             $relativePath = Str::replace($directoryPath, '', $phpFile->getRealPath());
             $relativePath = Str::replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
             $class = $namespace . str_replace(
-                    '/',
-                    '\\',
-                    pathinfo($relativePath, PATHINFO_FILENAME)
-                );
+                '/',
+                '\\',
+                pathinfo($relativePath, PATHINFO_FILENAME)
+            );
 
             if (class_exists($class)) {
                 $exploded = explode('\\', $relativePath);

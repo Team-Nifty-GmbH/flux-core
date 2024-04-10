@@ -1,16 +1,5 @@
 <?php
 
-use FluxErp\Models\Address;
-use FluxErp\Models\Communication;
-use FluxErp\Models\Contact;
-use FluxErp\Models\Log;
-use FluxErp\Models\Order;
-use FluxErp\Models\Project;
-use FluxErp\Models\Schedule;
-use FluxErp\Models\Task;
-use FluxErp\Models\Ticket;
-use FluxErp\Models\Transaction;
-use FluxErp\Models\WorkTime;
 use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Broadcast;
@@ -26,7 +15,7 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-foreach (Relation::morphMap() as $alias => $class) {
+foreach (Relation::morphMap() as $class) {
     $class = resolve_static($class, 'class');
     if (! in_array(BroadcastsEvents::class, class_uses_recursive($class))) {
         continue;
@@ -44,9 +33,12 @@ foreach (Relation::morphMap() as $alias => $class) {
     });
 }
 
-Broadcast::channel('FluxErp.Models.User.{user}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
-});
+Broadcast::channel(
+    class_to_broadcast_channel(Relation::getMorphedModel('user')),
+    function ($user, $id) {
+        return (int) $user->id === (int) $id;
+    }
+);
 
 Broadcast::channel('job-batch.{id}', function () {
     return true;
