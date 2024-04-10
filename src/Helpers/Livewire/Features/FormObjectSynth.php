@@ -14,7 +14,7 @@ class FormObjectSynth extends BaseFormObjectSynth
         return parent::hydrate($data, $meta, $hydrateChild);
     }
 
-    function dehydrate($target, $dehydrateChild): array
+    public function dehydrate($target, $dehydrateChild): array
     {
         $data = parent::dehydrate($target, $dehydrateChild);
 
