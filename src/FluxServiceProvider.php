@@ -24,7 +24,7 @@ use FluxErp\Facades\Repeatable;
 use FluxErp\Facades\Widget;
 use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\Composer;
-use FluxErp\Helpers\Livewire\Features\FormObjectSynth;
+use FluxErp\Helpers\Livewire\Features\SupportFormObjects;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
@@ -128,6 +128,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->singleton('flux.menu_manager', fn ($app) => app(MenuManager::class));
         $this->app->singleton('flux.repeatable_manager', fn ($app) => app(RepeatableManager::class));
 
+        app('livewire')->componentHook(SupportFormObjects::class);
+
         $this->app->extend(Builder::class, function (Builder $scoutBuilder) {
             if (($user = auth()->user()) instanceof User
                 && in_array(HasClientAssignment::class, class_uses_recursive($scoutBuilder->model))
@@ -150,7 +152,6 @@ class FluxServiceProvider extends ServiceProvider
     {
         bcscale(9);
 
-        app('livewire')->propertySynthesizer([FormObjectSynth::class]);
         $this->registerCommands();
 
         if (! Response::hasMacro('attachment')) {
