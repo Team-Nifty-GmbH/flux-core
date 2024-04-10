@@ -19,13 +19,12 @@ window.Tribute = Tribute;
 window.Pusher = Pusher;
 
 window.Echo = new Echo({
-    broadcaster: 'reverb',
-    key: document.head.querySelector('meta[name="pusher-key"]').content,
-    wsHost: window.location.hostname, // <-- important if you dont build the js file on the prod server
-    wsPort: 80, // <-- this ensures that nginx will receive the request
-    wssPort: 443, // <-- this ensures that nginx will receive the request
-    forceTLS: window.location.protocol === 'https:',
-    disableStats: true,
+    broadcaster: document.head.querySelector('meta[name="ws-broadcaster"]')?.content || 'reverb',
+    key: document.head.querySelector('meta[name="ws-key"]')?.content,
+    wsHost: document.head.querySelector('meta[name="ws-host"]')?.content || window.location.hostname, // <-- important if you dont build the js file on the prod server
+    wsPort: document.head.querySelector('meta[name="ws-port"]')?.content || 80, // <-- this ensures that nginx will receive the request
+    wssPort: document.head.querySelector('meta[name="ws-port"]')?.content || 443, // <-- this ensures that nginx will receive the request
+    forceTLS: document.head.querySelector('meta[name="ws-protocol"]')?.content === 'https',
     enabledTransports: ['ws', 'wss'],
 });
 

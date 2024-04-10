@@ -103,7 +103,7 @@ abstract class DuskTestCase extends TestCase
     public function openMenu(): void
     {
         $this->browse(function ($browser) {
-            $browser->script("Alpine.\$data(document.getElementById('main-navigation')).menuOpen = true;");
+            $browser->script("window.Alpine.\$data(document.getElementById('main-navigation')).menuOpen = true;");
             $browser->waitForText(__('Logged in as:'));
         });
     }

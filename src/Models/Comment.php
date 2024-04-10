@@ -10,6 +10,7 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\MediaLibrary\HasMedia;
@@ -39,6 +40,11 @@ class Comment extends Model implements HasMedia
     public function model(): MorphTo
     {
         return $this->morphTo('model');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
     }
 
     public function user(): Attribute

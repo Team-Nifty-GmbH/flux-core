@@ -52,7 +52,7 @@
                                             true,
                                         ]
                                     ],
-                                    'with' => 'contact.media',
+                                    'with' => ['contact.media', 'country:id,name'],
                                 ]
                             ]"
                         />

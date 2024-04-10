@@ -44,12 +44,13 @@ use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Casts\Money;
 use TeamNiftyGmbH\DataTable\Casts\Percentage;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment, HasCustomEvents,
-        HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification,
-        HasUuid, InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable {
+    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
+        HasCustomEvents, HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates,
+        HasUserModification, HasUuid, InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;
         }
 
@@ -379,8 +380,14 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             ->where('is_alternative', false)
             ->sum('total_base_gross_price');
 
-        $this->total_gross_price = bcadd($totalGross, $this->shipping_costs_gross_price ?: 0, 9);
-        $this->total_base_gross_price = bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9);
+        $this->total_gross_price = bcround(
+            bcadd($totalGross, $this->shipping_costs_gross_price ?: 0, 9),
+            2
+        );
+        $this->total_base_gross_price = bcround(
+            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
+            2
+        );
 
         return $this;
     }
@@ -394,8 +401,14 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             ->where('is_alternative', false)
             ->sum('total_base_net_price');
 
-        $this->total_net_price = bcadd($totalNet, $this->shipping_costs_net_price ?: 0, 9);
-        $this->total_base_net_price = bcadd($totalBaseNet, $this->shipping_costs_net_price ?: 0, 9);
+        $this->total_net_price = bcround(
+            bcadd($totalNet, $this->shipping_costs_net_price ?: 0, 9),
+            2
+        );
+        $this->total_base_net_price = bcround(
+            bcadd($totalBaseNet, $this->shipping_costs_net_price ?: 0, 9),
+            2
+        );
 
         return $this;
     }

@@ -483,3 +483,15 @@ if (! function_exists('resolve_static')) {
         }
     }
 }
+
+if (! function_exists('class_to_broadcast_channel')) {
+    function class_to_broadcast_channel(string $class, bool $withParam = true): string
+    {
+        if (! class_exists($class)) {
+            throw new InvalidArgumentException('Invalid class: ' . $class);
+        }
+
+        return str_replace('\\', '.', $class)
+            . ($withParam ? '.{' . \Illuminate\Support\Str::camel(class_basename($class)) . '}' : '');
+    }
+}
