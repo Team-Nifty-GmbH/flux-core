@@ -24,6 +24,7 @@ use FluxErp\Facades\Repeatable;
 use FluxErp\Facades\Widget;
 use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\Composer;
+use FluxErp\Helpers\Livewire\Features\FormObjectSynth;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
@@ -149,6 +150,7 @@ class FluxServiceProvider extends ServiceProvider
     {
         bcscale(9);
 
+        app('livewire')->propertySynthesizer([FormObjectSynth::class]);
         $this->registerCommands();
 
         if (! Response::hasMacro('attachment')) {
