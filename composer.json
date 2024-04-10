@@ -10,7 +10,7 @@
         "barryvdh/laravel-dompdf": "^2.0",
         "laravel-notification-channels/webpush": "^8.0",
         "laravel/fortify": "^1.13",
-        "laravel/framework": "^11.0",
+        "laravel/framework": "^11.3",
         "laravel/reverb": "@beta",
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^10.0",
@@ -113,10 +113,11 @@
         "laravel": {
             "providers": [
                 "FluxErp\\FluxServiceProvider",
+                "FluxErp\\Providers\\MorphMapServiceProvider",
                 "FluxErp\\Providers\\AuthServiceProvider",
-                "FluxErp\\Providers\\BroadcastServiceProvider",
                 "FluxErp\\Providers\\EventServiceProvider",
                 "FluxErp\\Providers\\FortifyServiceProvider",
+                "FluxErp\\Providers\\BroadcastServiceProvider",
                 "FluxErp\\Providers\\RouteServiceProvider",
                 "FluxErp\\Providers\\ViewServiceProvider"
             ]

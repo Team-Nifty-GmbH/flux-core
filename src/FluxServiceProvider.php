@@ -147,7 +147,6 @@ class FluxServiceProvider extends ServiceProvider
             $this->offerPublishing();
         }
 
-        $this->registerMorphMap();
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
@@ -548,95 +547,5 @@ class FluxServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
         $this->app['router']->aliasMiddleware('permission', Permissions::class);
         $this->app['router']->aliasMiddleware('localization', Localization::class);
-    }
-
-    private function registerMorphMap(): void
-    {
-        Relation::enforceMorphMap([
-            'activity' => Activity::class,
-            'additional_column' => AdditionalColumn::class,
-            'address' => Address::class,
-            'address_type' => AddressType::class,
-            'bank_connection' => BankConnection::class,
-            'calendar' => Calendar::class,
-            'calendar_event' => CalendarEvent::class,
-            'category' => Category::class,
-            'client' => Client::class,
-            'comment' => Comment::class,
-            'commission' => Commission::class,
-            'commission_rate' => CommissionRate::class,
-            'communication' => Communication::class,
-            'contact' => Contact::class,
-            'contact_bank_connection' => ContactBankConnection::class,
-            'contact_option' => ContactOption::class,
-            'country' => Country::class,
-            'country_region' => CountryRegion::class,
-            'currency' => Currency::class,
-            'custom_event' => CustomEvent::class,
-            'discount' => Discount::class,
-            'discount_group' => DiscountGroup::class,
-            'document_generation_setting' => DocumentGenerationSetting::class,
-            'document_type' => DocumentType::class,
-            'email' => Email::class,
-            'email_template' => EmailTemplate::class,
-            'event_subscription' => EventSubscription::class,
-            'favorite' => Favorite::class,
-            'form_builder_field' => FormBuilderField::class,
-            'form_builder_field_response' => FormBuilderFieldResponse::class,
-            'form_builder_form' => FormBuilderForm::class,
-            'form_builder_response' => FormBuilderResponse::class,
-            'form_builder_section' => FormBuilderSection::class,
-            'interface_user' => InterfaceUser::class,
-            'language' => Language::class,
-            'translation' => LanguageLine::class,
-            'ledger_account' => LedgerAccount::class,
-            'lock' => Lock::class,
-            'log' => Log::class,
-            'meta' => Meta::class,
-            'mail_account' => MailAccount::class,
-            'mail_folder' => MailFolder::class,
-            'media' => Media::class,
-            'notification' => Notification::class,
-            'notification_setting' => NotificationSetting::class,
-            'order' => Order::class,
-            'order_position' => OrderPosition::class,
-            'order_type' => OrderType::class,
-            'payment_notice' => PaymentNotice::class,
-            'payment_reminder' => PaymentReminder::class,
-            'payment_run' => PaymentRun::class,
-            'payment_type' => PaymentType::class,
-            'permission' => Permission::class,
-            'price' => Price::class,
-            'price_list' => PriceList::class,
-            'product' => Product::class,
-            'product_cross_selling' => ProductCrossSelling::class,
-            'product_option' => ProductOption::class,
-            'product_option_group' => ProductOptionGroup::class,
-            'product_property' => ProductProperty::class,
-            'project' => Project::class,
-            'purchase_invoice' => PurchaseInvoice::class,
-            'purchase_invoice_position' => PurchaseInvoicePosition::class,
-            'role' => Role::class,
-            'schedule' => Schedule::class,
-            'sepa_mandate' => SepaMandate::class,
-            'serial_number' => SerialNumber::class,
-            'serial_number_range' => SerialNumberRange::class,
-            'setting' => Setting::class,
-            'snapshot' => Snapshot::class,
-            'stock_posting' => StockPosting::class,
-            'tag' => Tag::class,
-            'task' => Task::class,
-            'ticket' => Ticket::class,
-            'ticket_type' => TicketType::class,
-            'token' => Token::class,
-            'transaction' => Transaction::class,
-            'unit' => Unit::class,
-            'user' => User::class,
-            'vat_rate' => VatRate::class,
-            'warehouse' => Warehouse::class,
-            'widget' => Models\Widget::class,
-            'work_time' => WorkTime::class,
-            'work_time_type' => WorkTimeType::class,
-        ]);
     }
 }

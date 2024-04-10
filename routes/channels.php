@@ -11,6 +11,7 @@ use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\Transaction;
 use FluxErp\Models\WorkTime;
+use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -27,6 +28,10 @@ use Illuminate\Support\Facades\Broadcast;
 
 foreach (Relation::morphMap() as $alias => $class) {
     $class = resolve_static($class, 'class');
+    if (! in_array(BroadcastsEvents::class, class_uses_recursive($class))) {
+        continue;
+    }
+
     $channel = class_to_broadcast_channel($class);
 
     Broadcast::channel($channel, function ($user) use ($channel) {
