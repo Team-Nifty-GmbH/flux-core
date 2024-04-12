@@ -2,6 +2,7 @@
 
 namespace FluxErp\Console\Commands\Init;
 
+use FluxErp\Jobs\ArtisanJob;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
@@ -72,7 +73,7 @@ class InitEnv extends Command
         }
 
         if ($pusherChanged) {
-            Artisan::call('reverb:restart');
+            ArtisanJob::dispatch('reverb:restart');
 
             $restart = 0;
             while ($restart !== 0) {

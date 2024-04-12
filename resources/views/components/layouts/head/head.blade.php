@@ -7,7 +7,7 @@
 <meta name="ws-key" content="{{ config('flux.vite.reverb_app_key') }}">
 <meta name="ws-broadcaster" content="{{ config('broadcasting.default', 'reverb') }}">
 <meta name="ws-host" content="{{ config('flux.vite.reverb_host') }}">
-<meta name="ws-post" content="{{ config('flux.vite.reverb_port') }}">
+<meta name="ws-port" content="{{ config('flux.vite.reverb_port') }}">
 <meta name="ws-protocol" content="{{ config('flux.vite.reverb_protocol') }}">
 <meta name="webpush-key" content="{{ config('webpush.vapid.public_key') }}">
 <meta name="currency-code" content="{{ $defaultCurrency?->iso }}">
