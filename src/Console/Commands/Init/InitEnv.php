@@ -6,6 +6,7 @@ use FluxErp\Jobs\ArtisanJob;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class InitEnv extends Command
@@ -18,9 +19,11 @@ class InitEnv extends Command
 
     public function handle(): void
     {
-        $envFile = base_path('.env');
+        if (File::missing($env = app()->environmentFile()) || Cache::get('flux:env:initialized', false)) {
+            return;
+        }
 
-        $env = file_get_contents($envFile);
+        $contents = File::get($env);
 
         $input = $this->argument('keyValues');
 
@@ -46,18 +49,18 @@ class InitEnv extends Command
         $keyValues = array_change_key_case($keyValues, CASE_UPPER);
 
         foreach ($keyValues as $key => $value) {
-            if (! preg_match('/' . $key . '=.*/', $env)) {
-                $env .= PHP_EOL . $key . '=' . $value;
+            if (! preg_match('/' . $key . '=.*/', $contents)) {
+                $contents .= PHP_EOL . $key . '=' . $value;
             } else {
-                $env = preg_replace(
+                $contents = preg_replace(
                     '/' . $key . '=.*/',
                     $key . '=' . $value,
-                    $env
+                    $contents
                 );
             }
         }
 
-        file_put_contents($envFile, $env);
+        File::put($env, $contents);
         Artisan::call('config:clear');
         Artisan::call('cache:clear');
         Artisan::call('route:clear');
@@ -82,6 +85,8 @@ class InitEnv extends Command
         }
 
         Artisan::call('queue:restart');
+
+        Cache::forever('flux:env:initialized', true);
     }
 
     protected function fluxDefault(): array
@@ -92,6 +97,7 @@ class InitEnv extends Command
             'log_channel' => 'database',
             'broadcast_connection' => 'reverb',
             'cache_store' => 'redis',
+            'cache_prefix' => uniqid() . '_',
             'queue_connection' => 'redis',
             'session_driver' => 'redis',
             'reverb_app_id' => random_int(100_000, 999_999),
@@ -101,6 +107,7 @@ class InitEnv extends Command
             'reverb_host' => 'localhost',
             'reverb_port' => 8080,
             'scout_driver' => 'meilisearch',
+            'scout_prefix' => uniqid() . '_',
         ];
     }
 
