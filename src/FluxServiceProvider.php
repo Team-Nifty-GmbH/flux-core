@@ -24,6 +24,7 @@ use FluxErp\Facades\Repeatable;
 use FluxErp\Facades\Widget;
 use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\Composer;
+use FluxErp\Helpers\Livewire\Features\SupportFormObjects;
 use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
@@ -126,6 +127,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->singleton('flux.action_manager', fn ($app) => app(ActionManager::class));
         $this->app->singleton('flux.menu_manager', fn ($app) => app(MenuManager::class));
         $this->app->singleton('flux.repeatable_manager', fn ($app) => app(RepeatableManager::class));
+
+        app('livewire')->componentHook(SupportFormObjects::class);
 
         $this->app->extend(Builder::class, function (Builder $scoutBuilder) {
             if (($user = auth()->user()) instanceof User
