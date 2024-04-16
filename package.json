@@ -21,7 +21,7 @@
         "axios": "^1.6",
         "dotenv": "^16.4.4",
         "dotenv-expand": "^11.0.0",
-        "laravel-echo": "^1.16.0",
+        "laravel-echo": "^1.16.1",
         "laravel-vite-plugin": "^1.0.2",
         "lodash": "^4.17.19",
         "postcss": "^8.4.36",
