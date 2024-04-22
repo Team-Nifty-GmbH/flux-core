@@ -1021,21 +1021,37 @@ class Order extends OrderPositionList
 
     private function recalculateOrderTotals(): void
     {
+
         $this->order->total_net_price = 0;
         $this->order->total_gross_price = 0;
         $this->order->total_vats = [];
+        $this->order->total_base_net_price = 0;
 
         foreach ($this->data as $item) {
+
+            $vatRatePercentage = bcmul($item['vat_rate_percentage'], 1);
+
+            // calculate total net price
             $this->order->total_net_price = bcadd($this->order->total_net_price, $item['total_net_price'] ?? 0);
+
+            // calculate total gross price
             $this->order->total_gross_price = bcadd(
                 $this->order->total_gross_price,
                 $item['total_gross_price'] ?? 0
             );
-            $this->order->total_vats[$item['vat_rate_percentage']]['total_vat_price'] = bcadd(
-                $this->order->total_vats[$item['vat_rate_percentage']]['total_vat_price'] ?? 0,
+
+            // calculate total base net price
+            $this->order->total_base_net_price = bcadd(
+                $this->order->total_base_net_price,
+                $item['total_base_net_price'] ?? 0
+            );
+
+            // calculate sum of vats
+            $this->order->total_vats[$vatRatePercentage]['total_vat_price'] = bcadd(
+                $this->order->total_vats[$vatRatePercentage]['total_vat_price'] ?? 0,
                 $item['vat_price'] ?? 0
             );
-            $this->order->total_vats[$item['vat_rate_percentage']]['vat_rate_percentage'] = $item['vat_rate_percentage'];
+            $this->order->total_vats[$vatRatePercentage]['vat_rate_percentage'] = $item['vat_rate_percentage'];
         }
 
         $this->isDirtyData = true;

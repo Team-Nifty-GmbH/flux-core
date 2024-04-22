@@ -126,6 +126,11 @@ class UpdateOrderPositionRuleset extends FluxRuleset
             'is_alternative' => 'boolean',
             'is_net' => 'boolean',
             'is_free_text' => 'boolean',
+
+            'discount_percentage' => [
+                new Numeric(0, 1),
+                'nullable',
+            ]
         ];
     }
 
