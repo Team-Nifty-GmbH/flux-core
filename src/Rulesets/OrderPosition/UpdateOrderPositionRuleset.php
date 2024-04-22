@@ -130,7 +130,7 @@ class UpdateOrderPositionRuleset extends FluxRuleset
             'discount_percentage' => [
                 new Numeric(0, 1),
                 'nullable',
-            ]
+            ],
         ];
     }
 
