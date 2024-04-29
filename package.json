@@ -6,7 +6,7 @@
         "build": "vite build"
     },
     "devDependencies": {
-        "@defstudio/vite-livewire-plugin": "^2.0.4",
+        "@defstudio/vite-livewire-plugin": "^2.0.5",
         "@fontsource/inter": "^5.0.18",
         "@fullcalendar/core": "^6.1.11",
         "@fullcalendar/daygrid": "^6.1.10",
