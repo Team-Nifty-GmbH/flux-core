@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->string('model_type')->nullable();
-            $table->unsignedBigInteger('model_id')->nullable();
+            $table->string('model_type')->nullable()->after('order_position_id');
+            $table->unsignedBigInteger('model_id')->nullable()->after('model_type');
 
             $table->index(['model_type', 'model_id']);
         });
