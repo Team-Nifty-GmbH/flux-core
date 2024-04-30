@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\WorkTime\CreateWorkTime;
 use FluxErp\Actions\WorkTime\DeleteWorkTime;
@@ -84,7 +83,6 @@ class WorkTimeForm extends FluxForm
     {
 
         parent::fill($values);
-        //        $this->started_at = $this->started_at ? Carbon::parse($this->started_at)->toISOString() : null;
-        //        $this->ended_at = $this->ended_at ? Carbon::parse($this->ended_at)->toISOString() : null;
+
     }
 }

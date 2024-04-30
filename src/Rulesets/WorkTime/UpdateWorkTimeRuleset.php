@@ -49,7 +49,7 @@ class UpdateWorkTimeRuleset extends FluxRuleset
                 'integer',
                 new MorphExists('trackable_type'),
             ],
-            'ended_at' => 'nullable|date_format:Y-m-d H:i:s',
+            'ended_at' => 'nullable|date',
             'name' => 'exclude_if:is_daily_work_time,true|string|nullable',
             'description' => 'string|nullable',
             'is_billable' => 'nullable|boolean',
