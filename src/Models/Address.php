@@ -121,7 +121,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     protected function casts(): array
     {
         return [
+            'date_of_birth' => 'date',
             'is_main_address' => 'boolean',
+            'is_invoice_address' => 'boolean',
+            'is_dark_mode' => 'boolean',
+            'is_delivery_address' => 'boolean',
             'is_active' => 'boolean',
             'can_login' => 'boolean',
         ];
