@@ -7,12 +7,15 @@ export default function($wire,route){
         trackable_type: $wire.entangle('workTime.trackable_type'),
         runningTimers: {},
         destroy(){
+            console.log('destroy');
             const keys = Object.keys(this.runningTimers);
             keys.forEach((key) => {
                 clearInterval(this.runningTimers[key]);
             });
         },
-        init() {
+        // when using init - with lazy load - can trigger init function several times
+        // hence rename to arbitrary name - and pass it to the x-init.once
+        load() {
             this.activeWorkTimes.forEach((workTime) => {
                 if(workTime.ended_at) {
                     return;

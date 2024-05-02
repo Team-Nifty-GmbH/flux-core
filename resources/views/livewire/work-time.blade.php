@@ -1,6 +1,7 @@
 <div
     x-on:start-time-tracking.window="relatedSelected($event.detail.trackable_type); $wire.start($event.detail);"
     x-data="workTime($wire,'{{route('search', '')}}')"
+    x-init.once="load()"
 >
     <x-modal name="work-time" persistent="true" x-on:close="$wire.resetWorkTime()">
         <x-card class="flex flex-col gap-4">

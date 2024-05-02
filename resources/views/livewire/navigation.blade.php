@@ -75,7 +75,7 @@
                         />
                         <livewire:features.search-bar />
                         <div class="flex gap-1.5" wire:ignore>
-                            <livewire:work-time />
+                            <livewire:work-time lazy/>
                             <livewire:features.notifications lazy />
                         </div>
                     </x-card>
@@ -92,15 +92,15 @@
                     @foreach($navigations as $key => $navigation)
                         <div>
                             <a x-bind:class="activeItem === '{{ $key }}' && 'bg-primary-500 dark:bg-primary-700 !text-white hover:bg-primary-600 nav-item-active'"
-                                @if($navigation['children'] ?? false)
-                                    x-on:click.prevent="toggleMenu('{{ $key }}')"
-                                @else
-                                    href="{{ $navigation['uri'] }}"
-                                    target="{{ ($navigation['target_blank'] ?? false) ? '_blank' : '' }}"
-                                    x-on:click="activeItem = '{{ $key }}'; activeSubItem = ''"
-                                @endif
-                                class="dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
-                                role="button" aria-haspopup="true"
+                               @if($navigation['children'] ?? false)
+                                   x-on:click.prevent="toggleMenu('{{ $key }}')"
+                               @else
+                                   href="{{ $navigation['uri'] }}"
+                               target="{{ ($navigation['target_blank'] ?? false) ? '_blank' : '' }}"
+                               x-on:click="activeItem = '{{ $key }}'; activeSubItem = ''"
+                               @endif
+                               class="dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
+                               role="button" aria-haspopup="true"
                             >
                                 <div class="w-16 flex-none">
                                     <div class="flex w-full justify-center text-white">
@@ -108,8 +108,8 @@
                                     </div>
                                 </div>
                                 <span class="truncate text-sm text-white"> {{ __($navigation['label'] ?? $key) }} </span>
-                                    @if($navigation['children'] ?? false)
-                                        <span aria-hidden="true" class="ml-auto pl-2 pr-2">
+                                @if($navigation['children'] ?? false)
+                                    <span aria-hidden="true" class="ml-auto pl-2 pr-2">
                                         <x-icon name="chevron-left" class="h-4 w-4 text-white transform transition-transform" x-bind:class="{ '-rotate-90': isOpen('{{ $key }}') }" />
                                     @endif
                                 </span>
@@ -178,8 +178,8 @@
                             @foreach($favorites as $favorite)
                                 <div class="flex justify-between">
                                     <a wire:navigate
-                                        href="{{ $favorite['url'] }}"
-                                        class="flex-1 overflow-hidden dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
+                                       href="{{ $favorite['url'] }}"
+                                       class="flex-1 overflow-hidden dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
                                     >
                                         <div class="w-16 flex-none">
                                             <div class="flex w-full justify-center text-white">
