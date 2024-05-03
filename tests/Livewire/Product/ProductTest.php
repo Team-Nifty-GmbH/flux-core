@@ -23,7 +23,7 @@ class ProductTest extends TestCase
         $dbClient = Client::factory()->create();
 
         $this->product = Product::factory()
-            ->hasAttached($dbClient, 'clients')
+            ->hasAttached(factory: $dbClient, relationship: 'clients')
             ->create();
 
         Currency::factory()->create(['is_default' => true]);
