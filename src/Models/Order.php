@@ -128,6 +128,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
             if ($order->isDirty('iban')
                 && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
+                && $order->iban
             ) {
                 $order->contact_bank_connection_id = null;
             }

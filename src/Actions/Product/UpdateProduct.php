@@ -34,6 +34,7 @@ class UpdateProduct extends FluxAction
     {
         $productOptions = Arr::pull($this->data, 'product_options');
         $productCrossSellings = Arr::pull($this->data, 'product_cross_sellings');
+        $clients = Arr::pull($this->data, 'clients');
 
         $productProperties = Arr::mapWithKeys(
             Arr::pull($this->data, 'product_properties', []),
@@ -70,6 +71,10 @@ class UpdateProduct extends FluxAction
 
         if (! is_null($suppliers)) {
             $product->suppliers()->sync($suppliers);
+        }
+
+        if ($clients) {
+            $product->clients()->sync($clients);
         }
 
         if ($prices) {
