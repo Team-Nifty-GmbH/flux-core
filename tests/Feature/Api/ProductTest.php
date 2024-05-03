@@ -131,7 +131,7 @@ class ProductTest extends BaseSetup
             ->first();
 
         $this->assertEquals($product['name'], $dbProduct->name);
-        $this->assertEquals($product['clients'], $dbProduct->clients->pluck('id'));
+        $this->assertEquals($product['clients'], $dbProduct->clients->pluck('id')->toArray());
         $this->assertNull($dbProduct->parent_id);
         $this->assertNull($dbProduct->vat_rate_id);
         $this->assertNull($dbProduct->unit_id);
@@ -167,7 +167,6 @@ class ProductTest extends BaseSetup
     {
         $product = [
             'name' => Str::random(),
-            'clients' => [$this->clients[0]->id],
             'parent_id' => $this->products[0]->id,
             'vat_rate_id' => $this->vatRates[0]->id,
             'unit_id' => $this->units[0]->id,
@@ -197,6 +196,7 @@ class ProductTest extends BaseSetup
             'is_required_product_serial_number' => rand(0, 1),
             'is_nos' => rand(0, 1),
             'is_active_export_to_web_shop' => rand(0, 1),
+            'clients' => [$this->clients[0]->id],
             'bundle_products' => [
                 [
                     'id' => $this->products[0]->id,
@@ -221,7 +221,6 @@ class ProductTest extends BaseSetup
             ->whereKey($responseProduct->id)
             ->first();
 
-        $this->assertEquals($product['clients'], $dbProduct->clients->pluck('id'));
         $this->assertEquals($product['parent_id'], $dbProduct->parent_id);
         $this->assertEquals($product['vat_rate_id'], $dbProduct->vat_rate_id);
         $this->assertEquals($product['unit_id'], $dbProduct->unit_id);
@@ -255,6 +254,7 @@ class ProductTest extends BaseSetup
         $this->assertEquals($product['is_nos'], $dbProduct->is_nos);
         $this->assertEquals($product['is_active_export_to_web_shop'], $dbProduct->is_active_export_to_web_shop);
 
+        $this->assertEquals($product['clients'], $dbProduct->clients->pluck('id')->toArray());
         $this->assertTrue($dbProduct->bundleProducts()
             ->wherePivot('bundle_product_id', $product['bundle_products'][0]['id'])
             ->wherePivot('count', $product['bundle_products'][0]['count'])

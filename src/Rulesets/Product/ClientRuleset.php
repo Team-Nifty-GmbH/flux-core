@@ -11,7 +11,7 @@ class ClientRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'clients' => 'required|array',
+            'clients' => 'array',
             'clients.*' => [
                 'required',
                 'integer',

@@ -19,6 +19,8 @@ class ClientProduct extends Pivot
 
     public $incrementing = true;
 
+    protected $primaryKey = 'pivot_id';
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');

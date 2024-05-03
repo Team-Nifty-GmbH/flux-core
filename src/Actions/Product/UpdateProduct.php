@@ -73,7 +73,7 @@ class UpdateProduct extends FluxAction
             $product->suppliers()->sync($suppliers);
         }
 
-        if (! is_null($clients)) {
+        if ($clients) {
             $product->clients()->sync($clients);
         }
 
