@@ -20,9 +20,9 @@ class ProductsTest extends BaseSetup
     {
         parent::setUp();
 
-        $this->product = Product::factory()->create([
-            'client_id' => $this->dbClient->id,
-        ]);
+        $this->product = Product::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
 
         $category = Category::factory()->create([
             'model_type' => Product::class,

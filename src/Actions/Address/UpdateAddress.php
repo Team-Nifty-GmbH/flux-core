@@ -68,7 +68,7 @@ class UpdateAddress extends FluxAction
             $this->data['is_delivery_address'] = true;
         }
 
-        if (is_null(data_get($this->data, 'login_password'))) {
+        if (! trim(data_get($this->data, 'login_password', ''))) {
             unset($this->data['login_password']);
         }
 

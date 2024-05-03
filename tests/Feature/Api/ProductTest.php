@@ -42,9 +42,10 @@ class ProductTest extends BaseSetup
 
         $this->clients = Client::factory()->count(3)->create();
 
-        $this->products = Product::factory()->count(3)->create([
-            'client_id' => $this->clients[0]->id,
-        ]);
+        $this->products = Product::factory()
+            ->count(3)
+            ->hasAttached($this->clients, relationship: 'clients')
+            ->create();
 
         $this->vatRates = VatRate::factory()->count(3)->create();
 
@@ -114,7 +115,7 @@ class ProductTest extends BaseSetup
     {
         $product = [
             'name' => Str::random(),
-            'client_id' => $this->clients[0]->id,
+            'clients' => [$this->clients[0]->id],
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -130,7 +131,7 @@ class ProductTest extends BaseSetup
             ->first();
 
         $this->assertEquals($product['name'], $dbProduct->name);
-        $this->assertEquals($product['client_id'], $dbProduct->client_id);
+        $this->assertEquals($product['clients'], $dbProduct->clients->pluck('id'));
         $this->assertNull($dbProduct->parent_id);
         $this->assertNull($dbProduct->vat_rate_id);
         $this->assertNull($dbProduct->unit_id);
@@ -166,7 +167,7 @@ class ProductTest extends BaseSetup
     {
         $product = [
             'name' => Str::random(),
-            'client_id' => $this->clients[0]->id,
+            'clients' => [$this->clients[0]->id],
             'parent_id' => $this->products[0]->id,
             'vat_rate_id' => $this->vatRates[0]->id,
             'unit_id' => $this->units[0]->id,
@@ -220,7 +221,7 @@ class ProductTest extends BaseSetup
             ->whereKey($responseProduct->id)
             ->first();
 
-        $this->assertEquals($product['client_id'], $dbProduct->client_id);
+        $this->assertEquals($product['clients'], $dbProduct->clients->pluck('id'));
         $this->assertEquals($product['parent_id'], $dbProduct->parent_id);
         $this->assertEquals($product['vat_rate_id'], $dbProduct->vat_rate_id);
         $this->assertEquals($product['unit_id'], $dbProduct->unit_id);

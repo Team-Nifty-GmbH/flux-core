@@ -28,9 +28,10 @@ class SerialNumberRangeTest extends BaseSetup
     {
         parent::setUp();
 
-        $this->products = Product::factory()->count(3)->create([
-            'client_id' => $this->dbClient->id,
-        ]);
+        $this->products = Product::factory()
+            ->count(3)
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
 
         $this->serialNumberRanges = new Collection();
         foreach ($this->products as $product) {

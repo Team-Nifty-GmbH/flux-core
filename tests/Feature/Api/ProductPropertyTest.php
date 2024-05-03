@@ -30,9 +30,9 @@ class ProductPropertyTest extends BaseSetup
         $this->productProperties = ProductProperty::factory()->count(3)->create();
         $client = Client::factory()->create();
 
-        $this->products = Product::factory()->create([
-            'client_id' => $client->id,
-        ]);
+        $this->products = Product::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
 
         $this->products->productProperties()->sync($this->productProperties[1]->id);
 

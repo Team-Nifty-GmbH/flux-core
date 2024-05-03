@@ -6,7 +6,6 @@ use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProductForm;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
@@ -67,7 +66,6 @@ class Product extends Component
     {
         return view('flux::livewire.product.product', [
             'vatRates' => $this->vatRates(),
-            'clients' => app(Client::class)->all(['id', 'name'])->toArray(),
         ]);
     }
 
@@ -183,7 +181,6 @@ class Product extends Component
                     ->price();
 
                 return [
-                    'name' => $priceList->name,
                     'id' => $priceList->id,
                     'price_id' => $price?->id,
                     'price_net' => $price
@@ -191,6 +188,7 @@ class Product extends Component
                     'price_gross' => $price
                         ?->getGross(data_get($this->product->vat_rate, 'rate_percentage', 0)),
                     'parent' => $priceList->parent?->toArray(),
+                    'name' => $priceList->name,
                     'is_net' => $priceList->is_net,
                     'is_default' => $priceList->is_default,
                     'is_editable' => ! is_null(data_get($price, 'id')) || ! is_null($price->parent),

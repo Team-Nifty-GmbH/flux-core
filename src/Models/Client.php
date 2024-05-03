@@ -106,6 +106,6 @@ class Client extends Model implements HasMedia
 
     public static function default(): ?static
     {
-        return static::query()->where('is_default', true)->first();
+        return app(static::class)->query()->where('is_default', true)->first();
     }
 }

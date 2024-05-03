@@ -113,7 +113,7 @@ class Price extends Model
     public function appliedDiscounts(): Attribute
     {
         return Attribute::get(
-            fn () => collect($this->appliedDiscounts)->toArray()
+            fn () => $this->appliedDiscounts
         );
     }
 
