@@ -90,7 +90,6 @@ class CreateProductRuleset extends FluxRuleset
         return array_merge(
             parent::getRules(),
             resolve_static(ClientRuleset::class, 'getRules'),
-            ['clients' => 'array|required'],
             resolve_static(ProductOptionRuleset::class, 'getRules'),
             resolve_static(ProductPropertyRuleset::class, 'getRules'),
             resolve_static(PriceRuleset::class, 'getRules'),
