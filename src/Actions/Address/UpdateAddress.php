@@ -37,6 +37,7 @@ class UpdateAddress extends FluxAction
             ->first();
 
         $tags = Arr::pull($this->data, 'tags');
+        $contactOptions = Arr::pull($this->data, 'contact_options');
 
         $canLogin = $address->can_login;
 
@@ -67,7 +68,9 @@ class UpdateAddress extends FluxAction
             $this->data['is_delivery_address'] = true;
         }
 
-        $contactOptions = Arr::pull($this->data, 'contact_options');
+        if (is_null(data_get($this->data, 'login_password'))) {
+            unset($this->data['login_password']);
+        }
 
         $address->fill($this->data);
         $address->save();

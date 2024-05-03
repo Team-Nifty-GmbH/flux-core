@@ -46,7 +46,7 @@ class PurchaseInvoiceForm extends FluxForm
 
     public ?string $bic = null;
 
-    public bool $is_net = true;
+    public bool $is_net = false;
 
     #[Locked]
     public $media = null;

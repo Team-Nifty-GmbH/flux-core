@@ -19,6 +19,7 @@ use FluxErp\Livewire\Forms\ScheduleForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Language;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order as OrderModel;
@@ -382,11 +383,8 @@ class Order extends OrderPositionList
                         ]
                     )
                 ),
-                'contactBankConnections' => app(Contact::class)->query()
-                    ->whereKey($this->order->contact_id)
-                    ->with('contactBankConnections')
-                    ->first('id')
-                    ->contactBankConnections()
+                'contactBankConnections' => app(ContactBankConnection::class)->query()
+                    ->where('contact_id', $this->order->contact_id)
                     ->select(['id', 'contact_id', 'iban'])
                     ->pluck('iban', 'id')
                     ?->toArray() ?? [],

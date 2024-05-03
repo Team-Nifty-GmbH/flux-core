@@ -116,6 +116,43 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
                     ->update($addressesUpdates);
             }
         });
+
+        static::deleted(function (Address $address) {
+            $contactUpdates = [];
+            $addressesUpdates = [];
+            $mainAddress = app(Address::class)
+                ->where('contact_id', $address->contact_id)
+                ->where('is_main_address', true)
+                ->first();
+
+            if ($address->is_invoice_address) {
+                $contactUpdates += [
+                    'invoice_address_id' => $mainAddress->id,
+                ];
+
+                $addressesUpdates += [
+                    'is_invoice_address' => true,
+                ];
+            }
+
+            if ($address->is_delivery_address) {
+                $contactUpdates += [
+                    'delivery_address_id' => $mainAddress->id,
+                ];
+
+                $addressesUpdates += [
+                    'is_delivery_address' => true,
+                ];
+            }
+
+            if ($contactUpdates) {
+                app(Contact::class)->query()
+                    ->whereKey($address->contact_id)
+                    ->update($contactUpdates);
+
+                $mainAddress->update($addressesUpdates);
+            }
+        });
     }
 
     protected function casts(): array

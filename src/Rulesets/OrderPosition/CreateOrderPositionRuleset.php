@@ -84,8 +84,12 @@ class CreateOrderPositionRuleset extends FluxRuleset
             'vat_rate_id' => [
                 'exclude_if:is_free_text,true',
                 'exclude_if:is_bundle_position,true',
-                'required_if:is_free_text,false',
-                'required_if:is_bundle_position,false',
+                Rule::when(
+                    fn (Fluent $data) => (! $data->is_free_text
+                        && ! $data->is_bundle_position)
+                        && ! app(Product::class)->whereKey($data->product_id)->exists(),
+                    'required'
+                ),
                 'integer',
                 'nullable',
                 new ModelExists(VatRate::class),

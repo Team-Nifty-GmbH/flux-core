@@ -35,6 +35,7 @@ trait HasUserModification
     {
         return Attribute::get(
             fn () => $this->activityAttributeQuery('created')
+                ->with('causer')
                 ->first()
                 ?->causer,
         );
@@ -44,6 +45,7 @@ trait HasUserModification
     {
         return Attribute::get(function () {
             $activity = $this->activityAttributeQuery('updated')
+                ->with('causer')
                 ->orderBy('id', 'desc')
                 ->first();
 
@@ -64,10 +66,10 @@ trait HasUserModification
     {
         return Attribute::get(
             fn () => $this->activityAttributeQuery('deleted')
+                ->with('causer')
                 ->orderBy('id', 'desc')
                 ->first()
-                ?->morphTo('causer')
-                ->first()
+                ?->causer
         );
     }
 

@@ -113,7 +113,7 @@ class SearchController extends Controller
             $query->whereHas($request->get('whereHas'));
         }
 
-        $result = $query->get();
+        $result = $query->latest()->get();
 
         if ($request->has('appends')) {
             $result->each(function ($item) use ($request) {

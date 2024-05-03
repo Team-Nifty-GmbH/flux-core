@@ -15,12 +15,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Laravel\Scout\EngineManager;
+use Laravel\Scout\Engines\Engine;
+use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 
 class Client extends Model implements HasMedia
 {
     use Commentable, Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid,
-        InteractsWithMedia, SoftDeletes;
+        InteractsWithMedia, Searchable, SoftDeletes;
 
     protected $appends = [
         'logo_url',
@@ -42,6 +45,11 @@ class Client extends Model implements HasMedia
             'opening_hours' => 'array',
             'is_default' => 'boolean',
         ];
+    }
+
+    public function searchableUsing(): Engine
+    {
+        return app(EngineManager::class)->engine('collection');
     }
 
     public function getAvatarUrlAttribute(): string

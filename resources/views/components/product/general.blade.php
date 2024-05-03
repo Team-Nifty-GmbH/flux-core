@@ -64,6 +64,20 @@
         <x-select
             multiselect
             x-bind:disabled="!edit"
+            wire:model.number="product.clients"
+            :label="__('Clients')"
+            option-value="id"
+            option-label="name"
+            :src="'logo_small_url'"
+            template="user-option"
+            :async-data="[
+                'api' => route('search', \FluxErp\Models\Client::class),
+                'method' => 'POST',
+            ]"
+        />
+        <x-select
+            multiselect
+            x-bind:disabled="!edit"
             wire:model.number="product.tags"
             :label="__('Tags')"
             option-value="id"

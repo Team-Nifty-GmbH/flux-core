@@ -6,6 +6,7 @@ use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProductForm;
+use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
@@ -20,7 +21,6 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use Livewire\Features\SupportRedirects\Redirector;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
 
@@ -52,6 +52,7 @@ class Product extends Component
                 'vatRate:id,rate_percentage',
                 'parent',
                 'coverMedia',
+                'clients:id',
             ])
             ->withCount('children')
             ->firstOrFail();
@@ -66,6 +67,7 @@ class Product extends Component
     {
         return view('flux::livewire.product.product', [
             'vatRates' => $this->vatRates(),
+            'clients' => app(Client::class)->all(['id', 'name'])->toArray(),
         ]);
     }
 
@@ -169,22 +171,31 @@ class Product extends Component
     #[Renderless]
     public function getPriceLists(): void
     {
-        $priceLists = app(PriceList::class)->query()
-            ->with('parent')
-            ->get(['id', 'parent_id', 'name', 'price_list_code', 'is_net', 'is_default']);
         $product = app(ProductModel::class)->query()->whereKey($this->product->id)->first();
         $priceListHelper = PriceHelper::make($product)->useDefault(false);
 
-        $priceLists->map(function (PriceList $priceList) use ($priceListHelper) {
-            $price = $priceListHelper
-                ->setPriceList($priceList)
-                ->price();
-            $priceList->price_net = $price
-                ?->getNet($this->product->vat_rate['rate_percentage'] ?? 0);
-            $priceList->price_gross = $price
-                ?->getGross($this->product->vat_rate['rate_percentage'] ?? 0);
-            $priceList->is_editable = is_null($price) || $price?->price_list_id === $priceList->id;
-        });
+        $priceLists = app(PriceList::class)->query()
+            ->with('parent')
+            ->get(['id', 'parent_id', 'name', 'price_list_code', 'is_net', 'is_default'])
+            ->map(function (PriceList $priceList) use ($priceListHelper) {
+                $price = $priceListHelper
+                    ->setPriceList($priceList)
+                    ->price();
+
+                return [
+                    'name' => $priceList->name,
+                    'id' => $priceList->id,
+                    'price_id' => $price?->id,
+                    'price_net' => $price
+                        ?->getNet(data_get($this->product->vat_rate, 'rate_percentage', 0)),
+                    'price_gross' => $price
+                        ?->getGross(data_get($this->product->vat_rate, 'rate_percentage', 0)),
+                    'parent' => $priceList->parent?->toArray(),
+                    'is_net' => $priceList->is_net,
+                    'is_default' => $priceList->is_default,
+                    'is_editable' => ! is_null(data_get($price, 'id')) || ! is_null($price->parent),
+                ];
+            });
 
         $this->priceLists = $priceLists->toArray();
     }
@@ -204,12 +215,14 @@ class Product extends Component
     }
 
     #[Renderless]
-    public function delete(): false|Redirector
+    public function delete(): bool
     {
         try {
             $this->product->delete();
 
-            return redirect()->route('products.products');
+            $this->redirect(route('products.products'), true);
+
+            return true;
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
         }

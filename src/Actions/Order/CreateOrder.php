@@ -65,8 +65,7 @@ class CreateOrder extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['currency_id'] = $this->data['currency_id'] ??
-            resolve_static(Currency::class, 'default')?->id;
+        $this->data['currency_id'] ??= resolve_static(Currency::class, 'default')?->id;
 
         if (! data_get($this->data, 'address_invoice_id', false)
             && $contactId = data_get($this->data, 'contact_id', false)
@@ -119,43 +118,35 @@ class CreateOrder extends FluxAction
             ->first();
 
         $this->data['agent_id'] = $this->data['agent_id'] ?? $contact->agent_id;
-        $this->data['approval_user_id'] = $this->data['approval_user_id'] ?? $contact->approval_user_id;
-        $this->data['bank_connection_id'] = $this->data['bank_connection_id']
-            ?? $contact->contactBankConnections()->first()?->id;
-        $this->data['payment_target'] = $this->data['payment_target']
-            ?? $contact->payment_target_days
+        $this->data['approval_user_id'] ??= $contact->approval_user_id;
+        $this->data['contact_bank_connection_id'] ??= $contact->contactBankConnections()->first()?->id;
+        $this->data['payment_target'] ??= $contact->payment_target_days
             ?? $paymentType->payment_target
             ?? 0;
-        $this->data['payment_discount_target'] = $this->data['payment_discount_target']
-            ?? $contact->discount_days
+        $this->data['payment_discount_target'] ??= $contact->discount_days
             ?? $paymentType->payment_discount_target
             ?? 0;
-        $this->data['payment_discount_percent'] = $this->data['payment_discount_percent']
-            ?? $contact->discount_percent
+        $this->data['payment_discount_percent'] ??= $contact->discount_percent
             ?? $paymentType->payment_discount_percent
             ?? 0;
-        $this->data['payment_reminder_days_1'] = $this->data['payment_reminder_days_1']
+        $this->data['payment_reminder_days_1'] ??= $this->data['payment_reminder_days_1']
             ?? $contact->payment_reminder_days_1
             ?? $paymentType->payment_reminder_days_1
             ?? 1;
-        $this->data['payment_reminder_days_2'] = $this->data['payment_reminder_days_2']
-            ?? $contact->payment_reminder_days_2
+        $this->data['payment_reminder_days_2'] ??= $contact->payment_reminder_days_2
             ?? $paymentType->payment_reminder_days_2
             ?? 1;
-        $this->data['payment_reminder_days_3'] = $this->data['payment_reminder_days_3']
-            ?? $contact->payment_reminder_days_3
+        $this->data['payment_reminder_days_3'] ??= $contact->payment_reminder_days_3
             ?? $paymentType->payment_reminder_days_3
             ?? 1;
 
-        $this->data['price_list_id'] = $this->data['price_list_id']
-            ?? $contact->price_list_id
+        $this->data['price_list_id'] ??= $contact->price_list_id
             ?? resolve_static(PriceList::class, 'default')?->id;
 
-        $this->data['language_id'] = $this->data['language_id']
-            ?? $addressInvoice->language_id
+        $this->data['language_id'] ??= $addressInvoice->language_id
             ?? resolve_static(Language::class, 'default')?->id;
 
-        $this->data['order_date'] = $this->data['order_date'] ?? now();
+        $this->data['order_date'] ??= now();
 
         $this->rules = array_merge(
             $this->rules,

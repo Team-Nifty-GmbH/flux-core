@@ -31,7 +31,7 @@
                 {{ __('Password') }}
             </label>
             <div class="col-span-2">
-                <x-inputs.password x-bind:readonly="!$wire.edit" wire:model="loginPassword"/>
+                <x-inputs.password x-bind:readonly="!$wire.edit" wire:model="address.login_password"/>
             </div>
         </div>
         <div
