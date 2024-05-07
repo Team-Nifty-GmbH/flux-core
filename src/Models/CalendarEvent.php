@@ -49,9 +49,4 @@ class CalendarEvent extends BaseCalendarEvent implements HasMedia
             ->using(CalendarEventInvite::class)
             ->withPivot(['status', 'model_calendar_id']);
     }
-
-    public function model(): MorphTo
-    {
-        return $this->morphTo('model');
-    }
 }

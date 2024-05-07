@@ -1,12 +1,6 @@
 {
     "name": "team-nifty-gmbh/flux-erp",
     "homepage": "https://flux-erp.com",
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../tall-calendar"
-        }
-    ],
     "require": {
         "php": "^8.2",
         "ext-bcmath": "*",
