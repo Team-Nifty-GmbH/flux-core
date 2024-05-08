@@ -22,10 +22,6 @@ class SerialNumber extends Model implements HasMedia, InteractsWithDataTables
     use Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasUserModification,
         HasUuid, InteractsWithMedia, Searchable;
 
-    protected $casts = [
-        'uuid' => 'string',
-    ];
-
     protected $guarded = [
         'id',
     ];

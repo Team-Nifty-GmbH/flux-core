@@ -32,12 +32,6 @@ class Project extends Model implements InteractsWithDataTables
         'id',
     ];
 
-    protected $casts = [
-        'uuid' => 'string',
-        'state' => ProjectState::class,
-        'time_budget' => TimeDuration::class,
-    ];
-
     public string $detailRouteName = 'projects.id';
 
     protected static function booted(): void
@@ -47,6 +41,14 @@ class Project extends Model implements InteractsWithDataTables
                 $project->getSerialNumber('project_number');
             }
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'state' => ProjectState::class,
+            'time_budget' => TimeDuration::class,
+        ];
     }
 
     public function children(): HasMany

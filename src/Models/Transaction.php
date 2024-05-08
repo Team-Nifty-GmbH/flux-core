@@ -19,14 +19,6 @@ class Transaction extends Model implements InteractsWithDataTables
 {
     use BroadcastsEvents, HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, Searchable;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'value_date' => 'date',
-        'booking_date' => 'date',
-        'amount' => Money::class,
-        'created_at' => 'datetime',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -59,6 +51,16 @@ class Transaction extends Model implements InteractsWithDataTables
                 $transaction->order->calculatePaymentState()->save();
             }
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'value_date' => 'date',
+            'booking_date' => 'date',
+            'amount' => Money::class,
+            'created_at' => 'datetime',
+        ];
     }
 
     public function bankConnection(): BelongsTo

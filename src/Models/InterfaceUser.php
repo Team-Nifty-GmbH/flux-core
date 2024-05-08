@@ -16,10 +16,6 @@ class InterfaceUser extends Authenticatable
         'password',
     ];
 
-    protected $casts = [
-        'uuid' => 'string',
-    ];
-
     public function password(): Attribute
     {
         return Attribute::set(

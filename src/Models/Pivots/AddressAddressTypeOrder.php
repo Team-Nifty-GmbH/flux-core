@@ -11,10 +11,6 @@ class AddressAddressTypeOrder extends Pivot
 {
     protected $table = 'address_address_type_order';
 
-    protected $casts = [
-        'address' => 'array',
-    ];
-
     protected static function booted(): void
     {
         static::saving(function (AddressAddressTypeOrder $model) {
@@ -22,6 +18,13 @@ class AddressAddressTypeOrder extends Pivot
                 $model->address = $model->address()->first();
             }
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'address' => 'array',
+        ];
     }
 
     public function getAddressAttribute(): ?Model

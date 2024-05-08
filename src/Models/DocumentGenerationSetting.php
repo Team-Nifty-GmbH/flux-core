@@ -17,10 +17,6 @@ class DocumentGenerationSetting extends Model
 {
     use HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-    ];
-
     protected $guarded = [
         'id',
     ];

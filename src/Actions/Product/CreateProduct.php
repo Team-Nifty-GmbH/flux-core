@@ -11,7 +11,6 @@ use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Product\CreateProductRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class CreateProduct extends FluxAction
 {
@@ -36,6 +35,7 @@ class CreateProduct extends FluxAction
         );
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
         $prices = Arr::pull($this->data, 'prices', []);
+        $clients = Arr::pull($this->data, 'clients', []);
 
         $suppliers = Arr::pull($this->data, 'suppliers', false);
         $tags = Arr::pull($this->data, 'tags', []);
@@ -54,6 +54,10 @@ class CreateProduct extends FluxAction
             $product->attachTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
         }
 
+        if ($clients) {
+            $product->clients()->attach($clients);
+        }
+
         if ($product->is_bundle && $bundleProducts) {
             $product->bundleProducts()
                 ->sync(
@@ -67,20 +71,18 @@ class CreateProduct extends FluxAction
         if (resolve_static(CreatePrice::class, 'canPerformAction', [false])) {
             foreach ($prices as $price) {
                 $price['product_id'] = $product->id;
-                try {
-                    CreatePrice::make($price)->validate()->execute();
-                } catch (ValidationException) {
-                }
+                CreatePrice::make($price)
+                    ->validate()
+                    ->execute();
             }
         }
 
         if (resolve_static(CreateProductCrossSelling::class, 'canPerformAction', [false])) {
             foreach ($productCrossSellings as $productCrossSelling) {
                 $productCrossSelling['product_id'] = $product->id;
-                try {
-                    CreateProductCrossSelling::make($productCrossSelling)->validate()->execute();
-                } catch (ValidationException) {
-                }
+                CreateProductCrossSelling::make($productCrossSelling)
+                    ->validate()
+                    ->execute();
             }
         }
 

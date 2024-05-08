@@ -15,15 +15,17 @@ class EmailTemplate extends Model
 {
     use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'to' => 'array',
-        'cc' => 'array',
-        'bcc' => 'array',
-        'view_data' => 'object',
-    ];
-
     protected $guarded = [
         'id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'to' => 'array',
+            'cc' => 'array',
+            'bcc' => 'array',
+            'view_data' => 'object',
+        ];
+    }
 }

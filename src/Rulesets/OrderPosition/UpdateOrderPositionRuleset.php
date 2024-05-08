@@ -98,6 +98,10 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'numeric',
                 'nullable',
             ],
+            'discount_percentage' => [
+                new Numeric(0, 1),
+                'nullable',
+            ],
             'margin' => 'exclude_if:is_free_text,true|sometimes|numeric|nullable',
             'provision' => 'numeric|nullable',
             'purchase_price' => [
@@ -113,7 +117,7 @@ class UpdateOrderPositionRuleset extends FluxRuleset
             'unit_gram_weight' => 'numeric|nullable',
 
             'description' => 'string|nullable',
-            'name' => 'sometimes|required|string',
+            'name' => 'sometimes|required|string|max:255',
             'product_number' => [
                 'exclude_if:is_free_text,true',
                 'exclude_with:product_id',

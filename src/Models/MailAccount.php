@@ -20,11 +20,6 @@ class MailAccount extends Model
 {
     use HasPackageFactory, HasUserModification, HasUuid;
 
-    protected $casts = [
-        'password' => 'encrypted',
-        'smtp_password' => 'encrypted',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -33,6 +28,14 @@ class MailAccount extends Model
         'password',
         'smtp_password',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'password' => 'encrypted',
+            'smtp_password' => 'encrypted',
+        ];
+    }
 
     public function mailFolders(): HasMany
     {

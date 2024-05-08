@@ -5,11 +5,27 @@
     <meta name="currency-code" content="{{ resolve_static(\FluxErp\Models\Currency::class, 'default')?->iso }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? $subject ?? '' }}</title>
-    @vite(['resources/css/app.css'], 'flux/build')
+    {{ \FluxErp\Facades\Asset::toHtml('resources/css/app.css') }}
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <style>
         html {
             font-family: 'Montserrat';
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        li {
+            list-style-type: disc;
+        }
+
+        ul {
+            padding-left: 15px;
+        }
+
+        li > p {
+            margin-bottom: 0;
         }
 
         tr>td:first-child, tr>th:first-child {

@@ -8,7 +8,6 @@ use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Rulesets\ProductOptionGroup\CreateProductOptionGroupRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class CreateProductOptionGroup extends FluxAction
 {
@@ -32,10 +31,9 @@ class CreateProductOptionGroup extends FluxAction
 
         foreach ($productOptions as $productOption) {
             $productOption = array_merge($productOption, ['product_option_group_id' => $productOptionGroup->id]);
-            try {
-                CreateProductOption::make($productOption)->validate()->execute();
-            } catch (ValidationException) {
-            }
+            CreateProductOption::make($productOption)
+                ->validate()
+                ->execute();
         }
 
         return $productOptionGroup->fresh();

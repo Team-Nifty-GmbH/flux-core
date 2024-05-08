@@ -44,9 +44,10 @@ class StockPostingTest extends BaseSetup
             'address_id' => $address->id,
         ]);
 
-        $this->products = Product::factory()->count(3)->create([
-            'client_id' => $this->dbClient->id,
-        ]);
+        $this->products = Product::factory()
+            ->count(3)
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
 
         $this->stockPostings = StockPosting::factory()->count(3)->create([
             'warehouse_id' => $this->warehouses[0]->id,

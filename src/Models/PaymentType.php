@@ -17,16 +17,6 @@ class PaymentType extends Model
 {
     use Filterable, HasClientAssignment, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'is_active' => 'boolean',
-        'is_direct_debit' => 'boolean',
-        'is_default' => 'boolean',
-        'is_purchase' => 'boolean',
-        'is_sales' => 'boolean',
-        'requires_manual_transfer' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -35,6 +25,18 @@ class PaymentType extends Model
         'name',
         'description',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+            'is_direct_debit' => 'boolean',
+            'is_default' => 'boolean',
+            'is_purchase' => 'boolean',
+            'is_sales' => 'boolean',
+            'requires_manual_transfer' => 'boolean',
+        ];
+    }
 
     public function client(): BelongsTo
     {

@@ -516,7 +516,44 @@
                                     autocomplete="off"
                                     wire:model="order.agent_id"
                                     :template="[
-                                        'name'   => 'user-option',
+                                        'name' => 'user-option',
+                                    ]"
+                                    :async-data="[
+                                        'api' => route('search', \FluxErp\Models\User::class),
+                                        'method' => 'POST',
+                                        'params' => [
+                                            'with' => 'media',
+                                        ]
+                                    ]"
+                                />
+                                <x-select
+                                    :label="__('Responsible User')"
+                                    :disabled="$order->is_locked"
+                                    autocomplete="off"
+                                    option-value="id"
+                                    option-label="label"
+                                    wire:model="order.responsible_user_id"
+                                    :template="[
+                                        'name' => 'user-option',
+                                    ]"
+                                    :async-data="[
+                                        'api' => route('search', \FluxErp\Models\User::class),
+                                        'method' => 'POST',
+                                        'params' => [
+                                            'with' => 'media',
+                                        ]
+                                    ]"
+                                />
+                                <x-select
+                                    :label="__('Assigned')"
+                                    :disabled="$order->is_locked"
+                                    autocomplete="off"
+                                    :multiselect="true"
+                                    option-value="id"
+                                    option-label="label"
+                                    wire:model="order.users"
+                                    :template="[
+                                        'name' => 'user-option',
                                     ]"
                                     :async-data="[
                                         'api' => route('search', \FluxErp\Models\User::class),
@@ -650,7 +687,7 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div x-cloak x-show="$wire.order.total_net_price !== $wire.order.total_base_net_price">
+                                <div x-cloak x-show="$wire.order.total_net_price !== ($wire.order.total_base_net_price ?? '0.0000000000')">
                                     <div class="flex justify-between p-2.5">
                                         <div>
                                             {{ __('Sum net without discount') }}

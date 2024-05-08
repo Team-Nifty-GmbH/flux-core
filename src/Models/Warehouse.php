@@ -15,14 +15,16 @@ class Warehouse extends Model
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, Searchable, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'is_default' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_default' => 'boolean',
+        ];
+    }
 
     public function stockPostings(): HasMany
     {

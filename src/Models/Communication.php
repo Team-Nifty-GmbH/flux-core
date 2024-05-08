@@ -30,16 +30,6 @@ class Communication extends Model implements HasMedia, OffersPrinting
         'id',
     ];
 
-    protected $casts = [
-        'from' => 'array',
-        'to' => 'array',
-        'cc' => 'array',
-        'bcc' => 'array',
-        'communication_type_enum' => CommunicationTypeEnum::class,
-        'date' => 'datetime',
-        'is_seen' => 'boolean',
-    ];
-
     protected static function booted(): void
     {
         static::saving(function (Communication $message) {
@@ -47,6 +37,19 @@ class Communication extends Model implements HasMedia, OffersPrinting
                 $message->text_body = strip_tags($message->text_body ?? '');
             }
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'from' => 'array',
+            'to' => 'array',
+            'cc' => 'array',
+            'bcc' => 'array',
+            'communication_type_enum' => CommunicationTypeEnum::class,
+            'date' => 'datetime',
+            'is_seen' => 'boolean',
+        ];
     }
 
     protected function fromMail(): Attribute

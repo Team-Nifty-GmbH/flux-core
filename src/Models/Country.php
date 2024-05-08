@@ -17,13 +17,6 @@ class Country extends Model
 {
     use Commentable, Filterable, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'is_active' => 'boolean',
-        'is_default' => 'boolean',
-        'is_eu_country' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -31,6 +24,15 @@ class Country extends Model
     public $translatable = [
         'name',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+            'is_default' => 'boolean',
+            'is_eu_country' => 'boolean',
+        ];
+    }
 
     public function addresses(): HasMany
     {
@@ -55,5 +57,10 @@ class Country extends Model
     public function regions(): HasMany
     {
         return $this->hasMany(CountryRegion::class);
+    }
+
+    public static function default(): ?static
+    {
+        return static::query()->where('is_default', true)->first();
     }
 }

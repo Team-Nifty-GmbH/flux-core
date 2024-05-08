@@ -11,14 +11,16 @@ class Setting extends Model
 {
     use HasPackageFactory, HasUuid;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'settings' => 'array',
-    ];
-
     protected $guarded = [
         'id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'settings' => 'array',
+        ];
+    }
 
     public function model(): MorphTo
     {

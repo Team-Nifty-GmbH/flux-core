@@ -10,7 +10,6 @@ use FluxErp\Models\PriceList;
 use FluxErp\Rulesets\Contact\CreateContactRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class CreateContact extends FluxAction
 {
@@ -27,8 +26,8 @@ class CreateContact extends FluxAction
 
     public function performAction(): Contact
     {
-        $discountGroups = Arr::pull($this->data, 'discount_groups', []);
-        $mainAddress = Arr::pull($this->data, 'main_address', []);
+        $discountGroups = Arr::pull($this->data, 'discount_groups');
+        $mainAddress = Arr::pull($this->data, 'main_address');
 
         $this->data['price_list_id'] = $this->data['price_list_id'] ?? PriceList::default()?->id;
         $this->data['payment_type_id'] = $this->data['payment_type_id'] ?? PaymentType::default()?->id;
@@ -36,7 +35,7 @@ class CreateContact extends FluxAction
         $contact = app(Contact::class, ['attributes' => $this->data]);
         $contact->save();
 
-        if ($discountGroups) {
+        if (is_array($discountGroups)) {
             $contact->discountGroups()->attach($discountGroups);
         }
 
@@ -47,14 +46,16 @@ class CreateContact extends FluxAction
             );
         }
 
-        $mainAddress['contact_id'] = $contact->id;
-        $mainAddress['client_id'] = $contact->client_id;
+        if (is_array($mainAddress)) {
+            $mainAddress['contact_id'] = $contact->id;
+            $mainAddress['client_id'] = $contact->client_id;
 
-        try {
-            CreateAddress::make($mainAddress)
+            $mainAddress = CreateAddress::make($mainAddress)
                 ->validate()
                 ->execute();
-        } catch (ValidationException) {
+
+            $contact->main_address_id = $mainAddress->id;
+            $contact->save();
         }
 
         return $contact->withoutRelations()->fresh();

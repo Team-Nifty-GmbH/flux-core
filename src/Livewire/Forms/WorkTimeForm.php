@@ -78,11 +78,4 @@ class WorkTimeForm extends FluxForm
     {
         return (string) $this->id;
     }
-
-    public function fill($values): void
-    {
-
-        parent::fill($values);
-
-    }
 }

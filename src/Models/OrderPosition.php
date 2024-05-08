@@ -37,30 +37,6 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
         'unit_price',
     ];
 
-    protected $casts = [
-        'uuid' => 'string',
-        'product_prices' => 'array',
-        'total_net_price' => Money::class,
-        'total_gross_price' => Money::class,
-        'unit_net_price' => Money::class,
-        'unit_gross_price' => Money::class,
-        'vat_price' => Money::class,
-        'margin' => Money::class,
-        'provision' => Money::class,
-        'purchase_price' => Money::class,
-        'total_base_price' => Money::class,
-        'total_base_gross_price' => Money::class,
-        'total_base_net_price' => Money::class,
-        'vat_rate_percentage' => Percentage::class,
-        'discount_percentage' => Percentage::class,
-        'amount' => BcFloat::class,
-        'is_alternative' => 'boolean',
-        'is_net' => 'boolean',
-        'is_free_text' => 'boolean',
-        'is_bundle_position' => 'boolean',
-        'is_positive_operator' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -75,6 +51,32 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
         static::addGlobalScope('withChildren', function ($builder) {
             $builder->with('children');
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'product_prices' => 'array',
+            'total_net_price' => Money::class,
+            'total_gross_price' => Money::class,
+            'unit_net_price' => Money::class,
+            'unit_gross_price' => Money::class,
+            'vat_price' => Money::class,
+            'margin' => Money::class,
+            'provision' => Money::class,
+            'purchase_price' => Money::class,
+            'total_base_price' => Money::class,
+            'total_base_gross_price' => Money::class,
+            'total_base_net_price' => Money::class,
+            'vat_rate_percentage' => Percentage::class,
+            'discount_percentage' => Percentage::class,
+            'amount' => BcFloat::class,
+            'is_alternative' => 'boolean',
+            'is_net' => 'boolean',
+            'is_free_text' => 'boolean',
+            'is_bundle_position' => 'boolean',
+            'is_positive_operator' => 'boolean',
+        ];
     }
 
     public function getChildrenAttribute(): Collection

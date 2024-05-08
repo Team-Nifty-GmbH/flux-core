@@ -13,16 +13,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class WorkTime extends Model
 {
-    use BroadcastsEvents, Filterable, HasPackageFactory, HasUuid, SoftDeletes;
-
-    protected $casts = [
-        'started_at' => 'datetime',
-        'ended_at' => 'datetime',
-        'is_billable' => 'boolean',
-        'is_daily_work_time' => 'boolean',
-        'is_locked' => 'boolean',
-        'is_pause' => 'boolean',
-    ];
+    use Filterable, HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -34,6 +25,18 @@ class WorkTime extends Model
             $workTime->started_at = $workTime->started_at ?? now();
             $workTime->user_id = $workTime->user_id ?? auth()->id();
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'started_at' => 'datetime',
+            'ended_at' => 'datetime',
+            'is_billable' => 'boolean',
+            'is_daily_work_time' => 'boolean',
+            'is_locked' => 'boolean',
+            'is_pause' => 'boolean',
+        ];
     }
 
     public function contact(): BelongsTo

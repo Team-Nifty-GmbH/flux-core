@@ -1,4 +1,4 @@
-export default function($wire,route){
+export default function ($wire, route) {
     return {
         currentWorkTime: $wire.entangle('workTime'),
         time: 0,
@@ -6,8 +6,7 @@ export default function($wire,route){
         activeWorkTimes: $wire.entangle('activeWorkTimes'),
         trackable_type: $wire.entangle('workTime.trackable_type'),
         runningTimers: {},
-        destroy(){
-            console.log('destroy');
+        destroy() {
             const keys = Object.keys(this.runningTimers);
             keys.forEach((key) => {
                 clearInterval(this.runningTimers[key]);
@@ -17,7 +16,7 @@ export default function($wire,route){
         // hence rename to arbitrary name - and pass it to the x-init.once
         load() {
             this.activeWorkTimes.forEach((workTime) => {
-                if(workTime.ended_at) {
+                if (workTime.ended_at) {
                     return;
                 }
                 this.startTimer(workTime);
@@ -30,8 +29,8 @@ export default function($wire,route){
 
             this.$watch('activeWorkTimes', (value) => {
                 this.activeWorkTimes.forEach((workTime) => {
-                    if(workTime.ended_at) {
-                        if(this.runningTimers[workTime.id]) {
+                    if (workTime.ended_at) {
+                        if (this.runningTimers[workTime.id]) {
                             // only covers pause case
                             clearInterval(this.runningTimers[workTime.id]);
                             delete this.runningTimers[workTime.id];
@@ -50,12 +49,11 @@ export default function($wire,route){
         relatedSelected(type) {
             let searchRoute = route;
             $wire.workTime.trackable_id = null;
-            // searchRoute = searchRoute.replace('__model__', type);
             searchRoute = searchRoute + '/' + type;
             Alpine.$data(document.getElementById('trackable-id').querySelector('[x-data]')).asyncData.api = searchRoute;
         },
         recordSelected(data) {
-            if (! data) {
+            if (!data) {
                 return;
             }
 
@@ -71,15 +69,15 @@ export default function($wire,route){
         },
         startTimer(workTime) {
             // called on init add new edit and continue
-            if(this.runningTimers[workTime.id]) {
+            if (this.runningTimers[workTime.id]) {
                 return;
             }
             this.runningTimers[workTime.id] = setInterval(() => {
                 // the greatest work time id should calculate time sum of all active work times
                 const greatestId = Object.keys(this.runningTimers)
-                    .map(e=>Number.parseInt(e))
-                    .sort((a,b)=> a - b).pop();
-                if(greatestId === workTime.id) {
+                    .map(e => Number.parseInt(e))
+                    .sort((a, b) => a - b).pop();
+                if (greatestId === workTime.id) {
                     this.time = this.activeWorkTimes.reduce((acc, workTime) => {
                         return this.calculateTime(workTime) + acc;
                     }, 0);
@@ -113,13 +111,13 @@ export default function($wire,route){
         async stopWorkTime(workTime) {
             // clear appropriate timer - watcher will not have access to workTime
             // since it is removed from an array
-            if(this.runningTimers[workTime.id]) {
+            if (this.runningTimers[workTime.id]) {
                 clearInterval(this.runningTimers[workTime.id]);
                 delete this.runningTimers[workTime.id];
             }
             await $wire.stop(workTime.id);
             // in case all active times are stopped recalculate time
-            if(Object.keys(this.runningTimers).length === 0) {
+            if (Object.keys(this.runningTimers).length === 0) {
                 this.time = this.activeWorkTimes.reduce((acc, workTime) => {
                     return this.calculateTime(workTime) + acc;
                 }, 0);
@@ -131,7 +129,7 @@ export default function($wire,route){
         },
         async continueWorkTime(workTime) {
             // timer start takes place in watcher
-            await $wire.continue(workTime.id)
+            await $wire.continue(workTime.id);
         }
     }
 }

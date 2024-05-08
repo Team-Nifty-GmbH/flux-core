@@ -15,23 +15,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Laravel\Scout\EngineManager;
+use Laravel\Scout\Engines\Engine;
+use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 
 class Client extends Model implements HasMedia
 {
     use Commentable, Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid,
-        InteractsWithMedia, SoftDeletes;
+        InteractsWithMedia, Searchable, SoftDeletes;
 
     protected $appends = [
         'logo_url',
         'logo_small_url',
-    ];
-
-    protected $casts = [
-        'uuid' => 'string',
-        'is_active' => 'boolean',
-        'opening_hours' => 'array',
-        'is_default' => 'boolean',
     ];
 
     protected $guarded = [
@@ -41,6 +37,20 @@ class Client extends Model implements HasMedia
     protected $with = [
         'media',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+            'opening_hours' => 'array',
+            'is_default' => 'boolean',
+        ];
+    }
+
+    public function searchableUsing(): Engine
+    {
+        return app(EngineManager::class)->engine('collection');
+    }
 
     public function getAvatarUrlAttribute(): string
     {
@@ -96,6 +106,6 @@ class Client extends Model implements HasMedia
 
     public static function default(): ?static
     {
-        return static::query()->where('is_default', true)->first();
+        return app(static::class)->query()->where('is_default', true)->first();
     }
 }

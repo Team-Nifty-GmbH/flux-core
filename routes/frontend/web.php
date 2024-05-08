@@ -28,6 +28,7 @@ use FluxErp\Livewire\Product\ProductList;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
 use FluxErp\Livewire\Project\Project;
 use FluxErp\Livewire\Project\ProjectList;
+use FluxErp\Livewire\Settings\ActivityLogs;
 use FluxErp\Livewire\Settings\AdditionalColumns;
 use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\Categories;
@@ -161,6 +162,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::get('/languages', Languages::class)->name('languages')->registersMenuItem();
                 Route::get('/ledger-accounts', LedgerAccounts::class)->name('ledger-accounts')->registersMenuItem();
                 Route::get('/logs', Logs::class)->name('logs')->registersMenuItem();
+                Route::get('/activity-logs', ActivityLogs::class)->name('activity-logs')->registersMenuItem();
                 Route::get('/notifications', Notifications::class)->name('notifications')->registersMenuItem();
                 Route::get('/order-types', OrderTypes::class)->name('order-types')->registersMenuItem();
                 Route::get('/permissions', Permissions::class)->name('permissions')->registersMenuItem();

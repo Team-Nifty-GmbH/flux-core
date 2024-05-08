@@ -6,12 +6,12 @@ use FluxErp\Actions\ContactOption\CreateContactOption;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
+use FluxErp\Models\Country;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Address\CreateAddressRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class CreateAddress extends FluxAction
 {
@@ -58,6 +58,7 @@ class CreateAddress extends FluxAction
         }
 
         $contactOptions = Arr::pull($this->data, 'contact_options', []);
+        $this->data['country_id'] ??= Country::default()?->id;
 
         $address = app(Address::class, ['attributes' => $this->data]);
         $address->save();
@@ -69,10 +70,9 @@ class CreateAddress extends FluxAction
         if (resolve_static(CreateContactOption::class, 'canPerformAction', [false])) {
             foreach ($contactOptions as $contactOption) {
                 $contactOption['address_id'] = $address->id;
-                try {
-                    CreateContactOption::make($contactOption)->validate()->execute();
-                } catch (ValidationException) {
-                }
+                CreateContactOption::make($contactOption)
+                    ->validate()
+                    ->execute();
             }
         }
 

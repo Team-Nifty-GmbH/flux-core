@@ -18,13 +18,6 @@ class FormBuilderForm extends Model
         'id',
     ];
 
-    protected $casts = [
-        'options' => 'array',
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
-        'is_active' => 'boolean',
-    ];
-
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderForm $form) {
@@ -35,6 +28,16 @@ class FormBuilderForm extends Model
                 $item->delete();
             });
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'options' => 'array',
+            'start_date' => 'datetime',
+            'end_date' => 'datetime',
+            'is_active' => 'boolean',
+        ];
     }
 
     public function responses(): hasMany

@@ -44,54 +44,18 @@ use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Casts\Money;
 use TeamNiftyGmbH\DataTable\Casts\Percentage;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
+use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment, HasCustomEvents,
-        HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification,
-        HasUuid, InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable {
+    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
+        HasCustomEvents, HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates,
+        HasUserModification, HasUuid, InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;
         }
 
     protected $with = [
         'currency',
-    ];
-
-    protected $casts = [
-        'uuid' => 'string',
-        'address_invoice' => 'array',
-        'address_delivery' => 'array',
-        'state' => OrderState::class,
-        'payment_state' => PaymentState::class,
-        'delivery_state' => DeliveryState::class,
-        'shipping_costs_net_price' => Money::class,
-        'shipping_costs_gross_price' => Money::class,
-        'shipping_costs_vat_price' => Money::class,
-        'shipping_costs_vat_rate_percentage' => Percentage::class,
-        'total_base_gross_price' => Money::class,
-        'total_base_net_price' => Money::class,
-        'margin' => Money::class,
-        'total_gross_price' => Money::class,
-        'total_net_price' => Money::class,
-        'total_vats' => 'array',
-        'balance' => Money::class,
-        'payment_reminder_next_date' => 'date',
-        'payment_texts' => 'array',
-        'order_date' => 'date',
-        'invoice_date' => 'date',
-        'system_delivery_date' => 'date',
-        'system_delivery_date_end' => 'date',
-        'customer_delivery_date' => 'date',
-        'date_of_approval' => 'date',
-        'has_logistic_notify_phone_number' => 'boolean',
-        'has_logistic_notify_number' => 'boolean',
-        'is_locked' => 'boolean',
-        'is_new_customer' => 'boolean',
-        'is_imported' => 'boolean',
-        'is_merge_invoice' => 'boolean',
-        'is_confirmed' => 'boolean',
-        'is_paid' => 'boolean',
-        'requires_approval' => 'boolean',
     ];
 
     public string $detailRouteName = 'orders.id';
@@ -164,6 +128,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
             if ($order->isDirty('iban')
                 && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
+                && $order->iban
             ) {
                 $order->contact_bank_connection_id = null;
             }
@@ -188,6 +153,45 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             $order->orderPositions()->delete();
             $order->purchaseInvoice()->update(['order_id' => null]);
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'address_invoice' => 'array',
+            'address_delivery' => 'array',
+            'state' => OrderState::class,
+            'payment_state' => PaymentState::class,
+            'delivery_state' => DeliveryState::class,
+            'shipping_costs_net_price' => Money::class,
+            'shipping_costs_gross_price' => Money::class,
+            'shipping_costs_vat_price' => Money::class,
+            'shipping_costs_vat_rate_percentage' => Percentage::class,
+            'total_base_gross_price' => Money::class,
+            'total_base_net_price' => Money::class,
+            'margin' => Money::class,
+            'total_gross_price' => Money::class,
+            'total_net_price' => Money::class,
+            'total_vats' => 'array',
+            'balance' => Money::class,
+            'payment_reminder_next_date' => 'date',
+            'payment_texts' => 'array',
+            'order_date' => 'date',
+            'invoice_date' => 'date',
+            'system_delivery_date' => 'date',
+            'system_delivery_date_end' => 'date',
+            'customer_delivery_date' => 'date',
+            'date_of_approval' => 'date',
+            'has_logistic_notify_phone_number' => 'boolean',
+            'has_logistic_notify_number' => 'boolean',
+            'is_locked' => 'boolean',
+            'is_new_customer' => 'boolean',
+            'is_imported' => 'boolean',
+            'is_merge_invoice' => 'boolean',
+            'is_confirmed' => 'boolean',
+            'is_paid' => 'boolean',
+            'requires_approval' => 'boolean',
+        ];
     }
 
     public function addresses(): BelongsToMany
@@ -377,8 +381,14 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             ->where('is_alternative', false)
             ->sum('total_base_gross_price');
 
-        $this->total_gross_price = bcadd($totalGross, $this->shipping_costs_gross_price ?: 0, 9);
-        $this->total_base_gross_price = bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9);
+        $this->total_gross_price = bcround(
+            bcadd($totalGross, $this->shipping_costs_gross_price ?: 0, 9),
+            2
+        );
+        $this->total_base_gross_price = bcround(
+            bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
+            2
+        );
 
         return $this;
     }
@@ -392,8 +402,14 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             ->where('is_alternative', false)
             ->sum('total_base_net_price');
 
-        $this->total_net_price = bcadd($totalNet, $this->shipping_costs_net_price ?: 0, 9);
-        $this->total_base_net_price = bcadd($totalBaseNet, $this->shipping_costs_net_price ?: 0, 9);
+        $this->total_net_price = bcround(
+            bcadd($totalNet, $this->shipping_costs_net_price ?: 0, 9),
+            2
+        );
+        $this->total_base_net_price = bcround(
+            bcadd($totalBaseNet, $this->shipping_costs_net_price ?: 0, 9),
+            2
+        );
 
         return $this;
     }

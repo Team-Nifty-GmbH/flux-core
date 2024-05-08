@@ -121,7 +121,10 @@ class AddressTest extends BaseSetup
         $this->assertEquals($this->addresses[0]->city, $jsonAddress->city);
         $this->assertEquals($this->addresses[0]->street, $jsonAddress->street);
         $this->assertEquals($this->addresses[0]->url, $jsonAddress->url);
-        $this->assertEquals($this->addresses[0]->date_of_birth, $jsonAddress->date_of_birth);
+        $this->assertEquals(
+            $this->addresses[0]->date_of_birth?->toDateString(),
+            $jsonAddress->date_of_birth ? Carbon::parse($jsonAddress->date_of_birth)->toDateString() : null
+        );
         $this->assertEquals($this->addresses[0]->department, $jsonAddress->department);
         $this->assertEquals($this->addresses[0]->is_main_address, $jsonAddress->is_main_address);
         $this->assertEquals($this->addresses[0]->lock()->exists(), $jsonAddress->is_locked);
@@ -284,7 +287,7 @@ class AddressTest extends BaseSetup
         $this->assertEquals($address['street'], $dbAddress->street);
         $this->assertEquals($address['city'], $dbAddress->city);
         $this->assertEquals($address['url'], $dbAddress->url);
-        $this->assertEquals($address['date_of_birth'], $dbAddress->date_of_birth);
+        $this->assertEquals($address['date_of_birth'], $dbAddress->date_of_birth->toDateString());
         $this->assertEquals($address['department'], $dbAddress->department);
         $this->assertEquals($address['is_main_address'], $dbAddress->is_main_address);
         $this->assertEquals($address['is_active'], $dbAddress->is_active);
@@ -386,7 +389,7 @@ class AddressTest extends BaseSetup
         $this->assertEquals($address['city'], $dbAddress->city);
         $this->assertEquals($address['street'], $dbAddress->street);
         $this->assertEquals($address['url'], $dbAddress->url);
-        $this->assertEquals($address['date_of_birth'], $dbAddress->date_of_birth);
+        $this->assertEquals($address['date_of_birth'], $dbAddress->date_of_birth->toDateString());
         $this->assertEquals($address['department'], $dbAddress->department);
         $this->assertEquals($address['is_main_address'], $dbAddress->is_main_address);
         $this->assertEquals($address['is_active'], $dbAddress->is_active);

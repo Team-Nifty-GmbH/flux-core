@@ -102,6 +102,7 @@ class UpdateProductRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
+            resolve_static(ClientRuleset::class, 'getRules'),
             resolve_static(ProductOptionRuleset::class, 'getRules'),
             resolve_static(ProductPropertyRuleset::class, 'getRules'),
             resolve_static(PriceRuleset::class, 'getRules'),

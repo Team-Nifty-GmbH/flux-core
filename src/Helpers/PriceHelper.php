@@ -87,6 +87,7 @@ class PriceHelper
             $price = $this->calculatePriceFromPriceList($this->priceList, []);
             if ($price) {
                 $price->isInherited = true;
+                unset($price->id, $price->uuid);
             }
         }
 
@@ -206,7 +207,12 @@ class PriceHelper
             $originalPrice = $price->basePrice->{$function}($this->product->vatRate?->rate_percentage);
 
             $price->discountFlat = bcsub($originalPrice, $price->price);
-            $price->discountPercentage = bcdiv($price->price, $originalPrice);
+            $price->discountPercentage = $originalPrice != 0 ? bcdiv($price->price, $originalPrice) : 0;
+        }
+
+        // set the used priceList
+        if ($this->priceList) {
+            $price->price_list_id = $this->priceList->id;
         }
 
         return $price;

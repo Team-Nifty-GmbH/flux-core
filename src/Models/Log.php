@@ -16,9 +16,12 @@ class Log extends Model
         'updated_at',
     ];
 
-    protected $casts = [
-        'is_done' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'is_done' => 'boolean',
+        ];
+    }
 
     public function prunable(): void
     {

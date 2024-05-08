@@ -6,6 +6,8 @@ use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Task\TaskState;
 use Spatie\ModelStates\Validation\ValidStateRule;
@@ -27,6 +29,16 @@ class CreateTaskRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 new ModelExists(User::class),
+            ],
+            'model_type' => [
+                'required_with:model_id',
+                'string',
+                new MorphClassExists(),
+            ],
+            'model_id' => [
+                'required_with:model_type',
+                'integer',
+                new MorphExists(),
             ],
             'name' => 'required|string',
             'description' => 'string|nullable',

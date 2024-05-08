@@ -44,7 +44,7 @@ if (! function_exists('exception_to_notifications')) {
                         explode('.', $field)
                     );
 
-                    foreach ($messages as $message) {
+                    foreach (\Illuminate\Support\Arr::flatten($messages) as $message) {
                         $component->notification()->error(implode(' -> ', $title), __($message), $description);
                         $component->addError($field, __($message));
                     }

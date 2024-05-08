@@ -36,12 +36,6 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
         HasUuid, InteractsWithMedia, Lockable, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'has_sensitive_reminder' => 'boolean',
-        'has_delivery_lock' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -66,6 +60,14 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
         static::deleting(function (Contact $contact) {
             $contact->addresses()->delete();
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'has_sensitive_reminder' => 'boolean',
+            'has_delivery_lock' => 'boolean',
+        ];
     }
 
     public function addresses(): HasMany

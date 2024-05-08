@@ -21,11 +21,6 @@ class SerialNumberRange extends Model
 {
     use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'uuid' => 'string',
-        'has_serial_number' => 'boolean',
-    ];
-
     protected $guarded = [
         'id',
     ];
@@ -40,6 +35,13 @@ class SerialNumberRange extends Model
                 $serialNumberRange->client_id,
             ]);
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'has_serial_number' => 'boolean',
+        ];
     }
 
     public function client(): BelongsTo

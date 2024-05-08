@@ -18,6 +18,7 @@ use FluxErp\Traits\Trackable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
@@ -36,13 +37,6 @@ class Task extends Model implements HasMedia, InteractsWithDataTables
         'id',
     ];
 
-    protected $casts = [
-        'start_date' => 'date',
-        'due_date' => 'date',
-        'state' => TaskState::class,
-        'time_budget' => TimeDuration::class,
-    ];
-
     public string $detailRouteName = 'tasks.id';
 
     protected static function booted(): void
@@ -56,6 +50,21 @@ class Task extends Model implements HasMedia, InteractsWithDataTables
         static::saved(function (Task $task) {
             $task->project?->calculateProgress();
         });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'date',
+            'due_date' => 'date',
+            'state' => TaskState::class,
+            'time_budget' => TimeDuration::class,
+        ];
+    }
+
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
     }
 
     public function orderPosition(): BelongsTo
