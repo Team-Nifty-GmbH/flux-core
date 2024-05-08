@@ -13,7 +13,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class WorkTime extends Model
 {
-    use Filterable, HasPackageFactory, HasUuid, SoftDeletes;
+    use BroadcastsEvents, Filterable, HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
