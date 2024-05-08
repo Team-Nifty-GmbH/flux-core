@@ -23,24 +23,14 @@ class UpdateCalendarEventRuleset extends FluxRuleset
                 new ModelExists(CalendarEvent::class),
             ],
             'calendar_id' => [
-                'required_without_all:model_type,model_id',
+                'required',
                 'integer',
                 new ModelExists(Calendar::class),
             ],
-            'model_type' => [
-                'string',
-                'nullable',
-                new MorphClassExists(HasCalendarEvents::class),
-            ],
-            'model_id' => [
-                'integer',
-                'nullable',
-                new MorphExists(),
-            ],
             'title' => 'sometimes|required|string',
             'description' => 'string|nullable',
-            'start' => 'sometimes|required|date_format:Y-m-d H:i',
-            'end' => 'sometimes|required|date_format:Y-m-d H:i|after_or_equal:starts_at',
+            'start' => 'sometimes|required|date',
+            'end' => 'sometimes|required|date|after_or_equal:start',
             'is_all_day' => 'boolean',
             'extended_props' => 'array|nullable',
         ];

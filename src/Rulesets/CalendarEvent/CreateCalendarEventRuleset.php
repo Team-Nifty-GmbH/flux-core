@@ -18,24 +18,14 @@ class CreateCalendarEventRuleset extends FluxRuleset
     {
         return [
             'calendar_id' => [
-                'required_without_all:model_type,model_id',
+                'required',
                 'integer',
                 new ModelExists(Calendar::class),
             ],
-            'model_type' => [
-                'required_without:calendar_id',
-                'string',
-                new MorphClassExists(HasCalendarEvents::class),
-            ],
-            'model_id' => [
-                'required_without:calendar_id',
-                'integer',
-                new MorphExists(),
-            ],
             'title' => 'required|string',
             'description' => 'string|nullable',
-            'start' => 'required|date_format:Y-m-d H:i',
-            'end' => 'required|date_format:Y-m-d H:i|after_or_equal:starts_at',
+            'start' => 'required|date',
+            'end' => 'required|date|after_or_equal:start',
             'is_all_day' => 'boolean',
             'extended_props' => 'array|nullable',
         ];

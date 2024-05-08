@@ -74,6 +74,8 @@ class FluxCalendar extends CalendarComponent
 
     public function saveEvent(array $attributes): array|false
     {
+        $attributes['is_all_day'] = $attributes['allDay'] ?? false;
+
         if ($attributes['calendar_type'] ?? false) {
             $action = Action::get(
                 $attributes['calendar_type'] . (($attributes['id'] ?? false) ? '.update' : '.create')

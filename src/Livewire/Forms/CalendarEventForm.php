@@ -18,11 +18,13 @@ class CalendarEventForm extends FluxForm
     #[Locked]
     public ?int $calendar_id = null;
 
-    public ?string $starts_at = null;
+    public ?string $start = null;
 
-    public ?string $ends_at = null;
+    public ?string $end = null;
 
-    public ?string $status = null;
+    public ?string $title = null;
+
+    public ?string $description = null;
 
     public bool $is_all_day = false;
 
