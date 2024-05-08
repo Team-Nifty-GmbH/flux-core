@@ -102,6 +102,10 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 new Numeric(),
                 'nullable',
             ],
+            'discount_percentage' => [
+                new Numeric(0, 1),
+                'nullable',
+            ],
             'margin' => [
                 'exclude_if:is_free_text,true',
                 new Numeric(),
@@ -156,11 +160,6 @@ class CreateOrderPositionRuleset extends FluxRuleset
             ],
             'is_free_text' => 'boolean',
             'is_bundle_position' => 'exclude_without:parent_id|boolean',
-
-            'discount_percentage' => [
-                new Numeric(0, 1),
-                'nullable',
-            ],
         ];
     }
 

@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Arr;
-
 if (! function_exists('format_number')) {
     function format_number(
         string|int|float|null $number,
@@ -46,7 +44,7 @@ if (! function_exists('exception_to_notifications')) {
                         explode('.', $field)
                     );
 
-                    foreach (Arr::dot($messages) as $message) {
+                    foreach ($messages as $message) {
                         $component->notification()->error(implode(' -> ', $title), __($message), $description);
                         $component->addError($field, __($message));
                     }

@@ -1015,21 +1015,18 @@ class Order extends OrderPositionList
             if ($bundleProduct->bundleProducts->count() > 0) {
                 $this->addBundlePositions($bundleProduct, $this->orderPosition->slug_position);
             }
-
         }
     }
 
     private function recalculateOrderTotals(): void
     {
-
         $this->order->total_net_price = 0;
         $this->order->total_gross_price = 0;
         $this->order->total_vats = [];
         $this->order->total_base_net_price = 0;
 
         foreach ($this->data as $item) {
-
-            $vatRatePercentage = bcmul($item['vat_rate_percentage'], 1);
+            $vatRatePercentage = bcadd($item['vat_rate_percentage'], 0);
 
             // calculate total net price
             $this->order->total_net_price = bcadd($this->order->total_net_price, $item['total_net_price'] ?? 0);
