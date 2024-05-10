@@ -9,6 +9,7 @@ use FluxErp\View\Layouts\Printing;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\FileViewFinder;
@@ -22,7 +23,10 @@ class ViewServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
+        if (
+            (! $this->app->runningInConsole() || $this->app->runningUnitTests())
+            && File::exists(flux_path('public/build/manifest.json'))
+        ) {
             Asset::vite(flux_path('public/build'), [
                 'resources/js/app.js',
                 'resources/js/alpine.js',
