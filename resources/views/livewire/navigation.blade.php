@@ -229,7 +229,7 @@
                                 icon="plus"
                                 :label="__('Add')"
                                 wire:click="addFavorite(window.location.pathname + window.location.search, $promptValue())"
-                                wire:confirm.prompt="{{  __('New Favorite') }}||{{  __('Cancel') }}|{{  __('Save') }}"
+                                wire:flux-confirm.prompt="{{  __('New Favorite') }}||{{  __('Cancel') }}|{{  __('Save') }}"
                             />
                         </div>
                     </div>
