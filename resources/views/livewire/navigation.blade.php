@@ -189,7 +189,7 @@
                                         <div class="truncate text-sm text-white"> {{ $favorite['name'] }} </div>
                                     </a>
                                     <div class="truncate" x-show="menuOpen" x-transition x-cloak>
-                                        <x-button.circle xs negative icon="trash" wire:click="deleteFavorite({{ $favorite['id'] }})" wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Favorite')]) }}"/>
+                                        <x-button.circle xs negative icon="trash" wire:click="deleteFavorite({{ $favorite['id'] }})" wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Favorite')]) }}"/>
                                     </div>
                                 </div>
                             @endforeach

@@ -48,7 +48,7 @@ class MediaList extends BaseDataTable
                 ->color('negative')
                 ->label(__('Delete'))
                 ->attributes([
-                    'wire:confirm.icon.error' => __('Delete media') . '|' .
+                    'wire:flux-confirm.icon.error' => __('Delete media') . '|' .
                         __('Do you really want to delete this media?') . '|' .
                         __('Cancel') . '|' .
                         __('Delete'),

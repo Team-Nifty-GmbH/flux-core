@@ -206,7 +206,7 @@
                                 negative
                                 :label="__('Delete')"
                                 wire:click="delete().then((success) => { if(success) close()})"
-                                wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Schedule')]) }}"
+                                wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Schedule')]) }}"
                             />
                         </div>
                     @endif
