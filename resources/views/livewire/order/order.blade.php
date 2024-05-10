@@ -319,7 +319,7 @@
             @endif
             @if(resolve_static(\FluxErp\Actions\Order\DeleteOrder::class, 'canPerformAction', [false]) && ! $order->is_locked)
                 <x-button
-                    wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order')]) }}"
+                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order')]) }}"
                     negative
                     label="{{ __('Delete') }}"
                     wire:click="delete"

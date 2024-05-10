@@ -11,6 +11,7 @@ use FluxErp\Models\Meta;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -40,7 +41,9 @@ trait HasAdditionalColumns
      */
     protected ?array $explicitlyAllowedMetaKeys = null;
 
-    protected ?Collection $additionalColumns = null;
+    protected static ?Collection $additionalColumns = null;
+
+    protected static ?Collection $modelSpecificAdditionalColumns = null;
 
     /**
      * Collection of the changed meta data for this model.
@@ -74,13 +77,23 @@ trait HasAdditionalColumns
      */
     public static function bootHasAdditionalColumns(): void
     {
+        foreach (
+            app(AdditionalColumn::class)
+                ->query()
+                ->whereNotNull('model_id')
+                ->where('model_type', app(static::class)->getMorphClass())
+                ->get() as $column
+        ) {
+            static::registerModelSpecificAdditionalColumn($column);
+        }
+
         static::addGlobalScope(function (Builder $builder) {
             $builder->with(['meta']);
         });
 
         static::retrieved(function (Model $model) {
             foreach ($model->getExplicitlyAllowedMetaKeys() as $key) {
-                if (isset($model->attributes[$key])) {
+                if (array_key_exists($key, $model->attributes)) {
                     $model->setFallbackValue($key, Arr::pull($model->attributes, $key));
                 }
             }
@@ -116,23 +129,23 @@ trait HasAdditionalColumns
         }
     }
 
+    public static function registerModelSpecificAdditionalColumn(Model $additionalColumn): void
+    {
+        $collection = static::$modelSpecificAdditionalColumns ?? collect();
+
+        $collection->push($additionalColumn);
+
+        static::$modelSpecificAdditionalColumns = $collection;
+    }
+
     /**
      * Initialize the HasMeta trait.
      */
     public function initializeHasAdditionalColumns(): void
     {
         $this->mergeCasts(
-            Cache::store('array')->rememberForever(
-                'meta_casts_' . get_class($this),
-                fn () => $this->getAdditionalColumns(false)
-                    ?->mapWithKeys(fn (AdditionalColumn $column) => [$column->name => MetaAttribute::class])
-                    ->toArray() ?? []
-            )
-        );
-
-        $this->additionalColumns = Cache::store('array')->rememberForever(
-            'meta_additional_columns_' . get_class($this),
-            fn () => $this->getAdditionalColumns(false)
+            $this->getAdditionalColumns()?->mapWithKeys(fn (AdditionalColumn $column) => [$column->name => MetaAttribute::class])
+                ->toArray() ?? []
         );
 
         $this->translatableMeta =
@@ -214,27 +227,33 @@ trait HasAdditionalColumns
     protected static function additionalColumnsQuery(): Builder
     {
         return app(AdditionalColumn::class)->query()
-            ->where('model_type', self::class)
+            ->where('model_type', Relation::getMorphClassAlias(static::class))
             ->whereNull('model_id');
     }
 
     public function setAdditionalColumns(): mixed
     {
-        return $this->additionalColumns = $this->additionalColumns()->get()?->unique('name');
+        return static::$additionalColumns = $this->additionalColumns()->get()?->unique('name');
     }
 
     public function getAdditionalColumnId(string $key): ?int
     {
-        return $this->additionalColumns?->keyBy('name')->get($key)?->id;
+        return $this->additionalColumns()
+            ->where('name', $key)
+            ->value('id');
     }
 
     public function getAdditionalColumns(bool $cached = true): ?Collection
     {
-        if ($cached && $this->additionalColumns) {
-            return $this->additionalColumns;
+        if ($cached && ! is_null(static::$additionalColumns)) {
+            return static::$additionalColumns;
         }
 
-        return $this->setAdditionalColumns();
+        return $this->setAdditionalColumns()
+            ->merge(
+                (static::$modelSpecificAdditionalColumns ?? collect())
+                    ->where('model_id', $this->getKey())
+            );
     }
 
     public function hasAdditionalColumnsValidationRules(): array
@@ -978,7 +997,7 @@ trait HasAdditionalColumns
     public function getTranslatedLocales(string $key): array
     {
         return array_keys($this->isTranslatableMeta($key) ?
-                $this->getMetaTranslations($key) : $this->getTranslations($key)
+            $this->getMetaTranslations($key) : $this->getTranslations($key)
         );
     }
 

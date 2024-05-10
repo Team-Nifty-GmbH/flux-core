@@ -73,16 +73,16 @@
                             primary
                             x-on:click="showMenu(true)"
                         />
-                        <livewire:features.search-bar/>
+                        <livewire:features.search-bar />
                         <div class="flex gap-1.5" wire:ignore>
-                            <livewire:work-time lazy/>
-                            <livewire:features.notifications lazy/>
+                            <livewire:work-time lazy />
+                            <livewire:features.notifications lazy />
                         </div>
                     </x-card>
                 </div>
             @else
                 <x-card class="block md:hidden">
-                    <x-button primary icon="menu" x-on:click="showMenu(true)"/>
+                    <x-button primary icon="menu" x-on:click="showMenu(true)" />
                 </x-card>
             @endif
         </div>
@@ -105,7 +105,7 @@
                             >
                                 <div class="w-16 flex-none">
                                     <div class="flex w-full justify-center text-white">
-                                        <x-heroicons :name="$navigation['icon'] ?? 'no-symbol'" class="h-4 w-4"/>
+                                        <x-heroicons :name="$navigation['icon'] ?? 'no-symbol'" class="h-4 w-4" />
                                     </div>
                                 </div>
                                 <span class="truncate text-sm text-white"> {{ __($navigation['label'] ?? $key) }} </span>
@@ -124,8 +124,7 @@
                                     x-show="isOpen('{{ $key }}')"
                                     x-cloak
                                     x-transition
-                                    class="mt-2 space-y-2 overflow-x-hidden text-white" role="menu"
-                                    aria-label="Authentication"
+                                    class="mt-2 space-y-2 overflow-x-hidden text-white"
                                 >
                                     @foreach($navigation['children'] as $child)
                                         <a x-on:click="activeSubItem = '{{ $child['uri'] }}'; activeItem = '{{ $key }}'"
@@ -145,7 +144,7 @@
                         <div x-on:click="frequentlyVisitedOpen = ! frequentlyVisitedOpen" class="cursor-pointer dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50">
                             <div class="w-16 flex-none">
                                 <div class="flex w-full justify-center text-white">
-                                    <x-heroicons name="clock" class="h-4 w-4"/>
+                                    <x-heroicons name="clock" class="h-4 w-4" />
                                 </div>
                             </div>
                             <span class="truncate text-sm text-white">{{ __('Frequently visited') }}</span>
@@ -183,7 +182,7 @@
                         <div x-on:click="favoritesOpen = ! favoritesOpen" class="cursor-pointer dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50">
                             <div class="w-16 flex-none">
                                 <div class="flex w-full justify-center text-white">
-                                    <x-heroicons name="star" variant="solid" class="h-4 w-4 fill-warning-400"/>
+                                    <x-heroicons name="star" variant="solid" class="h-4 w-4 fill-warning-400" />
                                 </div>
                             </div>
                             <span class="truncate text-sm text-white">{{ __('Favorites') }}</span>
@@ -218,7 +217,7 @@
                                             negative
                                             icon="trash"
                                             wire:click="deleteFavorite({{ $favorite['id'] }})"
-                                            wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Favorite')]) }}"
+                                            wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Favorite')]) }}"
                                         />
                                     </div>
                                 </div>

@@ -34,7 +34,7 @@
                     negative
                     label="{{ __('Delete') }}"
                     wire:click="delete()"
-                    wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Product')]) }}"
+                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Product')]) }}"
                 />
             @endif
             @if(resolve_static(\FluxErp\Actions\Product\UpdateProduct::class, 'canPerformAction', [false]))

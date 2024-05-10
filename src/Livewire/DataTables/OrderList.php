@@ -42,7 +42,7 @@ class OrderList extends BaseDataTable
                 ->when(fn () => resolve_static(DeleteOrder::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete',
-                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
                 ]),
         ];
     }

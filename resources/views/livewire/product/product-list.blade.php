@@ -4,7 +4,20 @@
             <section class="flex flex-col gap-4">
                 <x-input wire:model="product.product_number" :label="__('Product Number')" :placeholder="__('Leave empty to generate a new Product Number.')" />
                 <x-input wire:model="product.name" :label="__('Name')" />
-                <x-select wire:model="product.client_id" :label="__('Client')" :options="$clients" option-value="id" option-label="name"/>
+                <x-select
+                    multiselect
+                    x-bind:disabled="!edit"
+                    wire:model.number="product.clients"
+                    :label="__('Clients')"
+                    option-value="id"
+                    option-label="name"
+                    :src="'logo_small_url'"
+                    template="user-option"
+                    :async-data="[
+                        'api' => route('search', \FluxErp\Models\Client::class),
+                        'method' => 'POST',
+                    ]"
+                />
                 <x-editor wire:model="product.description" :label="__('Description')" />
             </section>
             <section class="flex flex-col gap-4">

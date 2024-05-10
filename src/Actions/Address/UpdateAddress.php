@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class UpdateAddress extends FluxAction
@@ -112,6 +113,15 @@ class UpdateAddress extends FluxAction
         }
 
         return $address->withoutRelations()->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->rules['login_name'] = [
+            Rule::unique('addresses', 'login_name')
+                ->whereNull('deleted_at')
+                ->ignore(data_get($this->data, 'id')),
+        ];
     }
 
     protected function validateData(): void

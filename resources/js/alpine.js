@@ -201,7 +201,7 @@ function wireNavigation() {
     }
 }
 
-Livewire.directive('confirm', ({ el, directive }) => {
+Livewire.directive('flux-confirm', ({ el, directive }) => {
     let icon = directive.modifiers.includes('icon')
         ? directive.modifiers[directive.modifiers.indexOf('icon') + 1]
         : 'question';

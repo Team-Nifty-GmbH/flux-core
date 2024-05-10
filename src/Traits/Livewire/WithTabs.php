@@ -17,7 +17,7 @@ trait WithTabs
      */
     public function renderingWithTabs(?View $view = null): static
     {
-        $this->setTabsToRender($this->getTabs());
+        $this->mergeTabsToRender($this->getTabs());
 
         event('tabs.rendering: ' . get_class($this), $this);
 
