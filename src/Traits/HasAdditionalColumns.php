@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Translatable\Events\TranslationHasBeenSetEvent;
 use Spatie\Translatable\Translatable;
-use function Laravel\Prompts\select;
 
 trait HasAdditionalColumns
 {
@@ -78,8 +77,18 @@ trait HasAdditionalColumns
      */
     public static function bootHasAdditionalColumns(): void
     {
+        foreach (
+            app(AdditionalColumn::class)
+                ->query()
+                ->whereNotNull('model_id')
+                ->where('model_type', app(static::class)->getMorphClass())
+                ->get() as $column
+        ) {
+            static::registerModelSpecificAdditionalColumn($column);
+        }
+
         static::addGlobalScope(function (Builder $builder) {
-            $builder->with(['meta' => fn(Relation $relation) => $relation->latest()->limit(1)]);
+            $builder->with(['meta']);
         });
 
         static::retrieved(function (Model $model) {
@@ -124,7 +133,7 @@ trait HasAdditionalColumns
     {
         $collection = static::$modelSpecificAdditionalColumns ?? collect();
 
-        $collection->merge($additionalColumn);
+        $collection->push($additionalColumn);
 
         static::$modelSpecificAdditionalColumns = $collection;
     }
@@ -135,10 +144,9 @@ trait HasAdditionalColumns
     public function initializeHasAdditionalColumns(): void
     {
         $this->mergeCasts(
-        $this->getAdditionalColumns()?->mapWithKeys(fn (AdditionalColumn $column) => [$column->name => MetaAttribute::class])
-            ->toArray() ?? []
+            $this->getAdditionalColumns()?->mapWithKeys(fn (AdditionalColumn $column) => [$column->name => MetaAttribute::class])
+                ->toArray() ?? []
         );
-
 
         $this->translatableMeta =
             Cache::store('array')->rememberForever(
@@ -230,7 +238,9 @@ trait HasAdditionalColumns
 
     public function getAdditionalColumnId(string $key): ?int
     {
-        return static::$additionalColumns?->keyBy('name')->get($key)?->id;
+        return $this->additionalColumns()
+            ->where('name', $key)
+            ->value('id');
     }
 
     public function getAdditionalColumns(bool $cached = true): ?Collection
@@ -987,7 +997,7 @@ trait HasAdditionalColumns
     public function getTranslatedLocales(string $key): array
     {
         return array_keys($this->isTranslatableMeta($key) ?
-                $this->getMetaTranslations($key) : $this->getTranslations($key)
+            $this->getMetaTranslations($key) : $this->getTranslations($key)
         );
     }
 
