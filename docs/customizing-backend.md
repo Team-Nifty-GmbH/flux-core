@@ -106,10 +106,13 @@ For more information about the state machine see [spatie/laravel-model-states](h
 
 public function register(): void
 {
-    \FluxErp\States\OrderState::$config = \FluxErp\States\State::config()
-        ->default(App\States\MyNewState::class)
-        ->allowedTransition(App\States\MyNewState::class, \FluxErp\States\Order\Open::class)
-        ->registerState(App\States\MyNewState::class);
+    \FluxErp\States\State::registerStateConfig(
+        \FluxErp\States\State::config()
+            ->default(App\States\MyNewState::class)
+            ->allowedTransition(App\States\MyNewState::class, \FluxErp\States\Order\Open::class)
+            ->registerState(App\States\MyNewState::class),
+        \FluxErp\States\Order\OrderState::class // You should set that if you crate the config from the base state
+    )
 }
 ```
 
@@ -120,9 +123,11 @@ If you just want to extend the existing state you can set the static property `$
 
 public function register(): void
 {
-    \FluxErp\States\OrderState::$config = \FluxErp\States\OrderState::config()
-        ->allowedTransition(App\States\MyNewState::class, \FluxErp\States\Order\Open::class)
-        ->registerState(App\States\MyNewState::class);
+    \FluxErp\States\State::registerStateConfig(
+        \FluxErp\States\OrderState::config()
+            ->allowedTransition(App\States\MyNewState::class, \FluxErp\States\Order\Open::class)
+            ->registerState(App\States\MyNewState::class)
+    );
 }
 ```
 

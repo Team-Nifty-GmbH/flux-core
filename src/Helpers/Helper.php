@@ -96,7 +96,6 @@ class Helper
         $relatedKeyName = $model->$relation()->getRelated()->getKeyName();
 
         $existing = $model->$relation()->pluck($relatedKeyName)->toArray();
-        $model->$relation()->whereNotIn($relatedKeyName, Arr::pluck($related, $relatedKeyName))->delete();
 
         $canCreate = resolve_static($createAction, 'canPerformAction', [false]);
         $canUpdate = resolve_static($updateAction, 'canPerformAction', [false]);
@@ -125,7 +124,8 @@ class Helper
             foreach (array_diff($existing, $updated) as $deleted) {
                 try {
                     $deleteAction::make(['id' => $deleted])->validate()->execute();
-                } catch (ValidationException) {
+                } catch (ValidationException $e) {
+                    dd($e->getMessage(), $deleted, $deleteAction, $existing);
                 }
             }
         }

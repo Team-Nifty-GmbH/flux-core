@@ -102,6 +102,10 @@ class PriceHelper
                 ->where('product_id', $this->product->id)
                 ->whereRelation('priceList', 'is_default', true)
                 ->first();
+            if ($price) {
+                $price->isInherited = true;
+                unset($price->id, $price->uuid);
+            }
         } else {
             $price?->setRelation('priceList', $this->priceList);
         }
