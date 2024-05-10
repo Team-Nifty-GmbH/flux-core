@@ -10,10 +10,10 @@
                     <x-input wire:model="ticket.title" :disabled="true"/>
                     <x-textarea wire:model="ticket.description" :disabled="true"/>
                     @if($ticket['model_type']
-                        && $component = resolve_static(\Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($ticket['model_type']), 'getLivewireComponentWidget')
+                        && $widgetComponent = resolve_static(\Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($ticket['model_type']), 'getLivewireComponentWidget')
                     )
                         <x-card>
-                            <livewire:is :component="$component" :modelId="$ticket['model_id']" />
+                            <livewire:is :component="$widgetComponent" :modelId="$ticket['model_id']" />
                         </x-card>
                     @endif
                     @section('additional-columns')

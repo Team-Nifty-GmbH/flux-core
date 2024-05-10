@@ -12,7 +12,7 @@ abstract class DeliveryState extends State implements HasFrontendFormatter
 
     public static function config(): StateConfig
     {
-        return static::$config ?? parent::config()
+        return data_get(static::$config, static::class) ?? parent::config()
             ->default(Open::class)
             ->allowTransitions([
                 [
