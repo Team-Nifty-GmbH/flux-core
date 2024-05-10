@@ -120,15 +120,15 @@ class CreateOrder extends FluxAction
         $this->data['agent_id'] = $this->data['agent_id'] ?? $contact->agent_id;
         $this->data['approval_user_id'] ??= $contact->approval_user_id;
         $this->data['contact_bank_connection_id'] ??= $contact->contactBankConnections()->first()?->id;
-        $this->data['payment_target'] ??= $contact->payment_target_days
-            ?? $paymentType->payment_target
-            ?? 0;
         $this->data['payment_discount_target'] ??= $contact->discount_days
             ?? $paymentType->payment_discount_target
             ?? 0;
         $this->data['payment_discount_percent'] ??= $contact->discount_percent
-            ?? $paymentType->payment_discount_percent
+            ?? $paymentType->payment_discount_percentage
             ?? 0;
+        $this->data['payment_target'] ??= $contact->payment_target_days
+            ?? $paymentType->payment_target
+            ?? ($this->data['payment_discount_target'] ? $this->data['payment_discount_target'] + 1 : 0);
         $this->data['payment_reminder_days_1'] ??= $this->data['payment_reminder_days_1']
             ?? $contact->payment_reminder_days_1
             ?? $paymentType->payment_reminder_days_1

@@ -191,7 +191,7 @@ class Product extends Component
                     'name' => $priceList->name,
                     'is_net' => $priceList->is_net,
                     'is_default' => $priceList->is_default,
-                    'is_editable' => ! is_null(data_get($price, 'id')) || ! is_null($price->parent),
+                    'is_editable' => ! is_null(data_get($price, 'id')) || ! is_null($price?->parent) || is_null($price),
                 ];
             });
 

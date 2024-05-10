@@ -4,7 +4,7 @@ namespace FluxErp\Actions\AdditionalColumn;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\AdditionalColumn;
-use FluxErp\Rulesets\AdditionalColumn\UpdateValueLIstRuleset;
+use FluxErp\Rulesets\AdditionalColumn\UpdateValueListRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
@@ -13,7 +13,7 @@ class UpdateValueList extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = resolve_static(UpdateValueLIstRuleset::class, 'getRules');
+        $this->rules = resolve_static(UpdateValueListRuleset::class, 'getRules');
     }
 
     public static function models(): array
