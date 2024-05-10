@@ -25,15 +25,15 @@ class ValueListTest extends BaseSetup
     {
         parent::setUp();
         $this->valueLists[] = AdditionalColumn::factory()->create([
-            'model_type' => User::class,
+            'model_type' => app(User::class)->getMorphClass(),
             'values' => [1, 2, 3, 4, 5],
         ]);
         $this->valueLists[] = AdditionalColumn::factory()->create([
-            'model_type' => Category::class,
+            'model_type' => app(Category::class)->getMorphClass(),
             'values' => [1, 3, 5, 7],
         ]);
         $this->valueLists[] = AdditionalColumn::factory()->create([
-            'model_type' => User::class,
+            'model_type' => app(User::class)->getMorphClass(),
             'values' => [1, 1, 2, 3, 5, 8],
         ]);
 
@@ -111,7 +111,7 @@ class ValueListTest extends BaseSetup
 
         $this->assertNotEmpty($jsonValueLists);
         $this->assertTrue($jsonValueLists->every(function ($value, $key) {
-            return $value->model_type === User::class;
+            return $value->model_type === app(User::class)->getMorphClass();
         }));
 
         $valueList = $this->valueLists[0];

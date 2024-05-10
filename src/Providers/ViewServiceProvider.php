@@ -22,7 +22,10 @@ class ViewServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
+        if (
+            (! $this->app->runningInConsole() || $this->app->runningUnitTests())
+            && file_exists(flux_path('public/build/manifest.json'))
+        ) {
             Asset::vite(flux_path('public/build'), [
                 'resources/js/app.js',
                 'resources/js/alpine.js',

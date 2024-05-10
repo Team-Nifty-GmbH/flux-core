@@ -58,4 +58,9 @@ class Country extends Model
     {
         return $this->hasMany(CountryRegion::class);
     }
+
+    public static function default(): ?static
+    {
+        return static::query()->where('is_default', true)->first();
+    }
 }

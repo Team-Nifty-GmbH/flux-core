@@ -174,9 +174,9 @@ class ProductOptionGroupTest extends BaseSetup
 
     public function test_delete_product_option_group_group_option_has_product()
     {
-        $product = Product::factory()->create([
-            'client_id' => $this->dbClient->id,
-        ]);
+        $product = Product::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
 
         $product->productOptions()->attach($this->productOptions[1]->id);
 

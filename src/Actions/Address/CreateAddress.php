@@ -6,6 +6,7 @@ use FluxErp\Actions\ContactOption\CreateContactOption;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
+use FluxErp\Models\Country;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Address\CreateAddressRuleset;
 use Illuminate\Database\Eloquent\Builder;
@@ -57,6 +58,7 @@ class CreateAddress extends FluxAction
         }
 
         $contactOptions = Arr::pull($this->data, 'contact_options', []);
+        $this->data['country_id'] ??= Country::default()?->id;
 
         $address = app(Address::class, ['attributes' => $this->data]);
         $address->save();

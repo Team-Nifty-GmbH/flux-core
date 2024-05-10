@@ -19,6 +19,7 @@ use FluxErp\Livewire\Forms\ScheduleForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Language;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order as OrderModel;
@@ -382,11 +383,8 @@ class Order extends OrderPositionList
                         ]
                     )
                 ),
-                'contactBankConnections' => app(Contact::class)->query()
-                    ->whereKey($this->order->contact_id)
-                    ->with('contactBankConnections')
-                    ->first('id')
-                    ->contactBankConnections()
+                'contactBankConnections' => app(ContactBankConnection::class)->query()
+                    ->where('contact_id', $this->order->contact_id)
                     ->select(['id', 'contact_id', 'iban'])
                     ->pluck('iban', 'id')
                     ?->toArray() ?? [],
@@ -1015,7 +1013,6 @@ class Order extends OrderPositionList
             if ($bundleProduct->bundleProducts->count() > 0) {
                 $this->addBundlePositions($bundleProduct, $this->orderPosition->slug_position);
             }
-
         }
     }
 
@@ -1024,18 +1021,32 @@ class Order extends OrderPositionList
         $this->order->total_net_price = 0;
         $this->order->total_gross_price = 0;
         $this->order->total_vats = [];
+        $this->order->total_base_net_price = 0;
 
         foreach ($this->data as $item) {
+            $vatRatePercentage = bcadd($item['vat_rate_percentage'], 0);
+
+            // calculate total net price
             $this->order->total_net_price = bcadd($this->order->total_net_price, $item['total_net_price'] ?? 0);
+
+            // calculate total gross price
             $this->order->total_gross_price = bcadd(
                 $this->order->total_gross_price,
                 $item['total_gross_price'] ?? 0
             );
-            $this->order->total_vats[$item['vat_rate_percentage']]['total_vat_price'] = bcadd(
-                $this->order->total_vats[$item['vat_rate_percentage']]['total_vat_price'] ?? 0,
+
+            // calculate total base net price
+            $this->order->total_base_net_price = bcadd(
+                $this->order->total_base_net_price,
+                $item['total_base_net_price'] ?? 0
+            );
+
+            // calculate sum of vats
+            $this->order->total_vats[$vatRatePercentage]['total_vat_price'] = bcadd(
+                $this->order->total_vats[$vatRatePercentage]['total_vat_price'] ?? 0,
                 $item['vat_price'] ?? 0
             );
-            $this->order->total_vats[$item['vat_rate_percentage']]['vat_rate_percentage'] = $item['vat_rate_percentage'];
+            $this->order->total_vats[$vatRatePercentage]['vat_rate_percentage'] = $item['vat_rate_percentage'];
         }
 
         $this->isDirtyData = true;

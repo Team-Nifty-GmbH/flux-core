@@ -7,6 +7,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -39,27 +40,26 @@ class Notifications extends Component
         return view('flux::livewire.features.notifications');
     }
 
+    #[Renderless]
     public function sendNotify(array $notify): void
     {
-        $notify['description'] = Str::of($notify['description'])->limit(75);
+        $notify['description'] = Str::of(data_get($notify, 'description'))->limit(75);
 
         $this->notification()->confirm($notify);
 
         $this->notifications[] = $notify;
         app(Notification::class)->query()->whereKey($notify['id'])->first()?->markAsRead();
-
-        $this->skipRender();
     }
 
+    #[Renderless]
     public function showNotifications(): void
     {
         $this->showNotifications = true;
 
         $this->getNotification();
-
-        $this->skipRender();
     }
 
+    #[Renderless]
     public function getNotification(): array
     {
         auth()->user()
@@ -82,6 +82,7 @@ class Notifications extends Component
         return $this->notifications;
     }
 
+    #[Renderless]
     public function markAsRead(string $id): void
     {
         app(Notification::class)->query()->whereKey($id)->first()?->markAsRead();
@@ -92,15 +93,12 @@ class Notifications extends Component
         if (! $this->unread) {
             $this->showNotifications = false;
         }
-
-        $this->skipRender();
     }
 
+    #[Renderless]
     public function markAllAsRead(): void
     {
         auth()->user()->unreadNotifications->markAsRead();
         $this->unread = 0;
-
-        $this->skipRender();
     }
 }

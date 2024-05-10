@@ -19,6 +19,10 @@ class TaskForm extends Form
 
     public ?int $responsible_user_id = null;
 
+    public ?string $model_type = null;
+
+    public ?int $model_id = null;
+
     public ?string $name = null;
 
     public ?string $description = null;

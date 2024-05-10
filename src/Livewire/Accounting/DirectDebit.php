@@ -88,6 +88,8 @@ class DirectDebit extends OrderList
             return;
         }
 
+        $this->selected = [];
+
         $this->notification()->success(__('Payment Run created.'));
         $this->loadData();
     }

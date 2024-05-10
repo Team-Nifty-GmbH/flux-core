@@ -6,7 +6,7 @@ use FluxErp\Models\AdditionalColumn;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
-class UpdateValueLIstRuleset extends FluxRuleset
+class UpdateValueListRuleset extends FluxRuleset
 {
     protected static ?string $model = AdditionalColumn::class;
 
