@@ -111,7 +111,7 @@ public function register(): void
             ->default(App\States\MyNewState::class)
             ->allowedTransition(App\States\MyNewState::class, \FluxErp\States\Order\Open::class)
             ->registerState(App\States\MyNewState::class),
-        \FluxErp\States\Order\OrderState::class // You should set that if you crate the config from the base state
+        \FluxErp\States\Order\OrderState::class // You should set that if you create the config from the base state
     )
 }
 ```

@@ -29,6 +29,7 @@ use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Menu\MenuManager;
+use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
@@ -45,6 +46,7 @@ use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Widgets\WidgetManager;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
@@ -153,6 +155,7 @@ class FluxServiceProvider extends ServiceProvider
         bcscale(9);
 
         $this->registerCommands();
+        $this->bootModelSpecificAdditionalColumns();
 
         if (! Response::hasMacro('attachment')) {
             Response::macro('attachment', function ($content, $filename = 'download.pdf') {
@@ -478,5 +481,12 @@ class FluxServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
         $this->app['router']->aliasMiddleware('permission', Permissions::class);
         $this->app['router']->aliasMiddleware('localization', Localization::class);
+    }
+
+    private function bootModelSpecificAdditionalColumns(): void
+    {
+        foreach (app(AdditionalColumn::class)->query()->whereNotNull('model_id')->get() as $column) {
+            Relation::getMorphedModel($column->model_type)::registerModelSpecificAdditionalColumn($column);
+        }
     }
 }

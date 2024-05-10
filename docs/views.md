@@ -60,7 +60,7 @@ class Order extends BaseOrder
 
 ## Tabs
 
-You can register your own tabs to every livewire component that uses the `WithTabs` trait. To do so you can use the `registerTab` method in the `boot` method of your `AppServiceProvider`.
+You can register your own tabs to every livewire component that uses the `WithTabs` trait.
 To do so you can use the `registerTab` method in the `boot` method of your `AppServiceProvider`.
 
 ```php

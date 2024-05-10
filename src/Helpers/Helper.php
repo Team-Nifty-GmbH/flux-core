@@ -124,8 +124,7 @@ class Helper
             foreach (array_diff($existing, $updated) as $deleted) {
                 try {
                     $deleteAction::make(['id' => $deleted])->validate()->execute();
-                } catch (ValidationException $e) {
-                    dd($e->getMessage(), $deleted, $deleteAction, $existing);
+                } catch (ValidationException) {
                 }
             }
         }

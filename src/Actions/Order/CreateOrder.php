@@ -128,8 +128,7 @@ class CreateOrder extends FluxAction
             ?? 0;
         $this->data['payment_target'] ??= $contact->payment_target_days
             ?? $paymentType->payment_target
-            ?? ($this->data['payment_discount_target'] ? $this->data['payment_discount_target'] + 1 : null)
-            ?? 0;
+            ?? ($this->data['payment_discount_target'] ? $this->data['payment_discount_target'] + 1 : 0);
         $this->data['payment_reminder_days_1'] ??= $this->data['payment_reminder_days_1']
             ?? $contact->payment_reminder_days_1
             ?? $paymentType->payment_reminder_days_1

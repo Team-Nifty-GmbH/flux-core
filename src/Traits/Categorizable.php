@@ -42,9 +42,13 @@ trait Categorizable
     public function initializeCategorizable(): void
     {
         $unguarded = array_diff(
-            static::$columnListing ?? static::$columnListing = Schema::getColumnListing($this->getTable()),
+            static::$columnListing ??= Schema::getColumnListing($this->getTable()),
             $this->getGuarded()
         );
+
+        if (in_array(HasAdditionalColumns::class, class_uses_recursive($this))) {
+            $unguarded = array_merge($unguarded, $this->getAdditionalColumns()->pluck('name')->toArray());
+        }
 
         $this->mergeFillable(array_merge($unguarded, ['category_id', 'categories']));
     }
@@ -131,6 +135,6 @@ trait Categorizable
 
     private function hasCategoryIdAttribute(): bool
     {
-        return in_array('category_id', static::$columnListing);
+        return in_array('category_id', static::$columnListing ?? []);
     }
 }
