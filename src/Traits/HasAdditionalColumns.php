@@ -227,7 +227,7 @@ trait HasAdditionalColumns
     protected static function additionalColumnsQuery(): Builder
     {
         return app(AdditionalColumn::class)->query()
-            ->where('model_type', self::class)
+            ->where('model_type', Relation::getMorphClassAlias(static::class))
             ->whereNull('model_id');
     }
 

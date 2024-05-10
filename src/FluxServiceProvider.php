@@ -45,6 +45,7 @@ use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Widgets\WidgetManager;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
@@ -246,6 +247,13 @@ class FluxServiceProvider extends ServiceProvider
 
             return $this;
         });
+
+        Relation::macro(
+            'getMorphClassAlias',
+            function (string $class): ?string {
+                return data_get(array_flip(Relation::$morphMap), $class);
+            }
+        );
     }
 
     protected function offerPublishing(): void
