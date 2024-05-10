@@ -16,13 +16,15 @@ abstract class State extends BaseState implements Arrayable
 
     public static function registerStateConfig(StateConfig $config, ?string $baseStateClass = null): void
     {
-        if (! is_a($baseStateClass ?? $config->baseStateClass, static::class, true)) {
+        $stateClass = $baseStateClass ?? $config->baseStateClass;
+
+        if (! is_a($stateClass, static::class, true)) {
             throw new \InvalidArgumentException(
-                "The state class `{$config->baseStateClass}` must be a subclass of `" . static::class . '`'
+                "The state class `{$stateClass}` must be a subclass of `" . static::class . '`'
             );
         }
 
-        static::$config[$baseStateClass ?? $config->baseStateClass] = $config;
+        static::$config[$stateClass] = $config;
     }
 
     public function toArray(): array|string
