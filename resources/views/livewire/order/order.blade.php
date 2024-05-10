@@ -687,7 +687,7 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div x-cloak x-show="$wire.order.total_net_price !== $wire.order.total_base_net_price">
+                                <div x-cloak x-show="$wire.order.total_net_price !== ($wire.order.total_base_net_price ?? '0.0000000000')">
                                     <div class="flex justify-between p-2.5">
                                         <div>
                                             {{ __('Sum net without discount') }}
