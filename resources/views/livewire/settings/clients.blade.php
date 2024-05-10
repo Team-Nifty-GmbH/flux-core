@@ -24,7 +24,7 @@
                     <div class="flex justify-between gap-x-4">
                         @if(resolve_static(\FluxErp\Actions\Client\DeleteClient::class, 'canPerformAction', [false]))
                             <x-button
-                                wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Client')]) }}"
+                                wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Client')]) }}"
                                 x-bind:class="$wire.client.id > 0 || 'invisible'"
                                 wire:click="delete().then((success) => {if(success) close();});"
                                 flat

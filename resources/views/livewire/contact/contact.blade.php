@@ -37,7 +37,7 @@
                 @endif
                 @if(resolve_static(\FluxErp\Actions\Contact\DeleteContact::class, 'canPerformAction', [false]))
                     <x-button negative label="{{ __('Delete') }}"
-                              wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Contact')]) }}"
+                              wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Contact')]) }}"
                               wire:click="delete()"
                     />
                 @endif

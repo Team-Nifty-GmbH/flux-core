@@ -24,7 +24,7 @@
                                     negative
                                     :label="__('Delete')"
                                     wire:click="removeOrder(order.id).then((closeModal) => {if(closeModal) close();})"
-                                    wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Payment position')]) }}"
+                                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Payment position')]) }}"
                                 />
                                 <x-button
                                     primary
@@ -70,7 +70,7 @@
                     negative
                     :label="__('Delete')"
                     wire:click="delete().then((success) => {if(success) close();})"
-                    wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Payment Run')]) }}"
+                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Payment Run')]) }}"
                 />
                 <div class="flex justify-end gap-1.5">
                     <x-button :label="__('Cancel')" x-on:click="close()" />
