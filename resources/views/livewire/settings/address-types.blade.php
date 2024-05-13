@@ -5,7 +5,7 @@
                 <div class="flex flex-col gap-4">
                     <x-input wire:model="addressType.name" :label="__('Name')" required/>
                     <x-input wire:model="addressType.address_type_code" :label="__('Address Type Code')" required/>
-                    <div x-show="! $wire.addressType.client_id" x-cloak>
+                    <div x-show="! $wire.addressType.id" x-cloak>
                         <x-select
                             :label="__('Client')"
                             option-value="id"
