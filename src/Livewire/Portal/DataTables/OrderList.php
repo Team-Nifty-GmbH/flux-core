@@ -2,11 +2,11 @@
 
 namespace FluxErp\Livewire\Portal\DataTables;
 
+use FluxErp\Livewire\DataTables\BaseDataTable;
 use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class OrderList extends DataTable
+class OrderList extends BaseDataTable
 {
     protected string $model = Order::class;
 
@@ -49,8 +49,7 @@ class OrderList extends DataTable
     public function getBuilder(Builder $builder): Builder
     {
         return $builder->where('is_locked', true)
-            ->with('orderType:id,name', 'currency:id,iso')
-            ->where('contact_id', auth()->user()->contact_id);
+            ->with('orderType:id,name', 'currency:id,iso');
     }
 
     public function getFormatters(): array

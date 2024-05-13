@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Media;
+use Illuminate\Database\Eloquent\Builder;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -18,6 +19,11 @@ class MediaList extends BaseDataTable
     public array $formatters = [
         'url' => 'image',
     ];
+
+    public function getBuilder(Builder $builder): Builder
+    {
+        return $builder->addSelect('model_type', 'disk', 'conversions_disk');
+    }
 
     public function itemToArray($item): array
     {

@@ -13,7 +13,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Support\OrderCollection;
+use FluxErp\Support\Collection\OrderCollection;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;

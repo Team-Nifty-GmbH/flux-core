@@ -45,16 +45,15 @@
                         primary
                         :label="__('Select all')"
                         x-bind:disabled="!$wire.edit"
-                        x-on:click="$wire.address.permissions = $wire.permissions.map(permission => permission.id)"
+                        x-on:click="$wire.permissions().then((permissions) => $wire.address.permissions = permissions.map(permission => permission.id))"
                     />
                     <template x-for="permission in $wire.permissions()">
                         <div class="flex">
                             <div>
                                 <x-checkbox
                                     x-bind:disabled="!$wire.edit"
-                                    wire:model.number="address.permissions"
+                                    x-model.number="$wire.address.permissions"
                                     x-bind:value="permission.id"
-                                    x-on:change="save = true"
                                     x-bind:id="'permission-' + permission.id"
                                 />
                             </div>

@@ -4,18 +4,21 @@ module.exports = {
     presets: [
         require('./vendor/wireui/wireui/tailwind.config.js'),
         require('./vendor/team-nifty-gmbh/tall-calendar/tailwind.config.js'),
+        require('./vendor/team-nifty-gmbh/tall-datatables/tailwind.config.js'),
     ],
     content: [
-        './resources/**/*.blade.php',
-        './resources/**/*.js',
-        './resources/**/*.vue',
-        './src/Htmlables/**/*.php',
-        './src/Livewire/**/*.php',
+        './vendor/team-nifty-gmbh/flux-erp/resources/**/*.blade.php',
+        './vendor/team-nifty-gmbh/flux-erp/resources/**/*.js',
+        './vendor/team-nifty-gmbh/flux-erp/resources/**/*.vue',
+        './vendor/team-nifty-gmbh/flux-erp/src/Htmlables/**/*.php',
+        './vendor/team-nifty-gmbh/flux-erp/src/Livewire/**/*.php',
         './vendor/wireui/wireui/resources/**/*.blade.php',
         './vendor/wireui/wireui/ts/**/*.ts',
         './vendor/wireui/wireui/src/View/**/*.php',
         './vendor/team-nifty-gmbh/tall-datatables/resources/views/**/*.blade.php',
         './vendor/team-nifty-gmbh/tall-datatables/resources/js/**/*.js',
+        './vendor/team-nifty-gmbh/tall-calendar/resources/views/**/*.blade.php',
+        './vendor/team-nifty-gmbh/tall-calendar/resources/js/**/*.js',
     ],
     theme: {
         extend: {

@@ -24,18 +24,22 @@ class ViewServiceProvider extends ServiceProvider
     {
         if (
             (! $this->app->runningInConsole() || $this->app->runningUnitTests())
-            && file_exists(flux_path('public/build/manifest.json'))
+            && file_exists(public_path('build/manifest.json'))
         ) {
-            Asset::vite(flux_path('public/build'), [
-                'resources/js/app.js',
-                'resources/js/alpine.js',
-                'resources/js/apex-charts.js',
-                'resources/css/app.css',
+            Asset::vite(public_path('build'), [
+                'vendor/team-nifty-gmbh/flux-erp/resources/css/app.css',
+                'vendor/team-nifty-gmbh/flux-erp/resources/js/app.js',
+                'vendor/team-nifty-gmbh/flux-erp/resources/js/apex-charts.js',
+                'vendor/team-nifty-gmbh/flux-erp/resources/js/alpine.js',
+                'vendor/team-nifty-gmbh/flux-erp/resources/js/sw.js',
+                'vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js',
+                'vendor/team-nifty-gmbh/tall-calendar/resources/js/index.js',
+                'vendor/wireui/wireui/dist/wireui.js',
             ]);
 
             if (auth()->guard('web')->check()) {
-                Asset::vite(flux_path('public/build'), [
-                    'resources/js/web-push.js',
+                Asset::vite(public_path('build'), [
+                    'vendor/team-nifty-gmbh/flux-erp/resources/js/web-push.js',
                 ]);
             }
         }

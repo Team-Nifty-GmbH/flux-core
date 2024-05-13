@@ -2,11 +2,11 @@
 
 namespace FluxErp\Livewire\Portal\DataTables;
 
+use FluxErp\Livewire\DataTables\BaseDataTable;
 use FluxErp\Models\Ticket;
 use Illuminate\Database\Eloquent\Builder;
-use TeamNiftyGmbH\DataTable\DataTable;
 
-class TicketList extends DataTable
+class TicketList extends BaseDataTable
 {
     protected string $model = Ticket::class;
 

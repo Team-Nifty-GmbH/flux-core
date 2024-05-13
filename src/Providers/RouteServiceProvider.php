@@ -4,47 +4,47 @@ namespace FluxErp\Providers;
 
 use FluxErp\Http\Middleware\Portal;
 use FluxErp\Http\Middleware\SetAcceptHeaders;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Fortify;
+use Livewire\Livewire;
 
 class RouteServiceProvider extends ServiceProvider
 {
-    /**
-     * The path to the "home" route for your application.
-     *
-     * This is used by Laravel authentication to redirect users after login.
-     *
-     * @var string
-     */
     public const HOME = '/';
 
-    /**
-     * The controller namespace for the application.
-     *
-     * When present, controller route declarations will automatically be prefixed with this namespace.
-     *
-     * @var string|null
-     */
-    // protected $namespace = 'FluxErp\\Http\\Controllers';
+    public static bool $registerFluxRoutes = true;
 
-    /**
-     * Define your route model bindings, pattern filters, etc.
-     */
+    public static bool $registerPortalRoutes = true;
+
+    public static bool $registerApiRoutes = true;
+
+    public function register(): void
+    {
+        parent::register();
+
+        Fortify::ignoreRoutes();
+    }
+
     public function boot(): void
     {
         $this->mapWebRoutes();
         $this->configureRateLimiting();
 
         Route::pattern('id', '[0-9]+');
+        Livewire::addPersistentMiddleware(Portal::class);
 
         $this->routes(function () {
-            Route::prefix('api')
-                ->middleware(['throttle:api', SetAcceptHeaders::class])
-                ->namespace($this->namespace)
-                ->group(__DIR__ . '/../../routes/api.php');
+            if (static::$registerApiRoutes) {
+                Route::prefix('api')
+                    ->middleware(['throttle:api', SetAcceptHeaders::class])
+                    ->namespace($this->namespace)
+                    ->group(__DIR__ . '/../../routes/api.php');
+            }
 
             Route::middleware('web')
                 ->namespace($this->namespace)
@@ -70,13 +70,28 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapWebRoutes(): void
     {
+        Authenticate::redirectUsing(fn (Request $request) => route('login', absolute: false));
+
         // Load the subdomain routes first.
-        Route::middleware(['web', Portal::class])
-            ->domain(config('flux.portal_domain'))
-            ->group(__DIR__ . '/../../routes/frontend/portal.php');
+        if (static::$registerPortalRoutes) {
+            Route::middleware(['web', Portal::class])
+                ->domain(config('flux.portal_domain'))
+                ->group(__DIR__ . '/../../routes/frontend/portal.php');
+            Route::namespace('Laravel\Fortify\Http\Controllers')
+                ->domain(config('flux.portal_domain'))
+                ->prefix(config('fortify.prefix'))
+                ->group(__DIR__ . '/../../routes/fortify.php');
+        }
 
         // Load the default routes second.
-        Route::middleware('web')
-            ->group(__DIR__ . '/../../routes/frontend/web.php');
+        if (static::$registerFluxRoutes) {
+            Route::middleware('web')
+                ->domain(config('flux.flux_url'))
+                ->group(__DIR__ . '/../../routes/frontend/web.php');
+            Route::namespace('Laravel\Fortify\Http\Controllers')
+                ->domain(config('flux.flux_url') ?? config('fortify.domain'))
+                ->prefix(config('fortify.prefix'))
+                ->group(__DIR__ . '/../../routes/fortify.php');
+        }
     }
 }

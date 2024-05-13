@@ -14,7 +14,9 @@
 <link rel="icon" href="{{ route('favicon') }}">
 <meta http-equiv="refresh" content="{{ config('session.lifetime') * 60 + 1 }}">
 @stack('meta')
-{!! WireUi::directives()->scripts(absolute: false) !!}
+<script>
+    {!! (new \WireUi\Support\BladeDirectives())->hooksScript() !!}
+</script>
 {{ \FluxErp\Facades\Asset::toHtml() }}
 @stack('scripts')
 {{$slot}}

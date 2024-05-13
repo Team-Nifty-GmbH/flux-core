@@ -55,8 +55,8 @@ abstract class DuskTestCase extends TestCase
             DB::statement('CREATE DATABASE ' . $database);
         }
 
-        if (! file_exists(public_path('flux'))) {
-            symlink(package_path('public'), public_path('flux'));
+        if (! file_exists(public_path())) {
+            symlink(package_path('public'), public_path());
         }
 
         $this->app->make(PermissionRegistrar::class)->forgetCachedPermissions();
