@@ -49,7 +49,7 @@ class Units extends UnitList
                 ->when(resolve_static(DeleteUnit::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Units')]),
+                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Unit')]),
                 ]),
         ];
     }
