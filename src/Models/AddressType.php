@@ -27,7 +27,7 @@ class AddressType extends Model
     protected function casts(): array
     {
         return [
-            'is_lock' => 'boolean',
+            'is_locked' => 'boolean',
             'is_unique' => 'boolean',
         ];
     }
