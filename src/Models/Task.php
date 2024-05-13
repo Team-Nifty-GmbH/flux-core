@@ -170,11 +170,17 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
         ];
     }
 
-    public function fromCalendarEvent(array $event): Model
+    public static function fromCalendarEvent(array $event): Model
     {
-        return $this->newQuery()
-            ->whereKey($event['id'] ?? null)
-            ->firstOrNew()
-            ->fill($event);
+        $task = new static;
+        $task->forceFill([
+            'id' => $event['id'],
+            'name' => $event['title'],
+            'start_date' => $event['start'],
+            'due_date' => $event['end'],
+            'description' => $event['description'],
+        ]);
+
+        return $task;
     }
 }

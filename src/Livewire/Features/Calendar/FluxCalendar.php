@@ -9,6 +9,7 @@ use FluxErp\Livewire\Forms\CalendarForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
@@ -29,6 +30,8 @@ class FluxCalendar extends CalendarComponent
     public CalendarForm $calendar;
 
     public CalendarEventForm $event;
+
+    protected string $view = 'flux::livewire.features.calendar.flux-calendar';
 
     public function getMyCalendars(): Collection
     {
@@ -85,8 +88,10 @@ class FluxCalendar extends CalendarComponent
                 return false;
             }
 
+            $modelClass = Relation::getMorphedModel($attributes['calendar_type']);
+
             try {
-                $result = $action['class']::make($attributes)
+                $result = $action['class']::make(resolve_static($modelClass, 'fromCalendarEvent', [$attributes]))
                     ->checkPermission()
                     ->validate()
                     ->execute();
@@ -137,8 +142,10 @@ class FluxCalendar extends CalendarComponent
                 return false;
             }
 
+            $modelClass = Relation::getMorphedModel($attributes['calendar_type']);
+
             try {
-                $action['class']::make($attributes)
+                $action['class']::make(resolve_static($modelClass, 'fromCalendarEvent', [$attributes]))
                     ->checkPermission()
                     ->validate()
                     ->execute();
@@ -192,6 +199,11 @@ class FluxCalendar extends CalendarComponent
         $model = app($this->tab === 'users' ? User::class : Address::class);
 
         $this->addInvitee($model->query()->whereKey($id)->first());
+    }
+
+    public function render(): View
+    {
+        return view($this->view);
     }
 
     #[Renderless]

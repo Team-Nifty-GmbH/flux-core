@@ -10,5 +10,5 @@ interface Calendarable
 
     public function toCalendarEvent(): array;
 
-    public function fromCalendarEvent(array $event): Model;
+    public static function fromCalendarEvent(array $event): Model;
 }
