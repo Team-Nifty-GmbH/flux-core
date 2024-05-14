@@ -2,7 +2,7 @@
 
 namespace FluxErp\Providers;
 
-use FluxErp\Http\Middleware\Portal;
+use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Http\Middleware\SetAcceptHeaders;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -36,7 +36,7 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         Route::pattern('id', '[0-9]+');
-        Livewire::addPersistentMiddleware(Portal::class);
+        Livewire::addPersistentMiddleware(PortalMiddleware::class);
 
         $this->routes(function () {
             if (static::$registerApiRoutes) {
@@ -74,7 +74,7 @@ class RouteServiceProvider extends ServiceProvider
 
         // Load the subdomain routes first.
         if (static::$registerPortalRoutes) {
-            Route::middleware(['web', Portal::class])
+            Route::middleware(['web', PortalMiddleware::class])
                 ->domain(config('flux.portal_domain'))
                 ->group(__DIR__ . '/../../routes/frontend/portal.php');
             Route::namespace('Laravel\Fortify\Http\Controllers')

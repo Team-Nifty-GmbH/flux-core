@@ -48,15 +48,14 @@ abstract class DuskTestCase extends TestCase
         }
 
         parent::setUp();
+        if (! file_exists(public_path('build'))) {
+            symlink(package_path('../../public/build'), public_path('build'));
+        }
 
         // check if database exists
         $database = config('database.connections.mysql.database');
         if (! DB::select("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$database'")) {
             DB::statement('CREATE DATABASE ' . $database);
-        }
-
-        if (! file_exists(public_path())) {
-            symlink(package_path('public'), public_path());
         }
 
         $this->app->make(PermissionRegistrar::class)->forgetCachedPermissions();
@@ -103,6 +102,7 @@ abstract class DuskTestCase extends TestCase
     public function openMenu(): void
     {
         $this->browse(function ($browser) {
+            $browser->pause(90000);
             $browser->script("window.Alpine.\$data(document.getElementById('main-navigation')).menuOpen = true;");
             $browser->waitForText(__('Logged in as:'));
         });
