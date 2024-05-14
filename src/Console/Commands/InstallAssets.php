@@ -13,7 +13,9 @@ class InstallAssets extends Command
      *
      * @var string
      */
-    protected $signature = 'flux:install-assets {--force : Overwrite existing files}';
+    protected $signature = 'flux:install-assets
+        {directory? : The directory to install the assets}
+        {--force : Overwrite existing files}';
 
     /**
      * The console command description.
@@ -27,42 +29,26 @@ class InstallAssets extends Command
      */
     public function handle(): void
     {
+        $target = $this->argument('directory');
+        if ($target && ! file_exists($target)) {
+            throw new \InvalidArgumentException('The target directory does not exist.');
+        }
+
         $this->callSilent('storage:link');
 
         // require npm packages
         $this->info('Installing npm packages...');
 
-        // Tailwind Configuration...
-        if (! file_exists(base_path('tailwind.config.js')) || $this->option('force')) {
-            $this->info('Publishing Tailwind Configuration...');
-            copy(__DIR__ . '/../../../stubs/tailwind/tailwind.config.js', base_path('tailwind.config.js'));
-        }
-
-        if (! file_exists(base_path('postcss.config.js')) || $this->option('force')) {
-            $this->info('Publishing PostCSS Configuration...');
-            copy(__DIR__ . '/../../../stubs/tailwind/postcss.config.js', base_path('postcss.config.js'));
-        }
-
-        if (! file_exists(base_path('vite.config.js')) || $this->option('force')) {
-            $this->info('Publishing Vite Configuration...');
-            copy(__DIR__ . '/../../../stubs/tailwind/vite.config.js', base_path('vite.config.js'));
-        }
+        static::copyStubs(force: $this->option('force'));
 
         $this->updateNodePackages(function ($packages) {
-            return [
-                '@fontsource/inter' => '^5.0.18',
-                '@fullcalendar/core' => '^6.1.11',
-                '@fullcalendar/daygrid' => '^6.1.10',
-                '@fullcalendar/interaction' => '^6.1.10',
-                '@fullcalendar/list' => '^6.1.11',
-                '@fullcalendar/timegrid' => '^6.1.10',
-                '@tailwindcss/forms' => '^0.5.7',
-                '@tailwindcss/typography' => '^0.5.10',
-                'autoprefixer' => '^10.4.16',
-                'postcss' => '^8.4.32',
-                'tailwindcss' => '^3.4.0',
-                'tributejs' => '^5.1.3',
-            ] + $packages;
+            return data_get(
+                json_decode(
+                    file_get_contents(__DIR__ . '/../../../stubs/tailwind/package.json'),
+                    true
+                ),
+                'devDependencies'
+            ) + $packages;
         });
 
         if (file_exists(resource_path('views/welcome.blade.php'))) {
@@ -110,5 +96,38 @@ class InstallAssets extends Command
         $process->run(function ($type, $line) {
             $this->output->write('    ' . $line);
         });
+    }
+
+    public static function copyStubs(
+        ?array $files = null,
+        bool $force = false,
+        ?\Closure $basePath = null
+    ): void {
+        $files = is_array($files)
+            ? $files
+            : [
+                'tailwind.config.js',
+                'postcss.config.js',
+                'vite.config.js',
+            ];
+        if (! $basePath) {
+            $basePath = fn ($path = '') => base_path($path);
+        }
+
+        foreach ($files as $file) {
+            if (file_exists($basePath('tailwind.config.js')) && ! $force) {
+                continue;
+            }
+            copy(__DIR__ . '/../../../stubs/tailwind/' . $file, $basePath($file));
+
+            //copy(__DIR__ . '/../stubs/tailwind/' . $file, __DIR__ . '/../' . $file);
+            $content = file_get_contents($basePath($file));
+            $content = str_replace(
+                '{{ relative_path }}',
+                substr(realpath(__DIR__ . '/../../../'), strlen($basePath()), 999),
+                $content
+            );
+            file_put_contents($basePath($file), $content);
+        }
     }
 }

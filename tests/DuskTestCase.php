@@ -3,6 +3,7 @@
 namespace FluxErp\Tests;
 
 use Dotenv\Dotenv;
+use FluxErp\Console\Commands\InstallAssets;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
@@ -25,6 +26,7 @@ use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Spatie\Tags\TagsServiceProvider;
 use Spatie\Translatable\TranslatableServiceProvider;
+use Symfony\Component\Process\Process;
 use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
@@ -40,6 +42,61 @@ abstract class DuskTestCase extends TestCase
 
     protected static string $guard = 'web';
 
+    public static function setUpBeforeClass(): void
+    {
+        static::installAssets();
+
+        parent::setUpBeforeClass();
+    }
+
+    protected static function deleteDirectory($dir): bool
+    {
+        if (! file_exists($dir)) {
+            return true;
+        }
+
+        if (! is_dir($dir)) {
+            return unlink($dir);
+        }
+
+        foreach (scandir($dir) as $item) {
+            if ($item == '.' || $item == '..') {
+                continue;
+            }
+
+            if (! static::deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+                return false;
+            }
+
+        }
+
+        return rmdir($dir);
+    }
+
+    protected static function installAssets(): void
+    {
+        static::deleteDirectory(__DIR__ . '/../public/build/assets/');
+        InstallAssets::copyStubs(
+            [
+                'tailwind.config.js',
+                'postcss.config.js',
+                'vite.config.js',
+                'package.json',
+            ],
+            true,
+            fn ($path = '') => __DIR__ . '/../' . $path
+        );
+
+        // run npm i and npm run build
+        $process = Process::fromShellCommandline('npm i && npm run build');
+        $process->run();
+
+        // wait for process to finish
+        while ($process->isRunning()) {
+            usleep(1000);
+        }
+    }
+
     protected function setUp(): void
     {
         if (file_exists(__DIR__ . '/../../../.env')) {
@@ -48,8 +105,9 @@ abstract class DuskTestCase extends TestCase
         }
 
         parent::setUp();
+
         if (! file_exists(public_path('build'))) {
-            symlink(package_path('../../public/build'), public_path('build'));
+            symlink(package_path('public/build'), public_path('build'));
         }
 
         // check if database exists
@@ -97,12 +155,12 @@ abstract class DuskTestCase extends TestCase
         $app['config']->set('database.connections.mysql.database', 'testing');
         $app['config']->set('auth.defaults.guard', 'web');
         $app['config']->set('flux.install_done', true);
+        $app['config']->set('session.driver', 'file');
     }
 
     public function openMenu(): void
     {
         $this->browse(function ($browser) {
-            $browser->pause(90000);
             $browser->script("window.Alpine.\$data(document.getElementById('main-navigation')).menuOpen = true;");
             $browser->waitForText(__('Logged in as:'));
         });

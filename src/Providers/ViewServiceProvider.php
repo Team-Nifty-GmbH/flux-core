@@ -26,16 +26,32 @@ class ViewServiceProvider extends ServiceProvider
             (! $this->app->runningInConsole() || $this->app->runningUnitTests())
             && file_exists(public_path('build/manifest.json'))
         ) {
-            Asset::vite(public_path('build'), [
+            $fluxAssets = [
                 'vendor/team-nifty-gmbh/flux-erp/resources/css/app.css',
                 'vendor/team-nifty-gmbh/flux-erp/resources/js/app.js',
                 'vendor/team-nifty-gmbh/flux-erp/resources/js/apex-charts.js',
                 'vendor/team-nifty-gmbh/flux-erp/resources/js/alpine.js',
                 'vendor/team-nifty-gmbh/flux-erp/resources/js/sw.js',
-                'vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js',
-                'vendor/team-nifty-gmbh/tall-calendar/resources/js/index.js',
-                'vendor/wireui/wireui/dist/wireui.js',
-            ]);
+            ];
+
+            if ($this->app->runningUnitTests()) {
+                $fluxAssets = array_map(
+                    fn (string $asset) => str_replace('vendor/team-nifty-gmbh/flux-erp/', '', $asset),
+                    $fluxAssets
+                );
+            }
+
+            Asset::vite(
+                public_path('build'),
+                array_merge(
+                    $fluxAssets,
+                    [
+                        'vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js',
+                        'vendor/team-nifty-gmbh/tall-calendar/resources/js/index.js',
+                        'vendor/wireui/wireui/dist/wireui.js',
+                    ]
+                )
+            );
 
             if (auth()->guard('web')->check()) {
                 Asset::vite(public_path('build'), [
