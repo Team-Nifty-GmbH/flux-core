@@ -26,7 +26,15 @@ class CalendarEventForm extends FluxForm
 
     public ?string $description = null;
 
+    public ?array $repeat = null;
+
+    public ?string $repeat_end = null;
+
+    public ?int $recurrences = null;
+
     public bool $is_all_day = false;
+
+    public ?string $confirm_option = null;
 
     protected function getActions(): array
     {

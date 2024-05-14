@@ -5,10 +5,7 @@ namespace FluxErp\Rulesets\CalendarEvent;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rules\MorphClassExists;
-use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\HasCalendarEvents;
 
 class UpdateCalendarEventRuleset extends FluxRuleset
 {
@@ -33,6 +30,7 @@ class UpdateCalendarEventRuleset extends FluxRuleset
             'end' => 'sometimes|required|date|after_or_equal:start',
             'is_all_day' => 'boolean',
             'extended_props' => 'array|nullable',
+            'confirm_option' => 'required|string|in:this,future,all',
         ];
     }
 
@@ -40,6 +38,7 @@ class UpdateCalendarEventRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
+            resolve_static(RepeatRuleset::class, 'getRules'),
             resolve_static(InvitedAddressRuleset::class, 'getRules'),
             resolve_static(InvitedUserRuleset::class, 'getRules')
         );

@@ -3,9 +3,11 @@
 namespace FluxErp\Actions\CalendarEvent;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Helpers\Helper;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rulesets\CalendarEvent\UpdateCalendarEventRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 class UpdateCalendarEvent extends FluxAction
 {
@@ -22,15 +24,60 @@ class UpdateCalendarEvent extends FluxAction
 
     public function performAction(): Model
     {
+        $confirmOption = Arr::pull($this->data, 'confirm_option');
+        $repeat = Arr::pull($this->data, 'repeat');
+
         $calendarEvent = app(CalendarEvent::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
-        $calendarEvent->fill($this->data);
+        if ($repeat) {
+            $this->data['repeat'] = Helper::buildRepeatStringFromArray(
+                array_merge($repeat, ['start' => $this->data['start'] ?? $calendarEvent->start->toDateTimeString()])
+            );
+        }
+
+        // If existing event is not repeatable, confirmOption should be "all".
+        switch ($confirmOption) {
+            case 'this':
+                $calendarEvent->fill([
+                    'excluded' => array_merge(
+                        $calendarEvent->excluded ?: [],
+                        [$calendarEvent->start->toDateTimeString()]
+                    ),
+                ]);
+                break;
+            case 'future':
+                $calendarEvent->fill([
+                    'repeat_end' => $calendarEvent->start->subSecond()->toDateTimeString(),
+                ]);
+                break;
+            default:
+                $calendarEvent->fill($this->data);
+                break;
+        }
+
         $calendarEvent->save();
 
-        SyncCalendarEventInvites::make($this->data)->execute();
+        if (in_array($confirmOption, ['this', 'future'])) {
+            CreateCalendarEvent::make($this->data)
+                ->validate()
+                ->execute();
+        } else {
+            SyncCalendarEventInvites::make($this->data)
+                ->validate()
+                ->execute();
+        }
 
         return $calendarEvent->withoutRelations()->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $repeat = data_get($this->data, 'repeat');
+
+        if (is_string($repeat)) {
+            $this->data['repeat'] = Helper::parseRepeatStringToArray($repeat);
+        }
     }
 }

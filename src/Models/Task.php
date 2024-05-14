@@ -159,14 +159,15 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
             'title' => $this->name,
             'start' => ($this->start_date ?? $this->created_at)->toDateTimeString(),
             'end' => $this->due_date?->endOfDay()->toDateTimeString(),
-            'allDay' => false,
-            'is_editable' => true,
-            'is_invited' => null,
-            'is_public' => false,
             'status' => $this->state::$name,
             'invited' => [],
             'description' => $this->description,
             'extendedProps' => null,
+            'allDay' => false,
+            'is_editable' => true,
+            'is_invited' => null,
+            'is_public' => false,
+            'is_repeatable' => false,
         ];
     }
 

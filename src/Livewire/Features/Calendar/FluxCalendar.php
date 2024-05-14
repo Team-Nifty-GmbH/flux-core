@@ -78,6 +78,17 @@ class FluxCalendar extends CalendarComponent
     public function saveEvent(array $attributes): array|false
     {
         $attributes['is_all_day'] = $attributes['allDay'] ?? false;
+        $attributes['confirm_option'] = ! $this->calendarEventWasRepeatable ? 'all' : $this->confirmSave;
+
+        if ($attributes['has_repeats'] ?? false) {
+            $attributes['repeat'] = [
+                'start' => $attributes['start'],
+                'interval' => $attributes['interval'] ?? null,
+                'unit' => $attributes['unit'] ?? null,
+                'weekdays' => $attributes['weekdays'] ?? null,
+                'monthly' => $attributes['monthly'] ?? null,
+            ];
+        }
 
         if ($attributes['calendar_type'] ?? false) {
             $action = Action::get(
@@ -119,6 +130,8 @@ class FluxCalendar extends CalendarComponent
 
     public function deleteCalendar(array $attributes): bool
     {
+        $attributes['confirm_option'] = ! $this->calendarEventWasRepeatable ? 'all' : $this->confirmDelete;
+
         try {
             $this->calendar->reset();
             $this->calendar->fill($attributes);

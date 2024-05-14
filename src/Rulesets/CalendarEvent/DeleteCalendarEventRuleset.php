@@ -20,6 +20,7 @@ class DeleteCalendarEventRuleset extends FluxRuleset
                 'integer',
                 new ModelExists(CalendarEvent::class),
             ],
+            'confirm_option' => 'required|string|in:this,future,all',
         ];
     }
 }
