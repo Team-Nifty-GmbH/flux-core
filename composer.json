@@ -23,7 +23,7 @@
         "spatie/laravel-model-info": "^2.0",
         "spatie/laravel-model-states": "^2.4",
         "spatie/laravel-permission": "^6.0",
-        "spatie/laravel-query-builder": "^5.0",
+        "spatie/laravel-query-builder": "^6.0",
         "spatie/laravel-tags": "^4.3",
         "spatie/laravel-translatable": "^6.0",
         "spatie/laravel-translation-loader": "^2.7",
