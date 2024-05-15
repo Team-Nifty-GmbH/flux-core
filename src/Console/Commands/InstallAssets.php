@@ -98,11 +98,8 @@ class InstallAssets extends Command
         });
     }
 
-    public static function copyStubs(
-        ?array $files = null,
-        bool $force = false,
-        ?\Closure $basePath = null
-    ): void {
+    public static function copyStubs(?array $files = null, bool $force = false, ?\Closure $basePath = null): void
+    {
         $files = is_array($files)
             ? $files
             : [
@@ -110,6 +107,7 @@ class InstallAssets extends Command
                 'postcss.config.js',
                 'vite.config.js',
             ];
+
         if (! $basePath) {
             $basePath = fn ($path = '') => base_path($path);
         }
@@ -120,11 +118,10 @@ class InstallAssets extends Command
             }
             copy(__DIR__ . '/../../../stubs/tailwind/' . $file, $basePath($file));
 
-            //copy(__DIR__ . '/../stubs/tailwind/' . $file, __DIR__ . '/../' . $file);
             $content = file_get_contents($basePath($file));
             $content = str_replace(
                 '{{ relative_path }}',
-                substr(realpath(__DIR__ . '/../../../'), strlen($basePath()), 999),
+                substr(realpath(__DIR__ . '/../../../'), strlen($basePath())),
                 $content
             );
             file_put_contents($basePath($file), $content);

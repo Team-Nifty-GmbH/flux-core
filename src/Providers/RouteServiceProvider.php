@@ -57,10 +57,12 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting(): void
     {
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(config('flux.rate_limit'))
-                ->by(optional($request->user())->id ?: $request->ip());
-        });
+        if (static::$registerApiRoutes) {
+            RateLimiter::for('api', function (Request $request) {
+                return Limit::perMinute(config('flux.rate_limit'))
+                    ->by(optional($request->user())->id ?: $request->ip());
+            });
+        }
     }
 
     /**
@@ -70,17 +72,21 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapWebRoutes(): void
     {
-        Authenticate::redirectUsing(fn (Request $request) => route('login', absolute: false));
+        if (static::$registerFluxRoutes || static::$registerPortalRoutes) {
+            Authenticate::redirectUsing(fn (Request $request) => route('login', absolute: false));
+        }
 
         // Load the subdomain routes first.
         if (static::$registerPortalRoutes) {
             Route::middleware(['web', PortalMiddleware::class])
                 ->domain(config('flux.portal_domain'))
                 ->group(__DIR__ . '/../../routes/frontend/portal.php');
-            Route::namespace('Laravel\Fortify\Http\Controllers')
-                ->domain(config('flux.portal_domain'))
-                ->prefix(config('fortify.prefix'))
-                ->group(__DIR__ . '/../../routes/fortify.php');
+            if (config('flux.portal_domain')) {
+                Route::namespace('Laravel\Fortify\Http\Controllers')
+                    ->domain(config('flux.portal_domain'))
+                    ->prefix(config('fortify.prefix'))
+                    ->group(__DIR__ . '/../../routes/fortify.php');
+            }
         }
 
         // Load the default routes second.

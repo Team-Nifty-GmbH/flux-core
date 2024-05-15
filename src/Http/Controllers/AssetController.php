@@ -95,7 +95,7 @@ class AssetController extends Controller
 
     public function pwaServiceWorker(): Response
     {
-        return response(Vite::content('resources/js/sw.js', flux_path('public/build')))
+        return response(Vite::content('resources/js/sw.js', public_path('build')))
             ->header('Content-Type', 'application/javascript');
     }
 }

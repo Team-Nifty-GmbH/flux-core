@@ -134,8 +134,7 @@ class ViewServiceProvider extends ServiceProvider
         $relativePath = ltrim(
             substr(
                 realpath(InstalledVersions::getInstallPath($packageName)),
-                strlen(realpath(array_keys(ClassLoader::getRegisteredLoaders())[0] . '/../')),
-                999
+                strlen(realpath(array_keys(ClassLoader::getRegisteredLoaders())[0] . '/../'))
             ) . '/',
             '/'
         );

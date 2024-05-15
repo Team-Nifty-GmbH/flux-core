@@ -20,13 +20,15 @@ class PortalMiddleware
             resolve_static(SerialNumber::class, 'addGlobalScope', [
                 'scope' => 'portal',
                 'implementation' => function (Builder $query) {
-                    $query->whereHas(
-                        'address',
-                        fn (Builder $query) => $query->where('contact_id', auth()->user()->contact->id)
-                    )->orWhereHas(
-                        'orderPosition.order',
-                        fn (Builder $query) => $query->where('contact_id', auth()->user()->contact->id)
-                    );
+                    $query->where(function(Builder $query) {
+                        $query->whereHas(
+                            'address',
+                            fn (Builder $query) => $query->where('contact_id', auth()->user()->contact->id)
+                        )->orWhereHas(
+                            'orderPosition.order',
+                            fn (Builder $query) => $query->where('contact_id', auth()->user()->contact->id)
+                        );
+                    });
                 },
             ]);
             resolve_static(Order::class, 'addGlobalScope', [
