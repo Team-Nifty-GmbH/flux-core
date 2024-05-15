@@ -4,6 +4,7 @@ namespace FluxErp\Traits\Livewire;
 
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Media;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
@@ -37,7 +38,7 @@ trait WithFileUploads
         $media = app(Media::class)->query()
             ->where('collection_name', 'like', $collection . '%')
             ->when($this->modelType ?? false,
-                fn ($query) => $query->where('model_type', $this->modelType)
+                fn ($query) => $query->where('model_type', Relation::getMorphClassAlias($this->modelType))
                     ->when(
                         $this->modelId ?? false,
                         fn ($query) => $query->where('model_id', $this->modelId)
@@ -95,7 +96,7 @@ trait WithFileUploads
         $property = ! is_array($property) ? [$property] : $property;
 
         $modelId = $modelId ?: $this->modelId ?? null;
-        $modelType = $modelType ?: $this->modelType;
+        $modelType = Relation::getMorphClassAlias($modelType ?: $this->modelType);
 
         $collection = $this->collection ?: 'default';
 
@@ -119,7 +120,13 @@ trait WithFileUploads
             $this->prepareForMediaLibrary($name, $modelId, $modelType);
         } else {
             $this->filesArray = array_map(
-                fn ($file) => array_merge($file, ['model_type' => $modelType, 'model_id' => $modelId]),
+                fn ($file) => array_merge(
+                    $file,
+                    [
+                        'model_type' => Relation::getMorphClassAlias($modelType),
+                        'model_id' => $modelId,
+                    ]
+                ),
                 $this->filesArray
             );
         }

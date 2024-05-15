@@ -21,6 +21,9 @@ class PortalMiddleware
                 'scope' => 'portal',
                 'implementation' => function (Builder $query) {
                     $query->whereHas(
+                        'address',
+                        fn (Builder $query) => $query->where('contact_id', auth()->user()->contact->id)
+                    )->orWhereHas(
                         'orderPosition.order',
                         fn (Builder $query) => $query->where('contact_id', auth()->user()->contact->id)
                     );

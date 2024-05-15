@@ -2,6 +2,8 @@
 
 namespace FluxErp\Providers;
 
+use Composer\Autoload\ClassLoader;
+use Composer\InstalledVersions;
 use FluxErp\Facades\Asset;
 use FluxErp\Models\Currency;
 use FluxErp\View\Layouts\App;
@@ -15,47 +17,57 @@ use Illuminate\View\FileViewFinder;
 
 class ViewServiceProvider extends ServiceProvider
 {
-    public function register(): void
-    {
-        //
-    }
-
     public function boot(): void
     {
         if (
             (! $this->app->runningInConsole() || $this->app->runningUnitTests())
             && file_exists(public_path('build/manifest.json'))
         ) {
-            $fluxAssets = [
-                'vendor/team-nifty-gmbh/flux-erp/resources/css/app.css',
-                'vendor/team-nifty-gmbh/flux-erp/resources/js/app.js',
-                'vendor/team-nifty-gmbh/flux-erp/resources/js/apex-charts.js',
-                'vendor/team-nifty-gmbh/flux-erp/resources/js/alpine.js',
-                'vendor/team-nifty-gmbh/flux-erp/resources/js/sw.js',
-            ];
-
-            if ($this->app->runningUnitTests()) {
-                $fluxAssets = array_map(
-                    fn (string $asset) => str_replace('vendor/team-nifty-gmbh/flux-erp/', '', $asset),
-                    $fluxAssets
-                );
-            }
-
+            // get the real path for the flux package root folder
             Asset::vite(
                 public_path('build'),
-                array_merge(
-                    $fluxAssets,
-                    [
-                        'vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js',
-                        'vendor/team-nifty-gmbh/tall-calendar/resources/js/index.js',
-                        'vendor/wireui/wireui/dist/wireui.js',
-                    ]
-                )
+                [
+                    static::getRealPackageAssetPath(
+                        'resources/css/app.css',
+                        'team-nifty-gmbh/flux-erp'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'resources/js/app.js',
+                        'team-nifty-gmbh/flux-erp'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'resources/js/apex-charts.js',
+                        'team-nifty-gmbh/flux-erp'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'resources/js/alpine.js',
+                        'team-nifty-gmbh/flux-erp'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'resources/js/sw.js',
+                        'team-nifty-gmbh/flux-erp'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'resources/js/tall-datatables.js',
+                        'team-nifty-gmbh/tall-datatables'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'resources/js/index.js',
+                        'team-nifty-gmbh/tall-calendar'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'dist/wireui.js',
+                        'wireui/wireui'
+                    ),
+                ]
             );
 
             if (auth()->guard('web')->check()) {
                 Asset::vite(public_path('build'), [
-                    'vendor/team-nifty-gmbh/flux-erp/resources/js/web-push.js',
+                    static::getRealPackageAssetPath(
+                        'resources/js/web-push.js',
+                        'team-nifty-gmbh/flux-erp'
+                    ),
                 ]);
             }
         }
@@ -114,5 +126,20 @@ class ViewServiceProvider extends ServiceProvider
                 View::share('defaultCurrency', new Currency());
             }
         });
+    }
+
+    public static function getRealPackageAssetPath(string $path, string $packageName): string
+    {
+        $path = ltrim($path, '/');
+        $relativePath = ltrim(
+            substr(
+                realpath(InstalledVersions::getInstallPath($packageName)),
+                strlen(realpath(array_keys(ClassLoader::getRegisteredLoaders())[0] . '/../')),
+                999
+            ) . '/',
+            '/'
+        );
+
+        return $relativePath . $path;
     }
 }
