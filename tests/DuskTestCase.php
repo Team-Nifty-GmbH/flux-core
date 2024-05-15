@@ -49,7 +49,7 @@ abstract class DuskTestCase extends TestCase
         parent::setUpBeforeClass();
     }
 
-    protected static function deleteDirectory($dir): bool
+    protected static function deleteDirectory(string $dir): bool
     {
         if (! file_exists($dir)) {
             return true;

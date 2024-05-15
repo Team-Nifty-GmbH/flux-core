@@ -20,7 +20,7 @@ class PortalMiddleware
             resolve_static(SerialNumber::class, 'addGlobalScope', [
                 'scope' => 'portal',
                 'implementation' => function (Builder $query) {
-                    $query->where(function(Builder $query) {
+                    $query->where(function (Builder $query) {
                         $query->whereHas(
                             'address',
                             fn (Builder $query) => $query->where('contact_id', auth()->user()->contact->id)
