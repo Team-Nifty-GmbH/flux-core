@@ -243,9 +243,9 @@ class PurchaseInvoiceTest extends BaseSetup
     public function test_create_purchase_invoice_maximum()
     {
         $ledgerAccount = LedgerAccount::factory()->create();
-        $product = Product::factory()->create([
-            'client_id' => $this->dbClient->id,
-        ]);
+        $product = Product::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
         $vatRate = VatRate::factory()->create();
 
         $purchaseInvoice = [

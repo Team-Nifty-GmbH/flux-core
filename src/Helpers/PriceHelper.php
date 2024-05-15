@@ -85,8 +85,10 @@ class PriceHelper
 
         if (! $price && $this->priceList?->parent) {
             $price = $this->calculatePriceFromPriceList($this->priceList, []);
+
             if ($price) {
                 $price->isInherited = true;
+                unset($price->id, $price->uuid);
             }
         }
 
@@ -101,6 +103,11 @@ class PriceHelper
                 ->where('product_id', $this->product->id)
                 ->whereRelation('priceList', 'is_default', true)
                 ->first();
+
+            if ($price) {
+                $price->isInherited = true;
+                unset($price->id, $price->uuid);
+            }
         } else {
             $price?->setRelation('priceList', $this->priceList);
         }
@@ -206,7 +213,12 @@ class PriceHelper
             $originalPrice = $price->basePrice->{$function}($this->product->vatRate?->rate_percentage);
 
             $price->discountFlat = bcsub($originalPrice, $price->price);
-            $price->discountPercentage = bcdiv($price->price, $originalPrice);
+            $price->discountPercentage = $originalPrice != 0 ? bcdiv($price->price, $originalPrice) : 0;
+        }
+
+        // set the used priceList
+        if ($this->priceList) {
+            $price->price_list_id = $this->priceList->id;
         }
 
         return $price;
@@ -273,7 +285,7 @@ class PriceHelper
     private function calculateLowestDiscountedPrice(Price $price, Collection $discounts): void
     {
         if (! $price->basePrice && $discounts->count()) {
-            $price->basePrice = (app(Price::class))->forceFill($price->toArray());
+            $price->basePrice = clone $price;
         }
 
         $maxPercentageDiscount = $discounts->reduce(function (?Discount $carry, Discount $item) {

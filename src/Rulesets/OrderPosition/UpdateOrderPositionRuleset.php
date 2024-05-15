@@ -98,6 +98,10 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'numeric',
                 'nullable',
             ],
+            'discount_percentage' => [
+                new Numeric(0, 1),
+                'nullable',
+            ],
             'margin' => 'exclude_if:is_free_text,true|sometimes|numeric|nullable',
             'provision' => 'numeric|nullable',
             'purchase_price' => [

@@ -3,7 +3,6 @@
 namespace FluxErp\Rulesets\Product;
 
 use FluxErp\Enums\TimeUnitEnum;
-use FluxErp\Models\Client;
 use FluxErp\Models\Product;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
@@ -23,11 +22,6 @@ class CreateProductRuleset extends FluxRuleset
             'name' => 'required|string',
 
             'uuid' => 'string|uuid|unique:products,uuid',
-            'client_id' => [
-                'required',
-                'integer',
-                new ModelExists(Client::class),
-            ],
             'parent_id' => [
                 'integer',
                 'nullable',
@@ -95,6 +89,8 @@ class CreateProductRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
+            resolve_static(ClientRuleset::class, 'getRules'),
+            ['clients' => 'required|array'],
             resolve_static(ProductOptionRuleset::class, 'getRules'),
             resolve_static(ProductPropertyRuleset::class, 'getRules'),
             resolve_static(PriceRuleset::class, 'getRules'),

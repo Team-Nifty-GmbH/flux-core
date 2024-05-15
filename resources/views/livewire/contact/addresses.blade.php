@@ -98,7 +98,7 @@
                     @if(resolve_static(\FluxErp\Actions\Address\DeleteAddress::class, 'canPerformAction', [false]))
                         <div x-cloak x-show="! $wire.address.is_main_address">
                             <x-button
-                                wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Address')]) }}"
+                                wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Address')]) }}"
                                 wire:click="delete()"
                                 negative
                                 :label="__('Delete')"

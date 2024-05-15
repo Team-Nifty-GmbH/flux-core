@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\Country\CreateCountry;
+use FluxErp\Actions\Country\DeleteCountry;
 use FluxErp\Actions\Country\UpdateCountry;
 use FluxErp\Livewire\DataTables\CountryList;
 use FluxErp\Models\Country;
@@ -98,14 +99,16 @@ class Countries extends CountryList
 
     public function delete(): void
     {
-        if (! user_can('api.countries.{id}.delete')) {
+        try {
+            DeleteCountry::make(['id' => $this->selectedCountry['id']])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
             return;
         }
-
-        app(Country::class)->query()
-            ->whereKey($this->selectedCountry['id'])
-            ->first()
-            ->delete();
 
         $this->loadData();
     }

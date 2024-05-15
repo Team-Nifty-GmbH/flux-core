@@ -779,6 +779,7 @@
     "orders.{id}.get": "Bestelldetails anzeigen",
     "Origin": "Ursprung",
     "Other media": "Sonstige Dateien",
+    "Override calculated price": "Berechneten Preis überschreiben",
     "Package :package installed successfully.": "Paket :package erfolgreich installiert.",
     "Package :package uninstalled successfully.": "Paket :package erfolgreich deinstalliert.",
     "Page": "Seite",

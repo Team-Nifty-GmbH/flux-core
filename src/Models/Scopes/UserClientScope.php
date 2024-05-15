@@ -31,7 +31,7 @@ class UserClientScope implements Scope
         }
 
         if ($model instanceof Client) {
-            $builder->whereIntegerInRaw($model->getKeyName(), $clients);
+            $builder->whereIntegerInRaw($model->getQualifiedKeyName(), $clients);
 
             return;
         }

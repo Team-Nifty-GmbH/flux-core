@@ -47,7 +47,7 @@
                     <div class="hidden">
                         <!-- Authentication -->
                         <form id="logout-form-desktop" method="POST" class="text-white hover:bg-gray-500"
-                              action="{{ route('logout') }}">
+                              action="{{ route('logout', absolute: false) }}">
                             @csrf
                         </form>
                     </div>

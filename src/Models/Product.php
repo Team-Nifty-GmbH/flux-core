@@ -3,6 +3,8 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\TimeUnitEnum;
+use FluxErp\Models\Pivots\ClientProduct;
+use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -83,9 +85,9 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         return $this->hasMany(Product::class, 'parent_id');
     }
 
-    public function client(): BelongsTo
+    public function clients(): BelongsToMany
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsToMany(Client::class, 'client_product')->using(ClientProduct::class);
     }
 
     public function coverMedia(): BelongsTo
@@ -110,7 +112,8 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
 
     public function productOptions(): BelongsToMany
     {
-        return $this->belongsToMany(ProductOption::class, 'product_product_option');
+        return $this->belongsToMany(ProductOption::class, 'product_product_option')
+            ->using(ProductProductOption::class);
     }
 
     public function productProperties(): BelongsToMany
@@ -123,7 +126,7 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         );
     }
 
-    public function purchasePrice(): float
+    public function purchasePrice(float|int $amount): float
     {
         // TODO: add calculation for purchase price
         return 0;

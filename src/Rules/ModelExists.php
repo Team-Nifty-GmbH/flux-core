@@ -19,7 +19,7 @@ class ModelExists extends Builder implements ValidationRule
             $model = app($model);
         }
 
-        $this->key = $key ?: $model->getKeyName();
+        $this->key = $key ?: $model->getQualifiedKeyName();
 
         parent::__construct($model::query()->getQuery());
 

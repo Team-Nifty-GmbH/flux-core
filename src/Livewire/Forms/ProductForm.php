@@ -95,6 +95,8 @@ class ProductForm extends FluxForm
 
     public array $bundle_products = [];
 
+    public array $clients = [];
+
     public ?array $vat_rate = null;
 
     public array $prices = [];
@@ -129,6 +131,7 @@ class ProductForm extends FluxForm
                 'suppliers.mainAddress:id,name',
                 'tags:id',
                 'vatRate:id,rate_percentage',
+                'clients:id',
             ]);
 
             $values->append('avatar_url');
@@ -138,6 +141,7 @@ class ProductForm extends FluxForm
 
         $this->categories = array_column($this->categories, 'id');
         $this->tags = array_column($this->tags, 'id');
+        $this->clients = array_column($this->clients, 'id');
         $this->parent = $this->parent
             ? [
                 'label' => $values->parent->getLabel(),

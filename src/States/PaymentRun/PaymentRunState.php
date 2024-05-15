@@ -10,7 +10,7 @@ abstract class PaymentRunState extends State implements HasFrontendFormatter
 {
     public static function config(): StateConfig
     {
-        return static::$config ?? parent::config();
+        return data_get(static::$config, static::class) ?? parent::config();
     }
 
     public static function getFrontendFormatter(...$args): string|array

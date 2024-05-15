@@ -17,9 +17,9 @@ class ProductTest extends PortalSetup
     {
         parent::setUp();
 
-        $product = Product::factory()->create([
-            'client_id' => $this->dbClient->id,
-        ]);
+        $product = Product::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
 
         $this->serialNumber = SerialNumber::factory()->create([
             'product_id' => $product->id,

@@ -13,12 +13,11 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Support\OrderCollection;
+use FluxErp\Support\Collection\OrderCollection;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
-use Livewire\Features\SupportRedirects\Redirector;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -92,7 +91,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                 ->when(fn () => resolve_static(DeleteOrder::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete',
-                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
                 ]),
         ];
     }
@@ -114,7 +113,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->order->address_delivery_id = $contact->delivery_address_id ?: $this->order->address_delivery_id;
     }
 
-    public function save(): false|Redirector
+    public function save(): ?false
     {
         try {
             $this->order->save();
@@ -124,7 +123,9 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
             return false;
         }
 
-        return redirect()->to(route('orders.id', $this->order->id));
+        $this->redirect(route('orders.id', $this->order->id), true);
+
+        return null;
     }
 
     public function openCreateDocumentsModal(): void

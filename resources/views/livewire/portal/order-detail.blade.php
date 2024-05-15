@@ -265,11 +265,6 @@
                     :show-filter-inputs="false"
                     :filters="[
                         [
-                            'contact_id',
-                            '=',
-                            auth()->user()->contact_id
-                        ],
-                        [
                             'parent_id',
                             '=',
                             $order['id']

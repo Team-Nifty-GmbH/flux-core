@@ -47,7 +47,14 @@
                 <div class="flex gap-1.5">
                     <span x-text="priceList.name"></span>
                     <x-badge x-show="priceList.is_default" primary label="{{ __('Default') }}" />
-                    <x-badge x-show="priceList.parent" warning x-text="'{{ __('Inherited from :parent_name') }}'.replace(':parent_name', priceList.parent?.name)" />
+                    <x-badge x-show="priceList.parent && ! priceList.price_id" warning x-text="'{{ __('Inherited from :parent_name') }}'.replace(':parent_name', priceList.parent?.name)" />
+                    <div x-show="priceList.parent">
+                        <x-toggle
+                            x-model.boolean="priceList.is_editable"
+                            x-bind:disabled="! edit"
+                            label="{{ __('Override calculated price') }}"
+                        />
+                    </div>
                 </div>
             </x-slot:title>
             <x-input

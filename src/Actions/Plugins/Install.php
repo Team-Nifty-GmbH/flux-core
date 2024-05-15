@@ -20,7 +20,7 @@ class Install extends BasePluginAction
 
         $command = array_merge(
             $this->data['packages'],
-            ['--no-progress', '--no-interaction', '--no-suggest', '--no-ansi'],
+            ['--no-progress', '--no-interaction', '--no-ansi'],
             $this->data['options'] ?? []
         );
         $run = $composer->requirePackages($command, false, function ($type, $buffer) use (&$output) {

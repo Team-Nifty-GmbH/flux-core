@@ -43,7 +43,7 @@
                         <x-button
                             flat
                             negative
-                            wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order Type')]) }}"
+                            wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order Type')]) }}"
                             :label="__('Delete')"
                             wire:click="delete().then((success) => {
                                 if (success) close();

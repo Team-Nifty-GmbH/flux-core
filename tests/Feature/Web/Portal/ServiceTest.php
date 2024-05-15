@@ -13,9 +13,9 @@ class ServiceTest extends PortalSetup
 
     public function test_portal_service_page()
     {
-        $product = Product::factory()->create([
-            'client_id' => $this->dbClient->id,
-        ]);
+        $product = Product::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
 
         $serialNumber = SerialNumber::factory()->create([
             'product_id' => $product->id,

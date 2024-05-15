@@ -35,7 +35,7 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="SCOUT_DRIVER" value="collection"/>
-        <env name="BROADCAST_DRIVER" value="log"/>
+        <env name="BROADCAST_CONNECTION" value="log"/>
     </php>
     <source>
         <include>

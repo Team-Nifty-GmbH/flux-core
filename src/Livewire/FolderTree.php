@@ -40,7 +40,7 @@ class FolderTree extends Component
     public function updatedFiles(): void
     {
         try {
-            resolve_static(UpdateMedia::class, 'canPerformAction');
+            resolve_static(UpdateMedia::class, 'canPerformAction', [false]);
         } catch (UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

@@ -10,7 +10,7 @@ use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
-use FluxErp\Support\OrderCollection;
+use FluxErp\Support\Collection\OrderCollection;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
@@ -128,6 +128,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
             if ($order->isDirty('iban')
                 && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
+                && $order->iban
             ) {
                 $order->contact_bank_connection_id = null;
             }
