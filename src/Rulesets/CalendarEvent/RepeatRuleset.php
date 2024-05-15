@@ -10,8 +10,8 @@ class RepeatRuleset extends FluxRuleset
     {
         return [
             'repeat' => 'array|nullable',
-            'repeat.interval' => 'required|integer|min:1',
-            'repeat.unit' => 'required|string|in:days,weeks,months,years',
+            'repeat.interval' => 'required_with:repeat|integer|min:1',
+            'repeat.unit' => 'required_with:repeat|string|in:days,weeks,months,years',
             'repeat.weekdays' => [
                 'exclude_unless:repeat.unit,weeks',
                 'required_if:repeat.unit,weeks',

@@ -125,7 +125,17 @@ class FluxCalendar extends CalendarComponent
             return false;
         }
 
-        return $this->event->getActionResult()?->toArray() ?? false;
+        $result = $this->event->getActionResult();
+        if ($result) {
+            $result = array_merge(
+                $result->toArray(),
+                [
+                    'is_editable' => true,
+                ],
+            );
+        }
+
+        return $result ?? false;
     }
 
     public function deleteCalendar(array $attributes): bool
@@ -148,6 +158,8 @@ class FluxCalendar extends CalendarComponent
     #[Renderless]
     public function deleteEvent(array $attributes): bool
     {
+        $attributes['confirm_option'] = ! $this->calendarEventWasRepeatable ? 'all' : $this->confirmDelete;
+
         if ($attributes['calendar_type'] ?? false) {
             $action = Action::get($attributes['calendar_type'] . '.delete');
 

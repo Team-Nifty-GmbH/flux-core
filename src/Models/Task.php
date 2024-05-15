@@ -144,6 +144,7 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
             'name' => __('Tasks'),
             'color' => '#813d9c',
             'resourceEditable' => false,
+            'hasRepeatableEvents' => false,
             'isPublic' => false,
             'isShared' => false,
             'permission' => 'owner',
