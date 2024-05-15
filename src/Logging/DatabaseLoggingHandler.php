@@ -49,7 +49,7 @@ class DatabaseLoggingHandler extends AbstractProcessingHandler
                     ->newBroadcastableModelEvent('created');
             }
         } catch (\Throwable $e) {
-            // fallback to single loggin of laravel
+            // fallback to single logging of laravel
         }
     }
 }

@@ -59,7 +59,7 @@ class Category extends Model implements InteractsWithDataTables, Sortable
             ->each(function (ModelInfo $modelInfo) {
                 $relationName = Str::of(class_basename($modelInfo->class))->camel()->plural()->toString();
 
-                if (method_exists(Category::class, $relationName)) {
+                if (method_exists(static::class, $relationName)) {
                     return;
                 }
 
