@@ -57,7 +57,7 @@ class ProductOptionGroupList extends BaseDataTable
                 ->icon('trash')
                 ->color('negative')
                 ->attributes([
-                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Product Option Group')]),
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Product Option Group')]),
                     'wire:click' => 'delete(record.id)',
                 ])
                 ->when(

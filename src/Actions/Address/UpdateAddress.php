@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class UpdateAddress extends FluxAction
@@ -37,6 +38,8 @@ class UpdateAddress extends FluxAction
             ->first();
 
         $tags = Arr::pull($this->data, 'tags');
+        $permissions = Arr::pull($this->data, 'permissions');
+        $contactOptions = Arr::pull($this->data, 'contact_options');
 
         $canLogin = $address->can_login;
 
@@ -67,13 +70,19 @@ class UpdateAddress extends FluxAction
             $this->data['is_delivery_address'] = true;
         }
 
-        $contactOptions = Arr::pull($this->data, 'contact_options');
+        if (! trim(data_get($this->data, 'login_password', ''))) {
+            unset($this->data['login_password']);
+        }
 
         $address->fill($this->data);
         $address->save();
 
         if (! is_null($tags)) {
             $address->syncTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
+        }
+
+        if (! is_null($permissions)) {
+            $address->syncPermissions($permissions);
         }
 
         if (! is_null($contactOptions)) {
@@ -109,6 +118,15 @@ class UpdateAddress extends FluxAction
         }
 
         return $address->withoutRelations()->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->rules['login_name'] = [
+            Rule::unique('addresses', 'login_name')
+                ->whereNull('deleted_at')
+                ->ignore(data_get($this->data, 'id')),
+        ];
     }
 
     protected function validateData(): void

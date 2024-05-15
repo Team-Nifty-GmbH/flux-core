@@ -97,7 +97,6 @@ class Helper
         $relatedKeyName = $model->$relation()->getRelated()->getKeyName();
 
         $existing = $model->$relation()->pluck($relatedKeyName)->toArray();
-        $model->$relation()->whereNotIn($relatedKeyName, Arr::pluck($related, $relatedKeyName))->delete();
 
         $canCreate = resolve_static($createAction, 'canPerformAction', [false]);
         $canUpdate = resolve_static($updateAction, 'canPerformAction', [false]);

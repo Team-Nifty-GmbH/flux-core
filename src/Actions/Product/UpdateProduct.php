@@ -15,6 +15,7 @@ use FluxErp\Rulesets\Product\UpdateProductRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class UpdateProduct extends FluxAction
@@ -34,6 +35,7 @@ class UpdateProduct extends FluxAction
     {
         $productOptions = Arr::pull($this->data, 'product_options');
         $productCrossSellings = Arr::pull($this->data, 'product_cross_sellings');
+        $clients = Arr::pull($this->data, 'clients');
 
         $productProperties = Arr::mapWithKeys(
             Arr::pull($this->data, 'product_properties', []),
@@ -70,6 +72,10 @@ class UpdateProduct extends FluxAction
 
         if (! is_null($suppliers)) {
             $product->suppliers()->sync($suppliers);
+        }
+
+        if ($clients) {
+            $product->clients()->sync($clients);
         }
 
         if ($prices) {
@@ -117,6 +123,11 @@ class UpdateProduct extends FluxAction
         $this->rules['cover_media_id'][] = (new ModelExists(Media::class))
             ->where('model_type', app(Product::class)->getMorphClass())
             ->where('model_id', $this->data['id'] ?? null);
+        $this->rules['product_number'] = [
+            Rule::unique('products', 'product_number')
+                ->whereNull('deleted_at')
+                ->ignore(data_get($this->data, 'id')),
+        ];
     }
 
     protected function validateData(): void

@@ -7,6 +7,7 @@
         "ext-intl": "*",
         "ext-json": "*",
         "ext-pdo": "*",
+        "ext-zip": "*",
         "barryvdh/laravel-dompdf": "^2.0",
         "laravel-notification-channels/webpush": "^8.0",
         "laravel/fortify": "^1.13",
@@ -73,11 +74,15 @@
         "post-autoload-dump": [
             "@clear",
             "@prepare",
+            "@dusk:install-chromedriver",
             "@php ./vendor/bin/testbench package:discover --ansi"
         ],
         "analyse": "vendor/bin/phpstan analyse",
         "testbench": "./vendor/bin/testbench package:test",
         "test": [
+            "@clear",
+            "@prepare",
+            "@build",
             "@test-browser",
             "@test-feature",
             "@test-livewire"

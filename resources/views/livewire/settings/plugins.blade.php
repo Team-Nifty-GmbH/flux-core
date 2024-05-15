@@ -172,7 +172,7 @@
                         @endif
                         @if(resolve_static(\FluxErp\Actions\Plugins\Uninstall::class, 'canPerformAction', [false]))
                             <div x-cloak x-show="plugin.can_uninstall">
-                                <x-button negative :label="__('Uninstall')" wire:click="uninstall(key, $promptValue('delete-data'))" wire:confirm.icon.error.id.uninstall="{{ __('wire:confirm.uninstall-plugin') }}" />
+                                <x-button negative :label="__('Uninstall')" wire:click="uninstall(key, $promptValue('delete-data'))" wire:flux-confirm.icon.error.id.uninstall="{{ __('wire:confirm.uninstall-plugin') }}" />
                             </div>
                         @endif
                         @if(resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))

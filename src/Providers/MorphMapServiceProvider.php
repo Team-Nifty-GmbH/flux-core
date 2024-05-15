@@ -55,6 +55,16 @@ use FluxErp\Models\PaymentReminder;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Pivots\AddressAddressTypeOrder;
+use FluxErp\Models\Pivots\CalendarEventInvite;
+use FluxErp\Models\Pivots\Categorizable;
+use FluxErp\Models\Pivots\ClientProduct;
+use FluxErp\Models\Pivots\Communicatable;
+use FluxErp\Models\Pivots\ContactDiscount;
+use FluxErp\Models\Pivots\ContactDiscountGroup;
+use FluxErp\Models\Pivots\ProductBundleProduct;
+use FluxErp\Models\Pivots\ProductCrossSellingProduct;
+use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
@@ -91,7 +101,7 @@ use Illuminate\Support\ServiceProvider;
 
 class MorphMapServiceProvider extends ServiceProvider
 {
-    public function boot(): void
+    public function register(): void
     {
         Relation::enforceMorphMap([
             'activity' => Activity::class,
@@ -178,6 +188,17 @@ class MorphMapServiceProvider extends ServiceProvider
             'widget' => Widget::class,
             'work_time' => WorkTime::class,
             'work_time_type' => WorkTimeType::class,
+
+            'address_address_type_order' => AddressAddressTypeOrder::class,
+            'calendar_event_invitee' => CalendarEventInvite::class,
+            'categorizable' => Categorizable::class,
+            'client_product' => ClientProduct::class,
+            'communicatable' => Communicatable::class,
+            'contact_discount' => ContactDiscount::class,
+            'contact_discount_group' => ContactDiscountGroup::class,
+            'product_bundle_product' => ProductBundleProduct::class,
+            'product_cross_selling_product' => ProductCrossSellingProduct::class,
+            'product_product_option' => ProductProductOption::class,
         ]);
     }
 }

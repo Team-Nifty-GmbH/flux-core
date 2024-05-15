@@ -22,7 +22,7 @@
                     flat
                     negative
                     wire:click="deleteTransaction().then((success) => {if(success) close();})"
-                    wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Transaction')]) }}"
+                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Transaction')]) }}"
                 />
                 <div class="w-full flex justify-end gap-1.5">
                     <x-button :label="__('Cancel')" x-on:click="close"/>

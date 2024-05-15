@@ -22,19 +22,6 @@
         <div class="mt-4 justify-end pr-2 pb-2 sm:mt-0 sm:ml-16 sm:flex">
             <x-button primary :label="__('New Ticket')" wire:click="show" />
         </div>
-        <livewire:portal.data-tables.ticket-list
-            :filters="[
-                [
-                    'authenticatable_id',
-                    '=',
-                    auth()->user()->id
-                ],
-                [
-                    'authenticatable_type',
-                    '=',
-                    app(\FluxErp\Models\Address::class)->getMorphClass()
-                ]
-            ]"
-        />
+        <livewire:portal.data-tables.ticket-list />
     </div>
 </div>

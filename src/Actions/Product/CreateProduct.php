@@ -35,6 +35,7 @@ class CreateProduct extends FluxAction
         );
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
         $prices = Arr::pull($this->data, 'prices', []);
+        $clients = Arr::pull($this->data, 'clients', []);
 
         $suppliers = Arr::pull($this->data, 'suppliers', false);
         $tags = Arr::pull($this->data, 'tags', []);
@@ -51,6 +52,10 @@ class CreateProduct extends FluxAction
 
         if ($tags) {
             $product->attachTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
+        }
+
+        if ($clients) {
+            $product->clients()->attach($clients);
         }
 
         if ($product->is_bundle && $bundleProducts) {

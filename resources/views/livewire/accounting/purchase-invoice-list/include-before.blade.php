@@ -297,7 +297,7 @@
                         x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                         :label="__('Delete')"
                         wire:click="delete().then((success) => { if (success) close(); })"
-                        wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Purchase Invoice')]) }}"
+                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Purchase Invoice')]) }}"
                     />
                 </div>
                 <div class="flex gap-1.5">

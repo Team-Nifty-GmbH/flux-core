@@ -13,7 +13,7 @@ abstract class OrderState extends State implements Arrayable, HasFrontendFormatt
 
     public static function config(): StateConfig
     {
-        return static::$config ?? parent::config()
+        return data_get(static::$config, static::class) ?? parent::config()
             ->default(Draft::class)
             ->allowTransitions([
                 [

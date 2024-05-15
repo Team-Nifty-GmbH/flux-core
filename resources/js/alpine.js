@@ -1,11 +1,11 @@
 import folderTree from './components/folder-tree';
-import '../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
-import '../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables';
 import setupEditor from './components/tiptap';
+import workTime from './components/work-time.js';
 import PullToRefresh from "pulltorefreshjs";
 
 window.folderTree = folderTree;
 window.setupEditor = setupEditor;
+window.workTime = workTime;
 
 if (typeof window.Livewire === 'undefined') {
     throw 'Livewire Sortable.js Plugin: window.Livewire is undefined. Make sure @livewireScripts is placed above this script include';
@@ -199,7 +199,7 @@ function wireNavigation() {
     }
 }
 
-Livewire.directive('confirm', ({ el, directive }) => {
+Livewire.directive('flux-confirm', ({ el, directive }) => {
     let icon = directive.modifiers.includes('icon')
         ? directive.modifiers[directive.modifiers.indexOf('icon') + 1]
         : 'question';

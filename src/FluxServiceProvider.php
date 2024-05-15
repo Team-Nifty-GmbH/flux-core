@@ -41,10 +41,13 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
+use FluxErp\Support\MediaLibrary\UrlGenerator;
 use FluxErp\Traits\HasClientAssignment;
+use FluxErp\Traits\HasParentMorphClass;
 use FluxErp\Widgets\WidgetManager;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
@@ -61,6 +64,7 @@ use Livewire\Livewire;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
+use Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Spatie\Translatable\Facades\Translatable;
@@ -85,6 +89,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerMiddleware();
         $this->registerConfig();
         $this->registerMarcos();
+
+        $this->app->bind(DefaultUrlGenerator::class, UrlGenerator::class);
 
         $this->app->extend('validator', function () {
             return $this->app->get(ValidatorFactory::class);
@@ -246,6 +252,17 @@ class FluxServiceProvider extends ServiceProvider
 
             return $this;
         });
+
+        Relation::macro(
+            'getMorphClassAlias',
+            function (string $class): ?string {
+                if (in_array(HasParentMorphClass::class, class_uses_recursive($class))) {
+                    $class = Relation::getMorphedModel($class::getParentMorphClass());
+                }
+
+                return data_get(array_flip(Relation::$morphMap), $class);
+            }
+        );
     }
 
     protected function offerPublishing(): void

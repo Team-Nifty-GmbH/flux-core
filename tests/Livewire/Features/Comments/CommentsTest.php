@@ -18,9 +18,9 @@ class CommentsTest extends BaseSetup
     {
         parent::setUp();
 
-        $this->product = Product::factory()->create([
-            'client_id' => $this->dbClient->id,
-        ]);
+        $this->product = Product::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
     }
 
     public function test_renders_successfully()

@@ -2,8 +2,6 @@
 
 use FluxErp\Http\Controllers\AssetController;
 use FluxErp\Http\Controllers\LoginLinkController;
-use FluxErp\Http\Middleware\NoAuth;
-use FluxErp\Livewire\InstallWizard;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,8 +14,6 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)->name('flux.install');
-
 Route::get('/login-link', LoginLinkController::class)->name('login-link');
 
 Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function () {

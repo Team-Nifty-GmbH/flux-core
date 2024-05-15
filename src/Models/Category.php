@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
@@ -15,9 +16,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
+use Spatie\ModelInfo\ModelInfo;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Category extends Model implements InteractsWithDataTables, Sortable
@@ -47,6 +50,26 @@ class Category extends Model implements InteractsWithDataTables, Sortable
         return [
             'is_active' => 'boolean',
         ];
+    }
+
+    public static function booted(): void
+    {
+        model_info_all()
+            ->filter(fn (ModelInfo $modelInfo) => $modelInfo->traits->contains(Categorizable::class))
+            ->each(function (ModelInfo $modelInfo) {
+                $relationName = Str::of(class_basename($modelInfo->class))->camel()->plural()->toString();
+
+                if (method_exists(static::class, $relationName)) {
+                    return;
+                }
+
+                static::resolveRelationUsing(
+                    $relationName,
+                    function (Category $category) use ($modelInfo) {
+                        return $category->morphedByMany($modelInfo->class, 'categorizable');
+                    }
+                );
+            });
     }
 
     public function assigned(): Attribute

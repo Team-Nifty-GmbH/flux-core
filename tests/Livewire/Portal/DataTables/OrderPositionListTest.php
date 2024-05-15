@@ -64,9 +64,9 @@ class OrderPositionListTest extends BaseSetup
             'is_locked' => false,
         ]);
 
-        Product::factory()->create([
-            'client_id' => $this->dbClient->id,
-        ]);
+        Product::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
 
         (new OrderPositionTableSeeder())->run();
     }
