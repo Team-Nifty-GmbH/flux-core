@@ -43,6 +43,7 @@ use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
 use FluxErp\Support\MediaLibrary\UrlGenerator;
 use FluxErp\Traits\HasClientAssignment;
+use FluxErp\Traits\HasParentMorphClass;
 use FluxErp\Widgets\WidgetManager;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -255,6 +256,10 @@ class FluxServiceProvider extends ServiceProvider
         Relation::macro(
             'getMorphClassAlias',
             function (string $class): ?string {
+                if (in_array(HasParentMorphClass::class, class_uses_recursive($class))) {
+                    $class = Relation::getMorphedModel($class::getParentMorphClass());
+                }
+
                 return data_get(array_flip(Relation::$morphMap), $class);
             }
         );
