@@ -55,6 +55,7 @@ class FluxCalendar extends CalendarComponent
         return parent::getEvents($info, $calendarAttributes);
     }
 
+    #[Renderless]
     public function saveCalendar(array $attributes): array|false
     {
         if ($attributes['model_type'] ?? false) {
@@ -75,6 +76,7 @@ class FluxCalendar extends CalendarComponent
         return $this->calendar->getActionResult()?->toArray() ?? false;
     }
 
+    #[Renderless]
     public function saveEvent(array $attributes): array|false
     {
         $attributes['is_all_day'] = $attributes['allDay'] ?? false;
@@ -126,16 +128,12 @@ class FluxCalendar extends CalendarComponent
         }
 
         $result = $this->event->getActionResult();
-        if ($result) {
-            $result = array_merge(
-                $result->toArray(),
-                [
-                    'is_editable' => true,
-                ],
-            );
-        }
+        $result = array_map(
+            fn(\TeamNiftyGmbH\Calendar\Models\CalendarEvent $event) => $event->toArray() + ['is_editable' => true],
+            $this->calculateRepetitionsFromEvent($result->toArray()) ?: $result
+        );
 
-        return $result ?? false;
+        return $result ?: false;
     }
 
     public function deleteCalendar(array $attributes): bool
