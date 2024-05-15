@@ -116,8 +116,8 @@ class InstallAssets extends Command
             if (file_exists($basePath('tailwind.config.js')) && ! $force) {
                 continue;
             }
-            copy(__DIR__ . '/../../../stubs/tailwind/' . $file, $basePath($file));
 
+            copy(__DIR__ . '/../../../stubs/tailwind/' . $file, $basePath($file));
             $content = file_get_contents($basePath($file));
             $content = str_replace(
                 '{{ relative_path }}',
