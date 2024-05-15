@@ -16,24 +16,14 @@ use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
+    public function register(): void
     {
     }
 
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
         if (request()->isPortal()) {
-            config(['fortify.domain' => config('app.portal_domain')]);
+            config(['fortify.domain' => config('flux.portal_domain')]);
             config(['fortify.guard' => 'address']);
             config(['fortify.email' => 'login_name']);
             config(['fortify.username' => 'login_name']);

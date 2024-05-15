@@ -1,6 +1,4 @@
 import folderTree from './components/folder-tree';
-import '../../vendor/team-nifty-gmbh/tall-calendar/resources/js/index';
-import '../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables';
 import setupEditor from './components/tiptap';
 import workTime from './components/work-time.js';
 import PullToRefresh from "pulltorefreshjs";

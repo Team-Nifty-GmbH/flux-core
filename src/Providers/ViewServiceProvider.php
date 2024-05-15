@@ -2,6 +2,8 @@
 
 namespace FluxErp\Providers;
 
+use Composer\Autoload\ClassLoader;
+use Composer\InstalledVersions;
 use FluxErp\Facades\Asset;
 use FluxErp\Models\Currency;
 use FluxErp\View\Layouts\App;
@@ -15,27 +17,57 @@ use Illuminate\View\FileViewFinder;
 
 class ViewServiceProvider extends ServiceProvider
 {
-    public function register(): void
-    {
-        //
-    }
-
     public function boot(): void
     {
         if (
             (! $this->app->runningInConsole() || $this->app->runningUnitTests())
-            && file_exists(flux_path('public/build/manifest.json'))
+            && file_exists(public_path('build/manifest.json'))
         ) {
-            Asset::vite(flux_path('public/build'), [
-                'resources/js/app.js',
-                'resources/js/alpine.js',
-                'resources/js/apex-charts.js',
-                'resources/css/app.css',
-            ]);
+            // get the real path for the flux package root folder
+            Asset::vite(
+                public_path('build'),
+                [
+                    static::getRealPackageAssetPath(
+                        'resources/css/app.css',
+                        'team-nifty-gmbh/flux-erp'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'resources/js/app.js',
+                        'team-nifty-gmbh/flux-erp'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'resources/js/apex-charts.js',
+                        'team-nifty-gmbh/flux-erp'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'resources/js/alpine.js',
+                        'team-nifty-gmbh/flux-erp'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'resources/js/sw.js',
+                        'team-nifty-gmbh/flux-erp'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'resources/js/tall-datatables.js',
+                        'team-nifty-gmbh/tall-datatables'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'resources/js/index.js',
+                        'team-nifty-gmbh/tall-calendar'
+                    ),
+                    static::getRealPackageAssetPath(
+                        'dist/wireui.js',
+                        'wireui/wireui'
+                    ),
+                ]
+            );
 
             if (auth()->guard('web')->check()) {
-                Asset::vite(flux_path('public/build'), [
-                    'resources/js/web-push.js',
+                Asset::vite(public_path('build'), [
+                    static::getRealPackageAssetPath(
+                        'resources/js/web-push.js',
+                        'team-nifty-gmbh/flux-erp'
+                    ),
                 ]);
             }
         }
@@ -94,5 +126,19 @@ class ViewServiceProvider extends ServiceProvider
                 View::share('defaultCurrency', new Currency());
             }
         });
+    }
+
+    public static function getRealPackageAssetPath(string $path, string $packageName): string
+    {
+        $path = ltrim($path, '/');
+        $relativePath = ltrim(
+            substr(
+                realpath(InstalledVersions::getInstallPath($packageName)),
+                strlen(realpath(array_keys(ClassLoader::getRegisteredLoaders())[0] . '/../'))
+            ) . '/',
+            '/'
+        );
+
+        return $relativePath . $path;
     }
 }

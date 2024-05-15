@@ -285,7 +285,7 @@ class PriceHelper
     private function calculateLowestDiscountedPrice(Price $price, Collection $discounts): void
     {
         if (! $price->basePrice && $discounts->count()) {
-            $price->basePrice = (app(Price::class))->forceFill($price->toArray());
+            $price->basePrice = clone $price;
         }
 
         $maxPercentageDiscount = $discounts->reduce(function (?Discount $carry, Discount $item) {

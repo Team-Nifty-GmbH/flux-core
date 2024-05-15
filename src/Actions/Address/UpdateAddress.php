@@ -38,6 +38,7 @@ class UpdateAddress extends FluxAction
             ->first();
 
         $tags = Arr::pull($this->data, 'tags');
+        $permissions = Arr::pull($this->data, 'permissions');
         $contactOptions = Arr::pull($this->data, 'contact_options');
 
         $canLogin = $address->can_login;
@@ -78,6 +79,10 @@ class UpdateAddress extends FluxAction
 
         if (! is_null($tags)) {
             $address->syncTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
+        }
+
+        if (! is_null($permissions)) {
+            $address->syncPermissions($permissions);
         }
 
         if (! is_null($contactOptions)) {
