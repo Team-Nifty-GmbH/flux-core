@@ -24,10 +24,6 @@ class UpdateProjectRuleset extends FluxRuleset
                 'integer',
                 new ModelExists(Project::class),
             ],
-            'client_id' => [
-                'integer',
-                new ModelExists(Client::class),
-            ],
             'contact_id' => [
                 'integer',
                 'nullable',

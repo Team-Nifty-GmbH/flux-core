@@ -199,9 +199,11 @@ class ProjectTest extends BaseSetup
             ->whereKey($responseProject->id)
             ->first();
         $this->assertNotEmpty($dbProject);
+        $this->assertEquals($project['client_id'], $dbProject->client_id);
         $this->assertEquals($project['contact_id'], $dbProject->contact_id);
         $this->assertEquals($project['order_id'], $dbProject->order_id);
         $this->assertEquals($project['responsible_user_id'], $dbProject->responsible_user_id);
+        $this->assertEquals($project['parent_id'], $dbProject->parent_id);
         $this->assertEquals($project['parent_id'], $dbProject->parent_id);
         $this->assertEquals($project['project_number'], $dbProject->project_number);
         $this->assertEquals($project['name'], $dbProject->name);

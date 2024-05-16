@@ -26,8 +26,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 class Project extends Model implements InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment,
-        HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
-        Searchable, SoftDeletes;
+        HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification,
+        HasUuid, Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',

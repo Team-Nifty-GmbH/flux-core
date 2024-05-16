@@ -14,7 +14,8 @@ return new class extends Migration
         });
 
         DB::table('projects')->update([
-            'client_id' => DB::table('clients')->where('is_default', true)->value('id'),
+            'client_id' => DB::table('clients')->where('is_default', true)->value('id')
+                ?? DB::table('clients')->value('id'),
         ]);
 
         Schema::table('projects', function (Blueprint $table) {

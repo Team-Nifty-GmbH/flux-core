@@ -9,7 +9,7 @@
         />
         <x-input x-bind:readonly="!edit" wire:model="project.name" label="{{ __('Name') }}" />
         <div @if($collapsed) x-collapse x-show="expanded" x-cloak @endif class="space-y-2.5">
-            <div x-bind:class="! edit && 'pointer-events-none'">
+            <div x-bind:class="! edit && 'pointer-events-none'" x-show="! $wire.project.id" x-cloak>
                 <x-select
                     x-bind:readonly="!edit"
                     :label="__('Client')"
