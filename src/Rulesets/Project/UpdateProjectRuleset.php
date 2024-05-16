@@ -2,7 +2,6 @@
 
 namespace FluxErp\Rulesets\Project;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\Project;

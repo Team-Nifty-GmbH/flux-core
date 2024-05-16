@@ -204,7 +204,6 @@ class ProjectTest extends BaseSetup
         $this->assertEquals($project['order_id'], $dbProject->order_id);
         $this->assertEquals($project['responsible_user_id'], $dbProject->responsible_user_id);
         $this->assertEquals($project['parent_id'], $dbProject->parent_id);
-        $this->assertEquals($project['parent_id'], $dbProject->parent_id);
         $this->assertEquals($project['project_number'], $dbProject->project_number);
         $this->assertEquals($project['name'], $dbProject->name);
         $this->assertEquals($project['start_date'], Carbon::parse($dbProject->start_date)->toDateString());
