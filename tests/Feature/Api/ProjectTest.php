@@ -78,6 +78,7 @@ class ProjectTest extends BaseSetup
         ]);
 
         $this->projects = Project::factory()->count(2)->create([
+            'client_id' => $this->dbClient->id,
             'contact_id' => $this->contact->id,
             'order_id' => $this->order->id,
             'responsible_user_id' => $this->user->id,
@@ -108,6 +109,7 @@ class ProjectTest extends BaseSetup
         $project = $json->data;
         $this->assertNotEmpty($project);
         $this->assertEquals($this->projects[0]->id, $project->id);
+        $this->assertEquals($this->projects[0]->client_id, $project->client_id);
         $this->assertEquals($this->projects[0]->contact_id, $project->contact_id);
         $this->assertEquals($this->projects[0]->order_id, $project->order_id);
         $this->assertEquals($this->projects[0]->responsible_user_id, $project->responsible_user_id);
@@ -150,6 +152,7 @@ class ProjectTest extends BaseSetup
         $referenceProject = Project::query()->first();
         $this->assertNotEmpty($projects);
         $this->assertEquals($referenceProject->id, $projects[0]->id);
+        $this->assertEquals($referenceProject->client_id, $projects[0]->client_id);
         $this->assertEquals($referenceProject->contact_id, $projects[0]->contact_id);
         $this->assertEquals($referenceProject->order_id, $projects[0]->order_id);
         $this->assertEquals($referenceProject->responsible_user_id, $projects[0]->responsible_user_id);
@@ -171,10 +174,11 @@ class ProjectTest extends BaseSetup
     public function test_create_project()
     {
         $project = [
-            'parent_id' => $this->projects[0]->id,
+            'client_id' => $this->dbClient->id,
             'contact_id' => $this->contact->id,
             'order_id' => $this->order->id,
             'responsible_user_id' => $this->user->id,
+            'parent_id' => $this->projects[0]->id,
             'project_number' => Str::random(),
             'name' => Str::random(),
             'start_date' => date('Y-m-d'),
@@ -195,10 +199,10 @@ class ProjectTest extends BaseSetup
             ->whereKey($responseProject->id)
             ->first();
         $this->assertNotEmpty($dbProject);
-        $this->assertEquals($project['parent_id'], $dbProject->parent_id);
         $this->assertEquals($project['contact_id'], $dbProject->contact_id);
         $this->assertEquals($project['order_id'], $dbProject->order_id);
         $this->assertEquals($project['responsible_user_id'], $dbProject->responsible_user_id);
+        $this->assertEquals($project['parent_id'], $dbProject->parent_id);
         $this->assertEquals($project['project_number'], $dbProject->project_number);
         $this->assertEquals($project['name'], $dbProject->name);
         $this->assertEquals($project['start_date'], Carbon::parse($dbProject->start_date)->toDateString());
@@ -236,6 +240,7 @@ class ProjectTest extends BaseSetup
     public function test_create_project_contact_not_found()
     {
         $project = [
+            'client_id' => $this->dbClient->id,
             'contact_id' => ++$this->contact->id,
             'name' => 'Project Name',
         ];
@@ -250,6 +255,7 @@ class ProjectTest extends BaseSetup
     public function test_create_project_order_not_found()
     {
         $project = [
+            'client_id' => $this->dbClient->id,
             'parent_id' => $this->order->id + 1000,
             'name' => 'Project Name',
         ];
@@ -264,7 +270,8 @@ class ProjectTest extends BaseSetup
     public function test_create_project_responsible_user_not_found()
     {
         $project = [
-            'parent_id' => ++$this->user->id,
+            'client_id' => $this->dbClient->id,
+            'responsible_user_id' => ++$this->user->id,
             'name' => 'Project Name',
         ];
 
@@ -273,11 +280,13 @@ class ProjectTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->post('/api/projects', $project);
         $response->assertStatus(422);
+        $response->assertJsonValidationErrorFor('responsible_user_id');
     }
 
     public function test_create_project_parent_project_not_found()
     {
         $project = [
+            'client_id' => $this->dbClient->id,
             'parent_id' => ++$this->projects[1]->id,
             'name' => 'Project Name',
         ];
@@ -287,6 +296,7 @@ class ProjectTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->post('/api/projects', $project);
         $response->assertStatus(422);
+        $response->assertJsonValidationErrorFor('parent_id');
     }
 
     public function test_update_project()
@@ -368,6 +378,7 @@ class ProjectTest extends BaseSetup
 
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['id'], $dbProject->id);
+        $this->assertEquals($this->projects[0]->client_id, $dbProject->client_id);
         $this->assertEquals($project['contact_id'], $dbProject->contact_id);
         $this->assertEquals($project['order_id'], $dbProject->order_id);
         $this->assertEquals($project['responsible_user_id'], $dbProject->responsible_user_id);
@@ -424,6 +435,7 @@ class ProjectTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/projects', $project);
         $response->assertStatus(422);
+        $response->assertJsonValidationErrorFor('contact_id');
     }
 
     public function test_update_project_order_not_found()
@@ -438,6 +450,7 @@ class ProjectTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/projects', $project);
         $response->assertStatus(422);
+        $response->assertJsonValidationErrorFor('order_id');
     }
 
     public function test_update_project_responsible_user_not_found()
@@ -452,6 +465,7 @@ class ProjectTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/projects', $project);
         $response->assertStatus(422);
+        $response->assertJsonValidationErrorFor('responsible_user_id');
     }
 
     public function test_delete_project()

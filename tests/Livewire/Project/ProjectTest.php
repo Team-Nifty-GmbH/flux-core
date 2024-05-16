@@ -18,7 +18,9 @@ class ProjectTest extends BaseSetup
     {
         parent::setUp();
 
-        $this->project = Project::factory()->create();
+        $this->project = Project::factory()->create([
+            'client_id' => $this->dbClient->id,
+        ]);
     }
 
     public function test_renders_successfully()

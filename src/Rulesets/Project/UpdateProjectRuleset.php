@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Project;
 
+use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\Project;
@@ -22,6 +23,10 @@ class UpdateProjectRuleset extends FluxRuleset
                 'required',
                 'integer',
                 new ModelExists(Project::class),
+            ],
+            'client_id' => [
+                'integer',
+                new ModelExists(Client::class),
             ],
             'contact_id' => [
                 'integer',

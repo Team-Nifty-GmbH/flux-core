@@ -7,6 +7,7 @@ use FluxErp\States\Project\ProjectState;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
@@ -24,9 +25,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Project extends Model implements InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, Searchable,
-        SoftDeletes;
+    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment,
+        HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
+        Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -54,6 +55,11 @@ class Project extends Model implements InteractsWithDataTables
     public function children(): HasMany
     {
         return $this->hasMany(Project::class, 'parent_id');
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'client_id');
     }
 
     public function contact(): BelongsTo
