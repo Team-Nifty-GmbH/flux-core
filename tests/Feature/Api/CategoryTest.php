@@ -540,7 +540,10 @@ class CategoryTest extends BaseSetup
     public function test_delete_category_category_belongs_to_project()
     {
         $category = Category::factory()->create(['model_type' => Task::class]);
-        $project = Project::factory()->create(['category_id' => $category->id]);
+        $project = Project::factory()->create([
+            'category_id' => $category->id,
+            'client_id' => $this->dbClient->id,
+        ]);
         $contact = Contact::factory()->create([
             'client_id' => $this->dbClient->id,
         ]);

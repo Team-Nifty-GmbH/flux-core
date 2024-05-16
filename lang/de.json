@@ -638,7 +638,7 @@
     "Lastname": "Nachname",
     "lastname": "Nachname",
     "Lay out user": "Auslage Benutzer",
-    "Leave empty to generate a new Product Number.": "Leer lassen, um eine neue Produktnummer zu erzeugen.",
+    "Leave empty to generate a new :attribute.": "Leer lassen, um eine neue :attribute zu erzeugen.",
     "Ledger Account": "Buchungskonto",
     "Ledger Account Type": "Buchungskonto-Typ",
     "Ledger Account Type Enum": "Buchungskonto-Typ",

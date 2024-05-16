@@ -2,7 +2,7 @@
     <x-modal name="create-product">
         <x-card :title="__('New Product')">
             <section class="flex flex-col gap-4">
-                <x-input wire:model="product.product_number" :label="__('Product Number')" :placeholder="__('Leave empty to generate a new Product Number.')" />
+                <x-input wire:model="product.product_number" :label="__('Product Number')" :placeholder="__('Leave empty to generate a new :attribute.', ['attribute' => __('Product Number')])" />
                 <x-input wire:model="product.name" :label="__('Name')" />
                 <x-select
                     multiselect

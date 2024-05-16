@@ -7,12 +7,13 @@ use FluxErp\Livewire\DataTables\ProjectList as BaseProjectList;
 use FluxErp\Livewire\Forms\ProjectForm;
 use FluxErp\Models\Project;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProjectList extends BaseProjectList
 {
-    protected string $view = 'flux::livewire.project.project-list';
+    protected ?string $includeBefore = 'flux::livewire.project.project-list';
 
     public array $availableStates = [];
 
@@ -42,13 +43,12 @@ class ProjectList extends BaseProjectList
                 ->color('primary')
                 ->label(__('Create'))
                 ->icon('plus')
-                ->attributes([
-                    'x-on:click' => "\$dispatch('create-project')",
-                ])
+                ->wireClick('createProject')
                 ->when(fn () => resolve_static(CreateProject::class, 'canPerformAction', [false])),
         ];
     }
 
+    #[Renderless]
     public function save(): bool
     {
         try {
@@ -64,7 +64,8 @@ class ProjectList extends BaseProjectList
         return true;
     }
 
-    public function resetForm(): void
+    #[Renderless]
+    public function createProject(): void
     {
         $this->project->reset();
         $this->project->additionalColumns = array_fill_keys(
@@ -74,6 +75,8 @@ class ProjectList extends BaseProjectList
             null
         );
 
-        $this->skipRender();
+        $this->js(<<<'JS'
+            $openModal('edit-project');
+        JS);
     }
 }
