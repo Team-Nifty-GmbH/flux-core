@@ -33,11 +33,13 @@ class CreateTaskRuleset extends FluxRuleset
             'model_type' => [
                 'required_with:model_id',
                 'string',
+                'nullable',
                 new MorphClassExists(),
             ],
             'model_id' => [
                 'required_with:model_type',
                 'integer',
+                'nullable',
                 new MorphExists(),
             ],
             'name' => 'required|string',
