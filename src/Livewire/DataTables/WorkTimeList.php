@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
-use FluxErp\Actions\WorkTime\CreateWorkTime;
+use FluxErp\Actions\WorkTime\CreateLockedWorkTime;
 use FluxErp\Actions\WorkTime\DeleteWorkTime;
 use FluxErp\Actions\WorkTime\UpdateLockedWorkTime;
 use FluxErp\Livewire\Forms\CreateOrdersFromWorkTimesForm;
@@ -103,7 +103,7 @@ class WorkTimeList extends BaseDataTable
                 ->color('primary')
                 ->icon('plus')
                 ->wireClick('edit')
-                ->when(resolve_static(CreateWorkTime::class, 'canPerformAction', [false])),
+                ->when(resolve_static(CreateLockedWorkTime::class, 'canPerformAction', [false])),
         ];
     }
 

@@ -22,6 +22,10 @@ class CreateLockedWorkTime extends CreateWorkTime
             $workTime->is_billable = $workTime->workTimeType?->is_billable ?? false;
         }
 
+       if (is_null($workTime->paused_time_ms)) {
+            $workTime->paused_time_ms = 0;
+        }
+
         $workTime->total_time_ms = Carbon::parse($workTime->ended_at)
             ->diffInMilliseconds(Carbon::parse($workTime->started_at)) - $workTime->paused_time_ms;
 
@@ -35,7 +39,7 @@ class CreateLockedWorkTime extends CreateWorkTime
         $this->data['user_id'] ??= auth()->user()->id;
 
         if (! is_null($this->data['user_id']) && ! is_null($this->data['started_at'])) {
-            //            add parent_id in case daily work time exists
+            // add parent_id in case daily work time exists
             $this->data['parent_id'] = WorkTime::query()->where('user_id', $this->data['user_id'])
                 ->where('is_daily_work_time', true)
                 ->whereDate('started_at', Carbon::parse($this->data['started_at'])->toDateString())
