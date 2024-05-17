@@ -2,15 +2,15 @@
 
 namespace FluxErp\Livewire\Portal\DataTables;
 
+use FluxErp\Livewire\DataTables\BaseDataTable;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\View\ComponentAttributeBag;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 
-class OrderPositionList extends DataTable
+class OrderPositionList extends BaseDataTable
 {
     protected string $model = OrderPosition::class;
 

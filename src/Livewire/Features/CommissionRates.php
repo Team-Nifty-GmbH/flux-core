@@ -5,16 +5,16 @@ namespace FluxErp\Livewire\Features;
 use FluxErp\Actions\CommissionRate\CreateCommissionRate;
 use FluxErp\Actions\CommissionRate\DeleteCommissionRate;
 use FluxErp\Actions\CommissionRate\UpdateCommissionRate;
+use FluxErp\Livewire\DataTables\BaseDataTable;
 use FluxErp\Models\Category;
 use FluxErp\Models\CommissionRate;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\CommissionRate\CreateCommissionRateRuleset;
 use Livewire\Attributes\Locked;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
 
-class CommissionRates extends DataTable
+class CommissionRates extends BaseDataTable
 {
     use Actions;
 

@@ -96,7 +96,7 @@ class SepaMandates extends SepaMandateList
                 ->color('negative')
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Sepa Mandate')]),
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Sepa Mandate')]),
                 ])
                 ->when(resolve_static(DeleteSepaMandate::class, 'canPerformAction', [false])),
         ];

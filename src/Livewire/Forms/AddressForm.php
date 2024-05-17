@@ -80,7 +80,7 @@ class AddressForm extends FluxForm
 
     public array $contact_options = [];
 
-    public array $permissions = [];
+    public ?array $permissions = null;
 
     public array $tags = [];
 
@@ -96,12 +96,24 @@ class AddressForm extends FluxForm
     public function fill($values): void
     {
         if ($values instanceof Address) {
-            $values->loadMissing(['contactOptions', 'tags:id']);
+            $values->loadMissing(['contactOptions', 'tags:id', 'permissions:id']);
 
             $values = $values->toArray();
             $values['tags'] = array_column($values['tags'] ?? [], 'id');
+            $values['permissions'] = array_column($values['permissions'] ?? [], 'id');
         }
 
         parent::fill($values);
+    }
+
+    public function toArray(): array
+    {
+        $data = parent::toArray();
+
+        if (is_null($this->login_password)) {
+            unset($data['login_password']);
+        }
+
+        return $data;
     }
 }
