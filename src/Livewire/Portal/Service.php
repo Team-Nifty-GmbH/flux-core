@@ -10,7 +10,6 @@ use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Livewire\Component;
-use Livewire\Features\SupportRedirects\Redirector;
 use WireUi\Traits\Actions;
 
 class Service extends Component
@@ -46,7 +45,11 @@ class Service extends Component
         $this->contactData = Auth::user()->toArray();
 
         if ($serialNumberId) {
-            $this->serialNumber = app(SerialNumber::class)->query()->whereKey($serialNumberId)->first()->toArray();
+            $this->serialNumber = app(SerialNumber::class)
+                ->query()
+                ->whereKey($serialNumberId)
+                ->firstOrFail()
+                ->toArray();
             $this->contactData['serial_number'] = $this->serialNumber['serial_number'];
 
             $this->ticket['model_type'] = app(SerialNumber::class)->getMorphClass();
@@ -59,7 +62,7 @@ class Service extends Component
         return view('flux::livewire.portal.service');
     }
 
-    public function save(): false|Redirector
+    public function save(): bool
     {
         try {
             $ticket = CreateTicket::make($this->ticket)
@@ -80,7 +83,9 @@ class Service extends Component
         $this->notification()->success(__('Ticket created…'));
         Event::dispatch('customerTicket.created', $ticket);
 
-        return redirect()->route('portal.dashboard');
+        $this->redirect(route('portal.dashboard'), true);
+
+        return true;
     }
 
     public function updateFilesArray(): void

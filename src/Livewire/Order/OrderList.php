@@ -13,7 +13,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Support\OrderCollection;
+use FluxErp\Support\Collection\OrderCollection;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -91,7 +91,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                 ->when(fn () => resolve_static(DeleteOrder::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete',
-                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
                 ]),
         ];
     }

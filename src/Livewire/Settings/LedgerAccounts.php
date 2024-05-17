@@ -50,7 +50,7 @@ class LedgerAccounts extends LedgerAccountList
                 ->when(resolve_static(DeleteLedgerAccount::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Ledger Account')]),
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Ledger Account')]),
                 ]),
         ];
     }

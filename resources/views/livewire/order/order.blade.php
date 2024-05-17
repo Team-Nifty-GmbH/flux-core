@@ -319,7 +319,7 @@
             @endif
             @if(resolve_static(\FluxErp\Actions\Order\DeleteOrder::class, 'canPerformAction', [false]) && ! $order->is_locked)
                 <x-button
-                    wire:confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order')]) }}"
+                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order')]) }}"
                     negative
                     label="{{ __('Delete') }}"
                     wire:click="delete"
@@ -687,7 +687,7 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div x-cloak x-show="$wire.order.total_net_price !== $wire.order.total_base_net_price">
+                                <div x-cloak x-show="$wire.order.total_net_price !== ($wire.order.total_base_net_price ?? '0.0000000000')">
                                     <div class="flex justify-between p-2.5">
                                         <div>
                                             {{ __('Sum net without discount') }}

@@ -3,6 +3,7 @@
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\PushSubscriptionController;
 use FluxErp\Http\Controllers\SearchController;
+use FluxErp\Http\Middleware\NoAuth;
 use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
@@ -20,6 +21,7 @@ use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\WorkTimeList;
+use FluxErp\Livewire\InstallWizard;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
@@ -75,6 +77,8 @@ use TeamNiftyGmbH\DataTable\Controllers\IconController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)->name('flux.install');
+
 Route::get('/icons/{name}/{variant?}', IconController::class)
     ->where('variant', '(outline|solid)')
     ->name('icons');
@@ -194,7 +198,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
 
     Route::get('/media/{media}/{filename}', function (Media $media) {
         return $media;
-    });
+    })->name('media');
 });
 
 Route::group(['middleware' => ['auth:web']], function () {
@@ -203,4 +207,10 @@ Route::group(['middleware' => ['auth:web']], function () {
         ->name('search');
     Route::match(['get', 'post'], '/print/render', [PrintController::class, 'render'])->name('print.render');
     Route::match(['get', 'post'], '/print/pdf', [PrintController::class, 'renderPdf']);
+});
+
+Route::group(['middleware' => ['signed']], function () {
+    Route::get('/media-private/{media}/{filename}', function (Media $media) {
+        return $media;
+    })->name('media.private');
 });

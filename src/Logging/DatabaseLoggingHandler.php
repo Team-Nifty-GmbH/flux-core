@@ -17,8 +17,12 @@ class DatabaseLoggingHandler extends AbstractProcessingHandler
         $uuid = property_exists($context, 'uuid') && ! empty($context->uuid) ? $context->uuid : null;
         unset($context->uuid);
 
-        if (Auth::check()) {
-            $record['extra']['user'] = get_class(Auth::user()) . ':' . Auth::user()->id;
+        try {
+            if (Auth::check()) {
+                $record['extra']['user'] = get_class(Auth::user()) . ':' . Auth::user()->id;
+            }
+        } catch (\Throwable $e) {
+            // Do nothing
         }
 
         $data = [
@@ -35,13 +39,17 @@ class DatabaseLoggingHandler extends AbstractProcessingHandler
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
-        $id = DB::table('logs')->insertGetId($data);
+        try {
+            $id = DB::table('logs')->insertGetId($data);
 
-        if (config('broadcasting.default') !== 'log') {
-            Log::query()
-                ->whereKey($id)
-                ->first()
-                ->newBroadcastableModelEvent('created');
+            if (config('broadcasting.default') !== 'log') {
+                Log::query()
+                    ->whereKey($id)
+                    ->first()
+                    ->newBroadcastableModelEvent('created');
+            }
+        } catch (\Throwable $e) {
+            // fallback to single logging of laravel
         }
     }
 }

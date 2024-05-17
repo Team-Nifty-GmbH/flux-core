@@ -74,7 +74,7 @@ class MailAccounts extends MailAccountList
                 ->color('negative')
                 ->icon('trash')
                 ->attributes([
-                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Mail Account')]),
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Mail Account')]),
                     'wire:click' => 'delete(record.id)',
                 ])
                 ->when(fn () => resolve_static(DeleteMailAccount::class, 'canPerformAction', [false])),

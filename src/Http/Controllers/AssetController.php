@@ -5,10 +5,10 @@ namespace FluxErp\Http\Controllers;
 use FluxErp\Facades\Asset;
 use FluxErp\Livewire\Contact\Communication;
 use FluxErp\Models\Client;
-use Illuminate\Foundation\Vite;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Vite;
 use Livewire\Drawer\Utils;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -24,7 +24,7 @@ class AssetController extends Controller
             abort(404);
         }
 
-        if (invade(app(Vite::class))->isCssPath($path)) {
+        if (invade(app(\Illuminate\Foundation\Vite::class))->isCssPath($path)) {
             $mimeType = 'text/css';
         } else {
             $mimeType = match (pathinfo($path, PATHINFO_EXTENSION)) {
@@ -95,7 +95,7 @@ class AssetController extends Controller
 
     public function pwaServiceWorker(): Response
     {
-        return response(Vite::content('resources/js/sw.js', 'flux/build'))
+        return response(Vite::content('resources/js/sw.js', public_path('build')))
             ->header('Content-Type', 'application/javascript');
     }
 }

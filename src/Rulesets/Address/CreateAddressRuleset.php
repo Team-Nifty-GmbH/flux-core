@@ -58,6 +58,7 @@ class CreateAddressRuleset extends FluxRuleset
             resolve_static(AddressTypeRuleset::class, 'getRules'),
             resolve_static(ContactOptionRuleset::class, 'getRules'),
             resolve_static(TagRuleset::class, 'getRules'),
+            resolve_static(PermissionRuleset::class, 'getRules'),
             [
                 'contact_options.*.id' => 'exclude',
             ]

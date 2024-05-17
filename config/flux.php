@@ -9,6 +9,8 @@ return [
         'PORTAL_DOMAIN',
         'portal.' . preg_replace('(^https?://)', '', env('APP_URL'))
     ),
+    'flux_url' => env('FLUX_URL'),
+
     'rate_limit' => env('API_RATE_LIMIT', 60),
 
     'media' => [

@@ -15,19 +15,19 @@ trait HasParentMorphClass
         try {
             return parent::getMorphClass();
         } catch (ClassMorphViolationException) {
-            return $this->getParentMorphClass();
+            return static::getParentMorphClass();
         }
     }
 
-    public function getParentMorphClass(): string
+    public static function getParentMorphClass(): string
     {
         $morphMap = Relation::morphMap();
 
-        $parentClass = get_parent_class($this);
+        $parentClass = get_parent_class(static::class);
         if (! empty($morphMap) && in_array($parentClass, $morphMap)) {
             return array_search($parentClass, $morphMap, true);
         }
 
-        throw new ClassMorphViolationException($this);
+        throw new ClassMorphViolationException(static::class);
     }
 }

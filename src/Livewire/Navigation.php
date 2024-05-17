@@ -82,6 +82,7 @@ class Navigation extends Component
         $guard = explode('_', Auth::guard()->getName());
 
         $navigations = Menu::forGuard($guard[1], $guard[1] === 'address' ? 'portal' : null);
+
         array_walk_recursive($navigations, function (&$item, $key) {
             if ($key === 'label') {
                 $item = __(Str::headline($item));

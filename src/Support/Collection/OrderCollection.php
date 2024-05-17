@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Support;
+namespace FluxErp\Support\Collection;
 
 use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Collection;
