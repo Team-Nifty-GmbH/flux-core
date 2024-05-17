@@ -50,7 +50,7 @@ class AddressTypes extends AddressTypeList
                 ->when(resolve_static(DeleteAddressType::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Address Types')]),
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Address Types')]),
                 ]),
         ];
     }
