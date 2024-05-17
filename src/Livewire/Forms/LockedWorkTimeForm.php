@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\WorkTime\CreateLockedWorkTime;
 use FluxErp\Actions\WorkTime\DeleteWorkTime;
 use FluxErp\Actions\WorkTime\UpdateLockedWorkTime;
 use Illuminate\Support\Carbon;
@@ -55,6 +56,7 @@ class LockedWorkTimeForm extends FluxForm
     protected function getActions(): array
     {
         return [
+            'create' => CreateLockedWorkTime::class,
             'update' => UpdateLockedWorkTime::class,
             'delete' => DeleteWorkTime::class,
         ];
