@@ -5,8 +5,8 @@ namespace FluxErp\Rulesets\WorkTime;
 use FluxErp\Models\WorkTime;
 use FluxErp\Rules\ModelExists;
 
-class CreateLockedWorkTimeRuleset extends CreateWorkTimeRuleset {
-
+class CreateLockedWorkTimeRuleset extends CreateWorkTimeRuleset
+{
     public function rules(): array
     {
         $rules = parent::rules();
@@ -16,7 +16,8 @@ class CreateLockedWorkTimeRuleset extends CreateWorkTimeRuleset {
             'integer',
             new ModelExists(WorkTime::class),
         ];
+        $rules['paused_time_ms'] = 'integer|nullable|min:0';
 
-        return  $rules;
+        return $rules;
     }
 }

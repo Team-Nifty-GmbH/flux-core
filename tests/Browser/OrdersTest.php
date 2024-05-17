@@ -27,7 +27,8 @@ class OrdersTest extends DuskTestCase
     }
 
     // test for deleting order
-    public function test_user_can_delete_open_order() {
+    public function test_user_can_delete_open_order()
+    {
         $this->browse(function (Browser $browser) {
             $browser->visit('/');
 
