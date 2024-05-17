@@ -55,6 +55,7 @@ use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Translations;
+use FluxErp\Livewire\Settings\Units;
 use FluxErp\Livewire\Settings\Users;
 use FluxErp\Livewire\Settings\VatRates;
 use FluxErp\Livewire\Settings\Warehouses;
@@ -173,6 +174,7 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::get('/price-lists', PriceLists::class)->name('price-lists')->registersMenuItem();
                 Route::get('/ticket-types', TicketTypes::class)->name('ticket-types')->registersMenuItem();
                 Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
+                Route::get('/units', Units::class)->name('units')->registersMenuItem();
                 Route::get('/users', Users::class)->name('users')->registersMenuItem();
                 Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts')->registersMenuItem();
                 Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types')->registersMenuItem();
