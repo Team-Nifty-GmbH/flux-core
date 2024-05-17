@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Features\Calendar;
 
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Facades\Action;
+use FluxErp\Helpers\Helper;
 use FluxErp\Livewire\Forms\CalendarEventForm;
 use FluxErp\Livewire\Forms\CalendarForm;
 use FluxErp\Models\Address;
@@ -73,7 +74,16 @@ class FluxCalendar extends CalendarComponent
             return false;
         }
 
-        return $this->calendar->getActionResult()?->toArray() ?? false;
+        $result = $this->calendar->getActionResult()?->toArray();
+
+        if (! $result) {
+            return false;
+        }
+
+        return array_merge(
+            $result,
+            ['resourceEditable' => $result['is_editable'] ?? false]
+        );
     }
 
     #[Renderless]
@@ -114,23 +124,35 @@ class FluxCalendar extends CalendarComponent
                 return false;
             }
 
-            return $result->toCalenderEvent();
+            $result = $result->toCalenderEvent();
+        } else {
+            try {
+                $this->event->reset();
+                $this->event->fill($attributes);
+                $this->event->original_start = data_get($this->oldCalendarEvent, 'start');
+                $this->event->save();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+
+                return false;
+            }
+
+            $result = array_values($this->event->getActionResult());
         }
 
-        try {
-            $this->event->reset();
-            $this->event->fill($attributes);
-            $this->event->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $result = $this->event->getActionResult();
         $result = array_map(
-            fn(\TeamNiftyGmbH\Calendar\Models\CalendarEvent $event) => $event->toArray() + ['is_editable' => true],
-            $this->calculateRepetitionsFromEvent($result->toArray()) ?: $result
+            function ($event) use ($attributes) {
+                if ($event instanceof CalendarEvent) {
+                    return $event->toCalendarEventObject([
+                        'is_editable' => true,
+                        'is_repeatable' => $attributes['is_repeatable'] ?? false,
+                        'has_repeats' => ! is_null($event->repeat),
+                    ]);
+                }
+
+                return $event;
+            },
+            Helper::getRepetitions($result, $this->calendarPeriod['start'], $this->calendarPeriod['end'])
         );
 
         return $result ?: false;
@@ -154,7 +176,7 @@ class FluxCalendar extends CalendarComponent
     }
 
     #[Renderless]
-    public function deleteEvent(array $attributes): bool
+    public function deleteEvent(array $attributes): array|false
     {
         $attributes['confirm_option'] = ! $this->calendarEventWasRepeatable ? 'all' : $this->confirmDelete;
 
@@ -177,19 +199,23 @@ class FluxCalendar extends CalendarComponent
 
                 return false;
             }
+        } else {
+            try {
+                $this->event->reset();
+                $this->event->fill($attributes);
+                $this->event->delete();
+            } catch (UnauthorizedException|ValidationException $e) {
+                exception_to_notifications($e, $this);
+
+                return false;
+            }
         }
 
-        try {
-            $this->event->reset();
-            $this->event->fill($attributes);
-            $this->event->delete();
-        } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        return true;
+        return [
+            'id' => $attributes['id'],
+            'confirmOption' => $attributes['confirm_option'],
+            'repetition' => $attributes['repetition'] ?? null,
+        ];
     }
 
     #[Renderless]

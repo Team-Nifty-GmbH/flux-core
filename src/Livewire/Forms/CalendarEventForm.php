@@ -38,6 +38,8 @@ class CalendarEventForm extends FluxForm
 
     public ?string $confirm_option = null;
 
+    public ?string $original_start = null;
+
     protected function getActions(): array
     {
         return [

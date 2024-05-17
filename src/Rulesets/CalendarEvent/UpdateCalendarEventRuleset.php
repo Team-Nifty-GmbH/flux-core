@@ -26,11 +26,12 @@ class UpdateCalendarEventRuleset extends FluxRuleset
             ],
             'title' => 'sometimes|required|string',
             'description' => 'string|nullable',
-            'start' => 'sometimes|required|date',
-            'end' => 'sometimes|required|date|after_or_equal:start',
+            'start' => 'required_if:confirm_option,this|required_if:confirm_option,future|date',
+            'end' => 'required_if:confirm_option,this|required_if:confirm_option,future|date|after_or_equal:start',
             'is_all_day' => 'boolean',
             'extended_props' => 'array|nullable',
             'confirm_option' => 'required|string|in:this,future,all',
+            'original_start' => 'required_if:confirm_option,this|required_if:confirm_option,future|date',
         ];
     }
 

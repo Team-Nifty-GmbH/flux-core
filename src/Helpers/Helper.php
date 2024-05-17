@@ -3,6 +3,8 @@
 namespace FluxErp\Helpers;
 
 use Carbon\Carbon;
+use DateInterval;
+use DatePeriod;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Support\Arr;
@@ -202,5 +204,111 @@ class Helper
         }
 
         return $repeat;
+    }
+
+    public static function getRepetitions(array|Model $repeatable, string $periodStart, string $periodEnd): array
+    {
+        $repeatable = Arr::wrap($repeatable);
+
+        if (! array_is_list($repeatable)) {
+            $repeatable = [$repeatable];
+        }
+
+        $repetitions = [];
+        foreach ($repeatable as $item) {
+            $repeatString = data_get($item, 'repeat');
+
+            if (! $repeatString) {
+                $repetitions[] = $item;
+                continue;
+            }
+
+            $i = 0;
+            $events = [];
+            $recurrences = data_get($item, 'recurrences');
+
+            for ($j = count($repeatValues = explode(',', $repeatString)); $j > 0; $j--) {
+                if (data_get($item, 'recurrences')) {
+                    if ($recurrences < 1) {
+                        continue;
+                    }
+
+                    $datePeriod = new DatePeriod(
+                        Carbon::parse(data_get($item, 'start')),
+                        DateInterval::createFromDateString($repeatValues[$i]),
+                        ($count = (int) ceil($recurrences / $j)) - (int) ($i === 0), // subtract 1, because start date does not count towards recurrences limit
+                        (int) ($i !== 0) // 1 = Exclude start date
+                    );
+
+                    $recurrences -= $count;
+                } else {
+                    $datePeriod = new DatePeriod(
+                        Carbon::parse(data_get($item, 'start')),
+                        DateInterval::createFromDateString($repeatValues[$i]),
+                        Carbon::parse(is_null(data_get($item, 'repeat_end')) ?
+                            $periodEnd :
+                            min([data_get($item, 'repeat_end'), $periodEnd])
+                        ),
+                        (int) ($i !== 0)
+                    );
+                }
+
+                // filter dates in between start and end
+                $dates = array_filter(
+                    iterator_to_array($datePeriod),
+                    fn ($dateItem) => ($date = $dateItem->format('Y-m-d H:i:s')) > $periodStart
+                        && $date < $periodEnd
+                        && ! in_array($date, data_get($item, 'excluded') ?: [])
+                        && (
+                            ! data_get($item, 'repeat_end')
+                            || $date < Carbon::parse(data_get($item, 'repeat_end'))->toDateTimeString()
+                        )
+                );
+
+                $events = array_merge($events, Arr::mapWithKeys($dates, function ($date, $key) use ($item) {
+                    $interval = date_diff(
+                        Carbon::parse(data_get($item, 'start')),
+                        Carbon::parse(data_get($item, 'end'))
+                    );
+
+                    if ($item instanceof Model) {
+                        return [
+                            $key => (new $item)->forceFill(
+                                array_merge(
+                                    $item->toArray(),
+                                    [
+                                        'start' => ($start = Carbon::parse(data_get($item, 'start'))
+                                            ->setDateFrom($date))
+                                            ->format('Y-m-d H:i:s'),
+                                        'end' => $start->add($interval)->format('Y-m-d H:i:s'),
+                                    ],
+                                    ['id' => data_get($item, 'id') . '|' . $key]
+                                )
+                            ),
+                        ];
+                    } else {
+                        return [
+                            $key => array_merge(
+                                $item,
+                                [
+                                    'start' => ($start = Carbon::parse(data_get($item, 'start'))->setDateFrom($date))
+                                        ->format('Y-m-d H:i:s'),
+                                    'end' => $start->add($interval)->format('Y-m-d H:i:s'),
+                                ],
+                                ['id' => data_get($item, 'id') . '|' . $key]
+                            ),
+                        ];
+                    }
+                }));
+
+                $i++;
+            }
+
+            foreach ($events as $event) {
+                $repetitions[] = $event;
+            }
+        }
+
+        return $repetitions;
     }
 }

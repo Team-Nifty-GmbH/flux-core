@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\CalendarEvent;
 
+use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rulesets\CalendarEvent\UpdateCalendarEventRuleset;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
 class UpdateCalendarEvent extends FluxAction
@@ -22,7 +22,7 @@ class UpdateCalendarEvent extends FluxAction
         return [CalendarEvent::class];
     }
 
-    public function performAction(): Model
+    public function performAction(): array
     {
         $confirmOption = Arr::pull($this->data, 'confirm_option');
         $repeat = Arr::pull($this->data, 'repeat');
@@ -43,13 +43,15 @@ class UpdateCalendarEvent extends FluxAction
                 $calendarEvent->fill([
                     'excluded' => array_merge(
                         $calendarEvent->excluded ?: [],
-                        [$calendarEvent->start->toDateTimeString()]
+                        [Carbon::parse(data_get($this->data, 'original_start'))->toDateTimeString()]
                     ),
                 ]);
                 break;
             case 'future':
                 $calendarEvent->fill([
-                    'repeat_end' => $calendarEvent->start->subSecond()->toDateTimeString(),
+                    'repeat_end' => Carbon::parse(data_get($this->data, 'original_start'))
+                        ->subSecond()
+                        ->toDateTimeString(),
                 ]);
                 break;
             default:
@@ -59,8 +61,9 @@ class UpdateCalendarEvent extends FluxAction
 
         $calendarEvent->save();
 
+        $createdEvent = null;
         if (in_array($confirmOption, ['this', 'future'])) {
-            CreateCalendarEvent::make($this->data)
+            $createdEvent = CreateCalendarEvent::make($this->data)
                 ->validate()
                 ->execute();
         } else {
@@ -69,7 +72,10 @@ class UpdateCalendarEvent extends FluxAction
                 ->execute();
         }
 
-        return $calendarEvent->withoutRelations()->fresh();
+        return [
+            'created' => $createdEvent,
+            'updated' => $calendarEvent->withoutRelations()->fresh(),
+        ];
     }
 
     protected function prepareForValidation(): void
