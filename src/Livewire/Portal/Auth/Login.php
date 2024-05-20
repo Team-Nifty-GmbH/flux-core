@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire\Portal;
+namespace FluxErp\Livewire\Portal\Auth;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Foundation\Application;

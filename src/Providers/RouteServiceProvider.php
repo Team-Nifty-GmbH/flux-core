@@ -10,7 +10,6 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Fortify;
 use Livewire\Livewire;
 
 class RouteServiceProvider extends ServiceProvider
@@ -26,8 +25,6 @@ class RouteServiceProvider extends ServiceProvider
     public function register(): void
     {
         parent::register();
-
-        Fortify::ignoreRoutes();
     }
 
     public function boot(): void
@@ -80,13 +77,8 @@ class RouteServiceProvider extends ServiceProvider
         if (static::$registerPortalRoutes) {
             Route::middleware(['web', PortalMiddleware::class])
                 ->domain(config('flux.portal_domain'))
+                ->name('portal.')
                 ->group(__DIR__ . '/../../routes/frontend/portal.php');
-            if (config('flux.portal_domain')) {
-                Route::namespace('Laravel\Fortify\Http\Controllers')
-                    ->domain(config('flux.portal_domain'))
-                    ->prefix(config('fortify.prefix'))
-                    ->group(__DIR__ . '/../../routes/fortify.php');
-            }
         }
 
         // Load the default routes second.
@@ -94,10 +86,6 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->domain(config('flux.flux_url'))
                 ->group(__DIR__ . '/../../routes/frontend/web.php');
-            Route::namespace('Laravel\Fortify\Http\Controllers')
-                ->domain(config('flux.flux_url') ?? config('fortify.domain'))
-                ->prefix(config('fortify.prefix'))
-                ->group(__DIR__ . '/../../routes/fortify.php');
         }
     }
 }
