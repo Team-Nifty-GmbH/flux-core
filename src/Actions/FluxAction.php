@@ -100,10 +100,10 @@ abstract class FluxAction
 
     public static function name(): string
     {
-        $exploded = explode('-', Str::kebab(class_basename(static::class)));
+        $exploded = explode('_', Str::snake(class_basename(static::class)));
         $function = array_shift($exploded);
 
-        return implode('-', $exploded) . '.' . $function;
+        return implode('_', $exploded) . '.' . $function;
     }
 
     public static function description(): ?string

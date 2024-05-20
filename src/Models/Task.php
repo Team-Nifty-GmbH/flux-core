@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Casts\TimeDuration;
+use FluxErp\Contracts\Calendarable;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
@@ -27,7 +29,7 @@ use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Task extends Model implements HasMedia, InteractsWithDataTables
+class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
         HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
@@ -132,5 +134,55 @@ class Task extends Model implements HasMedia, InteractsWithDataTables
     public function getAvatarUrl(): ?string
     {
         return null;
+    }
+
+    public static function toCalendar(): array
+    {
+        return [
+            'id' => Str::uuid()->toString(),
+            'model_type' => app(static::class)->getMorphClass(),
+            'name' => __('Tasks'),
+            'color' => '#813d9c',
+            'resourceEditable' => false,
+            'hasRepeatableEvents' => false,
+            'isPublic' => false,
+            'isShared' => false,
+            'permission' => 'owner',
+            'group' => 'my',
+        ];
+    }
+
+    public function toCalendarEvent(): array
+    {
+        return [
+            'id' => $this->id,
+            'calendar_type' => $this->getMorphClass(),
+            'title' => $this->name,
+            'start' => ($this->start_date ?? $this->created_at)->toDateTimeString(),
+            'end' => $this->due_date?->endOfDay()->toDateTimeString(),
+            'status' => $this->state::$name,
+            'invited' => [],
+            'description' => $this->description,
+            'extendedProps' => null,
+            'allDay' => false,
+            'is_editable' => true,
+            'is_invited' => null,
+            'is_public' => false,
+            'is_repeatable' => false,
+        ];
+    }
+
+    public static function fromCalendarEvent(array $event): Model
+    {
+        $task = new static;
+        $task->forceFill([
+            'id' => $event['id'],
+            'name' => $event['title'],
+            'start_date' => $event['start'],
+            'due_date' => $event['end'],
+            'description' => $event['description'],
+        ]);
+
+        return $task;
     }
 }
