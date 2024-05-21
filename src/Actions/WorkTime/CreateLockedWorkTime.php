@@ -22,13 +22,6 @@ class CreateLockedWorkTime extends CreateWorkTime
             $workTime->is_billable = $workTime->workTimeType?->is_billable ?? false;
         }
 
-       if (is_null($workTime->paused_time_ms)) {
-            $workTime->paused_time_ms = 0;
-        }
-
-        $workTime->total_time_ms = Carbon::parse($workTime->ended_at)
-            ->diffInMilliseconds(Carbon::parse($workTime->started_at)) - $workTime->paused_time_ms;
-
         $workTime->save();
 
         return $workTime->fresh();
@@ -45,5 +38,11 @@ class CreateLockedWorkTime extends CreateWorkTime
                 ->whereDate('started_at', Carbon::parse($this->data['started_at'])->toDateString())
                 ->first()->id ?? null;
         }
+
+        $this->data['paused_time_ms'] ??= 0;
+
+        $this->data['total_time_ms'] = Carbon::parse(data_get($this->data, 'ended_at', 0))
+                ->diffInMilliseconds(Carbon::parse(data_get($this->data, 'started_at', 0)))
+            - data_get($this->data, 'paused_time_ms');
     }
 }

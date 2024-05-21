@@ -17,6 +17,7 @@ class CreateLockedWorkTimeRuleset extends CreateWorkTimeRuleset
             new ModelExists(WorkTime::class),
         ];
         $rules['paused_time_ms'] = 'integer|nullable|min:0';
+        $rules['total_time_ms'] = 'integer|min:0';
 
         return $rules;
     }
