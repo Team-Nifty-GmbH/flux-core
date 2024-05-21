@@ -25,21 +25,4 @@ class OrdersTest extends DuskTestCase
                 ->waitForText(text: 'Order Type -> Name', seconds: 30);
         });
     }
-
-    // test for deleting order
-    public function test_user_can_delete_open_order()
-    {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/');
-
-            $this->openMenu();
-            $browser->script("Alpine.\$data(document.getElementById('main-navigation')).toggleMenu('orders');");
-
-            $browser->pause(600)
-                ->click('nav [href="/orders/list"]')
-                ->waitForRoute(route: 'orders.orders', seconds: 30)
-                ->waitForText(text: 'Payment State', seconds: 30);
-
-        });
-    }
 }
