@@ -5,6 +5,7 @@ namespace FluxErp\Http\Controllers;
 use FluxErp\Facades\Asset;
 use FluxErp\Livewire\Contact\Communication;
 use FluxErp\Models\Client;
+use FluxErp\Providers\ViewServiceProvider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
@@ -95,7 +96,15 @@ class AssetController extends Controller
 
     public function pwaServiceWorker(): Response
     {
-        return response(Vite::content('resources/js/sw.js', public_path('build')))
+        return response(
+            Vite::content(
+                ViewServiceProvider::getRealPackageAssetPath(
+                    'resources/js/sw.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                'build'
+            )
+        )
             ->header('Content-Type', 'application/javascript');
     }
 }
