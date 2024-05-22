@@ -38,7 +38,7 @@ class CreateLockedWorkTime extends CreateWorkTime
     {
         if (data_get($this->data, 'user_id') && data_get($this->data, 'started_at')) {
             // add parent_id in case daily work time exists
-            $this->data['parent_id'] = app(WorkTime::class)::query()
+            $this->data['parent_id'] = app(WorkTime::class)->query()
                 ->where('user_id', $this->data['user_id'])
                 ->where('started_at', '<=', Carbon::parse($this->data['started_at'])->toDateTimeString())
                 ->where(function ($query) {
