@@ -9,6 +9,8 @@ use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminder;
 use FluxErp\Livewire\Accounting\TransactionList;
+use FluxErp\Livewire\Auth\Login;
+use FluxErp\Livewire\Auth\Logout;
 use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
@@ -82,6 +84,11 @@ Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)->name('f
 Route::get('/icons/{name}/{variant?}', IconController::class)
     ->where('variant', '(outline|solid)')
     ->name('icons');
+Route::get('/login', Login::class)
+    ->middleware(['guest:web'])
+    ->name('login');
+Route::post('/logout', Logout::class)
+    ->name('logout');
 
 Route::middleware(['auth:web', 'permission'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);

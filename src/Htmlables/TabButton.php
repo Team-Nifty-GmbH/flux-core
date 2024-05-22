@@ -103,7 +103,11 @@ class TabButton implements Htmlable
             return $this;
         }
 
-        $this->shouldRender = (bool) value($condition);
+        try {
+            $this->shouldRender = (bool) value($condition);
+        } catch (\Throwable) {
+            $this->shouldRender = false;
+        }
 
         return $this;
     }
