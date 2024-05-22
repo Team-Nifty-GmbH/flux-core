@@ -3,8 +3,8 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasUserModification;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use TeamNiftyGmbH\Calendar\Models\Calendar as BaseCalendar;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
@@ -37,19 +37,8 @@ class Calendar extends BaseCalendar
         return $this->hasMany(CalendarEvent::class);
     }
 
-    public function children(): HasMany
+    public function users(): MorphToMany
     {
-        return $this->hasMany(Calendar::class, foreignKey: 'parent_id', localKey: 'id')
-            ->with('children');
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Calendar::class, 'parent_id');
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
+        return $this->morphedByMany(User::class, 'calendarable', 'calendarables');
     }
 }

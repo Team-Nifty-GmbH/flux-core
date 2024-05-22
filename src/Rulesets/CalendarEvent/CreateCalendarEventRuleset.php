@@ -5,10 +5,7 @@ namespace FluxErp\Rulesets\CalendarEvent;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rules\MorphClassExists;
-use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\HasCalendarEvents;
 
 class CreateCalendarEventRuleset extends FluxRuleset
 {
@@ -18,26 +15,18 @@ class CreateCalendarEventRuleset extends FluxRuleset
     {
         return [
             'calendar_id' => [
-                'required_without_all:model_type,model_id',
+                'required',
                 'integer',
                 new ModelExists(Calendar::class),
             ],
-            'model_type' => [
-                'required_without:calendar_id',
-                'string',
-                new MorphClassExists(HasCalendarEvents::class),
-            ],
-            'model_id' => [
-                'required_without:calendar_id',
-                'integer',
-                new MorphExists(),
-            ],
             'title' => 'required|string',
             'description' => 'string|nullable',
-            'start' => 'required|date_format:Y-m-d H:i',
-            'end' => 'required|date_format:Y-m-d H:i|after_or_equal:starts_at',
+            'start' => 'required|date',
+            'end' => 'required|date|after_or_equal:start',
             'is_all_day' => 'boolean',
             'extended_props' => 'array|nullable',
+            'excluded' => 'array|nullable',
+            'excluded.*' => 'date',
         ];
     }
 
@@ -45,6 +34,7 @@ class CreateCalendarEventRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
+            resolve_static(RepeatRuleset::class, 'getRules'),
             resolve_static(InvitedAddressRuleset::class, 'getRules'),
             resolve_static(InvitedUserRuleset::class, 'getRules')
         );

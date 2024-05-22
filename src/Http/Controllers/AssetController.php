@@ -3,8 +3,8 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Facades\Asset;
-use FluxErp\Livewire\Contact\Communication;
 use FluxErp\Models\Client;
+use FluxErp\Models\Communication;
 use FluxErp\Providers\ViewServiceProvider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -51,8 +51,8 @@ class AssetController extends Controller
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ])
-                ->event('mail_opened')
-                ->log($communication->subject . ' Mail opened');
+                ->event('communication_opened')
+                ->log($communication->subject . ' opened');
         }
 
         $logo = resolve_static(Client::class, 'default')->getFirstMedia('logo_small');
@@ -104,7 +104,6 @@ class AssetController extends Controller
                 ),
                 'build'
             )
-        )
-            ->header('Content-Type', 'application/javascript');
+        )->header('Content-Type', 'application/javascript');
     }
 }
