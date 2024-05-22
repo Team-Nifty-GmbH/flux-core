@@ -34,6 +34,7 @@ use FluxErp\Livewire\Project\Project;
 use FluxErp\Livewire\Project\ProjectList;
 use FluxErp\Livewire\Settings\ActivityLogs;
 use FluxErp\Livewire\Settings\AdditionalColumns;
+use FluxErp\Livewire\Settings\AddressTypes;
 use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\Clients;
@@ -153,6 +154,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                     ->registersMenuItem(icon: 'cog', order: 9999);
                 Route::get('/additional-columns', AdditionalColumns::class)
                     ->name('additional-columns')
+                    ->registersMenuItem();
+                Route::get('/address-types', AddressTypes::class)
+                    ->name('address-types')
                     ->registersMenuItem();
                 Route::get('/categories', Categories::class)
                     ->name('categories')
