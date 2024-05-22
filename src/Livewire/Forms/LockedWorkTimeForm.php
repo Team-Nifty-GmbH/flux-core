@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\WorkTime\CreateLockedWorkTime;
 use FluxErp\Actions\WorkTime\DeleteWorkTime;
 use FluxErp\Actions\WorkTime\UpdateLockedWorkTime;
 use Illuminate\Support\Carbon;
@@ -55,6 +56,7 @@ class LockedWorkTimeForm extends FluxForm
     protected function getActions(): array
     {
         return [
+            'create' => CreateLockedWorkTime::class,
             'update' => UpdateLockedWorkTime::class,
             'delete' => DeleteWorkTime::class,
         ];
@@ -62,29 +64,20 @@ class LockedWorkTimeForm extends FluxForm
 
     protected function makeAction(string $name, ?array $data = null): FluxAction
     {
-        $this->user_id = $this->user_id ?? auth()->id();
-
         $workTime = $data ?? $this->toArray();
         if (! $workTime['trackable_type'] ?? false) {
             unset($workTime['trackable_type'], $workTime['trackable_id']);
         }
 
-        $workTime['started_at'] = $workTime['started_at']
-            ? Carbon::parse($workTime['started_at'])->format('Y-m-d H:i:s')
-            : null;
-        $workTime['ended_at'] = $workTime['ended_at']
-            ? Carbon::parse($workTime['ended_at'])->format('Y-m-d H:i:s')
-            : null;
-
         if ($this->paused_time !== $this->original_paused_time) {
             if (is_null($this->paused_time)) {
                 $workTime['paused_time_ms'] = 0;
             } else {
-                if (preg_match('/[0-9]*/', $this->paused_time)) {
+                if (preg_match('/^[0-9]+$/', $this->paused_time)) {
                     $this->paused_time = $this->paused_time . ':00';
                 }
 
-                if (preg_match('/[0-9]*:[0-5][0-9]/', $this->paused_time)) {
+                if (preg_match('/^[0-9]+:[0-5][0-9]$/', $this->paused_time)) {
                     $exploded = explode(':', $this->paused_time);
 
                     $workTime['paused_time_ms'] = (int) bcmul(
