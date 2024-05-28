@@ -17,12 +17,12 @@ class CreateSettingRuleset extends FluxRuleset
             'uuid' => 'string|uuid|unique:settings,uuid',
             'key' => 'required|string|unique:settings,key',
             'model_type' => [
-                'required',
+                'required_with:model_id',
                 'string',
                 new MorphClassExists(),
             ],
             'model_id' => [
-                'required',
+                'required_with:model_type',
                 'integer',
                 new MorphExists(),
             ],
