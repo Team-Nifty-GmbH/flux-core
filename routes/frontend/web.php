@@ -224,4 +224,6 @@ Route::group(['middleware' => ['signed']], function () {
     Route::get('/media-private/{media}/{filename}', function (Media $media) {
         return $media;
     })->name('media.private');
+
+    Route::get('/order-public/{order:uuid}', \FluxErp\Livewire\Order\PublicLink::class)->name('order.public');
 });
