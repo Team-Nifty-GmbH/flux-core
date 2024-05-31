@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 
 trait WithAddressAuth
 {
+    use EnsureUsedInLivewire;
+
     public array $customerClient = [];
 
     public function mountWithAddressAuth(): void

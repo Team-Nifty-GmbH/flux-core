@@ -2,7 +2,7 @@
 
 namespace FluxErp\Providers;
 
-use FluxErp\VendorClasses\Guard;
+use FluxErp\Support\Sanctum\Guard;
 use Illuminate\Auth\RequestGuard;
 
 class SanctumServiceProvider extends \Laravel\Sanctum\SanctumServiceProvider

@@ -117,6 +117,7 @@
         "laravel": {
             "providers": [
                 "FluxErp\\FluxServiceProvider",
+                "FluxErp\\Providers\\BindingServiceProvider",
                 "FluxErp\\Providers\\MorphMapServiceProvider",
                 "FluxErp\\Providers\\AuthServiceProvider",
                 "FluxErp\\Providers\\EventServiceProvider",

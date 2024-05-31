@@ -98,7 +98,15 @@ class RepeatableManager
 
             $cacheKey = md5($directory . implode($namespaces));
 
-            if (! is_null($repeatables = Cache::get('flux.repeatable.' . $cacheKey)) && ! app()->runningInConsole()) {
+            // try to obtain the repeatables from cache
+            // if the cache is not available, we will iterate over the directory
+            try {
+                $repeatables = Cache::get('flux.repeatable.' . $cacheKey);
+            } catch (\Throwable) {
+                $repeatables = null;
+            }
+
+            if (! is_null($repeatables) && ! app()->runningInConsole()) {
                 $iterator = [];
             } else {
                 $repeatables = [];
@@ -135,7 +143,11 @@ class RepeatableManager
                 }
             }
 
-            Cache::put('flux.repeatable.' . $cacheKey, $repeatables);
+            try {
+                Cache::put('flux.repeatable.' . $cacheKey, $repeatables);
+            } catch (\Throwable) {
+                // Ignore exceptions during cache put
+            }
         }
     }
 

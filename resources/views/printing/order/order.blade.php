@@ -167,8 +167,9 @@
             </table>
         @show
         @section('footer')
-            <div class="break-inside-avoid prose prose-sm">
-                {{ $model->footer }}
+            <div class="break-inside-avoid prose prose-xs">
+                {!! $model->footer !!}
+                {!! $model->vatRates->pluck('footer_text')->implode('<br>') !!}
             </div>
         @show
     </main>

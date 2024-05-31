@@ -4,7 +4,6 @@ namespace FluxErp\Logging;
 
 use Carbon\Carbon;
 use FluxErp\Models\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\LogRecord;
@@ -17,24 +16,16 @@ class DatabaseLoggingHandler extends AbstractProcessingHandler
         $uuid = property_exists($context, 'uuid') && ! empty($context->uuid) ? $context->uuid : null;
         unset($context->uuid);
 
-        try {
-            if (Auth::check()) {
-                $record['extra']['user'] = get_class(Auth::user()) . ':' . Auth::user()->id;
-            }
-        } catch (\Throwable $e) {
-            // Do nothing
-        }
-
         $data = [
             'foreign_uuid' => $uuid,
-            'message' => $record['message'],
-            'context' => json_encode($context),
-            'level' => $record['level'],
-            'level_name' => $record['level_name'],
-            'channel' => $record['channel'],
-            'record_datetime' => Carbon::parse($record['datetime'])->toDateTimeString(),
-            'extra' => json_encode($record['extra']),
-            'formatted' => $record['formatted'],
+            'message' => data_get($record, 'message'),
+            'context' => json_encode($context ?? []),
+            'level' => data_get($record, 'level'),
+            'level_name' => data_get($record, 'level_name'),
+            'channel' => data_get($record, 'channel'),
+            'record_datetime' => Carbon::parse(data_get($record, 'datetime'))->toDateTimeString(),
+            'extra' => json_encode(data_get($record, 'extra', [])),
+            'formatted' => data_get($record, 'formatted'),
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ];
@@ -43,12 +34,13 @@ class DatabaseLoggingHandler extends AbstractProcessingHandler
             $id = DB::table('logs')->insertGetId($data);
 
             if (config('broadcasting.default') !== 'log') {
-                Log::query()
+                app(Log::class)
+                    ->query()
                     ->whereKey($id)
                     ->first()
                     ->newBroadcastableModelEvent('created');
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             // fallback to single logging of laravel
         }
     }

@@ -29,7 +29,7 @@ class CalendarEventInviteCreated extends Notification implements ShouldQueue
      *
      * @param  mixed  $notifiable
      */
-    public function toMail($notifiable): MailMessage
+    public function toMail(object $notifiable): MailMessage
     {
         $notification = $this->toArray($notifiable);
 
@@ -39,23 +39,7 @@ class CalendarEventInviteCreated extends Notification implements ShouldQueue
             ->action($notification['accept']['label'] ?? '', $notification['accept']['url'] ?? '');
     }
 
-    /**
-     * Get the array representation of the notification.
-     * The array should contain the folowing keys:
-     * - title (string)
-     * - description (string)
-     * - icon (string, all heroicons)
-     * - img (string, url to image)
-     * - accept (array, contains the following keys)
-     *     - label (string, required)
-     *     - url (string, required)
-     * - reject (array, contains the following keys)
-     *     - label (string, required)
-     *     - url (string, required)
-     *
-     * @param  mixed  $notifiable
-     */
-    public function toArray($notifiable): array
+    public function toArray(object $notifiable): array
     {
         $user = $this->model->userCreated ?? null;
         $morph = $this->model->calendarEvent;

@@ -10,6 +10,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\HasWidgets;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\MonitorsQueue;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -39,7 +40,7 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
 {
     use BroadcastsEvents, Commentable, Filterable, HasApiTokens, HasCalendars, HasDatatableUserSettings,
         HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles, HasUuid, HasWidgets,
-        InteractsWithMedia, Notifiable, Searchable, SoftDeletes;
+        InteractsWithMedia, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'password',

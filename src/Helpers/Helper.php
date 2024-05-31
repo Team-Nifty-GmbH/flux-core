@@ -220,6 +220,7 @@ class Helper
 
             if (! $repeatString) {
                 $repetitions[] = $item;
+
                 continue;
             }
 

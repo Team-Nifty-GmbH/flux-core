@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 trait WithFileUploads
 {
-    use WithFileUploadsBase;
+    use EnsureUsedInLivewire, WithFileUploadsBase;
 
     public array $filesArray = [];
 

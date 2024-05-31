@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification as BaseNotification;
 
 class Notification extends BaseNotification
 {
-    public function via($notifiable): array
+    public function via(object $notifiable): array
     {
         if ($notifiable instanceof AnonymousNotifiable) {
             return array_keys($notifiable->routes);

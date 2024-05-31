@@ -8,6 +8,8 @@ use Illuminate\View\ViewException;
 
 trait WithTabs
 {
+    use EnsureUsedInLivewire;
+
     protected array $_tabs = [];
 
     abstract public function getTabs(): array;

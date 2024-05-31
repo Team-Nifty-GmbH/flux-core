@@ -3,7 +3,6 @@
 namespace FluxErp\Rulesets\Calendar;
 
 use FluxErp\Models\Calendar;
-use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 

@@ -1,8 +1,7 @@
 <?php
 
-namespace FluxErp\Factories;
+namespace FluxErp\Support\Validator;
 
-use FluxErp\VendorClasses\Validator;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Validation\Factory;

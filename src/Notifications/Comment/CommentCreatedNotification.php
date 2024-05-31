@@ -30,7 +30,7 @@ class CommentCreatedNotification extends Notification implements ShouldQueue
      *
      * @param  mixed  $notifiable
      */
-    public function toMail($notifiable): MailMessage
+    public function toMail(object $notifiable): MailMessage
     {
         $notification = $this->toArray($notifiable);
 
@@ -56,7 +56,7 @@ class CommentCreatedNotification extends Notification implements ShouldQueue
      *
      * @param  mixed  $notifiable
      */
-    public function toArray($notifiable): array
+    public function toArray(object $notifiable): array
     {
         $user = $this->model->createdBy;
         $morph = $this->model->model;
@@ -85,7 +85,7 @@ class CommentCreatedNotification extends Notification implements ShouldQueue
         );
     }
 
-    public function toWebPush($notifiable): ?WebPushMessage
+    public function toWebPush(object $notifiable): ?WebPushMessage
     {
         if (! method_exists($notifiable, 'pushSubscriptions') || ! $notifiable->pushSubscriptions()->exists()) {
             return null;

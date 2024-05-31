@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\VendorClasses;
+namespace FluxErp\Support\Validator;
 
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasTranslations;
