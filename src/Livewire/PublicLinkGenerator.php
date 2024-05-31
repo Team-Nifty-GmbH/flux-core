@@ -2,25 +2,19 @@
 
 namespace FluxErp\Livewire;
 
-
+use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Models\Media;
-use FluxErp\Models\Order;
 use Illuminate\Support\Facades\URL;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
-class PublicLinkGenerator extends Component {
+class PublicLinkGenerator extends Component
+{
+    public ?string $publicLink = null;
 
-
-    public ?string $publicLink=null;
-
-
-    public Order $order;
-
-    public function mount(int $orderId): void
-    {
-        $this->order = app(Order::class)->find($orderId)->first();
-    }
+    #[Modelable]
+    public OrderForm $order;
 
     public function setPublicLink()
     {
@@ -28,7 +22,7 @@ class PublicLinkGenerator extends Component {
     }
 
     #[Computed]
-    public function getSignature():bool
+    public function getSignature(): bool
     {
         return is_null(app(Media::class)->query()
             ->where('model_type', 'order')
@@ -39,7 +33,6 @@ class PublicLinkGenerator extends Component {
 
     public function render()
     {
-            return view('flux::livewire.public-link-generator');
+        return view('flux::livewire.public-link-generator');
     }
-
 }

@@ -32,6 +32,7 @@
         "apexcharts": "^3.49.0",
         "dayjs": "^1.11.11",
         "pulltorefreshjs": "^0.1.22",
-        "lodash": "^4.17.21"
+        "lodash": "^4.17.21",
+        "signature_pad": "^5.0.1"
     }
 }
