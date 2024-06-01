@@ -19,12 +19,8 @@ class UpdateCalendarRuleset extends FluxRuleset
                 'integer',
                 new ModelExists(Calendar::class),
             ],
-            'user_id' => [
-                'required',
-                'integer',
-                new ModelExists(User::class),
-            ],
             'name' => 'sometimes|required|string',
+            'description' => 'string|nullable',
             'color' => [
                 'string',
                 'nullable',

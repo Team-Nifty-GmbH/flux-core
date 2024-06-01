@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Project;
 
+use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\Project;
@@ -19,6 +20,11 @@ class CreateProjectRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'string|uuid|unique:projects,uuid',
+            'client_id' => [
+                'required',
+                'integer',
+                new ModelExists(Client::class),
+            ],
             'contact_id' => [
                 'integer',
                 'nullable',

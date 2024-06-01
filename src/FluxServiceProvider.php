@@ -45,6 +45,7 @@ use FluxErp\Support\MediaLibrary\UrlGenerator;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasParentMorphClass;
 use FluxErp\Widgets\WidgetManager;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -52,6 +53,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
@@ -90,6 +92,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerMarcos();
 
+        $this->app->bind(StatefulGuard::class, fn () => Auth::guard('web'));
         $this->app->bind(DefaultUrlGenerator::class, UrlGenerator::class);
 
         $this->app->extend('validator', function () {
@@ -293,7 +296,6 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerConfig(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
-        $this->mergeConfigFrom(__DIR__ . '/../config/fortify.php', 'fortify');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
         $this->mergeConfigFrom(__DIR__ . '/../config/scout.php', 'scout');
         config(['auth' => require __DIR__ . '/../config/auth.php']);

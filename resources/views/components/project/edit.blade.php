@@ -1,76 +1,124 @@
 @props(['collapsed' => false])
 <div x-data="{expanded: false}" class="space-y-8 divide-y divide-gray-200">
     <div class="space-y-2.5">
-        <x-input x-bind:readonly="!edit" wire:model="project.project_number" label="{{ __('Project Number') }}" />
+        <x-input
+            :placeholder="__('Leave empty to generate a new :attribute.', ['attribute' => __('Project Number')])"
+            x-bind:readonly="!edit"
+            wire:model="project.project_number"
+            label="{{ __('Project Number') }}"
+        />
         <x-input x-bind:readonly="!edit" wire:model="project.name" label="{{ __('Name') }}" />
         <div @if($collapsed) x-collapse x-show="expanded" x-cloak @endif class="space-y-2.5">
-            <div class="flex justify-between gap-x-4">
-                <x-input type="date" x-bind:readonly="!edit" wire:model="project.start_date" label="{{ __('Start Date') }}" />
-                <x-input type="date" x-bind:readonly="!edit" wire:model="project.end_date" label="{{ __('End Date') }}" />
+            <div x-bind:class="! edit && 'pointer-events-none'" x-show="! $wire.project.id" x-cloak>
+                <x-select
+                    x-bind:readonly="!edit"
+                    :label="__('Client')"
+                    wire:model="project.client_id"
+                    option-value="id"
+                    option-label="name"
+                    :async-data="[
+                        'api' => route('search', \FluxErp\Models\Client::class),
+                        'method' => 'POST',
+                    ]"
+                />
             </div>
-            <x-state
-                class="w-full"
-                align="left"
-                :label="__('Project state')"
-                wire:model="project.state"
-                formatters="formatter.state"
-                available="availableStates"
-            />
-            <x-textarea x-bind:readonly="!edit" wire:model="project.description" label="{{ __('Description') }}" />
-            <x-select
-                :label="__('Responsible User')"
-                option-value="id"
-                option-label="label"
-                autocomplete="off"
-                wire:model="project.responsible_user_id"
-                :template="[
-                'name'   => 'user-option',
-            ]"
-                :async-data="[
-                'api' => route('search', \FluxErp\Models\User::class),
-                'method' => 'POST',
-                'params' => [
-                    'with' => 'media',
-                ]
-            ]"
-            />
-            <x-select :label="__('Contact')"
-                wire:model="project.contact_id"
-                option-value="contact_id"
-                option-label="label"
-                template="user-option"
-                :async-data="[
-                    'api' => route('search', \FluxErp\Models\Address::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'where' => [
-                            [
-                                'is_main_address',
-                                '=',
-                                true,
-                            ]
-                        ],
-                        'option-value' => 'contact_id',
-                        'fields' => [
-                            'contact_id',
-                            'name',
-                        ],
-                        'with' => 'contact.media',
-                    ]
-                ]"
-            />
-            <x-select
+            <div class="flex justify-between gap-x-4">
+                <x-input
+                    type="date"
+                    x-bind:readonly="!edit"
+                    wire:model="project.start_date"
+                    :label="__('Start Date')"
+                />
+                <x-input
+                    type="date"
+                    x-bind:readonly="!edit"
+                    wire:model="project.end_date"
+                    :label="__('End Date')"
+                />
+            </div>
+            <div x-bind:class="! edit && 'pointer-events-none'">
+                <x-state
+                    x-bind:readonly="!edit"
+                    class="w-full"
+                    align="left"
+                    :label="__('Project state')"
+                    wire:model="project.state"
+                    formatters="formatter.state"
+                    available="availableStates"
+                />
+            </div>
+            <x-textarea
                 x-bind:readonly="!edit"
-                :label="__('Order')"
-                wire:model="project.order_id"
-                option-value="id"
-                option-label="label"
-                option-description="description"
-                :async-data="[
-                    'api' => route('search', \FluxErp\Models\Order::class),
-                ]"
+                wire:model="project.description"
+                :label="__('Description')"
             />
-            <x-inputs.number :label="__('Budget')" x-bind:readonly="!edit" wire:model="project.budget" step="0.01" />
+            <div x-bind:class="! edit && 'pointer-events-none'">
+                <x-select
+                    x-bind:readonly="!edit"
+                    :label="__('Responsible User')"
+                    option-value="id"
+                    option-label="label"
+                    autocomplete="off"
+                    wire:model="project.responsible_user_id"
+                    :template="[
+                        'name'   => 'user-option',
+                    ]"
+                    :async-data="[
+                        'api' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'with' => 'media',
+                        ]
+                    ]"
+                />
+            </div>
+            <div x-bind:class="! edit && 'pointer-events-none'">
+                <x-select :label="__('Contact')"
+                    x-bind:readonly="!edit"
+                    wire:model="project.contact_id"
+                    option-value="contact_id"
+                    option-label="label"
+                    template="user-option"
+                    :async-data="[
+                        'api' => route('search', \FluxErp\Models\Address::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'is_main_address',
+                                    '=',
+                                    true,
+                                ]
+                            ],
+                            'option-value' => 'contact_id',
+                            'fields' => [
+                                'contact_id',
+                                'name',
+                            ],
+                            'with' => 'contact.media',
+                        ]
+                    ]"
+                />
+            </div>
+            <div x-bind:class="! edit && 'pointer-events-none'">
+                <x-select
+                    x-bind:readonly="!edit"
+                    :label="__('Order')"
+                    wire:model="project.order_id"
+                    option-value="id"
+                    option-label="label"
+                    option-description="description"
+                    :async-data="[
+                        'api' => route('search', \FluxErp\Models\Order::class),
+                    ]"
+                />
+            </div>
+            <x-inputs.number
+                :label="__('Budget')"
+                x-bind:readonly="!edit"
+                wire:model="project.budget"
+                step="0.01"
+            />
             <x-input
                 x-bind:readonly="!edit"
                 :label="__('Time Budget')"

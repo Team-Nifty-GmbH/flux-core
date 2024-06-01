@@ -32,7 +32,9 @@ class TaskTest extends BaseSetup
     protected function setUp(): void
     {
         parent::setUp();
-        $this->project = Project::factory()->create();
+        $this->project = Project::factory()->create([
+            'client_id' => $this->dbClient->id,
+        ]);
 
         $this->tasks = Task::factory()->count(3)->create([
             'project_id' => $this->project->id,
@@ -435,7 +437,9 @@ class TaskTest extends BaseSetup
     public function test_update_task_with_project_id()
     {
         $this->tasks[2] = $this->tasks[2]->refresh();
-        $project = Project::factory()->create();
+        $project = Project::factory()->create([
+            'client_id' => $this->dbClient->id,
+        ]);
 
         $task = [
             'id' => $this->tasks[2]->id,

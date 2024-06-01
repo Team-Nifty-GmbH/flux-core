@@ -24,6 +24,8 @@ class CreateCalendar extends FluxAction
         $calendar = app(Calendar::class, ['attributes' => $this->data]);
         $calendar->save();
 
+        $calendar->users()->attach($this->data['user_id']);
+
         return $calendar->fresh();
     }
 }

@@ -5,10 +5,7 @@ namespace FluxErp\Rulesets\CalendarEvent;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rules\MorphClassExists;
-use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\HasCalendarEvents;
 
 class UpdateCalendarEventRuleset extends FluxRuleset
 {
@@ -23,26 +20,18 @@ class UpdateCalendarEventRuleset extends FluxRuleset
                 new ModelExists(CalendarEvent::class),
             ],
             'calendar_id' => [
-                'required_without_all:model_type,model_id',
+                'required',
                 'integer',
                 new ModelExists(Calendar::class),
             ],
-            'model_type' => [
-                'string',
-                'nullable',
-                new MorphClassExists(HasCalendarEvents::class),
-            ],
-            'model_id' => [
-                'integer',
-                'nullable',
-                new MorphExists(),
-            ],
             'title' => 'sometimes|required|string',
             'description' => 'string|nullable',
-            'start' => 'sometimes|required|date_format:Y-m-d H:i',
-            'end' => 'sometimes|required|date_format:Y-m-d H:i|after_or_equal:starts_at',
+            'start' => 'required_if:confirm_option,this|required_if:confirm_option,future|date',
+            'end' => 'required_if:confirm_option,this|required_if:confirm_option,future|date|after_or_equal:start',
             'is_all_day' => 'boolean',
             'extended_props' => 'array|nullable',
+            'confirm_option' => 'required|string|in:this,future,all',
+            'original_start' => 'required_if:confirm_option,this|required_if:confirm_option,future|date',
         ];
     }
 
@@ -50,6 +39,7 @@ class UpdateCalendarEventRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
+            resolve_static(RepeatRuleset::class, 'getRules'),
             resolve_static(InvitedAddressRuleset::class, 'getRules'),
             resolve_static(InvitedUserRuleset::class, 'getRules')
         );

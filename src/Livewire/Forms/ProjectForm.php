@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Project\CreateProject;
 use FluxErp\Actions\Project\UpdateProject;
+use FluxErp\Models\Client;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
@@ -12,6 +13,8 @@ class ProjectForm extends Form
 {
     #[Locked]
     public ?int $id = null;
+
+    public ?int $client_id = null;
 
     public ?int $contact_id = null;
 
@@ -53,5 +56,12 @@ class ProjectForm extends Form
         $response = $action->validate()->execute();
 
         $this->fill($response);
+    }
+
+    public function reset(...$properties): void
+    {
+        parent::reset(...$properties);
+
+        $this->client_id = Client::default()?->id;
     }
 }
