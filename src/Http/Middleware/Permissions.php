@@ -14,7 +14,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class Permissions
 {
-    public function handle(Request $request, Closure $next): Response|RedirectResponse|JsonResponse
+    public function handle(Request $request, Closure $next)
     {
         if (
             ! Auth::user()
