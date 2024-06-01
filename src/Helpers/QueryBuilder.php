@@ -23,7 +23,7 @@ class QueryBuilder
 {
     public static function filterModel(object $model, ?Request $request = null): LaravelQueryBuilder
     {
-        $queryBuilder = LaravelQueryBuilder::for($model, $request);
+        $queryBuilder = LaravelQueryBuilder::for($model::query(), $request);
 
         if (! method_exists($model, 'relationships')) {
             return $queryBuilder;
