@@ -40,7 +40,7 @@ class BatchFinishedNotification extends Notification implements HasToastNotifica
     {
         return ToastNotification::make()
             ->notifiable($notifiable)
-            ->title(__(':job-name is finished', ['job-name' => __($this->model->name)]))
+            ->title(__(':job_name is finished', ['job_name' => __($this->model->name)]))
             ->description(
                 $this->model->failed_jobs === 0
                     ? __('All jobs have been processed successfully')

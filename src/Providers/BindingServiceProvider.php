@@ -78,7 +78,6 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
             'flux.repeatable_manager',
             Registry::class,
             'datatype.registry',
-            'composer',
             DefaultUrlGenerator::class,
             StatefulGuard::class,
         ];

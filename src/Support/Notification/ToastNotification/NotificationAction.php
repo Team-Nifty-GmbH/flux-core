@@ -3,6 +3,7 @@
 namespace FluxErp\Support\Notification\ToastNotification;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Arr;
 
 class NotificationAction implements Arrayable
 {
@@ -29,12 +30,14 @@ class NotificationAction implements Arrayable
     {
         $instance = app(static::class);
 
-        if (count($arguments) === 1 && is_array($arguments[0])) {
-            $arguments = $arguments[0];
+        if (count($arguments) === 1 && array_is_list($arguments)) {
+            $arguments = Arr::wrap($arguments[0]);
         }
 
         foreach ($arguments as $key => $value) {
-            $instance->$key = $value;
+            if (method_exists($instance, $key)) {
+                $instance->$key($value);
+            }
         }
 
         return $instance;

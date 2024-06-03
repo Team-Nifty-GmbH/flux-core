@@ -19,7 +19,7 @@ class DatabaseLoggingHandler extends AbstractProcessingHandler
         $data = [
             'foreign_uuid' => $uuid,
             'message' => data_get($record, 'message'),
-            'context' => json_encode($context ?? []),
+            'context' => json_encode($context),
             'level' => data_get($record, 'level'),
             'level_name' => data_get($record, 'level_name'),
             'channel' => data_get($record, 'channel'),

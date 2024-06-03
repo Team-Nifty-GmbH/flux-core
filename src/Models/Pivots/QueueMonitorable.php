@@ -13,6 +13,13 @@ class QueueMonitorable extends Pivot
 
     public $timestamps = false;
 
+    public function casts(): array
+    {
+        return [
+            'notify_on_finish' => 'boolean',
+        ];
+    }
+
     public function queueMonitor(): BelongsTo
     {
         return $this->belongsTo(QueueMonitor::class);

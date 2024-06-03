@@ -24,7 +24,7 @@ class BatchStartedNotification extends Notification implements HasToastNotificat
     {
         return ToastNotification::make()
             ->notifiable($notifiable)
-            ->title(__(':job-name started', ['job-name' => __($this->model->name)]))
+            ->title(__(':job_name started', ['job_name' => __($this->model->name)]))
             ->icon('info')
             ->timeout(0)
             ->attributes([

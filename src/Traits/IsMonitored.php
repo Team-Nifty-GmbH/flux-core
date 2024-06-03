@@ -20,16 +20,16 @@ trait IsMonitored
 
     public function queueUpdate(array $attributes): void
     {
-        $progress = data_get($attributes, 'progress', 0) / 100;
-        $attributes['progress'] = $progress;
-
-        if ($this->isQueueProgressOnCooldown($progress)) {
+        if ($this->isQueueProgressOnCooldown($progress = data_get($attributes, 'progress', 0))) {
             return;
         }
 
         if (! $monitor = $this->getQueueMonitor()) {
             return;
         }
+
+        $progress = $progress / 100;
+        $attributes['progress'] = $progress;
 
         $monitor->update($attributes);
     }
@@ -103,7 +103,7 @@ trait IsMonitored
         ]);
     }
 
-    private function isQueueProgressOnCooldown(int $progress): bool
+    private function isQueueProgressOnCooldown(float|int $progress): bool
     {
         if (in_array($progress, [0, 25, 50, 75, 100])) {
             return false;

@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('queue_monitors', function (Blueprint $table) {
             $table->id();
             $table->uuid('job_uuid')->nullable();
-            $table->string('job_batch_id')->nullable();
+            $table->string('job_batch_id')->index()->nullable();
             $table->string('job_id')->index();
             $table->string('name')->nullable();
             $table->string('queue')->nullable();
@@ -24,18 +24,18 @@ return new class extends Migration
             $table->timestamp('finished_at')->nullable();
             $table->string('finished_at_exact')->nullable();
 
-            $table->integer('attempt')->default(0);
+            $table->unsignedInteger('attempt')->default(0);
             $table->boolean('retried')->default(false);
             $table->decimal('progress', 11, 10)->default(0);
 
-            $table->longText('exception')->nullable();
+            $table->json('exception')->nullable();
             $table->text('exception_message')->nullable();
             $table->text('exception_class')->nullable();
 
-            $table->longText('data')->nullable();
-            $table->mediumText('accept')->nullable();
-            $table->mediumText('reject')->nullable();
-            $table->mediumText('message')->nullable();
+            $table->json('data')->nullable();
+            $table->text('accept')->nullable();
+            $table->text('reject')->nullable();
+            $table->text('message')->nullable();
 
             $table->timestamps();
         });

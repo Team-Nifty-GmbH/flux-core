@@ -4,6 +4,7 @@ namespace FluxErp\Support\Notification\ToastNotification;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
 use NotificationChannels\WebPush\WebPushMessage;
 
@@ -55,19 +56,17 @@ class ToastNotification implements Arrayable
 
     protected ?object $notifiable = null;
 
-    public static function make(...$arguments): self
+    public static function make(...$arguments): static
     {
         $instance = app(static::class);
 
-        if (count($arguments) === 1 && is_array($arguments[0])) {
-            $arguments = $arguments[0];
+        if (count($arguments) === 1 && array_is_list($arguments)) {
+            $arguments = Arr::wrap($arguments[0]);
         }
 
         foreach ($arguments as $key => $value) {
             if (method_exists($instance, $key)) {
                 $instance->$key($value);
-            } else {
-                $instance->$key = $value;
             }
         }
 

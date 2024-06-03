@@ -31,7 +31,7 @@ const customNotifications = () => {
 
             // If the notifications array has a notification with the same id, update it
             const index = this.notifications.findIndex((item) => item.id === notification.id);
-            if (~index) {
+            if (index !== -1) {
                 this.notifications.splice(index, 1, notification);
             } else {
                 this.notifications.push(notification);

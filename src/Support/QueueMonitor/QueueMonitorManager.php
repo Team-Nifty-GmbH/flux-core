@@ -56,7 +56,7 @@ class QueueMonitorManager
             'job_uuid' => $event->job->uuid(),
             'job_id' => static::getJobId($event->job),
             'queue' => $event->job->getQueue() ?: config('queue.default'),
-            'name' => $event->job->resolveName(),
+            'name' => static::getJobClass($event->job),
             'started_at' => $now,
             'started_at_exact' => $now->format('Y-m-d H:i:s.u'),
             'attempt' => $event->job->attempts(),
@@ -108,7 +108,7 @@ class QueueMonitorManager
         }
 
         /** @var ShouldBeMonitored $resolvedJob */
-        $resolvedJob = $job->resolveName();
+        $resolvedJob = static::getJobClass($job);
         if (is_null($exception) && ! $resolvedJob::keepMonitorOnSuccess()) {
             $monitor->delete();
 
@@ -117,9 +117,9 @@ class QueueMonitorManager
 
         $now = Carbon::now();
 
-        // if the job has an exception, but it's not failed (it did not exceed max tries and max exceptions),
-        // so it will be back to the queue
-        // if the job is processed, but it's released, so it will be back to the queue also
+        // If the job encounters an exception but hasn't failed (i.e., it hasn't reached the maximum
+        // number of tries and exceptions), it will be pushed back into the queue.
+        // Additionally, if the job is processed but then released, it will also be returned to the queue.
         if (
             (is_a($state, Failed::class, true) && ! $job->hasFailed())
             || (is_a($state, Succeeded::class, true) && $job->isReleased())
@@ -149,10 +149,15 @@ class QueueMonitorManager
     public static function shouldBeMonitored(object $job): bool
     {
         return is_a(
-            method_exists($job, 'resolveName') ? $job->resolveName() : $job,
+            static::getJobClass($job),
             ShouldBeMonitored::class,
             true
         );
+    }
+
+    public static function getJobClass(object $job): object|string
+    {
+        return method_exists($job, 'resolveName') ? $job->resolveName() : $job;
     }
 
     public static function getJobId(Job $job): string

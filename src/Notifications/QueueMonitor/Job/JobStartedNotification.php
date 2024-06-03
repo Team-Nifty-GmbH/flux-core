@@ -24,7 +24,7 @@ class JobStartedNotification extends Notification implements HasToastNotificatio
     {
         return ToastNotification::make()
             ->notifiable($notifiable)
-            ->title(__(':job-name started', ['job-name' => __($this->model->getJobName())]))
+            ->title(__(':job_name started', ['job_name' => __($this->model->getJobName())]))
             ->description($this->model->message)
             ->icon('info')
             ->timeout(0)

@@ -78,10 +78,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerMarcos();
         $this->registerExtensions();
 
-        $this->app->extend('validator', function () {
-            return $this->app->get(ValidatorFactory::class);
-        });
-
         Translatable::fallback(
             fallbackAny: true,
         );
@@ -453,6 +449,7 @@ class FluxServiceProvider extends ServiceProvider
                 );
             }
         );
+
         $this->app->extend(
             Builder::class,
             function (Builder $scoutBuilder) {
@@ -469,10 +466,18 @@ class FluxServiceProvider extends ServiceProvider
                 return $scoutBuilder;
             }
         );
+
         $this->app->extend(
             'composer',
             function () {
                 return $this->app->get(Composer::class);
+            }
+        );
+
+        $this->app->extend(
+            'validator',
+            function () {
+                return $this->app->get(ValidatorFactory::class);
             }
         );
     }

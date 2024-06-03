@@ -65,7 +65,7 @@ class JobBatch extends Model
         return 0;
     }
 
-    public function getProcessedJobs()
+    public function getProcessedJobs(): int
     {
         return $this->total_jobs - $this->pending_jobs - $this->failed_jobs;
     }
@@ -74,12 +74,16 @@ class JobBatch extends Model
     {
         $now ??= Carbon::now();
 
-        if (! $this->getProgress() || is_null($this->created_at) || $this->isFinished()) {
+        if (! $this->getProgress()
+            || is_null($this->created_at)
+            || $this->isFinished()
+            || $this->getProgress() === 0.0
+        ) {
             return CarbonInterval::seconds(0);
         }
 
         $timeDiff = $now->getTimestamp() - $this->created_at->getTimestamp();
-        if ($timeDiff === 0 || $this->getProgress() === 0.0) {
+        if ($timeDiff === 0) {
             return CarbonInterval::seconds(0);
         }
 

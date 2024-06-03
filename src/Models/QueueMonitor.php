@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Context;
@@ -54,7 +55,7 @@ class QueueMonitor extends Model
             $user = auth()->user();
             if (! $user && $context = Context::get('user')) {
                 $context = explode(':', $context);
-                $user = app($context[0])->find($context[1]);
+                $user = Relation::getMorphedModel($context[0])->whereKey($context[1])->first();
             }
 
             if ($user && array_key_exists(MonitorsQueue::class, class_uses_recursive($user))) {
@@ -66,7 +67,7 @@ class QueueMonitor extends Model
             }
         });
 
-        static::saved(function (QueueMonitor $monitor) {
+        static::updated(function (QueueMonitor $monitor) {
             if (! $monitor->job_batch_id) {
                 $monitor->users->each->notify(
                     $monitor->isFinished()
@@ -77,9 +78,9 @@ class QueueMonitor extends Model
         });
     }
 
-    public function prunable(): Builder
+    public function addresses(): MorphToMany
     {
-        return $this->where('finished_at', '<', now()->subDays(30));
+        return $this->morphedByMany(Address::class, 'queue_monitorable', 'queue_monitorables');
     }
 
     public function jobBatch(): BelongsTo
@@ -87,19 +88,19 @@ class QueueMonitor extends Model
         return $this->belongsTo(JobBatch::class);
     }
 
+    public function queueMonitorables(): HasMany
+    {
+        return $this->hasMany(QueueMonitorable::class);
+    }
+
     public function users(): MorphToMany
     {
         return $this->morphedByMany(User::class, 'queue_monitorable', 'queue_monitorables');
     }
 
-    public function addresses(): MorphToMany
+    public function prunable(): Builder
     {
-        return $this->morphedByMany(Address::class, 'queue_monitorable', 'queue_monitorables');
-    }
-
-    public function queueMonitorables(): HasMany
-    {
-        return $this->hasMany(QueueMonitorable::class);
+        return $this->where('finished_at', '<', now()->subDays(30));
     }
 
     public function broadcastWith(): array
@@ -142,12 +143,16 @@ class QueueMonitor extends Model
     {
         $now ??= Carbon::now();
 
-        if (! $this->progress || is_null($this->started_at) || $this->isFinished()) {
+        if (! $this->progress
+            || is_null($this->started_at)
+            || $this->isFinished()
+            || $this->progress === 0.0
+        ) {
             return CarbonInterval::seconds(0);
         }
 
         $timeDiff = $now->getTimestamp() - $this->started_at->getTimestamp();
-        if ($timeDiff === 0 || $this->progress === 0.0) {
+        if ($timeDiff === 0) {
             return CarbonInterval::seconds(0);
         }
 
@@ -160,7 +165,7 @@ class QueueMonitor extends Model
         }
     }
 
-    public function getElapsedSeconds(?Carbon $end = null): float
+    public function getElapsedSeconds(?Carbon $end = null): int
     {
         return $this->getElapsedInterval($end)->seconds;
     }

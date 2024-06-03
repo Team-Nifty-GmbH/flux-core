@@ -3,6 +3,7 @@
 namespace FluxErp\Support\Notification\ToastNotification;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Arr;
 
 class NotificationEvent implements Arrayable
 {
@@ -12,12 +13,12 @@ class NotificationEvent implements Arrayable
 
     protected mixed $params = null;
 
-    public static function make(...$arguments): self
+    public static function make(...$arguments): static
     {
         $instance = app(static::class);
 
-        if (count($arguments) === 1 && is_array($arguments[0])) {
-            $arguments = $arguments[0];
+        if (count($arguments) === 1 && array_is_list($arguments)) {
+            $arguments = Arr::wrap($arguments[0]);
         }
 
         foreach ($arguments as $key => $value) {
