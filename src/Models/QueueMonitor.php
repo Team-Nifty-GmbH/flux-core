@@ -143,7 +143,7 @@ class QueueMonitor extends Model
     {
         $now ??= Carbon::now();
 
-        if (! in_array($this->progress, [0.0, 1.0])
+        if (in_array($this->progress, [0.0, 1.0])
             || is_null($this->started_at)
             || $this->isFinished()
         ) {

@@ -74,7 +74,7 @@ class JobBatch extends Model
     {
         $now ??= Carbon::now();
 
-        if (! in_array($this->getProgress(), [0.0, 1.0])
+        if (in_array($this->getProgress(), [0.0, 1.0])
             || is_null($this->created_at)
             || $this->isFinished()
         ) {
