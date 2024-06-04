@@ -114,12 +114,12 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::guard('address')->attempt([
-            'login_name' => $credentials['login_name'],
-            'login_password' => $credentials['password'],
-            'is_active' => true,
-            'can_login' => true,
-        ])) {
+        if (Auth::guard('address')->attempt(
+            array_merge($credentials, [
+                'is_active' => true,
+                'can_login' => true,
+            ])
+        )) {
             $request->session()->regenerate();
 
             return redirect()->intended('portal.dashboard');

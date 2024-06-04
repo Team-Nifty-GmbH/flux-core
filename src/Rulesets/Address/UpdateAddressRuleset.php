@@ -41,7 +41,7 @@ class UpdateAddressRuleset extends FluxRuleset
             ],
             'date_of_birth' => 'date|nullable',
             'department' => 'string|nullable',
-            'login_name' => 'string|nullable',
+            'login_name' => 'required_with:login_password|required_if_accepted:can_login|string|nullable',
             'login_password' => 'string|nullable',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
