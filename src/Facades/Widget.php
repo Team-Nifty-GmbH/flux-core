@@ -2,6 +2,7 @@
 
 namespace FluxErp\Facades;
 
+use FluxErp\Widgets\WidgetManager;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -17,12 +18,12 @@ use Illuminate\Support\Facades\Facade;
  * @method static string|null get(string $name)
  * @method static void autoDiscoverWidgets(string $directory = null, string $namespace = null)
  *
- * @see \FluxErp\Widgets\WidgetManager
+ * @see WidgetManager
  */
 class Widget extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'flux.widget_manager';
+        return WidgetManager::class;
     }
 }

@@ -109,7 +109,11 @@ class QueueMonitorManager
 
         /** @var ShouldBeMonitored $resolvedJob */
         $resolvedJob = static::getJobClass($job);
-        if (is_null($exception) && ! $resolvedJob::keepMonitorOnSuccess()) {
+        $keepMonitorOnSuccess = method_exists($resolvedJob, 'keepMonitorOnSuccess')
+            ? $resolvedJob::keepMonitorOnSuccess()
+            : true;
+
+        if (is_null($exception) && ! $keepMonitorOnSuccess) {
             $monitor->delete();
 
             return;

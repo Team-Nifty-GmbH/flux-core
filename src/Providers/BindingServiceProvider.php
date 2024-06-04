@@ -2,9 +2,6 @@
 
 namespace FluxErp\Providers;
 
-use FluxErp\Actions\ActionManager;
-use FluxErp\Assets\AssetManager;
-use FluxErp\Console\Scheduling\RepeatableManager;
 use FluxErp\DataType\ArrayHandler;
 use FluxErp\DataType\BooleanHandler;
 use FluxErp\DataType\DateTimeHandler;
@@ -16,9 +13,7 @@ use FluxErp\DataType\ObjectHandler;
 use FluxErp\DataType\Registry;
 use FluxErp\DataType\SerializableHandler;
 use FluxErp\DataType\StringHandler;
-use FluxErp\Menu\MenuManager;
 use FluxErp\Support\MediaLibrary\UrlGenerator;
-use FluxErp\Widgets\WidgetManager;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\Facades\Auth;
@@ -55,27 +50,11 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
         });
 
         $this->app->alias(Registry::class, 'datatype.registry');
-
-        $this->app->singleton('flux.asset_manager', fn ($app) => app(AssetManager::class));
-        $this->app->singleton('flux.widget_manager', fn ($app) => app(WidgetManager::class));
-        $this->app->singleton('flux.action_manager', fn ($app) => app(ActionManager::class));
-        $this->app->singleton('flux.menu_manager', fn ($app) => app(MenuManager::class));
-        $this->app->singleton('flux.repeatable_manager', fn ($app) => app(RepeatableManager::class));
     }
 
     public function provides(): array
     {
         return [
-            AssetManager::class,
-            WidgetManager::class,
-            ActionManager::class,
-            MenuManager::class,
-            RepeatableManager::class,
-            'flux.asset_manager',
-            'flux.widget_manager',
-            'flux.action_manager',
-            'flux.menu_manager',
-            'flux.repeatable_manager',
             Registry::class,
             'datatype.registry',
             DefaultUrlGenerator::class,

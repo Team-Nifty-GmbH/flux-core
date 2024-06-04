@@ -55,7 +55,7 @@ class QueueMonitor extends Model
             $user = auth()->user();
             if (! $user && $context = Context::get('user')) {
                 $context = explode(':', $context);
-                $user = Relation::getMorphedModel($context[0])->whereKey($context[1])->first();
+                $user = Relation::getMorphedModel($context[0])::query()->whereKey($context[1])->first();
             }
 
             if ($user && array_key_exists(MonitorsQueue::class, class_uses_recursive($user))) {
@@ -143,10 +143,9 @@ class QueueMonitor extends Model
     {
         $now ??= Carbon::now();
 
-        if (! $this->progress
+        if (! in_array($this->progress, [0.0, 1.0])
             || is_null($this->started_at)
             || $this->isFinished()
-            || $this->progress === 0.0
         ) {
             return CarbonInterval::seconds(0);
         }

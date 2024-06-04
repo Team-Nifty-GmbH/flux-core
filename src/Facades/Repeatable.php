@@ -2,6 +2,7 @@
 
 namespace FluxErp\Facades;
 
+use FluxErp\Console\Scheduling\RepeatableManager;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -10,12 +11,12 @@ use Illuminate\Support\Facades\Facade;
  * @method static array|null get(string $name)
  * @method static void autoDiscover(string|null $directory = null, string|null $namespace = null)
  *
- * @see \FluxErp\Console\Scheduling\RepeatableManager
+ * @see RepeatableManager
  */
 class Repeatable extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'flux.repeatable_manager';
+        return RepeatableManager::class;
     }
 }

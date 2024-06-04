@@ -28,7 +28,7 @@ return new class extends Migration
             $table->boolean('retried')->default(false);
             $table->decimal('progress', 11, 10)->default(0);
 
-            $table->json('exception')->nullable();
+            $table->text('exception')->nullable();
             $table->text('exception_message')->nullable();
             $table->text('exception_class')->nullable();
 

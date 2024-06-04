@@ -6,10 +6,13 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Traits\Macroable;
 use NotificationChannels\WebPush\WebPushMessage;
 
 class ToastNotification implements Arrayable
 {
+    use Macroable;
+
     protected ?string $title = null;
 
     protected ?string $description = null;

@@ -14,6 +14,7 @@ use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\AuthContextMiddleware;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
+use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
@@ -41,6 +42,7 @@ use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
@@ -73,7 +75,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerBladeComponents();
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerLivewireComponents();
-        $this->registerMiddleware();
         $this->registerConfig();
         $this->registerMarcos();
         $this->registerExtensions();
@@ -91,8 +92,8 @@ class FluxServiceProvider extends ServiceProvider
     public function boot(): void
     {
         bcscale(9);
-
-        $this->registerCommands();
+        $this->bootMiddleware();
+        $this->bootCommands();
 
         if (! Response::hasMacro('attachment')) {
             Response::macro('attachment', function ($content, $filename = 'download.pdf') {
@@ -393,7 +394,7 @@ class FluxServiceProvider extends ServiceProvider
         return $components;
     }
 
-    protected function registerCommands(): void
+    protected function bootCommands(): void
     {
         if (! $this->app->runningInConsole()) {
             // commands required for installation
@@ -420,7 +421,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->commands($commandClasses);
     }
 
-    private function registerMiddleware(): void
+    private function bootMiddleware(): void
     {
         /** @var Kernel $kernel */
         $kernel = $this->app->make(Kernel::class);
@@ -434,6 +435,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
         $this->app['router']->aliasMiddleware('permission', Permissions::class);
         $this->app['router']->aliasMiddleware('localization', Localization::class);
+
+        Bus::pipeThrough([new SetJobAuthenticatedUserMiddleware()]);
     }
 
     private function registerExtensions(): void
