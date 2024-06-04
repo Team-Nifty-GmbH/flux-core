@@ -130,9 +130,9 @@ abstract class FluxAction
         return $this;
     }
 
-    public function getData(): array
+    public function getData(?string $key = null): mixed
     {
-        return $this->data;
+        return $key ? data_get($this->data, $key) : $this->data;
     }
 
     public function setRules(array $rules): static

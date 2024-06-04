@@ -95,6 +95,11 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         return $this->belongsTo(Media::class, 'cover_media_id');
     }
 
+    public function orderPositions(): HasMany
+    {
+        return $this->hasMany(OrderPosition::class);
+    }
+
     public function productCrossSellings(): HasMany
     {
         return $this->hasMany(ProductCrossSelling::class);

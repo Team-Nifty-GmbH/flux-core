@@ -5,6 +5,7 @@ namespace FluxErp\Helpers;
 use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
+use FluxErp\Actions\FluxAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Support\Arr;
@@ -96,6 +97,9 @@ class Helper
         string $updateAction,
         string $deleteAction
     ): void {
+        /** @var FluxAction $createAction */
+        /** @var FluxAction $updateAction */
+        /** @var FluxAction $deleteAction */
         $relatedKeyName = $model->$relation()->getRelated()->getKeyName();
 
         $existing = $model->$relation()->pluck($relatedKeyName)->toArray();
@@ -220,6 +224,7 @@ class Helper
 
             if (! $repeatString) {
                 $repetitions[] = $item;
+
                 continue;
             }
 
