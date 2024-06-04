@@ -48,7 +48,7 @@ class CreateVariants extends FluxAction
         $product['tags'] = $parentProduct->tags?->pluck('id')->toArray();
 
         foreach (data_get($this->data, 'product_options') as $variantCreate) {
-            if ($this->checkVariantExistance($variantCreate)) {
+            if ($this->variantExists($variantCreate)) {
                 continue;
             }
 
@@ -71,7 +71,7 @@ class CreateVariants extends FluxAction
         return $parentProduct->children()->get();
     }
 
-    protected function checkVariantExistance(array $configuration): bool
+    protected function variantExists(array $configuration): bool
     {
         return app(Product::class)
             ->query()
@@ -79,7 +79,7 @@ class CreateVariants extends FluxAction
             ->whereHas('productOptions', function (Builder $query) use ($configuration) {
                 return $query
                     ->select('product_product_option.product_id')
-                    ->whereIn('product_options.id', $configuration)
+                    ->whereIntegerInRaw('product_options.id', $configuration)
                     ->groupBy('product_product_option.product_id')
                     ->havingRaw('COUNT(`product_options`.`id`) = ?', [count($configuration)]);
             })

@@ -114,7 +114,7 @@ class VariantList extends ProductList
                 ->whereHas('productOptions', function (Builder $query) use ($activeProductOption) {
                     return $query
                         ->select('product_product_option.product_id')
-                        ->whereIn('product_options.id', $activeProductOption)
+                        ->whereIntegerInRaw('product_options.id', $activeProductOption)
                         ->groupBy('product_product_option.product_id')
                         ->havingRaw('COUNT(`product_options`.`id`) = ?', [count($activeProductOption)]);
                 })
