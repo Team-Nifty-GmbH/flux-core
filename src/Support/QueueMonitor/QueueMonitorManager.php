@@ -33,7 +33,7 @@ class QueueMonitorManager
         app(QueueMonitor::class)->query()->create([
             'job_batch_id' => $event->job->batchId ?? null,
             'job_id' => $event->id,
-            'name' => static::getJobClass($event->job),
+            'name' => get_class(static::getJobClass($event->job)),
             'queue' => $event->job->queue ?: 'default',
             'state' => Queued::class,
             'queued_at' => now(),
