@@ -8,7 +8,6 @@ use FluxErp\Actions\Product\Variant\CreateVariants;
 use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Product;
-use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -145,7 +144,15 @@ class VariantList extends ProductList
         }
 
         try {
-            CreateVariants::make(array_merge($this->product->toArray(), ['parent_id' => $this->product->id]))
+            CreateVariants::make(
+                array_merge(
+                    $this->product->toArray(),
+                    [
+                        'parent_id' => $this->product->id,
+                        'product_options' => data_get($this->variants, 'new', []),
+                    ]
+                )
+            )
                 ->checkPermission()
                 ->validate()
                 ->execute();

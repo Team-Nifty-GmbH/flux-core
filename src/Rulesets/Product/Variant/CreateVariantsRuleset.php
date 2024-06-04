@@ -2,11 +2,13 @@
 
 namespace FluxErp\Rulesets\Product\Variant;
 
+use FluxErp\Models\Client;
 use FluxErp\Models\Product;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rulesets\Product\CreateProductRuleset;
 use FluxErp\Rulesets\Product\ProductOptionRuleset;
+use Illuminate\Support\Arr;
 
 class CreateVariantsRuleset extends FluxRuleset
 {
@@ -20,16 +22,40 @@ class CreateVariantsRuleset extends FluxRuleset
                 'integer',
                 new ModelExists(Product::class),
             ],
+            'name' => 'string',
+            'clients' => 'array',
+            'clients.*' => [
+                'required',
+                'integer',
+                new ModelExists(Client::class),
+            ],
+            'product_options' => 'required|array',
         ];
     }
 
     public static function getRules(): array
     {
         return array_merge(
-            resolve_static(CreateProductRuleset::class, 'getRules'),
+            Arr::except(
+                resolve_static(CreateProductRuleset::class, 'getRules'),
+                [
+                    'uuid',
+                    'parent_id',
+                    'cover_media_id',
+                    'product_number',
+                    'product_options',
+                    'ean',
+                    'is_bundle',
+
+                    'product_options',
+                    'clients',
+                ]
+            ),
+            Arr::mapWithKeys(
+                resolve_static(ProductOptionRuleset::class, 'getRules'),
+                fn ($item, $key) => [$key . '.*' => $item]
+            ),
             parent::getRules(),
-            resolve_static(ProductOptionRuleset::class, 'getRules'),
-            ['product_options' => 'required|array'],
         );
     }
 }
