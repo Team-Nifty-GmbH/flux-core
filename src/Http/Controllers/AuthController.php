@@ -99,7 +99,7 @@ class AuthController extends Controller
         if (Auth::guard('web')->attempt(array_merge($credentials, ['is_active' => true]))) {
             $request->session()->regenerate();
 
-            return redirect()->intended('dashboard');
+            return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors([
@@ -122,12 +122,12 @@ class AuthController extends Controller
         )) {
             $request->session()->regenerate();
 
-            return redirect()->intended('portal.dashboard');
+            return redirect()->intended(route('portal.dashboard'));
         }
 
         return back()->withErrors([
             'login_name' => __('auth.failed'),
-        ])->onlyInput('email');
+        ])->onlyInput('login_name');
     }
 
     public function logout(Request $request): JsonResponse
