@@ -21,7 +21,12 @@ class Login extends \FluxErp\Livewire\Auth\Login
 
     protected function tryLogin(): bool
     {
-        return Auth::guard('address')->attempt(['login_name' => $this->email, 'password' => $this->password]);
+        return Auth::guard('address')->attempt([
+            'login_name' => $this->email,
+            'password' => $this->password,
+            'is_active' => true,
+            'can_login' => true,
+        ]);
     }
 
     protected function retrieveUserByCredentials(): ?Authenticatable

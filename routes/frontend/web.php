@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\PushSubscriptionController;
 use FluxErp\Http\Controllers\SearchController;
@@ -88,6 +89,8 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
 Route::get('/login', Login::class)
     ->middleware(['guest:web'])
     ->name('login');
+Route::post('/login', [AuthController::class, 'authenticateWeb'])
+    ->middleware(['guest:web']);
 Route::post('/logout', Logout::class)
     ->name('logout');
 
