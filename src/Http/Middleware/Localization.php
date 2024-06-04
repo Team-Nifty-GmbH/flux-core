@@ -12,7 +12,7 @@ class Localization
     public function handle(Request $request, Closure $next): mixed
     {
         try {
-            $userLanguage = (app('migrator')->repositoryExists() ? Auth::user()?->language->language_code : null);
+            $userLanguage = (app('migrator')->repositoryExists() ? Auth::user()?->language?->language_code : null);
         } catch (QueryException) {
             $userLanguage = null;
         }
