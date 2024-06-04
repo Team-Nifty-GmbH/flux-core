@@ -13,7 +13,19 @@ return new class extends Migration
             $table->morphs('job_batchable', 'job_batchable_index');
             $table->boolean('notify_on_finish')->default(false);
 
-            $table->foreign('job_batch_id')->references('id')->on('job_batches')->cascadeOnDelete();
+            $table->foreign('job_batch_id')
+                ->references('id')
+                ->on('job_batches')
+                ->cascadeOnDelete();
+
+            $table->primary(
+                [
+                    'job_batch_id',
+                    'job_batchable_id',
+                    'job_batchable_type'
+                ],
+                'job_batchables_primary'
+            );
         });
     }
 

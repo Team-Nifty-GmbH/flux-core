@@ -12,6 +12,15 @@ return new class extends Migration
             $table->foreignId('queue_monitor_id')->constrained()->cascadeOnDelete();
             $table->morphs('queue_monitorable', 'queue_monitorable_index');
             $table->boolean('notify_on_finish')->default(false);
+
+            $table->primary(
+                [
+                    'queue_monitor_id',
+                    'queue_monitorable_id',
+                    'queue_monitorable_type',
+                ],
+                'queue_monitorables_primary'
+            );
         });
     }
 
