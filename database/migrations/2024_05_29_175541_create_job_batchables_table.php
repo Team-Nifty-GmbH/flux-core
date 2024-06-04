@@ -22,7 +22,7 @@ return new class extends Migration
                 [
                     'job_batch_id',
                     'job_batchable_id',
-                    'job_batchable_type'
+                    'job_batchable_type',
                 ],
                 'job_batchables_primary'
             );
