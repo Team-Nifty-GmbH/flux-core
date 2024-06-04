@@ -227,6 +227,7 @@ class FillOrderPositions extends FluxAction
                 ],
                 'vat_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['vat_price'])),
+                    'nullable',
                     new Numeric(),
                 ],
                 'vat_rate_percentage' => [

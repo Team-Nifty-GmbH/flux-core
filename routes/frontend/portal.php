@@ -1,5 +1,8 @@
 <?php
 
+use FluxErp\Http\Controllers\AuthController;
+use FluxErp\Livewire\Portal\Auth\Login;
+use FluxErp\Livewire\Portal\Auth\Logout;
 use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
@@ -16,39 +19,46 @@ use TeamNiftyGmbH\DataTable\Controllers\IconController;
 */
 Route::get('/icons/{name}/{variant?}', IconController::class)
     ->where('variant', '(outline|solid)')
-    ->name('portal.icons');
+    ->name('icons');
+Route::get('/login', Login::class)
+    ->middleware(['guest:address'])
+    ->name('login');
+Route::post('/login', [AuthController::class, 'authenticatePortal'])
+    ->middleware(['guest:address']);
+Route::any('/logout', Logout::class)
+    ->name('logout');
 
 Route::middleware(['auth:address', 'permission'])->group(function () {
     Route::get('/', FluxErp\Livewire\Portal\Dashboard::class)
-        ->name('portal.dashboard')
+        ->name('dashboard')
         ->registersMenuItem(icon: 'home', order: -9999);
     Route::get('/calendar', FluxErp\Livewire\Portal\Calendar::class)
-        ->name('portal.calendar')
+        ->name('calendar')
         ->registersMenuItem(icon: 'calendar');
     Route::get('/files', FluxErp\Livewire\Portal\Files::class)
-        ->name('portal.files')
+        ->name('files')
         ->registersMenuItem(icon: 'folder-open');
     Route::get('/my-profile', FluxErp\Livewire\Portal\Profile::class)
-        ->name('portal.my-profile');
+        ->name('my-profile');
     Route::get('/orders/{id}', FluxErp\Livewire\Portal\OrderDetail::class)
-        ->name('portal.orders.id');
+        ->name('orders.id');
     Route::get('/orders', FluxErp\Livewire\Portal\Orders::class)
-        ->name('portal.orders')
+        ->name('orders')
         ->registersMenuItem(icon: 'shopping-bag');
     Route::get('/product/{id}', FluxErp\Livewire\Portal\Product::class)
-        ->name('portal.product');
+        ->name('product');
     Route::get('/profiles/{id?}', FluxErp\Livewire\Portal\Profile::class)
-        ->name('portal.profiles.id?');
+        ->name('profiles.id?');
     Route::get('/serial-numbers', FluxErp\Livewire\Portal\SerialNumbers::class)
-        ->name('portal.serial-numbers')
+        ->name('serial-numbers')
         ->registersMenuItem(icon: 'tag');
     Route::get('/service/{serialNumberId?}', FluxErp\Livewire\Portal\Service::class)
-        ->name('portal.service');
+        ->name('service');
     Route::get('/tickets', FluxErp\Livewire\Portal\Ticket\Tickets::class)
-        ->name('portal.tickets')
+        ->name('tickets')
         ->registersMenuItem(icon: 'wrench-screwdriver');
     Route::get('/tickets/{id}', FluxErp\Livewire\Portal\Ticket\Ticket::class)
-        ->name('portal.tickets.id');
+        ->name('tickets.id');
 
     Route::get('/media/{media}/{filename}', function (Media $media) {
         return $media;

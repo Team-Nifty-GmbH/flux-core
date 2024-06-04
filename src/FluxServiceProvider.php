@@ -2,33 +2,19 @@
 
 namespace FluxErp;
 
-use FluxErp\Actions\ActionManager;
-use FluxErp\Assets\AssetManager;
 use FluxErp\Console\Commands\Init\InitEnv;
 use FluxErp\Console\Commands\Init\InitPermissions;
-use FluxErp\Console\Scheduling\RepeatableManager;
-use FluxErp\DataType\ArrayHandler;
-use FluxErp\DataType\BooleanHandler;
-use FluxErp\DataType\DateTimeHandler;
-use FluxErp\DataType\FloatHandler;
-use FluxErp\DataType\IntegerHandler;
-use FluxErp\DataType\ModelCollectionHandler;
-use FluxErp\DataType\NullHandler;
-use FluxErp\DataType\ObjectHandler;
-use FluxErp\DataType\Registry;
-use FluxErp\DataType\SerializableHandler;
-use FluxErp\DataType\StringHandler;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Menu;
 use FluxErp\Facades\Repeatable;
 use FluxErp\Facades\Widget;
-use FluxErp\Factories\ValidatorFactory;
 use FluxErp\Helpers\Composer;
 use FluxErp\Helpers\Livewire\Features\SupportFormObjects;
 use FluxErp\Helpers\MediaLibraryDownloader;
+use FluxErp\Http\Middleware\AuthContextMiddleware;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
-use FluxErp\Menu\MenuManager;
+use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
@@ -41,18 +27,22 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
-use FluxErp\Support\MediaLibrary\UrlGenerator;
+use FluxErp\Support\Validator\ValidatorFactory;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasParentMorphClass;
-use FluxErp\Widgets\WidgetManager;
+use Illuminate\Bus\Dispatcher;
+use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\ServiceProvider;
@@ -64,7 +54,6 @@ use Livewire\Livewire;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
-use Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Spatie\Translatable\Facades\Translatable;
@@ -86,69 +75,15 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerBladeComponents();
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerLivewireComponents();
-        $this->registerMiddleware();
         $this->registerConfig();
         $this->registerMarcos();
-
-        $this->app->bind(DefaultUrlGenerator::class, UrlGenerator::class);
-
-        $this->app->extend('validator', function () {
-            return $this->app->get(ValidatorFactory::class);
-        });
-
-        $this->app->extend('composer', function () {
-            return $this->app->get(Composer::class);
-        });
-
-        $this->app->singleton(Registry::class, function () {
-            $registry = new Registry();
-            $dataTypeHandlers = [
-                BooleanHandler::class,
-                NullHandler::class,
-                IntegerHandler::class,
-                FloatHandler::class,
-                StringHandler::class,
-                DateTimeHandler::class,
-                ArrayHandler::class,
-                ModelCollectionHandler::class,
-                SerializableHandler::class,
-                ObjectHandler::class,
-            ];
-
-            foreach ($dataTypeHandlers as $handler) {
-                $registry->addHandler(new $handler());
-            }
-
-            return $registry;
-        });
+        $this->registerExtensions();
 
         Translatable::fallback(
             fallbackAny: true,
         );
 
-        $this->app->alias(Registry::class, 'datatype.registry');
-
-        $this->app->singleton('flux.asset_manager', fn ($app) => app(AssetManager::class));
-        $this->app->singleton('flux.widget_manager', fn ($app) => app(WidgetManager::class));
-        $this->app->singleton('flux.action_manager', fn ($app) => app(ActionManager::class));
-        $this->app->singleton('flux.menu_manager', fn ($app) => app(MenuManager::class));
-        $this->app->singleton('flux.repeatable_manager', fn ($app) => app(RepeatableManager::class));
-
         app('livewire')->componentHook(SupportFormObjects::class);
-
-        $this->app->extend(Builder::class, function (Builder $scoutBuilder) {
-            if (($user = auth()->user()) instanceof User
-                && in_array(HasClientAssignment::class, class_uses_recursive($scoutBuilder->model))
-                && $scoutBuilder->model->isRelation('client')
-                && ($relation = $scoutBuilder->model->client()) instanceof BelongsTo
-            ) {
-                $clients = $user->clients()->pluck('id')->toArray() ?: Client::query()->pluck('id')->toArray();
-
-                $scoutBuilder->whereIn($relation->getForeignKeyName(), $clients);
-            }
-
-            return $scoutBuilder;
-        });
     }
 
     /**
@@ -157,8 +92,8 @@ class FluxServiceProvider extends ServiceProvider
     public function boot(): void
     {
         bcscale(9);
-
-        $this->registerCommands();
+        $this->bootMiddleware();
+        $this->bootCommands();
 
         if (! Response::hasMacro('attachment')) {
             Response::macro('attachment', function ($content, $filename = 'download.pdf') {
@@ -216,7 +151,7 @@ class FluxServiceProvider extends ServiceProvider
                 });
         }
 
-        \Illuminate\Routing\Route::macro('registersMenuItem',
+        Route::macro('registersMenuItem',
             function (?string $label = null, ?string $icon = null, ?int $order = null) {
                 Menu::register(
                     route: $this,
@@ -227,7 +162,7 @@ class FluxServiceProvider extends ServiceProvider
             }
         );
 
-        \Illuminate\Routing\Route::macro('getPermissionName',
+        Route::macro('getPermissionName',
             function () {
                 $methods = array_flip($this->methods());
                 Arr::forget($methods, 'HEAD');
@@ -245,7 +180,7 @@ class FluxServiceProvider extends ServiceProvider
             }
         );
 
-        \Illuminate\Routing\Route::macro('hasPermission', function () {
+        Route::macro('hasPermission', function () {
             $this->setAction(array_merge($this->getAction(), [
                 'permission' => route_to_permission($this, false),
             ]));
@@ -257,12 +192,17 @@ class FluxServiceProvider extends ServiceProvider
             'getMorphClassAlias',
             function (string $class): ?string {
                 if (in_array(HasParentMorphClass::class, class_uses_recursive($class))) {
+                    /** @var HasParentMorphClass $class */
                     $class = Relation::getMorphedModel($class::getParentMorphClass());
                 }
 
                 return data_get(array_flip(Relation::$morphMap), $class);
             }
         );
+
+        Command::macro('removeLastLine', function () {
+            $this->output->write("\x1b[1A\r\x1b[K");
+        });
     }
 
     protected function offerPublishing(): void
@@ -293,7 +233,6 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerConfig(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
-        $this->mergeConfigFrom(__DIR__ . '/../config/fortify.php', 'fortify');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
         $this->mergeConfigFrom(__DIR__ . '/../config/scout.php', 'scout');
         config(['auth' => require __DIR__ . '/../config/auth.php']);
@@ -387,7 +326,7 @@ class FluxServiceProvider extends ServiceProvider
             ],
         ]);
 
-        if (app()->runningInConsole()) {
+        if ($this->app->runningInConsole()) {
             config([
                 'tinker.alias' => [
                     'FluxErp\\Models\\',
@@ -455,7 +394,7 @@ class FluxServiceProvider extends ServiceProvider
         return $components;
     }
 
-    protected function registerCommands(): void
+    protected function bootCommands(): void
     {
         if (! $this->app->runningInConsole()) {
             // commands required for installation
@@ -482,18 +421,67 @@ class FluxServiceProvider extends ServiceProvider
         $this->commands($commandClasses);
     }
 
-    private function registerMiddleware(): void
+    private function bootMiddleware(): void
     {
         /** @var Kernel $kernel */
-        $kernel = app()->make(Kernel::class);
+        $kernel = $this->app->make(Kernel::class);
         $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);
 
         $kernel->appendMiddlewareToGroup('web', Localization::class);
+        $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
 
         $this->app['router']->aliasMiddleware('abilities', CheckAbilities::class);
         $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
         $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
         $this->app['router']->aliasMiddleware('permission', Permissions::class);
         $this->app['router']->aliasMiddleware('localization', Localization::class);
+
+        Bus::pipeThrough([new SetJobAuthenticatedUserMiddleware()]);
+    }
+
+    private function registerExtensions(): void
+    {
+        $this->app->extend(
+            Dispatcher::class,
+            function () {
+                return new Support\Bus\Dispatcher(
+                    $this->app,
+                    function ($connection = null) {
+                        return $this->app[QueueFactoryContract::class]->connection($connection);
+                    }
+                );
+            }
+        );
+
+        $this->app->extend(
+            Builder::class,
+            function (Builder $scoutBuilder) {
+                if (($user = auth()->user()) instanceof User
+                    && in_array(HasClientAssignment::class, class_uses_recursive($scoutBuilder->model))
+                    && $scoutBuilder->model->isRelation('client')
+                    && ($relation = $scoutBuilder->model->client()) instanceof BelongsTo
+                ) {
+                    $clients = $user->clients()->pluck('id')->toArray() ?: Client::query()->pluck('id')->toArray();
+
+                    $scoutBuilder->whereIn($relation->getForeignKeyName(), $clients);
+                }
+
+                return $scoutBuilder;
+            }
+        );
+
+        $this->app->extend(
+            'composer',
+            function () {
+                return $this->app->get(Composer::class);
+            }
+        );
+
+        $this->app->extend(
+            'validator',
+            function () {
+                return $this->app->get(ValidatorFactory::class);
+            }
+        );
     }
 }

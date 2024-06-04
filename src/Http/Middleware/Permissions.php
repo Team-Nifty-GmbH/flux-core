@@ -11,12 +11,6 @@ use Spatie\Permission\Traits\HasRoles;
 
 class Permissions
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
-     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
-     */
     public function handle(Request $request, Closure $next)
     {
         if (
@@ -33,7 +27,7 @@ class Permissions
 
         try {
             $hasPermission = Auth::user()?->hasPermissionTo($permission);
-        } catch (PermissionDoesNotExist $e) {
+        } catch (PermissionDoesNotExist) {
             $hasPermission = true;
         }
 

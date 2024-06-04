@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\PushSubscriptionController;
 use FluxErp\Http\Controllers\SearchController;
@@ -9,6 +10,8 @@ use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminder;
 use FluxErp\Livewire\Accounting\TransactionList;
+use FluxErp\Livewire\Auth\Login;
+use FluxErp\Livewire\Auth\Logout;
 use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
@@ -32,6 +35,7 @@ use FluxErp\Livewire\Project\Project;
 use FluxErp\Livewire\Project\ProjectList;
 use FluxErp\Livewire\Settings\ActivityLogs;
 use FluxErp\Livewire\Settings\AdditionalColumns;
+use FluxErp\Livewire\Settings\AddressTypes;
 use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\Clients;
@@ -51,6 +55,7 @@ use FluxErp\Livewire\Settings\Permissions;
 use FluxErp\Livewire\Settings\Plugins;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Livewire\Settings\Profile;
+use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\TicketTypes;
@@ -82,6 +87,13 @@ Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)->name('f
 Route::get('/icons/{name}/{variant?}', IconController::class)
     ->where('variant', '(outline|solid)')
     ->name('icons');
+Route::get('/login', Login::class)
+    ->middleware(['guest:web'])
+    ->name('login');
+Route::post('/login', [AuthController::class, 'authenticateWeb'])
+    ->middleware(['guest:web']);
+Route::post('/logout', Logout::class)
+    ->name('logout');
 
 Route::middleware(['auth:web', 'permission'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);
@@ -147,6 +159,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                 Route::get('/additional-columns', AdditionalColumns::class)
                     ->name('additional-columns')
                     ->registersMenuItem();
+                Route::get('/address-types', AddressTypes::class)
+                    ->name('address-types')
+                    ->registersMenuItem();
                 Route::get('/categories', Categories::class)
                     ->name('categories')
                     ->registersMenuItem();
@@ -188,6 +203,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                     ->name('serial-number-ranges')
                     ->registersMenuItem();
                 Route::get('/scheduling', Scheduling::class)->name('scheduling')->registersMenuItem();
+                Route::get('/queue-monitor', QueueMonitor::class)
+                    ->name('queue-monitor')
+                    ->registersMenuItem();
                 Route::get('/plugins', Plugins::class)
                     ->name('plugins')
                     ->registersMenuItem();

@@ -60,7 +60,7 @@ class ViewServiceProvider extends ServiceProvider
                         'team-nifty-gmbh/tall-calendar'
                     ),
                     static::getRealPackageAssetPath(
-                        'dist/wireui.js',
+                        'ts/index.ts',
                         'wireui/wireui'
                     ),
                 ]

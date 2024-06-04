@@ -4,10 +4,10 @@ namespace FluxErp\Livewire\Product;
 
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
+use FluxErp\Actions\Product\Variant\CreateVariants;
 use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Product;
-use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -114,7 +114,7 @@ class VariantList extends ProductList
                 ->whereHas('productOptions', function (Builder $query) use ($activeProductOption) {
                     return $query
                         ->select('product_product_option.product_id')
-                        ->whereIn('product_options.id', $activeProductOption)
+                        ->whereIntegerInRaw('product_options.id', $activeProductOption)
                         ->groupBy('product_product_option.product_id')
                         ->havingRaw('COUNT(`product_options`.`id`) = ?', [count($activeProductOption)]);
                 })
@@ -143,37 +143,21 @@ class VariantList extends ProductList
                 ->execute();
         }
 
-        $product = $this->product->toArray();
-        unset(
-            $product['id'],
-            $product['cover_media_id'],
-            $product['parent_id'],
-            $product['product_options'],
-            $product['product_number'],
-            $product['ean'],
-            $product['is_bundle'],
-        );
-        $product['parent_id'] = $this->product->id;
-
-        foreach (data_get($this->variants, 'new', []) as $variantCreate) {
-            $product['product_options'] = $variantCreate;
-            $product['name'] = $this->product->name . ' - '
-                . implode(
-                    ' ',
-                    app(ProductOption::class)->query()
-                        ->whereIntegerInRaw('id', $variantCreate)
-                        ->pluck('name')
-                        ->toArray()
-                );
-
-            try {
-                CreateProduct::make($product)
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
-            }
+        try {
+            CreateVariants::make(
+                array_merge(
+                    $this->product->toArray(),
+                    [
+                        'parent_id' => $this->product->id,
+                        'product_options' => data_get($this->variants, 'new', []),
+                    ]
+                )
+            )
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
         }
 
         $this->variants = [];

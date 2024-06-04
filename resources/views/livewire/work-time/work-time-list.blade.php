@@ -34,6 +34,9 @@
                         'api' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',
                         'params' => [
+                            'where'=> [
+                                'is_active' => true,
+                            ],
                             'with' => 'media',
                         ]
                     ]"

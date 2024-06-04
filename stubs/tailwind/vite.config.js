@@ -1,5 +1,8 @@
 import {defineConfig} from 'vite';
 import laravel from 'laravel-vite-plugin';
+import path from "path";
+import tailwindcss from "tailwindcss";
+import autoprefixer from "autoprefixer";
 
 export default defineConfig({
     base: "/flux-assets/",
@@ -15,9 +18,22 @@ export default defineConfig({
                 './vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js',
                 './vendor/team-nifty-gmbh/tall-calendar/resources/js/index.js',
                 './vendor/team-nifty-gmbh/tall-calendar/resources/css/calendar.css',
-                './vendor/wireui/wireui/dist/wireui.js'
+                './vendor/wireui/wireui/ts/index.ts',
             ],
             refresh: false
         })
     ],
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, 'vendor/wireui/wireui/ts')
+        },
+    },
+    css: {
+        postcss: {
+            plugins: [
+                tailwindcss,
+                autoprefixer,
+            ],
+        },
+    }
 });
