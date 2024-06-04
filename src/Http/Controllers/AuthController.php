@@ -7,7 +7,9 @@ use FluxErp\Models\Address;
 use FluxErp\Models\InterfaceUser;
 use FluxErp\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -85,6 +87,47 @@ class AuthController extends Controller
                 'token' => $token->plainTextToken,
             ]
         );
+    }
+
+    public function authenticateWeb(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (Auth::guard('web')->attempt(array_merge($credentials, ['is_active' => true]))) {
+            $request->session()->regenerate();
+
+            return redirect()->intended('dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => __('auth.failed'),
+        ])->onlyInput('email');
+    }
+
+    public function authenticatePortal(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'login_name' => ['required', 'string'],
+            'password' => ['required'],
+        ]);
+
+        if (Auth::guard('address')->attempt([
+            'login_name' => $credentials['login_name'],
+            'login_password' => $credentials['password'],
+            'is_active' => true,
+            'can_login' => true,
+        ])) {
+            $request->session()->regenerate();
+
+            return redirect()->intended('portal.dashboard');
+        }
+
+        return back()->withErrors([
+            'login_name' => __('auth.failed'),
+        ])->onlyInput('email');
     }
 
     public function logout(Request $request): JsonResponse
