@@ -56,7 +56,7 @@ class QueueMonitorManager
             'job_uuid' => $event->job->uuid(),
             'job_id' => static::getJobId($event->job),
             'queue' => $event->job->getQueue() ?: config('queue.default'),
-            'name' => get_class(static::getJobClass($event->job)),
+            'name' => static::getJobClass($event->job),
             'started_at' => $now,
             'started_at_exact' => $now->format('Y-m-d H:i:s.u'),
             'attempt' => $event->job->attempts(),
