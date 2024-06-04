@@ -54,6 +54,7 @@ use FluxErp\Livewire\Settings\Permissions;
 use FluxErp\Livewire\Settings\Plugins;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Livewire\Settings\Profile;
+use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\TicketTypes;
@@ -199,6 +200,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                     ->name('serial-number-ranges')
                     ->registersMenuItem();
                 Route::get('/scheduling', Scheduling::class)->name('scheduling')->registersMenuItem();
+                Route::get('/queue-monitor', QueueMonitor::class)
+                    ->name('queue-monitor')
+                    ->registersMenuItem();
                 Route::get('/plugins', Plugins::class)
                     ->name('plugins')
                     ->registersMenuItem();

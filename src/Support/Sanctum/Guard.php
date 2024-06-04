@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\VendorClasses;
+namespace FluxErp\Support\Sanctum;
 
 use Laravel\Sanctum\Sanctum;
 

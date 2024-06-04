@@ -2,6 +2,7 @@
 
 namespace FluxErp\Facades;
 
+use FluxErp\Menu\MenuManager;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Facade;
 
@@ -12,12 +13,12 @@ use Illuminate\Support\Facades\Facade;
  * @method static array|null get(string $name)
  * @method static array forGuard(string $guard, string $group = null, bool $ignorePermissions = false)
  *
- * @see \FluxErp\Menu\MenuManager
+ * @see MenuManager
  */
 class Menu extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'flux.menu_manager';
+        return MenuManager::class;
     }
 }

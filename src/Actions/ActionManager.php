@@ -63,7 +63,13 @@ class ActionManager
 
         $cacheKey = md5($path . $namespace);
 
-        if (! is_null($actions = Cache::get('flux.actions.' . $cacheKey)) && ! app()->runningInConsole()) {
+        try {
+            $actions = Cache::get('flux.actions.' . $cacheKey);
+        } catch (\Throwable) {
+            $actions = null;
+        }
+
+        if (! is_null($actions) && ! app()->runningInConsole()) {
             $iterator = [];
         } else {
             $actions = [];
@@ -97,6 +103,10 @@ class ActionManager
             }
         }
 
-        Cache::put('flux.actions.' . $cacheKey, $actions);
+        try {
+            Cache::put('flux.actions.' . $cacheKey, $actions);
+        } catch (\Throwable) {
+            // Ignore exceptions during cache put
+        }
     }
 }

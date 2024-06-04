@@ -1,17 +1,18 @@
 <div
     x-data="wireui_notifications"
+    x-init.once="window.Echo.private('{{ auth()->user()->broadcastChannel() }}').notification((notification) => {
+        $wire.sendNotify(notification);
+    });"
 >
     <div x-data="{
-         unread: @entangle('unread').live,
-         showNotifications: @entangle('showNotifications').live,
          closeNotification(notification) {
              $wire.markAsRead(notification.notification_id);
 
              this.notifications = this.notifications.filter(n => n.id !== notification.id);
-         },
+         }
      }"
-         x-on:keydown.escape="showNotifications = false"
-         x-on:click.away="showNotifications = false"
+         x-on:keydown.escape="$wire.showNotifications = false"
+         x-on:click.away="$wire.showNotifications = false"
     >
         <div>
             <x-button.circle
@@ -27,19 +28,19 @@
                         )
                     }
                 )});
-                showNotifications = true;"
+                $wire.showNotifications = true;"
             />
-            <div class="z-10 -mt-11 pl-5" x-cloak x-transition x-show="unread">
+            <div class="z-10 -mt-11 pl-5" x-cloak x-transition x-show="$wire.unread">
                 <x-button rounded 2xs negative >
                     <x-slot name="label">
-                        <span x-text="unread"></span>
+                        <span x-text="$wire.unread"></span>
                     </x-slot>
                 </x-button>
             </div>
         </div>
         <aside
             x-cloak
-            x-show="showNotifications"
+            x-show="$wire.showNotifications"
             x-transition:enter="transform transition ease-in-out duration-500"
             x-transition:enter-start="translate-x-full"
             x-transition:enter-end="translate-x-0"
@@ -51,7 +52,7 @@
             <div class="flex h-full flex-col justify-between">
                 <div>
                     <div class="flex justify-end p-2.5">
-                        <x-button.circle secondary icon="x" x-on:click.prevent="showNotifications = false, notifications = []" />
+                        <x-button.circle secondary icon="x" x-on:click.prevent="$wire.showNotifications = false, notifications = []" />
                     </div>
                     <div class="space-y-3 p-6">
                         <template x-for="notification in notifications">
@@ -63,13 +64,13 @@
                                     :class="{
                                         'pl-4': Boolean(notification.dense),
                                         'p-4': !Boolean(notification.rightButtons),
-                                        'w-0 flex-1 flex items-center p-4': Boolean(notification.rightButtons),
+                                        'w-0 flex-1 flex items-center p-4': Boolean(notification.rightButtons)
                                     }"
                                 >
                                     <div
                                         :class="{
                                             'flex items-start': !Boolean(notification.rightButtons),
-                                            'w-full flex': Boolean(notification.rightButtons),
+                                            'w-full flex': Boolean(notification.rightButtons)
                                         }"
                                     >
                                         <!-- notification icon|img -->
@@ -77,7 +78,7 @@
                                             <div class="shrink-0"
                                                  :class="{
                                                     'w-6': Boolean(notification.icon),
-                                                    'pt-0.5': Boolean(notification.img),
+                                                    'pt-0.5': Boolean(notification.img)
                                                 }"
                                             >
                                                 <template x-if="notification.icon">
@@ -85,7 +86,7 @@
                                                 </template>
 
                                                 <template x-if="notification.img">
-                                                    <img class="h-10 w-10 rounded-full" :src="notification.img" />
+                                                    <img alt="notification-image" class="h-10 w-10 rounded-full" :src="notification.img" />
                                                 </template>
                                             </div>
                                         </template>
@@ -111,7 +112,7 @@
                                                             :class="{
                                                                 'bg-white dark:bg-transparent text-primary-600 hover:text-primary-500': !Boolean($wireui.dataGet(notification, 'accept.style')),
                                                                 [$wireui.dataGet(notification, 'accept.style')]: Boolean($wireui.dataGet(notification, 'accept.style')),
-                                                                'px-3 py-2 border shadow-sm': Boolean($wireui.dataGet(notification, 'accept.solid')),
+                                                                'px-3 py-2 border shadow-sm': Boolean($wireui.dataGet(notification, 'accept.solid'))
                                                             }"
                                                             x-on:click="accept(notification)"
                                                             x-show="$wireui.dataGet(notification, 'accept.label')"
@@ -122,7 +123,7 @@
                                                             :class="{
                                                                 'bg-white dark:bg-transparent text-secondary-700 dark:text-secondary-600 hover:text-secondary-500': !Boolean($wireui.dataGet(notification, 'reject.style')),
                                                                 [$wireui.dataGet(notification, 'reject.style')]: Boolean($wireui.dataGet(notification, 'reject.style')),
-                                                                'px-3 py-2 border border-secondary-300 shadow-sm': Boolean($wireui.dataGet(notification, 'accept.solid')),
+                                                                'px-3 py-2 border border-secondary-300 shadow-sm': Boolean($wireui.dataGet(notification, 'accept.solid'))
                                                             }"
                                                             x-on:click="reject(notification)"
                                                             x-show="$wireui.dataGet(notification, 'reject.label')"
@@ -172,7 +173,7 @@
                                                         :class="{
                                                             'text-primary-600 hover:text-primary-500 hover:bg-secondary-50 dark:hover:bg-secondary-700': !Boolean(notification.accept.style),
                                                             [notification.accept.style]: Boolean(notification.accept.style),
-                                                            'rounded-br-lg': !Boolean(notification.reject),
+                                                            'rounded-br-lg': !Boolean(notification.reject)
                                                         }"
                                                         x-on:click="accept(notification)"
                                                         x-text="notification.accept.label">
@@ -186,7 +187,7 @@
                                                         :class="{
                                                             'text-secondary-700 hover:text-secondary-500 dark:text-secondary-600 hover:bg-secondary-50 dark:hover:bg-secondary-700': !Boolean(notification.reject.style),
                                                             [notification.reject.style]: Boolean(notification.reject.style),
-                                                            'rounded-tr-lg': !Boolean(notification.accept),
+                                                            'rounded-tr-lg': !Boolean(notification.accept)
                                                         }"
                                                         x-on:click="reject(notification)"
                                                         x-text="notification.reject.label">
@@ -200,7 +201,7 @@
                     </div>
                 </div>
                 <div class="w-full p-6">
-                    <x-button primary class="w-full" :label="__('Mark all as read')" x-on:click.prevent="$wire.markAllAsRead(), showNotifications = false"/>
+                    <x-button primary class="w-full" :label="__('Mark all as read')" x-on:click.prevent="$wire.markAllAsRead(), $wire.showNotifications = false"/>
                 </div>
             </div>
         </aside>

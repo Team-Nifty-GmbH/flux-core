@@ -13,6 +13,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\Lockable;
+use FluxErp\Traits\MonitorsQueue;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -40,7 +41,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 {
     use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendars,
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid,
-        Lockable, Notifiable, Searchable, SoftDeletes;
+        Lockable, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'login_password',

@@ -7,6 +7,7 @@ use FluxErp\Console\Commands\InstallAssets;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
+use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
@@ -139,6 +140,7 @@ abstract class DuskTestCase extends TestCase
             ActivitylogServiceProvider::class,
             MediaLibraryServiceProvider::class,
             FluxServiceProvider::class,
+            BindingServiceProvider::class,
             RouteServiceProvider::class,
             SanctumServiceProvider::class,
             WebPushServiceProvider::class,
