@@ -122,11 +122,9 @@ class UpdateAddress extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->rules['login_name'] = [
-            Rule::unique('addresses', 'login_name')
-                ->whereNull('deleted_at')
-                ->ignore(data_get($this->data, 'id')),
-        ];
+        $this->rules['login_name'][] = Rule::unique('addresses', 'login_name')
+            ->whereNull('deleted_at')
+            ->ignore(data_get($this->data, 'id'));
     }
 
     protected function validateData(): void

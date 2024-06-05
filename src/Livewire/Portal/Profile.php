@@ -6,11 +6,11 @@ use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Models\Address;
 use FluxErp\Models\Permission;
-use FluxErp\Services\AddressService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Arr;
+use Illuminate\Validation\UnauthorizedException;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 
@@ -46,17 +46,14 @@ class Profile extends Component
             $user->contact_options = [];
         } else {
             $user = app(Address::class)->query()->whereKey($id)->first();
-            if ($user->contact_id !== auth()->user()->contact_id) {
+            if ($user?->contact_id !== auth()->user()->contact_id) {
                 abort(404);
             }
         }
 
         $this->address = $user->load('contactOptions')->toArray();
 
-        $this->address['permissions'] = array_map(
-            'strval',
-            $user->getAllPermissions()->pluck('id')->toArray()
-        );
+        $this->address['permissions'] = $user->getAllPermissions()->pluck('id')->toArray();
 
         $this->permissions = app(Permission::class)->query()
             ->where('guard_name', 'address')
@@ -71,13 +68,6 @@ class Profile extends Component
             ],
             collect($this->address['contact_options'] ?? [])->groupBy('type')->toArray()
         );
-    }
-
-    public function getRules(): array
-    {
-        $rules = (($this->address['id'] ?? false) ? UpdateAddress::make([]) : CreateAddress::make([]))->getRules();
-
-        return Arr::prependKeysWith($rules, 'address.');
     }
 
     public function render(): View|Factory|Application
@@ -103,9 +93,11 @@ class Profile extends Component
 
     public function save(): void
     {
-        $function = ($this->address['id'] ?? false) ? 'update' : 'create';
+        $action = $addressId = data_get($this->address, 'id') ? UpdateAddress::class : CreateAddress::class;
 
-        if ($function === 'create' && ! auth()->user()->can('profiles.{id?}.get')) {
+        if (is_a($action, CreateAddress::class, true) &&
+            ! auth()->user()->can('profiles.{id?}.get')
+        ) {
             return;
         }
 
@@ -114,16 +106,23 @@ class Profile extends Component
             $this->address['contact_options'] = array_merge($this->address['contact_options'], $contactOption);
         }
 
-        $validated = $this->validate();
-        if ($function === 'update' && $this->loginPassword) {
-            $validated['address']['login_password'] = $this->loginPassword;
+        if (is_a($action, UpdateAddress::class, true) && $this->loginPassword) {
+            $this->address['login_password'] = $this->loginPassword;
         }
 
-        $response = (new AddressService())->{$function}($validated['address']);
+        if (! auth()->user()->can('profiles.{id?}.get') || auth()->id() === $addressId) {
+            unset($this->address['permissions']);
+        }
 
-        if (auth()->user()->can('profiles.{id?}.get') && auth()->id() !== ($this->address['id'] ?? false)) {
-            $address = app(Address::class)->query()->whereKey($response['data']?->id ?: $response->id)->first();
-            $address->syncPermissions($this->address['permissions']);
+        try {
+            UpdateAddress::make($this->address)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
         }
 
         $this->notification()->success(__('Successfully saved'));

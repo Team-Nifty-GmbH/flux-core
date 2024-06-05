@@ -79,11 +79,11 @@ class Permissions extends Component
         $query = $this->searchPermission ?
             app(Permission::class)->search($this->searchPermission) : app(Permission::class)->query();
 
-        $this->permissions = $query
+        $this->permissions = data_get($query
             ->where('guard_name', $this->selectedRole['guard_name'])
             ->orderBy('name')
             ->paginate(999)
-            ->toArray()['data'];
+            ->toArray(), 'data', []);
     }
 
     public function saveTogglePermissions(): void

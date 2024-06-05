@@ -9,6 +9,7 @@ use FluxErp\Models\Language;
 use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class CreateAddressRuleset extends FluxRuleset
 {
@@ -40,7 +41,12 @@ class CreateAddressRuleset extends FluxRuleset
             ],
             'date_of_birth' => 'date|nullable',
             'department' => 'string|nullable',
-            'login_name' => 'string|unique:addresses,login_name|nullable',
+            'login_name' => [
+                'string',
+                'nullable',
+                Rule::unique('addresses', 'login_name')
+                    ->whereNull('deleted_at'),
+            ],
             'login_password' => 'string|nullable',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',

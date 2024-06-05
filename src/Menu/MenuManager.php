@@ -8,70 +8,132 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class MenuManager
 {
     use Macroable;
 
-    protected array $menuItems = [];
+    protected array $resolved = [];
+
+    protected array $registered = [];
+
+    protected array $registeredGroups = [];
 
     /**
      * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
      */
     public function register(
-        Route $route,
-        ?string $label = null,
+        string|Route $route,
         ?string $icon = null,
+        ?string $label = null,
         ?int $order = null): void
     {
-        $routeName = $route->getName();
+        $this->registered[] = [
+            'route' => $route,
+            'icon' => $icon,
+            'label' => $label,
+            'order' => $order,
+        ];
+    }
 
-        $guards = array_values(
-            array_filter(
-                $route->middleware(),
-                fn ($guard) => str_starts_with($guard, 'auth:')
-            )
-        );
-        $guard = array_shift($guards);
-        $guard = str_replace('auth:', '', $guard);
+    public function group(
+        string $path,
+        ?string $icon = null,
+        ?string $label = null,
+        ?int $order = null,
+        ?\Closure $closure = null): void
+    {
+        data_set($this->registeredGroups, $path, [
+            'label' => $label,
+            'icon' => $icon,
+            'order' => $order,
+            'children' => [],
+            'closure' => is_null($closure) ? null : $closure,
+        ]);
+    }
 
-        $path = str_contains($routeName, '.') && ! str_ends_with($routeName, '.')
-            ? Str::beforeLast($routeName, '.') . '.children.' . Str::afterLast($routeName, '.')
-            : (str_ends_with($routeName, '.') ? rtrim($routeName, '.') : $routeName);
+    protected function resolve(): void
+    {
+        foreach ($this->registeredGroups as $path => $group) {
+            data_set($this->resolved, $path, array_merge(
+                data_get($this->resolved, $path) ?? [],
+                [
+                    'label' => $group['label'] ?? Str::afterLast($path, '.'),
+                    'icon' => $group['icon'],
+                    'order' => $group['order'],
+                    'children' => [],
+                ]
+            ));
 
-        data_set($this->menuItems, $path, array_merge(
-            data_get($this->menuItems, $path) ?? [],
-            [
-                'label' => $label ?: Str::afterLast($path, '.'),
-                'uri' => Str::of($route->uri())->start('/')->toString(),
-                'icon' => $icon,
-                'route_name' => $routeName,
-                'guard' => $guard,
-                'domain' => $route->getDomain(),
-                'permission' => $route->getPermissionName(),
-                'order' => $order
-                    ?? count(
-                        data_get($this->menuItems, Str::beforeLast($path, '.'))
-                            ?: (str_contains($path, '.') ? [] : $this->menuItems)
-                    ),
-            ])
-        );
+            if ($group['closure']) {
+                $group['closure']($this);
+            }
+        }
+
+        foreach ($this->registered as $item) {
+            extract($item);
+            $resolvedRoute = is_string($route)
+                ? app('router')->getRoutes()->getByName($route)
+                : $route;
+
+            if (! $resolvedRoute) {
+                throw new RouteNotFoundException('No route found for ' . $route);
+            }
+
+            $routeName = $resolvedRoute->getName()
+                ?? str($resolvedRoute->uri())->replace('/', '.')->toString();
+
+            $guards = array_values(
+                array_filter(
+                    $resolvedRoute->middleware(),
+                    fn ($guard) => str_starts_with($guard, 'auth:')
+                )
+            );
+            $guard = array_shift($guards);
+            $guard = str_replace('auth:', '', $guard);
+
+            $path = str_contains($routeName, '.') && ! str_ends_with($routeName, '.')
+                ? Str::beforeLast($routeName, '.') . '.children.' . Str::afterLast($routeName, '.')
+                : (str_ends_with($routeName, '.') ? rtrim($routeName, '.') : $routeName);
+
+            data_set($this->resolved, $path, array_merge(
+                data_get($this->resolved, $path) ?? [],
+                [
+                    'label' => $label ?? Str::afterLast($path, '.'),
+                    'uri' => Str::of($resolvedRoute->uri())->start('/')->toString(),
+                    'icon' => $icon,
+                    'route_name' => $routeName,
+                    'guard' => $guard,
+                    'domain' => $resolvedRoute->getDomain(),
+                    'permission' => $resolvedRoute->getPermissionName(),
+                    'order' => $order
+                        ?? count(
+                            data_get($this->resolved, Str::beforeLast($path, '.'))
+                                ?: (str_contains($path, '.') ? [] : $this->resolved)
+                        ),
+                ])
+            );
+        }
     }
 
     public function unregister(string $name): void
     {
-        unset($this->menuItems[$name]);
+        unset($this->resolved[$name]);
     }
 
     public function all(): array
     {
-        return $this->sortMultiDimensional($this->menuItems);
+        $this->resolve();
+
+        return $this->sortMultiDimensional($this->resolved);
     }
 
     public function forGuard(string $guard, ?string $group = null, bool $ignorePermissions = false): array
     {
+        $this->resolve();
         $menuItems = $this->sortMultiDimensional(
-            $this->menuItems,
+            $this->resolved,
             function (array $value) use ($guard, $ignorePermissions) {
                 if (($value['guard'] ?? $guard) !== $guard) {
                     return false;
@@ -98,7 +160,7 @@ class MenuManager
 
     public function get(string $name): ?string
     {
-        return $this->menuItems[$name] ?? null;
+        return $this->resolved[$name] ?? null;
     }
 
     private function sortMultiDimensional(array $array, ?\Closure $filter = null): array
@@ -111,11 +173,7 @@ class MenuManager
 
         foreach ($array as $key => $item) {
             if ($item['children'] ?? false) {
-                $array[$key]['children'] = $this->sortMultiDimensional($item['children'], $filter);
-
-                if (count($array[$key]) === 1) {
-                    $array[$key] = $array[$key]['children'];
-                }
+                data_set($array[$key], 'children', $this->sortMultiDimensional($item['children'], $filter));
             }
         }
 

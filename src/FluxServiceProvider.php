@@ -14,6 +14,7 @@ use FluxErp\Helpers\MediaLibraryDownloader;
 use FluxErp\Http\Middleware\AuthContextMiddleware;
 use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
+use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
@@ -30,12 +31,15 @@ use FluxErp\Models\User;
 use FluxErp\Support\Validator\ValidatorFactory;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasParentMorphClass;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Route;
@@ -43,8 +47,10 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Route as RouteFacade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
@@ -60,6 +66,12 @@ use Spatie\Translatable\Facades\Translatable;
 
 class FluxServiceProvider extends ServiceProvider
 {
+    public static bool $registerFluxRoutes = true;
+
+    public static bool $registerPortalRoutes = true;
+
+    public static bool $registerApiRoutes = true;
+
     /**
      * Register any application services.
      */
@@ -94,6 +106,8 @@ class FluxServiceProvider extends ServiceProvider
         bcscale(9);
         $this->bootMiddleware();
         $this->bootCommands();
+        $this->bootRoutes();
+        $this->bootMenu();
 
         if (! Response::hasMacro('attachment')) {
             Response::macro('attachment', function ($content, $filename = 'download.pdf') {
@@ -392,6 +406,126 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         return $components;
+    }
+
+    protected function bootRoutes(): void
+    {
+        if (static::$registerFluxRoutes || static::$registerPortalRoutes) {
+            Authenticate::redirectUsing(fn (HttpRequest $request) => route('login', absolute: false));
+        }
+
+        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+
+        if (static::$registerApiRoutes) {
+            $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
+        }
+
+        if (static::$registerFluxRoutes) {
+            $this->loadRoutesFrom(__DIR__ . '/../routes/frontend/web.php');
+        }
+
+        if (static::$registerPortalRoutes) {
+            $this->loadRoutesFrom(__DIR__ . '/../routes/frontend/portal.php');
+        }
+
+        if (static::$registerApiRoutes) {
+            RateLimiter::for('api', function (HttpRequest $request) {
+                return Limit::perMinute(config('flux.rate_limit'))
+                    ->by(optional($request->user())->id ?: $request->ip());
+            });
+        }
+
+        RouteFacade::pattern('id', '[0-9]+');
+        Livewire::addPersistentMiddleware(PortalMiddleware::class);
+    }
+
+    protected function bootMenu(): void
+    {
+        Menu::register(route: 'dashboard', icon: 'home', order: -9999);
+
+        Menu::group(
+            path: 'orders',
+            icon: 'briefcase',
+            label: 'Orders',
+            closure: function () {
+                Menu::register(route: 'orders.orders');
+                Menu::register(route: 'orders.order-positions');
+            }
+        );
+        Menu::register(route: 'contacts', icon: 'identification');
+        Menu::register(route: 'tasks', icon: 'clipboard-document');
+        Menu::register(route: 'tickets', icon: 'wrench-screwdriver');
+        Menu::register(route: 'projects', icon: 'briefcase');
+
+        Menu::group(
+            path: 'accounting',
+            icon: 'banknotes',
+            label: 'Accounting',
+            closure: function () {
+                Menu::register(route: 'accounting.work-times');
+                Menu::register(route: 'accounting.commissions');
+                Menu::register(route: 'accounting.payment-reminders');
+                Menu::register(route: 'accounting.purchase-invoices');
+                Menu::register(route: 'accounting.transactions');
+                Menu::register(route: 'accounting.direct-debit');
+                Menu::register(route: 'accounting.money-transfer');
+                Menu::register(route: 'accounting.payment-runs');
+            }
+        );
+        Menu::group(
+            path: 'products',
+            icon: 'square-3-stack-3d',
+            label: 'Products',
+            closure: function () {
+                Menu::register(route: 'products.products');
+                Menu::register(route: 'products.serial-numbers');
+            }
+        );
+
+        Menu::register(route: 'mail', icon: 'envelope');
+        Menu::register(route: 'calendars', icon: 'calendar');
+
+        Menu::register(route: 'media-grid', label: 'media', icon: 'photo');
+
+        Menu::group(
+            path: 'settings',
+            icon: 'cog',
+            label: 'Settings',
+            order: 9999,
+            closure: function () {
+                Menu::register(route: 'settings.additional-columns');
+                Menu::register(route: 'settings.address-types');
+                Menu::register(route: 'settings.categories');
+                Menu::register(route: 'settings.product-option-groups');
+                Menu::register(route: 'settings.clients');
+                Menu::register(route: 'settings.bank-connections');
+                Menu::register(route: 'settings.countries');
+                Menu::register(route: 'settings.currencies');
+                Menu::register(route: 'settings.discount-groups');
+                Menu::register(route: 'settings.languages');
+                Menu::register(route: 'settings.ledger-accounts');
+                Menu::register(route: 'settings.logs');
+                Menu::register(route: 'settings.activity-logs');
+                Menu::register(route: 'settings.notifications');
+                Menu::register(route: 'settings.order-types');
+                Menu::register(route: 'settings.permissions');
+                Menu::register(route: 'settings.price-lists');
+                Menu::register(route: 'settings.ticket-types');
+                Menu::register(route: 'settings.translations');
+                Menu::register(route: 'settings.units');
+                Menu::register(route: 'settings.users');
+                Menu::register(route: 'settings.mail-accounts');
+                Menu::register(route: 'settings.work-time-types');
+                Menu::register(route: 'settings.vat-rates');
+                Menu::register(route: 'settings.payment-types');
+                Menu::register(route: 'settings.payment-reminder-texts');
+                Menu::register(route: 'settings.warehouses');
+                Menu::register(route: 'settings.serial-number-ranges');
+                Menu::register(route: 'settings.scheduling');
+                Menu::register(route: 'settings.queue-monitor');
+                Menu::register(route: 'settings.plugins');
+            }
+        );
     }
 
     protected function bootCommands(): void
