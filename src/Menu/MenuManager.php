@@ -45,11 +45,11 @@ class MenuManager
         ?\Closure $closure = null): void
     {
         data_set($this->registeredGroups, $path, [
-            'label' => $label,
-            'icon' => $icon,
-            'order' => $order,
-            'children' => [],
-            'closure' => is_null($closure) ? null : $closure,
+            'label' => $label ?? data_get($this->registeredGroups, $path . '.label'),
+            'icon' => $icon ?? data_get($this->registeredGroups, $path . '.icon'),
+            'order' => $order ?? data_get($this->registeredGroups, $path . '.order'),
+            'children' => data_get($this->registeredGroups, $path . '.children', []),
+            'closure' => array_merge(data_get($this->registeredGroups, $path . '.closure', []), [$closure]),
         ]);
     }
 
@@ -66,8 +66,11 @@ class MenuManager
                 ]
             ));
 
-            if ($group['closure']) {
-                $group['closure']($this);
+            if (count($group['closure'] ?? []) > 0) {
+                foreach ($group['closure'] as $closure)
+                {
+                    $closure($this);
+                }
             }
         }
 
