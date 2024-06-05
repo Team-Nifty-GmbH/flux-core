@@ -107,6 +107,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->bootMiddleware();
         $this->bootCommands();
         $this->bootRoutes();
+
         if (static::$registerFluxRoutes) {
             $this->bootFluxMenu();
         }
@@ -170,17 +171,6 @@ class FluxServiceProvider extends ServiceProvider
                         ->withPath($urlParams ? dirname(url()->full()) . $urlParams : url()->full());
                 });
         }
-
-        Route::macro('registersMenuItem',
-            function (?string $label = null, ?string $icon = null, ?int $order = null) {
-                Menu::register(
-                    route: $this,
-                    label: $label,
-                    icon: $icon,
-                    order: $order,
-                );
-            }
-        );
 
         Route::macro('getPermissionName',
             function () {
@@ -478,6 +468,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'accounting.payment-runs');
             }
         );
+
         Menu::group(
             path: 'products',
             icon: 'square-3-stack-3d',
@@ -491,7 +482,7 @@ class FluxServiceProvider extends ServiceProvider
         Menu::register(route: 'mail', icon: 'envelope');
         Menu::register(route: 'calendars', icon: 'calendar');
 
-        Menu::register(route: 'media-grid', label: 'media', icon: 'photo');
+        Menu::register(route: 'media-grid', icon: 'photo', label: 'media');
 
         Menu::group(
             path: 'settings',

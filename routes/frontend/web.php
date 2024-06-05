@@ -26,6 +26,7 @@ use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\WorkTimeList;
 use FluxErp\Livewire\InstallWizard;
 use FluxErp\Livewire\Mail\Mail;
+use FluxErp\Livewire\Media\Media as MediaGrid;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Product\Product;
@@ -183,7 +184,7 @@ Route::middleware('web')
                             ->name('plugins');
                     });
 
-                Route::get('/media', \FluxErp\Livewire\Media\Media::class)
+                Route::get('/media', MediaGrid::class)
                     ->name('media-grid');
             });
 

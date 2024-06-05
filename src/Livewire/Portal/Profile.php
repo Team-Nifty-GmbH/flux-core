@@ -95,9 +95,7 @@ class Profile extends Component
     {
         $action = $addressId = data_get($this->address, 'id') ? UpdateAddress::class : CreateAddress::class;
 
-        if (is_a($action, CreateAddress::class, true) &&
-            ! auth()->user()->can('profiles.{id?}.get')
-        ) {
+        if ($action === CreateAddress::class && ! auth()->user()->can('profiles.{id?}.get')) {
             return;
         }
 
@@ -106,7 +104,7 @@ class Profile extends Component
             $this->address['contact_options'] = array_merge($this->address['contact_options'], $contactOption);
         }
 
-        if (is_a($action, UpdateAddress::class, true) && $this->loginPassword) {
+        if ($action === UpdateAddress::class && $this->loginPassword) {
             $this->address['login_password'] = $this->loginPassword;
         }
 
@@ -115,7 +113,7 @@ class Profile extends Component
         }
 
         try {
-            UpdateAddress::make($this->address)
+            $action::make($this->address)
                 ->checkPermission()
                 ->validate()
                 ->execute();
