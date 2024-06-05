@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Controllers\PrintController;
 use FluxErp\Http\Controllers\PushSubscriptionController;
 use FluxErp\Http\Controllers\SearchController;
@@ -54,6 +55,7 @@ use FluxErp\Livewire\Settings\Permissions;
 use FluxErp\Livewire\Settings\Plugins;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Livewire\Settings\Profile;
+use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\TicketTypes;
@@ -88,6 +90,8 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
 Route::get('/login', Login::class)
     ->middleware(['guest:web'])
     ->name('login');
+Route::post('/login', [AuthController::class, 'authenticateWeb'])
+    ->middleware(['guest:web']);
 Route::post('/logout', Logout::class)
     ->name('logout');
 
@@ -199,6 +203,9 @@ Route::middleware(['auth:web', 'permission'])->group(function () {
                     ->name('serial-number-ranges')
                     ->registersMenuItem();
                 Route::get('/scheduling', Scheduling::class)->name('scheduling')->registersMenuItem();
+                Route::get('/queue-monitor', QueueMonitor::class)
+                    ->name('queue-monitor')
+                    ->registersMenuItem();
                 Route::get('/plugins', Plugins::class)
                     ->name('plugins')
                     ->registersMenuItem();

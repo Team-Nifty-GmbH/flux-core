@@ -38,6 +38,7 @@ class FluxCalendar extends CalendarComponent
     {
         $calendarables = model_info_all()
             ->filter(fn ($modelInfo) => in_array(Calendarable::class, $modelInfo->implements))
+            ->unique('morphClass')
             ->map(fn ($modelInfo) => resolve_static($modelInfo->class, 'toCalendar'));
 
         return parent::getMyCalendars()->isEmpty() ?
@@ -124,7 +125,7 @@ class FluxCalendar extends CalendarComponent
                 return false;
             }
 
-            $result = $result->toCalenderEvent();
+            $result = $result->toCalendarEvent();
         } else {
             try {
                 $this->event->reset();

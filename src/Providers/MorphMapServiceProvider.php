@@ -36,6 +36,7 @@ use FluxErp\Models\FormBuilderForm;
 use FluxErp\Models\FormBuilderResponse;
 use FluxErp\Models\FormBuilderSection;
 use FluxErp\Models\InterfaceUser;
+use FluxErp\Models\JobBatch;
 use FluxErp\Models\Language;
 use FluxErp\Models\LanguageLine;
 use FluxErp\Models\LedgerAccount;
@@ -62,9 +63,11 @@ use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
+use FluxErp\Models\Pivots\JobBatchable;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
+use FluxErp\Models\Pivots\QueueMonitorable;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
@@ -75,6 +78,7 @@ use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Project;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
+use FluxErp\Models\QueueMonitor;
 use FluxErp\Models\Role;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
@@ -138,15 +142,16 @@ class MorphMapServiceProvider extends ServiceProvider
             'form_builder_response' => FormBuilderResponse::class,
             'form_builder_section' => FormBuilderSection::class,
             'interface_user' => InterfaceUser::class,
+            'job_batch' => JobBatch::class,
             'language' => Language::class,
             'translation' => LanguageLine::class,
             'ledger_account' => LedgerAccount::class,
             'lock' => Lock::class,
             'log' => Log::class,
-            'meta' => Meta::class,
             'mail_account' => MailAccount::class,
             'mail_folder' => MailFolder::class,
             'media' => Media::class,
+            'meta' => Meta::class,
             'notification' => Notification::class,
             'notification_setting' => NotificationSetting::class,
             'order' => Order::class,
@@ -167,6 +172,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'project' => Project::class,
             'purchase_invoice' => PurchaseInvoice::class,
             'purchase_invoice_position' => PurchaseInvoicePosition::class,
+            'queue_monitor' => QueueMonitor::class,
             'role' => Role::class,
             'schedule' => Schedule::class,
             'sepa_mandate' => SepaMandate::class,
@@ -196,9 +202,11 @@ class MorphMapServiceProvider extends ServiceProvider
             'communicatable' => Communicatable::class,
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,
+            'job_batchable' => JobBatchable::class,
             'product_bundle_product' => ProductBundleProduct::class,
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
             'product_product_option' => ProductProductOption::class,
+            'queue_monitorable' => QueueMonitorable::class,
         ]);
     }
 }

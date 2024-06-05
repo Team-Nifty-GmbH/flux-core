@@ -2,6 +2,7 @@
 
 namespace FluxErp\Facades;
 
+use FluxErp\Actions\ActionManager;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -11,12 +12,12 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Illuminate\Support\Collection getByModel(string $model)
  * @method static void autoDiscover(string|null $directory = null, string|null $namespace = null)
  *
- * @see \FluxErp\Actions\ActionManager
+ * @see ActionManager
  */
 class Action extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'flux.action_manager';
+        return ActionManager::class;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Facades;
 
+use FluxErp\Assets\AssetManager;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\HtmlString;
@@ -20,12 +21,12 @@ use Illuminate\Support\HtmlString;
  * @method static void clear()
  * @method static void vite(string $path, string|array $files, string $manifestFilename = 'manifest.json')
  *
- * @see \FluxErp\Assets\AssetManager
+ * @see AssetManager
  */
 class Asset extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'flux.asset_manager';
+        return AssetManager::class;
     }
 }

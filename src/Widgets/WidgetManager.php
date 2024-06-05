@@ -84,7 +84,13 @@ class WidgetManager
 
         $cacheKey = md5($path . $namespace);
 
-        if (! is_null($widgets = Cache::get('flux.widgets.' . $cacheKey)) && ! app()->runningInConsole()) {
+        try {
+            $widgets = Cache::get('flux.widgets.' . $cacheKey);
+        } catch (\Throwable) {
+            $widgets = null;
+        }
+
+        if (! is_null($widgets) && ! app()->runningInConsole()) {
             $iterator = [];
         } else {
             $widgets = [];
@@ -129,6 +135,10 @@ class WidgetManager
             }
         }
 
-        Cache::put('flux.widgets.' . $cacheKey, $widgets);
+        try {
+            Cache::put('flux.widgets.' . $cacheKey, $widgets);
+        } catch (\Throwable) {
+            // Ignore exceptions during cache put
+        }
     }
 }

@@ -4,6 +4,8 @@ namespace FluxErp\Notifications\Ticket;
 
 use FluxErp\Models\Ticket;
 use FluxErp\Notifications\Notification;
+use FluxErp\Support\Notification\ToastNotification\NotificationAction;
+use FluxErp\Support\Notification\ToastNotification\ToastNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -30,57 +32,34 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
      *
      * @param  mixed  $notifiable
      */
-    public function toMail($notifiable): MailMessage
+    public function toMail(object $notifiable): MailMessage
     {
         $notification = $this->toArray($notifiable);
 
         return (new MailMessage)
             ->subject($notification['title'])
-            ->greeting($notification['subtitle'])
             ->line($notification['description'])
             ->action($notification['accept']['label'] ?? '', $notification['accept']['url'] ?? '');
     }
 
-    /**
-     * Get the array representation of the notification.
-     * The array should contain the following keys:
-     * - title (string)
-     * - description (string)
-     * - icon (string, all heroicons)
-     * - img (string, url to image)
-     * - accept (array, contains the following keys)
-     *     - label (string, required)
-     *     - url (string, required)
-     * - reject (array, contains the following keys)
-     *     - label (string, required)
-     *     - url (string, required)
-     *
-     * @param  mixed  $notifiable
-     */
-    public function toArray($notifiable): array
+    public function toArray(object $notifiable): array
     {
         $user = $this->model->authenticatable;
 
-        return [
-            'title' => __(
-                ':username created ticket :id',
-                [
-                    'username' => $user->name,
-                    'id' => $this->model->id,
-                ],
-            ),
-            'subtitle' => $this->model->title,
-            'description' => $this->model->description,
-            'icon' => 'info',
-            'img' => method_exists($user, 'getAvatarUrl') ? $user->getAvatarUrl() : null,
-            'accept' => [
-                'label' => __('View'),
-                'url' => config('app.url') . $this->model->detailRoute(false),
-            ],
-        ];
+        return ToastNotification::make()
+            ->title(__(':username created ticket :id', ['username' => $user->name, 'id' => $this->model->id]))
+            ->description($this->model->title . '<br>' . $this->model->description)
+            ->icon('info')
+            ->img(method_exists($user, 'getAvatarUrl') ? $user->getAvatarUrl() : null)
+            ->accept(
+                NotificationAction::make()
+                    ->label(__('View'))
+                    ->url(config('app.url') . $this->model->detailRoute(false))
+            )
+            ->toArray();
     }
 
-    public function toWebPush($notifiable): ?WebPushMessage
+    public function toWebPush(object $notifiable): ?WebPushMessage
     {
         if (! method_exists($notifiable, 'pushSubscriptions') || ! $notifiable->pushSubscriptions()->exists()) {
             return null;

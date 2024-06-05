@@ -6,6 +6,7 @@ use FluxErp\Models\Notification;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -20,15 +21,6 @@ class Notifications extends Component
     public int $unread = 0;
 
     public bool $showNotifications = false;
-
-    public function getListeners(): array
-    {
-        return [
-            'echo-private:'
-            . auth()->user()->broadcastChannel(false) .
-            ',.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated' => 'sendNotify',
-        ];
-    }
 
     public function mount(): void
     {
@@ -45,9 +37,28 @@ class Notifications extends Component
     {
         $notify['description'] = Str::of(data_get($notify, 'description'))->limit(75);
 
-        $this->notification()->confirm($notify);
+        if (! is_null(data_get($notify, 'progress'))) {
+            $notify['description'] = Blade::render(<<<'BLADE'
+                {!! $notify['description'] !!}
+                <div class="flex gap-1.5 items-center h-6">
+                    <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200 dark:bg-gray-700 w-full">
+                        <div x-bind:style="{width: notification.progress * 100 + '%'}" class="transition-all shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-500 dark:bg-primary-700"></div>
+                    </div>
+                </div>
+            BLADE, ['notify' => $notify]);
+        }
 
-        $this->notifications[] = $notify;
+        if (data_get($notify, 'accept') || data_get($notify, 'reject')) {
+            $notify['timeout'] = 0;
+        }
+
+        if (data_get($notify, 'accept')) {
+            $this->notification()->confirm($notify);
+        } else {
+            $this->notification()->send($notify);
+        }
+
+        $this->notifications[data_get($notify, 'id')] = $notify;
         app(Notification::class)->query()->whereKey($notify['id'])->first()?->markAsRead();
     }
 
@@ -76,8 +87,7 @@ class Notifications extends Component
                     'params' => $notification->id,
                 ];
                 $this->notifications[] = $notificationOptions;
-            }
-            );
+            });
 
         return $this->notifications;
     }

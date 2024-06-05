@@ -197,6 +197,11 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
         );
     }
 
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);

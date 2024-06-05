@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Livewire\Portal\Auth\Login;
 use FluxErp\Livewire\Portal\Auth\Logout;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +23,8 @@ Route::get('/icons/{name}/{variant?}', IconController::class)
 Route::get('/login', Login::class)
     ->middleware(['guest:address'])
     ->name('login');
+Route::post('/login', [AuthController::class, 'authenticatePortal'])
+    ->middleware(['guest:address']);
 Route::any('/logout', Logout::class)
     ->name('logout');
 

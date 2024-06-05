@@ -1,6 +1,7 @@
 import folderTree from './components/folder-tree';
 import setupEditor from './components/tiptap';
 import workTime from './components/work-time.js';
+import notifications from './components/wireui/notifications';
 import signature from './components/signature-pad.js';
 import PullToRefresh from "pulltorefreshjs";
 
@@ -9,9 +10,9 @@ window.setupEditor = setupEditor;
 window.workTime = workTime;
 window.signature = signature;
 
-if (typeof window.Livewire === 'undefined') {
-    throw 'Livewire Sortable.js Plugin: window.Livewire is undefined. Make sure @livewireScripts is placed above this script include';
-}
+window.addEventListener('alpine:init', () => {
+    window.Alpine.data('wireui_notifications', notifications);
+})
 
 window.Livewire.directive('sortable', (el, directive, component) => {
     // Only fire this handler on the "root" directive.
