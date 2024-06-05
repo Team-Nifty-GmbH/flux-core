@@ -67,8 +67,7 @@ class MenuManager
             ));
 
             if (count($group['closure'] ?? []) > 0) {
-                foreach ($group['closure'] as $closure)
-                {
+                foreach ($group['closure'] as $closure) {
                     $closure($this);
                 }
             }
@@ -177,6 +176,10 @@ class MenuManager
         foreach ($array as $key => $item) {
             if ($item['children'] ?? false) {
                 data_set($array[$key], 'children', $this->sortMultiDimensional($item['children'], $filter));
+
+                if (count($array[$key]) === 1) {
+                    $array[$key] = $array[$key]['children'];
+                }
             }
         }
 

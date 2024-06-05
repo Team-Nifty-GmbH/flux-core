@@ -107,7 +107,13 @@ class FluxServiceProvider extends ServiceProvider
         $this->bootMiddleware();
         $this->bootCommands();
         $this->bootRoutes();
-        $this->bootMenu();
+        if (static::$registerFluxRoutes) {
+            $this->bootFluxMenu();
+        }
+
+        if (static::$registerPortalRoutes) {
+            $this->bootPortalMenu();
+        }
 
         if (! Response::hasMacro('attachment')) {
             Response::macro('attachment', function ($content, $filename = 'download.pdf') {
@@ -420,12 +426,12 @@ class FluxServiceProvider extends ServiceProvider
             $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
         }
 
-        if (static::$registerFluxRoutes) {
-            $this->loadRoutesFrom(__DIR__ . '/../routes/frontend/web.php');
-        }
-
         if (static::$registerPortalRoutes) {
             $this->loadRoutesFrom(__DIR__ . '/../routes/frontend/portal.php');
+        }
+
+        if (static::$registerFluxRoutes) {
+            $this->loadRoutesFrom(__DIR__ . '/../routes/frontend/web.php');
         }
 
         if (static::$registerApiRoutes) {
@@ -439,7 +445,7 @@ class FluxServiceProvider extends ServiceProvider
         Livewire::addPersistentMiddleware(PortalMiddleware::class);
     }
 
-    protected function bootMenu(): void
+    protected function bootFluxMenu(): void
     {
         Menu::register(route: 'dashboard', icon: 'home', order: -9999);
 
@@ -526,6 +532,16 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.plugins');
             }
         );
+    }
+
+    protected function bootPortalMenu(): void
+    {
+        Menu::register(route: 'portal.dashboard', icon: 'home', order: -9999);
+        Menu::register(route: 'portal.calendar', icon: 'calendar');
+        Menu::register(route: 'portal.files', icon: 'folder-open');
+        Menu::register(route: 'portal.orders', icon: 'shopping-bag');
+        Menu::register(route: 'portal.serial-numbers', icon: 'tag');
+        Menu::register(route: 'portal.tickets', icon: 'wrench-screwdriver');
     }
 
     protected function bootCommands(): void

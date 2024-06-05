@@ -36,33 +36,27 @@ Route::middleware(['web', PortalMiddleware::class])
 
         Route::middleware(['auth:address', 'permission'])->group(function () {
             Route::get('/', FluxErp\Livewire\Portal\Dashboard::class)
-                ->name('dashboard')
-                ->registersMenuItem(icon: 'home', order: -9999);
+                ->name('dashboard');
             Route::get('/calendar', FluxErp\Livewire\Portal\Calendar::class)
-                ->name('calendar')
-                ->registersMenuItem(icon: 'calendar');
+                ->name('calendar');
             Route::get('/files', FluxErp\Livewire\Portal\Files::class)
-                ->name('files')
-                ->registersMenuItem(icon: 'folder-open');
+                ->name('files');
             Route::get('/my-profile', FluxErp\Livewire\Portal\Profile::class)
                 ->name('my-profile');
             Route::get('/orders/{id}', FluxErp\Livewire\Portal\OrderDetail::class)
                 ->name('orders.id');
             Route::get('/orders', FluxErp\Livewire\Portal\Orders::class)
-                ->name('orders')
-                ->registersMenuItem(icon: 'shopping-bag');
+                ->name('orders');
             Route::get('/product/{id}', FluxErp\Livewire\Portal\Product::class)
                 ->name('product');
             Route::get('/profiles/{id?}', FluxErp\Livewire\Portal\Profile::class)
                 ->name('profiles.id?');
             Route::get('/serial-numbers', FluxErp\Livewire\Portal\SerialNumbers::class)
-                ->name('serial-numbers')
-                ->registersMenuItem(icon: 'tag');
+                ->name('serial-numbers');
             Route::get('/service/{serialNumberId?}', FluxErp\Livewire\Portal\Service::class)
                 ->name('service');
             Route::get('/tickets', FluxErp\Livewire\Portal\Ticket\Tickets::class)
-                ->name('tickets')
-                ->registersMenuItem(icon: 'wrench-screwdriver');
+                ->name('tickets');
             Route::get('/tickets/{id}', FluxErp\Livewire\Portal\Ticket\Ticket::class)
                 ->name('tickets.id');
 
