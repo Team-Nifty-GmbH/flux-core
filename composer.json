@@ -122,7 +122,6 @@
                 "FluxErp\\Providers\\AuthServiceProvider",
                 "FluxErp\\Providers\\EventServiceProvider",
                 "FluxErp\\Providers\\BroadcastServiceProvider",
-                "FluxErp\\Providers\\RouteServiceProvider",
                 "FluxErp\\Providers\\ViewServiceProvider"
             ]
         }

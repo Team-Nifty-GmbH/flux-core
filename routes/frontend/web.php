@@ -26,6 +26,7 @@ use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\WorkTimeList;
 use FluxErp\Livewire\InstallWizard;
 use FluxErp\Livewire\Mail\Mail;
+use FluxErp\Livewire\Media\Media as MediaGrid;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Product\Product;
@@ -82,153 +83,129 @@ use TeamNiftyGmbH\DataTable\Controllers\IconController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)->name('flux.install');
+Route::middleware('web')
+    ->domain(config('flux.flux_url'))
+    ->group(function () {
+        Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)->name('flux.install');
 
-Route::get('/icons/{name}/{variant?}', IconController::class)
-    ->where('variant', '(outline|solid)')
-    ->name('icons');
-Route::get('/login', Login::class)
-    ->middleware(['guest:web'])
-    ->name('login');
-Route::post('/login', [AuthController::class, 'authenticateWeb'])
-    ->middleware(['guest:web']);
-Route::post('/logout', Logout::class)
-    ->name('logout');
+        Route::get('/icons/{name}/{variant?}', IconController::class)
+            ->where('variant', '(outline|solid)')
+            ->name('icons');
+        Route::get('/login', Login::class)
+            ->middleware(['guest:web'])
+            ->name('login');
+        Route::post('/login', [AuthController::class, 'authenticateWeb'])
+            ->middleware(['guest:web']);
+        Route::post('/logout', Logout::class)
+            ->name('logout');
 
-Route::middleware(['auth:web', 'permission'])->group(function () {
-    Route::get('/', Dashboard::class)->name('dashboard')->registersMenuItem(icon: 'home', order: -9999);
+        Route::middleware(['auth:web', 'permission'])->group(function () {
+            Route::get('/', Dashboard::class)->name('dashboard');
 
-    Route::middleware(TrackVisits::class)->group(function () {
-        Route::get('/mail', Mail::class)->name('mail')->registersMenuItem(icon: 'envelope');
-        Route::get('/calendars', Calendar::class)->name('calendars')->registersMenuItem(icon: 'calendar');
-        Route::get('/contacts', AddressList::class)->name('contacts')->registersMenuItem(icon: 'identification');
-        Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
+            Route::middleware(TrackVisits::class)->group(function () {
+                Route::get('/mail', Mail::class)->name('mail');
+                Route::get('/calendars', Calendar::class)->name('calendars');
+                Route::get('/contacts', AddressList::class)->name('contacts');
+                Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
 
-        Route::name('orders.')->prefix('orders')
-            ->group(function () {
-                Route::permanentRedirect('/', '/')
-                    ->withoutMiddleware(TrackVisits::class)
-                    ->registersMenuItem(icon: 'shopping-bag');
-                Route::get('/list', OrderList::class)->name('orders')->registersMenuItem();
-                Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions')
-                    ->registersMenuItem();
-                Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id');
+                Route::name('orders.')->prefix('orders')
+                    ->group(function () {
+                        Route::get('/list', OrderList::class)->name('orders');
+                        Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions');
+                        Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id');
+                    });
+
+                Route::get('/tasks', TaskList::class)->name('tasks');
+                Route::get('/tasks/{id}', Task::class)->name('tasks.id');
+                Route::get('/tickets', TicketList::class)->name('tickets');
+                Route::get('/tickets/{id}', Ticket::class)->name('tickets.id');
+                Route::get('/projects', ProjectList::class)->name('projects');
+                Route::get('/projects/{id}', Project::class)->name('projects.id');
+
+                Route::name('products.')->prefix('products')
+                    ->group(function () {
+                        Route::get('/list', ProductList::class)->name('products');
+                        Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers');
+                        Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
+                        Route::get('/{id}', Product::class)->where('id', '[0-9]+')->name('id');
+                    });
+
+                Route::name('accounting.')->prefix('accounting')
+                    ->group(function () {
+                        Route::get('/work-times', WorkTimeList::class)->name('work-times');
+                        Route::get('/commissions', CommissionList::class)->name('commissions');
+                        Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminders');
+                        Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
+                        Route::get('/transactions', TransactionList::class)->name('transactions');
+                        Route::get('/direct-debit', DirectDebit::class)->name('direct-debit');
+                        Route::get('/money-transfer', MoneyTransfer::class)->name('money-transfer');
+                        Route::get('/payment-runs', PaymentRunList::class)->name('payment-runs');
+                    });
+
+                Route::get('/my-profile', Profile::class)->name('my-profile');
+
+                Route::name('settings.')->prefix('settings')
+                    ->group(function () {
+                        Route::get('/additional-columns', AdditionalColumns::class)->name('additional-columns');
+                        Route::get('/address-types', AddressTypes::class)->name('address-types');
+                        Route::get('/categories', Categories::class)->name('categories');
+                        Route::get('/product-option-groups', ProductOptionGroupList::class)->name('product-option-groups');
+                        Route::get('/clients', Clients::class)->name('clients');
+                        Route::get('/bank-connections', BankConnections::class)->name('bank-connections');
+                        Route::get('/clients/{client}/customer-portal', CustomerPortal::class)->name('customer-portal');
+                        Route::get('/countries', Countries::class)->name('countries');
+                        Route::get('/currencies', Currencies::class)->name('currencies');
+                        Route::get('/discount-groups', DiscountGroups::class)->name('discount-groups');
+                        Route::get('/languages', Languages::class)->name('languages');
+                        Route::get('/ledger-accounts', LedgerAccounts::class)->name('ledger-accounts');
+                        Route::get('/logs', Logs::class)->name('logs');
+                        Route::get('/activity-logs', ActivityLogs::class)->name('activity-logs');
+                        Route::get('/notifications', Notifications::class)->name('notifications');
+                        Route::get('/order-types', OrderTypes::class)->name('order-types');
+                        Route::get('/permissions', Permissions::class)->name('permissions');
+                        Route::get('/price-lists', PriceLists::class)->name('price-lists');
+                        Route::get('/ticket-types', TicketTypes::class)->name('ticket-types');
+                        Route::get('/translations', Translations::class)->name('translations');
+                        Route::get('/units', Units::class)->name('units');
+                        Route::get('/users', Users::class)->name('users');
+                        Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts');
+                        Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types');
+                        Route::get('/vat-rates', VatRates::class)->name('vat-rates');
+                        Route::get('/payment-types', PaymentTypes::class)->name('payment-types');
+                        Route::get('/payment-reminder-texts', PaymentReminderTexts::class)
+                            ->name('payment-reminder-texts');
+                        Route::get('/warehouses', Warehouses::class)->name('warehouses');
+                        Route::get('/serial-number-ranges', SerialNumberRanges::class)
+                            ->name('serial-number-ranges');
+                        Route::get('/scheduling', Scheduling::class)->name('scheduling');
+                        Route::get('/queue-monitor', QueueMonitor::class)
+                            ->name('queue-monitor');
+                        Route::get('/plugins', Plugins::class)
+                            ->name('plugins');
+                    });
+
+                Route::get('/media', MediaGrid::class)
+                    ->name('media-grid');
             });
 
-        Route::get('/tasks', TaskList::class)->name('tasks')->registersMenuItem(icon: 'clipboard-document-list');
-        Route::get('/tasks/{id}', Task::class)->name('tasks.id');
-        Route::get('/tickets', TicketList::class)->name('tickets')->registersMenuItem(icon: 'wrench-screwdriver');
-        Route::get('/tickets/{id}', Ticket::class)->name('tickets.id');
-        Route::get('/projects', ProjectList::class)->name('projects')->registersMenuItem(icon: 'briefcase');
-        Route::get('/projects/{id}', Project::class)->name('projects.id');
+            Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);
 
-        Route::name('products.')->prefix('products')
-            ->group(function () {
-                Route::permanentRedirect('/', '/')
-                    ->withoutMiddleware(TrackVisits::class)
-                    ->registersMenuItem(icon: 'square-3-stack-3d');
-                Route::get('/list', ProductList::class)->name('products')->registersMenuItem();
-                Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers')->registersMenuItem();
-                Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
-                Route::get('/{id}', Product::class)->where('id', '[0-9]+')->name('id');
-            });
+            Route::get('/media/{media}/{filename}', function (Media $media) {
+                return $media;
+            })->name('media');
+        });
 
-        Route::name('accounting.')->prefix('accounting')
-            ->group(function () {
-                Route::permanentRedirect('/', '/')
-                    ->withoutMiddleware(TrackVisits::class)
-                    ->registersMenuItem(icon: 'banknotes');
-                Route::get('/work-times', WorkTimeList::class)->name('work-times')->registersMenuItem();
-                Route::get('/commissions', CommissionList::class)->name('commissions')->registersMenuItem();
-                Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminder')->registersMenuItem();
-                Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices')
-                    ->registersMenuItem();
-                Route::get('/transactions', TransactionList::class)->name('transactions')->registersMenuItem();
-                Route::get('/direct-debit', DirectDebit::class)->name('direct-debit')->registersMenuItem();
-                Route::get('/money-transfer', MoneyTransfer::class)->name('money-transfer')->registersMenuItem();
-                Route::get('/payment-runs', PaymentRunList::class)->name('payment-runs')->registersMenuItem();
-            });
+        Route::group(['middleware' => ['auth:web']], function () {
+            Route::any('/search/{model}', SearchController::class)
+                ->where('model', '(.*)')
+                ->name('search');
+            Route::match(['get', 'post'], '/print/render', [PrintController::class, 'render'])->name('print.render');
+            Route::match(['get', 'post'], '/print/pdf', [PrintController::class, 'renderPdf']);
+        });
 
-        Route::get('/my-profile', Profile::class)->name('my-profile');
-
-        Route::name('settings.')->prefix('settings')
-            ->group(function () {
-                Route::permanentRedirect('/', '/')
-                    ->withoutMiddleware(TrackVisits::class)
-                    ->registersMenuItem(icon: 'cog', order: 9999);
-                Route::get('/additional-columns', AdditionalColumns::class)
-                    ->name('additional-columns')
-                    ->registersMenuItem();
-                Route::get('/address-types', AddressTypes::class)
-                    ->name('address-types')
-                    ->registersMenuItem();
-                Route::get('/categories', Categories::class)
-                    ->name('categories')
-                    ->registersMenuItem();
-                Route::get('/product-option-groups', ProductOptionGroupList::class)
-                    ->name('product-option-groups')
-                    ->registersMenuItem();
-                Route::get('/clients', Clients::class)
-                    ->name('clients')
-                    ->registersMenuItem();
-                Route::get('/bank-connections', BankConnections::class)
-                    ->name('bank-connections')
-                    ->registersMenuItem();
-                Route::get('/clients/{client}/customer-portal', CustomerPortal::class)
-                    ->name('customer-portal');
-                Route::get('/countries', Countries::class)->name('countries')->registersMenuItem();
-                Route::get('/currencies', Currencies::class)->name('currencies')->registersMenuItem();
-                Route::get('/discount-groups', DiscountGroups::class)->name('discount-groups')->registersMenuItem();
-                Route::get('/languages', Languages::class)->name('languages')->registersMenuItem();
-                Route::get('/ledger-accounts', LedgerAccounts::class)->name('ledger-accounts')->registersMenuItem();
-                Route::get('/logs', Logs::class)->name('logs')->registersMenuItem();
-                Route::get('/activity-logs', ActivityLogs::class)->name('activity-logs')->registersMenuItem();
-                Route::get('/notifications', Notifications::class)->name('notifications')->registersMenuItem();
-                Route::get('/order-types', OrderTypes::class)->name('order-types')->registersMenuItem();
-                Route::get('/permissions', Permissions::class)->name('permissions')->registersMenuItem();
-                Route::get('/price-lists', PriceLists::class)->name('price-lists')->registersMenuItem();
-                Route::get('/ticket-types', TicketTypes::class)->name('ticket-types')->registersMenuItem();
-                Route::get('/translations', Translations::class)->name('translations')->registersMenuItem();
-                Route::get('/units', Units::class)->name('units')->registersMenuItem();
-                Route::get('/users', Users::class)->name('users')->registersMenuItem();
-                Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts')->registersMenuItem();
-                Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types')->registersMenuItem();
-                Route::get('/vat-rates', VatRates::class)->name('vat-rates')->registersMenuItem();
-                Route::get('/payment-types', PaymentTypes::class)->name('payment-types')->registersMenuItem();
-                Route::get('/payment-reminder-texts', PaymentReminderTexts::class)
-                    ->name('payment-reminder-texts')
-                    ->registersMenuItem();
-                Route::get('/warehouses', Warehouses::class)->name('warehouses')->registersMenuItem();
-                Route::get('/serial-number-ranges', SerialNumberRanges::class)
-                    ->name('serial-number-ranges')
-                    ->registersMenuItem();
-                Route::get('/scheduling', Scheduling::class)->name('scheduling')->registersMenuItem();
-                Route::get('/queue-monitor', QueueMonitor::class)
-                    ->name('queue-monitor')
-                    ->registersMenuItem();
-                Route::get('/plugins', Plugins::class)
-                    ->name('plugins')
-                    ->registersMenuItem();
-            });
+        Route::group(['middleware' => ['signed']], function () {
+            Route::get('/media-private/{media}/{filename}', function (Media $media) {
+                return $media;
+            })->name('media.private');
+        });
     });
-
-    Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);
-
-    Route::get('/media/{media}/{filename}', function (Media $media) {
-        return $media;
-    })->name('media');
-});
-
-Route::group(['middleware' => ['auth:web']], function () {
-    Route::any('/search/{model}', SearchController::class)
-        ->where('model', '(.*)')
-        ->name('search');
-    Route::match(['get', 'post'], '/print/render', [PrintController::class, 'render'])->name('print.render');
-    Route::match(['get', 'post'], '/print/pdf', [PrintController::class, 'renderPdf']);
-});
-
-Route::group(['middleware' => ['signed']], function () {
-    Route::get('/media-private/{media}/{filename}', function (Media $media) {
-        return $media;
-    })->name('media.private');
-});

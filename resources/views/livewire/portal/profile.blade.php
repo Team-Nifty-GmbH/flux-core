@@ -157,7 +157,7 @@
                     @foreach($permissions as $permission)
                         <x-toggle
                             md
-                            wire:model.live="address.permissions"
+                            wire:model.number="address.permissions"
                             :id="uniqid()"
                             :value="$permission['id']"
                             :label="__($permission['name'])"

@@ -7,7 +7,8 @@ use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static void register(Route $route, string $label = null, string $icon = null, int $order = null)
+ * @method static void register(string|Route $route, string|null $icon = null, string|null $label = null, int|null $order = null)
+ * @method static void group(string $path, string|null $icon = null, string|null $label = null, int|null $order = null, \Closure|null $closure = null)
  * @method static void unregister(string $name)
  * @method static array all()
  * @method static array|null get(string $name)

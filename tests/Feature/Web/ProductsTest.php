@@ -36,25 +36,16 @@ class ProductsTest extends BaseSetup
 
     public function test_products_no_user()
     {
-        $this->get('/products')
+        $this->get('/products/list')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_products_redirect_dashboard()
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('products.get', 'web'));
-
-        $this->actingAs($this->user, guard: 'web')->get('/products')
-            ->assertStatus(301)
-            ->assertRedirect(route('dashboard'));
-    }
-
     public function test_products_without_permission()
     {
-        Permission::findOrCreate('products.get', 'web');
+        Permission::findOrCreate('products.list.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/products')
+        $this->actingAs($this->user, 'web')->get('/products/list')
             ->assertStatus(403);
     }
 

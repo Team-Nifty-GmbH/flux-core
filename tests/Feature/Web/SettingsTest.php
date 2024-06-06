@@ -12,25 +12,16 @@ class SettingsTest extends BaseSetup
 
     public function test_settings_no_user()
     {
-        $this->get('/settings')
+        $this->get('/settings/clients')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_settings_redirect_dashboard()
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('settings.get', 'web'));
-
-        $this->actingAs($this->user, guard: 'web')->get('/settings')
-            ->assertStatus(301)
-            ->assertRedirect(route('dashboard'));
-    }
-
     public function test_settings_without_permission()
     {
-        Permission::findOrCreate('settings.get', 'web');
+        Permission::findOrCreate('settings.clients.get', 'web');
 
-        $this->actingAs($this->user, guard: 'web')->get('/settings')
+        $this->actingAs($this->user, guard: 'web')->get('/settings/clients')
             ->assertStatus(403);
     }
 }

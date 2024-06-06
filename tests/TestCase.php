@@ -6,7 +6,6 @@ use Dotenv\Dotenv;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
-use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -66,7 +65,6 @@ abstract class TestCase extends BaseTestCase
             MediaLibraryServiceProvider::class,
             FluxServiceProvider::class,
             BindingServiceProvider::class,
-            RouteServiceProvider::class,
             SanctumServiceProvider::class,
             WebPushServiceProvider::class,
             MorphMapServiceProvider::class,
