@@ -205,7 +205,7 @@
                                         <div class="w-16 flex-none">
                                             <div class="flex w-full justify-center text-white">
                                                 <x-heroicons
-                                                    :name="$navigations->first(fn ($item) => str_starts_with($favorite['url'], $item['uri']) && $item['uri'] !== '/')['icon'] ?? 'no-symbol'"
+                                                    :name="$navigations->first(fn ($item) => str_starts_with($favorite['url'], data_get($item, 'uri')) && data_get($item, 'uri') !== '/')['icon'] ?? 'no-symbol'"
                                                     class="h-4 w-4"/>
                                             </div>
                                         </div>
