@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Order;
 
 use FluxErp\Livewire\Forms\MediaForm;
+use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Validation\ValidationException;
@@ -19,7 +20,15 @@ class PublicLink extends Component
 
     public MediaForm $signature;
 
-    public function save(): void
+    public function mount():void
+    {
+         $media = app(Media::class)::where('model_id', $this->order->id)->where('collection_name','signature')->first();
+         if(!is_null($media)){
+            $this->signature->fill($media);
+         }
+    }
+
+    public function save(): string | null
     {
         $this->signature->model_type = app(Order::class)->getMorphClass();
         $this->signature->model_id = $this->order->id;
@@ -33,15 +42,16 @@ class PublicLink extends Component
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
 
-                return;
+                return null;
             }
         }
 
         $this->notification()->success(__('Signature saved'));
+        return $this->signature->stagedFiles[0]['preview_url'] ?? null;
     }
 
     public function render()
     {
-        return view('flux::livewire.order.public-link');
+        return view('flux::livewire.order.public-link')->layout('flux::layouts.empty');
     }
 }
