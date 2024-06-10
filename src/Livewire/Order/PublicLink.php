@@ -20,15 +20,15 @@ class PublicLink extends Component
 
     public MediaForm $signature;
 
-    public function mount():void
+    public function mount(): void
     {
-         $media = app(Media::class)::where('model_id', $this->order->id)->where('collection_name','signature')->first();
-         if(!is_null($media)){
+        $media = app(Media::class)::where('model_id', $this->order->id)->where('collection_name', 'signature')->first();
+        if (! is_null($media)) {
             $this->signature->fill($media);
-         }
+        }
     }
 
-    public function save(): string | null
+    public function save(): bool
     {
         $this->signature->model_type = app(Order::class)->getMorphClass();
         $this->signature->model_id = $this->order->id;
@@ -42,12 +42,28 @@ class PublicLink extends Component
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
 
-                return null;
+                return false;
             }
         }
 
-        $this->notification()->success(__('Signature saved'));
-        return $this->signature->stagedFiles[0]['preview_url'] ?? null;
+        return true;
+    }
+
+    public function downloadSignatureAsUrlData(Media $media): string|bool
+    {
+        if (! file_exists($media->getPath())) {
+            if (method_exists($this, 'notification')) {
+                $this->notification()->error(__('File not found!'));
+            }
+
+            return false;
+        }
+
+        $fileContent = file_get_contents($media->getPath());
+        $base64File = base64_encode($fileContent);
+
+        return "data:image/png;base64,$base64File";
+
     }
 
     public function render()

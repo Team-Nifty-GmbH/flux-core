@@ -1,23 +1,35 @@
 import SignaturePad from "signature_pad";
+import {entangle} from "alpinejs/src/entangle";
 
 export default function ($wire,$refs) {
     return {
         signaturePad:null,
         isEmpty:true,
-        publicUrl:null,
-        init() {
-            // TODO: if signature is already saved - display it - on canvas and disable signature pad
+        error:false,
+        id:null,
+        async init() {
+            // init signature pad
+            this.signaturePad = new SignaturePad($refs.canvas,{backgroundColor: 'rgba(255, 255, 255, 1)'});
+            // if signature is already saved - just display it on canvas but don't allow to draw
             if($wire.signature.stagedFiles.length > 0) {
-                this.publicUrl = $wire.signature.stagedFiles[0].preview_url;
+                this.id = $wire.signature.id;
+                await this.signaturePad.fromDataURL(await $wire.downloadSignatureAsUrlData(this.id));
+                this.signaturePad.off()
                 return;
             }
-            this.signaturePad = new SignaturePad($refs.canvas,{backgroundColor: 'rgba(255, 255, 255, 1)'});
+            // if signature is not saved - allow to draw and clear after first stroke
             this.signaturePad.addEventListener('afterUpdateStroke', this.strokeHandler.bind(this));
         },
         clear() {
-            console.log('clear');
             this.signaturePad.clear();
             this.isEmpty = true;
+        },
+        get iconName() {
+            if(this.error) {
+                return 'exclamation';
+            } else {
+              return  'check';
+            }
         },
         strokeHandler(){
           if(this.isEmpty){
@@ -26,11 +38,15 @@ export default function ($wire,$refs) {
         },
         async upload(_) {
             const res = await $wire.save();
-            this.clear();
-            // TODO: if upload successful - add image to the signature and disable
-            // signature pad to prevent further drawing
             if(res !== null) {
-                this.publicUrl = res;
+                this.id = $wire.entangle('signature.id');
+                this.error = false;
+                // clear buttons for save and clean
+                this.isEmpty = true;
+                // disable signature pad on successful upload
+                this.signaturePad.off();
+            } else {
+                this.error = true;
             }
         },
         async save() {

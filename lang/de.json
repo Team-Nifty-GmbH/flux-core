@@ -1058,6 +1058,8 @@
     "Showing": "Zeige",
     "Signed Date": "Unterzeichnet am",
     "Signed Sepa Mandate": "Unterzeichnetes Sepa Mandat",
+    "Signature saved": "Unterschrift gespeichert",
+    "Signatures Upload Failed": "Upload fehlgeschlagen",
     "Single Booking": "Einzelbuchung",
     "Slug Position": "Pos.",
     "stale": "Veraltet",
@@ -1339,6 +1341,5 @@
     "Your subject": "Betreff",
     "Zip": "PLZ",
     "zip": "PLZ",
-    "Zip / City": "PLZ / Ort",
-    "Signature saved": "Unterschrift gespeichert"
+    "Zip / City": "PLZ / Ort"
 }

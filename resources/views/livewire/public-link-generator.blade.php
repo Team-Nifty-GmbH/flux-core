@@ -22,6 +22,6 @@
             </x-slot:append>
             </x-input>
     @else
-        <p>Signature submitted</p>
+        <p>{{ __('Signature saved') }}</p>
     @endif
 </div>
