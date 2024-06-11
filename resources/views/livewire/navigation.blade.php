@@ -96,7 +96,7 @@
                                 @if($navigation['children'] ?? false)
                                     x-on:click.prevent="toggleMenu('{{ $key }}')"
                                 @else
-                                    href="{{ $navigation['uri'] }}"
+                                    href="{{ data_get($navigation, 'uri', '#') }}"
                                     target="{{ ($navigation['target_blank'] ?? false) ? '_blank' : '' }}"
                                     x-on:click="activeItem = '{{ $key }}'; activeSubItem = ''"
                                 @endif
@@ -127,9 +127,9 @@
                                     class="mt-2 space-y-2 overflow-x-hidden text-white"
                                 >
                                     @foreach($navigation['children'] as $child)
-                                        <a x-on:click="activeSubItem = '{{ $child['uri'] }}'; activeItem = '{{ $key }}'"
+                                        <a x-on:click="activeSubItem = '{{ data_get($child, 'uri', '#') }}'; activeItem = '{{ $key }}'"
                                            href="{{ $child['uri'] }}" role="menuitem"
-                                           :class="activeSubItem === '{{ $child['uri'] }}' && 'rounded-md bg-primary-600/50 dark:bg-primary-700/5 hover:bg-primary-600/10'"
+                                           :class="activeSubItem === '{{ data_get($child, 'uri', '#') }}' && 'rounded-md bg-primary-600/50 dark:bg-primary-700/5 hover:bg-primary-600/10'"
                                            class="dark:hover:text-light block truncate rounded-md p-2 pl-20 text-sm transition-colors duration-200 hover:bg-gray-800/50">
                                             {{ __($child['label']) }}
                                         </a>
@@ -166,7 +166,7 @@
                                     <div class="w-16 flex-none">
                                         <div class="flex w-full justify-center text-white">
                                             <x-heroicons
-                                                :name="$navigations->first(fn ($item) => str_starts_with($visit, $item['uri']) && $item['uri'] !== '/')['icon'] ?? 'no-symbol'"
+                                                :name="$navigations->first(fn ($item) => str_starts_with($visit, data_get($item, 'uri')) && data_get($item, 'uri') !== '/')['icon'] ?? 'no-symbol'"
                                                 class="h-4 w-4"
                                             />
                                         </div>
@@ -205,7 +205,7 @@
                                         <div class="w-16 flex-none">
                                             <div class="flex w-full justify-center text-white">
                                                 <x-heroicons
-                                                    :name="$navigations->first(fn ($item) => str_starts_with($favorite['url'], $item['uri']) && $item['uri'] !== '/')['icon'] ?? 'no-symbol'"
+                                                    :name="$navigations->first(fn ($item) => str_starts_with($favorite['url'], data_get($item, 'uri')) && data_get($item, 'uri') !== '/')['icon'] ?? 'no-symbol'"
                                                     class="h-4 w-4"/>
                                             </div>
                                         </div>

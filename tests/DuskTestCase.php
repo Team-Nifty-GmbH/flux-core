@@ -9,7 +9,6 @@ use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
-use FluxErp\Providers\RouteServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
 use Illuminate\Database\Eloquent\Model;
@@ -141,7 +140,6 @@ abstract class DuskTestCase extends TestCase
             MediaLibraryServiceProvider::class,
             FluxServiceProvider::class,
             BindingServiceProvider::class,
-            RouteServiceProvider::class,
             SanctumServiceProvider::class,
             WebPushServiceProvider::class,
             MorphMapServiceProvider::class,

@@ -2,23 +2,20 @@
 
 namespace FluxErp\Livewire\DataTables\Products;
 
-use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\Product\UpdateProduct;
-use FluxErp\Livewire\DataTables\MediaList;
+use FluxErp\Livewire\DataTables\MediaGrid as BaseMediaGrid;
 use FluxErp\Livewire\Forms\ProductForm;
-use FluxErp\Models\Media;
 use FluxErp\Models\Product;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Modelable;
-use Spatie\MediaLibrary\MediaCollections\Exceptions\InvalidConversion;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class MediaGrid extends MediaList
+class MediaGrid extends BaseMediaGrid
 {
     use WithFileUploads;
 
@@ -41,11 +38,6 @@ class MediaGrid extends MediaList
         parent::mount();
 
         $this->collection = 'images';
-    }
-
-    public function getLayout(): string
-    {
-        return 'tall-datatables::layouts.grid';
     }
 
     public function getRowActions(): array
@@ -88,18 +80,6 @@ class MediaGrid extends MediaList
         );
     }
 
-    public function itemToArray($item): array
-    {
-        $itemArray = parent::itemToArray($item);
-        try {
-            $itemArray['url'] = $item->getUrl('thumb_400x400');
-        } catch (InvalidConversion) {
-            $itemArray['url'] = $item->getUrl();
-        }
-
-        return $itemArray;
-    }
-
     #[Js]
     public function uploadMedia(): string
     {
@@ -113,22 +93,6 @@ class MediaGrid extends MediaList
                 $wire.uploadMultiple('uploads', e.target.files);
             }
         JS;
-    }
-
-    public function deleteMedia(Media $media): void
-    {
-        try {
-            DeleteMedia::make($media->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->loadData();
     }
 
     public function updatedUploads(): void

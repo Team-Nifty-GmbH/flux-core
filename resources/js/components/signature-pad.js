@@ -1,20 +1,21 @@
 import SignaturePad from "signature_pad";
 import {entangle} from "alpinejs/src/entangle";
 
-export default function ($wire,$refs) {
+export default function ($wire, $refs) {
     return {
-        signaturePad:null,
-        isEmpty:true,
-        error:false,
-        id:null,
+        signaturePad: null,
+        isEmpty: true,
+        error: false,
+        id: null,
         async init() {
             // init signature pad
-            this.signaturePad = new SignaturePad($refs.canvas,{backgroundColor: 'rgba(255, 255, 255, 1)'});
+            this.signaturePad = new SignaturePad($refs.canvas, {backgroundColor: 'rgba(255, 255, 255, 1)'});
             // if signature is already saved - just display it on canvas but don't allow to draw
-            if($wire.signature.stagedFiles.length > 0) {
+            if ($wire.signature.stagedFiles.length > 0) {
                 this.id = $wire.signature.id;
                 await this.signaturePad.fromDataURL(await $wire.downloadSignatureAsUrlData(this.id));
-                this.signaturePad.off()
+                this.signaturePad.off();
+
                 return;
             }
             // if signature is not saved - allow to draw and clear after first stroke
@@ -25,20 +26,20 @@ export default function ($wire,$refs) {
             this.isEmpty = true;
         },
         get iconName() {
-            if(this.error) {
+            if (this.error) {
                 return 'exclamation';
             } else {
-              return  'check';
+                return 'check';
             }
         },
-        strokeHandler(){
-          if(this.isEmpty){
-            this.isEmpty = false;
-          }
+        strokeHandler() {
+            if (this.isEmpty) {
+                this.isEmpty = false;
+            }
         },
         async upload(_) {
             const res = await $wire.save();
-            if(res !== null) {
+            if (res !== null) {
                 this.id = $wire.entangle('signature.id');
                 this.error = false;
                 // clear buttons for save and clean
@@ -50,9 +51,12 @@ export default function ($wire,$refs) {
             }
         },
         async save() {
-            if(this.signaturePad.isEmpty()) return;
-            const data =  await (await fetch(this.signaturePad.toDataURL())).blob();
-            await $wire.upload('signature.file',data, this.upload.bind(this));
+            if (this.signaturePad.isEmpty()) {
+                return;
+            }
+
+            const data = await (await fetch(this.signaturePad.toDataURL())).blob();
+            await $wire.upload('signature.file', data, this.upload.bind(this));
         },
         // TODO: Add resizeCanvas method to resize listener
         resizeCanvas() {

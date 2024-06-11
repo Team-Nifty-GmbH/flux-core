@@ -16,7 +16,7 @@ class PublicLinkGenerator extends Component
     #[Modelable]
     public OrderForm $order;
 
-    public function setPublicLink()
+    public function setPublicLink(): void
     {
         $this->publicLink = URL::signedRoute('order.public', ['order' => $this->order->uuid]);
     }
@@ -24,11 +24,13 @@ class PublicLinkGenerator extends Component
     #[Computed]
     public function getSignature(): bool
     {
-        return is_null(app(Media::class)->query()
-            ->where('model_type', 'order')
-            ->where('model_id', $this->order->id)
-            ->where('collection_name', 'signature')
-            ->first());
+        return is_null(
+            app(Media::class)->query()
+                ->where('model_type', 'order')
+                ->where('model_id', $this->order->id)
+                ->where('collection_name', 'signature')
+                ->first()
+        );
     }
 
     public function render()

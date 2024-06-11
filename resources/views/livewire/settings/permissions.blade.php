@@ -89,7 +89,7 @@
                             <div class="flex">
                                 <div class="flex-1 font-medium">{{ __($permission['name']) }}</div>
                                 <div class="">
-                                    <x-checkbox wire:model="selectedRole.permissions" :value="$permission['id']"/>
+                                    <x-checkbox wire:model.number="selectedRole.permissions" :value="$permission['id']"/>
                                 </div>
                             </div>
                         @endforeach
