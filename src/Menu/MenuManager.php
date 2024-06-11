@@ -109,8 +109,8 @@ class MenuManager
                 data_get($this->resolved, $path) ?? [],
                 [
                     'label' => $label ?? Str::afterLast($path, '.'),
-                    'uri' => filter_var($resolvedRoute->uri, FILTER_VALIDATE_URL)
-                        ? $resolvedRoute->uri
+                    'uri' => filter_var($resolvedRoute->uri(), FILTER_VALIDATE_URL)
+                        ? $resolvedRoute->uri()
                         : Str::of($resolvedRoute->uri())->start('/')->toString(),
                     'icon' => $icon,
                     'route_name' => $routeName,
