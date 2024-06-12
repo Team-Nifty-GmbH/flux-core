@@ -13,6 +13,8 @@ use Illuminate\Contracts\Container\Container;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class MonitorablePendingBatch extends PendingBatch
 {
@@ -31,24 +33,40 @@ class MonitorablePendingBatch extends PendingBatch
 
             if ($user && array_key_exists(MonitorsQueue::class, class_uses_recursive($user))) {
                 $user->jobBatches()->attach($jobBatch);
-                $user->notify(new BatchStartedNotification($jobBatch));
+                try {
+                    $user->notify(new BatchStartedNotification($jobBatch));
+                } catch (Throwable $e) {
+                    Log::error($e);
+                }
             }
         });
 
         $this->progress(function (Batch $batch) {
             $jobBatch = app(JobBatch::class)->whereKey($batch->id)->first();
 
-            $jobBatch->users->each->notify(
-                $jobBatch->isFinished()
-                    ? new BatchFinishedNotification($jobBatch)
-                    : new BatchProcessingNotification($jobBatch)
-            );
+            $jobBatch->users->each(function ($user) use ($jobBatch) {
+                try {
+                    $user->notify(
+                        $jobBatch->isFinished()
+                            ? new BatchFinishedNotification($jobBatch)
+                            : new BatchProcessingNotification($jobBatch)
+                    );
+                } catch (Throwable $e) {
+                    Log::error($e);
+                }
+            });
         });
 
         $this->finally(function (Batch $batch) {
             $jobBatch = app(JobBatch::class)->whereKey($batch->id)->first();
 
-            $jobBatch->users->each->notify(new BatchFinishedNotification($jobBatch));
+            $jobBatch->users->each(function ($user) use ($jobBatch) {
+                try {
+                    $user->notify(new BatchFinishedNotification($jobBatch));
+                } catch (Throwable $e) {
+                    Log::error($e);
+                }
+            });
         });
     }
 }

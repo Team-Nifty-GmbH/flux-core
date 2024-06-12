@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
+use Exception;
 use FluxErp\Models\Pivots\QueueMonitorable;
 use FluxErp\Notifications\QueueMonitor\Job\JobFinishedNotification;
 use FluxErp\Notifications\QueueMonitor\Job\JobProcessingNotification;
@@ -23,8 +24,10 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Log;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
+use Throwable;
 
 class QueueMonitor extends Model
 {
@@ -62,18 +65,28 @@ class QueueMonitor extends Model
                 $user->queueMonitors()->attach($monitor);
                 // ensure that the started notification is only sent once
                 if (! $monitor->job_batch_id) {
-                    $user->notify(new JobStartedNotification($monitor));
+                    try {
+                        $user->notify(new JobStartedNotification($monitor));
+                    } catch (Throwable $e) {
+                        Log::error($e);
+                    }
                 }
             }
         });
 
         static::updated(function (QueueMonitor $monitor) {
             if (! $monitor->job_batch_id) {
-                $monitor->users->each->notify(
-                    $monitor->isFinished()
-                        ? new JobFinishedNotification($monitor)
-                        : new JobProcessingNotification($monitor)
-                );
+                $monitor->users->each(function ($user) use ($monitor) {
+                    try {
+                        $user->notify(
+                            $monitor->isFinished()
+                                ? new JobFinishedNotification($monitor)
+                                : new JobProcessingNotification($monitor)
+                        );
+                    } catch (Throwable $e) {
+                        Log::error($e);
+                    }
+                });
             }
         });
     }
@@ -160,7 +173,7 @@ class QueueMonitor extends Model
             return CarbonInterval::seconds(
                 (1 - $this->progress) / ($this->progress / $timeDiff)
             )->cascade();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return CarbonInterval::seconds(0);
         }
     }
@@ -185,7 +198,7 @@ class QueueMonitor extends Model
         return $startedAt->diffAsCarbonInterval($end);
     }
 
-    public function getException(bool $rescue = true): ?\Throwable
+    public function getException(bool $rescue = true): ?Throwable
     {
         if (is_null($this->exception_class)) {
             return null;
@@ -197,7 +210,7 @@ class QueueMonitor extends Model
 
         try {
             return new $this->exception_class($this->exception_message);
-        } catch (\Exception) {
+        } catch (Exception) {
             return null;
         }
     }
@@ -233,7 +246,7 @@ class QueueMonitor extends Model
         $response = Artisan::call('queue:retry', ['id' => $this->job_uuid]);
 
         if ($response !== 0) {
-            throw new \Exception(Artisan::output());
+            throw new Exception(Artisan::output());
         }
     }
 
