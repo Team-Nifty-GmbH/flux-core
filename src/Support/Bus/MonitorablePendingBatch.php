@@ -13,6 +13,8 @@ use Illuminate\Contracts\Container\Container;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class MonitorablePendingBatch extends PendingBatch
 {
@@ -33,8 +35,8 @@ class MonitorablePendingBatch extends PendingBatch
                 $user->jobBatches()->attach($jobBatch);
                 try {
                     $user->notify(new BatchStartedNotification($jobBatch));
-                } catch (\Throwable) {
-                    // ignore
+                } catch (Throwable $e) {
+                    Log::error($e);
                 }
             }
         });
@@ -49,8 +51,8 @@ class MonitorablePendingBatch extends PendingBatch
                             ? new BatchFinishedNotification($jobBatch)
                             : new BatchProcessingNotification($jobBatch)
                     );
-                } catch (\Throwable) {
-                    // ignore
+                } catch (Throwable $e) {
+                    Log::error($e);
                 }
             });
         });
@@ -61,7 +63,7 @@ class MonitorablePendingBatch extends PendingBatch
             $jobBatch->users->each(function ($user) use ($jobBatch) {
                 try {
                     $user->notify(new BatchFinishedNotification($jobBatch));
-                } catch (\Throwable) {
+                } catch (Throwable) {
                     // ignore
                 }
             });
