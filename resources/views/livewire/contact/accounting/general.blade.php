@@ -114,7 +114,7 @@
                 step="0.01"
                 min="0"
                 max="100"
-                wire:model="contact.payment_discount_percent"
+                wire:model="contact.discount_percent"
                 :label="__('Payment Discount Percentage')"
             />
         </div>
