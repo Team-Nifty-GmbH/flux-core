@@ -108,11 +108,11 @@ class FluxServiceProvider extends ServiceProvider
         $this->bootCommands();
         $this->bootRoutes();
 
-        if (static::$registerFluxRoutes) {
+        if (static::$registerFluxRoutes && ! $this->app->runningInConsole()) {
             $this->bootFluxMenu();
         }
 
-        if (static::$registerPortalRoutes) {
+        if (static::$registerPortalRoutes && ! $this->app->runningInConsole()) {
             $this->bootPortalMenu();
         }
 
