@@ -2,10 +2,12 @@
 
 namespace FluxErp\Livewire\Forms;
 
+use Carbon\Carbon;
 use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Address\DeleteAddress;
 use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Models\Address;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 
 class AddressForm extends FluxForm
@@ -104,6 +106,12 @@ class AddressForm extends FluxForm
         }
 
         parent::fill($values);
+
+        if (! is_null($this->date_of_birth)) {
+            $this->date_of_birth = Carbon::create($this->date_of_birth)
+                ->locale(Auth::user()->language->language_code)
+                ->isoFormat('L');
+        }
     }
 
     public function toArray(): array
