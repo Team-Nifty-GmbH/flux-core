@@ -160,7 +160,7 @@ Alpine.directive('tribute', (el, { modifiers, expression }, { evaluate }) => {
 
 document.addEventListener('livewire:navigated', function() {
     wireNavigation();
-});
+}, {once: true});
 
 document.addEventListener('livewire:init', () => {
     wireNavigation();
