@@ -62,18 +62,28 @@ class QueueMonitor extends Model
                 $user->queueMonitors()->attach($monitor);
                 // ensure that the started notification is only sent once
                 if (! $monitor->job_batch_id) {
-                    $user->notify(new JobStartedNotification($monitor));
+                    try {
+                        $user->notify(new JobStartedNotification($monitor));
+                    } catch (\Throwable) {
+                        // ignore
+                    }
                 }
             }
         });
 
         static::updated(function (QueueMonitor $monitor) {
             if (! $monitor->job_batch_id) {
-                $monitor->users->each->notify(
-                    $monitor->isFinished()
-                        ? new JobFinishedNotification($monitor)
-                        : new JobProcessingNotification($monitor)
-                );
+                $monitor->users->each(function ($user) use ($monitor) {
+                    try {
+                        $user->notify(
+                            $monitor->isFinished()
+                                ? new JobFinishedNotification($monitor)
+                                : new JobProcessingNotification($monitor)
+                        );
+                    } catch (\Throwable) {
+                        // ignore
+                    }
+                });
             }
         });
     }

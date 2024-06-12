@@ -31,24 +31,40 @@ class MonitorablePendingBatch extends PendingBatch
 
             if ($user && array_key_exists(MonitorsQueue::class, class_uses_recursive($user))) {
                 $user->jobBatches()->attach($jobBatch);
-                $user->notify(new BatchStartedNotification($jobBatch));
+                try {
+                    $user->notify(new BatchStartedNotification($jobBatch));
+                } catch (\Throwable) {
+                    // ignore
+                }
             }
         });
 
         $this->progress(function (Batch $batch) {
             $jobBatch = app(JobBatch::class)->whereKey($batch->id)->first();
 
-            $jobBatch->users->each->notify(
-                $jobBatch->isFinished()
-                    ? new BatchFinishedNotification($jobBatch)
-                    : new BatchProcessingNotification($jobBatch)
-            );
+            $jobBatch->users->each(function ($user) use ($jobBatch) {
+                try {
+                    $user->notify(
+                        $jobBatch->isFinished()
+                            ? new BatchFinishedNotification($jobBatch)
+                            : new BatchProcessingNotification($jobBatch)
+                    );
+                } catch (\Throwable) {
+                    // ignore
+                }
+            });
         });
 
         $this->finally(function (Batch $batch) {
             $jobBatch = app(JobBatch::class)->whereKey($batch->id)->first();
 
-            $jobBatch->users->each->notify(new BatchFinishedNotification($jobBatch));
+            $jobBatch->users->each(function ($user) use ($jobBatch) {
+                try {
+                    $user->notify(new BatchFinishedNotification($jobBatch));
+                } catch (\Throwable) {
+                    // ignore
+                }
+            });
         });
     }
 }
