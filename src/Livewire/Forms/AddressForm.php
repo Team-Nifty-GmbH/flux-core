@@ -7,6 +7,7 @@ use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Address\DeleteAddress;
 use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Models\Address;
+use FluxErp\Models\Language;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 
@@ -109,7 +110,7 @@ class AddressForm extends FluxForm
 
         if (! is_null($this->date_of_birth)) {
             $this->date_of_birth = Carbon::create($this->date_of_birth)
-                ->locale(Auth::user()->language->language_code)
+                ->locale(Auth::user()?->language->language_code ?? Language::default()?->language_code)
                 ->isoFormat('L');
         }
     }
