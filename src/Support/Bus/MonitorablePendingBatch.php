@@ -63,8 +63,8 @@ class MonitorablePendingBatch extends PendingBatch
             $jobBatch->users->each(function ($user) use ($jobBatch) {
                 try {
                     $user->notify(new BatchFinishedNotification($jobBatch));
-                } catch (Throwable) {
-                    // ignore
+                } catch (Throwable $e) {
+                    Log::error($e);
                 }
             });
         });
