@@ -270,3 +270,7 @@
         <x-button icon="plus" :label="__('Add')" primary x-on:click.prevent="$wire.address.contact_options.push({})" x-bind:disabled="!$wire.edit"/>
     </div>
 </div>
+<div x-data="addressMap($wire)">
+    <div id="map"></div>
+</div>
+

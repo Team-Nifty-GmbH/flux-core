@@ -3,10 +3,12 @@ import setupEditor from './components/tiptap';
 import workTime from './components/work-time.js';
 import notifications from './components/wireui/notifications';
 import PullToRefresh from "pulltorefreshjs";
+import addressMap from "./components/address-map";
 
 window.folderTree = folderTree;
 window.setupEditor = setupEditor;
 window.workTime = workTime;
+window.addressMap = addressMap;
 
 window.addEventListener('alpine:init', () => {
     window.Alpine.data('wireui_notifications', notifications);

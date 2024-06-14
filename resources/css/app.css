@@ -2,6 +2,7 @@
 @import "/node_modules/@fontsource/inter/latin-400.css";
 @import "/node_modules/@fontsource/inter/latin-600.css";
 @import "/node_modules/@fontsource/inter/latin-900.css";
+@import "/node_modules/leaflet/dist/leaflet.css";
 
 @tailwind base;
 @tailwind components;
@@ -60,4 +61,11 @@
     .prose-xs {
         @apply text-xs;
     }
+
+    #map {
+        @apply h-96
+    }
 }
+
+
+
