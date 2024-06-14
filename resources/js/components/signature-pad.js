@@ -1,5 +1,4 @@
 import SignaturePad from "signature_pad";
-import {entangle} from "alpinejs/src/entangle";
 
 export default function ($wire, $refs) {
     return {

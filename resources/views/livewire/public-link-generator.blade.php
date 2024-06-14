@@ -1,9 +1,9 @@
 <div>
-    @if($this->getSignature && is_null($publicLink))
+    @if(! $this->hasSignature && is_null($publicLink))
         <x-button
             class="w-full"
             wire:click="setPublicLink"
-            :label="__('Create Signature')"
+            :label="__('Add Signature')"
         />
     @elseif(! is_null($publicLink))
         <x-input

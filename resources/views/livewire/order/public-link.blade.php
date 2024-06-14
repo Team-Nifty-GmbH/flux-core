@@ -14,7 +14,7 @@
                             </template>
                         </div>
                         <template x-if="error">
-                            <p class="text-2xl">{{__("Signature Upload Failed")}}</p>
+                            <p class="text-2xl">{{__("Upload Failed")}}</p>
                         </template>
                         <template x-if="id && !error">
                             <p class="text-2xl">{{__("Signature saved")}}</p>
@@ -24,7 +24,7 @@
                 <canvas x-ref="canvas" width=500 height=200 class="rounded-md h-auto">
                 </canvas>
             </div>
-            <div class="mt-4 h-8 mb-4 flex justify-end w-[100%] space-x-5">
+            <div class="mt-4 h-8 mb-4 flex justify-end w-full space-x-5">
                 <x-button
                     x-cloak
                     x-show="!isEmpty"

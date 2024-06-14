@@ -1,12 +1,24 @@
+@php
+
+use FluxErp\Facades\Asset;
+use FluxErp\Providers\ViewServiceProvider;
+
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    ...
-    @livewireStyles
+{{--Todo: this approach regarding livewire doesent work - its loaded twice --}}
 </head>
 <body>
-@vite('packages/flux-core/resources/js/alpine.js')
-@livewireScripts
+{{ Asset::toHtml(
+     ViewServiceProvider::getRealPackageAssetPath(
+         '/resources/js/alpine.js',
+         'team-nifty-gmbh/flux-erp'
+     )
+ )
+}}
+{{--@vite('packages/flux-core/resources/js/alpine.js')--}}
+{{--@livewireScripts--}}
 {{ $slot}}
 </body>
 </html>

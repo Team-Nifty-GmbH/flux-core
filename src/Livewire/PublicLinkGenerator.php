@@ -22,15 +22,13 @@ class PublicLinkGenerator extends Component
     }
 
     #[Computed]
-    public function getSignature(): bool
+    public function hasSignature(): bool
     {
-        return is_null(
-            app(Media::class)->query()
+        return app(Media::class)->query()
                 ->where('model_type', 'order')
                 ->where('model_id', $this->order->id)
                 ->where('collection_name', 'signature')
-                ->first()
-        );
+                ->exists();
     }
 
     public function render()
