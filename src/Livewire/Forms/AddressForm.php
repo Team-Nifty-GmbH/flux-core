@@ -114,10 +114,6 @@ class AddressForm extends FluxForm
             unset($data['login_password']);
         }
 
-        if (is_null($this->permissions)) {
-            unset($data['permissions']);
-        }
-
         $data['contact_options'] = array_filter($this->contact_options);
 
         return $data;

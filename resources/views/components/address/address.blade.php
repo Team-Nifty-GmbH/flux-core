@@ -255,18 +255,18 @@
     {{ __('Contact options') }}
 </h3>
 <hr class="py-2" />
-<div class="flex flex-col gap-1.5">
+<div class="flex flex-col gap-1.5" x-data="{edit: $wire.entangle('edit')}">
     <template x-for="(contactOption, index) in $wire.address.contact_options">
         <div class="flex gap-1.5 items-center">
-            <x-input x-model="contactOption.type" :placeholder="__('Group')" x-bind:disabled="!$wire.edit" x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"/>
-            <x-input x-model="contactOption.label" :placeholder="__('Label')" x-bind:disabled="!$wire.edit" x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"/>
-            <x-input x-model="contactOption.value" :placeholder="__('Value')" x-bind:disabled="!$wire.edit" x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"/>
-            <div x-transition x-show="$wire.edit">
-                <x-button icon="trash" negative x-on:click.prevent="$wire.address.contact_options.splice(index, 1)" x-bind:disabled="!$wire.edit"/>
+            <x-input x-model="contactOption.type" :placeholder="__('Group')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
+            <x-input x-model="contactOption.label" :placeholder="__('Label')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
+            <x-input x-model="contactOption.value" :placeholder="__('Value')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
+            <div x-transition x-show="edit">
+                <x-button icon="trash" negative x-on:click.prevent="$wire.address.contact_options.splice(index, 1)" x-bind:disabled="!edit"/>
             </div>
         </div>
     </template>
-    <div x-transition x-show="$wire.edit">
-        <x-button icon="plus" :label="__('Add')" primary x-on:click.prevent="$wire.address.contact_options.push({})" x-bind:disabled="!$wire.edit"/>
+    <div x-transition x-show="edit">
+        <x-button icon="plus" :label="__('Add')" primary x-on:click.prevent="$wire.address.contact_options.push({})" x-bind:disabled="!edit"/>
     </div>
 </div>
