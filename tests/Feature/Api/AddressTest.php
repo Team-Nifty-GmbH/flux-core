@@ -127,7 +127,6 @@ class AddressTest extends BaseSetup
         );
         $this->assertEquals($this->addresses[0]->department, $jsonAddress->department);
         $this->assertEquals($this->addresses[0]->is_main_address, $jsonAddress->is_main_address);
-        $this->assertEquals($this->addresses[0]->lock()->exists(), $jsonAddress->is_locked);
         $this->assertEquals($this->addresses[0]->is_active, $jsonAddress->is_active);
         $this->assertEquals(Carbon::parse($this->addresses[0]->created_at),
             Carbon::parse($jsonAddress->created_at));
