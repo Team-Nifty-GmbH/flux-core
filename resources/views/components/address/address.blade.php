@@ -115,7 +115,7 @@
             {{ __('Date Of Birth') }}
         </label>
         <div class="col-span-2">
-            <x-input wire:model="address.date_of_birth" x-bind:disabled="!$wire.edit" />
+            <x-datetime-picker wire:model="address.date_of_birth" :without-time="true" x-bind:disabled="!$wire.edit" />
         </div>
     </div>
     <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
