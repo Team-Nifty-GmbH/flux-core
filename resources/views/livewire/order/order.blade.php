@@ -668,6 +668,7 @@
                                                 @endforeach
                                             </x-dropdown>
                                         </div>
+                                        <livewire:public-link-generator wire:model="order"/>
                                     @endif
                                     @foreach($additionalModelActions as $modelAction)
                                         {{$modelAction}}
