@@ -104,6 +104,10 @@ class FluxCalendar extends CalendarComponent
     {
         $attributes['is_all_day'] = $attributes['allDay'] ?? false;
         $attributes['confirm_option'] = ! $this->calendarEventWasRepeatable ? 'all' : $this->confirmSave;
+        $attributes['calendar_type'] ??= data_get(
+            collect($this->selectableCalendars)->firstWhere('id', data_get($attributes, 'calendar_id')),
+            'model_type'
+        );
 
         if ($attributes['has_repeats'] ?? false) {
             $attributes['repeat'] = [
@@ -270,6 +274,22 @@ class FluxCalendar extends CalendarComponent
         $model = app($this->tab === 'users' ? User::class : Address::class);
 
         $this->addInvitee($model->query()->whereKey($id)->first());
+    }
+
+    #[Renderless]
+    public function onEventClick(array $eventInfo): void
+    {
+        data_set(
+            $eventInfo,
+            'event.extendedProps.calendar_id',
+            data_get(
+                collect($this->selectableCalendars)
+                    ->firstWhere('model_type', data_get($eventInfo, 'event.extendedProps.calendar_type')),
+                'id'
+            )
+        );
+
+        parent::onEventClick($eventInfo);
     }
 
     public function render(): View

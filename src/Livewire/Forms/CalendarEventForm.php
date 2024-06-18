@@ -18,7 +18,7 @@ class CalendarEventForm extends FluxForm
     public ?string $calendar_type = null;
 
     #[Locked]
-    public ?int $calendar_id = null;
+    public int|string|null $calendar_id = null;
 
     public ?string $start = null;
 
