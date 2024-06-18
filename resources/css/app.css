@@ -3,6 +3,9 @@
 @import "/node_modules/@fontsource/inter/latin-600.css";
 @import "/node_modules/@fontsource/inter/latin-900.css";
 
+@import '/node_modules/gridstack/dist/gridstack.min.css';
+@import '/node_modules/gridstack/dist/gridstack-extra.min.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -60,4 +63,11 @@
     .prose-xs {
         @apply text-xs;
     }
+}
+
+.grid-stack {
+    @apply w-full
+}
+.grid-stack-item-content {
+    @apply bg-indigo-500 text-white m-0 rounded shadow
 }

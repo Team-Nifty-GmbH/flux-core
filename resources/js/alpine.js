@@ -1,12 +1,14 @@
 import folderTree from './components/folder-tree';
 import setupEditor from './components/tiptap';
 import workTime from './components/work-time.js';
+import dashboard from './components/dashboard';
 import notifications from './components/wireui/notifications';
 import PullToRefresh from "pulltorefreshjs";
 
 window.folderTree = folderTree;
 window.setupEditor = setupEditor;
 window.workTime = workTime;
+window.dashboard = dashboard;
 
 window.addEventListener('alpine:init', () => {
     window.Alpine.data('wireui_notifications', notifications);
