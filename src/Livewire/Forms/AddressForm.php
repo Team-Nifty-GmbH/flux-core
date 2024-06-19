@@ -108,11 +108,9 @@ class AddressForm extends FluxForm
 
         parent::fill($values);
 
-        if (! is_null($this->date_of_birth)
-            && $locale = (Auth::user()?->language->language_code ?? Language::default()?->language_code)
-        ) {
+        if (! is_null($this->date_of_birth)) {
             $this->date_of_birth = Carbon::create($this->date_of_birth)
-                ->locale($locale)
+                ->locale(app()->getLocale())
                 ->isoFormat('L');
         }
     }

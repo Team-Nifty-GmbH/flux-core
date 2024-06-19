@@ -99,15 +99,28 @@
                 </div>
 
                 <template x-if="$wire.calendarEvent.unit === 'weeks'">
-                    <div class="grid grid-cols-7 items-center gap-1.5 mt-4">
+                    <div class="grid grid-cols-7 items-center gap-1.5 mt-4"
+                         x-data="{
+                            updateWeekdays(weekday) {
+                                if ($wire.calendarEvent.weekdays.indexOf(weekday) !== -1) {
+                                    $wire.calendarEvent.weekdays = $wire.calendarEvent.weekdays.filter((day) => day !== weekday);
+                                } else {
+                                    $wire.calendarEvent.weekdays.push(weekday);
+                                }
+                            },
+                            weekdaySelected(weekday) {
+                                return $wire.calendarEvent.weekdays.indexOf(weekday) !== -1 ? 'bg-primary-500 text-white' : '';
+                            }
+                         }"
+                    >
                         <x-button
                             rounded
                             primary
                             flat
                             xs
                             :label="__('Mon')"
-                            x-on:click="$wire.calendarEvent.weekdays.indexOf('Mon') !== -1 ? $wire.calendarEvent.weekdays = $wire.calendarEvent.weekdays.filter((day) => day !== 'Mon') : $wire.calendarEvent.weekdays.push('Mon')"
-                            x-bind:class="$wire.calendarEvent.weekdays.indexOf('Mon') !== -1 ? 'bg-primary-500 text-white' : ''"
+                            x-on:click="updateWeekdays('Mon')"
+                            x-bind:class="weekdaySelected('Mon')"
                         />
                         <x-button
                             rounded
@@ -115,8 +128,8 @@
                             flat
                             xs
                             :label="__('Tue')"
-                            x-on:click="$wire.calendarEvent.weekdays.indexOf('Tue') !== -1 ? $wire.calendarEvent.weekdays = $wire.calendarEvent.weekdays.filter((day) => day !== 'Tue') : $wire.calendarEvent.weekdays.push('Tue')"
-                            x-bind:class="$wire.calendarEvent.weekdays.indexOf('Tue') !== -1 ? 'bg-primary-500 text-white' : ''"
+                            x-on:click="updateWeekdays('Tue')"
+                            x-bind:class="weekdaySelected('Tue')"
                         />
                         <x-button
                             rounded
@@ -124,8 +137,8 @@
                             flat
                             xs
                             :label="__('Wed')"
-                            x-on:click="$wire.calendarEvent.weekdays.indexOf('Wed') !== -1 ? $wire.calendarEvent.weekdays = $wire.calendarEvent.weekdays.filter((day) => day !== 'Wed') : $wire.calendarEvent.weekdays.push('Wed')"
-                            x-bind:class="$wire.calendarEvent.weekdays.indexOf('Wed') !== -1 ? 'bg-primary-500 text-white' : ''"
+                            x-on:click="updateWeekdays('Wed')"
+                            x-bind:class="weekdaySelected('Wed')"
                         />
                         <x-button
                             rounded
@@ -133,8 +146,8 @@
                             flat
                             xs
                             :label="__('Thu')"
-                            x-on:click="$wire.calendarEvent.weekdays.indexOf('Thu') !== -1 ? $wire.calendarEvent.weekdays = $wire.calendarEvent.weekdays.filter((day) => day !== 'Thu') : $wire.calendarEvent.weekdays.push('Thu')"
-                            x-bind:class="$wire.calendarEvent.weekdays.indexOf('Thu') !== -1 ? 'bg-primary-500 text-white' : ''"
+                            x-on:click="updateWeekdays('Thu')"
+                            x-bind:class="weekdaySelected('Thu')"
                         />
                         <x-button
                             rounded
@@ -142,8 +155,8 @@
                             flat
                             xs
                             :label="__('Fri')"
-                            x-on:click="$wire.calendarEvent.weekdays.indexOf('Fri') !== -1 ? $wire.calendarEvent.weekdays = $wire.calendarEvent.weekdays.filter((day) => day !== 'Fri') : $wire.calendarEvent.weekdays.push('Fri')"
-                            x-bind:class="$wire.calendarEvent.weekdays.indexOf('Fri') !== -1 ? 'bg-primary-500 text-white' : ''"
+                            x-on:click="updateWeekdays('Fri')"
+                            x-bind:class="weekdaySelected('Fri')"
                         />
                         <x-button
                             rounded
@@ -151,8 +164,8 @@
                             flat
                             xs
                             :label="__('Sat')"
-                            x-on:click="$wire.calendarEvent.weekdays.indexOf('Sat') !== -1 ? $wire.calendarEvent.weekdays = $wire.calendarEvent.weekdays.filter((day) => day !== 'Sat') : $wire.calendarEvent.weekdays.push('Sat')"
-                            x-bind:class="$wire.calendarEvent.weekdays.indexOf('Sat') !== -1 ? 'bg-primary-500 text-white' : ''"
+                            x-on:click="updateWeekdays('Sat')"
+                            x-bind:class="weekdaySelected('Sat')"
                         />
                         <x-button
                             rounded
@@ -160,8 +173,8 @@
                             flat
                             xs
                             :label="__('Sun')"
-                            x-on:click="$wire.calendarEvent.weekdays.indexOf('Sun') !== -1 ? $wire.calendarEvent.weekdays = $wire.calendarEvent.weekdays.filter((day) => day !== 'Sun') : $wire.calendarEvent.weekdays.push('Sun')"
-                            x-bind:class="$wire.calendarEvent.weekdays.indexOf('Sun') !== -1 ? 'bg-primary-500 text-white' : ''"
+                            x-on:click="updateWeekdays('Sun')"
+                            x-bind:class="weekdaySelected('Sun')"
                         />
                     </div>
                 </template>
@@ -238,7 +251,8 @@
                                 positive
                                 xs
                                 icon="check"
-                            />{{__('Accepted')}}
+                            />
+                            {{__('Accepted')}}
                         </div>
                     </x-select.option>
                     <x-select.option :label="__('Declined')" value="declined">
@@ -248,7 +262,8 @@
                                 negative
                                 xs
                                 icon="x"
-                            />{{__('Declined')}}
+                            />
+                            {{__('Declined')}}
                         </div>
                     </x-select.option>
                     <x-select.option :label="__('Maybe')" value="maybe">
@@ -258,7 +273,8 @@
                                 warning
                                 xs
                                 label="?"
-                            />{{__('Maybe')}}
+                            />
+                            {{__('Maybe')}}
                         </div>
                     </x-select.option>
                 </x-select>
@@ -275,37 +291,33 @@
                                 x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
                                 x-on:click="$wire.calendarEvent.invited.splice($wire.calendarEvent.invited.indexOf(invited), 1)"
                             />
-                            <template x-if="invited.pivot?.status === 'accepted'">
-                                <x-button.circle
-                                    disabled
-                                    positive
-                                    xs
-                                    icon="check"
-                                />
-                            </template>
-                            <template x-if="invited.pivot?.status === 'declined'">
-                                <x-button.circle
-                                    disabled
-                                    negative
-                                    xs
-                                    icon="x" />
-                            </template>
-                            <template x-if="invited.pivot?.status === 'maybe'">
-                                <x-button.circle
-                                    disabled
-                                    warning
-                                    xs
-                                    label="?"
-                                />
-                            </template>
-                            <template x-if="invited.pivot?.status !== 'accepted' && invited.pivot?.status !== 'declined' && invited.pivot?.status !== 'maybe'">
-                                <x-button.circle
-                                    disabled
-                                    secondary
-                                    xs
-                                    label="?"
-                                />
-                            </template>
+                            <x-button.circle
+                                x-show="invited.pivot?.status === 'accepted'"
+                                disabled
+                                positive
+                                xs
+                                icon="check"
+                            />
+                            <x-button.circle
+                                x-show="invited.pivot?.status === 'declined'"
+                                disabled
+                                negative
+                                xs
+                                icon="x" />
+                            <x-button.circle
+                                x-show="invited.pivot?.status === 'maybe'"
+                                disabled
+                                warning
+                                xs
+                                label="?"
+                            />
+                            <x-button.circle
+                                x-show="invited.pivot?.status !== 'accepted' && invited.pivot?.status !== 'declined' && invited.pivot?.status !== 'maybe'"
+                                disabled
+                                secondary
+                                xs
+                                label="?"
+                            />
                             <x-badge md x-text="invited.label" />
                         </div>
                     </template>
