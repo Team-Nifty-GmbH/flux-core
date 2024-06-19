@@ -131,7 +131,7 @@ class SerialNumberTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/serial-numbers/' . Str::uuid());
+        $response = $this->actingAs($this->user)->get('/api/serial-numbers/' . $this->serialNumbers[2]->id + 10000);
         $response->assertStatus(404);
     }
 

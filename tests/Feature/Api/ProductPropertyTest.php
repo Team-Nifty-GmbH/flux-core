@@ -66,7 +66,8 @@ class ProductPropertyTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/product-properties/' . Str::uuid());
+        $response = $this->actingAs($this->user)
+            ->get('/api/product-properties/' . $this->productProperties[2]->id + 10000);
         $response->assertStatus(404);
     }
 
