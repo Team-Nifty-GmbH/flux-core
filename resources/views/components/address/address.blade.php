@@ -273,4 +273,3 @@
 <div x-data="addressMap($wire)">
     <div id="map" x-show="showMap"></div>
 </div>
-

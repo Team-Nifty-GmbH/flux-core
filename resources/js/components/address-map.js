@@ -12,9 +12,9 @@ L.Icon.Default.mergeOptions({
     shadowUrl: markerShadow
 });
 
-export default function ($wire){
+export default function ($wire) {
     return {
-        init(){
+        init() {
             // init map
             this.map = L.map('map');
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -25,10 +25,10 @@ export default function ($wire){
             this.lat = $wire.address.latitude !== null ? parseFloat($wire.address.latitude) : null;
             this.long = $wire.address.longitude !== null ? parseFloat($wire.address.longitude) : null;
 
-            if(this.lat !== null && this.long !== null){
+            if (this.lat !== null && this.long !== null) {
                 // x-show - racing condition with leaflet
                 // Dom is not ready yet - hence next event loop run
-                this.$nextTick(()=>{
+                this.$nextTick(() => {
                     // create view
                     this.map.setView([this.lat, this.long], 13);
                     // set marker
@@ -36,29 +36,29 @@ export default function ($wire){
                 });
             }
             // side-effect -> update map on address change
-            this.$watch('$wire.address',this.onChange.bind(this));
+            this.$watch('$wire.address', this.onChange.bind(this));
         },
-        onChange(value){
+        onChange(value) {
             // remove old marker if exists
-            if(this.marker){
+            if (this.marker) {
                 this.marker.remove();
             }
             // update new lat and long
             this.lat = $wire.address.latitude !== null ? parseFloat($wire.address.latitude) : null;
             this.long = $wire.address.longitude !== null ? parseFloat($wire.address.longitude) : null;
 
-            if(this.lat === null || this.long === null){
+            if (this.lat === null || this.long === null) {
                 return;
             }
-            this.$nextTick(()=>{
+            this.$nextTick(() => {
                 // create view
                 this.map.setView([this.lat, this.long], 13);
                 // set marker
                 this.marker = L.marker([this.lat, this.long]).addTo(this.map);
             });
         },
-        get showMap (){
-          return this.lat && this.long;
+        get showMap() {
+            return this.lat && this.long;
         },
         map: null,
         marker: null,
