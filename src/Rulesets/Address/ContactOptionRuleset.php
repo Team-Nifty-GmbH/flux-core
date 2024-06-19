@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\Address;
 use FluxErp\Models\ContactOption;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class ContactOptionRuleset extends FluxRuleset
 {
@@ -16,7 +17,11 @@ class ContactOptionRuleset extends FluxRuleset
                 'integer',
                 new ModelExists(ContactOption::class),
             ],
-            'contact_options.*.type' => 'required|string',
+            'contact_options.*.type' => [
+                'required',
+                'string',
+                Rule::in(['phone', 'email', 'website']),
+            ],
             'contact_options.*.label' => 'required|string',
             'contact_options.*.value' => 'required|string',
             'contact_options.*.is_primary' => 'boolean',

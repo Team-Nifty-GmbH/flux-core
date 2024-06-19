@@ -258,7 +258,21 @@
 <div class="flex flex-col gap-1.5" x-data="{edit: $wire.entangle('edit')}">
     <template x-for="(contactOption, index) in $wire.address.contact_options">
         <div class="flex gap-1.5 items-center">
-            <x-input x-model="contactOption.type" :placeholder="__('Group')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
+            <div>
+                <x-native-select
+                    x-bind:readonly="!edit"
+                    x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
+                    x-model="contactOption.type"
+                    :options="[
+                        ['label' => __('Email'), 'value' => 'email'],
+                        ['label' => __('Phone'), 'value' => 'phone'],
+                        ['label' => __('Website'), 'value' => 'website'],
+                    ]"
+                    option-label="label"
+                    option-value="value"
+                    :clearable="false"
+                />
+            </div>
             <x-input x-model="contactOption.label" :placeholder="__('Label')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
             <x-input x-model="contactOption.value" :placeholder="__('Value')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
             <div x-transition x-show="edit">
