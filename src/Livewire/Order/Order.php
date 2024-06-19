@@ -512,7 +512,6 @@ class Order extends OrderPositionList
     public function replicate(?string $orderTypeEnum = null): void
     {
         $this->replicateOrder->fill($this->order->toArray());
-        $this->replicateOrder->order_positions = [];
         $this->fetchContactData();
 
         $this->replicateOrderTypes = app(OrderType::class)->query()
@@ -524,6 +523,7 @@ class Order extends OrderPositionList
 
         if ($this->replicateOrderTypes) {
             $this->replicateOrder->parent_id = $this->order->id;
+            $this->replicateOrder->order_positions = [];
             if (count($this->replicateOrderTypes) === 1) {
                 $this->replicateOrder->order_type_id = $this->replicateOrderTypes[0]['id'];
             }
@@ -534,6 +534,7 @@ class Order extends OrderPositionList
                 $openModal('create-child-order');
             JS);
         } else {
+            $this->replicateOrder->order_positions = null;
             $this->skipRender();
 
             $this->js(<<<'JS'
