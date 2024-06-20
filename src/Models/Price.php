@@ -20,6 +20,7 @@ class Price extends Model
 
     protected $appends = [
         'base_price',
+        'root_price',
         'is_net',
         'gross',
         'net',
@@ -49,6 +50,8 @@ class Price extends Model
 
     public ?Price $basePrice = null;
 
+    public ?Price $rootPrice = null;
+
     protected function casts(): array
     {
         return [
@@ -65,6 +68,13 @@ class Price extends Model
     {
         return Attribute::get(
             fn () => $this->basePrice
+        );
+    }
+
+    public function rootPrice(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->rootPrice
         );
     }
 
