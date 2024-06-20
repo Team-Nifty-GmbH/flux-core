@@ -116,11 +116,13 @@ class PriceHelper
             return null;
         }
 
-        $productCategoriesDiscounts = $price->priceList->categoryDiscounts()
-            ->wherePivotIn('category_id', $this->product->categories()->pluck('id')->toArray())
-            ->get();
+        if ($price->isInherited) {
+            $productCategoriesDiscounts = $price->priceList->categoryDiscounts()
+                ->wherePivotIn('category_id', $this->product->categories()->pluck('id')->toArray())
+                ->get();
 
-        $this->calculateLowestDiscountedPrice($price, $productCategoriesDiscounts);
+            $this->calculateLowestDiscountedPrice($price, $productCategoriesDiscounts);
+        }
 
         if ($this->contact) {
             $discounts = app(Discount::class)->query()
@@ -213,7 +215,7 @@ class PriceHelper
             $originalPrice = $price->basePrice->{$function}($this->product->vatRate?->rate_percentage);
 
             $price->discountFlat = bcsub($originalPrice, $price->price);
-            $price->discountPercentage = $originalPrice != 0 ? bcdiv($price->price, $originalPrice) : 0;
+            $price->discountPercentage = $originalPrice != 0 ? diff_percentage($originalPrice, $price->price) : 0;
         }
 
         // set the used priceList
@@ -258,8 +260,12 @@ class PriceHelper
         // If price was found, apply all the discounts in reverse order
         if ($price) {
             $discounts = array_filter($discounts);
-            if ($discounts) {
+            if ($discounts || $priceList->parent) {
                 $price->basePrice = (app(Price::class))->forceFill($price->toArray());
+                $price->rootPrice = (app(Price::class))
+                    ->forceFill(
+                        $this->getRootPrice($priceList->parent, $price)?->toArray() ?? $price->toArray()
+                    );
             }
 
             $function = $this->priceList->is_net ? 'getNet' : 'getGross';
@@ -310,5 +316,22 @@ class PriceHelper
                 $price->appliedDiscounts[] = $maxFlatDiscount;
             }
         }
+    }
+
+    private function getRootPrice(?PriceList $priceList, ?Price $price): ?Price
+    {
+        if (is_null($priceList)) {
+            return $price;
+        }
+
+        $parentPrice = $priceList->parent?->prices()
+            ->where('product_id', $this->product->id)
+            ->first();
+
+        if ($priceList->parent) {
+            $price = $this->getRootPrice($priceList->parent, $parentPrice);
+        }
+
+        return $parentPrice ?? $price;
     }
 }
