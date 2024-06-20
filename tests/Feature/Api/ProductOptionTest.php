@@ -60,7 +60,8 @@ class ProductOptionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/product-options/' . Str::uuid());
+        $response = $this->actingAs($this->user)
+            ->get('/api/product-options/' . $this->productOptions[2]->id + 10000);
         $response->assertStatus(404);
     }
 

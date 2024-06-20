@@ -51,7 +51,7 @@ class UnitTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/units/' . Str::uuid());
+        $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id + 10000);
         $response->assertStatus(404);
     }
 

@@ -10,7 +10,7 @@ You should prefer to use the `@extendFlux` directive to extend a blade file. Thi
 @section('actions')
     <livewire:custom-order-action :order="$order" />
 @endsection
-@extendFlux(livewire.order.order)
+@extendFlux('livewire.order.order')
 ```
 
 If you want to extend the section rather than replace it you can use the `@parent` directive in your section.
@@ -20,7 +20,7 @@ If you want to extend the section rather than replace it you can use the `@paren
     @parent
     <livewire:custom-order-action :order="$order" />
 @endsection
-@extendFlux(livewire.order.order)
+@extendFlux('livewire.order.order')
 ```
 
 > [!notice]

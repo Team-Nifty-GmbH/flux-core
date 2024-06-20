@@ -57,7 +57,6 @@ class FluxCalendar extends CalendarComponent
         return parent::getEvents($info, $calendarAttributes);
     }
 
-    #[Renderless]
     public function saveCalendar(array $attributes): array|false
     {
         if ($attributes['model_type'] ?? false) {
@@ -81,10 +80,23 @@ class FluxCalendar extends CalendarComponent
             return false;
         }
 
-        return array_merge(
+        $calendar = array_merge(
             $result,
-            ['resourceEditable' => $result['is_editable'] ?? false]
+            [
+                'resourceEditable' => $result['is_editable'] ?? false,
+                'hasRepeatableEvents' => $result['has_repeatable_events'] ?? false,
+            ]
         );
+        $index = collect($this->selectableCalendars)->search(fn ($item) => $item['id'] === $result['id']);
+
+        if ($index === false) {
+            $this->selectableCalendars[] = $calendar;
+        } else {
+            $this->selectableCalendars[$index] = $calendar;
+        }
+
+
+        return $calendar;
     }
 
     #[Renderless]
@@ -92,6 +104,10 @@ class FluxCalendar extends CalendarComponent
     {
         $attributes['is_all_day'] = $attributes['allDay'] ?? false;
         $attributes['confirm_option'] = ! $this->calendarEventWasRepeatable ? 'all' : $this->confirmSave;
+        $attributes['calendar_type'] ??= data_get(
+            collect($this->selectableCalendars)->firstWhere('id', data_get($attributes, 'calendar_id')),
+            'model_type'
+        );
 
         if ($attributes['has_repeats'] ?? false) {
             $attributes['repeat'] = [
@@ -138,7 +154,12 @@ class FluxCalendar extends CalendarComponent
                 return false;
             }
 
-            $result = array_values($this->event->getActionResult());
+            $actionResult = $this->event->getActionResult();
+
+            $result = match (true) {
+                is_array($actionResult) => array_values($actionResult),
+                default => Arr::wrap($actionResult),
+            };
         }
 
         $result = array_map(
@@ -172,6 +193,10 @@ class FluxCalendar extends CalendarComponent
 
             return false;
         }
+
+        $this->selectableCalendars = collect($this->selectableCalendars)
+            ->reject(fn ($item) => $item['id'] === data_get($attributes, 'id'))
+            ->all();
 
         return true;
     }
@@ -249,6 +274,22 @@ class FluxCalendar extends CalendarComponent
         $model = app($this->tab === 'users' ? User::class : Address::class);
 
         $this->addInvitee($model->query()->whereKey($id)->first());
+    }
+
+    #[Renderless]
+    public function onEventClick(array $eventInfo): void
+    {
+        data_set(
+            $eventInfo,
+            'event.extendedProps.calendar_id',
+            data_get(
+                collect($this->selectableCalendars)
+                    ->firstWhere('model_type', data_get($eventInfo, 'event.extendedProps.calendar_type')),
+                'id'
+            )
+        );
+
+        parent::onEventClick($eventInfo);
     }
 
     public function render(): View
