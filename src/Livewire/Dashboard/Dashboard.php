@@ -19,23 +19,31 @@ class Dashboard extends Component
     use Actions;
 
     public array $widgets = [];
+    public array $availableWidgets = [];
 
     public function mount(): void
     {
+        $this->availableWidgets = $this->filterWidgets(Widget::all());
         $this->widgets();
+
     }
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.dashboard.dashboard', [
-            'availableWidgets' => $this->filterWidgets(Widget::all()),
-        ]);
+        return view('flux::livewire.dashboard.dashboard');
     }
 
     public function widgets(): void
     {
         $this->widgets = $this->filterWidgets(auth()->user()->widgets()->get()->toArray());
     }
+
+    #[Renderless]
+    public function syncWidgets(array $widgets): void
+    {
+        $this->widgets = $widgets;
+    }
+
 
     #[Renderless]
     public function saveDashboard(array $sortedIds = []): void
