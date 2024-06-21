@@ -70,3 +70,26 @@ if (! function_exists('exception_to_notifications')) {
         }
     }
 }
+
+if (! function_exists('cart')) {
+    function cart(): ?\FluxErp\Models\Cart
+    {
+        return auth()
+            ->user()
+            ?->carts()
+            ->current()
+            ->with(['cartItems', 'cartItems.product.coverMedia'])
+            ->withSum('cartItems', 'total')
+            ->first()
+            ?? app(\FluxErp\Models\Cart::class)
+                ->query()
+                ->where('session_id', session()->getId())
+                ->current()
+                ->with(['cartItems', 'cartItems.product.coverMedia'])
+                ->withSum('cartItems', 'total')
+                ->first()
+            ?? \FluxErp\Actions\Cart\CreateCart::make()
+                ->validate()
+                ->execute();
+    }
+}

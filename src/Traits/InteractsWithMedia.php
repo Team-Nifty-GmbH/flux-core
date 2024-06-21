@@ -98,5 +98,12 @@ trait InteractsWithMedia
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();
+
+        $this->addMediaConversion('thumb_800x800')
+            ->width(800)
+            ->height(800)
+            ->keepOriginalImageFormat()
+            ->quality(80)
+            ->optimize();
     }
 }

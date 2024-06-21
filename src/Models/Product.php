@@ -18,6 +18,8 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Lockable;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -158,6 +160,27 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
             ->useDisk('public');
     }
 
+    public function getChildProductOptions(): Collection
+    {
+        return app(ProductOptionGroup::class)
+            ->query()
+            ->whereHas('productOptions.products', function (Builder $query) {
+                return $query->whereIntegerInRaw('product_id', $this->children->pluck('id'));
+            })
+            ->with([
+                'productOptions' => fn ($query) => $query
+                    ->whereHas('products', function (Builder $query) {
+                        return $query->whereIntegerInRaw('product_id', $this->children->pluck('id'));
+                    })
+                    ->select([
+                        'product_options.id',
+                        'product_option_group_id',
+                        'name',
+                    ]),
+            ])
+            ->get();
+    }
+
     public function getLabel(): ?string
     {
         return $this->name;
@@ -181,5 +204,33 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         return $this->coverMedia?->getUrl('thumb')
             ?? $this->getFirstMedia('images')?->getUrl('thumb')
             ?? static::icon()->getUrl();
+    }
+
+    public function scopeWebshop(Builder $query): void
+    {
+        $query
+            ->with('coverMedia')
+            ->where(fn (Builder $query) => $query->where('is_active', true)
+                ->orWhere('is_nos', true)
+            )
+            ->where('is_active_export_to_web_shop', true)
+            ->where(function (Builder $query) {
+                $query->whereHas('children', function (Builder $query) {
+                    $query->where('is_active', true);
+                })->orWhere('is_nos', true);
+            })
+            ->whereNull('parent_id')
+            ->select(array_map(
+                fn (string $column) => $this->getTable() . '.' . $column,
+                [
+                    'id',
+                    'name',
+                    'description',
+                    'product_number',
+                    'is_highlight',
+                    'cover_media_id',
+                ]
+            ))
+            ->withCount('children');
     }
 }

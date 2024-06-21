@@ -4,6 +4,8 @@ use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Livewire\Portal\Auth\Login;
 use FluxErp\Livewire\Portal\Auth\Logout;
+use FluxErp\Livewire\Portal\Shop\ProductDetail;
+use FluxErp\Livewire\Portal\Shop\ProductList;
 use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
@@ -39,6 +41,10 @@ Route::middleware(['web', PortalMiddleware::class])
                 ->name('dashboard');
             Route::get('/calendar', FluxErp\Livewire\Portal\Calendar::class)
                 ->name('calendar');
+            Route::get('/products', ProductList::class)
+                ->name('products');
+            Route::get('/products/{product}', ProductDetail::class)
+                ->name('products.show');
             Route::get('/files', FluxErp\Livewire\Portal\Files::class)
                 ->name('files');
             Route::get('/my-profile', FluxErp\Livewire\Portal\Profile::class)
