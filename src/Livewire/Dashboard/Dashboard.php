@@ -46,7 +46,7 @@ class Dashboard extends Component
 
 
     #[Renderless]
-    public function saveDashboard(array $sortedIds = []): void
+    public function saveDashboard(): void
     {
         $existingItemIds = array_filter(Arr::pluck($this->widgets, 'id'), 'is_numeric');
         auth()->user()->widgets()->whereNotIn('id', $existingItemIds)->delete();
@@ -54,18 +54,15 @@ class Dashboard extends Component
         // create new widgets, update existing widgets
         foreach ($this->widgets as &$widget) {
             $savedWidget = auth()->user()->widgets()->updateOrCreate(['id' => $widget['id']], $widget);
-            $position = array_search($widget['id'], $sortedIds);
-
-            if ($position !== false) {
-                $sortedIds[$position] = $savedWidget->id;
-            }
-
             $widget['id'] = $savedWidget->id;
         }
 
-        $sortedIds = array_filter($sortedIds, 'is_numeric');
-        app(WidgetModel::class)->setNewOrder($sortedIds);
+        $this->widgets();
+    }
 
+    #[Renderless]
+    public function cancelDashboard(): void
+    {
         $this->widgets();
     }
 
