@@ -3,10 +3,13 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\FluxAction;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Form as BaseForm;
 
 abstract class FluxForm extends BaseForm
 {
+    protected ?string $modelClass = null;
+
     protected bool $checkPermission = true;
 
     protected mixed $actionResult = null;
@@ -33,6 +36,17 @@ abstract class FluxForm extends BaseForm
         $this->checkPermission = $checkPermission;
 
         return $this;
+    }
+
+    public function getModelInstance(): ?Model
+    {
+        if (is_null($this->modelClass)) {
+            return null;
+        }
+
+        return app($this->modelClass)->query()
+            ->where($this->getKey(), data_get($this, $this->getKey()))
+            ->first();
     }
 
     public function save(): void

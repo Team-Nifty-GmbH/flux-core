@@ -34,7 +34,8 @@ class UpdatePriceListRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
-            resolve_static(DiscountRuleset::class, 'getRules')
+            resolve_static(DiscountRuleset::class, 'getRules'),
+            resolve_static(RoundingRuleset::class, 'getRules')
         );
     }
 }

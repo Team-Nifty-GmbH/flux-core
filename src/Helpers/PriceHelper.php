@@ -3,17 +3,21 @@
 namespace FluxErp\Helpers;
 
 use Carbon\Carbon;
+use FluxErp\Enums\RoundingMethodEnum;
 use FluxErp\Models\Category;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Discount;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Support\Calculation\Rounding;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class PriceHelper
 {
+    public ?Price $price = null;
+
     private ?Contact $contact = null;
 
     private ?Discount $discount = null;
@@ -79,49 +83,49 @@ class PriceHelper
     {
         $this->timestamp = $this->timestamp ?? Carbon::now()->toDateTimeString();
 
-        $price = $this->priceList?->prices()
+        $this->price = $this->priceList?->prices()
             ->where('product_id', $this->product->id)
             ->first();
 
-        if (! $price && $this->priceList?->parent) {
-            $price = $this->calculatePriceFromPriceList($this->priceList, []);
+        if (! $this->price && $this->priceList?->parent) {
+            $this->price = $this->calculatePriceFromPriceList($this->priceList, []);
 
-            if ($price) {
-                $price->isInherited = true;
-                unset($price->id, $price->uuid);
+            if ($this->price) {
+                $this->price->isInherited = true;
+                unset($this->price->id, $this->price->uuid);
             }
         }
 
-        if (! $price) {
-            $price = $this->contact?->priceList?->prices()
+        if (! $this->price) {
+            $this->price = $this->contact?->priceList?->prices()
                 ->where('product_id', $this->product->id)
                 ->first();
         }
 
-        if (! $price && $this->useDefault) {
-            $price = app(Price::class)->query()
+        if (! $this->price && $this->useDefault) {
+            $this->price = app(Price::class)->query()
                 ->where('product_id', $this->product->id)
                 ->whereRelation('priceList', 'is_default', true)
                 ->first();
 
-            if ($price) {
-                $price->isInherited = true;
-                unset($price->id, $price->uuid);
+            if ($this->price) {
+                $this->price->isInherited = true;
+                unset($this->price->id, $this->price->uuid);
             }
         } else {
-            $price?->setRelation('priceList', $this->priceList);
+            $this->price?->setRelation('priceList', $this->priceList);
         }
 
-        if (! $price) {
+        if (! $this->price) {
             return null;
         }
 
-        if ($price->isInherited) {
-            $productCategoriesDiscounts = $price->priceList->categoryDiscounts()
+        if ($this->price->isInherited) {
+            $productCategoriesDiscounts = $this->price->priceList->categoryDiscounts()
                 ->wherePivotIn('category_id', $this->product->categories()->pluck('id')->toArray())
                 ->get();
 
-            $this->calculateLowestDiscountedPrice($price, $productCategoriesDiscounts);
+            $this->calculateLowestDiscountedPrice($this->price, $productCategoriesDiscounts);
         }
 
         if ($this->contact) {
@@ -201,29 +205,52 @@ class PriceHelper
                     ->get()
             );
 
-            $this->calculateLowestDiscountedPrice($price, $discounts->diff($productCategoriesDiscounts));
+            $this->calculateLowestDiscountedPrice($this->price, $discounts->diff($productCategoriesDiscounts));
         }
 
         // Apply added discount
         if ($this->discount) {
-            $this->calculateLowestDiscountedPrice($price, collect($this->discount));
+            $this->calculateLowestDiscountedPrice($this->price, collect($this->discount));
+        }
+
+        $this->fireEvent('price.calculated');
+
+        // set the used priceList and eventually round the price
+        if ($this->priceList) {
+            $this->price->price_list_id = $this->priceList->id;
+
+            $this->price->price = match ($this->priceList->rounding_method_enum) {
+                RoundingMethodEnum::Round => Rounding::round($this->price->price, $this->priceList->rounding_precision),
+                RoundingMethodEnum::Ceil => Rounding::ceil($this->price->price, $this->priceList->rounding_precision),
+                RoundingMethodEnum::Floor => Rounding::floor($this->price->price, $this->priceList->rounding_precision),
+                RoundingMethodEnum::Nearest => Rounding::nearest(
+                    number: $this->priceList->rounding_number,
+                    value: $this->price->price,
+                    precision: $this->priceList->rounding_precision,
+                    mode: $this->priceList->rounding_mode
+                ),
+                RoundingMethodEnum::End => Rounding::end(
+                    number: $this->priceList->rounding_number,
+                    value: $this->price->price,
+                    precision: $this->priceList->rounding_precision,
+                    mode: $this->priceList->rounding_mode
+                ),
+                default => $this->price->price
+            };
+
+            $this->fireEvent('price.rounded');
         }
 
         // Calculated total discounts based on base price and end price
-        if ($price->basePrice) {
-            $function = $price->basePrice->priceList->is_net ? 'getNet' : 'getGross';
-            $originalPrice = $price->basePrice->{$function}($this->product->vatRate?->rate_percentage);
+        if ($this->price->basePrice) {
+            $function = $this->price->basePrice->priceList->is_net ? 'getNet' : 'getGross';
+            $originalPrice = $this->price->basePrice->{$function}($this->product->vatRate?->rate_percentage);
 
-            $price->discountFlat = bcsub($originalPrice, $price->price);
-            $price->discountPercentage = $originalPrice != 0 ? diff_percentage($originalPrice, $price->price) : 0;
+            $this->price->discountFlat = bcsub($originalPrice, $this->price->price);
+            $this->price->discountPercentage = $originalPrice != 0 ? diff_percentage($originalPrice, $this->price->price) : 0;
         }
 
-        // set the used priceList
-        if ($this->priceList) {
-            $price->price_list_id = $this->priceList->id;
-        }
-
-        return $price;
+        return $this->price;
     }
 
     /**
@@ -333,5 +360,10 @@ class PriceHelper
         }
 
         return $parentPrice ?? $price;
+    }
+
+    protected function fireEvent(string $event): void
+    {
+        event($event, $this);
     }
 }

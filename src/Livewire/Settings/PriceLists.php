@@ -5,35 +5,26 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\Discount\UpdateDiscount;
 use FluxErp\Actions\PriceList\CreatePriceList;
-use FluxErp\Actions\PriceList\DeletePriceList;
 use FluxErp\Actions\PriceList\UpdatePriceList;
+use FluxErp\Enums\RoundingMethodEnum;
+use FluxErp\Livewire\DataTables\PriceListList;
+use FluxErp\Livewire\Forms\PriceListForm;
 use FluxErp\Models\Category;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
-use Illuminate\Contracts\View\View;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
-use Livewire\Component;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
 
-class PriceLists extends Component
+class PriceLists extends PriceListList
 {
     use Actions;
 
-    public array $selectedPriceList = [
-        'name' => '',
-        'parent_id' => null,
-        'price_list_code' => null,
-        'is_net' => false,
-        'is_default' => false,
-        'discount' => [
-            'discount' => null,
-            'is_percentage' => true,
-        ],
-    ];
+    protected ?string $includeBefore = 'flux::livewire.settings.price-lists';
 
-    public array $priceLists;
-
-    public array $categories;
+    public PriceListForm $priceList;
 
     public array $discountedCategories = [];
 
@@ -43,48 +34,66 @@ class PriceLists extends Component
         'is_percentage' => true,
     ];
 
-    public bool $editModal = false;
-
     public function mount(): void
     {
-        $this->priceLists = app(PriceList::class)->query()
-            ->get()
-            ->toArray();
+        parent::mount();
 
-        $this->categories = app(Category::class)->query()
-            ->where('model_type', app(Product::class)->getMorphClass())
-            ->get(['id', 'name'])
-            ->toArray();
+        $this->headline = __('Price Lists');
+    }
+
+    public function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('New'))
+                ->icon('plus')
+                ->color('primary')
+                ->when(resolve_static(CreatePriceList::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'edit',
+                ]),
+        ];
+    }
+
+    public function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('Edit'))
+                ->icon('pencil')
+                ->color('primary')
+                ->when(resolve_static(UpdatePriceList::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'edit(record.id)',
+                ]),
+        ];
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'priceLists' => app(PriceList::class)->query()
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'roundingMethods' => RoundingMethodEnum::valuesLocalized(),
+                'roundingModes' => [
+                    'round' => __('Round'),
+                    'ceil' => __('Round up'),
+                    'floor' => __('Round down'),
+                ],
+            ]
+        );
     }
 
     #[Renderless]
-    public function showEditModal(?int $priceListId = null): void
+    public function edit(PriceList $priceList): void
     {
-        $priceList = app(PriceList::class)->query()
-            ->whereKey($priceListId)
-            ->with('discount')
-            ->first();
+        $this->priceList->reset();
+        $this->priceList->fill($priceList);
 
-        $this->selectedPriceList = $priceList?->toArray() ?: [
-            'name' => '',
-            'parent_id' => null,
-            'price_list_code' => null,
-            'is_net' => false,
-            'is_default' => false,
-            'discount' => [
-                'discount' => null,
-                'is_percentage' => true,
-            ],
-        ];
-
-        if (is_null($this->selectedPriceList['discount'])) {
-            $this->selectedPriceList['discount'] = [
-                'discount' => null,
-                'is_percentage' => true,
-            ];
-        }
-
-        if ($priceList) {
+        if ($this->priceList->id) {
             $this->discountedCategories = $priceList->discountedCategories()
                 ->where('model_type', app(Product::class)->getMorphClass())
                 ->orderBy('sort_number', 'DESC')
@@ -101,12 +110,6 @@ class PriceLists extends Component
                     return $item;
                 })
                 ->toArray();
-
-            if ($this->selectedPriceList['discount']['is_percentage']
-                && $this->selectedPriceList['discount']['discount']
-            ) {
-                $this->selectedPriceList['discount']['discount'] *= 100;
-            }
         } else {
             $this->discountedCategories = [];
 
@@ -117,30 +120,23 @@ class PriceLists extends Component
             ];
         }
 
-        $this->editModal = true;
+        $this->js(<<<'JS'
+            $openModal('edit-price-list');
+        JS);
     }
 
-    public function save(): void
+    #[Renderless]
+    public function save(): bool
     {
-        $action = ($this->selectedPriceList['id'] ?? false) ? UpdatePriceList::class : CreatePriceList::class;
-        $selectedPriceList = $this->selectedPriceList;
-
-        if ($selectedPriceList['discount']['is_percentage']
-            && $selectedPriceList['discount']['discount']
-        ) {
-            $selectedPriceList['discount']['discount'] /= 100;
-        }
-
         try {
-            $priceList = $action::make($selectedPriceList)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
+            $this->priceList->save();
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return;
+            return false;
         }
+
+        $priceList = $this->priceList->getModelInstance();
 
         // Create product category discounts
         $categories = $priceList->discountedCategories()
@@ -202,37 +198,30 @@ class PriceLists extends Component
             $priceList->discountedCategories()->detach(array_column($removed, 'id'));
         }
 
-        array_unshift($this->priceLists, $priceList->toArray());
+        $this->loadData();
 
-        $this->notification()->success(__('Successfully saved'));
-        $this->editModal = false;
-
-        $this->dispatch('loadData')->to('data-tables.price-list-list');
-        $this->skipRender();
+        return true;
     }
 
-    public function delete(): void
+    #[Renderless]
+    public function delete(): bool
     {
         try {
-            DeletePriceList::make(['id' => $this->selectedPriceList['id']])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
+            $this->priceList->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return;
+            return false;
         }
 
-        $index = array_search($this->selectedPriceList['id'], array_column($this->priceLists, 'id'));
-        unset($this->priceLists[$index]);
-        $this->dispatch('loadData')->to('data-tables.price-list-list');
+        $this->loadData();
+
+        return true;
     }
 
+    #[Renderless]
     public function addCategoryDiscount(): void
     {
-        $this->skipRender();
-
         if ($this->newCategoryDiscount['category_id'] === null || ! $this->newCategoryDiscount['discount']) {
             return;
         }
@@ -241,8 +230,7 @@ class PriceLists extends Component
             'id' => $this->newCategoryDiscount['category_id'],
             'name' => app(Category::class)->query()
                 ->whereKey($this->newCategoryDiscount['category_id'])
-                ->first(['name'])
-                ->name,
+                ->value('name'),
             'discounts' => [
                 $this->newCategoryDiscount,
             ],
@@ -255,15 +243,9 @@ class PriceLists extends Component
         ];
     }
 
+    #[Renderless]
     public function removeCategoryDiscount(int $index): void
     {
         unset($this->discountedCategories[$index]);
-
-        $this->skipRender();
-    }
-
-    public function render(): View
-    {
-        return view('flux::livewire.settings.price-lists');
     }
 }
