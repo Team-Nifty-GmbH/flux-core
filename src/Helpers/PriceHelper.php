@@ -3,12 +3,14 @@
 namespace FluxErp\Helpers;
 
 use Carbon\Carbon;
+use FluxErp\Enums\RoundingMethodEnum;
 use FluxErp\Models\Category;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Discount;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Support\Calculation\Rounding;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -209,6 +211,34 @@ class PriceHelper
             $this->calculateLowestDiscountedPrice($price, collect($this->discount));
         }
 
+        $this->fireEvent('price.calculated');
+
+        // set the used priceList and eventually round the price
+        if ($this->priceList) {
+            $price->price_list_id = $this->priceList->id;
+
+            $price->price = match ($this->priceList->rounding_method_enum) {
+                RoundingMethodEnum::Round => Rounding::round($price->price, $this->priceList->rounding_precision),
+                RoundingMethodEnum::Ceil => Rounding::ceil($price->price, $this->priceList->rounding_precision),
+                RoundingMethodEnum::Floor => Rounding::floor($price->price, $this->priceList->rounding_precision),
+                RoundingMethodEnum::Nearest => Rounding::nearest(
+                    number: $this->priceList->rounding_number,
+                    value: $price->price,
+                    precision: $this->priceList->rounding_precision,
+                    mode: $this->priceList->rounding_mode
+                ),
+                RoundingMethodEnum::End => Rounding::end(
+                    number: $this->priceList->rounding_number,
+                    value: $price->price,
+                    precision: $this->priceList->rounding_precision,
+                    mode: $this->priceList->rounding_mode
+                ),
+                default => $price->price
+            };
+
+            $this->fireEvent('price.rounded');
+        }
+
         // Calculated total discounts based on base price and end price
         if ($price->basePrice) {
             $function = $price->basePrice->priceList->is_net ? 'getNet' : 'getGross';
@@ -216,11 +246,6 @@ class PriceHelper
 
             $price->discountFlat = bcsub($originalPrice, $price->price);
             $price->discountPercentage = $originalPrice != 0 ? diff_percentage($originalPrice, $price->price) : 0;
-        }
-
-        // set the used priceList
-        if ($this->priceList) {
-            $price->price_list_id = $this->priceList->id;
         }
 
         return $price;
@@ -333,5 +358,10 @@ class PriceHelper
         }
 
         return $parentPrice ?? $price;
+    }
+
+    private function fireEvent(string $event): void
+    {
+        event($event, $this);
     }
 }

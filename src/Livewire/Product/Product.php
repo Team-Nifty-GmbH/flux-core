@@ -174,7 +174,18 @@ class Product extends Component
 
         $priceLists = app(PriceList::class)->query()
             ->with('parent')
-            ->get(['id', 'parent_id', 'name', 'price_list_code', 'is_net', 'is_default'])
+            ->get([
+                'id',
+                'parent_id',
+                'name',
+                'price_list_code',
+                'rounding_method_enum',
+                'rounding_precision',
+                'rounding_number',
+                'rounding_mode',
+                'is_net',
+                'is_default',
+            ])
             ->map(function (PriceList $priceList) use ($priceListHelper) {
                 $price = $priceListHelper
                     ->setPriceList($priceList)

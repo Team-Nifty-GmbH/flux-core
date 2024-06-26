@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Enums\RoundingMethodEnum;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -23,6 +24,7 @@ class PriceList extends Model
     protected function casts(): array
     {
         return [
+            'rounding_method_enum' => RoundingMethodEnum::class,
             'is_net' => 'boolean',
             'is_default' => 'boolean',
         ];
