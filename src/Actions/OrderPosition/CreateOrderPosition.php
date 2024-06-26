@@ -50,13 +50,14 @@ class CreateOrderPosition extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags', []);
         $order = app(Order::class)->query()
-            ->with('orderType:id,order_type_enum')
+            ->with(['orderType:id,order_type_enum', 'priceList:id,is_net'])
             ->whereKey($this->data['order_id'])
             ->first();
         $orderPosition = app(OrderPosition::class);
 
-        $this->data['client_id'] = data_get($this->data, 'client_id', $order->client_id);
-        $this->data['price_list_id'] = data_get($this->data, 'price_list_id', $order->price_list_id);
+        $this->data['is_net'] ??= data_get($order, 'priceList.is_net', false);
+        $this->data['client_id'] ??= data_get($order, 'client_id');
+        $this->data['price_list_id'] ??= data_get($order, 'price_list_id');
 
         if (is_int($this->data['sort_number'] ?? false)) {
             $currentHighestSortNumber = app(OrderPosition::class)->query()

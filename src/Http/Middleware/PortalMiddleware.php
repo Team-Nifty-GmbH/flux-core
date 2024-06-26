@@ -4,6 +4,8 @@ namespace FluxErp\Http\Middleware;
 
 use Closure;
 use FluxErp\Models\Address;
+use FluxErp\Models\Cart;
+use FluxErp\Models\CartItem;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\SerialNumber;
@@ -17,6 +19,7 @@ class PortalMiddleware
     public function handle(Request $request, Closure $next): mixed
     {
         if (request()->isPortal()) {
+            config(['filesystems.disks.public.url' => config('flux.portal_domain') . '/storage']);
             resolve_static(SerialNumber::class, 'addGlobalScope', [
                 'scope' => 'portal',
                 'implementation' => function (Builder $query) {
@@ -34,7 +37,9 @@ class PortalMiddleware
             resolve_static(Order::class, 'addGlobalScope', [
                 'scope' => 'portal',
                 'implementation' => function (Builder $query) {
-                    $query->where('contact_id', auth()->user()->contact->id);
+                    $query->where('contact_id', auth()->user()->contact->id)
+                        ->where(fn (Builder $query) => $query->where('is_locked', true)
+                            ->orWhere('is_imported', true));
                 },
             ]);
             resolve_static(OrderPosition::class, 'addGlobalScope', [
@@ -46,8 +51,49 @@ class PortalMiddleware
             resolve_static(Ticket::class, 'addGlobalScope', [
                 'scope' => 'portal',
                 'implementation' => function (Builder $query) {
-                    $query->where('authenticatable_type', Relation::getMorphClassAlias(Address::class))
+                    $query->where('authenticatable_type', Relation::getMorphAlias(Address::class))
                         ->where('authenticatable_id', auth()->user()->id);
+                },
+            ]);
+            resolve_static(Cart::class, 'addGlobalScope', [
+                'scope' => 'portal',
+                'implementation' => function (Builder $query) {
+                    $query->where(function (Builder $query) {
+                        $query->where(function (Builder $query) {
+                            $query->where('authenticatable_id', auth()->id())
+                                ->where('authenticatable_type', auth()->user()?->getMorphClass());
+                        })->orWhere('session_id', session()->id())
+                            ->orWhere('is_portal_public', true);
+                    });
+                },
+            ]);
+            resolve_static(CartItem::class, 'addGlobalScope', [
+                'scope' => 'portal',
+                'implementation' => function (Builder $query) {
+                    $query->whereHas('cart', function (Builder $query) {
+                        $query->where(function (Builder $query) {
+                            $query->where(function (Builder $query) {
+                                $query->where('authenticatable_id', auth()->id())
+                                    ->where('authenticatable_type', auth()->user()?->getMorphClass());
+                            })->orWhere('session_id', session()->id())
+                                ->orWhere('is_portal_public', true);
+                        });
+                    });
+                },
+            ]);
+            resolve_static(Cart::class, 'deleting', [
+                'callback' => function (Cart $cart) {
+                    if (
+                        (
+                            $cart->authenticatable_type !== auth()->user()?->getMorphClass()
+                            || $cart->authenticatable_id !== auth()->id()
+                        )
+                        && $cart->session_id !== session()->id()
+                    ) {
+                        return false;
+                    }
+
+                    return $cart->deleteQuietly();
                 },
             ]);
 

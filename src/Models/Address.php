@@ -186,6 +186,19 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         );
     }
 
+    protected function postalAddress(): Attribute
+    {
+        return Attribute::get(
+            fn () => array_filter([
+                $this->company,
+                trim($this->firstname . ' ' . $this->lastname),
+                $this->street,
+                trim($this->zip . ' ' . $this->city),
+                $this->country?->name,
+            ])
+        );
+    }
+
     public function addressTypes(): BelongsToMany
     {
         return $this->belongsToMany(AddressType::class);
@@ -273,12 +286,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public function getDescription(): ?string
     {
-        return implode(', ', array_filter([
-            $this->name,
-            $this->street,
-            trim($this->zip . ' ' . $this->city),
-            $this->country?->name,
-        ]));
+        return implode(', ', $this->postalAddress());
     }
 
     public function getUrl(): ?string

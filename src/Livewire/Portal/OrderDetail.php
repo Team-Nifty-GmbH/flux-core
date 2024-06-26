@@ -58,10 +58,6 @@ class OrderDetail extends Component
             )
             ->first();
 
-        if (! $order || ! $order->is_locked || $order->contact_id !== auth()->user()->contact_id) {
-            abort(404);
-        }
-
         $this->enabledCols = ['slug_position', 'name'];
         $this->enabledCols = array_merge(
             $this->enabledCols,
@@ -207,8 +203,6 @@ class OrderDetail extends Component
 
         $this->positionDetails['image'] = $image?->toHtml();
         $this->detailModal = true;
-
-        $this->dispatch('renderFromTree', $position->product?->getMediaAsTree())->to('folder-tree');
     }
 
     public function downloadInvoice(): BinaryFileResponse

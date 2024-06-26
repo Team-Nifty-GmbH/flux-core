@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\TimeUnitEnum;
+use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Traits\Categorizable;
@@ -19,6 +20,7 @@ use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Lockable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -72,6 +74,17 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         ];
     }
 
+    public function price(): Attribute
+    {
+        return Attribute::get(function () {
+            return resolve_static(PriceHelper::class, 'make', ['product' => $this])
+                ->when(is_a(auth()->user(), Address::class), function (PriceHelper $priceHelper) {
+                    return $priceHelper->setContact(auth()->user()->contact);
+                })
+                ->price();
+        });
+    }
+
     public function bundleProducts(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -80,6 +93,11 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
             'product_id',
             'bundle_product_id'
         )->withPivot('count');
+    }
+
+    public function cartItems(): HasMany
+    {
+        return $this->hasMany(CartItem::class);
     }
 
     public function children(): HasMany
@@ -208,29 +226,36 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
 
     public function scopeWebshop(Builder $query): void
     {
-        $query
-            ->with('coverMedia')
-            ->where(fn (Builder $query) => $query->where('is_active', true)
-                ->orWhere('is_nos', true)
-            )
-            ->where('is_active_export_to_web_shop', true)
+        $query->with('coverMedia')
+            ->withCount('children')
             ->where(function (Builder $query) {
-                $query->whereHas('children', function (Builder $query) {
-                    $query->where('is_active', true);
-                })->orWhere('is_nos', true);
+                $query->where(fn (Builder $query) => $query->whereHas('stockPostings')
+                    ->orWhere('is_nos', true)
+                )
+                    ->orWhereHas('children', function (Builder $query) {
+                        $query->where(function (Builder $query) {
+                            $query->where('is_nos', true)
+                                ->orWhereHas('stockPostings');
+                        })
+                            ->where('is_active_export_to_web_shop', true)
+                            ->where('is_active', true);
+                    });
             })
+            ->where('is_active_export_to_web_shop', true)
+            ->where('is_active', true)
             ->whereNull('parent_id')
             ->select(array_map(
                 fn (string $column) => $this->getTable() . '.' . $column,
                 [
                     'id',
+                    'cover_media_id',
+                    'parent_id',
+                    'vat_rate_id',
+                    'product_number',
                     'name',
                     'description',
-                    'product_number',
                     'is_highlight',
-                    'cover_media_id',
                 ]
-            ))
-            ->withCount('children');
+            ));
     }
 }

@@ -25,7 +25,7 @@ class BatchFinishedNotification extends Notification implements HasToastNotifica
         $via = [BroadcastNowChannel::class, DatabaseChannel::class];
         if ($this->model
             ->jobBatchables()
-            ->where('job_batchable_type', Relation::getMorphClassAlias($notifiable::class))
+            ->where('job_batchable_type', Relation::getMorphAlias($notifiable::class))
             ->where('job_batchable_id', $notifiable->id)
             ->where('notify_on_finish', true)
             ->exists()

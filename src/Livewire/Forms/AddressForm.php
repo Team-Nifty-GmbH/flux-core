@@ -7,6 +7,7 @@ use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Address\DeleteAddress;
 use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Models\Address;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
 class AddressForm extends FluxForm
@@ -135,5 +136,11 @@ class AddressForm extends FluxForm
         $data['contact_options'] = array_filter($this->contact_options);
 
         return $data;
+    }
+
+    #[Computed]
+    public function postalAddress(): array
+    {
+        return app(Address::class)->fill($this->toArray())->postal_address;
     }
 }

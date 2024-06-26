@@ -47,7 +47,7 @@ trait InteractsWithMedia
             }
 
             $node[] = [
-                'name' => $key,
+                'name' => __($key),
                 'id' => Str::uuid()->toString(),
                 'is_static' => $isStatic,
                 'collection_name' => $prefix . $key,

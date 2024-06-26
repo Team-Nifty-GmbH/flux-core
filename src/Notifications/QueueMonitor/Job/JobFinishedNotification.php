@@ -26,7 +26,7 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
         $via = [BroadcastNowChannel::class, DatabaseChannel::class];
         if ($this->model
             ->queueMonitorables()
-            ->where('queue_monitorable_type', Relation::getMorphClassAlias($notifiable::class))
+            ->where('queue_monitorable_type', Relation::getMorphAlias($notifiable::class))
             ->where('queue_monitorable_id', $notifiable->id)
             ->where('notify_on_finish', true)
             ->exists()

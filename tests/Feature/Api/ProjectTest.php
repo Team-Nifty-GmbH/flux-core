@@ -343,7 +343,7 @@ class ProjectTest extends BaseSetup
     public function test_update_project_with_additional_column()
     {
         $additionalColumns = AdditionalColumn::factory()->count(2)->create([
-            'model_type' => Relation::getMorphClassAlias(Project::class),
+            'model_type' => Relation::getMorphAlias(Project::class),
         ]);
 
         $value = 'Original value from second additional column';

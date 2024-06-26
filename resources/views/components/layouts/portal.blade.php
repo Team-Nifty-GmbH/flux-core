@@ -25,6 +25,7 @@
             </div>
         </a>
         @auth('address')
+            <x-button icon="heart" wire:navigate :href="route('portal.watchlist')" />
             @persist('cart')
                 <livewire:portal.shop.cart />
             @endpersist

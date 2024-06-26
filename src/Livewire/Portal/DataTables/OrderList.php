@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\Portal\DataTables;
 
 use FluxErp\Livewire\DataTables\BaseDataTable;
 use FluxErp\Models\Order;
-use Illuminate\Database\Eloquent\Builder;
 
 class OrderList extends BaseDataTable
 {
@@ -44,12 +43,6 @@ class OrderList extends BaseDataTable
         );
 
         parent::mount();
-    }
-
-    public function getBuilder(Builder $builder): Builder
-    {
-        return $builder->where('is_locked', true)
-            ->with('orderType:id,name', 'currency:id,iso');
     }
 
     public function getFormatters(): array

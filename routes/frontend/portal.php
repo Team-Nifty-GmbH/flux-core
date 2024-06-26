@@ -65,6 +65,12 @@ Route::middleware(['web', PortalMiddleware::class])
                 ->name('tickets');
             Route::get('/tickets/{id}', FluxErp\Livewire\Portal\Ticket\Ticket::class)
                 ->name('tickets.id');
+            Route::get('/watchlist', FluxErp\Livewire\Portal\Shop\Watchlist::class)
+                ->name('watchlist');
+            Route::get('/checkout', FluxErp\Livewire\Portal\Shop\Checkout::class)
+                ->name('checkout');
+            Route::get('/checkout-finish', FluxErp\Livewire\Portal\Shop\CheckoutFinish::class)
+                ->name('checkout-finish');
 
             Route::get('/media/{media}/{filename}', function (Media $media) {
                 return $media;

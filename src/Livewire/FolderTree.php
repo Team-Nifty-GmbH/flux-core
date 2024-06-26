@@ -30,6 +30,23 @@ class FolderTree extends Component
 
     public array $latestUploads = [];
 
+    public function getListeners(): array
+    {
+        return [
+            'folder-tree:loadModel' => 'loadModel',
+        ];
+    }
+
+    public function loadModel(array $arguments): void
+    {
+        $this->fill($arguments);
+
+        $this->js(<<<'JS'
+            selected = false;
+            loadLevels();
+        JS);
+    }
+
     public function getRules(): array
     {
         return [

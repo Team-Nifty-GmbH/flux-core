@@ -230,7 +230,7 @@ class SerialNumberTest extends BaseSetup
     public function test_update_serial_number_with_additional_columns()
     {
         $additionalColumn = AdditionalColumn::factory()->create([
-            'model_type' => Relation::getMorphClassAlias(SerialNumber::class),
+            'model_type' => Relation::getMorphAlias(SerialNumber::class),
         ]);
 
         $serialNumber = [

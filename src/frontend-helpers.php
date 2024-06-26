@@ -34,8 +34,11 @@ if (! function_exists('exception_to_notifications')) {
         switch (true) {
             case method_exists($exception, 'errors') && $errors = $exception->errors():
             case method_exists($exception, 'getResponse')
-            && $errors = json_decode($exception->getResponse()->getContent(), true)['errors'] ?? []:
-
+            && $errors = data_get(
+                json_decode($exception->getResponse()->getContent(), true),
+                'errors',
+                []
+            ):
                 foreach ($errors as $field => $messages) {
                     $title = array_map(
                         fn ($segment) => is_numeric($segment)
@@ -80,10 +83,12 @@ if (! function_exists('cart')) {
             ->current()
             ->with(['cartItems', 'cartItems.product.coverMedia'])
             ->withSum('cartItems', 'total')
+            ->withSum('cartItems', 'total_net')
+            ->withSum('cartItems', 'total_gross')
             ->first()
             ?? app(\FluxErp\Models\Cart::class)
                 ->query()
-                ->where('session_id', session()->getId())
+                ->where('session_id', session()->id())
                 ->current()
                 ->with(['cartItems', 'cartItems.product.coverMedia'])
                 ->withSum('cartItems', 'total')
