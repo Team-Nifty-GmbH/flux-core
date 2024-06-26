@@ -75,7 +75,7 @@ class Checkout extends Cart
     public function buy(): void
     {
         try {
-            $this->validate();
+            $this->validateOnly('termsAndConditions');
             $order = CreateOrder::make([
                 'order_type_id' => OrderType::query()
                     ->where('order_type_enum', 'order')
