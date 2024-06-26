@@ -21,6 +21,18 @@ class Categories extends Component
         ]);
     }
 
+    public function placeholder(): string
+    {
+        return <<<'Blade'
+        <div class="min-w-96">
+            <x-card>
+                @include('flux::livewire.placeholders.horizontal-bar')
+            </x-card>
+        </div>
+        Blade;
+
+    }
+
     #[Computed(persist: true, seconds: 60 * 60 * 24, cache: true)]
     public function categories()
     {
