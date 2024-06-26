@@ -7,7 +7,6 @@ use FluxErp\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-
 class Widget extends Model
 {
     use HasPackageFactory, HasUuid;
@@ -16,12 +15,12 @@ class Widget extends Model
         'id',
     ];
 
-//    protected static function booted(): void
-//    {
-//        static::addGlobalScope('ordered', function (Builder $builder) {
-//            $builder->ordered();
-//        });
-//    }
+    //    protected static function booted(): void
+    //    {
+    //        static::addGlobalScope('ordered', function (Builder $builder) {
+    //            $builder->ordered();
+    //        });
+    //    }
 
     public function buildSortQuery(): Builder
     {

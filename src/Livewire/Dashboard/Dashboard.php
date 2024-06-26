@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\Dashboard;
 
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
-use FluxErp\Models\Widget as WidgetModel;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -19,6 +18,7 @@ class Dashboard extends Component
     use Actions;
 
     public array $widgets = [];
+
     public array $availableWidgets = [];
 
     public function mount(): void
@@ -43,7 +43,6 @@ class Dashboard extends Component
     {
         $this->widgets = $widgets;
     }
-
 
     #[Renderless]
     public function saveDashboard(): void
