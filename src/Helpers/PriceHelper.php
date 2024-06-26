@@ -362,7 +362,7 @@ class PriceHelper
         return $parentPrice ?? $price;
     }
 
-    private function fireEvent(string $event): void
+    protected function fireEvent(string $event): void
     {
         event($event, $this);
     }
