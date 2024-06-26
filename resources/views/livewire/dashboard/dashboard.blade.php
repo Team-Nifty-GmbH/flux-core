@@ -50,7 +50,9 @@
                             x-on:click="removeWidget('{{$widget['id']}}')"
                             class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative />
                     </div>
-                    <div class="z-0 w-full h-full bg-white dark:bg-secondary-800">
+                    <div
+                        x-bind:class="!editGrid ? 'pointer-events-none' : ''"
+                        class="w-full h-full bg-white dark:bg-secondary-800">
                         <livewire:is lazy :id="$widget['id']" :component="$widget['component_name'] ?? $widget['class']"
                                      wire:key="{{ uniqid() }}" />
                     </div>

@@ -109,7 +109,7 @@ export default function($wire) {
                 }
             });
             // sync properties
-            await  property$wire.syncWidgets(newSnapshot);
+            await  $wire.syncWidgets(newSnapshot);
             // save to db
             await $wire.saveDashboard();
 
