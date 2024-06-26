@@ -15,7 +15,7 @@
         <div x-cloak x-show="!editGrid">
             <x-button
                 x-on:click="editGridMode(true)"
-                class="flex-shrink-0">{{ __('Dashboard') }}</x-button>
+                class="flex-shrink-0">{{ __('Edit Dashboard') }}</x-button>
         </div>
         <div x-cloak x-show="editGrid">
             <x-button x-on:click="addPlaceHolder" class="flex-shrink-0">{{ __('Add') }}</x-button>
@@ -51,7 +51,7 @@
                             class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative />
                     </div>
                     <div
-                        x-bind:class="!editGrid ? 'pointer-events-none' : ''"
+                        x-bind:class="editGrid && !isWidgetList('{{$widget['id']}}') ? 'pointer-events-none' : ''"
                         class="w-full h-full bg-white dark:bg-secondary-800">
                         <livewire:is lazy :id="$widget['id']" :component="$widget['component_name'] ?? $widget['class']"
                                      wire:key="{{ uniqid() }}" />

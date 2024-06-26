@@ -15,13 +15,17 @@ export default function($wire) {
                 return;
             }
             if (mode) {
-                this.grid.enable();
+                this.reInit();
             }
             this.editGrid = mode;
         },
         // cannot save if widgets-list is presented in the grid
         get openGridItems() {
             return $wire.widgets.filter((w) => w.component_name === 'widgets.widget-list').length === 0;
+        },
+        isWidgetList(id) {
+            const w = $wire.widgets.find((w) => w.id.toString() === id.toString());
+            return w?.component_name === 'widgets.widget-list';
         },
         async cancelDashboard() {
             this.editGridMode(false);
@@ -93,6 +97,8 @@ export default function($wire) {
         },
         async save() {
             const snapshot = $wire.widgets;
+            console.log('snapshot', snapshot);
+            console.log('onScreen', this.grid.getGridItems());
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             // update x,y coordinates on save
@@ -109,12 +115,15 @@ export default function($wire) {
                 }
             });
             // sync properties
-            await  $wire.syncWidgets(newSnapshot);
+            await $wire.syncWidgets(newSnapshot);
             // save to db
             await $wire.saveDashboard();
-
+            // stop edit mode
             this.editGridMode(false);
-            this.grid.disable();
+            // refresh id
+            await $wire.$refresh();
+            // stop grid
+            this.reInit().disable();
         },
         async addPlaceHolder() {
             if (this.availableWidgets === null) {
@@ -165,6 +174,10 @@ export default function($wire) {
             }
         },
         reInit() {
+            // clear previous grid state
+            if (this.grid !== null) {
+                this.grid.destroy(false);
+            }
             // init grid
             this.grid = GridStack.init({
                 margin: 4,
