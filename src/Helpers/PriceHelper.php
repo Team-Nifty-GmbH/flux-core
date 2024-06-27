@@ -249,11 +249,11 @@ class PriceHelper
             // normalize base price to match net/gross with the returned price
             $function = $this->price->basePrice->priceList->is_net ? 'getNet' : 'getGross';
             $originalPrice = $this->price->basePrice->{$function}($this->product->vatRate?->rate_percentage);
-            $price->basePrice->priceList->is_net = $this->priceList->is_net;
-            $price->basePrice->price = $originalPrice;
+            $this->price->basePrice->priceList->is_net = $this->priceList->is_net;
+            $this->price->basePrice->price = $originalPrice;
 
             $this->price->discountFlat = bcsub($originalPrice, $this->price->price);
-            $this->price->discountPercentage = $originalPrice != 0 ? diff_percentage($originalPrice, $price->price) : 0;
+            $this->price->discountPercentage = $originalPrice != 0 ? diff_percentage($originalPrice, $this->price->price) : 0;
         }
 
         // set the used priceList
@@ -269,14 +269,14 @@ class PriceHelper
         if ($this->price->rootPrice) {
             // normalize root price to match net/gross with the returned price
             $function = $this->priceList->is_net ? 'getNet' : 'getGross';
-            $rootPrice = $price->rootPrice->{$function}($this->product->vatRate?->rate_percentage);
-            $price->rootPrice->priceList->is_net = $this->priceList->is_net;
-            $price->rootPrice->price = $rootPrice;
+            $rootPrice = $this->price->rootPrice->{$function}($this->product->vatRate?->rate_percentage);
+            $this->price->rootPrice->priceList->is_net = $this->priceList->is_net;
+            $this->price->rootPrice->price = $rootPrice;
 
-            if (bccomp($price->price, 0) !== 0) {
-                $price->rootDiscountPercentage = diff_percentage($rootPrice, $price->price);
+            if (bccomp($this->price->price, 0) !== 0) {
+                $this->price->rootDiscountPercentage = diff_percentage($rootPrice, $this->price->price);
             }
-            $price->rootDiscountFlat = bcsub($rootPrice, $price->price);
+            $this->price->rootDiscountFlat = bcsub($rootPrice, $this->price->price);
         }
 
         return $this->price;
