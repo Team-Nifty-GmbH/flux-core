@@ -4,7 +4,7 @@
     <x-modal name="confirm" persistent>
         <x-card
             class="flex justify-end gap-2"
-            :title="{{__('All changes will be lost. Are you sure?')}}"
+            title="{{__('All changes will be lost. Are you sure?')}}"
         >
             <x-button primary x-on:click="cancelDashboard().then((_)=>close())">{{__('Confirm')}}</x-button>
             <x-button x-on:click="close" negative>{{__('Cancel')}}</x-button>
