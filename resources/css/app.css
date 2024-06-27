@@ -68,10 +68,8 @@
 .grid-stack {
     @apply w-full
 }
+
 .grid-stack-item-content {
     @apply text-white m-0 rounded shadow
 }
 
-/*.grid-stack > .grid-stack-item > .ui-resizable-se {*/
-/*    @apply bg-white*/
-/*}*/

@@ -15,13 +15,6 @@ class Widget extends Model
         'id',
     ];
 
-    //    protected static function booted(): void
-    //    {
-    //        static::addGlobalScope('ordered', function (Builder $builder) {
-    //            $builder->ordered();
-    //        });
-    //    }
-
     public function buildSortQuery(): Builder
     {
         return static::query()

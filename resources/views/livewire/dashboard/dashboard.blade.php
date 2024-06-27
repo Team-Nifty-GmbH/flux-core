@@ -1,6 +1,15 @@
 <div
     wire:ignore.self
     x-data="dashboard($wire)">
+    <x-modal name="confirm" persistent>
+        <x-card
+            class="flex justify-end gap-2"
+            :title="{{__('All changes will be lost. Are you sure?')}}"
+        >
+            <x-button primary x-on:click="cancelDashboard().then((_)=>close())">{{__('Confirm')}}</x-button>
+            <x-button x-on:click="close" negative>{{__('Cancel')}}</x-button>
+        </x-card>
+    </x-modal>
     <div wire:ignore class="mx-auto py-6 flex justify-between items-center">
         <div class="pb-6 md:flex md:items-center md:justify-between md:space-x-5">
             <div class="flex items-start space-x-5">
@@ -27,7 +36,7 @@
                 class="flex-shrink-0">{{__('Save')}}</x-button>
             <x-button
                 negative
-                x-on:click="cancelDashboard"
+                x-on:click="$openModal('confirm')"
                 wire:flux-confirm.icon.error="cancelDashboard"
                 class="flex-shrink-0">{{__('Cancel')}}</x-button>
         </div>
