@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\RoundingMethodEnum;
+use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class PriceList extends Model
 {
-    use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use HasDefault, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -58,10 +59,5 @@ class PriceList extends Model
     public function prices(): HasMany
     {
         return $this->hasMany(Price::class);
-    }
-
-    public static function default(): ?static
-    {
-        return static::query()->where('is_default', true)->first();
     }
 }

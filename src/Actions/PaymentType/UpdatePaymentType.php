@@ -23,10 +23,6 @@ class UpdatePaymentType extends FluxAction
 
     public function performAction(): Model
     {
-        if ($this->data['is_default'] ?? false) {
-            app(PaymentType::class)->query()->update(['is_default' => false]);
-        }
-
         $paymentType = app(PaymentType::class)->query()
             ->whereKey($this->data['id'])
             ->first();
