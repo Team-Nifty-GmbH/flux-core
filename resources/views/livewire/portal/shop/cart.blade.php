@@ -1,6 +1,6 @@
 <div x-data="{show: false, showWatchlist: false}">
     @section('icon')
-        <x-button :label="count($this->cart->cartItems)" primary icon="shopping-cart" s x-on:click="show = true"/>
+        <x-button rounded :label="count($this->cart->cartItems)" primary icon="shopping-cart" s x-on:click="show = true"/>
     @show
     @section('cart-sidebar')
         <x-flux::sidebar x-show="show">
@@ -20,7 +20,8 @@
                         <div>{{ Number::currency($this->cart->cart_items_sum_total ?? 0, $defaultCurrency->iso, app()->getLocale()) }} *</div>
                     </div>
                     <div class="text-2xs text-secondary-400">
-                        @if(auth()->user()->contact->priceList->is_net)
+                        @if(auth()->user()->contact?->priceList->is_net || resolve_static(\FluxErp\Models\PriceList::class, 'default')->is_net)
+                            {{ __('* All prices net plus VAT') }}
                             * {{ __('All prices net plus VAT') }}
                         @else
                             * {{ __('All prices gross including VAT') }}
@@ -28,41 +29,48 @@
                     </div>
                 @show
             </div>
-            @if($this->cart->cartItems->isNotEmpty())
                 <x-slot:footer>
                     @section('cart-sidebar.footer')
                         <div class="flex flex-col gap-1.5 w-full">
-                            <x-button
-                                class="w-full"
-                                :label="__('Checkout')"
-                                wire:navigate
-                                x-on:click="show = false;"
-                                :href="route('portal.checkout')"
-                                primary
-                            />
-                            <x-button
-                                class="w-full"
-                                :label="__('Add items to watchlist')"
-                                x-on:click="showWatchlist = ! showWatchlist"
-                            />
-                            <div x-cloak x-show="showWatchlist" x-collapse class="flex flex-col gap-1.5 pt-4">
-                                <x-select
-                                    class="w-full"
-                                    :label="__('Select a watchlist')"
-                                    option-label="name"
-                                    option-value="id"
-                                    :options="$watchlists"
-                                    wire:model="selectedWatchlist"
-                                />
-                                <div x-cloak x-show="$wire.selectedWatchlist === 0">
-                                    <x-input class="w-full" :label="__('Watchlist Name')" wire:model="watchlistName"/>
-                                </div>
-                                <x-button primary wire:click="saveToWatchlist().then((success) => {if (success) showWatchlist = false;})" :label="__('Save to watchlist')" class="w-full"/>
-                            </div>
+                            @section('cart-sidebar.footer.buttons')
+                                @if($this->cart->cartItems->isNotEmpty())
+                                    @section('cart-sidebar.footer.buttons.buy')
+                                        <x-button
+                                            class="w-full"
+                                            :label="__('Checkout')"
+                                            wire:navigate
+                                            x-on:click="show = false;"
+                                            :href="route('portal.checkout')"
+                                            primary
+                                        />
+                                    @show
+                                    @section('cart-sidebar.footer.buttons.watchlist')
+                                        <x-button
+                                            class="w-full"
+                                            icon="chevron-down"
+                                            :label="__('Add items to watchlist')"
+                                            x-on:click="showWatchlist = ! showWatchlist"
+                                        />
+                                        <div x-cloak x-show="showWatchlist" x-collapse class="flex flex-col gap-1.5 pt-4">
+                                            <x-select
+                                                class="w-full"
+                                                :label="__('Select a watchlist')"
+                                                option-label="name"
+                                                option-value="id"
+                                                :options="$watchlists"
+                                                wire:model="selectedWatchlist"
+                                            />
+                                            <div x-cloak x-show="$wire.selectedWatchlist === 0">
+                                                <x-input class="w-full" :label="__('Watchlist Name')" wire:model="watchlistName"/>
+                                            </div>
+                                            <x-button primary wire:click="saveToWatchlist().then((success) => {if (success) showWatchlist = false;})" :label="__('Save to watchlist')" class="w-full"/>
+                                        </div>
+                                    @show
+                                @endif
+                            @show
                         </div>
                     @show
                 </x-slot:footer>
-            @endif
         </x-flux::sidebar>
     @show
 </div>

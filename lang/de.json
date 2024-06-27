@@ -1382,5 +1382,10 @@
     "Your watchlist is empty": "Ihre Merkliste ist leer",
     "Zip": "PLZ",
     "zip": "PLZ",
-    "Zip / City": "PLZ / Ort"
+    "Zip / City": "PLZ / Ort",
+    "Add to current order": "Zum aktuellen Auftrag hinzufügen",
+    "Load a watchlist": "Merkliste laden",
+    "Cart Items": "Warenkorb Positionen",
+    "Order placed successfully!": "Bestellung erfolgreich platziert!",
+    "Clear cart": "Warenkorb leeren"
 }

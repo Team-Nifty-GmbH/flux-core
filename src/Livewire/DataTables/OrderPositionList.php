@@ -4,9 +4,12 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\OrderPosition;
 use Illuminate\Database\Eloquent\Builder;
+use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class OrderPositionList extends BaseDataTable
 {
+    use HasEloquentListeners;
+
     protected string $model = OrderPosition::class;
 
     public array $enabledCols = [

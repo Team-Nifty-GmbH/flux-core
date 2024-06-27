@@ -100,6 +100,26 @@ class Order extends OrderPositionList
     #[Url]
     public string $tab = 'order.order-positions';
 
+    public function getListeners(): array
+    {
+        return [
+            'order:add-products' => 'addProducts',
+        ];
+    }
+
+    #[Renderless]
+    public function addProducts(array|int $products): void
+    {
+        foreach (Arr::wrap($products) as $product) {
+            if (is_array($product)) {
+                $this->orderPosition->fill($product);
+            } else {
+                $this->orderPosition->product_id = $product;
+            }
+            $this->quickAdd();
+        }
+    }
+
     public function mount(?string $id = null): void
     {
         parent::mount();

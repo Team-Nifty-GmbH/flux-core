@@ -85,8 +85,6 @@ class Watchlist extends Component
 
     public function addToCart(Cart $cart): void
     {
-        foreach ($cart->products as $product) {
-            $this->dispatch('cart:add', $product->toArray())->to('portal.shop.cart');
-        }
+        $this->dispatch('cart:add', $cart->products->pluck('id'))->to('portal.shop.cart');
     }
 }

@@ -31,7 +31,6 @@ class CreateCartItem extends FluxAction
         $cart = app(Cart::class)
             ->query()
             ->whereKey($this->data['cart_id'])
-            ->with('authenticatable.contact.priceList')
             ->sole();
 
         if ($cart->authenticatable instanceof Address) {

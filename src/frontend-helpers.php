@@ -1,5 +1,11 @@
 <?php
-
+/**
+ * Blade Directives
+ *
+ * @method static bool canAction(string $action)
+ * @method static void endCanAction()
+ * @method static string extendFlux(string $view)
+ */
 if (! function_exists('format_number')) {
     function format_number(
         string|int|float|null $number,

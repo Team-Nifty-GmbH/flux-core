@@ -86,7 +86,9 @@ class Checkout extends Cart
                 'is_imported' => true,
                 'commission' => $this->commission,
                 'address_delivery' => $this->deliveryAddress->toArray(),
-            ])->validate()->execute();
+            ])
+                ->validate()
+                ->execute();
 
             foreach ($this->cart()->cartItems as $cartItem) {
                 CreateOrderPosition::make([
@@ -94,7 +96,9 @@ class Checkout extends Cart
                     'product_id' => $cartItem->product_id,
                     'amount' => $cartItem->amount,
                     'unit_price' => $cartItem->price,
-                ])->validate()->execute();
+                ])
+                    ->validate()
+                    ->execute();
             }
 
             $order->calculatePrices()->save();
