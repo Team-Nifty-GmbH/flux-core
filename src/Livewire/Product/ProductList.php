@@ -10,7 +10,6 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\VatRate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
-use Livewire\Features\SupportRedirects\Redirector;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -95,7 +94,7 @@ class ProductList extends BaseProductList
         return data_get($this->priceLists, '0', []);
     }
 
-    public function save(): false|Redirector
+    public function save(): bool
     {
         $this->product->prices = [
             [
@@ -114,6 +113,8 @@ class ProductList extends BaseProductList
             return false;
         }
 
-        return redirect()->to(route('products.id', $this->product->id));
+        $this->redirect(route('products.id', $this->product->id), true);
+
+        return true;
     }
 }

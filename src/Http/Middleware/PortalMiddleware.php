@@ -11,7 +11,6 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 
 class PortalMiddleware
@@ -51,7 +50,7 @@ class PortalMiddleware
             resolve_static(Ticket::class, 'addGlobalScope', [
                 'scope' => 'portal',
                 'implementation' => function (Builder $query) {
-                    $query->where('authenticatable_type', Relation::getMorphAlias(Address::class))
+                    $query->where('authenticatable_type', morph_alias(Address::class))
                         ->where('authenticatable_id', auth()->user()->id);
                 },
             ]);

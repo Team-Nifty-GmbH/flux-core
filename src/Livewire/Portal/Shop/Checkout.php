@@ -10,7 +10,6 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Rulesets\Address\PostalAddressRuleset;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Renderless;
@@ -113,7 +112,7 @@ class Checkout extends Cart
 
         if ($this->comment) {
             CreateComment::make([
-                'model_type' => Relation::getMorphAlias(Order::class),
+                'model_type' => morph_alias(Order::class),
                 'model_id' => $order->id,
                 'comment' => $this->comment,
             ])->validate()->execute();

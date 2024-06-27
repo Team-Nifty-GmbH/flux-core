@@ -495,3 +495,32 @@ if (! function_exists('class_to_broadcast_channel')) {
             . ($withParam ? '.{' . \Illuminate\Support\Str::camel(class_basename($class)) . '}' : '');
     }
 }
+
+if (! function_exists('morph_alias')) {
+    function morph_alias(string $class): string
+    {
+        $class = resolve_static($class, 'class');
+
+        if (in_array(\FluxErp\Traits\HasParentMorphClass::class, class_uses_recursive($class))) {
+            /** @var \FluxErp\Traits\HasParentMorphClass $class */
+            $class = \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($class::getParentMorphClass());
+        }
+
+        /** @var \Illuminate\Database\Eloquent\Model $class */
+        return \Illuminate\Database\Eloquent\Relations\Relation::getMorphAlias($class);
+    }
+}
+
+if (! function_exists('morph_to')) {
+    function morph_to(string $type, ?int $id = null): Illuminate\Database\Eloquent\Model
+    {
+        if (is_null($id)) {
+            [$type, $id] = explode(':', $type);
+        }
+
+        /** @var \Illuminate\Database\Eloquent\Model $model */
+        $model = \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($type);
+
+        return $model::query()->whereKey($id)->first();
+    }
+}

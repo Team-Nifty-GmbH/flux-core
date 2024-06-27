@@ -18,7 +18,6 @@ use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -230,7 +229,7 @@ class SerialNumberTest extends BaseSetup
     public function test_update_serial_number_with_additional_columns()
     {
         $additionalColumn = AdditionalColumn::factory()->create([
-            'model_type' => Relation::getMorphAlias(SerialNumber::class),
+            'model_type' => morph_alias(SerialNumber::class),
         ]);
 
         $serialNumber = [

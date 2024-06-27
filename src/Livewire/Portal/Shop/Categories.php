@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Portal\Shop;
 use FluxErp\Models\Category;
 use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Lazy;
@@ -54,7 +53,7 @@ class Categories extends Component
             ->whereHas('products', function ($query) {
                 $query->webshop();
             })
-            ->where('model_type', Relation::getMorphAlias(Product::class))
+            ->where('model_type', morph_alias(Product::class))
             ->get();
     }
 
