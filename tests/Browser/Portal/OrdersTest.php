@@ -25,7 +25,12 @@ class OrdersTest extends PortalDuskTestCase
     {
         parent::setUp();
 
+        $priceList = PriceList::factory()->create([
+            'is_net' => false,
+        ]);
+
         $contacts = Contact::factory()->count(2)->create([
+            'price_list_id' => $priceList->id,
             'client_id' => $this->dbClient->id,
         ]);
 
@@ -42,8 +47,6 @@ class OrdersTest extends PortalDuskTestCase
         $paymentType = PaymentType::factory()->create([
             'client_id' => $this->dbClient->id,
         ]);
-
-        $priceList = PriceList::factory()->create();
 
         $addresses = Address::factory()->count(2)->create([
             'client_id' => $this->dbClient->id,

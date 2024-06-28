@@ -29,6 +29,13 @@ class CreateCart extends FluxAction
             unset($this->data['is_portal_public'], $this->data['is_public']);
         }
 
+        $this->data['price_list_id'] ??= auth()->user()?->contact?->price_list_id
+            ?? resolve_static(PriceList::class, 'default')?->id;
+
+        if (! $this->data['price_list_id']) {
+            dd(PriceList::all());
+        }
+
         $cart = app(Cart::class, ['attributes' => $this->data]);
         $cart->save();
 
@@ -41,8 +48,6 @@ class CreateCart extends FluxAction
         $this->data['authenticatable_id'] ??= auth()?->id();
         $this->data['payment_type_id'] ??= auth()->user()?->contact?->payment_type_id
             ?? resolve_static(PaymentType::class, 'default')?->id;
-        $this->data['price_list_id'] ??= auth()->user()?->contact?->price_list_id
-            ?? resolve_static(PriceList::class, 'default')?->id;
         $this->data['session_id'] ??= session()->id();
     }
 }

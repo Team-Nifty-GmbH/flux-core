@@ -25,10 +25,10 @@ class PortalMiddleware
                     $query->where(function (Builder $query) {
                         $query->whereHas(
                             'address',
-                            fn (Builder $query) => $query->where('contact_id', auth()->user()->contact->id)
+                            fn (Builder $query) => $query->where('contact_id', auth()->user()->contact_id)
                         )->orWhereHas(
                             'orderPosition.order',
-                            fn (Builder $query) => $query->where('contact_id', auth()->user()->contact->id)
+                            fn (Builder $query) => $query->where('contact_id', auth()->user()->contact_id)
                         );
                     });
                 },
@@ -36,7 +36,7 @@ class PortalMiddleware
             resolve_static(Order::class, 'addGlobalScope', [
                 'scope' => 'portal',
                 'implementation' => function (Builder $query) {
-                    $query->where('contact_id', auth()->user()->contact->id)
+                    $query->where('contact_id', auth()->user()->contact_id)
                         ->where(fn (Builder $query) => $query->where('is_locked', true)
                             ->orWhere('is_imported', true)
                         );
@@ -45,7 +45,7 @@ class PortalMiddleware
             resolve_static(OrderPosition::class, 'addGlobalScope', [
                 'scope' => 'portal',
                 'implementation' => function (Builder $query) {
-                    $query->whereRelation('order', 'contact_id', auth()->user()->contact->id);
+                    $query->whereRelation('order', 'contact_id', auth()->user()->contact_id);
                 },
             ]);
             resolve_static(Ticket::class, 'addGlobalScope', [

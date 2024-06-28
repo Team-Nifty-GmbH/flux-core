@@ -61,7 +61,7 @@ class OrderDetail extends Component
         $this->enabledCols = ['slug_position', 'name'];
         $this->enabledCols = array_merge(
             $this->enabledCols,
-            auth()->user()->contact?->priceList?->is_net
+            auth()->user()->priceList?->is_net
                 ? [
                     'amount',
                     'unit_net_price',
@@ -151,7 +151,7 @@ class OrderDetail extends Component
 
         $this->childOrders = $order->children?->toArray();
         $this->childEnabledCols = ['order_number', 'commission'];
-        $this->childEnabledCols[] = auth()->user()->contact?->priceList?->is_net
+        $this->childEnabledCols[] = auth()->user()->priceList?->is_net
             ? 'total_net_price'
             : 'total_gross_price';
         $this->childAvailableCols = array_merge(

@@ -26,7 +26,7 @@ class OrderList extends BaseDataTable
 
     public function mount(): void
     {
-        $this->enabledCols[] = auth()->user()->contact?->priceList?->is_net ? 'total_net_price' : 'total_gross_price';
+        $this->enabledCols[] = auth()->user()->priceList?->is_net ? 'total_net_price' : 'total_gross_price';
         $this->availableCols = array_merge(
             $this->enabledCols,
             [

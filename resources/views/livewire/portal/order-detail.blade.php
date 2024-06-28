@@ -207,7 +207,7 @@
                             <x-table.cell x-html="item.pos"/>
                             <x-table.cell class="col-span-3" x-html="item.name"/>
                             <x-table.cell
-                                x-html="item.{{ auth()->user()->contact?->priceList?->is_net ? 'total_net_price' : 'total_gross_price' }}"/>
+                                x-html="item.{{ auth()->user()->priceList?->is_net ? 'total_net_price' : 'total_gross_price' }}"/>
                         </x-table.row>
                     </template>
                 </x-table>

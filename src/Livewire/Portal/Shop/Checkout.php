@@ -80,8 +80,8 @@ class Checkout extends Cart
                     ->where('order_type_enum', 'order')
                     ->first()
                     ->id,
-                'contact_id' => auth()->user()->contact->id,
-                'client_id' => auth()->user()->contact->client->id,
+                'contact_id' => auth()->user()->contact_id,
+                'client_id' => auth()->user()->contact->client_id,
                 'is_imported' => true,
                 'commission' => $this->commission,
                 'address_delivery' => $this->deliveryAddress->toArray(),
