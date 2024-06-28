@@ -23,6 +23,7 @@ class Dashboard extends Component
 
     public function mount(): void
     {
+
         $this->availableWidgets = $this->filterWidgets(Widget::all());
         $this->widgets();
 

@@ -1,6 +1,7 @@
 import { GridStack } from 'gridstack';
 import { v4 as uuidv4 } from 'uuid';
 
+
 export default function($wire) {
     return {
         editGrid: false,
@@ -9,6 +10,13 @@ export default function($wire) {
         availableWidgets: null,
         init() {
             this.reInit().disable();
+        },
+        destroy(){
+            // destroy grid - on page leave - since livewire caches the component
+            if(this.grid !== null){
+                this.grid.destroy(false);
+                this.grid=null;
+            }
         },
         editGridMode(mode) {
             if (this.grid === null) {
@@ -97,8 +105,6 @@ export default function($wire) {
         },
         async save() {
             const snapshot = $wire.widgets;
-            console.log('snapshot', snapshot);
-            console.log('onScreen', this.grid.getGridItems());
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             // update x,y coordinates on save

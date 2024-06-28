@@ -1,5 +1,4 @@
 <div
-    wire:ignore.self
     x-data="dashboard($wire)">
     <x-modal name="confirm" persistent>
         <x-card
@@ -10,7 +9,7 @@
             <x-button x-on:click="close" negative>{{__('Cancel')}}</x-button>
         </x-card>
     </x-modal>
-    <div wire:ignore class="mx-auto py-6 flex justify-between items-center">
+    <div class="mx-auto py-6 flex justify-between items-center">
         <div class="pb-6 md:flex md:items-center md:justify-between md:space-x-5">
             <div class="flex items-start space-x-5">
                 <div class="flex-shrink-0">
@@ -49,9 +48,10 @@
                  gs-h="{{$widget['height']}}"
                  gs-x="{{$widget['order_column']}}"
                  gs-y="{{$widget['order_row']}}"
-                 x-bind:class="editGrid ? 'border border-4 dark:border-primary-500' : ''"
             >
-                <div class="grid-stack-item-content flex place-content-center col-span-full">
+                <div class="grid-stack-item-content flex border-white place-content-center col-span-full border border-4"
+                     x-bind:class="editGrid ? 'dark:border-primary-500' : 'dark:border-secondary-800'"
+                >
                     <div class="absolute top-2 right-2 z-10">
                         <x-button.circle
                             x-cloak
@@ -61,7 +61,7 @@
                     </div>
                     <div
                         x-bind:class="editGrid && !isWidgetList('{{$widget['id']}}') ? 'pointer-events-none' : ''"
-                        class="w-full h-full bg-white dark:bg-secondary-800">
+                        class="w-full h-full">
                         <livewire:is lazy :id="$widget['id']" :component="$widget['component_name'] ?? $widget['class']"
                                      wire:key="{{ uniqid() }}" />
                     </div>

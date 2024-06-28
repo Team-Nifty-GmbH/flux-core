@@ -1,8 +1,9 @@
-<x-card class="!py-0 !px-0">
-    <x-slot:title>
-        <div>{{ __('My Responsible Tasks') }}</div>
-    </x-slot:title>
-    <div class="w-full max-h-96 overflow-auto" x-data="{formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes'))}">
+<div class="!py-0 !px-0">
+    <div>
+        <h2 class="text-gray-400 text-xl">{{ __('My Responsible Tasks') }}</h2>
+    </div>
+    <div class="w-full" x-data="{formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes'))}">
+        <div class="overflow-auto">
         @foreach($tasks as $task)
             <x-list-item :item="$task">
                 <x-slot:avatar>
@@ -47,5 +48,6 @@
                 </x-slot:actions>
             </x-list-item>
         @endforeach
+        </div>
     </div>
-</x-card>
+</div>
