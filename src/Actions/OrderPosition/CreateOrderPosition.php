@@ -4,8 +4,10 @@ namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Models\Client;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rules\Numeric;
@@ -56,8 +58,16 @@ class CreateOrderPosition extends FluxAction
         $orderPosition = app(OrderPosition::class);
 
         $this->data['is_net'] ??= data_get($order, 'priceList.is_net', false);
-        $this->data['client_id'] ??= data_get($order, 'client_id');
-        $this->data['price_list_id'] ??= data_get($order, 'price_list_id');
+        $this->data['client_id'] ??= data_get(
+            $order,
+            'client_id',
+            resolve_static(Client::class, 'default')
+        );
+        $this->data['price_list_id'] ??= data_get(
+            $order,
+            'price_list_id',
+            resolve_static(PriceList::class, 'default')
+        );
 
         if (is_int($this->data['sort_number'] ?? false)) {
             $currentHighestSortNumber = app(OrderPosition::class)->query()

@@ -4,9 +4,11 @@
     @show
     @section('cart-sidebar')
         <x-flux::sidebar x-show="show">
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-4 text-gray-900 dark:text-gray-50">
                 @section('cart-sidebar.header')
-                    <h2 class="text-lg font-bold">{{ __('Cart :item_count positions', ['item_count' => count($this->cart->cartItems)]) }}</h2>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
+                        {{ __('Cart :item_count positions', ['item_count' => count($this->cart->cartItems)]) }}
+                    </h1>
                 @show
                 @section('cart-sidebar.content')
                     @foreach($this->cart?->cartItems ?? [] as $key => $cartItem)
@@ -20,8 +22,7 @@
                         <div>{{ Number::currency($this->cart->cart_items_sum_total ?? 0, $defaultCurrency->iso, app()->getLocale()) }} *</div>
                     </div>
                     <div class="text-2xs text-secondary-400">
-                        @if(auth()->user()->contact?->priceList->is_net || resolve_static(\FluxErp\Models\PriceList::class, 'default')->is_net)
-                            {{ __('* All prices net plus VAT') }}
+                        @if(auth()->user()->contact?->priceList?->is_net || resolve_static(\FluxErp\Models\PriceList::class, 'default')->is_net)
                             * {{ __('All prices net plus VAT') }}
                         @else
                             * {{ __('All prices gross including VAT') }}
@@ -54,6 +55,7 @@
                                         <div x-cloak x-show="showWatchlist" x-collapse class="flex flex-col gap-1.5 pt-4">
                                             <x-select
                                                 class="w-full"
+                                                :clearable="false"
                                                 :label="__('Select a watchlist')"
                                                 option-label="name"
                                                 option-value="id"

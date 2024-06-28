@@ -12,7 +12,8 @@ return new class extends Migration
             $table->id();
             $table->uuid();
             $table->nullableMorphs('authenticatable');
-            $table->foreignId('payment_type_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('payment_type_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('price_list_id')->constrained()->cascadeOnDelete();
             $table->string('session_id')->index();
             $table->string('name')->nullable();
             $table->decimal('total', 40, 10)->nullable();

@@ -1,7 +1,7 @@
 <div x-data="{
         additionalColumns: $wire.entangle('additionalColumns'),
         edit: false,
-        priceLists: $wire.entangle('priceLists'),
+        priceLists: $wire.entangle('priceLists')
     }"
 >
     <div
@@ -31,7 +31,7 @@
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
             @canAction(\FluxErp\Actions\CartItem\CreateCartItem::class)
                 <x-button
-                    x-on:click="$wire.dispatch('cart:add', {product: {id: $wire.product.id, name: $wire.product.name, price: $wire.product.price, amount: 1}})"
+                    x-on:click="$wire.$dispatch('cart:add', {products: $wire.product.id})"
                     primary
                     icon="shopping-cart"
                     label="+"

@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Cache;
@@ -235,6 +236,23 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             ->withPivot('address_type_id');
     }
 
+    public function projectTasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function priceList(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            PriceList::class,
+            Contact::class,
+            'id',
+            'id',
+            'contact_id',
+            'price_list_id'
+        );
+    }
+
     public function serialNumbers(): HasMany
     {
         return $this->hasMany(SerialNumber::class);
@@ -243,11 +261,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     public function settings(): MorphMany
     {
         return $this->morphMany(Setting::class, 'model');
-    }
-
-    public function projectTasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
     }
 
     /**

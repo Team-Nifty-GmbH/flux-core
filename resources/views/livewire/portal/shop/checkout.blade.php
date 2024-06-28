@@ -1,8 +1,7 @@
-<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-4 text-gray-900 dark:text-gray-50">
     <x-modal max-width="7xl" name="terms-and-conditions">
         <x-card>
             <div id="terms-and-conditions">
-
             </div>
         </x-card>
     </x-modal>
@@ -100,7 +99,7 @@
             <x-button class="w-full" wire:click="buy()" primary>{{ __('Buy now') }}</x-button>
         </x-slot:footer>
     </x-card>
-    @if(auth()->user()->contact->priceList->is_net)
+    @if(auth()->user()->priceList->is_net)
         * {{ __('All prices net plus VAT') }}
     @else
         * {{ __('All prices gross including VAT') }}

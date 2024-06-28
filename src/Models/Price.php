@@ -31,6 +31,8 @@ class Price extends Model
         'discount_percentage',
         'root_discount_flat',
         'root_discount_percentage',
+        'max_discount_flat',
+        'max_discount_percentage',
         'is_inherited',
     ];
 
@@ -111,6 +113,20 @@ class Price extends Model
     {
         return Attribute::get(
             fn () => $this->rootDiscountPercentage
+        );
+    }
+
+    public function maxDiscountFlat(): Attribute
+    {
+        return Attribute::get(
+            fn () => max($this->root_discount_flat, $this->discount_flat)
+        );
+    }
+
+    public function maxDiscountPercentage(): Attribute
+    {
+        return Attribute::get(
+            fn () => max($this->root_discount_percentage, $this->discount_percentage)
         );
     }
 

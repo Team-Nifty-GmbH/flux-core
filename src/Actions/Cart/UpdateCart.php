@@ -38,7 +38,7 @@ class UpdateCart extends FluxAction
         return $cart->withoutRelations()->fresh();
     }
 
-    public function prepareForValidation(): void
+    protected function prepareForValidation(): void
     {
         $this->data['authenticatable_type'] ??= auth()->user()?->getMorphClass();
         $this->data['authenticatable_id'] ??= auth()->user()?->getKey();

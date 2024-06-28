@@ -47,7 +47,7 @@
             </x-slot:footer>
         </x-card>
     @empty
-        <div class="flex flex-col gap-8 justify-center">
+        <div class="flex flex-col gap-8 justify-center text-gray-900 dark:text-gray-50">
             <div>
                 <h1 class="pt-5 pb-10 text-5xl font-bold text-center">
                     {{ __('Your watchlist is empty') }}

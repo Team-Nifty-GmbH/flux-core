@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->uuid();
             $table->foreignId('cart_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('product_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('vat_rate_id')->constrained()->cascadeOnDelete();
             $table->string('name')->nullable();
             $table->decimal('amount', 40, 10);
@@ -20,7 +20,6 @@ return new class extends Migration
             $table->decimal('total_net', 40, 10);
             $table->decimal('total_gross', 40, 10);
             $table->decimal('total', 40, 10);
-            $table->boolean('is_net')->default(true);
             $table->timestamps();
         });
     }

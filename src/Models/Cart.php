@@ -6,9 +6,11 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Collection;
 
 class Cart extends Model
 {
@@ -28,6 +30,11 @@ class Cart extends Model
         return $this->hasMany(CartItem::class);
     }
 
+    public function priceList(): BelongsTo
+    {
+        return $this->belongsTo(PriceList::class);
+    }
+
     public function products(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -45,7 +52,7 @@ class Cart extends Model
         $query->where('is_watchlist', false)->latest();
     }
 
-    public function vatRates()
+    public function vatRates(): Collection
     {
         return $this->cartItems()
             ->with('vatRate:id,rate_percentage')
@@ -57,9 +64,12 @@ class Cart extends Model
             ->get()
             ->toBase()
             ->transform(function (CartItem $item) {
-                return $item->toArray() + [
-                    'vat_rate_percentage' => $item->vatRate->rate_percentage,
-                ];
+                return array_merge(
+                    $item->toArray(),
+                    [
+                        'vat_rate_percentage' => $item->vatRate->rate_percentage,
+                    ]
+                );
             });
     }
 }

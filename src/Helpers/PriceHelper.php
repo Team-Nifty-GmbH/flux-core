@@ -208,7 +208,10 @@ class PriceHelper
                     ->get()
             );
 
-            $this->calculateLowestDiscountedPrice($this->price, $discounts->diff($productCategoriesDiscounts ?? collect()));
+            $this->calculateLowestDiscountedPrice(
+                $this->price,
+                $discounts->diff($productCategoriesDiscounts ?? collect())
+            );
         }
 
         // Apply added discount
@@ -221,6 +224,14 @@ class PriceHelper
         // set the used priceList and eventually round the price
         if ($this->priceList) {
             $this->price->price_list_id = $this->priceList->id;
+
+            $this->price->rootPrice = (app(Price::class))
+                ->forceFill(
+                    $this->getRootPrice(
+                        $this->price->basePrice?->priceList ?? $this->priceList,
+                        $this->price
+                    )?->toArray() ?? $this->price->toArray()
+                );
 
             $this->price->price = match ($this->priceList->rounding_method_enum) {
                 RoundingMethodEnum::Round => Rounding::round($this->price->price, $this->priceList->rounding_precision),
@@ -253,17 +264,9 @@ class PriceHelper
             $this->price->basePrice->price = $originalPrice;
 
             $this->price->discountFlat = bcsub($originalPrice, $this->price->price);
-            $this->price->discountPercentage = $originalPrice != 0 ? diff_percentage($originalPrice, $this->price->price) : 0;
-        }
-
-        // set the used priceList
-        if ($this->priceList) {
-            $this->price->price_list_id = $this->priceList->id;
-
-            $this->price->rootPrice = (app(Price::class))
-                ->forceFill(
-                    $this->getRootPrice($this->priceList, $this->price)?->toArray() ?? $this->price->toArray()
-                );
+            $this->price->discountPercentage = $originalPrice != 0
+                ? diff_percentage($originalPrice, $this->price->price)
+                : 0;
         }
 
         if ($this->price->rootPrice) {
@@ -276,6 +279,7 @@ class PriceHelper
             if (bccomp($this->price->price, 0) !== 0) {
                 $this->price->rootDiscountPercentage = diff_percentage($rootPrice, $this->price->price);
             }
+
             $this->price->rootDiscountFlat = bcsub($rootPrice, $this->price->price);
         }
 

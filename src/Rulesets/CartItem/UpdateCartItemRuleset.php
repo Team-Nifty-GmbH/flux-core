@@ -4,6 +4,7 @@ namespace FluxErp\Rulesets\CartItem;
 
 use FluxErp\Models\CartItem;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
 class UpdateCartItemRuleset extends FluxRuleset
@@ -19,11 +20,14 @@ class UpdateCartItemRuleset extends FluxRuleset
                 new ModelExists(CartItem::class),
             ],
             'amount' => [
-                'numeric',
-                'min:1',
+                'sometimes',
+                'required',
+                new Numeric(1),
             ],
             'price' => [
-                'numeric',
+                'sometimes',
+                'required',
+                new Numeric(),
             ],
         ];
     }

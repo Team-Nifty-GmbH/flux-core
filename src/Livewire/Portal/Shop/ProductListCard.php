@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Portal\Shop;
 use FluxErp\Livewire\Forms\Portal\ProductForm;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Lazy;
-use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
 #[Lazy]
@@ -33,12 +32,5 @@ class ProductListCard extends Component
                 @include('flux::livewire.placeholders.horizontal-bar')
             </x-card>
         Blade;
-    }
-
-    #[Renderless]
-    public function addToCart(): void
-    {
-        $this->dispatch('cart:add', $this->productForm->toArray())->to('portal.shop.cart');
-        $this->productForm->amount = 1;
     }
 }

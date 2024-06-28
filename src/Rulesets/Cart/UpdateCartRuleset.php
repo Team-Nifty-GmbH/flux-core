@@ -20,6 +20,7 @@ class UpdateCartRuleset extends FluxRuleset
                 new ModelExists(Cart::class),
             ],
             'payment_type_id' => [
+                'nullable',
                 'integer',
                 (new ModelExists(PaymentType::class))
                     ->where('is_active', true)

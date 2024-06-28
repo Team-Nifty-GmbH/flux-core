@@ -22,13 +22,13 @@ class UpdateCartItem extends FluxAction
 
     public function performAction(): Model
     {
-        $cart = app(CartItem::class)->query()
+        $cartItem = app(CartItem::class)->query()
             ->whereKey($this->data['id'])
             ->first();
 
-        $cart->fill($this->data);
-        $cart->save();
+        $cartItem->fill($this->data);
+        $cartItem->save();
 
-        return $cart->withoutRelations()->fresh();
+        return $cartItem->withoutRelations()->fresh();
     }
 }

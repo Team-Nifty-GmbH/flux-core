@@ -512,10 +512,14 @@ if (! function_exists('morph_alias')) {
 }
 
 if (! function_exists('morph_to')) {
-    function morph_to(string $type, ?int $id = null): Illuminate\Database\Eloquent\Model
+    function morph_to(string $type, ?int $id = null): ?Illuminate\Database\Eloquent\Model
     {
-        if (is_null($id)) {
+        if (is_null($id) && str_contains($type, ':')) {
             [$type, $id] = explode(':', $type);
+        }
+
+        if (is_null($id)) {
+            return null;
         }
 
         /** @var \Illuminate\Database\Eloquent\Model $model */

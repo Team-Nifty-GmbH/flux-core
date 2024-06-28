@@ -70,7 +70,7 @@
                     </div>
                 @show
                 <div class="text-2xs text-secondary-400">
-                    @if(auth()->user()->contact->priceList->is_net)
+                    @if(auth()->user()->priceList->is_net)
                         * {{ __('All prices net plus VAT') }}
                     @else
                         * {{ __('All prices gross including VAT') }}
@@ -81,7 +81,7 @@
                     x-data="{amount: 1}"
                 >
                     <x-inputs.number step="1" x-model="amount"/>
-                    <x-button x-on:click="$wire.dispatch('cart:add', {product: {id: $wire.productForm.id, name: $wire.productForm.name, price: $wire.productForm.price, amount: amount}})" primary class="w-full" :label="__('Add to cart')" />
+                    <x-button x-on:click="$wire.dispatch('cart:add', {products: {id: $wire.productForm.id, name: $wire.productForm.name, price: $wire.productForm.price, amount: amount}})" primary class="w-full" :label="__('Add to cart')" />
                 </div>
             @endif
             <div class="flex flex-col gap-4">
@@ -123,7 +123,10 @@
                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 pt-4"
             >
                 @foreach($crossSelling['products'] as $product)
-                    <livewire:portal.shop.product-list-card :product="$product" :key="$crossSelling['id'] . '-' .$product['id']" />
+                    <livewire:portal.shop.product-list-card
+                        :product="$product"
+                        :key="$crossSelling['id'] . '-' . $product['id']"
+                    />
                 @endforeach
             </div>
         @endforeach

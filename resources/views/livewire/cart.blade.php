@@ -16,7 +16,7 @@
         :label="__('Load a watchlist')"
         option-label="name"
         option-value="id"
-        :options="array_filter($watchlists, fn(array $watchlist) => $watchlist['id'] ?? false)"
+        :options="array_filter($watchlists, fn (array $watchlist) => $watchlist['id'] ?? false)"
         wire:model.live.numeric="loadWatchlist"
     />
 @endsection

@@ -53,7 +53,7 @@ class Checkout extends Cart
     #[Renderless]
     public function loadTermsAndConditions(): string
     {
-        return auth()->user()->contact->client->terms_and_conditions;
+        return auth()->user()->contact->client->terms_and_conditions ?? '';
     }
 
     public function saveDeliveryAddress(): bool
@@ -110,11 +110,21 @@ class Checkout extends Cart
             return;
         }
 
-        if ($this->comment) {
+        $comment = implode(
+            '<br />',
+            array_filter(
+                [
+                    $this->comment,
+                    $this->delivery_date ? __('Desired delivery date') . ': ' . $this->delivery_date : null,
+                ]
+            )
+        );
+
+        if ($comment) {
             CreateComment::make([
                 'model_type' => morph_alias(Order::class),
                 'model_id' => $order->id,
-                'comment' => $this->comment,
+                'comment' => $comment,
             ])->validate()->execute();
         }
 

@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-1">
+<div class="flex flex-col gap-1 dark:text-gray-50">
     <div class="w-full flex justify-end">
         <x-button.circle xs icon="x" negative wire:click="remove({{ $cartItem->id }})"/>
     </div>

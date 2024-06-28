@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\CartItem;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Address;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
@@ -24,27 +25,37 @@ class CreateCartItem extends FluxAction
 
     public function performAction(): mixed
     {
-        $this->data['vat_rate_id'] ??= app(Product::class)
-            ->query()
-            ->whereKey($this->data['product_id'])
-            ->value('vat_rate_id');
+        $this->data['amount'] ??= 1;
+
+        $product = null;
+        if ($productId = data_get($this->data, 'product_id')) {
+            $product = Product::query()
+                ->whereKey($productId)
+                ->first(['vat_rate_id', 'name']);
+            $this->data['vat_rate_id'] ??= $product?->vat_rate_id;
+            $this->data['name'] ??= $product?->name;
+        }
+
         $cart = app(Cart::class)
             ->query()
+            ->with('authenticatable')
             ->whereKey($this->data['cart_id'])
             ->sole();
 
-        if ($cart->authenticatable instanceof Address) {
-            $this->data['is_net'] ??= $cart->authenticatable->contact->priceList->is_net;
+        if (
+            $cart->authenticatable instanceof Address
+            && ! data_get($this->data, 'price')
+            && $product
+        ) {
+            $this->data['price'] = PriceHelper::make($product)
+                ->setContact($cart->authenticatable->contact)
+                ->price()
+                ->price;
         }
 
-        $cart = app(CartItem::class, ['attributes' => $this->data]);
-        $cart->save();
+        $cartItem = app(CartItem::class, ['attributes' => $this->data]);
+        $cartItem->save();
 
-        return $cart->fresh();
-    }
-
-    public function prepareForValidation(): void
-    {
-        $this->data['amount'] ??= 1;
+        return $cartItem->fresh();
     }
 }

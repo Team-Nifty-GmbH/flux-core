@@ -81,7 +81,7 @@ if (! function_exists('exception_to_notifications')) {
 }
 
 if (! function_exists('cart')) {
-    function cart(): ?\FluxErp\Models\Cart
+    function cart(): \FluxErp\Models\Cart
     {
         return auth()
             ->user()

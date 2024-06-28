@@ -59,7 +59,9 @@ class Cart extends Component
 
     public function add(array|int $products): void
     {
-        foreach (Arr::wrap($products) as $product) {
+        $products = Arr::wrap(is_array($products) && ! array_is_list($products) ? [$products] : $products);
+
+        foreach ($products as $product) {
             if ($productId = is_array($product) ? data_get($product, 'id') : $product) {
                 $productModel = app(Product::class)->whereKey($productId)->first();
                 if (is_null($productModel)) {
@@ -84,8 +86,8 @@ class Cart extends Component
 
             // check if a product with the same id is already in the cart
             if ($cartItem = $this->cart()->cartItems()->where('product_id', $productId)->first()) {
-                $data['amount'] = bcadd($cartItem->amount, $data['amount']);
                 $data['id'] = $cartItem->id;
+                $data['amount'] = bcadd($cartItem->amount, $data['amount']);
 
                 $action = UpdateCartItem::make($data);
             } else {
@@ -102,8 +104,12 @@ class Cart extends Component
 
             unset($this->cart);
 
-            $this->notification()->success(__('Product added to cart'));
         }
+
+        $this->notification()->success(count($products) > 1
+            ? __('Products added to cart')
+            : __('Product added to cart')
+        );
     }
 
     public function remove(CartItem $cartItem): void
@@ -175,6 +181,7 @@ class Cart extends Component
 
         $this->reset('selectedWatchlist', 'watchlistName');
         $this->notification()->success(__('Cart saved to watchlist'));
+        $this->mount();
 
         return true;
     }
@@ -194,17 +201,17 @@ class Cart extends Component
             return;
         }
 
-        $this->loadCart(
-            app(\FluxErp\Models\Cart::class)->with('products')->whereKey($this->loadWatchlist)->first()
+        $this->add(
+            app(\FluxErp\Models\Cart::class)
+                ->with('products')
+                ->whereKey($this->loadWatchlist)
+                ->first()
+                ->products
+                ->pluck('id')
+                ->toArray()
         );
-        $this->loadWatchlist = null;
-    }
 
-    public function loadCart(\FluxErp\Models\Cart $cart): void
-    {
-        foreach ($cart->products as $product) {
-            $this->add($product->id);
-        }
+        $this->loadWatchlist = null;
     }
 
     #[Computed(persist: true)]
@@ -223,8 +230,7 @@ class Cart extends Component
                     ->orWhere('is_public', true);
             })
             ->where('is_watchlist', true)
-            ->select(['id', 'name'])
-            ->get()
+            ->get(['id', 'name'])
             ->toArray();
     }
 }

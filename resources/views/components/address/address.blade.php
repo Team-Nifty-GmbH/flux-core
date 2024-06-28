@@ -1,7 +1,7 @@
 @props([
     'onlyPostal' => false,
-    'countries' => app(\FluxErp\Models\Country::class)->all(),
-    'languages' => app(\FluxErp\Models\Language::class)->all(),
+    'countries' => app(\FluxErp\Models\Country::class)->select(['id', 'name'])->get(),
+    'languages' => app(\FluxErp\Models\Language::class)->select(['id', 'name'])->get(),
 ])
 <div class="table w-full table-auto gap-1.5" x-ref="address">
     <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
@@ -226,19 +226,19 @@
                     option-value="id"
                     option-label="label"
                     :async-data="[
-                    'api' => route('search', \FluxErp\Models\Tag::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'option-value' => 'id',
-                        'where' => [
-                            [
-                                'type',
-                                '=',
-                                app(\FluxErp\Models\Address::class)->getMorphClass(),
+                        'api' => route('search', \FluxErp\Models\Tag::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'option-value' => 'id',
+                            'where' => [
+                                [
+                                    'type',
+                                    '=',
+                                    app(\FluxErp\Models\Address::class)->getMorphClass(),
+                                ],
                             ],
                         ],
-                    ],
-                ]"
+                    ]"
                 >
                     <x-slot:beforeOptions>
                         <div class="px-1">

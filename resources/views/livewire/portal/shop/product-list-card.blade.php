@@ -29,10 +29,10 @@
             @show
             @section('price')
                 @if($productForm->children_count === 0)
-                    <div class="flex flex-col gap-1.5 text-center">
-                        <div class="mt-3 text-sm font-semibold text-gray-900">{{ Number::currency($productForm->buy_price, $defaultCurrency->iso, app()->getLocale()) }}</div>
+                    <div class="flex flex-col gap-1.5 text-center text-gray-900 dark:text-gray-50">
+                        <div class="mt-3 text-sm font-semibold">{{ Number::currency($productForm->buy_price, $defaultCurrency->iso, app()->getLocale()) }}</div>
                         @if(bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
-                            <div class="text-gray-900">
+                            <div>
                                 <span class="line-through">
                                     {{ Number::currency($productForm->root_price_flat, $defaultCurrency->iso, app()->getLocale()) }}
                                 </span>
@@ -52,7 +52,12 @@
         @if($productForm->children_count === 0)
             <div class="flex items-center mt-4 gap-1.5">
                 <x-inputs.number step="1" wire:model="productForm.amount" />
-                <x-button wire:click="addToCart()" primary class="w-full" :label="__('Add to cart')" />
+                <x-button
+                    x-on:click="$wire.$dispatch('cart:add', {products: {id: $wire.productForm.id, amount: $wire.productForm.amount}})"
+                    primary
+                    class="w-full"
+                    :label="__('Add to cart')"
+                />
             </div>
         @endif
     @show

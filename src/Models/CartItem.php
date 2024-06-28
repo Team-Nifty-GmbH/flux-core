@@ -14,14 +14,19 @@ class CartItem extends Model
         'id',
     ];
 
-    public static function booted(): void
+    protected static function booted(): void
     {
         static::saving(function (CartItem $cartItem) {
+            $cartItem->loadMissing([
+                'cart.priceList:id,is_net',
+                'vatRate:id,rate_percentage',
+            ]);
+
             $cartItem->total = bcmul($cartItem->amount, $cartItem->price);
-            $cartItem->total_net = $cartItem->is_net
+            $cartItem->total_net = $cartItem->cart->priceList->is_net
                 ? $cartItem->total
                 : gross_to_net($cartItem->total, $cartItem->vatRate->rate_percentage);
-            $cartItem->total_gross = $cartItem->is_net
+            $cartItem->total_gross = $cartItem->cart->priceList->is_net
                 ? net_to_gross($cartItem->total, $cartItem->vatRate->rate_percentage)
                 : $cartItem->total;
         });

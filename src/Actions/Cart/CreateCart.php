@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Cart;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Cart;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
 use FluxErp\Rulesets\Cart\CreateCartRuleset;
 
@@ -34,12 +35,14 @@ class CreateCart extends FluxAction
         return $cart->fresh();
     }
 
-    public function prepareForValidation(): void
+    protected function prepareForValidation(): void
     {
         $this->data['authenticatable_type'] ??= auth()->user()?->getMorphClass();
-        $this->data['authenticatable_id'] ??= auth()->user()?->getKey();
-        $this->data['payment_type_id'] ??= auth()->user()?->contact->payment_type_id
+        $this->data['authenticatable_id'] ??= auth()?->id();
+        $this->data['payment_type_id'] ??= auth()->user()?->contact?->payment_type_id
             ?? resolve_static(PaymentType::class, 'default')?->id;
+        $this->data['price_list_id'] ??= auth()->user()?->contact?->price_list_id
+            ?? resolve_static(PriceList::class, 'default')?->id;
         $this->data['session_id'] ??= session()->id();
     }
 }

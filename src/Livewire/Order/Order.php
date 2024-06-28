@@ -102,9 +102,12 @@ class Order extends OrderPositionList
 
     public function getListeners(): array
     {
-        return [
-            'order:add-products' => 'addProducts',
-        ];
+        return array_merge(
+            parent::getListeners(),
+            [
+                'order:add-products' => 'addProducts',
+            ]
+        );
     }
 
     #[Renderless]
@@ -116,6 +119,7 @@ class Order extends OrderPositionList
             } else {
                 $this->orderPosition->product_id = $product;
             }
+
             $this->quickAdd();
         }
     }

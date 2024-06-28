@@ -14,8 +14,6 @@ use Illuminate\View\View;
 use Livewire\Component;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-use function Psl\Str\is_empty;
-
 class ProductDetail extends Component
 {
     public ProductForm $productForm;
@@ -95,7 +93,7 @@ class ProductDetail extends Component
         $this->productForm->fill(array_merge($this->productForm->toArray(), $product->toArray()));
         $this->productForm->meta = $product->meta
             ->pluck('value', 'additionalColumn.label')
-            ->filter(fn ($value) => ! is_empty($value))
+            ->filter(fn ($value) => ! empty($value))
             ->toArray();
 
         $this->productForm->cover_url = ($product->coverMedia ?? $product->parent?->coverMedia)

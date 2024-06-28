@@ -61,8 +61,7 @@ class Cart extends BaseCart
             ->where('authenticatable_type', auth()->user()->getMorphClass())
             ->where('authenticatable_id', auth()->id())
             ->where('is_watchlist', true)
-            ->select(['id', 'name'])
-            ->get()
+            ->get(['id', 'name'])
             ->toArray();
     }
 }

@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Portal\Shop;
 
 use FluxErp\Models\Product;
 use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Url;
@@ -35,7 +36,7 @@ class ProductList extends Component
         $this->setPage(1);
     }
 
-    protected function getProducts()
+    protected function getProducts(): LengthAwarePaginator
     {
         if (! $this->search) {
             $builder = app(Product::class)->query();

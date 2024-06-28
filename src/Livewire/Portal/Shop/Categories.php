@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Portal\Shop;
 
 use FluxErp\Models\Category;
 use FluxErp\Models\Product;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
@@ -33,34 +34,21 @@ class Categories extends Component
     }
 
     #[Computed(persist: true, seconds: 60 * 60 * 24, cache: true)]
-    public function categories()
+    public function categories(): Collection
     {
         Category::addGlobalScope('children', function ($query) {
-            $query->with(['children' => function (HasMany $query) {
-                $query->whereHas('products', function ($query) {
-                    $query->webshop();
-                })->withCount(['children' => fn ($query) => $query->whereHas('products', function ($query) {
-                    $query->webshop();
-                })]);
-            }]);
+            $query->with(['children' => fn (HasMany $query) => $query->whereHas('products', fn ($query) => $query->webshop())
+                ->withCount([
+                    'children' => fn ($query) => $query->whereHas('products', fn ($query) => $query->webshop()),
+                ]),
+            ]);
         });
 
         return app(Category::class)
             ->whereNull('parent_id')
-            ->withCount(['children' => fn ($query) => $query->whereHas('products', function ($query) {
-                $query->webshop();
-            })])
-            ->whereHas('products', function ($query) {
-                $query->webshop();
-            })
+            ->withCount(['children' => fn ($query) => $query->whereHas('products', fn ($query) => $query->webshop())])
+            ->whereHas('products', fn ($query) => $query->webshop())
             ->where('model_type', morph_alias(Product::class))
             ->get();
-    }
-
-    public function loadChildren(Category $category)
-    {
-        $category->load('children');
-
-        return $category->children?->toArray();
     }
 }

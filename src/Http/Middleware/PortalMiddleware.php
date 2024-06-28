@@ -38,7 +38,8 @@ class PortalMiddleware
                 'implementation' => function (Builder $query) {
                     $query->where('contact_id', auth()->user()->contact->id)
                         ->where(fn (Builder $query) => $query->where('is_locked', true)
-                            ->orWhere('is_imported', true));
+                            ->orWhere('is_imported', true)
+                        );
                 },
             ]);
             resolve_static(OrderPosition::class, 'addGlobalScope', [
@@ -61,7 +62,8 @@ class PortalMiddleware
                         $query->where(function (Builder $query) {
                             $query->where('authenticatable_id', auth()->id())
                                 ->where('authenticatable_type', auth()->user()?->getMorphClass());
-                        })->orWhere('session_id', session()->id())
+                        })
+                            ->orWhere('session_id', session()->id())
                             ->orWhere('is_portal_public', true);
                     });
                 },
@@ -74,7 +76,8 @@ class PortalMiddleware
                             $query->where(function (Builder $query) {
                                 $query->where('authenticatable_id', auth()->id())
                                     ->where('authenticatable_type', auth()->user()?->getMorphClass());
-                            })->orWhere('session_id', session()->id())
+                            })
+                                ->orWhere('session_id', session()->id())
                                 ->orWhere('is_portal_public', true);
                         });
                     });
@@ -84,15 +87,19 @@ class PortalMiddleware
                 'callback' => function (Cart $cart) {
                     if (
                         (
-                            $cart->authenticatable_type !== auth()->user()?->getMorphClass()
-                            || $cart->authenticatable_id !== auth()->id()
+                            is_null($cart->authenticatable_type)
+                            && is_null($cart->authenticatable_id)
+                            && $cart->session_id === session()->id()
                         )
-                        && $cart->session_id !== session()->id()
+                        || (
+                            $cart->authenticatable_type === auth()->user()?->getMorphClass()
+                            && $cart->authenticatable_id === auth()->id()
+                        )
                     ) {
-                        return false;
+                        return $cart->deleteQuietly();
                     }
 
-                    return $cart->deleteQuietly();
+                    return false;
                 },
             ]);
 
