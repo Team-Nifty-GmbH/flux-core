@@ -11,11 +11,11 @@ export default function($wire) {
         init() {
             this.reInit().disable();
         },
-        destroy(){
+        destroy() {
             // destroy grid - on page leave - since livewire caches the component
-            if(this.grid !== null){
+            if (this.grid !== null) {
                 this.grid.destroy(false);
-                this.grid=null;
+                this.grid = null;
             }
         },
         editGridMode(mode) {

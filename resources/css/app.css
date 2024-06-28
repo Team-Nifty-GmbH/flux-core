@@ -73,12 +73,16 @@
     @apply text-white m-0 rounded shadow-md bg-white dark:bg-secondary-800;
 }
 
+.grid-stack > .grid-stack-item > .grid-stack-item-content {
+    @apply overflow-hidden;
+}
+
 ::-webkit-scrollbar {
     width: .5rem;
 }
 
 ::-webkit-scrollbar-track {
-    @apply bg-gray-700 rounded;
+    @apply bg-gray-200 dark:bg-gray-700 rounded;
 }
 
 ::-webkit-scrollbar-thumb {

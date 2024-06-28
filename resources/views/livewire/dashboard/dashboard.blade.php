@@ -60,8 +60,8 @@
                             class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative />
                     </div>
                     <div
-                        x-bind:class="editGrid && !isWidgetList('{{$widget['id']}}') ? 'pointer-events-none' : ''"
-                        class="w-full h-full">
+                        class="w-full"
+                        x-bind:class="editGrid && !isWidgetList('{{$widget['id']}}') ? 'pointer-events-none' : ''">
                         <livewire:is lazy :id="$widget['id']" :component="$widget['component_name'] ?? $widget['class']"
                                      wire:key="{{ uniqid() }}" />
                     </div>
