@@ -236,11 +236,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             ->withPivot('address_type_id');
     }
 
-    public function projectTasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
-    }
-
     public function priceList(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -251,6 +246,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             'contact_id',
             'price_list_id'
         );
+    }
+
+    public function projectTasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
     }
 
     public function serialNumbers(): HasMany
@@ -299,7 +299,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public function getDescription(): ?string
     {
-        return implode(', ', $this->postalAddress());
+        return implode(', ', $this->postal_address);
     }
 
     public function getUrl(): ?string

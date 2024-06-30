@@ -8,6 +8,7 @@ use FluxErp\Actions\CartItem\DeleteCartItem;
 use FluxErp\Actions\CartItem\UpdateCartItem;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Address;
+use FluxErp\Models\Cart as CartModel;
 use FluxErp\Models\CartItem;
 use FluxErp\Models\Product;
 use Illuminate\Contracts\View\View;
@@ -64,9 +65,6 @@ class Cart extends Component
         foreach ($products as $product) {
             if ($productId = is_array($product) ? data_get($product, 'id') : $product) {
                 $productModel = app(Product::class)->whereKey($productId)->first();
-                if (is_null($productModel)) {
-                    dd($productModel, $product, $productId);
-                }
             }
 
             $data = [
@@ -153,7 +151,7 @@ class Cart extends Component
     {
         try {
             if ($this->selectedWatchlist) {
-                $cart = app(\FluxErp\Models\Cart::class)
+                $cart = app(CartModel::class)
                     ->query()
                     ->whereKey($this->selectedWatchlist)
                     ->where('is_watchlist', true)
@@ -202,7 +200,7 @@ class Cart extends Component
         }
 
         $this->add(
-            app(\FluxErp\Models\Cart::class)
+            app(CartModel::class)
                 ->with('products')
                 ->whereKey($this->loadWatchlist)
                 ->first()
@@ -215,14 +213,14 @@ class Cart extends Component
     }
 
     #[Computed(persist: true)]
-    public function cart(): ?\FluxErp\Models\Cart
+    public function cart(): ?CartModel
     {
         return cart();
     }
 
     protected function getWatchLists(): void
     {
-        $this->watchlists = app(\FluxErp\Models\Cart::class)
+        $this->watchlists = app(CartModel::class)
             ->query()
             ->where(function (Builder $query) {
                 $query->where(fn (Builder $query) => $query->where('authenticatable_type', auth()->user()->getMorphClass())

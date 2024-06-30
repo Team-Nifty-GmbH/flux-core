@@ -32,6 +32,7 @@ class CreateCartItemRuleset extends FluxRuleset
             ],
             'name' => [
                 'required_without:product_id',
+                'nullable',
                 'string',
             ],
             'amount' => [

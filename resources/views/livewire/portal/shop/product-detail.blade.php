@@ -1,4 +1,7 @@
-<div class="flex flex-col gap-8 h-full" x-init="$watch('$wire.productForm.product_cross_sellings', () => {showCrossSelling = $wire.productForm.product_cross_sellings[0]?.id})" x-data="{showMeta: null, showCrossSelling: null}">
+<div class="flex flex-col gap-8 h-full text-gray-900 dark:text-gray-50"
+     x-init="$watch('$wire.productForm.product_cross_sellings', () => {showCrossSelling = $wire.productForm.product_cross_sellings[0]?.id})"
+     x-data="{showMeta: null, showCrossSelling: null}"
+>
     <x-spinner />
     <div class="relative grid sm:flex gap-8 h-full">
         <div class="w-full sm:w-1/2 flex justify-items-center gap-4">
@@ -52,13 +55,13 @@
                 @section('price')
                     <div class="flex flex-col gap-1.5 text-center">
                         <div class="flex gap-4 content-center justify-center w-full">
-                            <div class="text-sm font-semibold text-gray-900">{{ Number::currency($productForm->buy_price, $defaultCurrency->iso, app()->getLocale()) }} *</div>
+                            <div class="text-sm font-semibold">{{ Number::currency($productForm->buy_price, $defaultCurrency->iso, app()->getLocale()) }} *</div>
                             @if(bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
                                 <x-badge negative xs :label="__('%')" />
                             @endif
                         </div>
                         @if(bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
-                            <div class="text-gray-900">
+                            <div>
                                 <span class="line-through">
                                     {{ Number::currency($productForm->root_price_flat ?? 0, $defaultCurrency->iso, app()->getLocale()) }} *
                                 </span>

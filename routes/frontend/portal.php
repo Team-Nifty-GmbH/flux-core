@@ -4,6 +4,8 @@ use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Livewire\Portal\Auth\Login;
 use FluxErp\Livewire\Portal\Auth\Logout;
+use FluxErp\Livewire\Portal\Calendar;
+use FluxErp\Livewire\Portal\Dashboard;
 use FluxErp\Livewire\Portal\Files;
 use FluxErp\Livewire\Portal\OrderDetail;
 use FluxErp\Livewire\Portal\Orders;
@@ -49,9 +51,9 @@ Route::middleware(['web', PortalMiddleware::class])
             ->name('logout');
 
         Route::middleware(['auth:address', 'permission'])->group(function () {
-            Route::get('/', \FluxErp\Livewire\Portal\Dashboard::class)
+            Route::get('/', Dashboard::class)
                 ->name('dashboard');
-            Route::get('/calendar', \FluxErp\Livewire\Portal\Calendar::class)
+            Route::get('/calendar', Calendar::class)
                 ->name('calendar');
             Route::get('/products', ProductList::class)
                 ->name('products');

@@ -52,6 +52,15 @@ class Communication extends Model implements HasMedia, OffersPrinting
         ];
     }
 
+    protected function broadcastWithout(): array
+    {
+        // exclude the body from broadcasting as the payload might be too large
+        return [
+            'text_body',
+            'html_body',
+        ];
+    }
+
     protected function fromMail(): Attribute
     {
         return Attribute::get(

@@ -19,12 +19,14 @@ class CreateCartRuleset extends FluxRuleset
     {
         return [
             'authenticatable_type' => [
-                'required_with:authenticatable_type',
+                'required_with:authenticatable_id',
+                'nullable',
                 'string',
                 new MorphClassExists(uses: HasCart::class),
             ],
             'authenticatable_id' => [
-                'required_with:authenticatable_id',
+                'required_with:authenticatable_type',
+                'nullable',
                 'integer',
                 new MorphExists(modelAttribute: 'authenticatable_type'),
             ],
