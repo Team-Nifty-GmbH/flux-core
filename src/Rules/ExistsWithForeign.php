@@ -44,8 +44,7 @@ class ExistsWithForeign implements DataAwareRule, InvokableRule
         public ?string $throughTable = null,
         public string $throughLocal = 'id',
         public ?string $throughForeign = null
-    ) {
-    }
+    ) {}
 
     /**
      * Run the validation rule.

@@ -22,8 +22,7 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
 
     public function __construct(
         public array $transactionIds
-    ) {
-    }
+    ) {}
 
     public function handle(): void
     {
