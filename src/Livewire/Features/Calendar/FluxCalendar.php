@@ -95,7 +95,6 @@ class FluxCalendar extends CalendarComponent
             $this->selectableCalendars[$index] = $calendar;
         }
 
-
         return $calendar;
     }
 

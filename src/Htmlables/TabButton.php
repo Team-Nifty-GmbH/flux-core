@@ -72,8 +72,7 @@ class TabButton implements Htmlable
         public bool $isLivewireComponent = false,
         public ?string $wireModel = null,
         public ?array $attributes = []
-    ) {
-    }
+    ) {}
 
     public function userHasTabPermission(bool $throwException = true): bool
     {

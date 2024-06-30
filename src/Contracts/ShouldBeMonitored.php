@@ -2,6 +2,4 @@
 
 namespace FluxErp\Contracts;
 
-interface ShouldBeMonitored
-{
-}
+interface ShouldBeMonitored {}

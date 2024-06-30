@@ -62,9 +62,7 @@ class Frequency implements DataAwareRule, ValidationRule
         'unlessBetween' => 'array:time,time',
     ];
 
-    public function __construct(protected string $frequencyKey)
-    {
-    }
+    public function __construct(protected string $frequencyKey) {}
 
     /**
      * Run the validation rule.
