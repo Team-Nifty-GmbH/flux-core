@@ -93,6 +93,7 @@ class OrdersTest extends PortalDuskTestCase
             $browser->click('nav [href="/orders"]')
                 ->waitForRoute('portal.orders')
                 ->assertRouteIs('portal.orders')
+                ->resize(1920, 1080)
                 ->waitForText('My orders')
                 ->waitForText('Order Number')
                 ->waitForText('Order Type -> Name')
