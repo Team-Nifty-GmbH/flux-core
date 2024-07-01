@@ -62,7 +62,7 @@
                     <div
                         class="w-full"
                         x-bind:class="editGrid && !isWidgetList('{{$widget['id']}}') ? 'pointer-events-none' : ''">
-                        <livewire:is lazy :id="$widget['id']" :component="$widget['component_name'] ?? $widget['class']"
+                        <livewire:is lazy  :id="$widget['id']" :component="$widget['component_name'] ?? $widget['class']"
                                      wire:key="{{ uniqid() }}" />
                     </div>
                 </div>
