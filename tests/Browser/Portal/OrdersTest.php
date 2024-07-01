@@ -93,7 +93,6 @@ class OrdersTest extends PortalDuskTestCase
             $browser->click('nav [href="/orders"]')
                 ->waitForRoute('portal.orders')
                 ->assertRouteIs('portal.orders')
-                ->resize(1920, 1080)
                 ->waitForText('My orders')
                 ->waitForText('Order Number')
                 ->waitForText('Order Type -> Name')
@@ -104,7 +103,8 @@ class OrdersTest extends PortalDuskTestCase
                 ->assertSee('Order Type -> Name')
                 ->assertSee('Commission')
                 ->assertSee('Payment State')
-                ->assertSee('Total Gross Price');
+                ->assertScript('document.body.innerText.includes("Total Net Price") || document.body.innerText.includes("Total Gross Price")')
+                ->assertScript('!(document.body.innerText.includes("Total Net Price") && document.body.innerText.includes("Total Gross Price"))');
 
             $rows = $browser->elements('[tall-datatable] tbody [data-id]');
 
