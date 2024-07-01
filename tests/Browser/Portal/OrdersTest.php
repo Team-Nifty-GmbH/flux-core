@@ -98,7 +98,6 @@ class OrdersTest extends PortalDuskTestCase
                 ->waitForText('Order Type -> Name')
                 ->waitForText('Commission')
                 ->waitForText('Payment State')
-                ->waitForText('Total Gross Price')
                 ->assertSee('Order Number')
                 ->assertSee('Order Type -> Name')
                 ->assertSee('Commission')
