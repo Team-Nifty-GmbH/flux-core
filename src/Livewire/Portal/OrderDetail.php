@@ -56,7 +56,7 @@ class OrderDetail extends Component
                     'currency:id,iso',
                 ]
             )
-            ->first();
+            ->firstOrFail();
 
         $this->enabledCols = ['slug_position', 'name'];
         $this->enabledCols = array_merge(
