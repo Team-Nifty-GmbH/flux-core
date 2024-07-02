@@ -2,12 +2,18 @@ import { GridStack } from 'gridstack';
 import { v4 as uuidv4 } from 'uuid';
 
 
+function delay (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+
+}
+
 export default function($wire) {
     return {
         editGrid: false,
         emptyLayout: false,
         grid: null,
         availableWidgets: null,
+        isLoading: false,
         init() {
             this.reInit().disable();
         },
@@ -36,6 +42,7 @@ export default function($wire) {
             return w?.component_name === 'widgets.widget-list';
         },
         async cancelDashboard() {
+            this.isLoading = true;
             this.editGridMode(false);
             // load data from db - to $wire.widgets
             await $wire.cancelDashboard();
@@ -83,6 +90,10 @@ export default function($wire) {
             // sync property
             await $wire.syncWidgets(newSnapshot);
         },
+        async pendingMessage(){
+            // on fetching data enable changes to the grid
+            await $wire.showFlashMessage();
+        },
         async syncGridOnDelete() {
             const snapshot = $wire.widgets;
             const onScreen = this.grid.getGridItems();
@@ -104,6 +115,8 @@ export default function($wire) {
             await $wire.syncWidgets(newSnapshot);
         },
         async save() {
+            this.isLoading = true;
+            await delay(5000);
             const snapshot = $wire.widgets;
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
@@ -132,6 +145,7 @@ export default function($wire) {
             this.reInit().disable();
         },
         async addPlaceHolder() {
+            this.isLoading = true;
             if (this.availableWidgets === null) {
                 this.availableWidgets = await $wire.availableWidgets;
             }
@@ -157,6 +171,7 @@ export default function($wire) {
             this.reInit();
         },
         async selectWidget(key, id) {
+            this.isLoading = true;
             const el = this.grid
                 .getGridItems()
                 .find(
@@ -180,6 +195,10 @@ export default function($wire) {
             }
         },
         reInit() {
+            // check if grid is loading
+            if(this.isLoading){
+                this.isLoading = false;
+            }
             // clear previous grid state
             if (this.grid !== null) {
                 this.grid.destroy(false);
@@ -187,7 +206,7 @@ export default function($wire) {
             // init grid
             this.grid = GridStack.init({
                 margin: 4,
-                columnHeight: 200,
+                cellHeight: 250,
                 alwaysShowResizeHandle: true,
                 columnOpts: {
                     breakpointForWindow: true,
@@ -200,6 +219,7 @@ export default function($wire) {
             return this.grid;
         },
         async removeWidget(id) {
+            this.isLoading = true;
             const el = this.grid
                 .getGridItems()
                 .find(
@@ -216,6 +236,9 @@ export default function($wire) {
                 await $wire.$refresh();
                 // init grid
                 this.reInit();
+            }
+            if(this.isLoading){
+                this.isLoading = false;
             }
         }
     };

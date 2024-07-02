@@ -69,6 +69,7 @@
     @apply w-full
 }
 
+
 .grid-stack-item-content {
     @apply text-white m-0 rounded shadow-md bg-white dark:bg-secondary-800;
 }

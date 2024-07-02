@@ -16,7 +16,7 @@
         <x-datetime-picker wire:model.live="start" without-time="true" :label="__('From')"/>
         <x-datetime-picker wire:model.live="end" without-time="true" :label="__('Until')"/>
     </div>
-    <div class="overflow-auto overflow-x-hidden flex-1 flex flex-col flex-grow justify-between gap-4">
+    <div class="overflow-auto overflow-x-hidden flex-1 flex flex-col flex-grow text-gray-400 justify-between gap-4">
         @section('chart')
             <div class="chart w-full">
             </div>

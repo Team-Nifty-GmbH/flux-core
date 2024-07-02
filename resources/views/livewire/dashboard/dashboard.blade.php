@@ -22,20 +22,20 @@
         </div>
         <div x-cloak x-show="!editGrid">
             <x-button
-                x-on:click="editGridMode(true)"
+                x-on:click="isLoading ? pendingMessage : editGridMode(true)"
                 class="flex-shrink-0">{{ __('Edit Dashboard') }}</x-button>
         </div>
         <div x-cloak x-show="editGrid">
-            <x-button x-on:click="addPlaceHolder" class="flex-shrink-0">{{ __('Add') }}</x-button>
+            <x-button x-on:click="isLoading ? pendingMessage : addPlaceHolder" class="flex-shrink-0">{{ __('Add') }}</x-button>
             <x-button
                 primary
                 x-cloak
                 x-show="openGridItems"
-                x-on:click="save"
+                x-on:click="isLoading ? pendingMessage : save"
                 class="flex-shrink-0">{{__('Save')}}</x-button>
             <x-button
                 negative
-                x-on:click="$openModal('confirm')"
+                x-on:click="isLoading ? pendingMessage : $openModal('confirm')"
                 wire:flux-confirm.icon.error="cancelDashboard"
                 class="flex-shrink-0">{{__('Cancel')}}</x-button>
         </div>
@@ -56,7 +56,7 @@
                         <x-button.circle
                             x-cloak
                             x-show="editGrid"
-                            x-on:click="removeWidget('{{$widget['id']}}')"
+                            x-on:click="isLoading ? pendingMessage : removeWidget('{{$widget['id']}}')"
                             class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative />
                     </div>
                     <div
