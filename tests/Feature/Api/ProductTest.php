@@ -90,7 +90,7 @@ class ProductTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/products/' . Str::random());
+        $response = $this->actingAs($this->user)->get('/api/products/' . $this->products[2]->id + 10000);
         $response->assertStatus(404);
     }
 
