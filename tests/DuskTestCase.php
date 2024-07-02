@@ -77,7 +77,11 @@ abstract class DuskTestCase extends TestCase
     protected static function installAssets(): void
     {
         static::deleteDirectory(__DIR__ . '/../public/build/assets/');
-        if (file_exists($manifest = __DIR__ . '/../public/build/manifest.json')) unlink($manifest);
+
+        if (file_exists($manifest = __DIR__ . '/../public/build/manifest.json')) {
+            unlink($manifest);
+        }
+
         InstallAssets::copyStubs(
             [
                 'tailwind.config.js',
