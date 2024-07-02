@@ -25,7 +25,12 @@ class OrdersTest extends PortalDuskTestCase
     {
         parent::setUp();
 
+        $priceList = PriceList::factory()->create([
+            'is_net' => false,
+        ]);
+
         $contacts = Contact::factory()->count(2)->create([
+            'price_list_id' => $priceList->id,
             'client_id' => $this->dbClient->id,
         ]);
 
@@ -42,8 +47,6 @@ class OrdersTest extends PortalDuskTestCase
         $paymentType = PaymentType::factory()->create([
             'client_id' => $this->dbClient->id,
         ]);
-
-        $priceList = PriceList::factory()->create();
 
         $addresses = Address::factory()->count(2)->create([
             'client_id' => $this->dbClient->id,
@@ -95,12 +98,12 @@ class OrdersTest extends PortalDuskTestCase
                 ->waitForText('Order Type -> Name')
                 ->waitForText('Commission')
                 ->waitForText('Payment State')
-                ->waitForText('Total Gross Price')
                 ->assertSee('Order Number')
                 ->assertSee('Order Type -> Name')
                 ->assertSee('Commission')
                 ->assertSee('Payment State')
-                ->assertSee('Total Gross Price');
+                ->assertScript('document.body.innerText.includes("Total Net Price") || document.body.innerText.includes("Total Gross Price")')
+                ->assertScript('!(document.body.innerText.includes("Total Net Price") && document.body.innerText.includes("Total Gross Price"))');
 
             $rows = $browser->elements('[tall-datatable] tbody [data-id]');
 

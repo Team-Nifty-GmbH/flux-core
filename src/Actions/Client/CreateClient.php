@@ -22,16 +22,9 @@ class CreateClient extends FluxAction
 
     public function performAction(): Client
     {
-        $this->data['is_default'] = ! app(Client::class)->query()->where('is_default', true)->exists()
-            ? true
-            : $this->data['is_default'] ?? false;
-
-        if ($this->data['is_default']) {
-            app(Client::class)->query()->update(['is_default' => false]);
-        }
-
         $bankConnections = Arr::pull($this->data, 'bank_connections');
 
+        /** @var Client $client */
         $client = app(Client::class, ['attributes' => $this->data]);
         $client->save();
 

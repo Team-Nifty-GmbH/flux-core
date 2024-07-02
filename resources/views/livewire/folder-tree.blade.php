@@ -210,7 +210,7 @@
             @endcan
         </ul>
     </div>
-    <div class="w-1/2 max-w-[96rem] flex flex-col gap-3">
+    <div class="w-1/2 flex flex-col gap-3">
         <div x-show="! selection.file_name && selected" class="flex flex-col gap-3" x-cloak>
             <div>
                 @can('action.media.upload')
@@ -292,12 +292,16 @@
                         </x-slot:append>
                     </x-input>
                 @endcan
-                <embed class="object-contain"
+                <object class="object-contain"
                     x-bind:type="selection.mime_type"
-                    x-bind:src="selection.original_url"
+                    x-bind:data="selection.original_url + '#zoom=85&scrollbar=0&toolbar=0&navpanes=0'"
                     width="100%"
                     height="200px"
-                />
+                >
+                    <div class="flex items-center justify-center w-full h-48 bg-gray-200 text-gray-400">
+                        {{ __('Your browser does not support preview for this file.') }}
+                    </div>
+                </object>
             </div>
         </div>
         @can('action.media.update')

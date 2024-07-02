@@ -83,7 +83,7 @@ class InstallAssets extends Command
 
     protected function runCommands($commands): void
     {
-        $process = Process::fromShellCommandline(implode(' && ', $commands), null, null, null, null);
+        $process = Process::fromShellCommandline(implode(' && ', $commands), null, null, null, 180);
 
         if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
             try {

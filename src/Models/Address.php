@@ -7,6 +7,7 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasCart;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Cache;
@@ -39,7 +41,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendars,
+    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendars, HasCart,
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid,
         Lockable, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 
@@ -185,6 +187,19 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         );
     }
 
+    protected function postalAddress(): Attribute
+    {
+        return Attribute::get(
+            fn () => array_filter([
+                $this->company,
+                trim($this->firstname . ' ' . $this->lastname),
+                $this->street,
+                trim($this->zip . ' ' . $this->city),
+                $this->country?->name,
+            ])
+        );
+    }
+
     public function addressTypes(): BelongsToMany
     {
         return $this->belongsToMany(AddressType::class);
@@ -221,6 +236,23 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             ->withPivot('address_type_id');
     }
 
+    public function priceList(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            PriceList::class,
+            Contact::class,
+            'id',
+            'id',
+            'contact_id',
+            'price_list_id'
+        );
+    }
+
+    public function projectTasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
     public function serialNumbers(): HasMany
     {
         return $this->hasMany(SerialNumber::class);
@@ -229,11 +261,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     public function settings(): MorphMany
     {
         return $this->morphMany(Setting::class, 'model');
-    }
-
-    public function projectTasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
     }
 
     /**
@@ -272,12 +299,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public function getDescription(): ?string
     {
-        return implode(', ', array_filter([
-            $this->name,
-            $this->street,
-            trim($this->zip . ' ' . $this->city),
-            $this->country?->name,
-        ]));
+        return implode(', ', $this->postal_address);
     }
 
     public function getUrl(): ?string

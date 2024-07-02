@@ -1,5 +1,11 @@
 <?php
-
+/**
+ * Blade Directives
+ *
+ * @method static bool canAction(string $action)
+ * @method static void endCanAction()
+ * @method static string extendFlux(string $view)
+ */
 if (! function_exists('format_number')) {
     function format_number(
         string|int|float|null $number,
@@ -34,8 +40,11 @@ if (! function_exists('exception_to_notifications')) {
         switch (true) {
             case method_exists($exception, 'errors') && $errors = $exception->errors():
             case method_exists($exception, 'getResponse')
-            && $errors = json_decode($exception->getResponse()->getContent(), true)['errors'] ?? []:
-
+            && $errors = data_get(
+                json_decode($exception->getResponse()->getContent(), true),
+                'errors',
+                []
+            ):
                 foreach ($errors as $field => $messages) {
                     $title = array_map(
                         fn ($segment) => is_numeric($segment)
@@ -68,5 +77,30 @@ if (! function_exists('exception_to_notifications')) {
         if ($skipRender) {
             $component->skipRender();
         }
+    }
+}
+
+if (! function_exists('cart')) {
+    function cart(): \FluxErp\Models\Cart
+    {
+        return auth()
+            ->user()
+            ?->carts()
+            ->current()
+            ->with(['cartItems', 'cartItems.product.coverMedia'])
+            ->withSum('cartItems', 'total')
+            ->withSum('cartItems', 'total_net')
+            ->withSum('cartItems', 'total_gross')
+            ->first()
+            ?? app(\FluxErp\Models\Cart::class)
+                ->query()
+                ->where('session_id', session()->id())
+                ->current()
+                ->with(['cartItems', 'cartItems.product.coverMedia'])
+                ->withSum('cartItems', 'total')
+                ->first()
+            ?? \FluxErp\Actions\Cart\CreateCart::make()
+                ->validate()
+                ->execute();
     }
 }

@@ -76,6 +76,13 @@ class OrderDetailTest extends BaseSetup
             'address_delivery_id' => $address->id,
             'is_locked' => true,
         ]);
+
+        Order::addGlobalScope('portal', function ($query) {
+            $query->where('contact_id', auth()->user()->contact_id)
+                ->where(fn ($query) => $query->where('is_locked', true)
+                    ->orWhere('is_imported', true)
+                );
+        });
     }
 
     public function test_renders_successfully()

@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasCart;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
@@ -38,7 +39,7 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
 class User extends Authenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasApiTokens, HasCalendars, HasDatatableUserSettings,
+    use BroadcastsEvents, Commentable, Filterable, HasApiTokens, HasCalendars, HasCart, HasDatatableUserSettings,
         HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles, HasUuid, HasWidgets,
         InteractsWithMedia, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 

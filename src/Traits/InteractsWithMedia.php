@@ -47,7 +47,7 @@ trait InteractsWithMedia
             }
 
             $node[] = [
-                'name' => $key,
+                'name' => __($key),
                 'id' => Str::uuid()->toString(),
                 'is_static' => $isStatic,
                 'collection_name' => $prefix . $key,
@@ -95,6 +95,13 @@ trait InteractsWithMedia
         $this->addMediaConversion('thumb_400x400')
             ->width(400)
             ->height(400)
+            ->keepOriginalImageFormat()
+            ->quality(80)
+            ->optimize();
+
+        $this->addMediaConversion('thumb_800x800')
+            ->width(800)
+            ->height(800)
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();

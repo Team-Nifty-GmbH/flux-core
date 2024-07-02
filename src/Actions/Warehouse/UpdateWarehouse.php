@@ -22,10 +22,6 @@ class UpdateWarehouse extends FluxAction
 
     public function performAction(): Model
     {
-        if ($this->data['is_default'] ?? false) {
-            app(Warehouse::class)->query()->update(['is_default' => false]);
-        }
-
         $warehouse = app(Warehouse::class)->query()
             ->whereKey($this->data['id'])
             ->first();

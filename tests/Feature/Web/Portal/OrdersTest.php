@@ -22,7 +22,9 @@ class OrdersTest extends PortalSetup
     {
         parent::setUp();
 
-        $priceList = PriceList::factory()->create();
+        $priceList = PriceList::factory()->create([
+            'is_default' => true,
+        ]);
 
         $currency = Currency::factory()->create([
             'is_default' => true,
@@ -37,6 +39,9 @@ class OrdersTest extends PortalSetup
 
         $paymentType = PaymentType::factory()->create([
             'client_id' => $this->dbClient->id,
+            'is_default' => true,
+            'is_active' => true,
+            'is_sales' => true,
         ]);
 
         $this->order = Order::factory()->create([

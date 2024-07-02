@@ -13,9 +13,12 @@ use FluxErp\Models\Product;
 use FluxErp\Support\Calculation\Rounding;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Traits\Conditionable;
 
 class PriceHelper
 {
+    use Conditionable;
+
     public ?Price $price = null;
 
     private ?Contact $contact = null;
@@ -205,7 +208,10 @@ class PriceHelper
                     ->get()
             );
 
-            $this->calculateLowestDiscountedPrice($this->price, $discounts->diff($productCategoriesDiscounts));
+            $this->calculateLowestDiscountedPrice(
+                $this->price,
+                $discounts->diff($productCategoriesDiscounts ?? collect())
+            );
         }
 
         // Apply added discount
@@ -218,6 +224,14 @@ class PriceHelper
         // set the used priceList and eventually round the price
         if ($this->priceList) {
             $this->price->price_list_id = $this->priceList->id;
+
+            $this->price->rootPrice = (app(Price::class))
+                ->forceFill(
+                    $this->getRootPrice(
+                        $this->price->basePrice?->priceList ?? $this->priceList,
+                        $this->price
+                    )?->toArray() ?? $this->price->toArray()
+                );
 
             $this->price->price = match ($this->priceList->rounding_method_enum) {
                 RoundingMethodEnum::Round => Rounding::round($this->price->price, $this->priceList->rounding_precision),
@@ -243,11 +257,30 @@ class PriceHelper
 
         // Calculated total discounts based on base price and end price
         if ($this->price->basePrice) {
+            // normalize base price to match net/gross with the returned price
             $function = $this->price->basePrice->priceList->is_net ? 'getNet' : 'getGross';
             $originalPrice = $this->price->basePrice->{$function}($this->product->vatRate?->rate_percentage);
+            $this->price->basePrice->priceList->is_net = $this->priceList->is_net;
+            $this->price->basePrice->price = $originalPrice;
 
             $this->price->discountFlat = bcsub($originalPrice, $this->price->price);
-            $this->price->discountPercentage = $originalPrice != 0 ? diff_percentage($originalPrice, $this->price->price) : 0;
+            $this->price->discountPercentage = $originalPrice != 0
+                ? diff_percentage($originalPrice, $this->price->price)
+                : 0;
+        }
+
+        if ($this->price->rootPrice) {
+            // normalize root price to match net/gross with the returned price
+            $function = $this->priceList->is_net ? 'getNet' : 'getGross';
+            $rootPrice = $this->price->rootPrice->{$function}($this->product->vatRate?->rate_percentage);
+            $this->price->rootPrice->priceList->is_net = $this->priceList->is_net;
+            $this->price->rootPrice->price = $rootPrice;
+
+            if (bccomp($this->price->price, 0) !== 0) {
+                $this->price->rootDiscountPercentage = diff_percentage($rootPrice, $this->price->price);
+            }
+
+            $this->price->rootDiscountFlat = bcsub($rootPrice, $this->price->price);
         }
 
         return $this->price;
@@ -256,7 +289,7 @@ class PriceHelper
     /**
      * Calculate price from price list based on price list parent(s) and discount per price list
      */
-    private function calculatePriceFromPriceList(PriceList $priceList, array $discounts): ?Price
+    protected function calculatePriceFromPriceList(PriceList $priceList, array $discounts): ?Price
     {
         $discounts[] = $priceList->discount()
             ->where(function (Builder $query) {
@@ -287,12 +320,8 @@ class PriceHelper
         // If price was found, apply all the discounts in reverse order
         if ($price) {
             $discounts = array_filter($discounts);
-            if ($discounts || $priceList->parent) {
+            if ($discounts) {
                 $price->basePrice = (app(Price::class))->forceFill($price->toArray());
-                $price->rootPrice = (app(Price::class))
-                    ->forceFill(
-                        $this->getRootPrice($priceList->parent, $price)?->toArray() ?? $price->toArray()
-                    );
             }
 
             $function = $this->priceList->is_net ? 'getNet' : 'getGross';
@@ -315,7 +344,7 @@ class PriceHelper
         return $price;
     }
 
-    private function calculateLowestDiscountedPrice(Price $price, Collection $discounts): void
+    protected function calculateLowestDiscountedPrice(Price $price, Collection $discounts): void
     {
         if (! $price->basePrice && $discounts->count()) {
             $price->basePrice = clone $price;
@@ -345,7 +374,7 @@ class PriceHelper
         }
     }
 
-    private function getRootPrice(?PriceList $priceList, ?Price $price): ?Price
+    protected function getRootPrice(?PriceList $priceList, ?Price $price): ?Price
     {
         if (is_null($priceList)) {
             return $price;

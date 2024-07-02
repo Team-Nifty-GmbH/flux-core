@@ -30,7 +30,6 @@ use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
 use FluxErp\Support\Validator\ValidatorFactory;
 use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasParentMorphClass;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -38,7 +37,6 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -197,18 +195,6 @@ class FluxServiceProvider extends ServiceProvider
 
             return $this;
         });
-
-        Relation::macro(
-            'getMorphClassAlias',
-            function (string $class): ?string {
-                if (in_array(HasParentMorphClass::class, class_uses_recursive($class))) {
-                    /** @var HasParentMorphClass $class */
-                    $class = Relation::getMorphedModel($class::getParentMorphClass());
-                }
-
-                return data_get(array_flip(Relation::$morphMap), $class);
-            }
-        );
 
         Command::macro('removeLastLine', function () {
             $this->output->write("\x1b[1A\r\x1b[K");
@@ -529,6 +515,7 @@ class FluxServiceProvider extends ServiceProvider
     {
         Menu::register(route: 'portal.dashboard', icon: 'home', order: -9999);
         Menu::register(route: 'portal.calendar', icon: 'calendar');
+        Menu::register(route: 'portal.products', icon: 'square-3-stack-3d');
         Menu::register(route: 'portal.files', icon: 'folder-open');
         Menu::register(route: 'portal.orders', icon: 'shopping-bag');
         Menu::register(route: 'portal.serial-numbers', icon: 'tag');

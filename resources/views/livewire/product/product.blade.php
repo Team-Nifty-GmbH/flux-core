@@ -1,7 +1,7 @@
 <div x-data="{
         additionalColumns: $wire.entangle('additionalColumns'),
         edit: false,
-        priceLists: $wire.entangle('priceLists'),
+        priceLists: $wire.entangle('priceLists')
     }"
 >
     <div
@@ -29,15 +29,23 @@
             </div>
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-            @if(resolve_static(\FluxErp\Actions\Product\DeleteProduct::class, 'canPerformAction', [false]))
+            @canAction(\FluxErp\Actions\CartItem\CreateCartItem::class)
+                <x-button
+                    x-on:click="$wire.$dispatch('cart:add', {products: $wire.product.id})"
+                    primary
+                    icon="shopping-cart"
+                    label="+"
+                />
+            @endCanAction
+            @canAction(\FluxErp\Actions\Product\DeleteProduct::class)
                 <x-button
                     negative
                     label="{{ __('Delete') }}"
                     wire:click="delete()"
                     wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Product')]) }}"
                 />
-            @endif
-            @if(resolve_static(\FluxErp\Actions\Product\UpdateProduct::class, 'canPerformAction', [false]))
+            @endCanAction
+            @canAction(\FluxErp\Actions\Product\UpdateProduct::class)
                 <x-button
                     primary
                     x-show="!edit"
@@ -63,7 +71,7 @@
                     x-on:click="edit = false"
                     :label="__('Cancel')"
                 />
-            @endif
+            @endCanAction
         </div>
     </div>
     <x-tabs

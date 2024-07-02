@@ -91,6 +91,13 @@ class ViewServiceProvider extends ServiceProvider
             return Blade::compileString(file_get_contents($filePath));
         });
 
+        Blade::directive('canAction', function ($expression) {
+            return "<?php if (resolve_static($expression, 'canPerformAction', [false])): ?>";
+        });
+        Blade::directive('endCanAction', function () {
+            return '<?php endif; ?>';
+        });
+
         Blade::component(App::class, 'layouts.app');
         Blade::component(Printing::class, 'layouts.print');
         config([

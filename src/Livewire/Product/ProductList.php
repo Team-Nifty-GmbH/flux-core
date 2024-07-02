@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Product;
 
+use FluxErp\Actions\CartItem\CreateCartItem;
 use FluxErp\Livewire\DataTables\ProductList as BaseProductList;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Client;
@@ -9,7 +10,6 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\VatRate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
-use Livewire\Features\SupportRedirects\Redirector;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -25,6 +25,8 @@ class ProductList extends BaseProductList
 
     public array $priceLists = [];
 
+    public bool $isSelectable = true;
+
     public function mount(): void
     {
         parent::mount();
@@ -34,6 +36,24 @@ class ProductList extends BaseProductList
         $priceList['is_editable'] = true;
 
         $this->priceLists = [$priceList];
+    }
+
+    public function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('Add to cart'))
+                ->icon('shopping-cart')
+                ->when(resolve_static(CreateCartItem::class, 'canPerformAction', [false]))
+                ->wireClick('addSelectedToCart; showSelectedActions = false;'),
+        ];
+    }
+
+    #[Renderless]
+    public function addSelectedToCart(): void
+    {
+        $this->dispatch('cart:add', $this->selected)->to('cart');
+        $this->reset('selected');
     }
 
     #[Renderless]
@@ -74,7 +94,7 @@ class ProductList extends BaseProductList
         return data_get($this->priceLists, '0', []);
     }
 
-    public function save(): false|Redirector
+    public function save(): bool
     {
         $this->product->prices = [
             [
@@ -93,6 +113,8 @@ class ProductList extends BaseProductList
             return false;
         }
 
-        return redirect()->to(route('products.id', $this->product->id));
+        $this->redirect(route('products.id', $this->product->id), true);
+
+        return true;
     }
 }

@@ -22,12 +22,6 @@ class UpdateCurrency extends FluxAction
 
     public function performAction(): Model
     {
-        if ($this->data['is_default'] ?? false) {
-            app(Currency::class)->query()
-                ->whereKeyNot($this->data['id'])
-                ->update(['is_default' => false]);
-        }
-
         $currency = app(Currency::class)->query()
             ->whereKey($this->data['id'])
             ->first();
