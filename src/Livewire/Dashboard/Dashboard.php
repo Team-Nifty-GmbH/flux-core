@@ -12,7 +12,6 @@ use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use WireUi\Traits\Actions;
-use function React\Async\delay;
 
 class Dashboard extends Component
 {
@@ -90,7 +89,6 @@ class Dashboard extends Component
     #[Renderless]
     public function showFlashMessage(): void
     {
-        $this->notification()->success(__("Dashboard syncing"));
+        $this->notification()->success(__('Dashboard syncing'));
     }
-
 }

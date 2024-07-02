@@ -2,11 +2,6 @@ import { GridStack } from 'gridstack';
 import { v4 as uuidv4 } from 'uuid';
 
 
-function delay (ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-
-}
-
 export default function($wire) {
     return {
         editGrid: false,
@@ -90,7 +85,7 @@ export default function($wire) {
             // sync property
             await $wire.syncWidgets(newSnapshot);
         },
-        async pendingMessage(){
+        async pendingMessage() {
             // on fetching data enable changes to the grid
             await $wire.showFlashMessage();
         },
@@ -116,7 +111,6 @@ export default function($wire) {
         },
         async save() {
             this.isLoading = true;
-            await delay(5000);
             const snapshot = $wire.widgets;
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
@@ -196,7 +190,7 @@ export default function($wire) {
         },
         reInit() {
             // check if grid is loading
-            if(this.isLoading){
+            if (this.isLoading) {
                 this.isLoading = false;
             }
             // clear previous grid state
@@ -237,7 +231,7 @@ export default function($wire) {
                 // init grid
                 this.reInit();
             }
-            if(this.isLoading){
+            if (this.isLoading) {
                 this.isLoading = false;
             }
         }
