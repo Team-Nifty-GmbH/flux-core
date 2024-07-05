@@ -55,6 +55,7 @@ class ProductList extends Component
                     $query->where('category_id', $category);
                 });
             })
+            ->withCount('children')
             ->paginate(perPage: 18);
 
         $result->getCollection()

@@ -104,8 +104,21 @@
                     </x-card>
                 @endforeach
                 <div id="folder-tree" class="pt-3">
+                    @if($productForm->parent_id)
+                        <h2 class="font-semibold pb-1.5">
+                            {{ __('Variant files') }}
+                        </h2>
+                    @endif
                     <livewire:folder-tree lazy :model-id="$productForm->id" :model-type="\FluxErp\Models\Product::class" />
                 </div>
+                @if($productForm->parent_id)
+                    <div id="folder-tree" class="pt-3">
+                        <h2 class="font-semibold pb-1.5">
+                            {{ __('Main product files') }}
+                        </h2>
+                        <livewire:folder-tree lazy :model-id="$productForm->parent_id" :model-type="\FluxErp\Models\Product::class" />
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -113,7 +126,11 @@
         <div class="flex gap-8">
             @foreach($productForm->product_cross_sellings ?? [] as $crossSelling)
                 <div>
-                    <h2 x-bind:class="showCrossSelling === {{ $crossSelling['id'] }} && 'underline'" class="text-xl font-semibold" x-on:click="showCrossSelling = {{ $crossSelling['id'] }}">
+                    <h2
+                        x-bind:class="showCrossSelling === {{ $crossSelling['id'] }} && 'underline'"
+                        class="text-xl font-semibold cursor-pointer"
+                        x-on:click="showCrossSelling = {{ $crossSelling['id'] }}"
+                    >
                         {{ $crossSelling['name'] }}
                     </h2>
                 </div>
