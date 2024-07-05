@@ -62,7 +62,7 @@ class ProductDetail extends Component
     {
         $product->load([
             'productCrossSellings:id,product_id,name',
-            'productCrossSellings.products' => fn (BelongsToMany $query) => $query->webshop(),
+            'productCrossSellings.products' => fn (BelongsToMany $query) => $query->webshop()->withCount('children'),
             'meta' => fn (MorphMany $query) => $query->with('additionalColumn:id,label')
                 ->whereHas(
                     'additionalColumn',
@@ -89,6 +89,10 @@ class ProductDetail extends Component
                 ->values()
         );
 
+        if (is_null($product->productCrossSellings) || $product->productCrossSellings->isEmpty()) {
+            $product->unsetRelation('productCrossSellings');
+        }
+
         $this->productForm->reset('buy_price', 'root_price_flat', 'root_discount_percentage');
         $this->productForm->fill(array_merge($this->productForm->toArray(), $product->toArray()));
         $this->productForm->meta = $product->meta
@@ -104,6 +108,7 @@ class ProductDetail extends Component
             ->where('collection_name', 'images')
             ->whereNot('id', $product->cover_media_id)
             ->get()
+            ->merge($product->parent?->media()->where('collection_name', 'images')->get() ?? [])
             ->map(fn (Media $media) => $media->getUrl('thumb_400x400'))
             ->prepend($this->productForm->cover_url)
             ->toArray();
