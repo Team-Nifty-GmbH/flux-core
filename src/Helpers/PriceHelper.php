@@ -43,6 +43,11 @@ class PriceHelper
         return app(static::class, ['product' => $product]);
     }
 
+    public function getProduct(): Product
+    {
+        return $this->product;
+    }
+
     public function setContact(Contact $contact): static
     {
         $this->contact = $contact;
@@ -52,6 +57,11 @@ class PriceHelper
         }
 
         return $this;
+    }
+
+    public function getContact(): ?Contact
+    {
+        return $this->contact;
     }
 
     public function addDiscount(Discount $discount): static
@@ -68,11 +78,21 @@ class PriceHelper
         return $this;
     }
 
+    public function getPriceList(): ?PriceList
+    {
+        return $this->priceList;
+    }
+
     public function setTimestamp(string $timestamp): static
     {
         $this->timestamp = Carbon::parse($timestamp)->toDateTimeString();
 
         return $this;
+    }
+
+    public function getTimestamp(): ?string
+    {
+        return $this->timestamp;
     }
 
     public function useDefault(bool $useDefault): static
