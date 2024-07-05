@@ -115,7 +115,7 @@ class OrdersTest extends PortalSetup
 
     public function test_portal_orders_id_order_not_locked()
     {
-        $this->order->update(['is_locked' => false]);
+        $this->order->update(['is_locked' => false, 'is_imported' => false]);
 
         $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
 
