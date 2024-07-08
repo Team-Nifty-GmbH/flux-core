@@ -31,8 +31,18 @@ class MessageSendingEventSubscriber
             $communicationForm->attachments,
             fn ($attachment) => ! data_get($attachment, 'id')
         );
-        $communicationForm->communication_type_enum = CommunicationTypeEnum::Mail->value;
+        $communicationForm->attachments = array_map(
+            function ($attachment) {
+                $attachment['model_type'] = morph_alias(Communication::class);
+                $attachment['collection_name'] = 'attachments';
+                $attachment['media_type'] = 'string';
+                $attachment['media'] = $attachment['path'];
 
+                return $attachment;
+            },
+            $communicationForm->attachments
+        );
+        $communicationForm->communication_type_enum = CommunicationTypeEnum::Mail->value;
         $communicationForm->save();
 
         $communication = app(Communication::class)->query()->whereKey($communicationForm->id)->first();

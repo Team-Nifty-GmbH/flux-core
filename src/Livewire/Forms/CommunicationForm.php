@@ -96,8 +96,10 @@ class CommunicationForm extends FluxForm
 
     public function communicatable(): ?Model
     {
-        return Relation::getMorphedModel($this->communicatable_type)::query()
-            ->whereKey($this->communicatable_id)
-            ->first();
+        return $this->communicatable_type && $this->communicatable_id
+            ? Relation::getMorphedModel($this->communicatable_type)::query()
+                ->whereKey($this->communicatable_id)
+                ->first()
+            : null;
     }
 }

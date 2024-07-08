@@ -84,17 +84,20 @@ class UploadMedia extends FluxAction
         return $media->withoutRelations();
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->data['file_name'] ??= match (true) {
+            data_get($this->data, 'media') instanceof UploadedFile => $this->data['media']->getClientOriginalName(),
+            file_exists(data_get($this->data, 'media', '')) => basename($this->data['media']),
+            default => hash('sha512', microtime() . Str::uuid()),
+        };
+        $this->data['name'] ??= $this->data['file_name'];
+        $this->data['collection_name'] ??= 'default';
+    }
+
     protected function validateData(): void
     {
         parent::validateData();
-
-        $this->data['file_name'] = $this->data['file_name'] ?? (
-            $this->data['media'] instanceof UploadedFile ?
-                $this->data['media']->getClientOriginalName() :
-                hash('sha512', microtime() . Str::uuid())
-        );
-        $this->data['name'] = $this->data['name'] ?? $this->data['file_name'];
-        $this->data['collection_name'] ??= 'default';
 
         if (app(Media::class)->query()
             ->where('model_type', $this->data['model_type'])
