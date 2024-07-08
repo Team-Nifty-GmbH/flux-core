@@ -80,14 +80,17 @@ class ProductDetail extends Component
 
     public function downloadMedia(array|int $media, ?string $collectionName = null): void
     {
-        $media = app(MediaModel::class)->query()->whereIntegerInRaw('id', Arr::wrap($media))->get();
+        $media = app(MediaModel::class)
+            ->query()
+            ->whereIntegerInRaw('id', Arr::wrap($media))
+            ->get();
 
         count($media) > 1
             ? $this->redirectRoute(
                 'portal.media.download-multiple',
                 [
                     'ids' => $media->pluck('id')->implode(','),
-                    'filename' => $this->productForm->name . ' - ' . $collectionName,
+                    'filename' => $this->productForm->name . ($collectionName ? ' - ' . $collectionName : ''),
                 ]
             )
             : $this->redirectRoute(
@@ -188,7 +191,8 @@ class ProductDetail extends Component
             [
                 'scope' => 'bundleProducts',
                 'implementation' => fn (Builder $query) => $query->with([
-                    'bundleProducts' => fn ($query) => $query->withPivot('count'), 'media',
+                    'bundleProducts' => fn (BelongsToMany $query) => $query->withPivot('count'),
+                    'media',
                 ]),
             ]
         );

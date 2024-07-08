@@ -1,6 +1,7 @@
 <?php
 
 use FluxErp\Http\Controllers\AuthController;
+use FluxErp\Http\Controllers\MediaController;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Livewire\Portal\Auth\Login;
 use FluxErp\Livewire\Portal\Auth\Logout;
@@ -20,11 +21,8 @@ use FluxErp\Livewire\Portal\Shop\ProductList;
 use FluxErp\Livewire\Portal\Shop\Watchlist;
 use FluxErp\Livewire\Portal\Ticket\Ticket;
 use FluxErp\Livewire\Portal\Ticket\Tickets;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Spatie\MediaLibrary\Support\MediaStream;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
 
 /*
@@ -93,19 +91,7 @@ Route::middleware(['web', PortalMiddleware::class])
                 return $media;
             })->name('media');
 
-            Route::any('/media/download-multiple', function (Request $request) {
-                $ids = $request->input('ids');
-                $fileName = Str::finish($request->input('filename') ?? 'media', '.zip');
-                $ids = is_array($ids) ? $ids : explode(',', $ids);
-
-                if (! $ids) {
-                    abort(422);
-                }
-
-                $media = Media::query()->whereIntegerInRaw('id', $ids)->get();
-
-                return MediaStream::create($fileName)
-                    ->addMedia($media);
-            })->name('media.download-multiple');
+            Route::any('/media/download-multiple', [MediaController::class, 'downloadMultiple'])
+                ->name('media.download-multiple');
         });
     });
