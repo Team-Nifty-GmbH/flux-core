@@ -12,7 +12,7 @@ class Tickets extends TicketList
     #[Modelable]
     public int $contactId;
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->whereHasMorph(
             'authenticatable',

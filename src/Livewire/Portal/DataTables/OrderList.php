@@ -63,7 +63,7 @@ class OrderList extends BaseDataTable
         return app($this->model)->search($this->search)->where('contact_id', auth()->user()->contact_id);
     }
 
-    public function getReturnKeys(): array
+    protected function getReturnKeys(): array
     {
         return array_merge(parent::getReturnKeys(), ['currency.iso']);
     }

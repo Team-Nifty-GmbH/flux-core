@@ -108,7 +108,7 @@ class Communication extends CommunicationList
         );
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->whereRelation('contacts', 'communicatable_id', $this->contactId);
     }

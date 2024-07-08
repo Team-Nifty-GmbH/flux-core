@@ -38,7 +38,7 @@ class ProductList extends BaseProductList
         $this->priceLists = [$priceList];
     }
 
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()

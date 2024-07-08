@@ -93,7 +93,7 @@ class LogList extends BaseDataTable
         ];
     }
 
-    public function itemToArray($item): array
+    protected function itemToArray($item): array
     {
         $item = parent::itemToArray($item);
 

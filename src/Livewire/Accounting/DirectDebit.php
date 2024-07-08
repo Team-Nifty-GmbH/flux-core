@@ -26,7 +26,7 @@ class DirectDebit extends OrderList
 
     public array $accounts = [];
 
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()
@@ -40,7 +40,7 @@ class DirectDebit extends OrderList
         ];
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         $orderTypes = app(OrderType::class)->query()
             ->where('is_active', true)

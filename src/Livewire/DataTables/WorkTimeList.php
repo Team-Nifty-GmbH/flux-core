@@ -61,7 +61,7 @@ class WorkTimeList extends BaseDataTable
 
     public bool $isSelectable = true;
 
-    public function itemToArray($item): array
+    protected function itemToArray($item): array
     {
         $item = parent::itemToArray($item);
         $item['name'] = __($item['name']);
@@ -69,7 +69,7 @@ class WorkTimeList extends BaseDataTable
         return $item;
     }
 
-    public function getReturnKeys(): array
+    protected function getReturnKeys(): array
     {
         return array_merge(
             parent::getReturnKeys(),
@@ -77,12 +77,7 @@ class WorkTimeList extends BaseDataTable
         );
     }
 
-    public function getAggregatable(): array
-    {
-        return array_merge(parent::getAggregatable(), ['paused_time_ms', 'total_time_ms']);
-    }
-
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()

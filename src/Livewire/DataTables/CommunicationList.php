@@ -37,7 +37,7 @@ class CommunicationList extends BaseDataTable
         ]);
     }
 
-    public function itemToArray($item): array
+    protected function itemToArray($item): array
     {
         $array = parent::itemToArray($item);
 

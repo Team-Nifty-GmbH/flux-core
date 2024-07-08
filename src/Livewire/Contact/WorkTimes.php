@@ -11,7 +11,7 @@ class WorkTimes extends WorkTimeList
     #[Modelable]
     public int $contactId;
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->where('contact_id', $this->contactId);
     }

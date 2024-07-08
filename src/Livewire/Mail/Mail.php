@@ -117,7 +117,7 @@ class Mail extends CommunicationList
         }
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder
             ->where('communication_type_enum', 'mail')

@@ -21,7 +21,7 @@ class OrderPositionList extends BaseDataTable
         'total_net_price',
     ];
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->orderBy('order_id');
     }
