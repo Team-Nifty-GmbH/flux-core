@@ -92,7 +92,7 @@ Route::prefix('api')
         Route::get('/media/{filename}', [MediaController::class, 'downloadPublic'])->name('media.public');
         Route::post('/auth/token', [AuthController::class, 'authenticate']);
 
-        Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission'])
+        Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission', 'api'])
             ->name('api.')
             ->group(function () {
                 //Validate Token
@@ -112,6 +112,7 @@ Route::prefix('api')
                 Route::post('/addresses', [AddressController::class, 'create']);
                 Route::put('/addresses', [AddressController::class, 'update']);
                 Route::delete('/addresses/{id}', [AddressController::class, 'delete']);
+                Route::post('/address/{address}/login-token', [AddressController::class, 'generateLoginToken']);
 
                 //AddressTypes
                 Route::get('/address-types/{id}', [AddressTypeController::class, 'show']);

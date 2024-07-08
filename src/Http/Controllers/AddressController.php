@@ -40,4 +40,15 @@ class AddressController extends BaseController
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
+
+    public function generateLoginToken(Address $address): JsonResponse
+    {
+        $token = $address->createLoginToken();
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 201,
+            data: $token,
+            statusMessage: 'login token generated'
+        );
+    }
 }

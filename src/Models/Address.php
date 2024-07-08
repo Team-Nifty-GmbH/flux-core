@@ -30,7 +30,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Illuminate\Validation\UnauthorizedException;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 use Spatie\Permission\Traits\HasRoles;
@@ -315,8 +317,12 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         return $this->contact?->getAvatarUrl();
     }
 
-    public function sendLoginLink(): void
+    public function createLoginToken(): array
     {
+        if (! $this->can_login || ! $this->is_active) {
+            throw new UnauthorizedException('Address cannot login');
+        }
+
         $plaintext = Str::uuid()->toString();
         $expires = now()->addMinutes(15);
         Cache::put('login_token_' . $plaintext,
@@ -327,6 +333,24 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             ],
             $expires
         );
+        URL::forceRootUrl(config('flux.portal_domain'));
+
+        return [
+            'token' => $plaintext,
+            'expires' => $expires,
+            'url' => URL::temporarySignedRoute(
+                'login-link',
+                $expires,
+                [
+                    'token' => $plaintext,
+                ]
+            ),
+        ];
+    }
+
+    public function sendLoginLink(): void
+    {
+        [$plaintext, $expires] = $this->createLoginToken();
 
         // dont queue mail as the address isnt used as auth in the regular app url
         Mail::to($this->login_name)->send(new MagicLoginLink($plaintext, $expires));
