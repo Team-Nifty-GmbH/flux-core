@@ -31,4 +31,3 @@ Route::middleware('web')
                 ->name('mail-pixel');
         });
     });
-
