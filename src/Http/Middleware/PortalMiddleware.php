@@ -6,8 +6,10 @@ use Closure;
 use FluxErp\Models\Address;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
+use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Models\Scopes\AddressMediaScope;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
 use Illuminate\Database\Eloquent\Builder;
@@ -101,6 +103,10 @@ class PortalMiddleware
 
                     return false;
                 },
+            ]);
+
+            resolve_static(Media::class, 'addGlobalScope', [
+                'scope' => resolve_static(AddressMediaScope::class, 'class'),
             ]);
 
             config(['livewire.layout' => 'flux::components.layouts.portal']);

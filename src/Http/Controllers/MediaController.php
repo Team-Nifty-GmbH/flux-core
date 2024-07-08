@@ -3,6 +3,7 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
+use FluxErp\Http\Requests\DownloadMultipleMediaRequest;
 use FluxErp\Http\Requests\DownloadPublicMediaRequest;
 use FluxErp\Models\Media;
 use FluxErp\Services\MediaService;
@@ -76,17 +77,18 @@ class MediaController extends Controller
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function downloadMultiple(Request $request)
+    public function downloadMultiple(DownloadMultipleMediaRequest $request): MediaStream
     {
-        $ids = $request->input('ids');
-        $fileName = Str::finish($request->input('filename') ?? 'media', '.zip');
-        $ids = is_array($ids) ? $ids : explode(',', $ids);
+        $data = $request->validated();
 
-        if (! $ids) {
-            abort(422);
-        }
+        $fileName = Str::finish(data_get($data, 'filename') ?: 'media', '.zip');
+        $ids = is_array(data_get($data, 'ids')) ?
+            data_get($data, 'ids') : explode(',', data_get($data, 'ids'));
 
-        $media = app(Media::class)->query()->whereIntegerInRaw('id', $ids)->get();
+        $media = app(Media::class)
+            ->query()
+            ->whereIntegerInRaw('id', $ids)
+            ->get();
 
         return MediaStream::create($fileName)
             ->addMedia($media);
