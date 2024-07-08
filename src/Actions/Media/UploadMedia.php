@@ -87,8 +87,8 @@ class UploadMedia extends FluxAction
     public function prepareForValidation(): void
     {
         $this->data['file_name'] ??= match (true) {
-            $this->data['media'] instanceof UploadedFile => $this->data['media']->getClientOriginalName(),
-            file_exists($this->data['media']) => basename($this->data['media']),
+            data_get($this->data, 'media') instanceof UploadedFile => $this->data['media']->getClientOriginalName(),
+            file_exists(data_get($this->data, 'media', '')) => basename($this->data['media']),
             default => hash('sha512', microtime() . Str::uuid()),
         };
         $this->data['name'] ??= $this->data['file_name'];
