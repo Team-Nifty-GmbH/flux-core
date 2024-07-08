@@ -7,6 +7,7 @@ use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
 
 class AddressMediaScope implements Scope
@@ -27,7 +28,7 @@ class AddressMediaScope implements Scope
             $query->whereNot('model_type', morph_alias(Order::class))
                 ->orWhere(function (Builder $query) {
                     $query->where('model_type', morph_alias(Order::class))
-                        ->where('model_id', function (Builder $query) {
+                        ->where('model_id', function (QueryBuilder $query) {
                             $query->select('id')
                                 ->from('orders')
                                 ->where('contact_id', Auth::user()->contact_id)
