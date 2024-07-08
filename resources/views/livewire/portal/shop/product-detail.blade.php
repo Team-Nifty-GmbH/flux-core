@@ -1,6 +1,9 @@
 <div class="flex flex-col gap-8 h-full text-gray-900 dark:text-gray-50"
-     x-init="$watch('$wire.productForm.product_cross_sellings', () => {showCrossSelling = $wire.productForm.product_cross_sellings[0]?.id})"
-     x-data="{showMeta: null, showCrossSelling: null}"
+     x-data="{
+         showMeta: null,
+         showCrossSelling: {{ $productForm->product_cross_sellings[0]['id'] ?? 'null' }},
+         showMedia: null
+     }"
 >
     <x-spinner />
     <div class="relative grid sm:flex gap-8 h-full">
@@ -103,21 +106,47 @@
                         </div>
                     </x-card>
                 @endforeach
-                <div id="folder-tree" class="pt-3">
-                    @if($productForm->parent_id)
-                        <h2 class="font-semibold pb-1.5">
-                            {{ __('Variant files') }}
-                        </h2>
-                    @endif
-                    <livewire:folder-tree lazy :model-id="$productForm->id" :model-type="\FluxErp\Models\Product::class" />
-                </div>
-                @if($productForm->parent_id)
-                    <div id="folder-tree" class="pt-3">
-                        <h2 class="font-semibold pb-1.5">
-                            {{ __('Main product files') }}
-                        </h2>
-                        <livewire:folder-tree lazy :model-id="$productForm->parent_id" :model-type="\FluxErp\Models\Product::class" />
-                    </div>
+                @if($productForm->bundle_products)
+                    <x-card :title="__('Bundle Products')">
+                        @foreach($productForm->bundle_products as $bundleProduct)
+                           <a href="{{ route('portal.products.show', [$bundleProduct['id']]) }}">
+                               <div class="flex gap-4">
+                                   <div class="flex flex-col gap-1.5">
+                                       <h3 class="font-semibold">
+                                           {{ bcround($bundleProduct['count'] ?? 1) }} x {{ $bundleProduct['name'] }}
+                                       </h3>
+                                   </div>
+                               </div>
+                          </a>
+                        @endforeach
+                    </x-card>
+                @endif
+                @if($productForm->additionalMedia)
+                    <h2 class="font-semibold">
+                        {{ __('Additional Media') }}
+                    </h2>
+                    @foreach($productForm->additionalMedia ?? [] as $collection => $media)
+                        <x-card class="!px-0 !py-0">
+                            <x-slot:title>
+                                <div class="w-full font-semiboldl" x-on:click="showMedia = showMedia === '{{ $collection }}' ? null : '{{ $collection }}'">
+                                    {{ __($collection) }}
+                                </div>
+                            </x-slot:title>
+                            <x-slot:action>
+                                <div class="flex gap-1.5 justify-end">
+                                    <x-button :label="__('Download folder')" primary icon="save" wire:click="downloadMedia({{ \Illuminate\Support\Js::from(array_keys($media)) }}, '{{ $collection }}')" />
+                                    <x-button icon="chevron-down" x-on:click="showMedia = showMedia === '{{ $collection }}' ? null : '{{ $collection }}'" />
+                                </div>
+                            </x-slot:action>
+                            <div class="px-2 py-5 md:px-4 flex flex-col" x-cloak x-show="showMedia === '{{ $collection }}'" x-collapse>
+                                @foreach($media as $item)
+                                    <div wire:click="downloadMedia({{ $item['id'] }})" class="cursor-pointer">
+                                        {{ $item['name'] }}
+                                    </div>
+                                @endforeach
+                            </div>
+                        </x-card>
+                    @endforeach
                 @endif
             </div>
         </div>
@@ -136,13 +165,13 @@
                 </div>
             @endforeach
         </div>
-        @foreach($productForm->product_cross_sellings ?? [] as $crossSelling)
+        @foreach($productForm->product_cross_sellings ?? [] as $crossSellingProducts)
             <div
                 x-cloak
-                x-show="showCrossSelling === {{ $crossSelling['id'] }}"
+                x-show="showCrossSelling === {{ $crossSellingProducts['id'] }}"
                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 pt-4"
             >
-                @foreach($crossSelling['products'] as $product)
+                @foreach($crossSellingProducts['products'] as $product)
                     <livewire:portal.shop.product-list-card
                         :product="$product"
                         :key="$crossSelling['id'] . '-' . $product['id']"

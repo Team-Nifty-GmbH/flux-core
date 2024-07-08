@@ -37,9 +37,13 @@ class ProductForm extends Form
 
     public ?array $media = null;
 
+    public ?array $additionalMedia = null;
+
     public ?array $meta = null;
 
     public ?array $product_cross_sellings = null;
+
+    public ?array $bundle_products = null;
 
     public function fill($values): void
     {
