@@ -10,6 +10,7 @@ use FluxErp\Livewire\DataTables\SepaMandateList;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Livewire\Forms\SepaMandateForm;
+use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Traits\Livewire\WithFileUploads;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -208,6 +210,8 @@ class SepaMandates extends SepaMandateList
                 [
                     'to' => $to,
                     'subject' => __('Sepa Mandate'),
+                    'communicatable_type' => morph_alias(Contact::class),
+                    'communicatable_id' => $this->contact->id,
                     'attachments' => [
                         [
                             'name' => $filename,
