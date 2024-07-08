@@ -83,7 +83,8 @@ class MediaController extends Controller
 
         $fileName = Str::finish(data_get($data, 'filename') ?: 'media', '.zip');
         $ids = is_array(data_get($data, 'ids')) ?
-            data_get($data, 'ids') : explode(',', data_get($data, 'ids'));
+            data_get($data, 'ids') :
+            explode(',', data_get($data, 'ids'));
 
         $media = app(Media::class)
             ->query()
