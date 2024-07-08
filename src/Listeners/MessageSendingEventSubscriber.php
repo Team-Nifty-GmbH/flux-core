@@ -33,7 +33,7 @@ class MessageSendingEventSubscriber
         );
         $communicationForm->attachments = array_map(
             function ($attachment) {
-                $attachment['model_type'] = Communication::class;
+                $attachment['model_type'] = morph_alias(Communication::class);
                 $attachment['collection_name'] = 'attachments';
                 $attachment['media_type'] = 'string';
                 $attachment['media'] = $attachment['path'];

@@ -84,7 +84,7 @@ class UploadMedia extends FluxAction
         return $media->withoutRelations();
     }
 
-    public function prepareForValidation(): void
+    protected function prepareForValidation(): void
     {
         $this->data['file_name'] ??= match (true) {
             data_get($this->data, 'media') instanceof UploadedFile => $this->data['media']->getClientOriginalName(),
