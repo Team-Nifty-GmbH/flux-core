@@ -27,7 +27,9 @@ class MonitorablePendingBatch extends PendingBatch
             $user = auth()->user();
             if (! $user && $context = Context::get('user')) {
                 $context = explode(':', $context);
-                $user = morphed_model($context[0])::query()->whereKey($context[1])->first();
+                $user = morphed_model($context[0])::query()
+                    ->whereKey($context[1])
+                    ->first();
             }
 
             if ($user && array_key_exists(MonitorsQueue::class, class_uses_recursive($user))) {

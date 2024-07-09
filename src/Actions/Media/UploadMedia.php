@@ -26,7 +26,7 @@ class UploadMedia extends FluxAction
 
     public function performAction(): Model
     {
-        $modelInstance = app(morphed_model($this->data['model_type']))->query()
+        $modelInstance = morphed_model($this->data['model_type'])::query()
             ->whereKey($this->data['model_id'])
             ->first();
 

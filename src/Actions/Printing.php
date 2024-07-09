@@ -21,7 +21,7 @@ class Printing extends FluxAction
         $this->rules = resolve_static(PrintingRuleset::class, 'getRules');
 
         $this->validate();
-        $this->model = app(morphed_model($this->data['model_type']))->query()
+        $this->model = morphed_model($this->data['model_type'])::query()
             ->whereKey($this->data['model_id'])
             ->first();
     }
