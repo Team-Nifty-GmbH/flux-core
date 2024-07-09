@@ -84,7 +84,7 @@ class Clients extends ClientList
                 ->color('primary')
                 ->icon('user')
                 ->attributes([
-                    'wire:click' => 'showCustomerPortal(record)',
+                    'wire:click' => 'showCustomerPortal(record.id)',
                 ])
                 ->when(resolve_static(UpdateClient::class, 'canPerformAction', [false])),
         ];

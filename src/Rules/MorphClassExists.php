@@ -4,7 +4,6 @@ namespace FluxErp\Rules;
 
 use Closure;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 class MorphClassExists extends ClassExists
 {
@@ -15,7 +14,7 @@ class MorphClassExists extends ClassExists
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (! $morphClass = Relation::getMorphedModel($value)) {
+        if (! $morphClass = morphed_model($value)) {
             $fail(sprintf('%s is not a valid morph class.', $value))->translate();
         }
 

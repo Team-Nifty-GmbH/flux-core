@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Spatie\EloquentSortable\Sortable;
@@ -102,7 +101,7 @@ class Category extends Model implements InteractsWithDataTables, Sortable
     public function model(): MorphToMany
     {
         return $this->model_type
-            ? $this->morphedByMany(Relation::getMorphedModel($this->model_type), 'categorizable')
+            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable')
             : new MorphToMany(
                 static::query(),
                 $this,

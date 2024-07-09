@@ -7,7 +7,6 @@ use FluxErp\Actions\Communication\DeleteCommunication;
 use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Models\Communication;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Livewire\Attributes\Locked;
 
 class CommunicationForm extends FluxForm
@@ -97,7 +96,7 @@ class CommunicationForm extends FluxForm
     public function communicatable(): ?Model
     {
         return $this->communicatable_type && $this->communicatable_id
-            ? Relation::getMorphedModel($this->communicatable_type)::query()
+            ? morphed_model($this->communicatable_type)::query()
                 ->whereKey($this->communicatable_id)
                 ->first()
             : null;

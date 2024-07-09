@@ -34,7 +34,7 @@ foreach (Relation::morphMap() as $class) {
 }
 
 Broadcast::channel(
-    class_to_broadcast_channel(Relation::getMorphedModel('user')),
+    class_to_broadcast_channel(morphed_model('user')),
     function ($user, $id) {
         return (int) $user->id === (int) $id;
     }
