@@ -3,6 +3,7 @@
 namespace FluxErp\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 
@@ -15,7 +16,8 @@ class InstallAssets extends Command
      */
     protected $signature = 'flux:install-assets
         {directory? : The directory to install the assets}
-        {--force : Overwrite existing files}';
+        {--force : Overwrite existing files}
+        {--merge : If a files i json parsable merge it recursively}';
 
     /**
      * The console command description.
@@ -39,7 +41,7 @@ class InstallAssets extends Command
         // require npm packages
         $this->info('Installing npm packages...');
 
-        static::copyStubs(force: $this->option('force'));
+        static::copyStubs(force: $this->option('force'), merge: $this->option('merge'));
 
         $this->updateNodePackages(function ($packages) {
             return data_get(
@@ -98,11 +100,16 @@ class InstallAssets extends Command
         });
     }
 
-    public static function copyStubs(?array $files = null, bool $force = false, ?\Closure $basePath = null): void
-    {
+    public static function copyStubs(
+        ?array $files = null,
+        bool $force = false,
+        bool $merge = true,
+        ?\Closure $basePath = null
+    ): void {
         $files = is_array($files)
             ? $files
             : [
+                'package.json',
                 'tailwind.config.js',
                 'postcss.config.js',
                 'vite.config.js',
@@ -113,17 +120,44 @@ class InstallAssets extends Command
         }
 
         foreach ($files as $file) {
-            if (file_exists($basePath('tailwind.config.js')) && ! $force) {
+            if (file_exists($basePath($file)) && ! $force && ! $merge) {
                 continue;
             }
 
-            copy(__DIR__ . '/../../../stubs/tailwind/' . $file, $basePath($file));
-            $content = file_get_contents($basePath($file));
+            $oldContent = null;
+            if (file_exists($basePath($file))) {
+                $oldContent = file_get_contents($basePath($file));
+            }
+
+            $content = file_get_contents(__DIR__ . '/../../../stubs/tailwind/' . $file);
             $content = str_replace(
                 '{{ relative_path }}',
                 substr(realpath(__DIR__ . '/../../../'), strlen($basePath())),
                 $content
             );
+
+            if ($merge && $oldContent) {
+                // if the file is json parsable merge it recursively
+                $decodedContent = json_decode(str_replace('.', '__dot__', $content), true);
+                $decodedOldContent = json_decode(str_replace('.', '__dot__', $oldContent), true);
+
+                if (is_array($decodedContent) && is_array($decodedOldContent)) {
+                    $content = str_replace(
+                        '__dot__',
+                        '.',
+                        json_encode(
+                            Arr::undot(
+                                array_merge(
+                                    Arr::dot($decodedContent),
+                                    Arr::dot($decodedOldContent)
+                                )
+                            ),
+                            JSON_PRETTY_PRINT
+                        )
+                    );
+                }
+            }
+
             file_put_contents($basePath($file), $content);
         }
     }
