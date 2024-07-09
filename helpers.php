@@ -519,10 +519,7 @@ if (! function_exists('morphed_model')) {
             return null;
         }
 
-        return resolve_static(
-            $class,
-            'class'
-        );
+        return resolve_static($class, 'class');
     }
 }
 
