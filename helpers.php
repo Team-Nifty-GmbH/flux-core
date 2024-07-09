@@ -530,7 +530,7 @@ if (! function_exists('class_to_broadcast_channel')) {
 }
 
 if (! function_exists('morphed_model')) {
-    function morphed_model(string $alias): ?Illuminate\Database\Eloquent\Model
+    function morphed_model(string $alias): string
     {
         return resolve_static(
             \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($alias),
