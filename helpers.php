@@ -502,7 +502,7 @@ if (! function_exists('class_to_broadcast_channel')) {
 
             if (in_array(\FluxErp\Traits\HasParentMorphClass::class, class_uses_recursive($class))) {
                 /** @var \FluxErp\Traits\HasParentMorphClass $class */
-                $class = \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($class::getParentMorphClass());
+                $class = morphed_model($class::getParentMorphClass());
             }
 
             /** @var \Illuminate\Database\Eloquent\Model $class */
@@ -522,42 +522,19 @@ if (! function_exists('class_to_broadcast_channel')) {
             }
 
             /** @var \Illuminate\Database\Eloquent\Model $model */
-            $model = \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($type);
+            $model = morphed_model($type);
 
             return $model::query()->whereKey($id)->first();
         }
     }
 }
 
-if (! function_exists('morph_alias')) {
-    function morph_alias(string $class): string
+if (! function_exists('morphed_model')) {
+    function morphed_model(string $alias): ?Illuminate\Database\Eloquent\Model
     {
-        $class = resolve_static($class, 'class');
-
-        if (in_array(\FluxErp\Traits\HasParentMorphClass::class, class_uses_recursive($class))) {
-            /** @var \FluxErp\Traits\HasParentMorphClass $class */
-            $class = \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($class::getParentMorphClass());
-        }
-
-        /** @var \Illuminate\Database\Eloquent\Model $class */
-        return \Illuminate\Database\Eloquent\Relations\Relation::getMorphAlias($class);
-    }
-}
-
-if (! function_exists('morph_to')) {
-    function morph_to(string $type, ?int $id = null): ?Illuminate\Database\Eloquent\Model
-    {
-        if (is_null($id) && str_contains($type, ':')) {
-            [$type, $id] = explode(':', $type);
-        }
-
-        if (is_null($id)) {
-            return null;
-        }
-
-        /** @var \Illuminate\Database\Eloquent\Model $model */
-        $model = \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($type);
-
-        return $model::query()->whereKey($id)->first();
+        return resolve_static(
+            \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($alias),
+            'class'
+        );
     }
 }

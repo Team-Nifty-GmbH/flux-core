@@ -6,7 +6,6 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Media;
 use FluxErp\Rulesets\Media\UploadMediaRuleset;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -27,7 +26,7 @@ class UploadMedia extends FluxAction
 
     public function performAction(): Model
     {
-        $modelInstance = app(Relation::getMorphedModel($this->data['model_type']))->query()
+        $modelInstance = app(morphed_model($this->data['model_type']))->query()
             ->whereKey($this->data['model_id'])
             ->first();
 

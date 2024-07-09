@@ -159,7 +159,7 @@ trait HasRelatedModel
         // First, we will need to determine the foreign key and "other key" for the
         // relationship. Once we have determined the keys we will make the query
         // instances, as well as the relationship instances we need for these.
-        $instance = $this->newRelatedInstance(Relation::getMorphedModel($related) ?? $related);
+        $instance = $this->newRelatedInstance(morphed_model($related) ?? $related);
 
         $foreignPivotKey = $foreignPivotKey ?: $name . '_id';
 

@@ -47,7 +47,7 @@ class MessageSendingEventSubscriber
 
         $communication = app(Communication::class)->query()->whereKey($communicationForm->id)->first();
 
-        $communicatable = Relation::getMorphedModel($communicationForm->communicatable_type)::query()
+        $communicatable = morphed_model($communicationForm->communicatable_type)::query()
             ->whereKey($communicationForm->communicatable_id)
             ->first();
 

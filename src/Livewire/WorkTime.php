@@ -8,7 +8,6 @@ use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\Trackable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -78,7 +77,7 @@ class WorkTime extends Component
     public function start(?array $data): void
     {
         if ($trackableType = data_get($data, 'trackable_type')) {
-            $data['trackable_type'] = app(Relation::getMorphedModel($trackableType) ?? $trackableType)->getMorphClass();
+            $data['trackable_type'] = app(morphed_model($trackableType) ?? $trackableType)->getMorphClass();
         }
 
         $this->workTime->fill($data ?? []);

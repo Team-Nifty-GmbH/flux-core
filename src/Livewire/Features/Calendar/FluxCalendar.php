@@ -12,7 +12,6 @@ use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
@@ -48,7 +47,7 @@ class FluxCalendar extends CalendarComponent
     public function getEvents(array $info, array $calendarAttributes): array
     {
         if ($calendarAttributes['model_type'] ?? false) {
-            return Relation::getMorphedModel($calendarAttributes['model_type'])::query()
+            return morphed_model($calendarAttributes['model_type'])::query()
                 ->get()
                 ->map(fn (Model $model) => $model->toCalendarEvent())
                 ->toArray();
@@ -127,7 +126,7 @@ class FluxCalendar extends CalendarComponent
                 return false;
             }
 
-            $modelClass = Relation::getMorphedModel($attributes['calendar_type']);
+            $modelClass = morphed_model($attributes['calendar_type']);
 
             try {
                 $result = $action['class']::make(resolve_static($modelClass, 'fromCalendarEvent', [$attributes]))
@@ -212,7 +211,7 @@ class FluxCalendar extends CalendarComponent
                 return false;
             }
 
-            $modelClass = Relation::getMorphedModel($attributes['calendar_type']);
+            $modelClass = morphed_model($attributes['calendar_type']);
 
             try {
                 $action['class']::make(resolve_static($modelClass, 'fromCalendarEvent', [$attributes]))

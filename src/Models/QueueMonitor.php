@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Context;
@@ -58,7 +57,7 @@ class QueueMonitor extends Model
             $user = auth()->user();
             if (! $user && $context = Context::get('user')) {
                 $context = explode(':', $context);
-                $user = Relation::getMorphedModel($context[0])->whereKey($context[1])->first();
+                $user = morphed_model($context[0])->whereKey($context[1])->first();
             }
 
             if ($user && array_key_exists(MonitorsQueue::class, class_uses_recursive($user))) {
