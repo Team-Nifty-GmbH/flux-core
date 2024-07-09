@@ -198,7 +198,7 @@ class Order extends OrderPositionList
         ];
     }
 
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()
@@ -258,7 +258,7 @@ class Order extends OrderPositionList
         ];
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->whereNull('parent_id')
             ->reorder('sort_number');
@@ -275,7 +275,7 @@ class Order extends OrderPositionList
         );
     }
 
-    public function getReturnKeys(): array
+    protected function getReturnKeys(): array
     {
         return array_merge(
             parent::getReturnKeys(),
@@ -316,7 +316,7 @@ class Order extends OrderPositionList
         );
     }
 
-    public function getResultFromQuery(Builder $query): array
+    protected function getResultFromQuery(Builder $query): array
     {
         $tree = to_flat_tree($query->get()->toArray());
         $returnKeys = $this->getReturnKeys();

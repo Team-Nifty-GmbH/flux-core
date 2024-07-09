@@ -61,7 +61,7 @@ class SepaMandates extends SepaMandateList
         ]);
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->where('contact_id', $this->contact->id);
     }

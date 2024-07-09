@@ -39,14 +39,14 @@ class CommissionList extends BaseDataTable
         );
     }
 
-    public function itemToArray($item): array
+    protected function itemToArray($item): array
     {
         $item->commission_rate = $item->commission_rate['commission_rate'];
 
         return parent::itemToArray($item);
     }
 
-    public function getReturnKeys(): array
+    protected function getReturnKeys(): array
     {
         return array_merge(
             parent::getReturnKeys(),

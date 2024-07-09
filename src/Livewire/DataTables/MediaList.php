@@ -20,12 +20,12 @@ class MediaList extends BaseDataTable
         'url' => 'image',
     ];
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->addSelect('model_type', 'disk', 'conversions_disk');
     }
 
-    public function itemToArray($item): array
+    protected function itemToArray($item): array
     {
         $item->makeVisible('collection_name');
 

@@ -16,12 +16,12 @@ class CategoryList extends BaseDataTable
         'is_active',
     ];
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->whereNull('parent_id')->with('children');
     }
 
-    public function getResultFromQuery(Builder $query): array
+    protected function getResultFromQuery(Builder $query): array
     {
         $tree = to_flat_tree($query->get()->toArray());
 

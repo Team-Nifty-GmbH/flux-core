@@ -24,7 +24,7 @@ class MediaGrid extends MediaList
         return 'tall-datatables::layouts.grid';
     }
 
-    public function itemToArray($item): array
+    protected function itemToArray($item): array
     {
         $itemArray = parent::itemToArray($item);
         try {

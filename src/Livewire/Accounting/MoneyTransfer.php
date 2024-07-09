@@ -22,7 +22,7 @@ class MoneyTransfer extends DirectDebit
         'commission',
     ];
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         $orderTypes = app(OrderType::class)->query()
             ->where('is_active', true)

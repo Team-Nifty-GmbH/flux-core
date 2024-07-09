@@ -19,7 +19,7 @@ class ProductList extends BaseDataTable
         'product_image' => 'image',
     ];
 
-    public function itemToArray($item): array
+    protected function itemToArray($item): array
     {
         $returnArray = parent::itemToArray($item);
         $returnArray['product_image'] = $item->getAvatarUrl();
