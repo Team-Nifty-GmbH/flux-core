@@ -29,7 +29,6 @@ class PublicLink extends Component
 
     public function mount(): void
     {
-
         $queryClass = implode('', array_map('ucfirst', explode('-', $this->orderType)));
 
         if (class_exists('FluxErp\\View\\Printing\\Order\\' . $queryClass)) {
@@ -42,17 +41,19 @@ class PublicLink extends Component
                 ->first();
 
             $this->signature->fill($media ?? []);
-        } // false
+        } else {
+            abort(404);
+        }
     }
 
     public function save(): bool
     {
-
         // add to which type it belongs
         if (($this->signature->stagedFiles || $this->signature->id) && ! is_null($this->className)) {
             $this->signature->model_type = Relation::getMorphClassAlias(Order::class);
             $this->signature->model_id = $this->order->id;
             $this->signature->collection_name = 'signature';
+            $this->signature->disk = 'local';
             $this->signature->custom_properties = ['order_type' => $this->orderType];
             $this->signature->stagedFiles[0]['name'] = 'signature-' . $this->orderType;
             $this->signature->stagedFiles[0]['file_name'] = data_get(
@@ -62,6 +63,7 @@ class PublicLink extends Component
             );
             try {
                 $this->signature->save();
+
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
 

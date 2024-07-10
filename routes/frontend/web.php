@@ -204,11 +204,11 @@ Route::middleware('web')
             Route::match(['get', 'post'], '/print/pdf', [PrintController::class, 'renderPdf']);
         });
 
-        Route::group(['middleware' => ['signed']], function () {
+        Route::middleware('signed')->group(function () {
             Route::get('/media-private/{media}/{filename}', function (Media $media) {
                 return $media;
             })->name('media.private');
+            Route::get('/order-public/{order:uuid}', PublicLink::class)->name('order.public');
         });
 
-        Route::get('/order-public/{order:uuid}', PublicLink::class)->name('order.public');
     });

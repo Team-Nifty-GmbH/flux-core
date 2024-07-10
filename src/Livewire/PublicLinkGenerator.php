@@ -13,25 +13,25 @@ class PublicLinkGenerator extends Component
     #[Modelable]
     public OrderForm $order;
 
-    public array $signed_urls = [];
+    public array $signedUrls = [];
 
-    public array $unsigned_documents = [];
+    public array $unsignedDocuments = [];
 
-    public array $generated_urls = [];
+    public array $generatedUrls = [];
 
     public function mount(): void
     {
-        $this->signed_urls = array_map(function (array $item) {
+        $this->signedUrls = array_map(function (array $item) {
             return $item['custom_properties']['order_type'];
         }, app(Media::class)->query()
             ->where('model_id', $this->order->id)
             ->where('collection_name', 'signature')->get()->toArray());
 
-        $mergedArray = array_merge($this->order->order_type['print_layouts'], $this->signed_urls);
+        $mergedArray = array_merge($this->order->order_type['print_layouts'], $this->signedUrls);
 
         $valueCounts = array_count_values($mergedArray);
 
-        $this->unsigned_documents = array_values(array_filter($mergedArray, function ($value) use ($valueCounts) {
+        $this->unsignedDocuments = array_values(array_filter($mergedArray, function ($value) use ($valueCounts) {
             return $valueCounts[$value] === 1;
         }));
 
@@ -40,13 +40,13 @@ class PublicLinkGenerator extends Component
     public function setPublicLink(string $orderType): void
     {
 
-        $key = array_search($orderType, $this->unsigned_documents);
+        $key = array_search($orderType, $this->unsignedDocuments);
         if ($key !== false) {
-            unset($this->unsigned_documents[$key]);
+            unset($this->unsignedDocuments[$key]);
         }
-        $this->unsigned_documents = array_values($this->unsigned_documents);
+        $this->unsignedDocuments = array_values($this->unsignedDocuments);
 
-        $this->generated_urls[$orderType] = URL::signedRoute('order.public', ['order' => $this->order->uuid]) . "&orderType={$orderType}";
+        $this->generatedUrls[$orderType] = URL::signedRoute('order.public', ['order' => $this->order->uuid, 'orderType' => $orderType]);
 
     }
 

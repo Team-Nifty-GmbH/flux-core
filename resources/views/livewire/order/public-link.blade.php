@@ -1,54 +1,50 @@
 <div>
-
-@if(!is_null($className))
-    <div>
-        {{ $order->print()->renderView($className) }}
-        <div x-data="signature($wire,$refs)" class="bg-gray-100 pt-10 pr-10">
-            <div class="flex flex-col items-end">
-                <div class="flex w-full justify-between">
-                    <div class="flex-1 flex items-center justify-center">
-                        <div x-cloak class="flex flex-col items-center justify-center" x-show="error || id">
-                            <div class="w-10 h-10">
+    @if(!is_null($className))
+        <div>
+            {{ $order->print()->renderView($className) }}
+            <div x-data="signature($wire,$refs)" class="bg-gray-100 mt-12 pt-10 pr-10">
+                <div class="flex flex-col items-end">
+                    <h1 class="text-xl mb-2">{{__('Signe Here')}}</h1>
+                    <div class="flex w-full justify-between">
+                        <div class="flex-1 flex items-center justify-center">
+                            <div x-cloak class="flex flex-col items-center justify-center" x-show="error || id">
+                                <div class="w-10 h-10">
+                                    <template x-if="error">
+                                        <x-icon name="exclamation" />
+                                    </template>
+                                    <template x-if="id && !error">
+                                        <x-icon name="check" />
+                                    </template>
+                                </div>
                                 <template x-if="error">
-                                    <x-icon name="exclamation" />
+                                    <p class="text-2xl">{{__("Upload Failed")}}</p>
                                 </template>
                                 <template x-if="id && !error">
-                                    <x-icon name="check" />
+                                    <p class="text-2xl">{{__("Signature saved")}}</p>
                                 </template>
                             </div>
-                            <template x-if="error">
-                                <p class="text-2xl">{{__("Upload Failed")}}</p>
-                            </template>
-                            <template x-if="id && !error">
-                                <p class="text-2xl">{{__("Signature saved")}}</p>
-                            </template>
                         </div>
+                        <canvas x-ref="canvas" width=500 height=200 class="rounded-md h-auto">
+                        </canvas>
                     </div>
-                    <canvas x-ref="canvas" width=500 height=200 class="rounded-md h-auto">
-                    </canvas>
-                </div>
-                <div class="mt-4 h-8 mb-4 flex justify-end w-full space-x-5">
-                    <x-button
-                        x-cloak
-                        x-show="!isEmpty"
-                        x-on:click="clear"
-                        class="bg-red-500 rounded-md px-4 py-2 text-center font-medium text-white shadow-sm ring-1 ring-slate-700/10 hover:bg-red-600"
-                        :label="__('Clear')"
-                    />
-                    <x-button
-                        x-cloak
-                        x-show="!isEmpty"
-                        x-on:click="save"
-                        class="bg-primary-600 rounded-md px-4 py-2 text-center font-medium text-white shadow-sm ring-1 ring-slate-700/10"
-                        :label="__('Save')"
-                    />
+                    <div class="mt-4 h-8 mb-4 flex justify-end w-full space-x-5">
+                        <x-button
+                            x-cloak
+                            x-show="!isEmpty"
+                            x-on:click="clear"
+                            negative
+                            :label="__('Clear')"
+                        />
+                        <x-button
+                            x-cloak
+                            x-show="!isEmpty"
+                            x-on:click="save"
+                            primary
+                            :label="__('Save')"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-@else
-    <div>
-        Ups
-    </div>
-@endif
+    @endif
 </div>

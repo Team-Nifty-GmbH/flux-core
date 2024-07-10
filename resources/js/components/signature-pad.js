@@ -20,6 +20,9 @@ export default function($wire, $refs) {
             // if signature is not saved - allow to draw and clear after first stroke
             this.signaturePad.addEventListener('afterUpdateStroke', this.strokeHandler.bind(this));
         },
+        destroy() {
+            window.removeEventListener('resize', this.resizeCanvas.bind(this));
+        },
         clear() {
             this.signaturePad.clear();
             this.isEmpty = true;
@@ -57,12 +60,14 @@ export default function($wire, $refs) {
             const data = await (await fetch(this.signaturePad.toDataURL())).blob();
             await $wire.upload('signature.file', data, this.upload.bind(this));
         },
-        // TODO: Add resizeCanvas method to resize listener
         resizeCanvas() {
-            this.ratio = Math.max(window.devicePixelRatio || 1, 1);
-            $refs.canvas.width = $refs.canvas.offsetWidth * this.ratio;
-            $refs.canvas.height = $refs.canvas.offsetHeight * this.ratio;
-            $refs.canvas.getContext('2d').scale(this.ratio, this.ratio);
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            $refs.canvas.width = $refs.canvas.offsetWidth * ratio;
+            $refs.canvas.height = $refs.canvas.offsetHeight * ratio;
+            const ctx = $refs.canvas.getContext('2d');
+            ctx.scale(ratio, ratio);
+            ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+            ctx.fillRect(0, 0, $refs.canvas.width, $refs.canvas.height);
         }
     };
 }
