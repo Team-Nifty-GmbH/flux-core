@@ -9,6 +9,7 @@ use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
 use FluxErp\Tests\DuskTestCase;
 
 class PortalDuskTestCase extends DuskTestCase
@@ -44,13 +45,23 @@ class PortalDuskTestCase extends DuskTestCase
         $country = Country::factory()->create([
             'language_id' => $language->id,
             'currency_id' => $currency->id,
+            'is_default' => true,
         ]);
 
         $paymentType = PaymentType::factory()->create([
             'client_id' => $this->dbClient->id,
+            'is_active' => true,
+            'is_default' => true,
+            'is_sales' => true,
+            'is_purchase' => true,
+        ]);
+
+        $priceList = PriceList::factory()->create([
+            'is_default' => true,
         ]);
 
         $contact = Contact::factory()->create([
+            'price_list_id' => $priceList->id,
             'client_id' => $this->dbClient->id,
             'payment_type_id' => $paymentType->id,
         ]);
@@ -61,7 +72,7 @@ class PortalDuskTestCase extends DuskTestCase
             'language_id' => $language->id,
             'country_id' => $country->id,
             'can_login' => true,
-            'login_password' => $this->password,
+            'password' => $this->password,
             'is_main_address' => true,
         ]);
     }

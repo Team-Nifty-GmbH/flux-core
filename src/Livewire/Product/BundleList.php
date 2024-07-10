@@ -80,7 +80,7 @@ class BundleList extends ProductBundleProductList
         ];
     }
 
-    public function getReturnKeys(): array
+    protected function getReturnKeys(): array
     {
         return array_merge(
             parent::getReturnKeys(),

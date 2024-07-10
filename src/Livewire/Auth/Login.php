@@ -2,14 +2,13 @@
 
 namespace FluxErp\Livewire\Auth;
 
-use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\PasswordBroker;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Session;
-use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 use WireUi\Traits\Actions;
@@ -22,9 +21,6 @@ class Login extends Component
     public string $email;
 
     public string $password = '';
-
-    #[Locked]
-    public bool $showPasswordReset = false;
 
     protected string $dashboardRoute = 'dashboard';
 
@@ -65,7 +61,6 @@ class Login extends Component
 
             return true;
         } else {
-            $this->showPasswordReset = true;
             $this->reset('password');
             $this->notification()->error(__('Login failed'));
             $this->js('$focus.focus(document.getElementById(\'password\'));');
@@ -76,7 +71,10 @@ class Login extends Component
 
     public function sendMagicLink(): void
     {
-        $user = $this->retrieveUserByCredentials();
+        $user = Auth::guard($this->guard)
+            ->getProvider()
+            ->retrieveByCredentials(['email' => $this->email]);
+
         if ($user && method_exists($user, 'sendLoginLink')) {
             $user->sendLoginLink();
         }
@@ -86,7 +84,7 @@ class Login extends Component
     {
         $this->validateOnly('email');
 
-        Password::broker('users')->sendResetLink(['email' => $this->email]);
+        $this->getPasswordBroker()->sendResetLink(['email' => $this->email]);
 
         $this->notification()->success(__('Password reset link sent'));
     }
@@ -100,10 +98,16 @@ class Login extends Component
         ]);
     }
 
-    protected function retrieveUserByCredentials(): ?Authenticatable
+    protected function getPasswordBroker(): PasswordBroker
     {
-        return Auth::guard('web')
-            ->getProvider()
-            ->retrieveByCredentials(['email' => $this->email]);
+        $provider = config('auth.guards.' . Auth::guard($this->guard)->name . '.provider');
+        $broker = collect(config('auth.passwords'))
+            ->filter(function ($item) use ($provider) {
+                return $item['provider'] === $provider;
+            })
+            ->keys()
+            ->first();
+
+        return Password::broker($broker);
     }
 }

@@ -76,7 +76,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         );
     }
 
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()

@@ -61,15 +61,9 @@ class SerialNumbers extends Component
             ->load('product');
     }
 
-    public function serialNumberCreatedEvent(array $data): void
-    {
-    }
+    public function serialNumberCreatedEvent(array $data): void {}
 
-    public function serialNumberUpdatedEvent(array $data): void
-    {
-    }
+    public function serialNumberUpdatedEvent(array $data): void {}
 
-    public function serialNumberDeletedEvent(array $data): void
-    {
-    }
+    public function serialNumberDeletedEvent(array $data): void {}
 }

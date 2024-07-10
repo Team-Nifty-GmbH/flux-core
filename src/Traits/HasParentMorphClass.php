@@ -28,6 +28,10 @@ trait HasParentMorphClass
             return array_search($parentClass, $morphMap, true);
         }
 
-        throw new ClassMorphViolationException(static::class);
+        if (Relation::requiresMorphMap()) {
+            throw new ClassMorphViolationException(new $parentClass);
+        }
+
+        return $parentClass;
     }
 }

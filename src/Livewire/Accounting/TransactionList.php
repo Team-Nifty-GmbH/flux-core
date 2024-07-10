@@ -66,7 +66,7 @@ class TransactionList extends BaseTransactionList
         );
     }
 
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()
@@ -77,7 +77,7 @@ class TransactionList extends BaseTransactionList
         ];
     }
 
-    public function getReturnKeys(): array
+    protected function getReturnKeys(): array
     {
         return array_merge(
             parent::getReturnKeys(),

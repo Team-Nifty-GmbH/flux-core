@@ -41,7 +41,8 @@ trait Lockable
 
     public function initializeLockable(): void
     {
-        $this->setAppends(array_merge($this->appends ?? [], ['is_locked']));
+        // TODO: Currently disabled as the locks dont have any functionality.
+        // $this->setAppends(array_merge($this->appends ?? [], ['is_locked']));
     }
 
     public function getIsLockedAttribute(): bool

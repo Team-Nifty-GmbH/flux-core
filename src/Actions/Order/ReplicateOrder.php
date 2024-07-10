@@ -109,7 +109,7 @@ class ReplicateOrder extends FluxAction
         parent::validateData();
 
         $orderPositions = data_get($this->data, 'order_positions', []);
-        $ids = array_column($orderPositions, 'id');
+        $ids = array_column($orderPositions ?? [], 'id');
 
         if (count($ids) !== count(array_unique($ids))) {
             throw ValidationException::withMessages([

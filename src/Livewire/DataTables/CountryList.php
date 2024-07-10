@@ -21,7 +21,7 @@ class CountryList extends BaseDataTable
         'is_eu_country',
     ];
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->with([
             'language:id,name',

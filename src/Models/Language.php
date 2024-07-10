@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
 use FluxErp\Traits\HasUserModification;
@@ -14,7 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Language extends Model
 {
-    use Commentable, Filterable, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
+    use Commentable, Filterable, HasDefault, HasPackageFactory, HasTranslations, HasUserModification, HasUuid,
+        SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -39,10 +41,5 @@ class Language extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
-    }
-
-    public static function default(): ?static
-    {
-        return static::query()->where('is_default', true)->first();
     }
 }

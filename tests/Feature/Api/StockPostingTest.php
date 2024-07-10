@@ -85,7 +85,7 @@ class StockPostingTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/stock-postings/' . Str::uuid());
+        $response = $this->actingAs($this->user)->get('/api/stock-postings/' . $this->stockPostings[2]->id + 10000);
         $response->assertStatus(404);
     }
 

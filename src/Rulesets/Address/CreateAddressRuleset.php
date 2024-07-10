@@ -41,13 +41,13 @@ class CreateAddressRuleset extends FluxRuleset
             ],
             'date_of_birth' => 'date|nullable',
             'department' => 'string|nullable',
-            'login_name' => [
-                'string',
+            'email' => [
                 'nullable',
-                Rule::unique('addresses', 'login_name')
+                'email',
+                Rule::unique('addresses', 'email')
                     ->whereNull('deleted_at'),
             ],
-            'login_password' => 'string|nullable',
+            'password' => 'string|nullable',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
             'is_delivery_address' => 'boolean',

@@ -100,6 +100,30 @@ class Order extends OrderPositionList
     #[Url]
     public string $tab = 'order.order-positions';
 
+    public function getListeners(): array
+    {
+        return array_merge(
+            parent::getListeners(),
+            [
+                'order:add-products' => 'addProducts',
+            ]
+        );
+    }
+
+    #[Renderless]
+    public function addProducts(array|int $products): void
+    {
+        foreach (Arr::wrap($products) as $product) {
+            if (is_array($product)) {
+                $this->orderPosition->fill($product);
+            } else {
+                $this->orderPosition->product_id = $product;
+            }
+
+            $this->quickAdd();
+        }
+    }
+
     public function mount(?string $id = null): void
     {
         parent::mount();
@@ -174,7 +198,7 @@ class Order extends OrderPositionList
         ];
     }
 
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()
@@ -234,7 +258,7 @@ class Order extends OrderPositionList
         ];
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->whereNull('parent_id')
             ->reorder('sort_number');
@@ -251,7 +275,7 @@ class Order extends OrderPositionList
         );
     }
 
-    public function getReturnKeys(): array
+    protected function getReturnKeys(): array
     {
         return array_merge(
             parent::getReturnKeys(),
@@ -292,7 +316,7 @@ class Order extends OrderPositionList
         );
     }
 
-    public function getResultFromQuery(Builder $query): array
+    protected function getResultFromQuery(Builder $query): array
     {
         $tree = to_flat_tree($query->get()->toArray());
         $returnKeys = $this->getReturnKeys();
@@ -512,7 +536,6 @@ class Order extends OrderPositionList
     public function replicate(?string $orderTypeEnum = null): void
     {
         $this->replicateOrder->fill($this->order->toArray());
-        $this->replicateOrder->order_positions = [];
         $this->fetchContactData();
 
         $this->replicateOrderTypes = app(OrderType::class)->query()
@@ -524,6 +547,7 @@ class Order extends OrderPositionList
 
         if ($this->replicateOrderTypes) {
             $this->replicateOrder->parent_id = $this->order->id;
+            $this->replicateOrder->order_positions = [];
             if (count($this->replicateOrderTypes) === 1) {
                 $this->replicateOrder->order_type_id = $this->replicateOrderTypes[0]['id'];
             }
@@ -534,6 +558,7 @@ class Order extends OrderPositionList
                 $openModal('create-child-order');
             JS);
         } else {
+            $this->replicateOrder->order_positions = null;
             $this->skipRender();
 
             $this->js(<<<'JS'

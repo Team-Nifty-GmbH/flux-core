@@ -6,7 +6,6 @@ use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 class MorphExists implements DataAwareRule, ValidationRule
 {
@@ -31,7 +30,7 @@ class MorphExists implements DataAwareRule, ValidationRule
             return;
         }
 
-        $morphClass = Relation::getMorphedModel($model);
+        $morphClass = morphed_model($model);
         if (! $morphClass && (! class_exists($model) || ! app($model) instanceof Model)) {
             $fail(sprintf('%s is not a valid model.', $model))->translate();
 

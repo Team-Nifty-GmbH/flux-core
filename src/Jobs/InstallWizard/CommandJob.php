@@ -15,9 +15,7 @@ class CommandJob implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public string $command, private readonly array $parameters = [])
-    {
-    }
+    public function __construct(public string $command, private readonly array $parameters = []) {}
 
     public function handle(): void
     {

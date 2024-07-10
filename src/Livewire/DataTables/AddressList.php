@@ -50,12 +50,12 @@ class AddressList extends BaseDataTable
         ];
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->with('contact.media');
     }
 
-    public function itemToArray($item): array
+    protected function itemToArray($item): array
     {
         $returnArray = parent::itemToArray($item);
         $returnArray['avatar'] = $item->getAvatarUrl();

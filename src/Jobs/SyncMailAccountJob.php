@@ -84,7 +84,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         }
     }
 
-    private function createFolder(Folder $folder, ?int $parentId = null): array
+    protected function createFolder(Folder $folder, ?int $parentId = null): array
     {
         $folderIds = [];
         $mailFolder = app(MailFolder::class)->query()
@@ -115,7 +115,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         return $folderIds;
     }
 
-    private function getNewMessages(Folder $folder): void
+    protected function getNewMessages(Folder $folder): void
     {
         $startUid = app(Communication::class)->query()
             ->where('mail_account_id', $this->mailAccount->id)
@@ -193,7 +193,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             );
     }
 
-    private function storeMessage(Message $message, int $folderId): void
+    protected function storeMessage(Message $message, int $folderId): void
     {
         $messageModel = app(Communication::class)->query()
             ->where('mail_account_id', $this->mailAccount->id)

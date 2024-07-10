@@ -362,7 +362,6 @@
                                             document.getElementById('order-delivery-address-id').querySelector('[x-data]')
                                         ).asyncData.params.where[0][2] = id;
                                         $wire.fetchContactData();
-                                        console.log('a');
                                     }
                                 }"
                             >

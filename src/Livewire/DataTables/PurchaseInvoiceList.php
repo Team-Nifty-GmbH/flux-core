@@ -59,7 +59,7 @@ class PurchaseInvoiceList extends BaseDataTable
         }
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->with(['media', 'invoice']);
     }
@@ -123,7 +123,7 @@ class PurchaseInvoiceList extends BaseDataTable
         );
     }
 
-    public function itemToArray($item): array
+    protected function itemToArray($item): array
     {
         $itemArray = parent::itemToArray($item);
 

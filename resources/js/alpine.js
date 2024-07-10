@@ -4,10 +4,12 @@ import workTime from './components/work-time.js';
 import notifications from './components/wireui/notifications';
 import signature from './components/signature-pad.js';
 import PullToRefresh from "pulltorefreshjs";
+import addressMap from "./components/address-map";
 
 window.folderTree = folderTree;
 window.setupEditor = setupEditor;
 window.workTime = workTime;
+window.addressMap = addressMap;
 window.signature = signature;
 
 window.addEventListener('alpine:init', () => {

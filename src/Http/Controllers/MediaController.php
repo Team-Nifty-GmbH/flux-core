@@ -3,10 +3,14 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
+use FluxErp\Http\Requests\DownloadMultipleMediaRequest;
 use FluxErp\Http\Requests\DownloadPublicMediaRequest;
+use FluxErp\Models\Media;
 use FluxErp\Services\MediaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Spatie\MediaLibrary\Support\MediaStream;
 
 class MediaController extends Controller
 {
@@ -71,5 +75,23 @@ class MediaController extends Controller
         $response = $mediaService->deleteCollection($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
+    public function downloadMultiple(DownloadMultipleMediaRequest $request): MediaStream
+    {
+        $data = $request->validated();
+
+        $fileName = Str::finish(data_get($data, 'filename') ?: 'media', '.zip');
+        $ids = is_array(data_get($data, 'ids')) ?
+            data_get($data, 'ids') :
+            explode(',', data_get($data, 'ids'));
+
+        $media = app(Media::class)
+            ->query()
+            ->whereIntegerInRaw('id', $ids)
+            ->get();
+
+        return MediaStream::create($fileName)
+            ->addMedia($media);
     }
 }

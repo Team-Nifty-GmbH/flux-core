@@ -79,6 +79,12 @@ class MenuManager
                 ? app('router')->getRoutes()->getByName($route)
                 : $route;
 
+            if (filter_var($route, FILTER_VALIDATE_URL)) {
+                $resolvedRoute = (new Route(['GET'], $route, fn () => null))
+                    ->setUri($route)
+                    ->name($label ?? str($route)->slug());
+            }
+
             if (! $resolvedRoute) {
                 throw new RouteNotFoundException('No route found for ' . $route);
             }
@@ -103,10 +109,12 @@ class MenuManager
                 data_get($this->resolved, $path) ?? [],
                 [
                     'label' => $label ?? Str::afterLast($path, '.'),
-                    'uri' => Str::of($resolvedRoute->uri())->start('/')->toString(),
+                    'uri' => filter_var($resolvedRoute->uri(), FILTER_VALIDATE_URL)
+                        ? $resolvedRoute->uri()
+                        : Str::of($resolvedRoute->uri())->start('/')->toString(),
                     'icon' => $icon,
                     'route_name' => $routeName,
-                    'guard' => $guard,
+                    'guard' => $guard ?: null,
                     'domain' => $resolvedRoute->getDomain(),
                     'permission' => $resolvedRoute->getPermissionName(),
                     'order' => $order
@@ -142,15 +150,15 @@ class MenuManager
                 }
 
                 // first check if a permission exists
-                if (($value['permission'] ?? false) && ! $ignorePermissions) {
+                if ($permission = data_get($value, 'permission') && ! $ignorePermissions) {
                     try {
-                        app(Permission::class)->findByName($value['permission'], $guard);
+                        app(Permission::class)->findByName($permission, $guard);
                     } catch (PermissionDoesNotExist) {
                         return true;
                     }
 
                     // if the user has the permission, return true
-                    return auth()->user()?->can($value['permission']);
+                    return auth()->user()?->can($permission);
                 }
 
                 return true;

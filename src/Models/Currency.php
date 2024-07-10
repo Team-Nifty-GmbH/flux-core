@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Currency extends Model
 {
-    use Commentable, Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use Commentable, Filterable, HasDefault, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -30,10 +31,5 @@ class Currency extends Model
     public function countries(): HasMany
     {
         return $this->hasMany(Country::class);
-    }
-
-    public static function default(): ?static
-    {
-        return static::query()->where('is_default', true)->first();
     }
 }

@@ -17,7 +17,6 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Project;
 use FluxErp\States\Project\Done;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -343,7 +342,7 @@ class ProjectTest extends BaseSetup
     public function test_update_project_with_additional_column()
     {
         $additionalColumns = AdditionalColumn::factory()->count(2)->create([
-            'model_type' => Relation::getMorphClassAlias(Project::class),
+            'model_type' => morph_alias(Project::class),
         ]);
 
         $value = 'Original value from second additional column';

@@ -9,6 +9,8 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ProductOption extends Model
 {
@@ -21,4 +23,14 @@ class ProductOption extends Model
     public array $translatable = [
         'name',
     ];
+
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_product_option');
+    }
+
+    public function productOptionGroup(): BelongsTo
+    {
+        return $this->belongsTo(ProductOptionGroup::class);
+    }
 }

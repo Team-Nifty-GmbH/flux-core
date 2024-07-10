@@ -13,7 +13,6 @@ use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
@@ -77,7 +76,7 @@ class SerialNumberRange extends Model
         }
 
         $modelAttributes = array_fill_keys(
-            ModelInfo::forModel(Relation::getMorphedModel($this->model_type))->attributes->pluck('name')->toArray(),
+            ModelInfo::forModel(morphed_model($this->model_type))->attributes->pluck('name')->toArray(),
             null
         );
 

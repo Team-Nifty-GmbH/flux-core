@@ -14,16 +14,22 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::get('/login-link', LoginLinkController::class)->name('login-link');
 
-Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function () {
-    Route::get('/manifest.json', [AssetController::class, 'manifest'])->name('manifest');
-    Route::get('favicon.svg', [AssetController::class, 'favicon'])->name('favicon');
-    Route::get('/flux-assets/{file}', [AssetController::class, 'asset'])
-        ->where('file', '.+')
-        ->name('flux-asset');
-    Route::get('/pwa-service-worker', [AssetController::class, 'pwaServiceWorker'])
-        ->name('pwa-service-worker');
-});
+Route::middleware('web')
+    ->group(function () {
+        Route::middleware('signed')->group(function () {
+            Route::get('/login-link', LoginLinkController::class)->name('login-link');
+        });
 
-Route::get('/mail-pixel/{communication:uuid?}', [AssetController::class, 'mailPixel'])->name('mail-pixel');
+        Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function () {
+            Route::get('/manifest.json', [AssetController::class, 'manifest'])->name('manifest');
+            Route::get('favicon.svg', [AssetController::class, 'favicon'])->name('favicon');
+            Route::get('/flux-assets/{file}', [AssetController::class, 'asset'])
+                ->where('file', '.+')
+                ->name('flux-asset');
+            Route::get('/pwa-service-worker', [AssetController::class, 'pwaServiceWorker'])
+                ->name('pwa-service-worker');
+            Route::get('/mail-pixel/{communication:uuid}', [AssetController::class, 'mailPixel'])
+                ->name('mail-pixel');
+        });
+    });

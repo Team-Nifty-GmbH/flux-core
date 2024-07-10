@@ -59,7 +59,7 @@ class ReplicateOrderPositionList extends OrderPositionList
             );
     }
 
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()
@@ -71,7 +71,7 @@ class ReplicateOrderPositionList extends OrderPositionList
         ];
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder
             ->withSum('descendants as descendantsAmount', 'amount')
@@ -90,7 +90,7 @@ class ReplicateOrderPositionList extends OrderPositionList
         );
     }
 
-    public function getReturnKeys(): array
+    protected function getReturnKeys(): array
     {
         return array_merge(
             parent::getReturnKeys(),
@@ -111,7 +111,7 @@ class ReplicateOrderPositionList extends OrderPositionList
         );
     }
 
-    public function getResultFromQuery(Builder $query): array
+    protected function getResultFromQuery(Builder $query): array
     {
         $tree = to_flat_tree($query->get()->toArray());
         $returnKeys = $this->getReturnKeys();

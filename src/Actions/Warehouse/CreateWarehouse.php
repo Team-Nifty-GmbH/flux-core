@@ -21,14 +21,6 @@ class CreateWarehouse extends FluxAction
 
     public function performAction(): Warehouse
     {
-        $this->data['is_default'] = ! app(Warehouse::class)->query()->where('is_default', true)->exists()
-            ? true
-            : $this->data['is_default'] ?? false;
-
-        if ($this->data['is_default']) {
-            app(Warehouse::class)->query()->update(['is_default' => false]);
-        }
-
         $warehouse = app(Warehouse::class, ['attributes' => $this->data]);
         $warehouse->save();
 

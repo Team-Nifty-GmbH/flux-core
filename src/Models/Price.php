@@ -20,12 +20,17 @@ class Price extends Model
 
     protected $appends = [
         'base_price',
+        'base_price_flat',
+        'root_price',
+        'root_price_flat',
         'is_net',
         'gross',
         'net',
         'applied_discounts',
         'discount_flat',
         'discount_percentage',
+        'root_discount_flat',
+        'root_discount_percentage',
         'is_inherited',
     ];
 
@@ -45,9 +50,15 @@ class Price extends Model
 
     public ?string $discountPercentage = null;
 
+    public ?string $rootDiscountFlat = null;
+
+    public ?string $rootDiscountPercentage = null;
+
     public bool $isInherited = false;
 
     public ?Price $basePrice = null;
+
+    public ?Price $rootPrice = null;
 
     protected function casts(): array
     {
@@ -61,10 +72,45 @@ class Price extends Model
         ];
     }
 
+    public function basePriceFlat(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->basePrice?->price
+        );
+    }
+
     public function basePrice(): Attribute
     {
         return Attribute::get(
             fn () => $this->basePrice
+        );
+    }
+
+    public function rootPrice(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->rootPrice
+        );
+    }
+
+    public function rootPriceFlat(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->rootPrice?->price
+        );
+    }
+
+    public function rootDiscountFlat(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->rootDiscountFlat
+        );
+    }
+
+    public function rootDiscountPercentage(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->rootDiscountPercentage
         );
     }
 

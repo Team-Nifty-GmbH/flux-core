@@ -19,8 +19,7 @@ class ListItem extends Component
 
         // Slots
         public mixed $actions = null,
-    ) {
-    }
+    ) {}
 
     public function render(): View|Closure|string
     {

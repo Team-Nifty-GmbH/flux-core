@@ -9,6 +9,7 @@ use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Communication\CreateCommunicationRuleset;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class CreateCommunication extends FluxAction
 {
@@ -50,7 +51,10 @@ class CreateCommunication extends FluxAction
             $attachment['collection_name'] = 'attachments';
             $attachment['media_type'] = 'string';
 
-            UploadMedia::make($attachment)->execute();
+            try {
+                UploadMedia::make($attachment)->validate()->execute();
+            } catch (ValidationException) {
+            }
         }
 
         return $communication->fresh();

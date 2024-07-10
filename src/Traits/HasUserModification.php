@@ -4,6 +4,7 @@ namespace FluxErp\Traits;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -35,7 +36,12 @@ trait HasUserModification
     {
         return Attribute::get(
             fn () => $this->activityAttributeQuery('created')
-                ->with('causer')
+                ->select(['id', 'causer_type', 'causer_id'])
+                ->with([
+                    'causer' => fn (MorphTo $query) => $query->withoutGlobalScopes()
+                        ->withTrashed()
+                        ->select(['id', 'name']),
+                ])
                 ->first()
                 ?->causer,
         );
@@ -45,7 +51,12 @@ trait HasUserModification
     {
         return Attribute::get(function () {
             $activity = $this->activityAttributeQuery('updated')
-                ->with('causer')
+                ->select(['id', 'causer_type', 'causer_id'])
+                ->with([
+                    'causer' => fn (MorphTo $query) => $query->withoutGlobalScopes()
+                        ->withTrashed()
+                        ->select(['id', 'name']),
+                ])
                 ->orderBy('id', 'desc')
                 ->first();
 
@@ -58,7 +69,7 @@ trait HasUserModification
                 ];
             }
 
-            return $activity?->causer ?: $this->createdBy;
+            return $activity?->causer ?? $this->created_by;
         });
     }
 
@@ -66,7 +77,12 @@ trait HasUserModification
     {
         return Attribute::get(
             fn () => $this->activityAttributeQuery('deleted')
-                ->with('causer')
+                ->select(['id', 'causer_type', 'causer_id'])
+                ->with([
+                    'causer' => fn (MorphTo $query) => $query->withoutGlobalScopes()
+                        ->withTrashed()
+                        ->select(['id', 'name']),
+                ])
                 ->orderBy('id', 'desc')
                 ->first()
                 ?->causer

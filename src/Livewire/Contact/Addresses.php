@@ -47,7 +47,11 @@ class Addresses extends Component
 
         $this->address->fill(
             $this->addressId
-                ? app(Address::class)->query()->whereKey($this->addressId)->with('contactOptions')->first()
+                ? app(Address::class)
+                    ->query()
+                    ->whereKey($this->addressId)
+                    ->with(['contactOptions', 'tags:id', 'permissions:id'])
+                    ->first()
                     ?? $this->contact->main_address
                 : $this->contact->main_address
         );
@@ -121,7 +125,7 @@ class Addresses extends Component
 
     public function select(Address $address): void
     {
-        $address->loadMissing(['contactOptions', 'tags:id']);
+        $address->loadMissing(['contactOptions', 'tags:id', 'permissions:id']);
 
         $currentTab = $this->getTabButton($this->tab);
         if (! $currentTab->isLivewireComponent) {
@@ -239,9 +243,17 @@ class Addresses extends Component
     #[Renderless]
     public function permissions(): array
     {
+        $this->address->permissions ??= [];
+
         return app(Permission::class)->query()
             ->where('guard_name', 'address')
             ->get(['id', 'name'])
+            ->map(function (Permission $permission) {
+                return [
+                    'id' => $permission->id,
+                    'name' => __($permission->name),
+                ];
+            })
             ->toArray();
     }
 

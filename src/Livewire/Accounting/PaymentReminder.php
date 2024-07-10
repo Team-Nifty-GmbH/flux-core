@@ -30,7 +30,7 @@ class PaymentReminder extends OrderList
         'commission',
     ];
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         $orderTypes = app(OrderType::class)->query()
             ->where('is_active', true)
@@ -47,7 +47,7 @@ class PaymentReminder extends OrderList
             ->whereIntegerInRaw('order_type_id', $orderTypes);
     }
 
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()

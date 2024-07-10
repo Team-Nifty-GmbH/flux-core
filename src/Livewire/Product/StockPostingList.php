@@ -36,7 +36,7 @@ class StockPostingList extends BaseStockPostingList
         ]];
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder
             ->where('product_id', $this->productId);

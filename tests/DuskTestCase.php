@@ -5,7 +5,9 @@ namespace FluxErp\Tests;
 use Dotenv\Dotenv;
 use FluxErp\Console\Commands\InstallAssets;
 use FluxErp\FluxServiceProvider;
+use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
 use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
@@ -75,20 +77,24 @@ abstract class DuskTestCase extends TestCase
     protected static function installAssets(): void
     {
         static::deleteDirectory(__DIR__ . '/../public/build/assets/');
-        unlink(__DIR__ . '/../public/build/manifest.json');
+
+        if (file_exists($manifest = __DIR__ . '/../public/build/manifest.json')) {
+            unlink($manifest);
+        }
+
         InstallAssets::copyStubs(
-            [
+            files: [
                 'tailwind.config.js',
                 'postcss.config.js',
                 'vite.config.js',
                 'package.json',
             ],
-            true,
-            fn ($path = '') => __DIR__ . '/../' . $path
+            force: true,
+            basePath: fn ($path = '') => __DIR__ . '/../' . $path
         );
 
         // run npm i and npm run build
-        $process = Process::fromShellCommandline('npm i && npm run build');
+        $process = Process::fromShellCommandline('npm i && npm run build', timeout: 180);
         $process->run();
 
         // wait for process to finish
@@ -176,6 +182,14 @@ abstract class DuskTestCase extends TestCase
     public function createLoginUser(): void
     {
         $language = Language::factory()->create();
+
+        PriceList::factory()->create([
+            'is_default' => true,
+        ]);
+
+        Currency::factory()->create([
+            'is_default' => true,
+        ]);
 
         $this->user = new User();
         $this->user->language_id = $language->id;
