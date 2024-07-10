@@ -340,9 +340,13 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public function sendLoginLink(): void
     {
-        [$plaintext, $expires] = $this->createLoginToken();
+        try {
+            $login = $this->createLoginToken();
+        } catch (UnauthorizedException) {
+            return;
+        }
 
         // dont queue mail as the address isnt used as auth in the regular app url
-        Mail::to($this->email)->send(new MagicLoginLink($plaintext, $expires));
+        Mail::to($this->email)->send(new MagicLoginLink($login['token'], $login['expires']));
     }
 }
