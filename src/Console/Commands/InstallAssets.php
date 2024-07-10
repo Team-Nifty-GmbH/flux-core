@@ -156,9 +156,9 @@ class InstallAssets extends Command
                             JSON_PRETTY_PRINT
                         )
                     );
-                }
 
-                $merged = true;
+                    $merged = true;
+                }
             }
 
             if ($merged || $force) {
