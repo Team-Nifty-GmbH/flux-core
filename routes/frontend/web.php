@@ -12,6 +12,7 @@ use FluxErp\Livewire\Accounting\PaymentReminder;
 use FluxErp\Livewire\Accounting\TransactionList;
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Auth\Logout;
+use FluxErp\Livewire\Auth\ResetPassword;
 use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
@@ -86,16 +87,19 @@ use TeamNiftyGmbH\DataTable\Controllers\IconController;
 Route::middleware('web')
     ->domain(config('flux.flux_url'))
     ->group(function () {
-        Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)->name('flux.install');
+        Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)
+            ->name('flux.install');
 
         Route::get('/icons/{name}/{variant?}', IconController::class)
             ->where('variant', '(outline|solid)')
             ->name('icons');
-        Route::get('/login', Login::class)
-            ->middleware(['guest:web'])
-            ->name('login');
-        Route::post('/login', [AuthController::class, 'authenticateWeb'])
-            ->middleware(['guest:web']);
+        Route::middleware(['guest:web'])->group(function (){
+            Route::get('/login', Login::class)
+                ->name('login');
+            Route::post('/login', [AuthController::class, 'authenticateWeb']);
+            Route::get('/reset-password', ResetPassword::class)
+                ->name('password.reset');
+        });
         Route::post('/logout', Logout::class)
             ->name('logout');
 

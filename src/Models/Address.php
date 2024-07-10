@@ -48,7 +48,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         Lockable, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
-        'login_password',
+        'password',
     ];
 
     protected $guarded = [
@@ -172,17 +172,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         ];
     }
 
-    public function getAuthPassword()
-    {
-        return $this->login_password;
-    }
-
-    public function getAuthPasswordName(): string
-    {
-        return 'login_password';
-    }
-
-    protected function loginPassword(): Attribute
+    protected function password(): Attribute
     {
         return Attribute::set(
             fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
@@ -357,6 +347,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         }
 
         // dont queue mail as the address isnt used as auth in the regular app url
-        Mail::to($this->login_name)->send(new MagicLoginLink($login['token'], $login['expires']));
+        Mail::to($this->email)->send(new MagicLoginLink($login['token'], $login['expires']));
     }
 }

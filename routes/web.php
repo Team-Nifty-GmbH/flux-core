@@ -17,7 +17,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')
     ->group(function () {
-        Route::get('/login-link', LoginLinkController::class)->name('login-link');
+        Route::middleware('signed')->group(function () {
+            Route::get('/login-link', LoginLinkController::class)->name('login-link');
+        });
 
         Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function () {
             Route::get('/manifest.json', [AssetController::class, 'manifest'])->name('manifest');

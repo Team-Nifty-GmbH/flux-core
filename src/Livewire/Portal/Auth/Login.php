@@ -2,13 +2,13 @@
 
 namespace FluxErp\Livewire\Portal\Auth;
 
-use Illuminate\Contracts\Auth\Authenticatable;
+use FluxErp\Livewire\Auth\Login as BaseLogin;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 
-class Login extends \FluxErp\Livewire\Auth\Login
+class Login extends BaseLogin
 {
     protected string $dashboardRoute = 'portal.dashboard';
 
@@ -22,17 +22,10 @@ class Login extends \FluxErp\Livewire\Auth\Login
     protected function tryLogin(): bool
     {
         return Auth::guard('address')->attempt([
-            'login_name' => $this->email,
+            'email' => $this->email,
             'password' => $this->password,
             'is_active' => true,
             'can_login' => true,
         ]);
-    }
-
-    protected function retrieveUserByCredentials(): ?Authenticatable
-    {
-        return Auth::guard('address')
-            ->getProvider()
-            ->retrieveByCredentials(['login_name' => $this->email]);
     }
 }

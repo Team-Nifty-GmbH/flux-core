@@ -139,12 +139,12 @@
             </div>
             <div
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                <label for="{{ md5('address.login_name') }}"
+                <label for="{{ md5('address.email') }}"
                        class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                     {{ __('Email') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input wire:model="address.login_name"/>
+                    <x-input wire:model="address.email"/>
                 </div>
             </div>
             <div

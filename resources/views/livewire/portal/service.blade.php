@@ -12,7 +12,7 @@
                 <div class="w-full grid-cols-2 md:grid md:gap-5">
                     <x-input wire:model="contactData.firstname" :placeholder="__('Firstname')"/>
                     <x-input wire:model="contactData.lastname" :placeholder="__('Lastname')"/>
-                    <x-input wire:model="contactData.login_name" :placeholder="__('E-Mail')"/>
+                    <x-input wire:model="contactData.email" :placeholder="__('E-Mail')"/>
                     <x-input wire:model="contactData.phone" :placeholder="__('Phone')"/>
                 </div>
                 <x-input wire:model="contactData.company" :placeholder="__('Company')" />
