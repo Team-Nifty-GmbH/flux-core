@@ -45,16 +45,16 @@ Route::middleware(['web', PortalMiddleware::class])
         Route::get('/icons/{name}/{variant?}', IconController::class)
             ->where('variant', '(outline|solid)')
             ->name('icons');
-        Route::get('/login', Login::class)
-            ->middleware(['guest:address'])
-            ->name('login');
-        Route::post('/login', [AuthController::class, 'authenticatePortal'])
-            ->middleware(['guest:address']);
+
+        Route::middleware(['guest:address'])->group(function () {
+            Route::get('/login', Login::class)
+                ->name('login');
+            Route::post('/login', [AuthController::class, 'authenticatePortal']);
+            Route::get('/reset-password', ResetPassword::class)
+                ->name('password.reset');
+        });
         Route::any('/logout', Logout::class)
             ->name('logout');
-        Route::get('/reset-password', ResetPassword::class)
-            ->middleware(['guest:address'])
-            ->name('password.reset');
 
         Route::middleware(['auth:address', 'permission'])->group(function () {
             Route::get('/', Dashboard::class)

@@ -40,18 +40,19 @@ class ResetPassword extends Component
     {
         $this->validate();
 
+        $success = false;
         $result = Password::broker($this->passwordBroker)->reset(
             [
                 'email' => $this->email,
                 'token' => $this->token,
                 'password' => $this->password,
             ],
-            function (CanResetPassword $user, string $password) {
-                return $this->updateUser($user, $password);
+            function (CanResetPassword $user, string $password) use (&$success) {
+                $success = $this->updateUser($user, $password);
             }
         );
 
-        if ($result === Password::PASSWORD_RESET) {
+        if ($result === Password::PASSWORD_RESET && $success) {
             session()->flash('flash.success', __('Password reset successfully'));
         } else {
             session()->flash('flash.error', __('Password reset failed'));

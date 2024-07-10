@@ -154,7 +154,7 @@ class RoleTest extends BaseSetup
     public function test_revoke_role_permission_validation_fails()
     {
         $rolePermissions = [
-            'id' => Str::random(),
+            'id' => Role::query()->max('id') + 100,
             'permissions' => [
                 'id' => $this->permissions['test']->id,
             ],
@@ -210,7 +210,7 @@ class RoleTest extends BaseSetup
     public function test_revoke_role_user_validation_fails()
     {
         $roleUsers = [
-            'id' => Str::random(),
+            'id' => Role::query()->max('id') + 100,
             'users' => [
                 'id' => $this->user->id,
             ],
@@ -239,7 +239,7 @@ class RoleTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/roles/' . Str::random());
+        $response = $this->actingAs($this->user)->delete('/api/roles/' . Role::query()->max('id') + 100);
         $response->assertStatus(404);
     }
 

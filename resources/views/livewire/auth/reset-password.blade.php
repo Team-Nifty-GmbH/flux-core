@@ -8,7 +8,7 @@
                 <form class="flex flex-col gap-6" wire:submit="resetPassword()">
                     <x-inputs.password wire:model="password" :label="__('Set new password…')" />
                     <x-inputs.password wire:model="password_confirmation" :label="__('Retype password…')" />
-                    <x-button type="submit" primary class="w-full" :label="__('Reset password')"></x-button>
+                    <x-button type="submit" primary class="w-full" :label="__('Reset password')" />
                 </form>
             </div>
         </div>

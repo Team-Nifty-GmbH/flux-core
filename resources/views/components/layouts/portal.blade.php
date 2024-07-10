@@ -17,19 +17,7 @@
 <body class="dark:bg-secondary-900 h-full bg-gray-50 text-xs">
     <x-notifications z-index="z-50"></x-notifications>
     <x-dialog z-index="z-40" blur="md" align="center"/>
-    @if(session()->has('flash'))
-        <script>
-            window.addEventListener('livewire:navigated', () => {
-                @foreach(\Illuminate\Support\Arr::wrap(session('flash')) as $type => $flash)
-                window.$wireui.notify({
-                    title: '{{ $flash }}',
-                    icon: '{{ $type }}',
-                    timeout: 0,
-                })
-                @endforeach
-            });
-        </script>
-    @endif
+    <x-flux::flash />
     <div class="absolute right-4 top-6 flex gap-1.5">
         <a href="{{ $client?->website }}" target="_blank" class="flex items-center dark:text-gray-50">
             <x-heroicons name="arrow-up-right" class="h-4 w-4" />
@@ -44,11 +32,11 @@
             @endpersist
         @endauth
     </div>
-    @if(auth('address')->check())
+    @auth('address')
         <div id="nav">
             <livewire:navigation :show-search-bar="false" :setting="$setting"/>
         </div>
-    @endif
+    @endauth
     <div class="flex flex-1 flex-col md:pl-20">
         @section('main')
             <div class="h-full w-full p-4 lg:p-8">

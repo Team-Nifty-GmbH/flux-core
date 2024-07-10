@@ -62,7 +62,7 @@ class CreateContact extends FluxAction
         return $contact->withoutRelations()->fresh();
     }
 
-    public function prepareForValidation(): void
+    protected function prepareForValidation(): void
     {
         $this->data['client_id'] ??= resolve_static(Client::class, 'default')?->id;
     }

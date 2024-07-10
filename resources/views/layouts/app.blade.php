@@ -19,19 +19,7 @@
             <x-input id="prompt-value" />
         </x-dialog>
     @endpersist
-    @if(session()->has('flash'))
-        <script>
-            window.addEventListener('livewire:navigated', () => {
-                @foreach(\Illuminate\Support\Arr::wrap(session('flash')) as $type => $flash)
-                    window.$wireui.notify({
-                        title: '{{ $flash }}',
-                        icon: '{{ $type }}',
-                        timeout: 0,
-                    })
-                @endforeach
-            });
-        </script>
-    @endif
+    <x-flux::flash />
     @auth('web')
         @persist('mail')
             <div id="mail">
