@@ -17,7 +17,7 @@ class InstallAssets extends Command
     protected $signature = 'flux:install-assets
         {directory? : The directory to install the assets}
         {--force : Overwrite existing files}
-        {--merge : If a files i json parsable merge it recursively}';
+        {--merge-json : If a file is json parsable merge it recursively}';
 
     /**
      * The console command description.
@@ -41,7 +41,7 @@ class InstallAssets extends Command
         // require npm packages
         $this->info('Installing npm packages...');
 
-        static::copyStubs(force: $this->option('force'), merge: $this->option('merge'));
+        static::copyStubs(force: $this->option('force'), merge: $this->option('merge-json'));
 
         $this->updateNodePackages(function ($packages) {
             return data_get(
@@ -124,6 +124,7 @@ class InstallAssets extends Command
                 continue;
             }
 
+            $merged = false;
             $oldContent = null;
             if (file_exists($basePath($file))) {
                 $oldContent = file_get_contents($basePath($file));
@@ -156,9 +157,13 @@ class InstallAssets extends Command
                         )
                     );
                 }
+
+                $merged = true;
             }
 
-            file_put_contents($basePath($file), $content);
+            if ($merged || $force) {
+                file_put_contents($basePath($file), $content);
+            }
         }
     }
 }
