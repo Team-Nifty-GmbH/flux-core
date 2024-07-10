@@ -83,14 +83,14 @@ abstract class DuskTestCase extends TestCase
         }
 
         InstallAssets::copyStubs(
-            [
+            files: [
                 'tailwind.config.js',
                 'postcss.config.js',
                 'vite.config.js',
                 'package.json',
             ],
-            true,
-            fn ($path = '') => __DIR__ . '/../' . $path
+            force: true,
+            basePath: fn ($path = '') => __DIR__ . '/../' . $path
         );
 
         // run npm i and npm run build

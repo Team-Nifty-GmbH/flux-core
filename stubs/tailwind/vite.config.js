@@ -1,14 +1,16 @@
 import {defineConfig} from 'vite';
 import laravel from 'laravel-vite-plugin';
-import path from "path";
-import tailwindcss from "tailwindcss";
-import autoprefixer from "autoprefixer";
+import path from 'path';
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
 
 export default defineConfig({
     base: "/flux-assets/",
     plugins: [
         laravel({
             input: [
+                'resources/css/app.css',
+                'resources/js/app.js',
                 '.{{ relative_path }}/resources/css/app.css',
                 '.{{ relative_path }}/resources/js/app.js',
                 '.{{ relative_path }}/resources/js/apex-charts.js',
