@@ -5,30 +5,49 @@ namespace FluxErp\Livewire;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Models\Media;
 use Illuminate\Support\Facades\URL;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
 class PublicLinkGenerator extends Component
 {
-    public ?string $publicLink = null;
-
     #[Modelable]
     public OrderForm $order;
 
-    public function setPublicLink(): void
+    public array $signed_urls = [];
+
+    public array $unsigned_documents = [];
+
+    public array $generated_urls = [];
+
+    public function mount(): void
     {
-        $this->publicLink = URL::signedRoute('order.public', ['order' => $this->order->uuid]);
+        $this->signed_urls = array_map(function (array $item) {
+            return $item['custom_properties']['order_type'];
+        }, app(Media::class)->query()
+            ->where('model_id', $this->order->id)
+            ->where('collection_name', 'signature')->get()->toArray());
+
+        $mergedArray = array_merge($this->order->order_type['print_layouts'], $this->signed_urls);
+
+        $valueCounts = array_count_values($mergedArray);
+
+        $this->unsigned_documents = array_values(array_filter($mergedArray, function ($value) use ($valueCounts) {
+            return $valueCounts[$value] === 1;
+        }));
+
     }
 
-    #[Computed]
-    public function hasSignature(): bool
+    public function setPublicLink(string $orderType): void
     {
-        return app(Media::class)->query()
-                ->where('model_type', 'order')
-                ->where('model_id', $this->order->id)
-                ->where('collection_name', 'signature')
-                ->exists();
+
+        $key = array_search($orderType, $this->unsigned_documents);
+        if ($key !== false) {
+            unset($this->unsigned_documents[$key]);
+        }
+        $this->unsigned_documents = array_values($this->unsigned_documents);
+
+        $this->generated_urls[$orderType] = URL::signedRoute('order.public', ['order' => $this->order->uuid]) . "&orderType={$orderType}";
+
     }
 
     public function render()

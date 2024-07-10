@@ -10,15 +10,15 @@ use FluxErp\Providers\ViewServiceProvider;
 {{--Todo: this approach regarding livewire doesent work - its loaded twice --}}
 </head>
 <body>
-{{ Asset::toHtml(
-     ViewServiceProvider::getRealPackageAssetPath(
-         '/resources/js/alpine.js',
-         'team-nifty-gmbh/flux-erp'
-     )
- )
-}}
-{{--@vite('packages/flux-core/resources/js/alpine.js')--}}
-{{--@livewireScripts--}}
+{{--{{ Asset::toHtml(--}}
+{{--     ViewServiceProvider::getRealPackageAssetPath(--}}
+{{--         '/resources/js/alpine.js',--}}
+{{--         'team-nifty-gmbh/flux-erp'--}}
+{{--     )--}}
+{{-- )--}}
+{{--}}--}}
+@vite('packages/flux-core/resources/js/alpine.js')
+@livewireScripts
 {{ $slot}}
 </body>
 </html>

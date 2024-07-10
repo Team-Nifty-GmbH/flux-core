@@ -1,6 +1,6 @@
-import SignaturePad from "signature_pad";
+import SignaturePad from 'signature_pad';
 
-export default function ($wire, $refs) {
+export default function($wire, $refs) {
     return {
         signaturePad: null,
         isEmpty: true,
@@ -8,7 +8,7 @@ export default function ($wire, $refs) {
         id: null,
         async init() {
             // init signature pad
-            this.signaturePad = new SignaturePad($refs.canvas, {backgroundColor: 'rgba(255, 255, 255, 1)'});
+            this.signaturePad = new SignaturePad($refs.canvas, { backgroundColor: 'rgba(255, 255, 255, 1)' });
             // if signature is already saved - just display it on canvas but don't allow to draw
             if ($wire.signature.stagedFiles.length > 0) {
                 this.id = $wire.signature.id;
@@ -38,7 +38,7 @@ export default function ($wire, $refs) {
         },
         async upload(_) {
             const res = await $wire.save();
-            if (res !== null) {
+            if (res) {
                 this.id = $wire.entangle('signature.id');
                 this.error = false;
                 // clear buttons for save and clean
@@ -64,5 +64,5 @@ export default function ($wire, $refs) {
             $refs.canvas.height = $refs.canvas.offsetHeight * this.ratio;
             $refs.canvas.getContext('2d').scale(this.ratio, this.ratio);
         }
-    }
+    };
 }

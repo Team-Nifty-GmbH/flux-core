@@ -8,6 +8,7 @@ use FluxErp\Models\Order;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Ramsey\Uuid\Uuid;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -21,29 +22,44 @@ class PublicLink extends Component
 
     public MediaForm $signature;
 
+    public ?string $className;
+
+    #[Url]
+    public ?string $orderType = null;
+
     public function mount(): void
     {
-        $media = app(Media::class)->query()
-            ->where('model_id', $this->order->id)
-            ->where('collection_name', 'signature')
-            ->first();
 
-        $this->signature->fill($media ?? []);
+        $queryClass = implode('', array_map('ucfirst', explode('-', $this->orderType)));
+
+        if (class_exists('FluxErp\\View\\Printing\\Order\\' . $queryClass)) {
+            $this->className = 'FluxErp\\View\\Printing\\Order\\' . $queryClass;
+
+            $media = app(Media::class)->query()
+                ->where('model_id', $this->order->id)
+                ->where('collection_name', 'signature')
+                ->whereJsonContains('custom_properties->order_type', $this->orderType)
+                ->first();
+
+            $this->signature->fill($media ?? []);
+        } // false
     }
 
     public function save(): bool
     {
-        if ($this->signature->stagedFiles || $this->signature->id) {
+
+        // add to which type it belongs
+        if (($this->signature->stagedFiles || $this->signature->id) && ! is_null($this->className)) {
             $this->signature->model_type = Relation::getMorphClassAlias(Order::class);
             $this->signature->model_id = $this->order->id;
             $this->signature->collection_name = 'signature';
-            $this->signature->stagedFiles[0]['name'] = 'signature';
+            $this->signature->custom_properties = ['order_type' => $this->orderType];
+            $this->signature->stagedFiles[0]['name'] = 'signature-' . $this->orderType;
             $this->signature->stagedFiles[0]['file_name'] = data_get(
                 $this->signature->stagedFiles[0],
                 'temporary_filename',
                 Uuid::uuid4()->toString() . '.png'
             );
-
             try {
                 $this->signature->save();
             } catch (ValidationException|UnauthorizedException $e) {
