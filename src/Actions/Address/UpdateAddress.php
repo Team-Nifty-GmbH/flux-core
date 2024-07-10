@@ -148,15 +148,17 @@ class UpdateAddress extends FluxAction
                     'email' => [__('Unable to clear email while \'can_login\' = \'true\'')],
                 ];
             }
-            if ($address->password &&
-                array_key_exists('password', $this->data) &&
-                ! $this->data['password']
+
+            if ($address->password
+                && array_key_exists('password', $this->data)
+                && ! $this->data['password']
             ) {
                 $errors += [
                     'password' => [__('Unable to clear password while \'can_login\' = \'true\'')],
                 ];
             }
-            if (data_get($this->data, 'password') && ! $address->email) {
+
+            if (data_get($this->data, 'password') && ! data_get($this->data, 'email', $address->email)) {
                 $errors += [
                     'email' => [__('Email is required when setting a password')],
                 ];

@@ -154,7 +154,7 @@ class RoleTest extends BaseSetup
     public function test_revoke_role_permission_validation_fails()
     {
         $rolePermissions = [
-            'id' => Role::query()->max('id') + 100,
+            'id' => Str::random(),
             'permissions' => [
                 'id' => $this->permissions['test']->id,
             ],
@@ -210,7 +210,7 @@ class RoleTest extends BaseSetup
     public function test_revoke_role_user_validation_fails()
     {
         $roleUsers = [
-            'id' => Role::query()->max('id') + 100,
+            'id' => Str::random(),
             'users' => [
                 'id' => $this->user->id,
             ],
