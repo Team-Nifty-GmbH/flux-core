@@ -12,6 +12,7 @@ use FluxErp\Livewire\Accounting\PaymentReminder;
 use FluxErp\Livewire\Accounting\TransactionList;
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Auth\Logout;
+use FluxErp\Livewire\Auth\ResetPassword;
 use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
@@ -98,6 +99,9 @@ Route::middleware('web')
             ->middleware(['guest:web']);
         Route::post('/logout', Logout::class)
             ->name('logout');
+        Route::get('/reset-password', ResetPassword::class)
+            ->middleware(['guest:web'])
+            ->name('password.reset');
 
         Route::middleware(['auth:web', 'permission'])->group(function () {
             Route::get('/', Dashboard::class)->name('dashboard');

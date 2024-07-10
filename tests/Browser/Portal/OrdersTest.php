@@ -83,7 +83,7 @@ class OrdersTest extends PortalDuskTestCase
     public function test_can_see_orders()
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit($this->baseUrl())->type('email', $this->user->login_name)
+            $browser->visit($this->baseUrl())->type('email', $this->user->email)
                 ->type('password', $this->password)
                 ->press('Login')
                 ->waitForReload()
