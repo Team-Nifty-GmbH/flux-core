@@ -15,7 +15,7 @@ use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 class Contact extends Component
 {

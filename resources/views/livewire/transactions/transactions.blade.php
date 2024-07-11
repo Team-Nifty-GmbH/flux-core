@@ -1,5 +1,5 @@
-<x-modal name="transaction-details" max-width="6xl">
-    <x-card class="flex flex-col gap-3">
+<x-modal-card name="transaction-details" width="6xl">
+    <div class="flex flex-col gap-3">
         <x-select
             :label="__('Bank Connection')"
             wire:model="transactionForm.bank_connection_id"
@@ -14,7 +14,7 @@
         <x-input wire:model="transactionForm.counterpart_iban" :label="__('Counterpart IBAN')"/>
         <x-input wire:model="transactionForm.counterpart_bank_name" :label="__('Counterpart Bank Name')"/>
         <x-textarea wire:model="transactionForm.purpose" :label="__('Purpose')"/>
-        <x-inputs.number step="0.01" wire:model="transactionForm.amount" :label="__('Amount')"/>
+        <x-number step="0.01" wire:model="transactionForm.amount" :label="__('Amount')"/>
         <x-slot:footer>
             <div class="flex justify-between">
                 <x-button
@@ -30,5 +30,5 @@
                 </div>
             </div>
         </x-slot:footer>
-    </x-card>
-</x-modal>
+    </div>
+</x-modal-card>

@@ -60,18 +60,18 @@
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">{{ __('Hello') }} {{ Auth::user()->name }}</h1>
                 </div>
             </div>
-            <x-modal name="edit-widget">
-                <x-card class="flex flex-col gap-4">
+            <x-modal-card name="edit-widget">
+                <div class="flex flex-col gap-4">
                     <x-input :label="__('Name')" x-model="widget.name" />
-                    <x-inputs.number :label="__('Width')" max="12" min="1" step="1" x-model.number="widget.width" />
-                    <x-inputs.number :label="__('Height')" min="1" step="1" x-model.number="widget.height" />
+                    <x-number :label="__('Width')" max="12" min="1" step="1" x-model.number="widget.width" />
+                    <x-number :label="__('Height')" min="1" step="1" x-model.number="widget.height" />
                     <x-slot:footer>
                         <div class="flex justify-end w-full">
                             <x-button x-on:click="close()" :label="__('Close')" />
                         </div>
                     </x-slot:footer>
-                </x-card>
-            </x-modal>
+                </div>
+            </x-modal-card>
         </div>
         <div class="flex gap-4">
             <div x-show="! editMode">
@@ -94,8 +94,8 @@
                     >
                         <div x-cloak x-show="editMode" x-transition class="w-full absolute top-0 bottom-0 bg-primary-100 opacity-25 z-10 handle"></div>
                         <div class="absolute top-2 right-2 z-10" x-cloak x-show="editMode">
-                            <x-button.circle class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" x-on:click="edit($el.parentNode.parentNode.dataset.id)" primary icon="pencil"/>
-                            <x-button.circle class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative x-on:click="removeWidget($el, $wire.id)"/>
+                            <x-mini-button rounded class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" x-on:click="edit($el.parentNode.parentNode.dataset.id)" primary icon="pencil"/>
+                            <x-mini-button rounded class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative x-on:click="removeWidget($el, $wire.id)"/>
                         </div>
                         <div class="z-0 w-full">
                             <livewire:is lazy :component="$widget['component_name'] ?? $widget['class']" wire:key="{{ uniqid() }}" />

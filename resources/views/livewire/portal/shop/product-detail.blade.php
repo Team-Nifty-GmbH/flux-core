@@ -86,7 +86,7 @@
                     class="grid grid-cols-2 w-full gap-4"
                     x-data="{amount: 1}"
                 >
-                    <x-inputs.number step="1" x-model="amount"/>
+                    <x-number step="1" x-model="amount"/>
                     <x-button x-on:click="$wire.dispatch('cart:add', {products: {id: $wire.productForm.id, name: $wire.productForm.name, price: $wire.productForm.price, amount: amount}})" primary class="w-full" :label="__('Add to cart')" />
                 </div>
             @endif
@@ -134,7 +134,7 @@
                             </x-slot:title>
                             <x-slot:action>
                                 <div class="flex gap-1.5 justify-end">
-                                    <x-button :label="__('Download folder')" primary icon="save" wire:click="downloadMedia({{ \Illuminate\Support\Js::from(array_keys($media)) }}, '{{ $collection }}')" />
+                                    <x-button :label="__('Download folder')" primary icon="arrow-down-tray" wire:click="downloadMedia({{ \Illuminate\Support\Js::from(array_keys($media)) }}, '{{ $collection }}')" />
                                     <x-button icon="chevron-down" x-on:click="showMedia = showMedia === '{{ $collection }}' ? null : '{{ $collection }}'" />
                                 </div>
                             </x-slot:action>

@@ -15,7 +15,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 class Task extends Component
 {

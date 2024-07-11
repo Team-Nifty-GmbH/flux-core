@@ -1,5 +1,5 @@
 <div>
-    <x-modal.card z-index="z-30" wire:model="showTicketModal" :title="__('New Ticket')">
+    <x-modal-card z-index="z-30" wire:model="showTicketModal" :title="__('New Ticket')">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div x-data="{
@@ -87,6 +87,6 @@
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
+    </x-modal-card>
     @include('tall-datatables::livewire.data-table')
 </div>

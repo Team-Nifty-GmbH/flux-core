@@ -26,8 +26,8 @@
         }
     }"
 >
-   <x-modal max-width="7xl" name="show-mail">
-      <x-card class="flex flex-col gap-4">
+   <x-modal-card width="7xl" name="show-mail">
+      <div class="flex flex-col gap-4">
          <div class="flex">
             <div class="grow">
                <div class="font-semibold" x-text="$wire.mailMessage.from"></div>
@@ -67,8 +67,8 @@
          </div>
          <div class="p-4 border rounded-md overflow-auto" id="mail-body">
          </div>
-      </x-card>
-   </x-modal>
+      </div>
+   </x-modal-card>
    <section class="max-w-[96rem] flex flex-col gap-4">
       <x-card id="mail-folders">
          <ul class="flex flex-col gap-1" wire:ignore>

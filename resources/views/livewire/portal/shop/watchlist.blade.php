@@ -13,10 +13,10 @@
                 @foreach($cart->products as $cartItem)
                     <div class="max-w-96 relative z-0">
                         @if(! $cart->is_portal_public)
-                            <x-button.circle
+                            <x-mini-button rounded
                                 xs
                                 negative
-                                icon="x"
+                                icon="x-mark"
                                 wire:click="removeProduct({{ $cart->id }}, {{ $cartItem['id'] }})"
                                 class="absolute right-2 top-2 h-4 w-4 z-10"
                             />

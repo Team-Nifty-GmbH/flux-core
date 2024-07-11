@@ -11,7 +11,7 @@ use FluxErp\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 class Permissions extends Component
 {

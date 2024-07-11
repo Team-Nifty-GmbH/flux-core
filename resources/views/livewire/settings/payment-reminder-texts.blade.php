@@ -1,5 +1,5 @@
-<x-modal name="edit-payment-reminder-text">
-    <x-card
+<x-modal-card name="edit-payment-reminder-text">
+    <div
         class="flex flex-col gap-4"
         x-data="{
             addReceiver($event, type) {
@@ -21,7 +21,7 @@
             }
         }"
     >
-        <x-inputs.number
+        <x-number
             :label="__('Minimum reminder level')"
             wire:model.number="paymentReminderTextForm.reminder_level"
         />
@@ -48,7 +48,7 @@
                             x-on:click="$wire.paymentReminderTextForm.mail_to.splice($wire.paymentReminderTextForm.mail_to.indexOf(to), 1)"
                         >
                             <x-icon
-                                name="x"
+                                name="x-mark"
                                 class="w-4 h-4"
                             />
                         </button>
@@ -78,7 +78,7 @@
                             x-on:click="$wire.paymentReminderTextForm.mail_cc.splice($wire.paymentReminderTextForm.mail_cc.indexOf(to), 1)"
                         >
                             <x-icon
-                                name="x"
+                                name="x-mark"
                                 class="w-4 h-4"
                             />
                         </button>
@@ -108,5 +108,5 @@
                 />
             </div>
         </x-slot:footer>
-    </x-card>
-</x-modal>
+    </div>
+</x-modal-card>

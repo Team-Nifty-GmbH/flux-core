@@ -50,7 +50,7 @@
     </x-card>
     <x-card>
         <div class="flex flex-col gap-1.5">
-            <x-inputs.number
+            <x-number
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 wire:model="contact.credit_line"
                 :label="__('Credit line')"
@@ -74,42 +74,42 @@
     </x-card>
     <x-card>
         <div class="flex flex-col gap-1.5">
-            <x-inputs.number
+            <x-number
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 step="1"
                 min="0"
                 wire:model="contact.payment_target_days"
                 :label="__('Payment Target Days')"
             />
-            <x-inputs.number
+            <x-number
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 step="1"
                 min="1"
                 wire:model="contact.payment_reminder_days_1"
                 :label="__('Payment Reminder 1 Days')"
             />
-            <x-inputs.number
+            <x-number
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 step="1"
                 min="1"
                 wire:model="contact.payment_reminder_days_2"
                 :label="__('Payment Reminder 2 Days')"
             />
-            <x-inputs.number
+            <x-number
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 step="1"
                 min="1"
                 wire:model="contact.payment_reminder_days_3"
                 :label="__('Payment Reminder 3 Days')"
             />
-            <x-inputs.number
+            <x-number
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 step="1"
                 min="1"
                 wire:model="contact.payment_discount_days"
                 :label="__('Payment Discount Days')"
             />
-            <x-inputs.number
+            <x-number
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 step="0.01"
                 min="0"

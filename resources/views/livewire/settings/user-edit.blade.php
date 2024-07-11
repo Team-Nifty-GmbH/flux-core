@@ -22,8 +22,8 @@
             option-description="email"
         />
         <x-checkbox :label="__('Active')" wire:model="user.is_active"/>
-        <x-inputs.password :label="__('New password')" wire:model="user.password"/>
-        <x-inputs.password :label="__('Repeat password')" wire:model="user.password_confirmation"/>
+        <x-password :label="__('New password')" wire:model="user.password"/>
+        <x-password :label="__('Repeat password')" wire:model="user.password_confirmation"/>
         <x-input wire:model="user.account_holder" :label="__('Account Holder')"/>
         <x-input wire:model="user.iban" :label="__('IBAN')"/>
         <x-input wire:model="user.bic" :label="__('BIC')"/>
@@ -79,7 +79,7 @@
         @if(resolve_static(\FluxErp\Actions\Permission\UpdateUserPermissions::class, 'canPerformAction', [false]))
             <div x-show="active === 'permissions'">
                 <div class="pb-3">
-                    <x-input wire:model.live.debounce.500ms="searchPermission" icon="search"/>
+                    <x-input wire:model.live.debounce.500ms="searchPermission" icon="magnifying-glass"/>
                 </div>
                 <div class="max-h-96 space-y-3 overflow-y-auto pt-3">
                     <div class="grid grid-cols-6 gap-3">

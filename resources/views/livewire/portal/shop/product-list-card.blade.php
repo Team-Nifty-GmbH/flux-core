@@ -51,7 +51,7 @@
     @section('add-to-cart')
         @if($productForm->children_count === 0)
             <div class="flex items-center mt-4 gap-1.5">
-                <x-inputs.number step="1" wire:model="productForm.amount" />
+                <x-number step="1" wire:model="productForm.amount" />
                 <x-button
                     x-on:click="$wire.$dispatch('cart:add', {products: {id: $wire.productForm.id, amount: $wire.productForm.amount}})"
                     primary

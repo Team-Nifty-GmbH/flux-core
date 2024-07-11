@@ -13,8 +13,8 @@
         }
     }
 }">
-    <x-modal name="edit-communication" max-width="5xl">
-        <x-card :title="__('Edit Communication')" class="flex flex-col gap-4">
+    <x-modal-card name="edit-communication" width="5xl" :title="__('Edit Communication')">
+        <div class="flex flex-col gap-4">
             <div>
                 <x-select
                     :clearable="false"
@@ -68,7 +68,7 @@
                                     x-on:click="$wire.communication.to.splice($wire.communication.to.indexOf(to), 1)"
                                 >
                                     <x-icon
-                                        name="x"
+                                        name="x-mark"
                                         class="w-4 h-4"
                                     />
                                 </button>
@@ -101,7 +101,7 @@
                                     x-on:click="$wire.communication.cc.splice($wire.communication.cc.indexOf(to), 1)"
                                 >
                                     <x-icon
-                                        name="x"
+                                        name="x-mark"
                                         class="w-4 h-4"
                                     />
                                 </button>
@@ -134,7 +134,7 @@
                                     x-on:click="$wire.communication.bcc.splice($wire.communication.bcc.indexOf(to), 1)"
                                 >
                                     <x-icon
-                                        name="x"
+                                        name="x-mark"
                                         class="w-4 h-4"
                                     />
                                 </button>
@@ -208,30 +208,28 @@
                     </div>
                 </div>
             </x-slot:footer>
-        </x-card>
-    </x-modal>
-    <x-modal name="create-preview">
-        <x-card :title="__('Create Preview')">
-            <div class="grid grid-cols-3 gap-1.5">
-                <div class="font-semibold text-sm">{{ __('Print') }}</div>
-                <div class="font-semibold text-sm">{{ __('Email') }}</div>
-                <div class="font-semibold text-sm">{{ __('Download') }}</div>
-                @foreach($printLayouts as $printLayout)
-                    <x-checkbox wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}" :label="__($printLayout)" />
-                    <x-checkbox wire:model.boolean="selectedPrintLayouts.email.{{ $printLayout }}" :label="__($printLayout)" />
-                    <x-checkbox wire:model.boolean="selectedPrintLayouts.download.{{ $printLayout }}" :label="__($printLayout)" />
-                @endforeach
-            </div>
-            <x-slot:footer>
-                <div class="flex justify-end gap-x-4">
-                    <div class="flex">
-                        <x-button flat :label="__('Cancel')" x-on:click="close" />
-                        <x-button primary :label="__('Continue')" spinner wire:click="createDocuments().then(() => { close(); });" />
-                    </div>
+        </div>
+    </x-modal-card>
+    <x-modal-card name="create-preview" :title="__('Create Preview')">
+        <div class="grid grid-cols-3 gap-1.5">
+            <div class="font-semibold text-sm">{{ __('Print') }}</div>
+            <div class="font-semibold text-sm">{{ __('Email') }}</div>
+            <div class="font-semibold text-sm">{{ __('Download') }}</div>
+            @foreach($printLayouts as $printLayout)
+                <x-checkbox wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}" :label="__($printLayout)" />
+                <x-checkbox wire:model.boolean="selectedPrintLayouts.email.{{ $printLayout }}" :label="__($printLayout)" />
+                <x-checkbox wire:model.boolean="selectedPrintLayouts.download.{{ $printLayout }}" :label="__($printLayout)" />
+            @endforeach
+        </div>
+        <x-slot:footer>
+            <div class="flex justify-end gap-x-4">
+                <div class="flex">
+                    <x-button flat :label="__('Cancel')" x-on:click="close" />
+                    <x-button primary :label="__('Continue')" spinner wire:click="createDocuments().then(() => { close(); });" />
                 </div>
-            </x-slot:footer>
-        </x-card>
-    </x-modal>
+            </div>
+        </x-slot:footer>
+    </x-modal-card>
     <div wire:ignore>
         @include('tall-datatables::livewire.data-table')
     </div>

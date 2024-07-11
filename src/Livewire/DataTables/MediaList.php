@@ -38,7 +38,7 @@ class MediaList extends BaseDataTable
     public function getRowActions(): array
     {
         return [
-            DataTableButton::make(icon: 'save')
+            DataTableButton::make(icon: 'arrow-down-tray')
                 ->label(__('Download'))
                 ->attributes([
                     'x-on:click' => '$wire.downloadMedia(record.id)',

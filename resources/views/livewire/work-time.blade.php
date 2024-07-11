@@ -3,8 +3,8 @@
     x-data="workTime($wire, '{{ route('search', '') }}')"
     x-init.once="load()"
 >
-    <x-modal name="work-time" persistent="true" x-on:close="$wire.resetWorkTime()">
-        <x-card class="flex flex-col gap-4">
+    <x-modal-card name="work-time" persistent="true" x-on:close="$wire.resetWorkTime()">
+        <div class="flex flex-col gap-4">
             <x-select :label="__('Work Time Type')"
                       :options="$workTimeTypes"
                       wire:model="workTime.work_time_type_id"
@@ -76,8 +76,8 @@
                     </div>
                 </div>
             </x-slot:footer>
-        </x-card>
-    </x-modal>
+        </div>
+    </x-modal-card>
     <x-button
         rounded
         primary
@@ -101,7 +101,7 @@
     >
         <x-card id="active-work-times" class="flex flex-col gap-4 max-w-md" :title="__('Active Work Times')">
             <x-slot:action>
-                <x-button.circle xs x-on:click="open = false" icon="x" />
+                <x-mini-button rounded xs x-on:click="open = false" icon="x-mark" />
             </x-slot:action>
             <div class="flex w-full gap-1.5">
                 <x-button class="w-full" x-show="! $wire.dailyWorkTime.id" positive :label="__('Start Workday')" x-on:click="$wire.toggleWorkDay(true)" />

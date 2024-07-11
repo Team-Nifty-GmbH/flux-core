@@ -18,7 +18,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 class SerialNumber extends Component
 {

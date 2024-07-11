@@ -1,42 +1,38 @@
 <div class="flex flex-col gap-4 text-gray-900 dark:text-gray-50">
-    <x-modal max-width="7xl" name="terms-and-conditions">
-        <x-card>
-            <div id="terms-and-conditions">
-            </div>
-        </x-card>
-    </x-modal>
-    <x-modal name="edit-delivery-address">
-        <x-card :title="__('Edit delivery address')">
-            <x-flux::address.address :only-postal="true" />
-            <div class="flex flex-wrap gap-4 pt-4">
-                @foreach(auth()->user()->contact->addresses as $address)
-                    <div
-                        class="cursor-pointer rounded-md bg-secondary-100 p-2"
-                        x-on:click="$wire.loadAddress({{ $address->id }})"
-                        x-bind:class="$wire.address.id === {{ $address->id }} && 'ring-2 ring-offset-2 ring-primary-500'"
-                    >
-                        {!! implode('<br />', $address->postal_address)  !!}
-                    </div>
-                @endforeach
+    <x-modal-card width="7xl" name="terms-and-conditions">
+        <div id="terms-and-conditions">
+        </div>
+    </x-modal-card>
+    <x-modal-card name="edit-delivery-address" :title="__('Edit delivery address')">
+        <x-flux::address.address :only-postal="true" />
+        <div class="flex flex-wrap gap-4 pt-4">
+            @foreach(auth()->user()->contact->addresses as $address)
                 <div
-                    class="cursor-pointer rounded-md bg-secondary-100 p-2 flex justify-center items-center flex-col"
-                    x-on:click="$wire.loadAddress()"
-                    x-bind:class="$wire.address.id === null && 'ring-2 ring-offset-2 ring-primary-500'"
+                    class="cursor-pointer rounded-md bg-secondary-100 p-2"
+                    x-on:click="$wire.loadAddress({{ $address->id }})"
+                    x-bind:class="$wire.address.id === {{ $address->id }} && 'ring-2 ring-offset-2 ring-primary-500'"
                 >
-                    <x-icon class="w-5 h-5" name="plus" />
-                    <div>
-                        {{  __('Add new address') }}
-                    </div>
+                    {!! implode('<br />', $address->postal_address)  !!}
+                </div>
+            @endforeach
+            <div
+                class="cursor-pointer rounded-md bg-secondary-100 p-2 flex justify-center items-center flex-col"
+                x-on:click="$wire.loadAddress()"
+                x-bind:class="$wire.address.id === null && 'ring-2 ring-offset-2 ring-primary-500'"
+            >
+                <x-icon class="w-5 h-5" name="plus" />
+                <div>
+                    {{  __('Add new address') }}
                 </div>
             </div>
-            <x-slot:footer>
-                <div class="flex justify-end gap-1">
-                    <x-button x-on:click="close()">{{ __('Cancel') }}</x-button>
-                    <x-button wire:click="saveDeliveryAddress().then((success) => success ? close() : null)" primary>{{ __('Save') }}</x-button>
-                </div>
-            </x-slot>
-        </x-card>
-    </x-modal>
+        </div>
+        <x-slot:footer>
+            <div class="flex justify-end gap-1">
+                <x-button x-on:click="close()">{{ __('Cancel') }}</x-button>
+                <x-button wire:click="saveDeliveryAddress().then((success) => success ? close() : null)" primary>{{ __('Save') }}</x-button>
+            </div>
+        </x-slot>
+    </x-modal-card>
     <x-card :title="__('Terms And Conditions')">
         <div class="flex items-center gap-1.5">
             <x-checkbox wire:model.boolean="termsAndConditions" />

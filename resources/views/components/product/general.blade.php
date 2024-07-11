@@ -127,7 +127,7 @@
                     </x-slot:sub-value>
                     <x-slot:actions>
                         <x-input x-bind:disabled="! edit" x-model="supplier.manufacturer_product_number" :label="__('Manufacturer product number')" />
-                        <x-inputs.number x-bind:disabled="! edit" x-model="supplier.purchase_price" :label="__('Purchase Price')" step="0.01" />
+                        <x-number x-bind:disabled="! edit" x-model="supplier.purchase_price" :label="__('Purchase Price')" step="0.01" />
                         <div class="mt-6">
                             <x-button
                                 negative

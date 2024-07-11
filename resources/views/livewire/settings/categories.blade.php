@@ -22,7 +22,7 @@
     category: $wire.$entangle('category'),
 }">
     <div id="category-modal">
-        <x-modal.card :title="$category->id ? __('Edit Category') : __('Create Category')">
+        <x-modal-card :title="$category->id ? __('Edit Category') : __('Create Category')">
             <div class="flex flex-col gap-4">
                 <x-input wire:model="category.name" :label="__('Name')"></x-input>
                 <x-toggle wire:model="category.is_active" :label="__('Active')"></x-toggle>
@@ -75,7 +75,7 @@
                     </div>
                 </div>
             </x-slot:footer>
-        </x-modal.card>
+        </x-modal-card>
     </div>
     <div wire:ignore>
         @include('tall-datatables::livewire.data-table')

@@ -113,7 +113,7 @@
                     ]"
                 />
             </div>
-            <x-inputs.number
+            <x-number
                 :label="__('Budget')"
                 x-bind:readonly="!edit"
                 wire:model="project.budget"

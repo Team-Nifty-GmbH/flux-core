@@ -33,7 +33,7 @@
                 <x-button flat squared x-on:click="editor().chain().focus().toggleStrike().run()" class="line-through" label="S"></x-button>
             @endif
             @if($code)
-                <x-button flat squared x-on:click="editor().chain().focus().toggleCode().run()" icon="code" :label="null"/>
+                <x-button flat squared x-on:click="editor().chain().focus().toggleCode().run()" icon="code-bracket" :label="null"/>
             @endif
             @if($h1)
                 <x-button flat squared x-on:click="editor().chain().focus().toggleHeading({ level: 1 }).run()" label="H1"></x-button>
@@ -52,14 +52,14 @@
             @if($bulletList)
                 <x-button flat squared x-on:click="editor().chain().focus().toggleBulletList().run()">
                     <x-slot:label>
-                        <x-heroicons name="list-bullet" class="w-4 h-4"/>
+                        <x-icon name="list-bullet" class="w-4 h-4"/>
                     </x-slot:label>
                 </x-button>
             @endif
             @if($orderedList)
                 <x-button flat squared x-on:click="editor().chain().focus().toggleOrderedList().run()">
                     <x-slot:label>
-                        <x-heroicons name="list-bullet" class="w-4 h-4"/>
+                        <x-icon name="list-bullet" class="w-4 h-4"/>
                     </x-slot:label>
                 </x-button>
             @endif
@@ -69,7 +69,7 @@
             @if($codeBlock)
                 <x-button flat squared x-on:click="editor().chain().focus().toggleCodeBlock().run()">
                     <x-slot:label>
-                        <x-heroicons name="code-bracket-square" class="w-4 h-4"/>
+                        <x-icon name="code-bracket-square" class="w-4 h-4"/>
                     </x-slot:label>
                 </x-button>
             @endif

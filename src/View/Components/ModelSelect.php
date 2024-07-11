@@ -2,9 +2,9 @@
 
 namespace FluxErp\View\Components;
 
-use WireUi\View\Components\Select;
+use WireUi\Components\Select\Base;
 
-class ModelSelect extends Select
+class ModelSelect extends Base
 {
     protected function getView(): string
     {

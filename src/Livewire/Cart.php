@@ -20,7 +20,7 @@ use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 #[Lazy]
 class Cart extends Component

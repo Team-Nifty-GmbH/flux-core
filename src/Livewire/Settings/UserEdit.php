@@ -21,7 +21,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Livewire\Component;
 use Livewire\WithPagination;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 class UserEdit extends Component
 {

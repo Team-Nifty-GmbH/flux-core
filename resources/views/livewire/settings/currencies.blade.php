@@ -9,7 +9,7 @@
         @include('tall-datatables::livewire.data-table')
     </div>
 
-    <x-modal.card :title="($selectedCurrency->id ?? false) ? __('Edit Currency') : __('Create Currency')" wire:model="editModal">
+    <x-modal-card :title="($selectedCurrency->id ?? false) ? __('Edit Currency') : __('Create Currency')" wire:model="editModal">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
@@ -42,5 +42,5 @@
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
+    </x-modal-card>
 </div>

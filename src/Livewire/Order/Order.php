@@ -45,7 +45,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 class Order extends OrderPositionList
 {

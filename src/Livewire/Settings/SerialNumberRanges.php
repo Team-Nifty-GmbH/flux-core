@@ -15,7 +15,7 @@ use Illuminate\Validation\ValidationException;
 use Spatie\ModelInfo\ModelInfo;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 class SerialNumberRanges extends SerialNumberRangeList
 {

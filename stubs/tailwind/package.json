@@ -6,6 +6,7 @@
         "build": "vite build"
     },
     "devDependencies": {
+        "lodash.throttle": "^4.1.1",
         "@alpinejs/collapse": "^3.13.10",
         "@floating-ui/dom": "^1.5.3",
         "@fontsource/inter": "^5.0.18",

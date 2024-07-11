@@ -66,28 +66,30 @@
         <div class="pb-4 md:pt-4 md:pr-8 md:pl-28">
             @if($showSearchBar)
                 <div>
-                    <x-card class="flex w-full gap-2">
-                        <x-button
-                            class="block md:hidden"
-                            icon="menu"
-                            primary
-                            x-on:click="showMenu(true)"
-                        />
-                        <livewire:features.search-bar />
-                        <div class="flex gap-1.5" wire:ignore>
-                            @canAction(\FluxErp\Actions\Cart\CreateCart::class)
-                                <livewire:cart />
-                            @endCanAction
-                            @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
-                                <livewire:work-time lazy />
-                            @endCanAction
-                            <livewire:features.notifications lazy />
+                    <x-card>
+                        <div class="flex w-full gap-2">
+                            <x-button
+                                class="block md:hidden"
+                                icon="bars-3"
+                                primary
+                                x-on:click="showMenu(true)"
+                            />
+                            <livewire:features.search-bar />
+                            <div class="flex gap-1.5" wire:ignore>
+                                @canAction(\FluxErp\Actions\Cart\CreateCart::class)
+                                    <livewire:cart />
+                                @endCanAction
+                                @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
+                                    <livewire:work-time lazy />
+                                @endCanAction
+                                <livewire:features.notifications lazy />
+                            </div>
                         </div>
                     </x-card>
                 </div>
             @else
                 <x-card class="block md:hidden">
-                    <x-button primary icon="menu" x-on:click="showMenu(true)" />
+                    <x-button primary icon="bars-3" x-on:click="showMenu(true)" />
                 </x-card>
             @endif
         </div>
@@ -110,7 +112,7 @@
                             >
                                 <div class="w-16 flex-none">
                                     <div class="flex w-full justify-center text-white">
-                                        <x-heroicons :name="$navigation['icon'] ?? 'no-symbol'" class="h-4 w-4" />
+                                        <x-icon :name="$navigation['icon'] ?? 'no-symbol'" class="h-4 w-4" />
                                     </div>
                                 </div>
                                 <span class="truncate text-sm text-white"> {{ __($navigation['label'] ?? $key) }} </span>
@@ -149,7 +151,7 @@
                         <div x-on:click="frequentlyVisitedOpen = ! frequentlyVisitedOpen" class="cursor-pointer dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50">
                             <div class="w-16 flex-none">
                                 <div class="flex w-full justify-center text-white">
-                                    <x-heroicons name="clock" class="h-4 w-4" />
+                                    <x-icon name="clock" class="h-4 w-4" />
                                 </div>
                             </div>
                             <span class="truncate text-sm text-white">{{ __('Frequently visited') }}</span>
@@ -170,7 +172,7 @@
                                 >
                                     <div class="w-16 flex-none">
                                         <div class="flex w-full justify-center text-white">
-                                            <x-heroicons
+                                            <x-icon
                                                 :name="$navigations->first(fn ($item) => str_starts_with($visit, data_get($item, 'uri')) && data_get($item, 'uri') !== '/')['icon'] ?? 'no-symbol'"
                                                 class="h-4 w-4"
                                             />
@@ -187,7 +189,7 @@
                         <div x-on:click="favoritesOpen = ! favoritesOpen" class="cursor-pointer dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50">
                             <div class="w-16 flex-none">
                                 <div class="flex w-full justify-center text-white">
-                                    <x-heroicons name="star" variant="solid" class="h-4 w-4 fill-warning-400" />
+                                    <x-icon name="star" variant="solid" class="h-4 w-4 fill-warning-400" />
                                 </div>
                             </div>
                             <span class="truncate text-sm text-white">{{ __('Favorites') }}</span>
@@ -209,7 +211,7 @@
                                     >
                                         <div class="w-16 flex-none">
                                             <div class="flex w-full justify-center text-white">
-                                                <x-heroicons
+                                                <x-icon
                                                     :name="$navigations->first(fn ($item) => str_starts_with($favorite['url'], data_get($item, 'uri')) && data_get($item, 'uri') !== '/')['icon'] ?? 'no-symbol'"
                                                     class="h-4 w-4"/>
                                             </div>
@@ -217,7 +219,7 @@
                                         <div class="truncate text-sm text-white"> {{ $favorite['name'] }} </div>
                                     </a>
                                     <div class="truncate" x-show="menuOpen" x-transition x-cloak>
-                                        <x-button.circle
+                                        <x-mini-button rounded
                                             xs
                                             negative
                                             icon="trash"

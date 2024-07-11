@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 class Notifications extends Component
 {

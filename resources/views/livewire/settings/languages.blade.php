@@ -1,5 +1,5 @@
 <div class="py-6">
-    <x-modal.card :title="$selectedLanguage->id ?? false ? __('Edit Language') : __('Create Language')" wire:model="editModal">
+    <x-modal-card :title="$selectedLanguage->id ?? false ? __('Edit Language') : __('Create Language')" wire:model="editModal">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
@@ -34,7 +34,7 @@
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
+    </x-modal-card>
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">

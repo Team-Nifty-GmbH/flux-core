@@ -19,7 +19,7 @@ use Livewire\Attributes\Renderless;
 use Livewire\WithFileUploads;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 class Clients extends ClientList
 {

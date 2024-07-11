@@ -13,7 +13,7 @@ use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 class ProjectTaskList extends BaseTaskList
 {
@@ -57,6 +57,7 @@ class ProjectTaskList extends BaseTaskList
         return [
             DataTableButton::make()
                 ->label(__('New'))
+                ->icon('plus')
                 ->color('primary')
                 ->attributes([
                     'x-on:click' => '$wire.fillForm()',

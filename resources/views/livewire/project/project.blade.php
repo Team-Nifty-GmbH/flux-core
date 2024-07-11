@@ -18,7 +18,7 @@
                     </div>
                 </h1>
                 <a class="flex gap-1.5 font-semibold opacity-40" x-bind:href="project.parent?.url" x-show="project.parent?.url">
-                    <x-heroicons name="link" class="w-4 h-4" />
+                    <x-icon name="link" class="w-4 h-4" />
                     <span x-text="project.parent?.label">
                     </span>
                 </a>

@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Livewire\Component;
 use Livewire\WithPagination;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 class SearchBar extends Component
 {

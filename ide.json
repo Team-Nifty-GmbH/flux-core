@@ -1,11 +1,20 @@
 {
-    "$schema": "http://laravel-ide.com/schema/laravel-ide-v1.json",
+    "$schema": "https://laravel-ide.com/schema/laravel-ide-v2.json",
     "blade": {
         "components": {
-            "viewPaths": [
+            "fromConfig": [
                 {
-                    "path": "vendor/wireui/wireui/resources/views/components"
+                    "configFileName": "wireui",
+                    "componentsKey": "components",
+                    "classFetch": {
+                        "type": "arrayKey",
+                        "key": "class"
+                    },
+                    "aliasKey": "alias"
                 }
+            ],
+            "ignoreViewPaths": [
+                "vendor/wireui/wireui/src/resources/views"
             ]
         }
     }

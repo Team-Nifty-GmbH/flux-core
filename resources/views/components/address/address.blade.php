@@ -131,14 +131,13 @@
         </label>
         <div class="col-span-2">
             <x-input x-bind:readonly="!$wire.edit"
-                     class="pl-12"
                      x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
                      wire:model="address.email">
                 <x-slot:prepend>
                     <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                         <x-button
                             class="h-full rounded-l-md"
-                            icon="mail"
+                            icon="envelope"
                             primary
                             flat
                             squared
@@ -155,7 +154,6 @@
         </label>
         <div class="col-span-2">
             <x-input x-bind:readonly="!$wire.edit"
-                class="pl-12"
                 x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
                 wire:model="address.phone"
             >
@@ -181,14 +179,13 @@
             </label>
             <div class="col-span-2">
                 <x-input x-bind:readonly="!$wire.edit"
-                         class="pl-12"
                          x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
                          wire:model="address.url">
                     <x-slot:prepend>
                         <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                             <x-button
                                 class="h-full rounded-l-md"
-                                icon="globe"
+                                icon="globe-alt"
                                 primary
                                 flat
                                 squared

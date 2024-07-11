@@ -12,7 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 class Profile extends Component
 {

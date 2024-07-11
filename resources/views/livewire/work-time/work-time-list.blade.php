@@ -9,8 +9,8 @@
         });
     }
 }">
-    <x-modal name="edit-work-time">
-        <x-card class="flex flex-col gap-4">
+    <x-modal-card name="edit-work-time">
+        <div class="flex flex-col gap-4">
             <div class="flex flex-col gap-1.5" x-cloak x-show="! $wire.workTime.is_daily_work_time">
                 <x-select
                     :label="__('Work Time Type')"
@@ -120,8 +120,8 @@
                     </div>
                 </div>
             </x-slot:footer>
-        </x-card>
-    </x-modal>
+        </div>
+    </x-modal-card>
     <div wire:ignore>
         @include('tall-datatables::livewire.data-table')
     </div>

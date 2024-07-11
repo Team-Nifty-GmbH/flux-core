@@ -21,7 +21,7 @@ use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions as Actions;
 
 #[Lazy]
 class Plugins extends Component

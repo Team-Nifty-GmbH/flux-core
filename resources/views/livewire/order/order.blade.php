@@ -12,7 +12,7 @@
     }"
 >
     @section('modals')
-        <x-modal.card id="preview" max-width="6xl" :title="__('Preview')">
+        <x-modal-card id="preview" width="6xl" :title="__('Preview')">
             <iframe id="preview-iframe" src="#" loading="lazy" class="w-full min-h-screen"></iframe>
             <x-slot:footer>
                 <div class="flex justify-end gap-x-4">
@@ -22,242 +22,236 @@
                     </div>
                 </div>
             </x-slot:footer>
-        </x-modal.card>
-        <x-modal name="create-documents">
-            <x-card :title="__('Create Documents')">
-                <div class="grid grid-cols-4 gap-1.5">
-                    <div class="font-semibold text-sm">{{ __('Print') }}</div>
-                    <div class="font-semibold text-sm">{{ __('Email') }}</div>
-                    <div class="font-semibold text-sm">{{ __('Download') }}</div>
-                    <div class="font-semibold text-sm">{{ __('Force Create') }}</div>
-                    @foreach($printLayouts as $printLayout)
-                        <div class="text-ellipsis overflow-hidden">
-                            <x-checkbox wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}" :label="__($printLayout)" />
-                        </div>
-                        <div class="text-ellipsis overflow-hidden">
-                            <x-checkbox class="truncate" wire:model.boolean="selectedPrintLayouts.email.{{ $printLayout }}" :label="__($printLayout)" />
-                        </div>
-                        <div class="text-ellipsis overflow-hidden">
-                            <x-checkbox class="truncate" wire:model.boolean="selectedPrintLayouts.download.{{ $printLayout }}" :label="__($printLayout)" />
-                        </div>
-                        <div class="text-ellipsis overflow-hidden">
-                            <x-checkbox class="truncate" wire:model.boolean="selectedPrintLayouts.force.{{ $printLayout }}" :label="__($printLayout)" />
-                        </div>
-                    @endforeach
-                </div>
-                <x-slot:footer>
-                    <div class="flex justify-end gap-x-4">
-                        <div class="flex">
-                            <x-button flat :label="__('Cancel')" x-on:click="close" />
-                            <x-button primary :label="__('Continue')" spinner wire:click="createDocuments().then(() => { close(); });" />
-                        </div>
+        </x-modal-card>
+        <x-modal-card name="create-documents" :title="__('Create Documents')">
+            <div class="grid grid-cols-4 gap-1.5">
+                <div class="font-semibold text-sm">{{ __('Print') }}</div>
+                <div class="font-semibold text-sm">{{ __('Email') }}</div>
+                <div class="font-semibold text-sm">{{ __('Download') }}</div>
+                <div class="font-semibold text-sm">{{ __('Force Create') }}</div>
+                @foreach($printLayouts as $printLayout)
+                    <div class="text-ellipsis overflow-hidden">
+                        <x-checkbox wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}" :label="__($printLayout)" />
                     </div>
-                </x-slot:footer>
-            </x-card>
-        </x-modal>
-        <x-modal name="replicate-order">
-            <x-card>
-                <section x-data="{
-                    updateContactId(id) {
-                        Alpine.$data(
-                            document.getElementById('invoice-address-id').querySelector('[x-data]')
-                        ).asyncData.params.where[0][2] = id;
-                        Alpine.$data(
-                            document.getElementById('delivery-address-id').querySelector('[x-data]')
-                        ).asyncData.params.where[0][2] = id;
-                        $wire.fetchContactData(true);
-                    }
+                    <div class="text-ellipsis overflow-hidden">
+                        <x-checkbox class="truncate" wire:model.boolean="selectedPrintLayouts.email.{{ $printLayout }}" :label="__($printLayout)" />
+                    </div>
+                    <div class="text-ellipsis overflow-hidden">
+                        <x-checkbox class="truncate" wire:model.boolean="selectedPrintLayouts.download.{{ $printLayout }}" :label="__($printLayout)" />
+                    </div>
+                    <div class="text-ellipsis overflow-hidden">
+                        <x-checkbox class="truncate" wire:model.boolean="selectedPrintLayouts.force.{{ $printLayout }}" :label="__($printLayout)" />
+                    </div>
+                @endforeach
+            </div>
+            <x-slot:footer>
+                <div class="flex justify-end gap-x-4">
+                    <div class="flex">
+                        <x-button flat :label="__('Cancel')" x-on:click="close" />
+                        <x-button primary :label="__('Continue')" spinner wire:click="createDocuments().then(() => { close(); });" />
+                    </div>
+                </div>
+            </x-slot:footer>
+        </x-modal-card>
+        <x-modal-card name="replicate-order">
+            <section x-data="{
+                updateContactId(id) {
+                    Alpine.$data(
+                        document.getElementById('invoice-address-id').querySelector('[x-data]')
+                    ).asyncData.params.where[0][2] = id;
+                    Alpine.$data(
+                        document.getElementById('delivery-address-id').querySelector('[x-data]')
+                    ).asyncData.params.where[0][2] = id;
+                    $wire.fetchContactData(true);
                 }
-                ">
-                    <div class="space-y-2.5 divide-y divide-secondary-200">
+            }
+            ">
+                <div class="space-y-2.5 divide-y divide-secondary-200">
+                    <x-select
+                        :options="$orderTypes"
+                        option-label="name"
+                        option-value="id"
+                        :label="__('Order type')"
+                        wire:model="replicateOrder.order_type_id"
+                    />
+                    <div class="pt-4">
                         <x-select
-                            :options="$orderTypes"
-                            option-label="name"
-                            option-value="id"
-                            :label="__('Order type')"
-                            wire:model="replicateOrder.order_type_id"
+                            :label="__('Contact')"
+                            class="pb-4"
+                            wire:model="replicateOrder.contact_id"
+                            option-value="contact_id"
+                            option-label="label"
+                            option-description="description"
+                            :clearable="false"
+                            x-on:selected="updateContactId($event.detail.contact_id)"
+                            template="user-option"
+                            :async-data="[
+                                'api' => route('search', \FluxErp\Models\Address::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'option-value' => 'contact_id',
+                                    'fields' => [
+                                        'name',
+                                        'contact_id',
+                                        'firstname',
+                                        'lastname',
+                                        'company',
+                                    ],
+                                    'where' => [
+                                        [
+                                            'is_main_address',
+                                            '=',
+                                            true,
+                                        ]
+                                    ],
+                                    'with' => 'contact.media',
+                                ]
+                            ]"
                         />
-                        <div class="pt-4">
+                        <div id="invoice-address-id">
                             <x-select
-                                :label="__('Contact')"
                                 class="pb-4"
-                                wire:model="replicateOrder.contact_id"
-                                option-value="contact_id"
+                                :label="__('Invoice Address')"
+                                wire:model="replicateOrder.address_invoice_id"
+                                option-value="id"
                                 option-label="label"
                                 option-description="description"
                                 :clearable="false"
-                                x-on:selected="updateContactId($event.detail.contact_id)"
-                                template="user-option"
                                 :async-data="[
                                     'api' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
                                     'params' => [
-                                        'option-value' => 'contact_id',
-                                        'fields' => [
-                                            'name',
-                                            'contact_id',
-                                            'firstname',
-                                            'lastname',
-                                            'company',
-                                        ],
-                                        'where' => [
-                                            [
-                                                'is_main_address',
-                                                '=',
-                                                true,
-                                            ]
-                                        ],
                                         'with' => 'contact.media',
+                                        'where' => [
+                                            ['contact_id', '=', $order->contact_id],
+                                        ],
                                     ]
                                 ]"
                             />
-                            <div id="invoice-address-id">
-                                <x-select
-                                    class="pb-4"
-                                    :label="__('Invoice Address')"
-                                    wire:model="replicateOrder.address_invoice_id"
-                                    option-value="id"
-                                    option-label="label"
-                                    option-description="description"
-                                    :clearable="false"
-                                    :async-data="[
-                                        'api' => route('search', \FluxErp\Models\Address::class),
-                                        'method' => 'POST',
-                                        'params' => [
-                                            'with' => 'contact.media',
-                                            'where' => [
-                                                ['contact_id', '=', $order->contact_id],
-                                            ],
-                                        ]
-                                    ]"
-                                />
-                            </div>
-                            <div id="delivery-address-id">
-                                <x-select
-                                    :label="__('Delivery Address')"
-                                    class="pb-4"
-                                    wire:model="replicateOrder.address_delivery_id"
-                                    option-value="id"
-                                    option-label="label"
-                                    option-description="description"
-                                    :clearable="false"
-                                    :async-data="[
-                                        'api' => route('search', \FluxErp\Models\Address::class),
-                                        'method' => 'POST',
-                                        'params' => [
-                                            'with' => 'contact.media',
-                                            'where' => [
-                                                ['contact_id', '=', $order->contact_id],
-                                            ],
-                                        ]
-                                    ]"
-                                />
-                            </div>
                         </div>
-                        <div class="space-y-3 pt-4">
+                        <div id="delivery-address-id">
                             <x-select
-                                :label="__('Client')"
-                                :options="$clients"
+                                :label="__('Delivery Address')"
+                                class="pb-4"
+                                wire:model="replicateOrder.address_delivery_id"
                                 option-value="id"
-                                option-label="name"
+                                option-label="label"
+                                option-description="description"
                                 :clearable="false"
-                                autocomplete="off"
-                                wire:model="replicateOrder.client_id"
-                            />
-                            <x-select
-                                :label="__('Price list')"
-                                :options="$priceLists"
-                                option-value="id"
-                                option-label="name"
-                                :clearable="false"
-                                autocomplete="off"
-                                wire:model="replicateOrder.price_list_id"
-                            />
-                            <x-select
-                                :label="__('Payment method')"
-                                :options="$paymentTypes"
-                                option-value="id"
-                                option-label="name"
-                                :clearable="false"
-                                autocomplete="off"
-                                wire:model="replicateOrder.payment_type_id"
-                            />
-                            <x-select
-                                :label="__('Language')"
-                                :options="$languages"
-                                option-value="id"
-                                option-label="name"
-                                :clearable="false"
-                                autocomplete="off"
-                                wire:model="replicateOrder.language_id"
+                                :async-data="[
+                                    'api' => route('search', \FluxErp\Models\Address::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'with' => 'contact.media',
+                                        'where' => [
+                                            ['contact_id', '=', $order->contact_id],
+                                        ],
+                                    ]
+                                ]"
                             />
                         </div>
                     </div>
-                </section>
-                <x-errors />
-                <x-slot:footer>
-                    <div class="flex justify-end gap-x-4">
-                        <div class="flex">
-                            <x-button flat :label="__('Cancel')" x-on:click="close" />
-                            <x-button spinner="saveReplicate" primary :label="__('Save')" wire:click="saveReplicate()" />
-                        </div>
-                    </div>
-                </x-slot:footer>
-            </x-card>
-        </x-modal>
-        <x-modal name="create-child-order" max-width="7xl">
-            <x-card>
-                <div class="grid grid-cols-2 gap-1.5">
-                    <div class="flex flex-col gap-1.5">
+                    <div class="space-y-3 pt-4">
                         <x-select
-                            :label="__('Order Type')"
-                            wire:model="replicateOrder.order_type_id"
-                            :options="$replicateOrderTypes"
+                            :label="__('Client')"
+                            :options="$clients"
                             option-value="id"
                             option-label="name"
                             :clearable="false"
+                            autocomplete="off"
+                            wire:model="replicateOrder.client_id"
+                        />
+                        <x-select
+                            :label="__('Price list')"
+                            :options="$priceLists"
+                            option-value="id"
+                            option-label="name"
+                            :clearable="false"
+                            autocomplete="off"
+                            wire:model="replicateOrder.price_list_id"
+                        />
+                        <x-select
+                            :label="__('Payment method')"
+                            :options="$paymentTypes"
+                            option-value="id"
+                            option-label="name"
+                            :clearable="false"
+                            autocomplete="off"
+                            wire:model="replicateOrder.payment_type_id"
+                        />
+                        <x-select
+                            :label="__('Language')"
+                            :options="$languages"
+                            option-value="id"
+                            option-label="name"
+                            :clearable="false"
+                            autocomplete="off"
+                            wire:model="replicateOrder.language_id"
                         />
                     </div>
-                    <div class="overflow-auto">
-                        <template x-for="(position, index) in $wire.replicateOrder.order_positions">
-                            <x-list-item :item="[]">
-                                <x-slot:value>
-                                    <span x-text="position.name"></span>
-                                </x-slot:value>
-                                <x-slot:sub-value>
-                                    <div class="flex flex-col">
-                                        <span x-html="position.description"></span>
-                                    </div>
-                                </x-slot:sub-value>
-                                <x-slot:actions>
-                                    <x-inputs.number x-model.number="position.amount" min="0" />
-                                    <x-button
-                                        negative
-                                        icon="trash"
-                                        x-on:click="$wire.replicateOrder.order_positions.splice(index, 1); $wire.recalculateReplicateOrderPositions();"
-                                    />
-                                </x-slot:actions>
-                            </x-list-item>
-                        </template>
+                </div>
+            </section>
+            <x-errors />
+            <x-slot:footer>
+                <div class="flex justify-end gap-x-4">
+                    <div class="flex">
+                        <x-button flat :label="__('Cancel')" x-on:click="close" />
+                        <x-button spinner="saveReplicate" primary :label="__('Save')" wire:click="saveReplicate()" />
                     </div>
                 </div>
-                <div class="pt-4">
-                    <livewire:order.replicate-order-position-list :id="$order->id" />
+            </x-slot:footer>
+        </x-modal-card>
+        <x-modal-card name="create-child-order" width="7xl">
+            <div class="grid grid-cols-2 gap-1.5">
+                <div class="flex flex-col gap-1.5">
+                    <x-select
+                        :label="__('Order Type')"
+                        wire:model="replicateOrder.order_type_id"
+                        :options="$replicateOrderTypes"
+                        option-value="id"
+                        option-label="name"
+                        :clearable="false"
+                    />
                 </div>
-                <x-slot:footer>
-                    <div class="flex justify-end gap-1.5">
-                        <x-button :label="__('Cancel')" x-on:click="close"/>
-                        <x-button
-                            x-cloak
-                            x-show="$wire.replicateOrder.order_positions?.length"
-                            primary
-                            :label="__('Save')"
-                            wire:click="saveReplicate()"
-                        />
-                    </div>
-                </x-slot:footer>
-            </x-card>
-        </x-modal>
+                <div class="overflow-auto">
+                    <template x-for="(position, index) in $wire.replicateOrder.order_positions">
+                        <x-list-item :item="[]">
+                            <x-slot:value>
+                                <span x-text="position.name"></span>
+                            </x-slot:value>
+                            <x-slot:sub-value>
+                                <div class="flex flex-col">
+                                    <span x-html="position.description"></span>
+                                </div>
+                            </x-slot:sub-value>
+                            <x-slot:actions>
+                                <x-number x-model.number="position.amount" min="0" />
+                                <x-button
+                                    negative
+                                    icon="trash"
+                                    x-on:click="$wire.replicateOrder.order_positions.splice(index, 1); $wire.recalculateReplicateOrderPositions();"
+                                />
+                            </x-slot:actions>
+                        </x-list-item>
+                    </template>
+                </div>
+            </div>
+            <div class="pt-4">
+                <livewire:order.replicate-order-position-list :id="$order->id" />
+            </div>
+            <x-slot:footer>
+                <div class="flex justify-end gap-1.5">
+                    <x-button :label="__('Cancel')" x-on:click="close"/>
+                    <x-button
+                        x-cloak
+                        x-show="$wire.replicateOrder.order_positions?.length"
+                        primary
+                        :label="__('Save')"
+                        wire:click="saveReplicate()"
+                    />
+                </div>
+            </x-slot:footer>
+        </x-modal-card>
     @show
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
@@ -266,8 +260,8 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex gap-1.5">
-                        <x-heroicons x-cloak x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
-                        <x-heroicons x-cloak x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
+                        <x-icon x-cloak x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
+                        <x-icon x-cloak x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
                         <div>
                             <div>
                                 <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.order_type.name">
@@ -303,7 +297,7 @@
                     </div>
                 </h1>
                 <a wire:navigate class="flex gap-1.5 font-semibold opacity-40 dark:text-gray-200" x-bind:href="$wire.order.parent?.url" x-cloak x-show="$wire.order.parent?.url">
-                    <x-heroicons name="link" class="w-4 h-4" />
+                    <x-icon name="link" class="w-4 h-4" />
                     <span x-text="$wire.order.parent?.label"></span>
                 </a>
             </div>
@@ -656,7 +650,7 @@
                                         <div class="dropdown-full-w">
                                             <x-dropdown width="w-full">
                                                 <x-slot name="trigger">
-                                                    <x-button class="w-full" icon="search">
+                                                    <x-button class="w-full" icon="magnifying-glass">
                                                         {{ __('Preview') }}
                                                     </x-button>
                                                 </x-slot>

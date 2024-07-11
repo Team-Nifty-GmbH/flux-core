@@ -1,5 +1,5 @@
-<x-modal name="edit-purchase-invoice" max-width="" spacing="">
-    <x-card style="height: calc(100vh - 62.5px - 36px);" :title="__('Edit Purchase Invoice')" rounded="">
+<x-modal-card name="edit-purchase-invoice" width="" spacing="" :title="__('Edit Purchase Invoice')">
+    <div style="height: calc(100vh - 62.5px - 36px);" rounded="">
         <div class="h-full grid sm:grid-cols-2 gap-4 content-stretch">
             <div x-cloak x-show="! $wire.purchaseInvoiceForm.id">
                 <x-flux::features.media.upload-form-object
@@ -208,7 +208,7 @@
                                     :label="__('Name')"
                                 />
                                 <div class="flex flex-col md:flex-row gap-1.5">
-                                    <x-inputs.number
+                                    <x-number
                                         step="0.01"
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                         x-on:keyup="recalculatePrices(position, $event)"
@@ -224,14 +224,14 @@
                                             x-on:selected="position.vat_rate_id = $event.detail?.value"
                                         />
                                     </div>
-                                    <x-inputs.number
+                                    <x-number
                                         step="0.01"
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                         x-on:keyup="recalculatePrices(position, $event)"
                                         x-model.number="position.unit_price"
                                         :label="__('Unit Price')"
                                     />
-                                    <x-inputs.number
+                                    <x-number
                                         step="0.01"
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                         x-on:keyup="recalculatePrices(position, $event)"
@@ -322,5 +322,5 @@
                 </div>
             </div>
         </x-slot:footer>
-    </x-card>
-</x-modal>
+    </div>
+</x-modal-card>
