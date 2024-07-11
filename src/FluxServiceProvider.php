@@ -62,7 +62,6 @@ use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Spatie\Translatable\Facades\Translatable;
 use WireUi\Enum\Packs\Color;
-use WireUi\Enum\Packs\Variant;
 use WireUi\WireUiConfig;
 
 class FluxServiceProvider extends ServiceProvider
