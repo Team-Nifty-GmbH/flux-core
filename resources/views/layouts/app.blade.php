@@ -33,7 +33,7 @@
 </head>
 <body class="dark:bg-secondary-900 h-full bg-slate-50 transition duration-300">
     @persist('notifications')
-        <x-notifications z-index="z-50"></x-notifications>
+        <x-notifications z-index="z-60"></x-notifications>
         <x-dialog align="center"/>
         <x-dialog align="center" id="prompt">
             <x-input id="prompt-value" />
