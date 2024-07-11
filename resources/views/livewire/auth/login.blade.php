@@ -1,6 +1,8 @@
 <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8" x-data>
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <x-logo fill="#000000" class="h-24"/>
+        @section('logo')
+            <x-logo fill="#000000" class="h-24"/>
+        @show
     </div>
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
