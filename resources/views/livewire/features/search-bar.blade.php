@@ -28,10 +28,11 @@
     class="relative flex-1"
 >
     <x-input
-        shadowless
         autocomplete="off"
         icon="magnifying-glass"
-        class="w-full !border-0"
+        class="w-full"
+        shadowless
+        padding="pl-3 pr-3 py-2 !ring-0"
         x-on:click="show = true"
         x-on:keydown="show = true"
         x-on:keydown.enter="show = false"
