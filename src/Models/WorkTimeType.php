@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
 use FluxErp\Traits\HasUuid;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class WorkTimeType extends Model
 {
-    use HasPackageFactory, HasTranslations, HasUuid, SoftDeletes;
+    use CacheModelQueries, HasPackageFactory, HasTranslations, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',

@@ -45,6 +45,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
@@ -82,9 +83,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
-        $this->registerBladeComponents();
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
-        $this->registerLivewireComponents();
         $this->registerConfig();
         $this->registerMarcos();
         $this->registerExtensions();
@@ -105,6 +104,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->bootMiddleware();
         $this->bootCommands();
         $this->bootRoutes();
+        $this->registerLivewireComponents();
+        $this->registerBladeComponents();
 
         if (static::$registerFluxRoutes && ! $this->app->runningInConsole()) {
             $this->bootFluxMenu();
@@ -362,6 +363,10 @@ class FluxServiceProvider extends ServiceProvider
 
     private function getViewClassAliasFromNamespace(string $namespace, ?string $directoryPath = null): array
     {
+        if (Cache::has('flux.view-classes.' . Str::slug($namespace))) {
+            return Cache::get('flux.view-classes.' . Str::slug($namespace));
+        }
+
         $directoryPath = $directoryPath ?: Str::replace(['\\', 'FluxErp'], ['/', __DIR__], $namespace);
         $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath));
         $phpFiles = new RegexIterator($directoryIterator, '/\.php$/');
@@ -387,7 +392,7 @@ class FluxServiceProvider extends ServiceProvider
             }
         }
 
-        return $components;
+        return Cache::rememberForever('flux.view-classes.' . Str::slug($namespace), fn () => $components);
     }
 
     protected function bootRoutes(): void

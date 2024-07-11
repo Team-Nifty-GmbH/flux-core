@@ -17,6 +17,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Spatie\Translatable\Events\TranslationHasBeenSetEvent;
 use Spatie\Translatable\Translatable;
@@ -451,9 +452,11 @@ trait HasAdditionalColumns
 
         if (! (static::$metaSchemaColumnsCache[$class] ?? false)) {
             static::$metaSchemaColumnsCache[$class] = collect(
-                $this->getConnection()
-                    ->getSchemaBuilder()
-                    ->getColumnListing($this->getTable()) ?? []
+                Cache::remember(
+                    'column-listing:' . $this->getTable(),
+                    86400,
+                    fn () => Schema::getColumnListing($this->getTable()),
+                ) ?? []
             )->map(fn ($item) => strtolower($item))->toArray();
         }
 

@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 
 class UserClientScope implements Scope
 {
+    protected static array $clients = [];
+
     public function apply(Builder $builder, Model $model): void
     {
         // Don't apply scope if no user is authenticated
@@ -20,18 +22,19 @@ class UserClientScope implements Scope
             return;
         }
 
-        $clients = ($user = Auth::user()) instanceof User ?
+        // write the clients to a static property to avoid multiple queries if the scope is used multiple times
+        static::$clients ??= ($user = Auth::user()) instanceof User ?
             $user->clients()
                 ->withoutGlobalScope(UserClientScope::class)
                 ->pluck('id')
                 ->toArray() : [];
 
-        if (! $clients) {
+        if (! static::$clients) {
             return;
         }
 
         if ($model instanceof Client) {
-            $builder->whereIntegerInRaw($model->getQualifiedKeyName(), $clients);
+            $builder->whereIntegerInRaw($model->getQualifiedKeyName(), static::$clients);
 
             return;
         }
@@ -42,7 +45,7 @@ class UserClientScope implements Scope
             $builder->where(fn (Builder $query) => $query
                 ->whereIntegerInRaw(
                     $relation->getQualifiedForeignKeyName(),
-                    $clients
+                    static::$clients
                 )
                 ->orWhereNull($relation->getQualifiedForeignKeyName())
             );
@@ -61,7 +64,7 @@ class UserClientScope implements Scope
                 ->where(fn (Builder $query) => $query
                     ->whereIntegerInRaw(
                         'ucs.' . $relation->getRelatedPivotKeyName(),
-                        $clients
+                        static::$clients
                     )
                     ->orWhereNull('ucs.' . $relation->getForeignPivotKeyName())
                 );

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductOptionGroup extends Model
 {
-    use Filterable, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
+    use CacheModelQueries, Filterable, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
