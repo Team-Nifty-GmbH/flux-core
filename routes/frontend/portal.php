@@ -5,6 +5,7 @@ use FluxErp\Http\Controllers\MediaController;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Livewire\Portal\Auth\Login;
 use FluxErp\Livewire\Portal\Auth\Logout;
+use FluxErp\Livewire\Portal\Auth\ResetPassword;
 use FluxErp\Livewire\Portal\Calendar;
 use FluxErp\Livewire\Portal\Dashboard;
 use FluxErp\Livewire\Portal\Files;
@@ -40,14 +41,18 @@ Route::middleware(['web', PortalMiddleware::class])
     ->domain(config('flux.portal_domain'))
     ->name('portal.')
     ->group(function () {
+
         Route::get('/icons/{name}/{variant?}', IconController::class)
             ->where('variant', '(outline|solid)')
             ->name('icons');
-        Route::get('/login', Login::class)
-            ->middleware(['guest:address'])
-            ->name('login');
-        Route::post('/login', [AuthController::class, 'authenticatePortal'])
-            ->middleware(['guest:address']);
+
+        Route::middleware(['guest:address'])->group(function () {
+            Route::get('/login', Login::class)
+                ->name('login');
+            Route::post('/login', [AuthController::class, 'authenticatePortal']);
+            Route::get('/reset-password', ResetPassword::class)
+                ->name('password.reset');
+        });
         Route::any('/logout', Logout::class)
             ->name('logout');
 

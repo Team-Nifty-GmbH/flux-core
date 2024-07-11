@@ -26,7 +26,7 @@ class LoginTest extends PortalDuskTestCase
             $browser
                 ->visit($this->baseUrl())
                 ->assertSee(__('For more transparency, quality and speed in all service processes'))
-                ->type('email', $this->user->login_name)
+                ->type('email', $this->user->email)
                 ->type('password', $this->password)
                 ->press('Login')
                 ->waitForReload()

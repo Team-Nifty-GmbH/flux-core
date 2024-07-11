@@ -72,7 +72,7 @@ class PortalDuskTestCase extends DuskTestCase
             'language_id' => $language->id,
             'country_id' => $country->id,
             'can_login' => true,
-            'login_password' => $this->password,
+            'password' => $this->password,
             'is_main_address' => true,
         ]);
     }

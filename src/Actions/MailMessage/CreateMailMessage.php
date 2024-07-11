@@ -59,7 +59,7 @@ class CreateMailMessage extends FluxAction
         if ($mailMessage->mailAccount->is_auto_assign) {
             if ($mailMessage->from_mail && $mailMessage->mailAccount->email !== $mailMessage->from_mail) {
                 $addresses = app(Address::class)->query()
-                    ->where('login_name', $mailMessage->from_mail)
+                    ->where('email', $mailMessage->from_mail)
                     ->get()
                     ->each(
                         fn (Address $address) => $address->mailMessages()->attach($mailMessage->id)

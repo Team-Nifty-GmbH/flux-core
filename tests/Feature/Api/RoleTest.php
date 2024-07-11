@@ -239,7 +239,7 @@ class RoleTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/roles/' . Str::random());
+        $response = $this->actingAs($this->user)->delete('/api/roles/' . Role::query()->max('id') + 100);
         $response->assertStatus(404);
     }
 

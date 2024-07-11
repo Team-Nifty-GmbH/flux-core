@@ -105,7 +105,7 @@ class Profile extends Component
         }
 
         if ($action === UpdateAddress::class && $this->loginPassword) {
-            $this->address['login_password'] = $this->loginPassword;
+            $this->address['password'] = $this->loginPassword;
         }
 
         if (! auth()->user()->can('profiles.{id?}.get') || auth()->id() === $addressId) {

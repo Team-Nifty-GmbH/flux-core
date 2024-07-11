@@ -62,7 +62,7 @@ class ProductOptionGroupTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->get('/api/product-option-groups/'
-            . Str::random());
+            . $this->productOptionGroups[2]->id + 100);
         $response->assertStatus(404);
     }
 

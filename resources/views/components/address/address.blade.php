@@ -126,13 +126,13 @@
         </div>
     @endif
     <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="{{ md5('address.email') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
+        <label for="{{ md5('address.email_primary') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
             {{ __('Email') }}
         </label>
         <div class="col-span-2">
             <x-input x-bind:readonly="!$wire.edit"
                      x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                     wire:model="address.email">
+                     wire:model="address.email_primary">
                 <x-slot:prepend>
                     <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                         <x-button
@@ -141,7 +141,7 @@
                             primary
                             flat
                             squared
-                            x-on:click.prevent="window.open('mailto:' + $wire.address.email)"
+                            x-on:click.prevent="window.open('mailto:' + $wire.address.email_primary)"
                         />
                     </div>
                 </x-slot:prepend>

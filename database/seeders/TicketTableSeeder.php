@@ -17,8 +17,8 @@ class TicketTableSeeder extends Seeder
     {
         $ticketTypes = TicketType::all();
         $addressUsers = Address::query()
-            ->whereNotNull('login_name')
-            ->whereNotNull('login_password')
+            ->whereNotNull('email')
+            ->whereNotNull('password')
             ->where('can_login', true)
             ->where('is_active', true)
             ->get();

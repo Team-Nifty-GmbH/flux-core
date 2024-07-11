@@ -98,6 +98,6 @@ return [
             'table' => 'password_reset_tokens',
             'expire' => 60,
         ],
-
     ],
+
 ];

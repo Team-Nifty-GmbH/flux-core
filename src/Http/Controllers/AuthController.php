@@ -48,13 +48,13 @@ class AuthController extends Controller
 
         if (count($abilities) < 1) {
             $user = app(Address::class)->query()
-                ->where('login_name', $request->email)
+                ->where('email', $request->email)
                 ->where('can_login', true)
-                ->whereNotNull('login_name')
-                ->whereNotNull('login_password')
+                ->whereNotNull('email')
+                ->whereNotNull('password')
                 ->first();
 
-            if ($user && Hash::check($request->password, $user->login_password)) {
+            if ($user && Hash::check($request->password, $user->password)) {
                 $abilities = ['address'];
             }
         }
@@ -110,7 +110,7 @@ class AuthController extends Controller
     public function authenticatePortal(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
-            'login_name' => ['required', 'string'],
+            'email' => ['required', 'string'],
             'password' => ['required'],
         ]);
 
@@ -126,8 +126,8 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'login_name' => __('auth.failed'),
-        ])->onlyInput('login_name');
+            'email' => __('auth.failed'),
+        ])->onlyInput('email');
     }
 
     public function logout(Request $request): JsonResponse

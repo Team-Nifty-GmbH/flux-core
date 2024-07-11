@@ -55,7 +55,7 @@ class AddressForm extends FluxForm
 
     public ?string $url = null;
 
-    public ?string $email = null;
+    public ?string $email_primary = null;
 
     public ?string $phone = null;
 
@@ -63,9 +63,9 @@ class AddressForm extends FluxForm
 
     public ?string $department = null;
 
-    public ?string $login_name = null;
+    public ?string $email = null;
 
-    public ?string $login_password = null;
+    public ?string $password = null;
 
     public bool $is_main_address = false;
 
@@ -129,8 +129,8 @@ class AddressForm extends FluxForm
     {
         $data = parent::toArray();
 
-        if (is_null($this->login_password)) {
-            unset($data['login_password']);
+        if (is_null($this->password)) {
+            unset($data['password']);
         }
 
         $data['contact_options'] = array_filter($this->contact_options);

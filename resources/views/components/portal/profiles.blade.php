@@ -41,7 +41,7 @@
                 <tr class="divide-x divide-gray-200">
                     <td x-text="address.firstname" class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6" />
                     <td x-text="address.lastname" class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6" />
-                    <td x-text="address.login_name" class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6" />
+                    <td x-text="address.email" class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6" />
                     <td class="whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm text-gray-500">
                         <x-button :label="__('Edit')" href="#" x-bind:href="editUserUrl.replace(':addressId', address.id)" />
                     </td>
