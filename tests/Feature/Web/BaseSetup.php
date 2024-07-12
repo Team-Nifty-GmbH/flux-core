@@ -13,6 +13,11 @@ class BaseSetup extends FeatureBaseSetup
         parent::setUp();
 
         PriceList::factory()->create(['is_default' => true]);
-        PaymentType::factory()->create(['is_default' => true]);
+        PaymentType::factory()->create([
+            'is_default' => true,
+            'is_active' => true,
+            'is_sales' => true,
+            'client_id' => $this->dbClient->id,
+        ]);
     }
 }
