@@ -30,6 +30,12 @@ class CartItem extends Model
                 ? net_to_gross($cartItem->total, $cartItem->vatRate->rate_percentage)
                 : $cartItem->total;
         });
+
+        static::saved(function (CartItem $cartItem) {
+            // Update the cart's updated_at timestamp to reflect the change in the cart item
+            // it also triggers the broadcasting of the cart update
+            $cartItem->cart->touch();
+        });
     }
 
     public function cart(): BelongsTo
