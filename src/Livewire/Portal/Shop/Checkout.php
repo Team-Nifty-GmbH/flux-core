@@ -73,9 +73,12 @@ class Checkout extends Cart
     {
         try {
             $this->validateOnly('termsAndConditions');
-            $order = $this->cart()->createOrder(attributes: [
-                'commission' => $this->commission,
-            ]);
+            $order = $this->cart()->createOrder(
+                deliveryAddress: $this->deliveryAddress->toArray(),
+                attributes: [
+                    'commission' => $this->commission,
+                ]
+            );
 
             $this->cart()->delete();
             unset($this->cart);
