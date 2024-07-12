@@ -6,7 +6,6 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
-use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
 use FluxErp\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;

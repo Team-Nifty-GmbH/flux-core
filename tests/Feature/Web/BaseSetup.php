@@ -7,7 +7,7 @@ use FluxErp\Tests\Feature\BaseSetup as FeatureBaseSetup;
 
 class BaseSetup extends FeatureBaseSetup
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         PriceList::factory()->create(['is_default' => true]);
 

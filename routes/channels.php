@@ -24,12 +24,12 @@ foreach (Relation::morphMap() as $class) {
 
     $channel = class_to_broadcast_channel($class);
 
-    Broadcast::channel($channel, function (Authenticatable $user, int|string $key) use ($channel, $class) {
+    Broadcast::channel($channel, function (Authenticatable $user, int|string $key) use ($class) {
         return $class::query()->where(app($class)->getRouteKeyName(), $key)->exists();
     }, ['guards' => ['web', 'address']]);
 
     $channel = class_to_broadcast_channel($class, false);
-    Broadcast::channel($channel, function (Authenticatable $user) use ($channel, $class) {
+    Broadcast::channel($channel, function (Authenticatable $user) {
         return true;
     }, ['guards' => ['web', 'address']]);
 }
