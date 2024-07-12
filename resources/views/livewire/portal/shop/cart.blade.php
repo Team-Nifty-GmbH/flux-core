@@ -34,6 +34,11 @@
                     @section('cart-sidebar.footer')
                         <div class="flex flex-col gap-1.5 w-full">
                             @section('cart-sidebar.footer.buttons')
+                                <x-button
+                                    class="w-full"
+                                    :label="__('Close')"
+                                    x-on:click="show = false;"
+                                />
                                 @if($this->cart->cartItems->isNotEmpty())
                                     @section('cart-sidebar.footer.buttons.buy')
                                         <x-button

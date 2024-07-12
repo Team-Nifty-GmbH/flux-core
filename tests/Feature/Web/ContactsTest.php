@@ -20,6 +20,7 @@ class ContactsTest extends BaseSetup
 
         $paymentType = PaymentType::factory()->create([
             'client_id' => $this->dbClient->id,
+            'is_default' => false,
         ]);
 
         $this->contact = Contact::factory()->create([
