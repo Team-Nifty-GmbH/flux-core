@@ -24,7 +24,7 @@ class UpdateUserRolesRuleset extends FluxRuleset
                 'required',
                 'integer',
                 (new ModelExists(Role::class))
-                    ->whereIn('guard_name', resolve_static(User::class, 'getGuardNames')),
+                    ->whereIn('guard_name', resolve_static(User::class, 'guardNames')),
             ],
         ];
     }
