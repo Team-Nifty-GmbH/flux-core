@@ -418,7 +418,6 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         RouteFacade::pattern('id', '[0-9]+');
-        Livewire::addPersistentMiddleware(PortalMiddleware::class);
     }
 
     protected function bootFluxMenu(): void
@@ -557,6 +556,7 @@ class FluxServiceProvider extends ServiceProvider
 
         $kernel->appendMiddlewareToGroup('web', Localization::class);
         $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
+        $kernel->appendMiddlewareToGroup('web', PortalMiddleware::class);
 
         $this->app['router']->aliasMiddleware('abilities', CheckAbilities::class);
         $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
