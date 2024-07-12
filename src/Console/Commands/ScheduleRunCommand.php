@@ -19,6 +19,12 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
 {
     public function handle(Schedule $schedule, Dispatcher $dispatcher, Cache $cache, ExceptionHandler $handler): void
     {
+        if ($this->laravel->isDownForMaintenance()) {
+            parent::handle($schedule, $dispatcher, $cache, $handler);
+
+            return;
+        }
+
         $dispatcher->dispatch(new ScheduleTasksRegistering($schedule));
 
         $overdueEvents = [];
