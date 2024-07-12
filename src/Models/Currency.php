@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasDefault;
@@ -14,7 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Currency extends Model
 {
-    use Commentable, Filterable, HasDefault, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use CacheModelQueries, Commentable, Filterable, HasDefault, HasPackageFactory, HasUserModification, HasUuid,
+        SoftDeletes;
 
     protected $guarded = [
         'id',

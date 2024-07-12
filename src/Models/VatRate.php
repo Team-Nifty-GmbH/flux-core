@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class VatRate extends Model
 {
-    use Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use CacheModelQueries, Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',

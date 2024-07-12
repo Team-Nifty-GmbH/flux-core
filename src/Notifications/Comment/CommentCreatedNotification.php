@@ -51,7 +51,9 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
                 ['username' => $this->model->createdBy?->getLabel() ?? __('Unknown')],
             ))
             ->icon('chat')
-            ->when(method_exists($this->model->createdBy, 'getAvatarUrl'),
+            ->when(
+                method_exists($this->model->createdBy, 'getAvatarUrl')
+                && $this->model->createdBy->getAvatarUrl(),
                 function (ToastNotification $toast) {
                     return $toast->img($this->model->createdBy->getAvatarUrl());
                 }
