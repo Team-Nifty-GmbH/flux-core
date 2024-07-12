@@ -3,7 +3,6 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
-use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class SettingsCountriesTest extends BaseSetup
