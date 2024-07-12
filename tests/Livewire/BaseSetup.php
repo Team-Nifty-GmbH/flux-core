@@ -28,7 +28,7 @@ class BaseSetup extends TestCase
 
         $this->withoutVite();
 
-        $this->dbClient = Client::factory()->create();
+        $this->dbClient = Client::factory()->create(['is_default' => true]);
         $language = Language::query()->where('language_code', config('app.locale'))->first();
         if (! $language) {
             $language = Language::factory()->create(['language_code' => config('app.locale')]);

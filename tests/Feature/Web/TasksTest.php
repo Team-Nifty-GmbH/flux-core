@@ -4,7 +4,6 @@ namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
 use FluxErp\Models\Task;
-use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class TasksTest extends BaseSetup

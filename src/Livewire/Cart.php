@@ -48,6 +48,14 @@ class Cart extends Component
         $this->watchlists[] = ['id' => 0, 'name' => __('New watchlist')];
     }
 
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . $this->cart()->broadcastChannel() . ',.CartUpdated' => 'refresh',
+            'echo-private:' . $this->cart()->broadcastChannel() . ',.CartDeleted' => 'refresh',
+        ];
+    }
+
     public function render(): View
     {
         return view('flux::livewire.cart');
