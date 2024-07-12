@@ -9,8 +9,8 @@ class BaseSetup extends FeatureBaseSetup
 {
     protected function setUp(): void
     {
-        PriceList::factory()->create(['is_default' => true]);
-
         parent::setUp();
+
+        PriceList::factory()->create(['is_default' => true]);
     }
 }
