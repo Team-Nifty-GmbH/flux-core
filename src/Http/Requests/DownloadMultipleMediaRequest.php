@@ -7,7 +7,7 @@ class DownloadMultipleMediaRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'ids' => 'required|array|string',
+            'ids' => 'required|string',
             'filename' => 'string|nullable',
         ];
     }

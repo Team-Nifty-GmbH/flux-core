@@ -105,10 +105,9 @@ class PortalMiddleware
                 },
             ]);
 
-            // TODO: fix this, Cardinality violation: 1242 Subquery returns more than 1 row
-//            resolve_static(Media::class, 'addGlobalScope', [
-//                'scope' => resolve_static(AddressMediaScope::class, 'class'),
-//            ]);
+            resolve_static(Media::class, 'addGlobalScope', [
+                'scope' => resolve_static(AddressMediaScope::class, 'class'),
+            ]);
 
             config(['livewire.layout' => 'flux::components.layouts.portal']);
             config(['app.url' => config('flux.portal_domain')]);

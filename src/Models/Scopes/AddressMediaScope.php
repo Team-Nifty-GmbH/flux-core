@@ -28,7 +28,7 @@ class AddressMediaScope implements Scope
             $query->whereNot('model_type', morph_alias(Order::class))
                 ->orWhere(function (Builder $query) {
                     $query->where('model_type', morph_alias(Order::class))
-                        ->where('model_id', function (QueryBuilder $query) {
+                        ->whereIn('model_id', function (QueryBuilder $query) {
                             $query->select('id')
                                 ->from('orders')
                                 ->where('contact_id', Auth::user()->contact_id)
