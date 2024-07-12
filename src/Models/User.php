@@ -217,4 +217,17 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
 
         Mail::to($this->email)->queue(new MagicLoginLink($plaintext, $expires));
     }
+
+    public static function getGuardNames(): array
+    {
+        return [
+            'web',
+            'sanctum',
+        ];
+    }
+
+    public function guardName(): array
+    {
+        return static::getGuardNames();
+    }
 }

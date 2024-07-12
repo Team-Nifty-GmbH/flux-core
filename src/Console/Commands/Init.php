@@ -144,18 +144,11 @@ class Init extends Command
             $this->call('init:countries');
             $this->call('init:country-regions');
             $this->call('init:permissions');
-            $this->call('init:users');
-            $this->call('init:clients');
             $this->call('init:address-types');
 
             $this->setEnvVariable($content, 'APP_DEBUG', false);
             $this->setEnvVariable($content, 'APP_ENV', 'production');
             $this->writeFile($envFilePath, $content);
-
-            // Settings tables.
-            //$this->call('init:payment-types');
-            //$this->call('init:document-types');
-            //$this->call('init:order-types');
         }
     }
 

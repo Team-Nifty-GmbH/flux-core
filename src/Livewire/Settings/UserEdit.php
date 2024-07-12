@@ -58,6 +58,7 @@ class UserEdit extends Component
         $this->languages = app(Language::class)->all(['id', 'name'])->toArray();
 
         $this->roles = app(Role::class)->query()
+            ->whereIn('guard_name', resolve_static(User::class, 'getGuardNames'))
             ->get(['id', 'name', 'guard_name'])
             ->toArray();
 
