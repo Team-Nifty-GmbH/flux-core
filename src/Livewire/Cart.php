@@ -17,6 +17,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -27,12 +28,6 @@ class Cart extends Component
 {
     use Actions;
 
-    protected $listeners = [
-        'cart:add' => 'add',
-        'cart:remove' => 'remove',
-        'cart:refresh' => 'refresh',
-    ];
-
     public array $watchlists = [];
 
     public int $selectedWatchlist = 0;
@@ -41,6 +36,9 @@ class Cart extends Component
 
     #[Rule('required_if:selectedWatchlist,0')]
     public ?string $watchlistName = null;
+
+    #[Locked]
+    public ?int $cartId = null;
 
     public function mount(): void
     {
@@ -52,7 +50,10 @@ class Cart extends Component
     {
         return [
             'echo-private:' . $this->cart()->broadcastChannel() . ',.CartUpdated' => 'refresh',
-            'echo-private:' . $this->cart()->broadcastChannel() . ',.CartDeleted' => 'refresh',
+            'echo-private:' . $this->cartId . ',.CartDeleted' => 'refresh',
+            'cart:add' => 'add',
+            'cart:remove' => 'remove',
+            'cart:refresh' => 'refresh',
         ];
     }
 
@@ -223,7 +224,10 @@ class Cart extends Component
     #[Computed(persist: true)]
     public function cart(): ?CartModel
     {
-        return cart();
+        $cart = cart();
+        $this->cartId = $cart->id;
+
+        return $cart;
     }
 
     protected function getWatchLists(): void
