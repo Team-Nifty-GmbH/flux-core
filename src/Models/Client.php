@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
@@ -24,8 +25,8 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Client extends Model implements HasMedia
 {
-    use Commentable, Filterable, HasClientAssignment, HasDefault, HasPackageFactory, HasUserModification,
-        HasUuid, InteractsWithMedia, Searchable, SoftDeletes;
+    use CacheModelQueries, Commentable, Filterable, HasClientAssignment, HasDefault, HasPackageFactory,
+        HasUserModification, HasUuid, InteractsWithMedia, Searchable, SoftDeletes;
 
     protected $appends = [
         'logo_url',

@@ -28,7 +28,7 @@ class CachedBuilder extends Builder
 
         // store the result in the cache
         Cache::put(
-            $this->cacheKey($this->getModel()),
+            static::cacheKey($this->getModel()),
             array_merge(
                 Cache::get(static::cacheKey($this->getModel()), []),
                 [
