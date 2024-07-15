@@ -9,7 +9,7 @@
         "ext-pdo": "*",
         "ext-zip": "*",
         "barryvdh/laravel-dompdf": "^2.0",
-        "laravel-notification-channels/webpush": "^8.0",
+        "laravel-notification-channels/webpush": "^9.0",
         "laravel/framework": "^11.15",
         "laravel/reverb": "@beta",
         "laravel/sanctum": "^4.0",
