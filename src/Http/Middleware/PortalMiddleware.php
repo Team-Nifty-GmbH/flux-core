@@ -50,8 +50,7 @@ class PortalMiddleware
             resolve_static(OrderPosition::class, 'addGlobalScope', [
                 'scope' => 'portal',
                 'implementation' => function (Builder $query) {
-                    $query->whereNotNull('order_id')
-                        ->whereRelation('order', 'contact_id', auth()->user()?->contact_id);
+                    $query->whereRelation('order', 'contact_id', auth()->user()?->contact_id);
                 },
             ]);
             resolve_static(Ticket::class, 'addGlobalScope', [
