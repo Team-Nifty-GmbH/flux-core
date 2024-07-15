@@ -50,6 +50,7 @@ class TransactionTest extends BaseSetup
 
         $paymentType = PaymentType::factory()->create([
             'client_id' => $this->dbClient->id,
+            'is_default' => false,
         ]);
 
         $bankConnections = BankConnection::factory()->count(3)->create([

@@ -47,6 +47,7 @@ class OrderPositionsTest extends BaseSetup
 
         $paymentType = PaymentType::factory()->create([
             'client_id' => $this->dbClient->id,
+            'is_default' => false,
         ]);
 
         $order = Order::factory()->create([
