@@ -152,11 +152,9 @@ class FluxServiceProvider extends ServiceProvider
 
         if (! Request::hasMacro('isPortal')) {
             Request::macro('isPortal', function () {
-                return $this->getHost() === preg_replace(
-                    '(^https?://)',
-                    '',
-                    config('flux.portal_domain')
-                );
+                // check if the current url matches with config('flux.portal_domain')
+                // ignore http or https, just match the host itself
+                return Str::startsWith($this->getHost(), Str::after(config('flux.portal_domain'), '://'));
             });
         }
 
