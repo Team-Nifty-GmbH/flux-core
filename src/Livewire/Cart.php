@@ -50,7 +50,8 @@ class Cart extends Component
     {
         return [
             'echo-private:' . $this->cart()->broadcastChannel() . ',.CartUpdated' => 'refresh',
-            'echo-private:' . $this->cartId . ',.CartDeleted' => 'refresh',
+            'echo-private:' . app(CartModel::class)->broadcastChannel()
+                . $this->cartId . ',.CartDeleted' => 'refresh',
             'cart:add' => 'add',
             'cart:remove' => 'remove',
             'cart:refresh' => 'refresh',
