@@ -235,7 +235,8 @@ class Cart extends Component
         $this->watchlists = app(CartModel::class)
             ->query()
             ->where(function (Builder $query) {
-                $query->where(fn (Builder $query) => $query->where('authenticatable_type', auth()->user()->getMorphClass())
+                $query->where(fn (Builder $query) => $query
+                    ->where('authenticatable_type', auth()->user()?->getMorphClass())
                     ->where('authenticatable_id', auth()->id()))
                     ->orWhere('is_public', true);
             })
