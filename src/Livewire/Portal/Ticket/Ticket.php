@@ -9,7 +9,6 @@ use FluxErp\Models\TicketType;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Ticket extends Component

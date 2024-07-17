@@ -58,7 +58,7 @@ class Cart extends BaseCart
     {
         $this->watchlists = app(\FluxErp\Models\Cart::class)
             ->query()
-            ->where('authenticatable_type', auth()->user()->getMorphClass())
+            ->where('authenticatable_type', auth()->user()?->getMorphClass())
             ->where('authenticatable_id', auth()->id())
             ->where('is_watchlist', true)
             ->get(['id', 'name'])
