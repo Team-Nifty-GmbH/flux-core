@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 return [
     'reset' => 'Das Passwort wurde zurückgesetzt!',
     'sent' => 'E-Mail zum Zurücksetzen des Passworts wurde gesendet!',
