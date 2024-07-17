@@ -149,7 +149,6 @@ export default function($wire) {
                 h: 1,
                 w: 2
             });
-
             placeholder.gridstackNode.order_column =
                 placeholder.gridstackNode.x;
             placeholder.gridstackNode.order_row = placeholder.gridstackNode.y;
@@ -168,8 +167,7 @@ export default function($wire) {
             this.isLoading = true;
             const el = this.grid
                 .getGridItems()
-                .find(
-                    (item) =>
+                .find((item) =>
                         item.gridstackNode.id.toString() === id.toString()
                 );
             if (el !== undefined) {

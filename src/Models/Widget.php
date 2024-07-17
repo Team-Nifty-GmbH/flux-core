@@ -4,7 +4,6 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Widget extends Model
@@ -14,11 +13,4 @@ class Widget extends Model
     protected $guarded = [
         'id',
     ];
-
-    public function buildSortQuery(): Builder
-    {
-        return static::query()
-            ->where('widgetable_type', $this->widgetable_type)
-            ->where('widgetable_id', $this->widgetable_id);
-    }
 }
