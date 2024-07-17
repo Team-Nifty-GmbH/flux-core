@@ -9,6 +9,7 @@ use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Translation\TranslationServiceProvider;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
 use NotificationChannels\WebPush\WebPushServiceProvider;
@@ -49,6 +50,7 @@ abstract class TestCase extends BaseTestCase
     public function getPackageProviders($app): array
     {
         return [
+            TranslationServiceProvider::class,
             TranslatableServiceProvider::class,
             LivewireServiceProvider::class,
             ViewServiceProvider::class,

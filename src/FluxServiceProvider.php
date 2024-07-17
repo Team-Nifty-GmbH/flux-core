@@ -87,10 +87,6 @@ class FluxServiceProvider extends ServiceProvider
             fn () => [__DIR__ . '/../lang', base_path('lang')]
         );
 
-        $this->app->singleton('translation.loader', function ($app) {
-            return new FileLoader($app['files'], $app['path.lang']);
-        });
-
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerConfig();
