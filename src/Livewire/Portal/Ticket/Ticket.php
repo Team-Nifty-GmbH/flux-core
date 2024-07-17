@@ -28,8 +28,6 @@ class Ticket extends Component
     {
         $ticket = app(TicketModel::class)->query()
             ->whereKey($id)
-            ->where('authenticatable_type', Auth::user()->getMorphClass())
-            ->where('authenticatable_id', Auth::id())
             ->firstOrFail();
 
         $this->additionalColumns = app(AdditionalColumn::class)->query()
