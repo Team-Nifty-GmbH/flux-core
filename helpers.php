@@ -32,7 +32,6 @@ if (! function_exists('route_to_permission')) {
     {
         $route = is_string($route) ? \Illuminate\Support\Facades\Route::getRoutes()->getByName($route) : $route;
         $route = $route ?: \Illuminate\Support\Facades\Route::current();
-        \Illuminate\Support\Facades\Route::getRoutes()->getByName('portal.checkout');
 
         if ($route === null) {
             return null;
