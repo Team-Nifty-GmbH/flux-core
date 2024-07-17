@@ -25,6 +25,8 @@ foreach (Relation::morphMap() as $class) {
     $channel = class_to_broadcast_channel($class);
 
     Broadcast::channel($channel, function (Authenticatable $user, int|string $key) use ($class) {
+        auth()->setUser($user);
+
         return $class::query()->where(app($class)->getRouteKeyName(), $key)->exists();
     }, ['guards' => ['web', 'address']]);
 

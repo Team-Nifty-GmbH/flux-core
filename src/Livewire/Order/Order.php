@@ -707,13 +707,13 @@ class Order extends OrderPositionList
             $to = [];
 
             $to[] = in_array('invoice', $createDocuments) && $order->contact->invoiceAddress
-                ? $order->contact->invoiceAddress->email
-                : $order->contact->mainAddress->email;
+                ? $order->contact->invoiceAddress->email_primary
+                : $order->contact->mainAddress->email_primary;
 
             if (array_keys($this->selectedPrintLayouts['email']) !== ['invoice']
-                && $order->contact->mainAddress->email
+                && $order->contact->mainAddress->email_primary
             ) {
-                $to[] = $order->contact->mainAddress->email;
+                $to[] = $order->contact->mainAddress->email_primary;
             }
 
             $this->dispatch(

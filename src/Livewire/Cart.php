@@ -50,7 +50,8 @@ class Cart extends Component
     {
         return [
             'echo-private:' . $this->cart()->broadcastChannel() . ',.CartUpdated' => 'refresh',
-            'echo-private:' . $this->cartId . ',.CartDeleted' => 'refresh',
+            'echo-private:' . app(CartModel::class)->broadcastChannel()
+                . $this->cartId . ',.CartDeleted' => 'refresh',
             'cart:add' => 'add',
             'cart:remove' => 'remove',
             'cart:refresh' => 'refresh',
@@ -235,7 +236,8 @@ class Cart extends Component
         $this->watchlists = app(CartModel::class)
             ->query()
             ->where(function (Builder $query) {
-                $query->where(fn (Builder $query) => $query->where('authenticatable_type', auth()->user()->getMorphClass())
+                $query->where(fn (Builder $query) => $query
+                    ->where('authenticatable_type', auth()->user()?->getMorphClass())
                     ->where('authenticatable_id', auth()->id()))
                     ->orWhere('is_public', true);
             })

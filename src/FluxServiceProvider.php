@@ -81,7 +81,11 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
+        $this->app->bind(
+            'path.lang',
+            fn () => [__DIR__ . '/../lang', base_path('lang')]
+        );
+
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerConfig();

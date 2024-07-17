@@ -101,7 +101,9 @@ class PaymentReminder extends OrderList
                     ->attachToModel($order);
 
                 $mailMessages[] = [
-                    'to' => Arr::wrap($paymentReminderText->mail_to ?: $order->contact->invoiceAddress->email),
+                    'to' => Arr::wrap($paymentReminderText->mail_to
+                        ?: $order->contact->invoiceAddress->email_primary
+                    ),
                     'cc' => Arr::wrap($paymentReminderText->mail_cc),
                     'subject' => html_entity_decode($paymentReminderText->mail_subject) ?:
                         __(
