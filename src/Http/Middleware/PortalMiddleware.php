@@ -58,7 +58,13 @@ class PortalMiddleware
                 'implementation' => function (Builder $query) {
                     $query->whereNotNull('authenticatable_id')
                         ->where('authenticatable_type', morph_alias(Address::class))
-                        ->where('authenticatable_id', auth()->id());
+                        ->whereHasMorph(
+                            'authenticatable',
+                            [auth()->user()?->getMorphClass()],
+                            function (Builder $query) {
+                                $query->where('contact_id', auth()->user()?->contact_id);
+                            }
+                        );
                 },
             ]);
             resolve_static(Cart::class, 'addGlobalScope', [
