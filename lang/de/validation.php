@@ -150,7 +150,6 @@ return [
     'uuid' => ':Attribute muss ein UUID sein.',
 
     'attributes' => [
-        'Typ' => 'Typ',
         'abbreviation' => 'Abkürzung',
         'account_holder' => 'Kontoinhaber',
         'addition' => 'Zusatz',

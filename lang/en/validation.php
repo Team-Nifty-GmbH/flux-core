@@ -150,7 +150,6 @@ return [
     'uuid' => 'The :attribute must be a valid UUID.',
 
     'attributes' => [
-        'Typ' => 'Typ',
         'abbreviation' => 'Abkürzung',
         'account_holder' => 'Kontoinhaber',
         'addition' => 'Zusatz',
