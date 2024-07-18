@@ -31,7 +31,6 @@ class UpdateCommunication extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
-
         $startedAt = data_get($this->data, 'started_at');
         $endedAt = data_get($this->data, 'ended_at');
 
