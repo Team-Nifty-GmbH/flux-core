@@ -16,7 +16,7 @@ use WireUi\Traits\Actions;
 
 class PublicLink extends Component
 {
-    use Actions, WithFileUploads;
+    use Actions,WithFileUploads;
 
     public Order $order;
 
@@ -50,7 +50,7 @@ class PublicLink extends Component
     {
         // add to which type it belongs
         if (($this->signature->stagedFiles || $this->signature->id) && ! is_null($this->className)) {
-            $this->signature->model_type = Relation::getMorphClassAlias(Order::class);
+            $this->signature->model_type = Relation::getMorphAlias(Order::class);
             $this->signature->model_id = $this->order->id;
             $this->signature->collection_name = 'signature';
             $this->signature->disk = 'local';
@@ -59,8 +59,8 @@ class PublicLink extends Component
             $this->signature->stagedFiles[0]['file_name'] = data_get(
                 $this->signature->stagedFiles[0],
                 'temporary_filename',
-                Uuid::uuid4()->toString() . '.png'
-            );
+                Uuid::uuid4()->toString()
+            ) . '.png';
             try {
                 $this->signature->save();
 

@@ -376,6 +376,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
         $this->addMediaCollection('payment-reminders')
             ->acceptsMimeTypes(['application/pdf']);
+
+        $this->addMediaCollection('signature')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png'])
+            ->useDisk('local');
     }
 
     public function calculatePrices(): static
