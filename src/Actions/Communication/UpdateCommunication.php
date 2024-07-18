@@ -8,6 +8,7 @@ use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Communication\UpdateCommunicationRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 
 class UpdateCommunication extends FluxAction
 {
@@ -29,6 +30,14 @@ class UpdateCommunication extends FluxAction
         $communication = app(Communication::class)->query()
             ->whereKey($this->data['id'])
             ->first();
+
+
+        $startedAt = data_get($this->data, 'started_at');
+        $endedAt = data_get($this->data, 'ended_at');
+
+        if (is_null(data_get($this->data, 'total_time_ms')) && $startedAt && $endedAt) {
+            $this->data['total_time_ms'] = Carbon::parse($endedAt)->diffInMilliseconds(Carbon::parse($startedAt));
+        }
 
         $communication->fill($this->data);
         $communication->save();
