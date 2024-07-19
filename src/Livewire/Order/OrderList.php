@@ -3,7 +3,7 @@
 namespace FluxErp\Livewire\Order;
 
 use FluxErp\Actions\Order\DeleteOrder;
-use FluxErp\Actions\Printing;
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
@@ -13,10 +13,9 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Support\Collection\OrderCollection;
-use FluxErp\View\Printing\PrintableView;
-use Illuminate\Support\Str;
+use FluxErp\Traits\Livewire\CreatesDocuments;
 use Illuminate\Validation\ValidationException;
+use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Renderless;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -24,17 +23,13 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 {
+    use CreatesDocuments;
+
     protected string $view = 'flux::livewire.order.order-list';
 
     public ?string $cacheKey = 'order.order-list';
 
     public OrderForm $order;
-
-    public OrderCollection $orders;
-
-    public array $printLayouts = [];
-
-    public array $selectedPrintLayouts = [];
 
     public function getTableActions(): array
     {
@@ -128,134 +123,57 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         return null;
     }
 
-    public function openCreateDocumentsModal(): void
+    protected function getTo(OffersPrinting $item, array $documents): array
     {
-        $this->orders = app(Order::class)->query()
-            ->whereIntegerInRaw('id', $this->selected)
-            ->get(['id', 'order_type_id']);
+        $to = [];
 
-        $this->printLayouts = $this->orders->printLayouts();
+        $to[] = in_array('invoice', $documents) && $item->contact->invoiceAddress
+            ? $item->contact->invoiceAddress->email_primary
+            : $item->contact->mainAddress->email_primary;
 
-        $this->js(<<<'JS'
-            $openModal('create-documents');
-        JS);
+        if (array_keys($this->selectedPrintLayouts['email']) !== ['invoice']
+            && $item->contact->mainAddress->email_primary
+        ) {
+            $to[] = $item->contact->mainAddress->email_primary;
+        }
 
-        $this->forceRender();
+        return $to;
     }
 
-    #[Renderless]
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return html_entity_decode(
+            $item->orderType->mail_subject ?? '{{ $order->orderType->name }} {{ $order->order_number }}'
+        );
+    }
+
+    protected function getHtmlBody(OffersPrinting $item): string
+    {
+        return html_entity_decode($item->orderType->mail_body);
+    }
+
+    protected function getBladeParameters(OffersPrinting $item): array|SerializableClosure|null
+    {
+        return new SerializableClosure(
+            fn () => ['order' => app(Order::class)->whereKey($item->getKey())->first()]
+        );
+    }
+
+    protected function getPrintLayouts(): array
+    {
+        return app(Order::class)->query()
+            ->whereIntegerInRaw('id', $this->selected)
+            ->with('orderType')
+            ->get(['id', 'order_type_id'])
+            ->printLayouts();
+    }
+
     public function createDocuments(): null|MediaStream|Media
     {
-        $downloadIds = [];
-        $printIds = [];
-        $mailMessages = [];
-        foreach ($this->orders as $order) {
-            $order = app(Order::class)->query()
-                ->whereKey($order->id)
-                ->first();
+        $response = $this->createDocumentFromItems($this->getSelectedModels());
+        $this->loadData();
+        $this->selected = [];
 
-            $mailAttachments = [];
-            $hash = md5(json_encode($order->toArray()) . json_encode($order->orderPositions->toArray()));
-
-            $createDocuments = [];
-            foreach ($this->selectedPrintLayouts as $type => $selectedPrintLayout) {
-                $this->selectedPrintLayouts[$type] = array_intersect_key(
-                    $order->resolvePrintViews(),
-                    array_filter($selectedPrintLayout)
-                );
-                $createDocuments = array_unique(
-                    array_merge(
-                        $createDocuments,
-                        array_keys($this->selectedPrintLayouts[$type]))
-                );
-            }
-
-            // create the documents
-            foreach ($createDocuments as $createDocument) {
-                $media = $order->getMedia($createDocument)->last();
-
-                if (! $media || ($this->selectedPrintLayouts['force'][$createDocument] ?? false)) {
-                    try {
-                        /** @var PrintableView $file */
-                        $file = Printing::make([
-                            'model_type' => app(Order::class)->getMorphClass(),
-                            'model_id' => $order->id,
-                            'view' => $createDocument,
-                        ])->checkPermission()->validate()->execute();
-
-                        $media = $file->attachToModel();
-                        $media->setCustomProperty('hash', $hash)->save();
-                    } catch (ValidationException|UnauthorizedException $e) {
-                        exception_to_notifications($e, $this);
-
-                        continue;
-                    }
-                }
-
-                if ($this->selectedPrintLayouts['download'][$createDocument] ?? false) {
-                    $downloadIds[] = $media->id;
-                }
-
-                if ($this->selectedPrintLayouts['print'][$createDocument] ?? false) {
-                    // TODO: add to print queue for spooler
-                    $printIds[] = $media->id;
-                }
-
-                if ($this->selectedPrintLayouts['email'][$createDocument] ?? false) {
-                    $mailAttachments[] = [
-                        'name' => $media->file_name,
-                        'id' => $media->id,
-                    ];
-                }
-            }
-
-            if (($this->selectedPrintLayouts['email'] ?? false) && $mailAttachments) {
-                $order->refresh();
-                $to = [];
-
-                $to[] = in_array('invoice', $createDocuments) && $order->contact->invoiceAddress
-                    ? $order->contact->invoiceAddress->email_primary
-                    : $order->contact->mainAddress->email_primary;
-
-                if (array_keys($this->selectedPrintLayouts['email']) !== ['invoice']
-                    && $order->contact->mainAddress->email_primary
-                ) {
-                    $to[] = $order->contact->mainAddress->email_primary;
-                }
-
-                $mailMessages[] = [
-                    'to' => array_unique($to),
-                    'subject' => html_entity_decode($order->orderType->mail_subject) ?:
-                        $order->orderType->name . ' ' . $order->order_number,
-                    'attachments' => $mailAttachments,
-                    'html_body' => html_entity_decode($order->orderType->mail_body),
-                    'blade_parameters_serialized' => true,
-                    'blade_parameters' => serialize(['order' => $order]),
-                    'communicatable_type' => app(Order::class)->getMorphClass(),
-                    'communicatable_id' => $order->id,
-                ];
-            }
-        }
-
-        if ($mailMessages) {
-            $sessionKey = 'mail_' . Str::uuid()->toString();
-            session()->put($sessionKey, $mailMessages);
-            $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
-        }
-
-        if ($downloadIds) {
-            $files = app(Media::class)->query()
-                ->whereIntegerInRaw('id', $downloadIds)
-                ->get();
-
-            if ($files->count() === 1) {
-                return $files->first();
-            }
-
-            return MediaStream::create(__('Order_collection') . '_' . now()->toDateString() . '.zip')
-                ->addMedia($files);
-        }
-
-        return null;
+        return $response;
     }
 }

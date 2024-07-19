@@ -31,17 +31,22 @@ class MessageSendingEventSubscriber
             $communicationForm->attachments,
             fn ($attachment) => ! data_get($attachment, 'id')
         );
-        $communicationForm->attachments = array_map(
-            function ($attachment) {
-                $attachment['model_type'] = morph_alias(Communication::class);
-                $attachment['collection_name'] = 'attachments';
-                $attachment['media_type'] = 'string';
-                $attachment['media'] = $attachment['path'];
 
-                return $attachment;
-            },
-            $communicationForm->attachments
+        $communicationForm->attachments = array_filter(
+            array_map(
+                function ($attachment) {
+                    $attachment['model_type'] = morph_alias(Communication::class);
+                    $attachment['collection_name'] = 'attachments';
+                    $attachment['media_type'] = 'string';
+                    $attachment['media'] = data_get($attachment, 'path');
+
+                    return $attachment;
+                },
+                $communicationForm->attachments
+            ),
+            fn ($attachment) => ! is_null(data_get($attachment, 'media'))
         );
+
         $communicationForm->communication_type_enum = CommunicationTypeEnum::Mail->value;
         $communicationForm->save();
 

@@ -7,6 +7,7 @@ use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Actions\Printing;
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Htmlables\TabButton;
@@ -30,14 +31,14 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\VatRate;
+use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
-use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
+use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Spatie\MediaLibrary\Support\MediaStream;
@@ -49,7 +50,7 @@ use WireUi\Traits\Actions;
 
 class Order extends OrderPositionList
 {
-    use Actions, WithTabs;
+    use Actions, CreatesDocuments, WithTabs;
 
     protected string $view = 'flux::livewire.order.order';
 
@@ -66,10 +67,6 @@ class Order extends OrderPositionList
     public ?int $orderPositionIndex = null;
 
     public array $availableStates = [];
-
-    public array $printLayouts = [];
-
-    public array $selectedPrintLayouts = [];
 
     public array $paymentStates = [];
 
@@ -99,6 +96,64 @@ class Order extends OrderPositionList
 
     #[Url]
     public string $tab = 'order.order-positions';
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        $to = [];
+
+        $to[] = in_array('invoice', $documents) && $item->contact->invoiceAddress
+            ? $item->contact->invoiceAddress->email_primary
+            : $item->contact->mainAddress->email_primary;
+
+        if (array_keys($this->selectedPrintLayouts['email']) !== ['invoice']
+            && $item->contact->mainAddress->email_primary
+        ) {
+            $to[] = $item->contact->mainAddress->email_primary;
+        }
+
+        return $to;
+    }
+
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return html_entity_decode(
+            $item->orderType->mail_subject ?? '{{ $order->orderType->name }} {{ $order->order_number }}'
+        );
+    }
+
+    protected function getHtmlBody(OffersPrinting $item): string
+    {
+        return html_entity_decode($item->orderType->mail_body);
+    }
+
+    protected function getBladeParameters(OffersPrinting $item): array|SerializableClosure|null
+    {
+        return new SerializableClosure(
+            fn () => ['order' => app(OrderModel::class)->whereKey($item->getKey())->first()]
+        );
+    }
+
+    protected function getPrintLayouts(): array
+    {
+        return array_keys(
+            app(OrderModel::class)->query()
+                ->whereKey($this->order->id)
+                ->with('orderType')
+                ->first()
+                ->resolvePrintViews()
+        );
+    }
+
+    public function createDocuments(): null|MediaStream|Media
+    {
+        return $this->createDocumentFromItems(
+            app(OrderModel::class)
+                ->query()
+                ->whereKey($this->order->id)
+                ->first(),
+            false
+        );
+    }
 
     public function getListeners(): array
     {
@@ -632,125 +687,6 @@ class Order extends OrderPositionList
         );
     }
 
-    #[Renderless]
-    public function createDocuments(): null|MediaStream|Media
-    {
-        if (! $this->save()) {
-            return null;
-        }
-
-        $order = app(OrderModel::class)->query()
-            ->whereKey($this->order->id)
-            ->with('addresses')
-            ->first();
-
-        $hash = md5(json_encode($order->toArray()) . json_encode($order->orderPositions->toArray()));
-
-        $createDocuments = [];
-        foreach ($this->selectedPrintLayouts as $type => $selectedPrintLayout) {
-            $this->selectedPrintLayouts[$type] = array_filter($selectedPrintLayout);
-            $createDocuments = array_unique(
-                array_merge(
-                    $createDocuments,
-                    array_keys($this->selectedPrintLayouts[$type]))
-            );
-        }
-
-        // create the documents
-        $mediaIds = [];
-        $downloadIds = [];
-        $printIds = [];
-        $mailAttachments = [];
-        foreach ($createDocuments as $createDocument) {
-            $media = $order->getMedia($createDocument)->last();
-
-            if (! $media || ($this->selectedPrintLayouts['force'][$createDocument] ?? false)) {
-                try {
-                    /** @var PrintableView $file */
-                    $file = Printing::make([
-                        'model_type' => app(OrderModel::class)->getMorphClass(),
-                        'model_id' => $this->order->id,
-                        'view' => $createDocument,
-                    ])->checkPermission()->validate()->execute();
-
-                    $media = $file->attachToModel();
-                    $media->setCustomProperty('hash', $hash)->save();
-                } catch (ValidationException|UnauthorizedException $e) {
-                    exception_to_notifications($e, $this);
-
-                    continue;
-                }
-            }
-
-            $mediaIds[$createDocument] = $media->id;
-
-            if ($this->selectedPrintLayouts['download'][$createDocument] ?? false) {
-                $downloadIds[] = $media->id;
-            }
-
-            if ($this->selectedPrintLayouts['print'][$createDocument] ?? false) {
-                // TODO: add to print queue for spooler
-                $printIds[] = $media->id;
-            }
-
-            if ($this->selectedPrintLayouts['email'][$createDocument] ?? false) {
-                $mailAttachments[] = [
-                    'name' => $media->file_name,
-                    'id' => $media->id,
-                ];
-            }
-        }
-
-        $this->fetchOrder($this->order->id);
-
-        if (($this->selectedPrintLayouts['email'] ?? false) && $mailAttachments) {
-            $to = [];
-
-            $to[] = in_array('invoice', $createDocuments) && $order->contact->invoiceAddress
-                ? $order->contact->invoiceAddress->email_primary
-                : $order->contact->mainAddress->email_primary;
-
-            if (array_keys($this->selectedPrintLayouts['email']) !== ['invoice']
-                && $order->contact->mainAddress->email_primary
-            ) {
-                $to[] = $order->contact->mainAddress->email_primary;
-            }
-
-            $this->dispatch(
-                'create',
-                [
-                    'to' => array_unique($to),
-                    'subject' => Blade::render(
-                        html_entity_decode($this->order->order_type['mail_subject']),
-                        ['order' => $order]
-                    ) ?: $this->order->order_type['name'] . ' ' . $this->order->order_number,
-                    'attachments' => $mailAttachments,
-                    'html_body' => Blade::render(
-                        html_entity_decode($this->order->order_type['mail_body']),
-                        ['order' => $order]
-                    ),
-                    'communicatable_type' => app(OrderModel::class)->getMorphClass(),
-                    'communicatable_id' => $this->order->id,
-                ]
-            )->to('edit-mail');
-        }
-
-        if ($downloadIds) {
-            $files = app(Media::class)->query()
-                ->whereIntegerInRaw('id', $downloadIds)
-                ->get();
-
-            if ($files->count() === 1) {
-                return $files->first();
-            }
-
-            return MediaStream::create($this->order->order_type['name'] . '_' . $this->order->order_number . '.zip')
-                ->addMedia($files);
-        }
-
-        return null;
-    }
-
     public function updatedOrderState(): void
     {
         $this->getAvailableStates('state');
@@ -1093,10 +1029,10 @@ class Order extends OrderPositionList
             ->firstOrFail()
             ->append('avatar_url');
 
-        $this->printLayouts = array_keys($order->resolvePrintViews());
-
         $this->order->fill($order);
         $this->order->users = $order->users->pluck('id')->toArray();
+
+        $this->printLayouts = $this->getPrintLayouts();
 
         $invoice = $order->invoice();
         if ($invoice) {

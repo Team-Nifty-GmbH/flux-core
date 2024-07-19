@@ -231,6 +231,7 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function registerConfig(): void
     {
+        $this->loadViewsFrom(__DIR__ . '/../resources/views/vendor/wireui', 'wireui');
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
         $this->mergeConfigFrom(__DIR__ . '/../config/scout.php', 'scout');
