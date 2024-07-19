@@ -1,5 +1,7 @@
 import SignaturePad from 'signature_pad';
 
+// resizing canvas - data get lost - hence need for tempData during drawing
+// and existingData for already saved signature
 export default function($wire, $refs) {
     return {
         signaturePad: null,
@@ -74,6 +76,7 @@ export default function($wire, $refs) {
         },
         resizeCanvas() {
             if (window.innerWidth < 700) {
+                // going to small screen - resize canvas to fit the screen
                 const width = $refs.canvas.offsetWidth;
                 const ratio = Math.max(window.devicePixelRatio || 1, 1);
                 $refs.canvas.width = (width * ratio) - (this.prevWidth - window.innerWidth);
@@ -83,8 +86,10 @@ export default function($wire, $refs) {
                 ctx.scale(ratio, ratio);
                 ctx.fillStyle = 'rgba(255, 255, 255, 1)';
                 ctx.fillRect(0, 0, $refs.canvas.width, $refs.canvas.height);
+                // redraw signature on resize - since canvas removes all data on resize
                 this.debounce();
             } else if (window.innerWidth >= 700 && this.prevWidth !== 700) {
+                // going to big screen - resize canvas to default size
                 this.prevWidth = 700;
                 const ratio = Math.max(window.devicePixelRatio || 1, 1);
                 $refs.canvas.width = 500 * ratio;

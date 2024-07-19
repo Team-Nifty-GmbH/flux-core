@@ -94,7 +94,7 @@ Route::middleware('web')
         Route::get('/icons/{name}/{variant?}', IconController::class)
             ->where('variant', '(outline|solid)')
             ->name('icons');
-        Route::middleware(['guest:web'])->group(function (){
+        Route::middleware(['guest:web'])->group(function () {
             Route::get('/login', Login::class)
                 ->name('login');
             Route::post('/login', [AuthController::class, 'authenticateWeb']);

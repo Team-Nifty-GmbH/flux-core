@@ -3,6 +3,7 @@
         $isNet = $model->priceList->is_net;
         $currency = $model->currency->iso;
         $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
+        $media = $model->getMedia('signature')->first();
     @endphp
     <x-print.first-page-header :address="$model->addressInvoice">
         <x-slot:right-block>
@@ -171,6 +172,14 @@
                 {!! $model->footer !!}
                 {!! $model->vatRates->pluck('footer_text')->implode('<br>') !!}
             </div>
+             @if($media && file_exists($media->getPath()))
+            <div class="flex justify-end mt-10">
+                <div>
+                    <h2 class="text-xl text-right">{{__('Signature')}}</h2>
+                    <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents($media->getPath())) }}"
+                        alt="{{ __('Signature') }}"></div>
+            </div>
+            @endif
         @show
     </main>
 </x-layouts.print>
