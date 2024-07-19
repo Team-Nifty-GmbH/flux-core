@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('widgets', function (Blueprint $table) {
-            $table->unsignedInteger('order_row')->default(0);
+            $table->unsignedInteger('order_row')->after('order_column')->default(0);
         });
     }
 

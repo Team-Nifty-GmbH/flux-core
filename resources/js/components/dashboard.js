@@ -127,10 +127,8 @@ export default function($wire) {
                     newSnapshot.push(widget);
                 }
             });
-            // sync properties
-            await $wire.syncWidgets(newSnapshot);
-            // save to db
-            await $wire.saveDashboard();
+            // sync and save to db
+            await $wire.saveDashboard(newSnapshot);
             // stop edit mode
             this.editGridMode(false);
             // refresh id
@@ -168,7 +166,7 @@ export default function($wire) {
             const el = this.grid
                 .getGridItems()
                 .find((item) =>
-                        item.gridstackNode.id.toString() === id.toString()
+                    item.gridstackNode.id.toString() === id.toString()
                 );
             if (el !== undefined) {
                 const selectedWidget = this.availableWidgets[key];

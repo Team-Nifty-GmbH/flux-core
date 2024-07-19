@@ -46,8 +46,10 @@ class Dashboard extends Component
     }
 
     #[Renderless]
-    public function saveDashboard(): void
+    public function saveDashboard(array $widgets): void
     {
+
+        $this->widgets = $widgets;
 
         $existingItemIds = array_filter(Arr::pluck($this->widgets, 'id'), 'is_numeric');
         auth()->user()->widgets()->whereNotIn('id', $existingItemIds)->delete();
