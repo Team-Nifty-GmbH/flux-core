@@ -7,6 +7,7 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasCart;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
@@ -22,13 +23,16 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Illuminate\Validation\UnauthorizedException;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 use Spatie\Permission\Traits\HasRoles;
@@ -39,12 +43,12 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendars,
+    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendars, HasCart,
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid,
         Lockable, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
-        'login_password',
+        'password',
     ];
 
     protected $guarded = [
@@ -168,20 +172,23 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         ];
     }
 
-    public function getAuthPassword()
-    {
-        return $this->login_password;
-    }
-
-    public function getAuthPasswordName(): string
-    {
-        return 'login_password';
-    }
-
-    protected function loginPassword(): Attribute
+    protected function password(): Attribute
     {
         return Attribute::set(
             fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
+        );
+    }
+
+    protected function postalAddress(): Attribute
+    {
+        return Attribute::get(
+            fn () => array_filter([
+                $this->company,
+                trim($this->firstname . ' ' . $this->lastname),
+                $this->street,
+                trim($this->zip . ' ' . $this->city),
+                $this->country?->name,
+            ])
         );
     }
 
@@ -221,6 +228,23 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             ->withPivot('address_type_id');
     }
 
+    public function priceList(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            PriceList::class,
+            Contact::class,
+            'id',
+            'id',
+            'contact_id',
+            'price_list_id'
+        );
+    }
+
+    public function projectTasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
     public function serialNumbers(): HasMany
     {
         return $this->hasMany(SerialNumber::class);
@@ -229,11 +253,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     public function settings(): MorphMany
     {
         return $this->morphMany(Setting::class, 'model');
-    }
-
-    public function projectTasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
     }
 
     /**
@@ -272,12 +291,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
     public function getDescription(): ?string
     {
-        return implode(', ', array_filter([
-            $this->name,
-            $this->street,
-            trim($this->zip . ' ' . $this->city),
-            $this->country?->name,
-        ]));
+        return implode(', ', $this->postal_address);
     }
 
     public function getUrl(): ?string
@@ -293,8 +307,12 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         return $this->contact?->getAvatarUrl();
     }
 
-    public function sendLoginLink(): void
+    public function createLoginToken(): array
     {
+        if (! $this->can_login || ! $this->is_active) {
+            throw new UnauthorizedException('Address cannot login');
+        }
+
         $plaintext = Str::uuid()->toString();
         $expires = now()->addMinutes(15);
         Cache::put('login_token_' . $plaintext,
@@ -305,8 +323,30 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             ],
             $expires
         );
+        URL::forceRootUrl(config('flux.portal_domain'));
+
+        return [
+            'token' => $plaintext,
+            'expires' => $expires,
+            'url' => URL::temporarySignedRoute(
+                'login-link',
+                $expires,
+                [
+                    'token' => $plaintext,
+                ]
+            ),
+        ];
+    }
+
+    public function sendLoginLink(): void
+    {
+        try {
+            $login = $this->createLoginToken();
+        } catch (UnauthorizedException) {
+            return;
+        }
 
         // dont queue mail as the address isnt used as auth in the regular app url
-        Mail::to($this->login_name)->send(new MagicLoginLink($plaintext, $expires));
+        Mail::to($this->email)->send(new MagicLoginLink($login['token'], $login['expires']));
     }
 }

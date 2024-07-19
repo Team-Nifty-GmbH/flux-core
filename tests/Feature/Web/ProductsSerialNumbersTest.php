@@ -4,7 +4,6 @@ namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
 use FluxErp\Models\SerialNumber;
-use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class ProductsSerialNumbersTest extends BaseSetup

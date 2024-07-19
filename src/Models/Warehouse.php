@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -13,7 +14,7 @@ use Laravel\Scout\Searchable;
 
 class Warehouse extends Model
 {
-    use Filterable, HasPackageFactory, HasUserModification, HasUuid, Searchable, SoftDeletes;
+    use Filterable, HasDefault, HasPackageFactory, HasUserModification, HasUuid, Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -29,10 +30,5 @@ class Warehouse extends Model
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class, 'warehouse_id');
-    }
-
-    public static function default(): ?static
-    {
-        return static::query()->where('is_default', true)->first();
     }
 }

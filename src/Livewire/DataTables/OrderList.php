@@ -32,7 +32,7 @@ class OrderList extends BaseDataTable
 
     public bool $showModal = false;
 
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()
@@ -60,7 +60,7 @@ class OrderList extends BaseDataTable
         return $formatters;
     }
 
-    public function getReturnKeys(): array
+    protected function getReturnKeys(): array
     {
         return array_merge(parent::getReturnKeys(), ['currency.iso']);
     }

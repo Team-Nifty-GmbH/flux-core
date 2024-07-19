@@ -2,9 +2,11 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
+use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -23,8 +25,8 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Client extends Model implements HasMedia
 {
-    use Commentable, Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid,
-        InteractsWithMedia, Searchable, SoftDeletes;
+    use CacheModelQueries, Commentable, Filterable, HasClientAssignment, HasDefault, HasPackageFactory,
+        HasUserModification, HasUuid, InteractsWithMedia, Searchable, SoftDeletes;
 
     protected $appends = [
         'logo_url',
@@ -108,10 +110,5 @@ class Client extends Model implements HasMedia
         $this->addMediaConversion('png')
             ->performOnCollections('logo', 'logo_small')
             ->format('png');
-    }
-
-    public static function default(): ?static
-    {
-        return app(static::class)->query()->where('is_default', true)->first();
     }
 }

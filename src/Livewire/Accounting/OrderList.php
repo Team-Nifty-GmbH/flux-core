@@ -22,12 +22,12 @@ class OrderList extends DataTableOrderList
 
     public int $perPage = 10;
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->whereNotNull('invoice_number');
     }
 
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()

@@ -18,7 +18,7 @@ class DiscountList extends BaseDataTable
         'discount' => 'percentage',
     ];
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->with('model');
     }

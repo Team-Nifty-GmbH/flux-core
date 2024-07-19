@@ -18,12 +18,12 @@
             </div>
             <div
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5">
-                <label for="{{ md5('address.login_name') }}"
+                <label for="{{ md5('address.email') }}"
                        class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                    {{ __('Login name') }}
+                    {{ __('Login Email') }}
                 </label>
                 <div class="col-span-2">
-                    <x-input x-bind:readonly="!$wire.edit" wire:model="address.login_name"/>
+                    <x-input x-bind:readonly="!$wire.edit" wire:model="address.email"/>
                 </div>
             </div>
             <div
@@ -32,7 +32,7 @@
                     {{ __('Password') }}
                 </label>
                 <div class="col-span-2">
-                    <x-inputs.password x-bind:readonly="!$wire.edit" wire:model="address.login_password"/>
+                    <x-inputs.password x-bind:readonly="!$wire.edit" wire:model="address.password"/>
                 </div>
             </div>
             <div

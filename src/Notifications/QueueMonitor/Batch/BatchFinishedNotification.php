@@ -7,7 +7,6 @@ use FluxErp\Models\JobBatch;
 use FluxErp\Notifications\Notification;
 use FluxErp\Support\Notification\BroadcastNowChannel;
 use FluxErp\Support\Notification\ToastNotification\ToastNotification;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\Channels\DatabaseChannel;
 use Illuminate\Notifications\Channels\MailChannel;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -25,7 +24,7 @@ class BatchFinishedNotification extends Notification implements HasToastNotifica
         $via = [BroadcastNowChannel::class, DatabaseChannel::class];
         if ($this->model
             ->jobBatchables()
-            ->where('job_batchable_type', Relation::getMorphClassAlias($notifiable::class))
+            ->where('job_batchable_type', morph_alias($notifiable::class))
             ->where('job_batchable_id', $notifiable->id)
             ->where('notify_on_finish', true)
             ->exists()

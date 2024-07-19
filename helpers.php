@@ -28,8 +28,9 @@ if (! function_exists('model_info_all')) {
 }
 
 if (! function_exists('route_to_permission')) {
-    function route_to_permission(?Illuminate\Routing\Route $route = null, bool $checkPermission = true): ?string
+    function route_to_permission(Illuminate\Routing\Route|string|null $route = null, bool $checkPermission = true): ?string
     {
+        $route = is_string($route) ? \Illuminate\Support\Facades\Route::getRoutes()->getByName($route) : $route;
         $route = $route ?: \Illuminate\Support\Facades\Route::current();
 
         if ($route === null) {
@@ -493,5 +494,50 @@ if (! function_exists('class_to_broadcast_channel')) {
 
         return str_replace('\\', '.', $class)
             . ($withParam ? '.{' . \Illuminate\Support\Str::camel(class_basename($class)) . '}' : '');
+    }
+}
+
+if (! function_exists('morph_alias')) {
+    function morph_alias(string $class): string
+    {
+        $class = resolve_static($class, 'class');
+
+        if (in_array(\FluxErp\Traits\HasParentMorphClass::class, class_uses_recursive($class))) {
+            return $class::getParentMorphClass();
+        }
+
+        /** @var \Illuminate\Database\Eloquent\Model $class */
+        return \Illuminate\Database\Eloquent\Relations\Relation::getMorphAlias($class);
+    }
+}
+
+if (! function_exists('morphed_model')) {
+    function morphed_model(string $alias): ?string
+    {
+        $class = \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($alias);
+
+        if (is_null($class)) {
+            return null;
+        }
+
+        return resolve_static($class, 'class');
+    }
+}
+
+if (! function_exists('morph_to')) {
+    function morph_to(string $type, ?int $id = null): ?Illuminate\Database\Eloquent\Model
+    {
+        if (is_null($id) && str_contains($type, ':')) {
+            [$type, $id] = explode(':', $type);
+        }
+
+        if (is_null($id)) {
+            return null;
+        }
+
+        /** @var \Illuminate\Database\Eloquent\Model $model */
+        $model = morphed_model($type);
+
+        return $model::query()->whereKey($id)->first();
     }
 }

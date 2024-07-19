@@ -7,7 +7,6 @@ use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Http\Requests\GetPrintViewsRequest;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -18,7 +17,7 @@ class PrintController extends Controller
     {
         $validated = $request->validated();
 
-        $modelType = Relation::getMorphedModel($validated['model_type']);
+        $modelType = morphed_model($validated['model_type']);
         if ($validated['model_id'] ?? false) {
             $views = array_keys(
                 app($modelType)->query()

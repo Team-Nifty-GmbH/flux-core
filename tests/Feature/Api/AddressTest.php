@@ -43,10 +43,12 @@ class AddressTest extends BaseSetup
         $this->countries = Country::factory()->count(2)->create([
             'language_id' => $this->languages[0]->id,
             'currency_id' => $currency->id,
+            'is_default' => false,
         ]);
         $this->countries[] = Country::factory()->create([
             'language_id' => $this->languages[1]->id,
             'currency_id' => $currency->id,
+            'is_default' => true,
         ]);
 
         $paymentTypes = PaymentType::factory()->count(2)->create([
@@ -209,7 +211,7 @@ class AddressTest extends BaseSetup
         $this->assertEquals($address['client_id'], $dbAddress->client_id);
         $this->assertEquals($address['contact_id'], $dbAddress->contact_id);
         $this->assertNull($dbAddress->language_id);
-        $this->assertNull($dbAddress->country_id);
+        $this->assertEquals($this->countries[2]->id, $dbAddress->country_id);
         $this->assertNull($dbAddress->company);
         $this->assertNull($dbAddress->title);
         $this->assertNull($dbAddress->salutation);

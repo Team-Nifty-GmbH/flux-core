@@ -2,8 +2,10 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
 use FluxErp\Traits\HasUserModification;
@@ -15,7 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Country extends Model
 {
-    use Commentable, Filterable, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
+    use CacheModelQueries, Commentable, Filterable, HasDefault, HasPackageFactory, HasTranslations, HasUserModification,
+        HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -57,10 +60,5 @@ class Country extends Model
     public function regions(): HasMany
     {
         return $this->hasMany(CountryRegion::class);
-    }
-
-    public static function default(): ?static
-    {
-        return static::query()->where('is_default', true)->first();
     }
 }

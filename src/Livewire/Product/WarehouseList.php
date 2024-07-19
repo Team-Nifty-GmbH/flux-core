@@ -39,7 +39,7 @@ class WarehouseList extends BaseWarehouseList
         return $this->enabledCols;
     }
 
-    public function getAggregatableRelationCols(): array
+    protected function getAggregatableRelationCols(): array
     {
         return [
             AggregatableRelationColumn::make(

@@ -18,7 +18,6 @@ use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -131,7 +130,7 @@ class SerialNumberTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/serial-numbers/' . Str::uuid());
+        $response = $this->actingAs($this->user)->get('/api/serial-numbers/' . $this->serialNumbers[2]->id + 10000);
         $response->assertStatus(404);
     }
 
@@ -230,7 +229,7 @@ class SerialNumberTest extends BaseSetup
     public function test_update_serial_number_with_additional_columns()
     {
         $additionalColumn = AdditionalColumn::factory()->create([
-            'model_type' => Relation::getMorphClassAlias(SerialNumber::class),
+            'model_type' => morph_alias(SerialNumber::class),
         ]);
 
         $serialNumber = [

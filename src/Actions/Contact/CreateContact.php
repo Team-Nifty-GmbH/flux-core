@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Contact;
 
 use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
@@ -59,6 +60,11 @@ class CreateContact extends FluxAction
         }
 
         return $contact->withoutRelations()->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->data['client_id'] ??= resolve_static(Client::class, 'default')?->id;
     }
 
     protected function validateData(): void

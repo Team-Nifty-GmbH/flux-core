@@ -16,7 +16,7 @@ class Orders extends OrderList
     #[Modelable]
     public ContactForm $contact;
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->where('contact_id', $this->contact->id);
     }

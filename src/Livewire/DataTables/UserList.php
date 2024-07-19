@@ -41,12 +41,12 @@ class UserList extends BaseDataTable
         ];
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->with('media');
     }
 
-    public function getReturnKeys(): array
+    protected function getReturnKeys(): array
     {
         $returnKeys = parent::getReturnKeys();
         $returnKeys[] = 'avatar';
@@ -54,7 +54,7 @@ class UserList extends BaseDataTable
         return $returnKeys;
     }
 
-    public function itemToArray($item): array
+    protected function itemToArray($item): array
     {
         $returnArray = parent::itemToArray($item);
         $returnArray['avatar'] = $item->getAvatarUrl();

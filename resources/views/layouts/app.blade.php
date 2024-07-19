@@ -19,6 +19,7 @@
             <x-input id="prompt-value" />
         </x-dialog>
     @endpersist
+    <x-flux::flash />
     @auth('web')
         @persist('mail')
             <div id="mail">

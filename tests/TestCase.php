@@ -19,6 +19,7 @@ use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Spatie\Tags\TagsServiceProvider;
 use Spatie\Translatable\TranslatableServiceProvider;
+use Spatie\TranslationLoader\TranslationServiceProvider;
 use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
@@ -49,6 +50,7 @@ abstract class TestCase extends BaseTestCase
     public function getPackageProviders($app): array
     {
         return [
+            TranslationServiceProvider::class,
             TranslatableServiceProvider::class,
             LivewireServiceProvider::class,
             ViewServiceProvider::class,

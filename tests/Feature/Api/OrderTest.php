@@ -123,7 +123,7 @@ class OrderTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/orders/' . Str::random());
+        $response = $this->actingAs($this->user)->get('/api/orders/' . $this->orders[2]->id + 10000);
         $response->assertStatus(404);
     }
 

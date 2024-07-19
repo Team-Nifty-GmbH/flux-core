@@ -38,6 +38,7 @@
         "jest-extended": "^4.0.2",
         "laravel-echo": "^1.16.1",
         "laravel-vite-plugin": "^1.0.0",
+        "leaflet": "^1.9.4",
         "lodash": "^4.17.21",
         "lodash.debounce": "^4.0.8",
         "lodash.kebabcase": "^4.1.1",

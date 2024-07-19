@@ -2,6 +2,7 @@
 @import "/node_modules/@fontsource/inter/latin-400.css";
 @import "/node_modules/@fontsource/inter/latin-600.css";
 @import "/node_modules/@fontsource/inter/latin-900.css";
+@import "/node_modules/leaflet/dist/leaflet.css";
 
 @import '/node_modules/gridstack/dist/gridstack.min.css';
 @import '/node_modules/gridstack/dist/gridstack-extra.min.css';
@@ -62,6 +63,10 @@
 
     .prose-xs {
         @apply text-xs;
+    }
+
+    #map {
+        @apply h-96
     }
 }
 

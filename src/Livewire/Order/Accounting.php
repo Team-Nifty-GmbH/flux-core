@@ -24,7 +24,7 @@ class Accounting extends TransactionList
         'purpose',
     ];
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->where('order_id', $this->order->id);
     }

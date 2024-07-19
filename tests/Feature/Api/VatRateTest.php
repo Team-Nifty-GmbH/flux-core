@@ -54,7 +54,7 @@ class VatRateTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/vat-rates/' . Str::uuid());
+        $response = $this->actingAs($this->user)->get('/api/vat-rates/' . $this->vatRates[2]->id + 10000);
         $response->assertStatus(404);
     }
 

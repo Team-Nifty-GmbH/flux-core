@@ -34,7 +34,7 @@ class TicketList extends BaseDataTable
 
     public array $availableRelations = [];
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return $builder->with([
             'ticketType:id,name',

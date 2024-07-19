@@ -79,7 +79,7 @@
                             </div>
                             @section('content.widget')
                                 @if($ticket['model_type']
-                                    && $widgetComponent = resolve_static(\Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($ticket['model_type']), 'getLivewireComponentWidget')
+                                    && $widgetComponent = resolve_static(morphed_model($ticket['model_type']), 'getLivewireComponentWidget')
                                 )
                                     <x-card>
                                         <livewire:is :component="$widgetComponent" :modelId="$ticket['model_id']" />
@@ -181,8 +181,8 @@
                                     ]"
                                     :async-data="[
                                         'api' => route('search', $ticket['authenticatable_type'] ?
-                                            \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($ticket['authenticatable_type']) :
-                                            \FluxErp\Models\Address::class
+                                            morphed_model($ticket['authenticatable_type']) :
+                                            resolve_static(\FluxErp\Models\Address::class, 'class')
                                         ),
                                         'method' => 'POST',
                                         'params' => [

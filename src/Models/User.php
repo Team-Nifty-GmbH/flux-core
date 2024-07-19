@@ -3,8 +3,10 @@
 namespace FluxErp\Models;
 
 use FluxErp\Mail\MagicLoginLink;
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasCart;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
@@ -38,9 +40,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
 class User extends Authenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasApiTokens, HasCalendars, HasDatatableUserSettings,
-        HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles, HasUuid, HasWidgets,
-        InteractsWithMedia, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
+    use BroadcastsEvents, CacheModelQueries, Commentable, Filterable, HasApiTokens, HasCalendars, HasCart,
+        HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles, HasUuid,
+        HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'password',
@@ -215,5 +217,18 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
         );
 
         Mail::to($this->email)->queue(new MagicLoginLink($plaintext, $expires));
+    }
+
+    public static function guardNames(): array
+    {
+        return [
+            'web',
+            'sanctum',
+        ];
+    }
+
+    public function guardName(): array
+    {
+        return static::guardNames();
     }
 }

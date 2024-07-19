@@ -2,10 +2,12 @@
 
 namespace FluxErp\Livewire\Forms;
 
+use Carbon\Carbon;
 use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Address\DeleteAddress;
 use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Models\Address;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
 class AddressForm extends FluxForm
@@ -53,7 +55,7 @@ class AddressForm extends FluxForm
 
     public ?string $url = null;
 
-    public ?string $email = null;
+    public ?string $email_primary = null;
 
     public ?string $phone = null;
 
@@ -61,9 +63,9 @@ class AddressForm extends FluxForm
 
     public ?string $department = null;
 
-    public ?string $login_name = null;
+    public ?string $email = null;
 
-    public ?string $login_password = null;
+    public ?string $password = null;
 
     public bool $is_main_address = false;
 
@@ -101,21 +103,44 @@ class AddressForm extends FluxForm
             $values = $values->toArray();
             $values['tags'] = array_column($values['tags'] ?? [], 'id');
             $values['permissions'] = array_column($values['permissions'] ?? [], 'id');
+        } elseif (data_get($values, 'id')) {
+            $address = app(Address::class)->query()
+                ->whereKey(data_get($values, 'id'))
+                ->with(['contactOptions', 'tags:id', 'permissions:id'])
+                ->first(['id']);
+
+            if ($address) {
+                $values['contact_options'] ??= $address->contactOptions->toArray();
+                $values['tags'] ??= $address->tags->pluck('id')->toArray();
+                $values['permissions'] ??= $address->permissions->pluck('id')->toArray();
+            }
         }
 
         parent::fill($values);
+
+        if (! is_null($this->date_of_birth)) {
+            $this->date_of_birth = Carbon::create($this->date_of_birth)
+                ->locale(app()->getLocale())
+                ->isoFormat('L');
+        }
     }
 
     public function toArray(): array
     {
         $data = parent::toArray();
 
-        if (is_null($this->login_password)) {
-            unset($data['login_password']);
+        if (is_null($this->password)) {
+            unset($data['password']);
         }
 
         $data['contact_options'] = array_filter($this->contact_options);
 
         return $data;
+    }
+
+    #[Computed]
+    public function postalAddress(): array
+    {
+        return app(Address::class)->fill($this->toArray())->postal_address;
     }
 }

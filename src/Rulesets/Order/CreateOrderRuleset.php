@@ -110,6 +110,7 @@ class CreateOrderRuleset extends FluxRuleset
                 'nullable',
             ],
             'address_delivery.id' => [
+                'nullable',
                 'integer',
                 new ExistsWithForeign(
                     foreignAttribute: 'client_id',

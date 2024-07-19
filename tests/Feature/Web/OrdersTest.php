@@ -12,7 +12,6 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
-use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class OrdersTest extends BaseSetup
@@ -49,6 +48,7 @@ class OrdersTest extends BaseSetup
 
         $paymentType = PaymentType::factory()->create([
             'client_id' => $this->dbClient->id,
+            'is_default' => false,
         ]);
 
         $this->order = Order::factory()->create([

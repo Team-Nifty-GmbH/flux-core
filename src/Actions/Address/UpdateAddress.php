@@ -70,8 +70,8 @@ class UpdateAddress extends FluxAction
             $this->data['is_delivery_address'] = true;
         }
 
-        if (! trim(data_get($this->data, 'login_password', ''))) {
-            unset($this->data['login_password']);
+        if (! trim(data_get($this->data, 'password', ''))) {
+            unset($this->data['password']);
         }
 
         $address->fill($this->data);
@@ -122,7 +122,7 @@ class UpdateAddress extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->rules['login_name'][] = Rule::unique('addresses', 'login_name')
+        $this->rules['email'][] = Rule::unique('addresses', 'email')
             ->whereNull('deleted_at')
             ->ignore(data_get($this->data, 'id'));
     }
@@ -140,20 +140,27 @@ class UpdateAddress extends FluxAction
             ->first();
 
         if ($address->can_login && ($this->data['can_login'] ?? false)) {
-            if ($address->login_name
-                && array_key_exists('login_name', $this->data)
-                && ! $this->data['login_name']
+            if ($address->email
+                && array_key_exists('email', $this->data)
+                && ! $this->data['email']
             ) {
                 $errors += [
-                    'login_name' => [__('Unable to clear login name while \'can_login\' = \'true\'')],
+                    'email' => [__('Unable to clear email while \'can_login\' = \'true\'')],
                 ];
             }
-            if ($address->login_password &&
-                array_key_exists('login_password', $this->data) &&
-                ! $this->data['login_password']
+
+            if ($address->password
+                && array_key_exists('password', $this->data)
+                && ! $this->data['password']
             ) {
                 $errors += [
-                    'login_password' => [__('Unable to clear login password while \'can_login\' = \'true\'')],
+                    'password' => [__('Unable to clear password while \'can_login\' = \'true\'')],
+                ];
+            }
+
+            if (data_get($this->data, 'password') && ! data_get($this->data, 'email', $address->email)) {
+                $errors += [
+                    'email' => [__('Email is required when setting a password')],
                 ];
             }
         }

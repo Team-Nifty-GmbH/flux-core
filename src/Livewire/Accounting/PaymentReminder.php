@@ -30,7 +30,7 @@ class PaymentReminder extends OrderList
         'commission',
     ];
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         $orderTypes = app(OrderType::class)->query()
             ->where('is_active', true)
@@ -47,7 +47,7 @@ class PaymentReminder extends OrderList
             ->whereIntegerInRaw('order_type_id', $orderTypes);
     }
 
-    public function getSelectedActions(): array
+    protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()
@@ -101,7 +101,9 @@ class PaymentReminder extends OrderList
                     ->attachToModel($order);
 
                 $mailMessages[] = [
-                    'to' => Arr::wrap($paymentReminderText->mail_to ?: $order->contact->invoiceAddress->email),
+                    'to' => Arr::wrap($paymentReminderText->mail_to
+                        ?: $order->contact->invoiceAddress->email_primary
+                    ),
                     'cc' => Arr::wrap($paymentReminderText->mail_cc),
                     'subject' => html_entity_decode($paymentReminderText->mail_subject) ?:
                         __(

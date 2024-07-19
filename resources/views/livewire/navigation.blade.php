@@ -75,7 +75,12 @@
                         />
                         <livewire:features.search-bar />
                         <div class="flex gap-1.5" wire:ignore>
-                            <livewire:work-time lazy />
+                            @canAction(\FluxErp\Actions\Cart\CreateCart::class)
+                                <livewire:cart />
+                            @endCanAction
+                            @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
+                                <livewire:work-time lazy />
+                            @endCanAction
                             <livewire:features.notifications lazy />
                         </div>
                     </x-card>

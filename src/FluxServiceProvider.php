@@ -30,7 +30,6 @@ use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
 use FluxErp\Support\Validator\ValidatorFactory;
 use FluxErp\Traits\HasClientAssignment;
-use FluxErp\Traits\HasParentMorphClass;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -38,7 +37,6 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -47,6 +45,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
@@ -82,11 +81,13 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux');
+        $this->app->bind(
+            'path.lang',
+            fn () => [__DIR__ . '/../lang', base_path('lang')]
+        );
+
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
-        $this->registerBladeComponents();
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
-        $this->registerLivewireComponents();
         $this->registerConfig();
         $this->registerMarcos();
         $this->registerExtensions();
@@ -107,6 +108,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->bootMiddleware();
         $this->bootCommands();
         $this->bootRoutes();
+        $this->registerLivewireComponents();
+        $this->registerBladeComponents();
 
         if (static::$registerFluxRoutes && ! $this->app->runningInConsole()) {
             $this->bootFluxMenu();
@@ -153,11 +156,9 @@ class FluxServiceProvider extends ServiceProvider
 
         if (! Request::hasMacro('isPortal')) {
             Request::macro('isPortal', function () {
-                return $this->getHost() === preg_replace(
-                    '(^https?://)',
-                    '',
-                    config('flux.portal_domain')
-                );
+                // check if the current url matches with config('flux.portal_domain')
+                // ignore http or https, just match the host itself
+                return Str::startsWith($this->getHost(), Str::after(config('flux.portal_domain'), '://'));
             });
         }
 
@@ -197,18 +198,6 @@ class FluxServiceProvider extends ServiceProvider
 
             return $this;
         });
-
-        Relation::macro(
-            'getMorphClassAlias',
-            function (string $class): ?string {
-                if (in_array(HasParentMorphClass::class, class_uses_recursive($class))) {
-                    /** @var HasParentMorphClass $class */
-                    $class = Relation::getMorphedModel($class::getParentMorphClass());
-                }
-
-                return data_get(array_flip(Relation::$morphMap), $class);
-            }
-        );
 
         Command::macro('removeLastLine', function () {
             $this->output->write("\x1b[1A\r\x1b[K");
@@ -376,6 +365,10 @@ class FluxServiceProvider extends ServiceProvider
 
     private function getViewClassAliasFromNamespace(string $namespace, ?string $directoryPath = null): array
     {
+        if (Cache::has('flux.view-classes.' . Str::slug($namespace))) {
+            return Cache::get('flux.view-classes.' . Str::slug($namespace));
+        }
+
         $directoryPath = $directoryPath ?: Str::replace(['\\', 'FluxErp'], ['/', __DIR__], $namespace);
         $directoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath));
         $phpFiles = new RegexIterator($directoryIterator, '/\.php$/');
@@ -401,7 +394,7 @@ class FluxServiceProvider extends ServiceProvider
             }
         }
 
-        return $components;
+        return Cache::rememberForever('flux.view-classes.' . Str::slug($namespace), fn () => $components);
     }
 
     protected function bootRoutes(): void
@@ -432,7 +425,6 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         RouteFacade::pattern('id', '[0-9]+');
-        Livewire::addPersistentMiddleware(PortalMiddleware::class);
     }
 
     protected function bootFluxMenu(): void
@@ -529,6 +521,7 @@ class FluxServiceProvider extends ServiceProvider
     {
         Menu::register(route: 'portal.dashboard', icon: 'home', order: -9999);
         Menu::register(route: 'portal.calendar', icon: 'calendar');
+        Menu::register(route: 'portal.products', icon: 'square-3-stack-3d');
         Menu::register(route: 'portal.files', icon: 'folder-open');
         Menu::register(route: 'portal.orders', icon: 'shopping-bag');
         Menu::register(route: 'portal.serial-numbers', icon: 'tag');
@@ -570,6 +563,7 @@ class FluxServiceProvider extends ServiceProvider
 
         $kernel->appendMiddlewareToGroup('web', Localization::class);
         $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
+        $kernel->appendMiddlewareToGroup('web', PortalMiddleware::class);
 
         $this->app['router']->aliasMiddleware('abilities', CheckAbilities::class);
         $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);

@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\LedgerAccountTypeEnum;
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Laravel\Scout\Searchable;
 
 class LedgerAccount extends Model
 {
-    use HasPackageFactory, HasUuid, Searchable;
+    use CacheModelQueries, HasPackageFactory, HasUuid, Searchable;
 
     protected $guarded = [
         'id',

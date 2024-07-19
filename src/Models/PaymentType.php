@@ -2,8 +2,10 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
+use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
 use FluxErp\Traits\HasUserModification;
@@ -15,7 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PaymentType extends Model
 {
-    use Filterable, HasClientAssignment, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
+    use CacheModelQueries, Filterable, HasClientAssignment, HasDefault, HasPackageFactory, HasTranslations,
+        HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -46,10 +49,5 @@ class PaymentType extends Model
     public function paymentNotices(): HasMany
     {
         return $this->hasMany(PaymentNotice::class, 'payment_type_id');
-    }
-
-    public static function default(): ?static
-    {
-        return static::query()->where('is_default', true)->first();
     }
 }

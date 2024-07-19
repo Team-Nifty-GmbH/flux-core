@@ -7,6 +7,11 @@ module.exports = {
         require('./vendor/team-nifty-gmbh/tall-datatables/tailwind.config.js'),
     ],
     content: [
+        './resources/**/*.blade.php',
+        './resources/**/*.js',
+        './resources/**/*.vue',
+        './app/Livewire/**/*.php',
+        './app/Components/**/*.php',
         '.{{ relative_path }}/resources/**/*.blade.php',
         '.{{ relative_path }}/resources/**/*.js',
         '.{{ relative_path }}/resources/**/*.vue',
