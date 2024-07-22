@@ -30,7 +30,7 @@ class QueueMonitorManager
 
     protected static function jobQueued(JobQueued $event): void
     {
-        app(QueueMonitor::class)->query()->create([
+        resolve_static(QueueMonitor::class, 'query')->create([
             'job_batch_id' => $event->job->batchId ?? null,
             'job_id' => $event->id,
             'name' => get_class(static::getJobClass($event->job)),
@@ -45,9 +45,7 @@ class QueueMonitorManager
     {
         $now = Carbon::now();
 
-        $monitor = app(QueueMonitor::class)
-            ->query()
-            ->where('job_id', $jobId = static::getJobId($event->job))
+        $monitor = resolve_static(QueueMonitor::class, 'query')            ->where('job_id', $jobId = static::getJobId($event->job))
             ->where('queue', $event->job->getQueue() ?? config('queue.default'))
             ->whereState('state', Queued::class)
             ->firstOrNew();
@@ -65,7 +63,7 @@ class QueueMonitorManager
         $monitor->save();
 
         // Mark jobs with same job id (different execution) as stale
-        app(QueueMonitor::class)->query()
+        resolve_static(QueueMonitor::class, 'query')
             ->whereNot('id', $monitor->id)
             ->where('job_id', $jobId)
             ->whereNotState('state', Failed::class)
@@ -96,9 +94,7 @@ class QueueMonitorManager
 
     protected static function jobFinished(Job $job, string $state, ?\Throwable $exception = null): void
     {
-        $monitor = app(QueueMonitor::class)
-            ->query()
-            ->where('job_id', static::getJobId($job))
+        $monitor = resolve_static(QueueMonitor::class, 'query')            ->where('job_id', static::getJobId($job))
             ->where('attempt', $job->attempts())
             ->orderByDesc('started_at')
             ->first();

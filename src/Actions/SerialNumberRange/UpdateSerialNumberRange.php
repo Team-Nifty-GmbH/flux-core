@@ -24,7 +24,7 @@ class UpdateSerialNumberRange extends FluxAction
 
     public function performAction(): Model
     {
-        $serialNumberRange = app(SerialNumberRange::class)->query()
+        $serialNumberRange = resolve_static(SerialNumberRange::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -39,7 +39,7 @@ class UpdateSerialNumberRange extends FluxAction
         parent::validateData();
 
         if ((array_key_exists('prefix', $this->data) || array_key_exists('affix', $this->data))
-            && app(SerialNumber::class)->query()
+            && resolve_static(SerialNumber::class, 'query')
                 ->where('serial_number_range_id', $this->data['id'])
                 ->exists()
         ) {

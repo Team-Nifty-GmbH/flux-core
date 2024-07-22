@@ -36,9 +36,7 @@ class CreateCartItem extends FluxAction
             $this->data['name'] ??= $product?->name;
         }
 
-        $cart = app(Cart::class)
-            ->query()
-            ->with('authenticatable')
+        $cart = resolve_static(Cart::class, 'query')            ->with('authenticatable')
             ->whereKey($this->data['cart_id'])
             ->sole();
 

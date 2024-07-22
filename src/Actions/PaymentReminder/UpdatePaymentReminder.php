@@ -30,7 +30,7 @@ class UpdatePaymentReminder extends FluxAction
 
     public function performAction(): Model
     {
-        $paymentReminder = app(PaymentReminder::class)->query()
+        $paymentReminder = resolve_static(PaymentReminder::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -44,11 +44,11 @@ class UpdatePaymentReminder extends FluxAction
     {
         parent::validateData();
 
-        $paymentReminder = app(PaymentReminder::class)->query()
+        $paymentReminder = resolve_static(PaymentReminder::class, 'query')
             ->whereKey($this->data['id'])
             ->first(['id', 'order_id']);
 
-        if (! app(Media::class)->query()
+        if (! resolve_static(Media::class, 'query')
             ->whereKey($this->data['media_id'])
             ->where('model_type', app(Order::class)->getMorphClass())
             ->where('model_id', $paymentReminder->order_id)

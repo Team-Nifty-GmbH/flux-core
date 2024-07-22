@@ -22,7 +22,7 @@ class UpdateComment extends FluxAction
 
     public function performAction(): Model
     {
-        $comment = app(Comment::class)->query()
+        $comment = resolve_static(Comment::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

@@ -97,7 +97,7 @@ class QueryBuilder
 
         $modelFilters = self::calculateFilters($model);
 
-        $additionalColumns = app(AdditionalColumn::class)->query()
+        $additionalColumns = resolve_static(AdditionalColumn::class, 'query')
             ->where('model_type', $modelName)
             ->get()
             ->pluck('name')

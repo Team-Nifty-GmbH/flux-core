@@ -24,7 +24,7 @@ class UpdateLockedWorkTime extends FluxAction
 
     public function performAction(): Model
     {
-        $workTime = app(WorkTime::class)->query()
+        $workTime = resolve_static(WorkTime::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -50,7 +50,7 @@ class UpdateLockedWorkTime extends FluxAction
         parent::validateData();
 
         if ($endedAt = data_get($this->data, 'ended_at')) {
-            $workTime = app(WorkTime::class)->query()
+            $workTime = resolve_static(WorkTime::class, 'query')
                 ->whereKey($this->data['id'])
                 ->first();
 

@@ -22,7 +22,7 @@ class UpdateCartItem extends FluxAction
 
     public function performAction(): Model
     {
-        $cartItem = app(CartItem::class)->query()
+        $cartItem = resolve_static(CartItem::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

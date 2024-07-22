@@ -25,7 +25,7 @@ class UpdateCategory extends FluxAction
 
     public function performAction(): Model
     {
-        $category = app(Category::class)->query()
+        $category = resolve_static(Category::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -43,11 +43,11 @@ class UpdateCategory extends FluxAction
         $this->data = $validator->validate();
 
         if ($this->data['parent_id'] ?? false) {
-            $category = app(Category::class)->query()
+            $category = resolve_static(Category::class, 'query')
                 ->whereKey($this->data['id'])
                 ->first();
 
-            $parentCategory = app(Category::class)->query()
+            $parentCategory = resolve_static(Category::class, 'query')
                 ->whereKey($this->data['parent_id'])
                 ->where('model_type', $category->model_type ?? $this->data['model_type'])
                 ->first();

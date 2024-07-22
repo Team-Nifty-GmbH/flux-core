@@ -22,7 +22,7 @@ class UpdateUnit extends FluxAction
 
     public function performAction(): Model
     {
-        $unit = app(Unit::class)->query()
+        $unit = resolve_static(Unit::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

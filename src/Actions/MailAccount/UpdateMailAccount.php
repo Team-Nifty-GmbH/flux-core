@@ -26,7 +26,7 @@ class UpdateMailAccount extends FluxAction
             unset($this->data['password']);
         }
 
-        $mailAccount = app(MailAccount::class)->query()
+        $mailAccount = resolve_static(MailAccount::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

@@ -67,7 +67,7 @@ class OrderList extends BaseDataTable
 
     public function delete(): void
     {
-        $orders = app(Order::class)->query()
+        $orders = resolve_static(Order::class, 'query')
             ->whereIntegerInRaw('id', $this->selected)
             ->where('is_locked', false)
             ->pluck('id');

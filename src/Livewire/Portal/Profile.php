@@ -45,7 +45,7 @@ class Profile extends Component
             $user->country_id = null;
             $user->contact_options = [];
         } else {
-            $user = app(Address::class)->query()->whereKey($id)->first();
+            $user = resolve_static(Address::class, 'query')->whereKey($id)->first();
             if ($user?->contact_id !== auth()->user()->contact_id) {
                 abort(404);
             }
@@ -55,7 +55,7 @@ class Profile extends Component
 
         $this->address['permissions'] = $user->getAllPermissions()->pluck('id')->toArray();
 
-        $this->permissions = app(Permission::class)->query()
+        $this->permissions = resolve_static(Permission::class, 'query')
             ->where('guard_name', 'address')
             ->get()
             ->toArray();
@@ -81,7 +81,7 @@ class Profile extends Component
             return;
         }
 
-        $this->addresses = app(Address::class)->query()
+        $this->addresses = resolve_static(Address::class, 'query')
             ->where('contact_id', auth()->user()->contact_id)
             ->get()
             ->toArray();

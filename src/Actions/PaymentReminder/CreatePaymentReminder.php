@@ -35,7 +35,7 @@ class CreatePaymentReminder extends FluxAction
         parent::validateData();
 
         // Validate Order
-        $order = app(Order::class)->query()
+        $order = resolve_static(Order::class, 'query')
             ->whereKey($this->data['order_id'])
             ->with('orderType:id,order_type_enum')
             ->first();
@@ -52,7 +52,7 @@ class CreatePaymentReminder extends FluxAction
 
         // Validate Media
         if (($this->data['media_id'] ?? false)
-            && ! app(Media::class)->query()
+            && ! resolve_static(Media::class, 'query')
                 ->whereKey($this->data['media_id'])
                 ->where('model_type', app(Order::class)->getMorphClass())
                 ->where('model_id', $this->data['order_id'])

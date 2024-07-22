@@ -22,7 +22,7 @@ class UpdateSetting extends FluxAction
 
     public function performAction(): Model
     {
-        $setting = app(Setting::class)->query()
+        $setting = resolve_static(Setting::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

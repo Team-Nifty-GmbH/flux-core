@@ -10,6 +10,7 @@ use Dompdf\Options;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Client;
 use FluxErp\Printing\Printable;
+use FluxErp\Traits\Makeable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
@@ -21,6 +22,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 abstract class PrintableView extends Component
 {
+    use Makeable;
+
     public PDF $pdf;
 
     private ?\Imagick $imagick = null;

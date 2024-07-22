@@ -21,7 +21,7 @@ class SerialNumbers extends Component
 
     protected function getListeners(): array
     {
-        $addresses = app(Address::class)->query()
+        $addresses = resolve_static(Address::class, 'query')
             ->where('contact_id', Auth::user()->contact_id)
             ->get();
 

@@ -22,7 +22,7 @@ class FinishTask extends FluxAction
 
     public function performAction(): Model
     {
-        $task = app(Task::class)->query()
+        $task = resolve_static(Task::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

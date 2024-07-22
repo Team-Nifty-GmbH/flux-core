@@ -57,16 +57,16 @@ class UserEdit extends Component
         );
         $this->languages = app(Language::class)->all(['id', 'name'])->toArray();
 
-        $this->roles = app(Role::class)->query()
+        $this->roles = resolve_static(Role::class, 'query')
             ->whereIn('guard_name', resolve_static(User::class, 'guardNames'))
             ->get(['id', 'name', 'guard_name'])
             ->toArray();
 
-        $this->mailAccounts = app(MailAccount::class)->query()
+        $this->mailAccounts = resolve_static(MailAccount::class, 'query')
             ->get(['id', 'email'])
             ->toArray();
 
-        $this->users = app(User::class)->query()
+        $this->users = resolve_static(User::class, 'query')
             ->get(['id', 'email', 'firstname', 'lastname', 'name'])
             ->toArray();
     }
@@ -75,11 +75,11 @@ class UserEdit extends Component
     {
         return view('flux::livewire.settings.user-edit',
             [
-                'permissions' => app(Permission::class)->query()
+                'permissions' => resolve_static(Permission::class, 'query')
                     ->where('guard_name', '!=', 'address')
                     ->when($this->searchPermission, fn ($query) => $query->search($this->searchPermission))
                     ->paginate(pageName: 'permissionsPage'),
-                'clients' => app(Client::class)->query()
+                'clients' => resolve_static(Client::class, 'query')
                     ->get(['id', 'name', 'client_code']),
             ]
         );
@@ -97,7 +97,7 @@ class UserEdit extends Component
 
     public function show(?int $id = null): void
     {
-        $user = app(User::class)->query()
+        $user = resolve_static(User::class, 'query')
             ->whereKey($id)
             ->with(['roles', 'mailAccounts:id', 'clients:id'])
             ->firstOrNew();
@@ -221,7 +221,7 @@ class UserEdit extends Component
             return;
         }
 
-        $lockedPermissions = app(Role::class)->query()
+        $lockedPermissions = resolve_static(Role::class, 'query')
             ->whereIntegerInRaw('id', $this->user['roles'])
             ->with('permissions')
             ->get()

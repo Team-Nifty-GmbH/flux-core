@@ -22,7 +22,7 @@ class DeletePriceList extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(PriceList::class)->query()
+        return resolve_static(PriceList::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -32,7 +32,7 @@ class DeletePriceList extends FluxAction
     {
         parent::validateData();
 
-        if (app(PriceList::class)->query()
+        if (resolve_static(PriceList::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->prices()

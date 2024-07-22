@@ -24,7 +24,7 @@ class UpdateSerialNumber extends FluxAction
 
     public function performAction(): Model
     {
-        $serialNumber = app(SerialNumber::class)->query()
+        $serialNumber = resolve_static(SerialNumber::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -41,7 +41,7 @@ class UpdateSerialNumber extends FluxAction
 
         $this->data = $validator->validate();
 
-        $serialNumber = app(SerialNumber::class)->query()
+        $serialNumber = resolve_static(SerialNumber::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

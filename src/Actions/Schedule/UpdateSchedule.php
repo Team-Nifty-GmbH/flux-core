@@ -23,7 +23,7 @@ class UpdateSchedule extends FluxAction
 
     public function performAction(): Model
     {
-        $schedule = app(Schedule::class)->query()
+        $schedule = resolve_static(Schedule::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

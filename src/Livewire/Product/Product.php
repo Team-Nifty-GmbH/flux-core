@@ -42,7 +42,7 @@ class Product extends Component
 
     public function mount(int $id): void
     {
-        $product = app(ProductModel::class)->query()
+        $product = resolve_static(ProductModel::class, 'query')
             ->whereKey($id)
             ->with([
                 'categories:id',
@@ -169,10 +169,10 @@ class Product extends Component
     #[Renderless]
     public function getPriceLists(): void
     {
-        $product = app(ProductModel::class)->query()->whereKey($this->product->id)->first();
+        $product = resolve_static(ProductModel::class, 'query')->whereKey($this->product->id)->first();
         $priceListHelper = PriceHelper::make($product)->useDefault(false);
 
-        $priceLists = app(PriceList::class)->query()
+        $priceLists = resolve_static(PriceList::class, 'query')
             ->with('parent')
             ->get([
                 'id',
@@ -212,7 +212,7 @@ class Product extends Component
     #[Renderless]
     public function getProductCrossSellings(): void
     {
-        $this->productCrossSellings = app(ProductCrossSelling::class)->query()
+        $this->productCrossSellings = resolve_static(ProductCrossSelling::class, 'query')
             ->where('product_id', $this->product->id)
             ->with('products:id,name,product_number')
             ->get()

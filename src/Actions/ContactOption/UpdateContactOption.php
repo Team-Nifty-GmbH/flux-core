@@ -22,7 +22,7 @@ class UpdateContactOption extends FluxAction
 
     public function performAction(): Model
     {
-        $contactOption = app(ContactOption::class)->query()
+        $contactOption = resolve_static(ContactOption::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

@@ -44,7 +44,7 @@ class OrderDetail extends Component
             ->pluck('name', 'id')
             ->toArray();
 
-        $order = app(Order::class)->query()
+        $order = resolve_static(Order::class, 'query')
             ->whereKey($id)
             ->with(
                 [
@@ -137,7 +137,7 @@ class OrderDetail extends Component
             ]
         ));
 
-        $positions = app(OrderPosition::class)->query()
+        $positions = resolve_static(OrderPosition::class, 'query')
             ->where('order_id', $order->id)
             ->whereNull('parent_id')
             ->with('tags')
@@ -187,7 +187,7 @@ class OrderDetail extends Component
 
     public function selectPosition(int $id): void
     {
-        $position = app(OrderPosition::class)->query()
+        $position = resolve_static(OrderPosition::class, 'query')
             ->whereKey($id)
             ->first();
 
@@ -211,7 +211,7 @@ class OrderDetail extends Component
 
     public function downloadInvoice(): BinaryFileResponse
     {
-        $order = app(Order::class)->query()
+        $order = resolve_static(Order::class, 'query')
             ->whereKey($this->order['id'])
             ->first();
         $mediaItem = $order->invoice();
@@ -229,7 +229,7 @@ class OrderDetail extends Component
 
     public function downloadMedia(int $id): BinaryFileResponse
     {
-        $order = app(Order::class)->query()
+        $order = resolve_static(Order::class, 'query')
             ->whereKey($this->order['id'])
             ->first();
 

@@ -51,7 +51,7 @@ class CreateOrderPosition extends FluxAction
     public function performAction(): OrderPosition
     {
         $tags = Arr::pull($this->data, 'tags', []);
-        $order = app(Order::class)->query()
+        $order = resolve_static(Order::class, 'query')
             ->with(['orderType:id,order_type_enum', 'priceList:id,is_net'])
             ->whereKey($this->data['order_id'])
             ->first();
@@ -70,13 +70,13 @@ class CreateOrderPosition extends FluxAction
         );
 
         if (is_int($this->data['sort_number'] ?? false)) {
-            $currentHighestSortNumber = app(OrderPosition::class)->query()
+            $currentHighestSortNumber = resolve_static(OrderPosition::class, 'query')
                 ->where('order_id', $this->data['order_id'])
                 ->max('sort_number');
             $this->data['sort_number'] = min($this->data['sort_number'], $currentHighestSortNumber + 1);
 
             $orderPosition->sortable['sort_when_creating'] = false;
-            app(OrderPosition::class)->query()->where('order_id', $this->data['order_id'])
+            resolve_static(OrderPosition::class, 'query')->where('order_id', $this->data['order_id'])
                 ->where('sort_number', '>=', $this->data['sort_number'])
                 ->increment('sort_number');
         }
@@ -87,7 +87,7 @@ class CreateOrderPosition extends FluxAction
 
         $product = null;
         if (data_get($this->data, 'product_id', false)) {
-            $product = app(Product::class)->query()
+            $product = resolve_static(Product::class, 'query')
                 ->whereKey($this->data['product_id'])
                 ->with([
                     'bundleProducts:id,name',
@@ -164,7 +164,7 @@ class CreateOrderPosition extends FluxAction
 
         // Only allow creation of order_position if exists in parent order and amount not greater than totalAmount
         if (! ($this->data['is_free_text'] ?? false)) {
-            $order = app(Order::class)->query()
+            $order = resolve_static(Order::class, 'query')
                 ->whereKey($this->data['order_id'])
                 ->first();
 
@@ -177,7 +177,7 @@ class CreateOrderPosition extends FluxAction
                     ])->errorBag('createOrderPosition');
                 }
 
-                if (! app(OrderPosition::class)->query()
+                if (! resolve_static(OrderPosition::class, 'query')
                     ->whereKey($originPositionId)
                     ->where('order_id', $order->parent_id)
                     ->exists()
@@ -187,7 +187,7 @@ class CreateOrderPosition extends FluxAction
                     ]);
                 }
 
-                $originPosition = app(OrderPosition::class)->query()
+                $originPosition = resolve_static(OrderPosition::class, 'query')
                     ->whereKey($originPositionId)
                     ->withSum('descendants as descendantsAmount', 'amount')
                     ->first();

@@ -23,7 +23,7 @@ class UpdateProductBundleProduct extends FluxAction
 
     public function performAction(): Model
     {
-        $productBundleProduct = app(ProductBundleProduct::class)->query()
+        $productBundleProduct = resolve_static(ProductBundleProduct::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

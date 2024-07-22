@@ -20,7 +20,7 @@ trait HasSerialNumberRange
                 continue;
             }
 
-            $query = app(SerialNumberRange::class)->query()
+            $query = resolve_static(SerialNumberRange::class, 'query')
                 ->where('type', $type)
                 ->where('model_type', app(static::class)->getMorphClass())
                 ->where('client_id', $clientId);
@@ -50,7 +50,7 @@ trait HasSerialNumberRange
 
             if (! $serialNumberRange->is_pre_filled && ! $serialNumberRange->is_randomized) {
                 $serialNumberRange = DB::transaction(function () use ($serialNumberRange) {
-                    $serialNumberRange = app(SerialNumberRange::class)->query()
+                    $serialNumberRange = resolve_static(SerialNumberRange::class, 'query')
                         ->whereKey($serialNumberRange->id)
                         ->lockForUpdate()
                         ->first();

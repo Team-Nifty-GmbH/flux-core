@@ -21,7 +21,7 @@ class DeleteTicket extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Ticket::class)->query()
+        return resolve_static(Ticket::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

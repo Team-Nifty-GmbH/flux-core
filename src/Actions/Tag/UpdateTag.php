@@ -21,7 +21,7 @@ class UpdateTag extends FluxAction
 
     public function performAction(): Tag
     {
-        $tag = app(Tag::class)->query()
+        $tag = resolve_static(Tag::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

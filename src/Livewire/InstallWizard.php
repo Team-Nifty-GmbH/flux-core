@@ -303,7 +303,7 @@ class InstallWizard extends Component
         $this->userForm->language_id = $this->languageForm->id;
         $this->userForm->setCheckPermission(false)->save();
 
-        app(User::class)->query()
+        resolve_static(User::class, 'query')
             ->whereKey($this->userForm->id)
             ->first()
             ->assignRole('Super Admin');

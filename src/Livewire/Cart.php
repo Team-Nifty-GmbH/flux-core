@@ -161,9 +161,7 @@ class Cart extends Component
     {
         try {
             if ($this->selectedWatchlist) {
-                $cart = app(CartModel::class)
-                    ->query()
-                    ->whereKey($this->selectedWatchlist)
+                $cart = resolve_static(CartModel::class, 'query')                    ->whereKey($this->selectedWatchlist)
                     ->where('is_watchlist', true)
                     ->first();
             } else {
@@ -233,9 +231,7 @@ class Cart extends Component
 
     protected function getWatchLists(): void
     {
-        $this->watchlists = app(CartModel::class)
-            ->query()
-            ->where(function (Builder $query) {
+        $this->watchlists = resolve_static(CartModel::class, 'query')            ->where(function (Builder $query) {
                 $query->where(fn (Builder $query) => $query
                     ->where('authenticatable_type', auth()->user()?->getMorphClass())
                     ->where('authenticatable_id', auth()->id()))

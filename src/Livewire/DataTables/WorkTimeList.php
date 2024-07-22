@@ -106,7 +106,7 @@ class WorkTimeList extends BaseDataTable
     {
         try {
             $this->createOrdersFromWorkTimes->validate();
-            $product = app(Product::class)->query()
+            $product = resolve_static(Product::class, 'query')
                 ->whereKey($this->createOrdersFromWorkTimes->product_id)
                 ->firstOrFail();
         } catch (ValidationException|ModelNotFoundException $e) {
@@ -120,12 +120,12 @@ class WorkTimeList extends BaseDataTable
         $selectedIds = $this->getSelectedValues();
 
         // get all contact_ids from selected work times
-        $contactIds = app(WorkTime::class)->query()
+        $contactIds = resolve_static(WorkTime::class, 'query')
             ->whereIntegerInRaw('id', $selectedIds)
             ->whereNotNull('contact_id')
             ->distinct('contact_id')
             ->pluck('contact_id');
-        $contacts = app(Contact::class)->query()
+        $contacts = resolve_static(Contact::class, 'query')
             ->whereIntegerInRaw('id', $contactIds)
             ->with('client')
             ->get();
@@ -133,7 +133,7 @@ class WorkTimeList extends BaseDataTable
         $orderIds = [];
         $billedWorkTimes = 0;
         foreach ($contacts as $contact) {
-            $workTimes = app(WorkTime::class)->query()
+            $workTimes = resolve_static(WorkTime::class, 'query')
                 ->whereIntegerInRaw('id', $selectedIds)
                 ->where('contact_id', $contact->id)
                 ->where('is_locked', true)
@@ -284,7 +284,7 @@ class WorkTimeList extends BaseDataTable
         return array_merge(
             parent::getViewData(),
             [
-                'workTimeTypes' => app(WorkTimeType::class)->query()
+                'workTimeTypes' => resolve_static(WorkTimeType::class, 'query')
                     ->get(['id', 'name', 'is_billable'])
                     ->toArray(),
                 'trackableTypes' => model_info_all()
@@ -297,7 +297,7 @@ class WorkTimeList extends BaseDataTable
                         'value' => $modelInfo->morphClass,
                     ])
                     ->toArray(),
-                'orderTypes' => app(OrderType::class)->query()
+                'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->where('is_hidden', false)
                     ->where('is_active', true)
                     ->get(['id', 'name', 'order_type_enum'])

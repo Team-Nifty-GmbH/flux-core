@@ -47,9 +47,7 @@ class Addresses extends Component
 
         $this->address->fill(
             $this->addressId
-                ? app(Address::class)
-                    ->query()
-                    ->whereKey($this->addressId)
+                ? resolve_static(Address::class, 'query')                    ->whereKey($this->addressId)
                     ->with(['contactOptions', 'tags:id', 'permissions:id'])
                     ->first()
                     ?? $this->contact->main_address
@@ -111,12 +109,12 @@ class Addresses extends Component
         return view(
             'flux::livewire.contact.addresses',
             [
-                'countries' => app(Country::class)->query()
+                'countries' => resolve_static(Country::class, 'query')
                     ->where('is_active', true)
                     ->orderByDesc('is_default')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'languages' => app(Language::class)->query()
+                'languages' => resolve_static(Language::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
             ]
@@ -173,7 +171,7 @@ class Addresses extends Component
             fn ($address) => $address['id'] !== $this->addressId
         ));
 
-        $address = app(Address::class)->query()
+        $address = resolve_static(Address::class, 'query')
             ->whereKey($this->addresses[0]['id'])
             ->first();
         $this->select($address);
@@ -245,7 +243,7 @@ class Addresses extends Component
     {
         $this->address->permissions ??= [];
 
-        return app(Permission::class)->query()
+        return resolve_static(Permission::class, 'query')
             ->where('guard_name', 'address')
             ->get(['id', 'name'])
             ->map(function (Permission $permission) {
@@ -262,7 +260,7 @@ class Addresses extends Component
     {
         if (! $this->address->id) {
             $this->select(
-                app(Address::class)->query()
+                resolve_static(Address::class, 'query')
                     ->whereKey($this->addresses[0]['id'])
                     ->with('contactOptions')
                     ->first()
@@ -271,7 +269,7 @@ class Addresses extends Component
             return;
         }
 
-        $address = app(Address::class)->query()
+        $address = resolve_static(Address::class, 'query')
             ->whereKey($this->address->id)
             ->with('contactOptions')
             ->first();
@@ -284,7 +282,7 @@ class Addresses extends Component
 
     public function loadAddresses(): void
     {
-        $addresses = app(Address::class)->query()
+        $addresses = resolve_static(Address::class, 'query')
             ->where('contact_id', $this->contact->id)
             ->get([
                 'id',

@@ -79,9 +79,7 @@ trait HasAdditionalColumns
     public static function bootHasAdditionalColumns(): void
     {
         foreach (
-            app(AdditionalColumn::class)
-                ->query()
-                ->whereNotNull('model_id')
+            resolve_static(AdditionalColumn::class, 'query')                ->whereNotNull('model_id')
                 ->where('model_type', app(static::class)->getMorphClass())
                 ->get() as $column
         ) {
@@ -227,7 +225,7 @@ trait HasAdditionalColumns
 
     protected static function additionalColumnsQuery(): Builder
     {
-        return app(AdditionalColumn::class)->query()
+        return resolve_static(AdditionalColumn::class, 'query')
             ->where('model_type', morph_alias(static::class))
             ->whereNull('model_id');
     }

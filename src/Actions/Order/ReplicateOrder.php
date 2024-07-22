@@ -26,7 +26,7 @@ class ReplicateOrder extends FluxAction
     {
         $getOrderPositionsFromOrigin = is_null(data_get($this->data, 'order_positions'));
 
-        $originalOrder = app(Order::class)->query()
+        $originalOrder = resolve_static(Order::class, 'query')
             ->whereKey($this->data['id'])
             ->when($getOrderPositionsFromOrigin, fn ($query) => $query->with('orderPositions'))
             ->first()
@@ -68,7 +68,7 @@ class ReplicateOrder extends FluxAction
 
         if (! $getOrderPositionsFromOrigin) {
             $replicateOrderPositions = collect($this->data['order_positions']);
-            $orderPositions = app(OrderPosition::class)->query()
+            $orderPositions = resolve_static(OrderPosition::class, 'query')
                 ->whereIntegerInRaw('id', array_column($this->data['order_positions'], 'id'))
                 ->get()
                 ->map(function (OrderPosition $orderPosition) use ($replicateOrderPositions) {
@@ -118,7 +118,7 @@ class ReplicateOrder extends FluxAction
         }
 
         if ($orderPositions) {
-            if (app(OrderPosition::class)->query()
+            if (resolve_static(OrderPosition::class, 'query')
                 ->whereIntegerInRaw('id', $ids)
                 ->where('order_id', '!=', $this->data['id'])
                 ->exists()

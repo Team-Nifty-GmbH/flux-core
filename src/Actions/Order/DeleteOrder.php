@@ -22,7 +22,7 @@ class DeleteOrder extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Order::class)->query()
+        return resolve_static(Order::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -33,7 +33,7 @@ class DeleteOrder extends FluxAction
         parent::validateData();
 
         $errors = [];
-        $order = app(Order::class)->query()
+        $order = resolve_static(Order::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

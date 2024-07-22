@@ -104,7 +104,7 @@ class AddressForm extends FluxForm
             $values['tags'] = array_column($values['tags'] ?? [], 'id');
             $values['permissions'] = array_column($values['permissions'] ?? [], 'id');
         } elseif (data_get($values, 'id')) {
-            $address = app(Address::class)->query()
+            $address = resolve_static(Address::class, 'query')
                 ->whereKey(data_get($values, 'id'))
                 ->with(['contactOptions', 'tags:id', 'permissions:id'])
                 ->first(['id']);

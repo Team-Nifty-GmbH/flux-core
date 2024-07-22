@@ -34,9 +34,7 @@ class DatabaseLoggingHandler extends AbstractProcessingHandler
             $id = DB::table('logs')->insertGetId($data);
 
             if (config('broadcasting.default') !== 'log') {
-                app(Log::class)
-                    ->query()
-                    ->whereKey($id)
+                resolve_static(Log::class, 'query')                    ->whereKey($id)
                     ->first()
                     ->newBroadcastableModelEvent('created');
             }

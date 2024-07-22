@@ -37,7 +37,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
     public function __construct(MailAccount|string $email, public readonly bool $onlyFolders = false)
     {
         if (is_string($email)) {
-            $this->mailAccount = app(MailAccount::class)->query()
+            $this->mailAccount = resolve_static(MailAccount::class, 'query')
                 ->where('email', $email)
                 ->firstOrFail();
         } else {
@@ -59,7 +59,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             $this->folderIds = array_merge($this->folderIds, $this->createFolder($folder));
         }
 
-        app(MailFolder::class)->query()
+        resolve_static(MailFolder::class, 'query')
             ->where('mail_account_id', $this->mailAccount->id)
             ->whereIntegerNotInRaw('id', array_values($this->folderIds))
             ->get('id')
@@ -70,7 +70,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         }
 
         foreach ($folders->reverse() as $folder) {
-            if (! app(MailFolder::class)->query()
+            if (! resolve_static(MailFolder::class, 'query')
                 ->where('mail_account_id', $this->mailAccount->id)
                 ->where('slug', $folder->path)
                 ->first()
@@ -87,7 +87,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
     protected function createFolder(Folder $folder, ?int $parentId = null): array
     {
         $folderIds = [];
-        $mailFolder = app(MailFolder::class)->query()
+        $mailFolder = resolve_static(MailFolder::class, 'query')
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('slug', $folder->path)
             ->first();
@@ -117,7 +117,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
 
     protected function getNewMessages(Folder $folder): void
     {
-        $startUid = app(Communication::class)->query()
+        $startUid = resolve_static(Communication::class, 'query')
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('mail_folder_id', $this->folderIds[$folder->path])
             ->max('message_uid')
@@ -170,7 +170,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             $unreadUids[] = $messages->map(fn (Message $message) => $message->getUid())->toArray();
         } while ($page !== $messages->lastPage());
 
-        app(Communication::class)->query()
+        resolve_static(Communication::class, 'query')
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('mail_folder_id', $this->folderIds[$folder->path])
             ->where('is_seen', false)
@@ -181,7 +181,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                     ->execute()
             );
 
-        app(Communication::class)->query()
+        resolve_static(Communication::class, 'query')
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('mail_folder_id', $this->folderIds[$folder->path])
             ->where('is_seen', true)
@@ -195,7 +195,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
 
     protected function storeMessage(Message $message, int $folderId): void
     {
-        $messageModel = app(Communication::class)->query()
+        $messageModel = resolve_static(Communication::class, 'query')
             ->where('mail_account_id', $this->mailAccount->id)
             ->where('message_id', $message->getMessageId())
             ->first();
@@ -218,7 +218,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             $tags = $message->getFlags()->toArray();
             $tagIds = [];
             $type = app(Communication::class)->getMorphClass();
-            $existingTags = app(Tag::class)->query()
+            $existingTags = resolve_static(Tag::class, 'query')
                 ->whereIn('name', $tags)
                 ->where('type', $type)
                 ->pluck('id', 'name')

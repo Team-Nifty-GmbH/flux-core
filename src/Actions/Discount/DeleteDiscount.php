@@ -21,7 +21,7 @@ class DeleteDiscount extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Discount::class)->query()
+        return resolve_static(Discount::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

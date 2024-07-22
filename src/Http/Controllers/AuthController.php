@@ -37,7 +37,7 @@ class AuthController extends Controller
 
         $abilities = [];
 
-        $user = app(User::class)->query()
+        $user = resolve_static(User::class, 'query')
             ->where('email', $request->email ?? $request->username)
             ->where('is_active', true)
             ->first();
@@ -47,7 +47,7 @@ class AuthController extends Controller
         }
 
         if (count($abilities) < 1) {
-            $user = app(Address::class)->query()
+            $user = resolve_static(Address::class, 'query')
                 ->where('email', $request->email)
                 ->where('can_login', true)
                 ->whereNotNull('email')
@@ -60,7 +60,7 @@ class AuthController extends Controller
         }
 
         if (count($abilities) < 1) {
-            $user = app(InterfaceUser::class)->query()
+            $user = resolve_static(InterfaceUser::class, 'query')
                 ->where('name', $request->email)
                 ->where('is_active', true)
                 ->first();

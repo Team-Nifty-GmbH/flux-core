@@ -22,7 +22,7 @@ class UpdatePaymentReminderText extends FluxAction
 
     public function performAction(): Model
     {
-        $paymentReminderText = app(PaymentReminderText::class)->query()
+        $paymentReminderText = resolve_static(PaymentReminderText::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

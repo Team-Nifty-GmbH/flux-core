@@ -34,7 +34,7 @@ class CreateSepaMandate extends FluxAction
     {
         parent::validateData();
 
-        $clientContactExists = app(Contact::class)->query()
+        $clientContactExists = resolve_static(Contact::class, 'query')
             ->whereKey($this->data['contact_id'])
             ->where('client_id', $this->data['client_id'])
             ->exists();
@@ -44,7 +44,7 @@ class CreateSepaMandate extends FluxAction
             $errors[] = ['contact_id' => [__('Client has no such contact')]];
         }
 
-        $contactBankConnectionExists = app(ContactBankConnection::class)->query()
+        $contactBankConnectionExists = resolve_static(ContactBankConnection::class, 'query')
             ->whereKey($this->data['contact_bank_connection_id'])
             ->where('contact_id', $this->data['contact_id'])
             ->exists();

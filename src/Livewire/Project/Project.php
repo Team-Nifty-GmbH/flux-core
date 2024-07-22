@@ -84,7 +84,7 @@ class Project extends Component
 
     public function resetForm(): void
     {
-        $project = app(ProjectModel::class)->query()
+        $project = resolve_static(ProjectModel::class, 'query')
             ->whereKey($this->project->id)
             ->firstOrFail();
 
@@ -118,7 +118,7 @@ class Project extends Component
     public function avatarUrl(): ?string
     {
         return $this->project->id
-            ? app(ProjectModel::class)->query()->whereKey($this->project->id)->first()->getAvatarUrl()
+            ? resolve_static(ProjectModel::class, 'query')->whereKey($this->project->id)->first()->getAvatarUrl()
             : null;
     }
 }

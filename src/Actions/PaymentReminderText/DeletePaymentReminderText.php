@@ -21,7 +21,7 @@ class DeletePaymentReminderText extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(PaymentReminderText::class)->query()
+        return resolve_static(PaymentReminderText::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

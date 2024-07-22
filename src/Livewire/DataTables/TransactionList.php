@@ -52,7 +52,7 @@ class TransactionList extends BaseDataTable
         return array_merge(
             parent::getViewData(),
             [
-                'bankConnections' => app(BankConnection::class)->query()->get(['bank_connections.id', 'name', 'iban']),
+                'bankConnections' => resolve_static(BankConnection::class, 'query')->get(['bank_connections.id', 'name', 'iban']),
             ]
         );
     }

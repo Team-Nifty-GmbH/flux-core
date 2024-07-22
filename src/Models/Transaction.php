@@ -34,7 +34,7 @@ class Transaction extends Model implements InteractsWithDataTables
         static::saved(function (Transaction $transaction) {
             $originalOrderId = $transaction->getRawOriginal('order_id');
             if ($originalOrderId) {
-                app(Order::class)->query()
+                resolve_static(Order::class, 'query')
                     ->whereKey($originalOrderId)
                     ->first()
                     ->calculatePaymentState()
