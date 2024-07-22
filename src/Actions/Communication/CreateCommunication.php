@@ -67,6 +67,7 @@ class CreateCommunication extends FluxAction
         }
 
         if ($this->data['communicatable_type'] === morph_alias(Address::class)) {
+            $communication->loadMissing('communicatable.contact');
             $communication->communicatable->contact->communications()->attach($communication->id);
         }
 
