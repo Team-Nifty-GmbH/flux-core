@@ -1,139 +1,103 @@
+@use('\FluxErp\Enums\SalutationEnum')
 @props([
     'onlyPostal' => false,
-    'countries' => app(\FluxErp\Models\Country::class)->select(['id', 'name'])->get(),
-    'languages' => app(\FluxErp\Models\Language::class)->select(['id', 'name'])->get(),
+    'countries' => app(\FluxErp\Models\Country::class)->select(['id', 'name'])->pluck('name', 'id')->toArray(),
+    'languages' => app(\FluxErp\Models\Language::class)->select(['id', 'name'])->pluck('name', 'id')->toArray(),
 ])
 <div class="table w-full table-auto gap-1.5" x-ref="address">
-    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="{{ md5('address.company') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-            {{ __('Company') }}
-        </label>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <x-label :label="__('Company')" for="{{ md5('address.company') }}" />
         <div class="col-span-2 w-full">
-            <x-input x-bind:readonly="!$wire.edit"
-                x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                wire:model="address.company"
-            />
+            <x-input x-bind:readonly="!$wire.edit" wire:model="address.company"/>
         </div>
     </div>
-    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="{{ md5('address.department') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-            {{ __('Department') }}
-        </label>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <x-label :label="__('Department')" for="{{ md5('address.department') }}" />
         <div class="col-span-2 w-full">
-            <x-input x-bind:readonly="!$wire.edit"
-                     x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                     wire:model="address.department"
-            />
+            <x-input x-bind:readonly="!$wire.edit" wire:model="address.department" />
         </div>
     </div>
-    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="{{ md5('address.salutation') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-            {{ __('Salutation') }}
-        </label>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <div></div>
         <div class="col-span-2 w-full">
-            <x-input x-bind:readonly="!$wire.edit"
-                x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
+            <x-checkbox :label="__('Formal salutation')" x-bind:disabled="!$wire.edit" wire:model="address.is_formal_salutation"/>
+        </div>
+    </div>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <x-label :label="__('Salutation')" for="{{ md5('address.salutation') }}" />
+        <div class="col-span-2 w-full">
+            <x-select
+                :options="SalutationEnum::valuesLocalized()"
+                option-key-value
+                x-bind:readonly="!$wire.edit"
                 wire:model="address.salutation"
             />
         </div>
     </div>
-    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="{{ md5('address.title') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-            {{ __('Title') }}
-        </label>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <x-label :label="__('Title')" for="{{ md5('address.title') }}" />
         <div class="col-span-2">
-            <x-input x-bind:readonly="!$wire.edit"
-                x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                wire:model="address.title"
-            />
+            <x-input x-bind:readonly="!$wire.edit" wire:model="address.title" />
         </div>
     </div>
-    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="{{ md5('address.firstname') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-            {{ __('Firstname') }}
-        </label>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <x-label :label="__('Firstname')" for="{{ md5('address.firstname') }}" />
         <div class="col-span-2">
-            <x-input x-bind:readonly="!$wire.edit"
-                x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                wire:model="address.firstname"
-            />
+            <x-input x-bind:readonly="!$wire.edit" wire:model="address.firstname" />
         </div>
     </div>
-    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="{{ md5('address.lastname') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-            {{ __('Lastname') }}
-        </label>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <x-label :label="__('Lastname')" for="{{ md5('address.lastname') }}" />
         <div class="col-span-2">
-            <x-input x-bind:readonly="!$wire.edit"
-                x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                wire:model="address.lastname"
-            />
+            <x-input x-bind:readonly="!$wire.edit" wire:model="address.lastname" />
         </div>
     </div>
-    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="{{ md5('address.street') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-            {{ __('Street') }}
-        </label>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <x-label :label="__('Addition')" for="{{ md5('address.addition') }}" />
         <div class="col-span-2">
-            <x-input x-bind:readonly="!$wire.edit"
-                x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                wire:model="address.street"
-            />
+            <x-input x-bind:readonly="!$wire.edit" wire:model="address.addition" />
         </div>
     </div>
-    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="{{ md5('address.country_id') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-            {{ __('Country') }}
-        </label>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <x-label :label="__('Street')" for="{{ md5('address.street') }}" />
+        <div class="col-span-2">
+            <x-input x-bind:readonly="!$wire.edit" wire:model="address.street" />
+        </div>
+    </div>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <x-label :label="__('Country')" for="{{ md5('address.country_id') }}" />
         <div class="col-span-2">
             <x-select x-bind:readonly="!$wire.edit"
-                      x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
                       wire:model="address.country_id"
                       searchable
                       :options="$countries"
-                      option-label="name"
-                      option-value="id"
+                      option-key-value
             />
         </div>
     </div>
-    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="postal-code" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-            {{ __('Zip / City') }}
-        </label>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <x-label :label="__('Zip / City')" for="postal-code" />
         <div class="mt-1 w-full items-center space-x-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2">
             <div class="flex-none">
-                <x-input x-bind:readonly="!$wire.edit"
-                    x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                    wire:model="address.zip"
-                />
+                <x-input x-bind:readonly="!$wire.edit" wire:model="address.zip" />
             </div>
             <div class="grow">
-                <x-input x-bind:readonly="!$wire.edit"
-                    x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                    wire:model="address.city"
-                />
+                <x-input x-bind:readonly="!$wire.edit" wire:model="address.city" />
             </div>
         </div>
     </div>
     @if(! $onlyPostal)
-        <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <label for="{{ md5('address.date_of_birth') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                {{ __('Date Of Birth') }}
-            </label>
+        <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+            <x-label :label="__('Date Of Birth')" for="{{ md5('address.date_of_birth') }}" />
             <div class="col-span-2">
                 <x-datetime-picker wire:model="address.date_of_birth" :without-time="true" x-bind:disabled="!$wire.edit" />
             </div>
         </div>
     @endif
-    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="{{ md5('address.email_primary') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-            {{ __('Email') }}
-        </label>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <x-label :label="__('Email')" for="{{ md5('address.email_primary') }}" />
         <div class="col-span-2">
-            <x-input x-bind:readonly="!$wire.edit"
-                     class="pl-12"
-                     x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                     wire:model="address.email_primary">
+            <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.email_primary">
                 <x-slot:prepend>
                     <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                         <x-button
@@ -149,16 +113,10 @@
             </x-input>
         </div>
     </div>
-    <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-        <label for="{{ md5('address.phone') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-            {{ __('Phone') }}
-        </label>
+    <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <x-label :label="__('Phone')" for="{{ md5('address.phone') }}" />
         <div class="col-span-2">
-            <x-input x-bind:readonly="!$wire.edit"
-                class="pl-12"
-                x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                wire:model="address.phone"
-            >
+            <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.phone">
                 <x-slot:prepend>
                     <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                         <x-button
@@ -175,15 +133,10 @@
         </div>
     </div>
     @if(! $onlyPostal)
-        <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <label for="{{ md5('address.url') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                {{ __('URL') }}
-            </label>
+        <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+            <x-label :label="__('URL')" for="{{ md5('address.url') }}" />
             <div class="col-span-2">
-                <x-input x-bind:readonly="!$wire.edit"
-                         class="pl-12"
-                         x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
-                         wire:model="address.url">
+                <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.url">
                     <x-slot:prepend>
                         <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                             <x-button
@@ -199,25 +152,19 @@
                 </x-input>
             </div>
         </div>
-        <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <label for="{{ md5('address.language_id') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                {{ __('Language') }}
-            </label>
+        <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+            <x-label :label="__('Language')" for="{{ md5('address.language_id') }}" />
             <div class="col-span-2">
                 <x-select x-bind:disabled="!$wire.edit"
-                          x-bind:class="! $wire.edit && 'border-none bg-transparent shadow-none'"
                           wire:model="address.language_id"
                           searchable
                           :options="$languages"
-                          option-label="name"
-                          option-value="id"
+                          option-key-value
                 />
             </div>
         </div>
-        <div class="sm:table-row sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <label for="{{ md5('address.tags') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                {{ __('Tags') }}
-            </label>
+        <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+            <x-label :label="__('Tags')" for="{{ md5('address.tags') }}" />
             <div class="col-span-2">
                 <x-select
                     multiselect

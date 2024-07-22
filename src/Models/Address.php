@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Enums\SalutationEnum;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
@@ -163,6 +164,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     {
         return [
             'date_of_birth' => 'date',
+            'is_formal_salutation' => 'boolean',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
             'is_dark_mode' => 'boolean',
@@ -190,6 +192,17 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
                 $this->country?->name,
             ])
         );
+    }
+
+    public function salutation(): ?string
+    {
+        try {
+            $enum = SalutationEnum::from($this->salutation ?? '');
+        } catch (\Throwable) {
+            $enum = SalutationEnum::NO_SALUTATION;
+        }
+
+        return $enum->salutation($this);
     }
 
     public function addressTypes(): BelongsToMany

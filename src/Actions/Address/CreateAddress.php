@@ -59,6 +59,7 @@ class CreateAddress extends FluxAction
 
         $contactOptions = Arr::pull($this->data, 'contact_options', []);
         $this->data['country_id'] ??= Country::default()?->id;
+        $this->data['is_formal_salutation'] ??= config('flux.formal_salutation', true);
 
         $address = app(Address::class, ['attributes' => $this->data]);
         $address->save();

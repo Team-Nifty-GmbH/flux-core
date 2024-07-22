@@ -67,6 +67,8 @@ class AddressForm extends FluxForm
 
     public ?string $password = null;
 
+    public ?bool $is_formal_salutation = null;
+
     public bool $is_main_address = false;
 
     public bool $is_invoice_address = false;
