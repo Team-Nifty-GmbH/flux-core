@@ -118,7 +118,10 @@ class Project extends Component
     public function avatarUrl(): ?string
     {
         return $this->project->id
-            ? resolve_static(ProjectModel::class, 'query')->whereKey($this->project->id)->first()->getAvatarUrl()
+            ? resolve_static(ProjectModel::class, 'query')
+                ->whereKey($this->project->id)
+                ->first()
+                ->getAvatarUrl()
             : null;
     }
 }

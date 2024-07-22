@@ -217,7 +217,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
 
             $tags = $message->getFlags()->toArray();
             $tagIds = [];
-            $type = app(Communication::class)->getMorphClass();
+            $type = morph_alias(Communication::class);
             $existingTags = resolve_static(Tag::class, 'query')
                 ->whereIn('name', $tags)
                 ->where('type', $type)

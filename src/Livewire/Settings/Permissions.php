@@ -76,8 +76,9 @@ class Permissions extends Component
 
     public function getPermissions(): void
     {
-        $query = $this->searchPermission ?
-            app(Permission::class)->search($this->searchPermission) : resolve_static(Permission::class, 'query');
+        $query = $this->searchPermission
+            ? resolve_static(Permission::class, 'search', ['query' => $this->searchPermission])
+            : resolve_static(Permission::class, 'query');
 
         $this->permissions = data_get($query
             ->where('guard_name', $this->selectedRole['guard_name'])

@@ -34,7 +34,9 @@ class Calendars extends CalendarComponent
 
     public function getEvents(array $info, array $calendarAttributes): array
     {
-        $calendar = resolve_static(Calendar::class, 'query')->find($calendarAttributes['id']);
+        $calendar = resolve_static(Calendar::class, 'query')
+            ->whereKey($calendarAttributes['id'])
+            ->first();
 
         return $calendar->calendarEvents()
             ->where(function ($query) use ($info) {

@@ -45,7 +45,10 @@ class Profile extends Component
             $user->country_id = null;
             $user->contact_options = [];
         } else {
-            $user = resolve_static(Address::class, 'query')->whereKey($id)->first();
+            $user = resolve_static(Address::class, 'query')
+                ->whereKey($id)
+                ->first();
+
             if ($user?->contact_id !== auth()->user()->contact_id) {
                 abort(404);
             }

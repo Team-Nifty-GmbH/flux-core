@@ -84,7 +84,8 @@ class MediaController extends Controller
         $fileName = Str::finish(data_get($data, 'filename') ?: 'media', '.zip');
         $ids = explode(',', data_get($data, 'ids'));
 
-        $media = resolve_static(Media::class, 'query')            ->whereIntegerInRaw('id', $ids)
+        $media = resolve_static(Media::class, 'query')
+            ->whereIntegerInRaw('id', $ids)
             ->get();
 
         return MediaStream::create($fileName)

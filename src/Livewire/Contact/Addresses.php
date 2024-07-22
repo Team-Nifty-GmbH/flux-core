@@ -47,7 +47,8 @@ class Addresses extends Component
 
         $this->address->fill(
             $this->addressId
-                ? resolve_static(Address::class, 'query')                    ->whereKey($this->addressId)
+                ? resolve_static(Address::class, 'query')
+                    ->whereKey($this->addressId)
                     ->with(['contactOptions', 'tags:id', 'permissions:id'])
                     ->first()
                     ?? $this->contact->main_address

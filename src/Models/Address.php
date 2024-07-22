@@ -124,7 +124,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         static::deleted(function (Address $address) {
             $contactUpdates = [];
             $addressesUpdates = [];
-            $mainAddress = app(Address::class)
+            $mainAddress = resolve_static(Address::class, 'query')
                 ->where('contact_id', $address->contact_id)
                 ->where('is_main_address', true)
                 ->first();

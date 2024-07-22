@@ -51,7 +51,11 @@ class Currencies extends CurrencyList
         if (! $currencyId) {
             $this->selectedCurrency->reset();
         } else {
-            $this->selectedCurrency->fill(resolve_static(Currency::class, 'query')->whereKey($currencyId)->first());
+            $this->selectedCurrency->fill(
+                resolve_static(Currency::class, 'query')
+                    ->whereKey($currencyId)
+                    ->first()
+            );
         }
 
         $this->editModal = true;

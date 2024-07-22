@@ -76,7 +76,8 @@ class CreateOrderPosition extends FluxAction
             $this->data['sort_number'] = min($this->data['sort_number'], $currentHighestSortNumber + 1);
 
             $orderPosition->sortable['sort_when_creating'] = false;
-            resolve_static(OrderPosition::class, 'query')->where('order_id', $this->data['order_id'])
+            resolve_static(OrderPosition::class, 'query')
+                ->where('order_id', $this->data['order_id'])
                 ->where('sort_number', '>=', $this->data['sort_number'])
                 ->increment('sort_number');
         }

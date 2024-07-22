@@ -152,7 +152,7 @@ class MenuManager
                 // first check if a permission exists
                 if ($permission = data_get($value, 'permission') && ! $ignorePermissions) {
                     try {
-                        app(Permission::class)->findByName($permission, $guard);
+                        resolve_static(Permission::class, 'query')->findByName($permission, $guard);
                     } catch (PermissionDoesNotExist) {
                         return true;
                     }

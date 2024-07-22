@@ -86,7 +86,8 @@ class Translations extends Component
     public function updatedSearch(): void
     {
         if ($this->search) {
-            $result = app(LanguageLine::class)->search($this->search)->paginate();
+            $result = resolve_static(LanguageLine::class, 'search', ['query' => $this->search])
+                ->paginate();
 
             $this->translations = count($result->items()) ?
                 $result->items() : app(LanguageLine::class)->all()->toArray();

@@ -28,7 +28,7 @@ class TotalProfit extends Component
     {
         return view('flux::livewire.widgets.total-profit',
             [
-                'currency' => resolve_static(Currency::class, 'query')->where('is_default', true)->first()->toArray(),
+                'currency' => resolve_static(Currency::class, 'default')?->toArray(),
                 'timeFrames' => array_map(function (TimeFrameEnum $timeFrame) {
                     return [
                         'value' => $timeFrame->name,

@@ -78,14 +78,18 @@ class CreateMailMessage extends FluxAction
                     );
             }
 
-            app(Order::class)->search(
-                $mailMessage->subject,
-                function (Indexes $meilisearch, string $query, array $options) {
-                    return $meilisearch->search(
-                        $query,
-                        $options + ['attributesToSearchOn' => ['invoice_number', 'order_number', 'commission']]
-                    );
-                }
+            resolve_static(
+                Order::class,
+                'search',
+                [
+                    'query' => $mailMessage->subject,
+                    'callback' => function (Indexes $meilisearch, string $query, array $options) {
+                        return $meilisearch->search(
+                            $query,
+                            $options + ['attributesToSearchOn' => ['invoice_number', 'order_number', 'commission']]
+                        );
+                    },
+                ]
             )
                 ->first()
                 ?->communications()

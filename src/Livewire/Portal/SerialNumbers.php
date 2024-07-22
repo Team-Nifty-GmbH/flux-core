@@ -56,7 +56,7 @@ class SerialNumbers extends Component
 
     public function updatedSearch(): void
     {
-        $this->serialNumbers = app(SerialNumber::class)->search($this->search)
+        $this->serialNumbers = resolve_static(SerialNumber::class, 'search', ['query' => $this->search])
             ->get()
             ->load('product');
     }
