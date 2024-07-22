@@ -300,5 +300,10 @@
     "validation.uuid": "The :attribute must be a valid UUID.",
     "wire:confirm.delete": "Delete :model|Do you really want to delete this :model?|Cancel|Delete",
     "wire:confirm.install-uploaded-plugin": "Install uploaded Plugins|The code of uploaded Plugins cant be verified.\nBe sure that the source is trusted.|Cancel|Install",
-    "wire:confirm.uninstall-plugin": "Uninstall Plugin|Do you really want to uninstall this plugin?|Cancel|Uninstall"
+    "wire:confirm.uninstall-plugin": "Uninstall Plugin|Do you really want to uninstall this plugin?|Cancel|Uninstall",
+    "mr": "Mr.",
+    "mrs": "Mrs.",
+    "company": "Company",
+    "family": "Family",
+    "no_salutation": "No salutation"
 }
