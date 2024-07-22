@@ -34,7 +34,7 @@ abstract class FluxAction
 
     abstract public function performAction(): mixed;
 
-    public function __construct(array $data, bool $keepEmptyStrings = false)
+    public function __construct(array $data = [], bool $keepEmptyStrings = false)
     {
         $this->setEventDispatcher();
 
