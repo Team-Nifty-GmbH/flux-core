@@ -71,7 +71,13 @@ abstract class FluxAction
     public static function canPerformAction(bool $throwException = true): bool
     {
         try {
-            Permission::findByName('action.' . static::name());
+            resolve_static(
+                Permission::class,
+                'findByName',
+                [
+                    'name' => 'action.' . static::name(),
+                ]
+            );
         } catch (PermissionDoesNotExist) {
             return true;
         }

@@ -122,7 +122,10 @@ class UserEdit extends Component
     public function save(): void
     {
         if (
-            in_array(Role::findByName('Super Admin')->id, $this->user['roles'])
+            in_array(
+                resolve_static(Role::class, 'findByName', ['name' => 'Super Admin'])->id,
+                $this->user['roles']
+            )
             && ! auth()->user()->hasRole('Super Admin')
         ) {
             return;
@@ -214,7 +217,10 @@ class UserEdit extends Component
     {
         $this->skipRender();
 
-        if (in_array(Role::findByName('Super Admin')->id, $this->user['roles'])) {
+        if (in_array(
+            resolve_static(Role::class, 'findByName', ['name' => 'Super Admin'])->id,
+            $this->user['roles']
+        )) {
             $this->lockedPermissions = app(Permission::class)->all(['id'])->pluck('id')->toArray();
             $this->isSuperAdmin = true;
 

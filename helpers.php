@@ -49,7 +49,14 @@ if (! function_exists('route_to_permission')) {
         }
 
         try {
-            $permission = \Spatie\Permission\Models\Permission::findByName($route->getPermissionName(), $guard[1] ?? $defaultGuard);
+            $permission = resolve_static(
+                \Spatie\Permission\Models\Permission::class,
+                'findByName',
+                [
+                    'name' => $route->getPermissionName(),
+                    'guardName' => $guard[1] ?? $defaultGuard,
+                ]
+            );
         } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
             $permission = null;
         }
