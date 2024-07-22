@@ -55,6 +55,6 @@ class UpdateCommunication extends FluxAction
             ->first(['started_at', 'ended_at']);
 
         $this->data['started_at'] ??= $model->started_at;
-        $this->data['started_at'] ??= $model->ended_at;
+        $this->data['ended_at'] ??= $model->ended_at;
     }
 }
