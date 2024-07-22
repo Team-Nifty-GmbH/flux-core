@@ -25,7 +25,8 @@ class CreateVariants extends FluxAction
 
     public function performAction(): Collection
     {
-        $parentProduct = resolve_static(Product::class, 'query')->whereKey($this->data['parent_id'])
+        $parentProduct = resolve_static(Product::class, 'query')
+            ->whereKey($this->data['parent_id'])
             ->with(['clients:id', 'categories:id', 'prices:id,price_list_id,price', 'tags:id'])
             ->first();
 

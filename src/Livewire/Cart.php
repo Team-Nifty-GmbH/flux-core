@@ -163,7 +163,8 @@ class Cart extends Component
     {
         try {
             if ($this->selectedWatchlist) {
-                $cart = resolve_static(CartModel::class, 'query')->whereKey($this->selectedWatchlist)
+                $cart = resolve_static(CartModel::class, 'query')
+                    ->whereKey($this->selectedWatchlist)
                     ->where('is_watchlist', true)
                     ->first();
             } else {

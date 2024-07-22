@@ -61,21 +61,18 @@ class Calendars extends CalendarComponent
             ?->toArray();
     }
 
-    public function attendEvent($eventId)
+    public function attendEvent(CalendarEvent $event): void
     {
-        $event = resolve_static(CalendarEvent::class, 'query')->find($eventId);
-
-        $event->invites()->create([
-            'inviteable_type' => auth()->user()->getMorphClass(),
-            'inviteable_id' => auth()->user()->getKey(),
-            'status' => 'accepted',
-        ]);
+        $event->invites()
+            ->create([
+                'inviteable_type' => auth()->user()->getMorphClass(),
+                'inviteable_id' => auth()->user()->getKey(),
+                'status' => 'accepted',
+            ]);
     }
 
-    public function notAttendEvent($eventId)
+    public function notAttendEvent(CalendarEvent $event): void
     {
-        $event = resolve_static(CalendarEvent::class, 'query')->find($eventId);
-
         $event->invites()
             ->where('inviteable_type', auth()->user()->getMorphClass())
             ->where('inviteable_id', auth()->user()->getKey())
