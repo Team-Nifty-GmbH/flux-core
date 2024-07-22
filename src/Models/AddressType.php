@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
@@ -14,7 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AddressType extends Model
 {
-    use HasClientAssignment, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
+    use CacheModelQueries, HasClientAssignment, HasPackageFactory, HasTranslations, HasUserModification, HasUuid,
+        SoftDeletes;
 
     protected $guarded = [
         'id',

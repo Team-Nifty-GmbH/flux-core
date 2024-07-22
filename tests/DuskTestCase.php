@@ -27,6 +27,7 @@ use Spatie\Permission\PermissionServiceProvider;
 use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Spatie\Tags\TagsServiceProvider;
 use Spatie\Translatable\TranslatableServiceProvider;
+use Spatie\TranslationLoader\TranslationServiceProvider;
 use Symfony\Component\Process\Process;
 use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
@@ -131,6 +132,7 @@ abstract class DuskTestCase extends TestCase
     {
         return array_merge(parent::getApplicationProviders($app), [
             TranslatableServiceProvider::class,
+            TranslationServiceProvider::class,
             LivewireServiceProvider::class,
             ViewServiceProvider::class,
             PermissionServiceProvider::class,

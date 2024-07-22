@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Broadcast;
@@ -23,14 +24,16 @@ foreach (Relation::morphMap() as $class) {
 
     $channel = class_to_broadcast_channel($class);
 
-    Broadcast::channel($channel, function ($user) use ($channel) {
-        return $user->can(channel_to_permission($channel));
-    });
+    Broadcast::channel($channel, function (Authenticatable $user, int|string $key) use ($class) {
+        auth()->setUser($user);
+
+        return $class::query()->where(app($class)->getRouteKeyName(), $key)->exists();
+    }, ['guards' => ['web', 'address']]);
 
     $channel = class_to_broadcast_channel($class, false);
-    Broadcast::channel($channel, function ($user) use ($channel) {
-        return $user->can(channel_to_permission($channel));
-    });
+    Broadcast::channel($channel, function (Authenticatable $user) {
+        return true;
+    }, ['guards' => ['web', 'address']]);
 }
 
 Broadcast::channel(

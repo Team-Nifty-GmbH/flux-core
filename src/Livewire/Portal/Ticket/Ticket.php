@@ -9,7 +9,6 @@ use FluxErp\Models\TicketType;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Ticket extends Component
@@ -28,8 +27,6 @@ class Ticket extends Component
     {
         $ticket = app(TicketModel::class)->query()
             ->whereKey($id)
-            ->where('authenticatable_type', Auth::user()->getMorphClass())
-            ->where('authenticatable_id', Auth::id())
             ->firstOrFail();
 
         $this->additionalColumns = app(AdditionalColumn::class)->query()

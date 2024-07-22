@@ -40,6 +40,7 @@ class UpdateAddress extends FluxAction
         $tags = Arr::pull($this->data, 'tags');
         $permissions = Arr::pull($this->data, 'permissions');
         $contactOptions = Arr::pull($this->data, 'contact_options');
+        $this->data['has_formal_salutation'] ??= config('flux.formal_salutation', true);
 
         $canLogin = $address->can_login;
 

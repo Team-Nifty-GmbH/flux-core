@@ -22,7 +22,7 @@
                         <div>{{ Number::currency($this->cart->cart_items_sum_total ?? 0, $defaultCurrency->iso, app()->getLocale()) }} *</div>
                     </div>
                     <div class="text-2xs text-secondary-400">
-                        @if(auth()->user()->priceList?->is_net || resolve_static(\FluxErp\Models\PriceList::class, 'default')->is_net)
+                        @if(auth()->user()?->priceList?->is_net || resolve_static(\FluxErp\Models\PriceList::class, 'default')->is_net)
                             * {{ __('All prices net plus VAT') }}
                         @else
                             * {{ __('All prices gross including VAT') }}
@@ -34,6 +34,11 @@
                     @section('cart-sidebar.footer')
                         <div class="flex flex-col gap-1.5 w-full">
                             @section('cart-sidebar.footer.buttons')
+                                <x-button
+                                    class="w-full"
+                                    :label="__('Close')"
+                                    x-on:click="show = false;"
+                                />
                                 @if($this->cart->cartItems->isNotEmpty())
                                     @section('cart-sidebar.footer.buttons.buy')
                                         <x-button

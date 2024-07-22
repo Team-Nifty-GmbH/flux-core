@@ -26,10 +26,12 @@
             </div>
         </a>
         @auth('address')
-            <x-button icon="heart" wire:navigate :href="route('portal.watchlist')" />
-            @persist('cart')
-                <livewire:portal.shop.cart />
-            @endpersist
+            @can(route_to_permission('portal.checkout'))
+                <x-button icon="heart" wire:navigate :href="route('portal.watchlist')" />
+                @persist('cart')
+                    <livewire:portal.shop.cart />
+                @endpersist
+            @endcan
         @endauth
     </div>
     @auth('address')

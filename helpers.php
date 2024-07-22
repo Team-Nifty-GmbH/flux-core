@@ -28,8 +28,9 @@ if (! function_exists('model_info_all')) {
 }
 
 if (! function_exists('route_to_permission')) {
-    function route_to_permission(?Illuminate\Routing\Route $route = null, bool $checkPermission = true): ?string
+    function route_to_permission(Illuminate\Routing\Route|string|null $route = null, bool $checkPermission = true): ?string
     {
+        $route = is_string($route) ? \Illuminate\Support\Facades\Route::getRoutes()->getByName($route) : $route;
         $route = $route ?: \Illuminate\Support\Facades\Route::current();
 
         if ($route === null) {

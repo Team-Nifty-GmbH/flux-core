@@ -203,7 +203,7 @@ class SepaMandates extends SepaMandateList
         }
 
         if ($this->selectedPrintLayouts['email']['sepa-mandate'] ?? false) {
-            $to[] = $sepaMandate->contact->mainAddress->email;
+            $to[] = $sepaMandate->contact->mainAddress->email_primary;
 
             $this->dispatch(
                 'create',

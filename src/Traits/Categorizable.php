@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 
@@ -42,7 +43,11 @@ trait Categorizable
     public function initializeCategorizable(): void
     {
         $unguarded = array_diff(
-            static::$columnListing ??= Schema::getColumnListing($this->getTable()),
+            static::$columnListing ??= Cache::remember(
+                'column-listing:' . $this->getTable(),
+                86400,
+                fn () => Schema::getColumnListing($this->getTable()),
+            ),
             $this->getGuarded()
         );
 

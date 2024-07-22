@@ -29,19 +29,21 @@
             @show
             @section('price')
                 @if($productForm->children_count === 0)
-                    <div class="flex flex-col gap-1.5 text-center text-gray-900 dark:text-gray-50">
-                        <div class="mt-3 text-sm font-semibold">{{ Number::currency($productForm->buy_price, $defaultCurrency->iso, app()->getLocale()) }}</div>
-                        @if(bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
-                            <div>
-                                <span class="line-through">
-                                    {{ Number::currency($productForm->root_price_flat, $defaultCurrency->iso, app()->getLocale()) }}
-                                </span>
-                                <span>
-                                    {{ __('Total discount of :percentage %', ['percentage' => bcmul($productForm->root_discount_percentage, 100, 2)]) }}
-                                </span>
-                            </div>
-                        @endif
-                    </div>
+                    @can(route_to_permission('portal.checkout'))
+                        <div class="flex flex-col gap-1.5 text-center text-gray-900 dark:text-gray-50">
+                            <div class="mt-3 text-sm font-semibold">{{ Number::currency($productForm->buy_price, $defaultCurrency->iso, app()->getLocale()) }}</div>
+                            @if(bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
+                                <div>
+                                    <span class="line-through">
+                                        {{ Number::currency($productForm->root_price_flat, $defaultCurrency->iso, app()->getLocale()) }}
+                                    </span>
+                                    <span>
+                                        {{ __('Total discount of :percentage %', ['percentage' => bcmul($productForm->root_discount_percentage, 100, 2)]) }}
+                                    </span>
+                                </div>
+                            @endif
+                        </div>
+                    @endcan
                 @else
                     <x-button :label="__('View variants')" primary class="w-full" :href="route('portal.products.show', [$productForm->id])"/>
                 @endif
@@ -50,15 +52,17 @@
     </a>
     @section('add-to-cart')
         @if($productForm->children_count === 0)
-            <div class="flex items-center mt-4 gap-1.5">
-                <x-inputs.number step="1" wire:model="productForm.amount" />
-                <x-button
-                    x-on:click="$wire.$dispatch('cart:add', {products: {id: $wire.productForm.id, amount: $wire.productForm.amount}})"
-                    primary
-                    class="w-full"
-                    :label="__('Add to cart')"
-                />
-            </div>
+            @can(route_to_permission('portal.checkout'))
+                <div class="flex items-center mt-4 gap-1.5">
+                    <x-inputs.number step="1" wire:model="productForm.amount" />
+                    <x-button
+                        x-on:click="$wire.$dispatch('cart:add', {products: {id: $wire.productForm.id, amount: $wire.productForm.amount}})"
+                        primary
+                        class="w-full"
+                        :label="__('Add to cart')"
+                    />
+                </div>
+            @endcan
         @endif
     @show
 </x-card>

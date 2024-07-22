@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasPackageFactory;
@@ -14,7 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TicketType extends Model
 {
-    use HasAdditionalColumns, HasCustomEvents, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use CacheModelQueries, HasAdditionalColumns, HasCustomEvents, HasPackageFactory, HasUserModification, HasUuid,
+        SoftDeletes;
 
     protected $guarded = [
         'id',

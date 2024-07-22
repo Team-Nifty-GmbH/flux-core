@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasDefault;
@@ -16,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PaymentType extends Model
 {
-    use Filterable, HasClientAssignment, HasDefault, HasPackageFactory, HasTranslations, HasUserModification, HasUuid,
-        SoftDeletes;
+    use CacheModelQueries, Filterable, HasClientAssignment, HasDefault, HasPackageFactory, HasTranslations,
+        HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',

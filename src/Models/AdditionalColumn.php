@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Cache;
 
 class AdditionalColumn extends Model
 {
-    use Filterable, HasPackageFactory;
+    use CacheModelQueries, Filterable, HasPackageFactory;
 
     protected $guarded = [
         'id',

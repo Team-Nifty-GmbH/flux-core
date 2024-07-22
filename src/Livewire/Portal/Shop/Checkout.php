@@ -3,12 +3,10 @@
 namespace FluxErp\Livewire\Portal\Shop;
 
 use FluxErp\Actions\Comment\CreateComment;
-use FluxErp\Actions\Order\CreateOrder;
-use FluxErp\Actions\OrderPosition\CreateOrderPosition;
+use FluxErp\Events\PortalOrderCreated;
 use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Order;
-use FluxErp\Models\OrderType;
 use FluxErp\Rulesets\Address\PostalAddressRuleset;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -75,32 +73,12 @@ class Checkout extends Cart
     {
         try {
             $this->validateOnly('termsAndConditions');
-            $order = CreateOrder::make([
-                'order_type_id' => OrderType::query()
-                    ->where('order_type_enum', 'order')
-                    ->first()
-                    ->id,
-                'contact_id' => auth()->user()->contact_id,
-                'client_id' => auth()->user()->contact->client_id,
-                'is_imported' => true,
-                'commission' => $this->commission,
-                'address_delivery' => $this->deliveryAddress->toArray(),
-            ])
-                ->validate()
-                ->execute();
-
-            foreach ($this->cart()->cartItems as $cartItem) {
-                CreateOrderPosition::make([
-                    'order_id' => $order->id,
-                    'product_id' => $cartItem->product_id,
-                    'amount' => $cartItem->amount,
-                    'unit_price' => $cartItem->price,
-                ])
-                    ->validate()
-                    ->execute();
-            }
-
-            $order->calculatePrices()->save();
+            $order = $this->cart()->createOrder(
+                deliveryAddress: $this->deliveryAddress->toArray(),
+                attributes: [
+                    'commission' => $this->commission,
+                ]
+            );
 
             $this->cart()->delete();
             unset($this->cart);
@@ -129,6 +107,7 @@ class Checkout extends Cart
         }
 
         $this->notification()->success('Order placed successfully!');
+        event(new PortalOrderCreated($order));
         $this->redirect(route('portal.checkout-finish'), true);
     }
 }

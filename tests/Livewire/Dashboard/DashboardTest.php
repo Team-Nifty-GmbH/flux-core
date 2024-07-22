@@ -109,7 +109,7 @@ class DashboardTest extends BaseSetup
 
     public function test_dashboard_show_widget_with_permission()
     {
-        $permission = Permission::findOrCreate('widget.sample-component');
+        $permission = Permission::findOrCreate('widget.sample-component', 'web');
 
         Livewire::test('dashboard.dashboard')
             ->assertOk()

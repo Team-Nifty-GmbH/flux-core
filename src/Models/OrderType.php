@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasEnums;
@@ -16,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderType extends Model
 {
-    use Filterable, HasClientAssignment, HasEnums, HasPackageFactory, HasTranslations, HasUserModification, HasUuid,
-        SoftDeletes;
+    use CacheModelQueries, Filterable, HasClientAssignment, HasEnums, HasPackageFactory, HasTranslations,
+        HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',

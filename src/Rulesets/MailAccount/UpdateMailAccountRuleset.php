@@ -24,7 +24,7 @@ class UpdateMailAccountRuleset extends FluxRuleset
             'port' => 'integer',
             'encryption' => 'sometimes|string|max:255|in:ssl,tls',
             'smtp_mailer' => 'nullable|string|max:255',
-            'smtp_email' => 'email',
+            'smtp_email' => 'string',
             'smtp_password' => 'nullable|string|max:255',
             'smtp_host' => 'nullable|string|max:255',
             'smtp_port' => 'integer',

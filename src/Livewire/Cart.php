@@ -17,6 +17,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -27,12 +28,6 @@ class Cart extends Component
 {
     use Actions;
 
-    protected $listeners = [
-        'cart:add' => 'add',
-        'cart:remove' => 'remove',
-        'cart:refresh' => 'refresh',
-    ];
-
     public array $watchlists = [];
 
     public int $selectedWatchlist = 0;
@@ -42,10 +37,25 @@ class Cart extends Component
     #[Rule('required_if:selectedWatchlist,0')]
     public ?string $watchlistName = null;
 
+    #[Locked]
+    public ?int $cartId = null;
+
     public function mount(): void
     {
         $this->getWatchLists();
         $this->watchlists[] = ['id' => 0, 'name' => __('New watchlist')];
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . $this->cart()->broadcastChannel() . ',.CartUpdated' => 'refresh',
+            'echo-private:' . app(CartModel::class)->broadcastChannel()
+                . $this->cartId . ',.CartDeleted' => 'refresh',
+            'cart:add' => 'add',
+            'cart:remove' => 'remove',
+            'cart:refresh' => 'refresh',
+        ];
     }
 
     public function render(): View
@@ -215,7 +225,10 @@ class Cart extends Component
     #[Computed(persist: true)]
     public function cart(): ?CartModel
     {
-        return cart();
+        $cart = cart();
+        $this->cartId = $cart->id;
+
+        return $cart;
     }
 
     protected function getWatchLists(): void
@@ -223,7 +236,8 @@ class Cart extends Component
         $this->watchlists = app(CartModel::class)
             ->query()
             ->where(function (Builder $query) {
-                $query->where(fn (Builder $query) => $query->where('authenticatable_type', auth()->user()->getMorphClass())
+                $query->where(fn (Builder $query) => $query
+                    ->where('authenticatable_type', auth()->user()?->getMorphClass())
                     ->where('authenticatable_id', auth()->id()))
                     ->orWhere('is_public', true);
             })
