@@ -8,8 +8,6 @@ use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Country;
-use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
@@ -107,19 +105,7 @@ class Addresses extends Component
 
     public function render(): Application|Factory|View
     {
-        return view(
-            'flux::livewire.contact.addresses',
-            [
-                'countries' => resolve_static(Country::class, 'query')
-                    ->where('is_active', true)
-                    ->orderByDesc('is_default')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'languages' => resolve_static(Language::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-            ]
-        );
+        return view('flux::livewire.contact.addresses');
     }
 
     public function select(Address $address): void
@@ -224,12 +210,16 @@ class Addresses extends Component
         return [
             TabButton::make('address.address')
                 ->label(__('Address')),
-            TabButton::make('address.permissions')
-                ->label(__('Permissions')),
             TabButton::make('address.comments')
                 ->label(__('Comments'))
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
+            TabButton::make('address.communication')
+                ->label(__('Communication'))
+                ->isLivewireComponent()
+                ->wireModel('address.id'),
+            TabButton::make('address.permissions')
+                ->label(__('Permissions')),
             TabButton::make('address.additional-columns')
                 ->label(__('Additional columns')),
             TabButton::make('address.activities')
@@ -285,6 +275,10 @@ class Addresses extends Component
     {
         $addresses = resolve_static(Address::class, 'query')
             ->where('contact_id', $this->contact->id)
+            ->orderByDesc('is_main_address')
+            ->orderByDesc('is_invoice_address')
+            ->orderByDesc('is_delivery_address')
+            ->orderByDesc('is_active')
             ->get([
                 'id',
                 'contact_id',
