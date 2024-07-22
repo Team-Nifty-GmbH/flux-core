@@ -57,7 +57,9 @@ class FillOrderPositions extends FluxAction
         }
 
         if (! $this->data['simulate']) {
-            $order = resolve_static(Order::class, 'query')->whereKey($this->data['order_id'])->first();
+            $order = resolve_static(Order::class, 'query')
+                ->whereKey($this->data['order_id'])
+                ->first();
             Event::dispatch('order.calculating-prices', $order);
             $order->calculatePrices()->save();
             Event::dispatch('order.calculated-prices', $order);

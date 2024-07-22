@@ -169,7 +169,9 @@ class Product extends Component
     #[Renderless]
     public function getPriceLists(): void
     {
-        $product = resolve_static(ProductModel::class, 'query')->whereKey($this->product->id)->first();
+        $product = resolve_static(ProductModel::class, 'query')
+            ->whereKey($this->product->id)
+            ->first();
         $priceListHelper = PriceHelper::make($product)->useDefault(false);
 
         $priceLists = resolve_static(PriceList::class, 'query')
