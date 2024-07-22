@@ -176,7 +176,7 @@ class Communication extends CommunicationList
         $this->communication->attachments = $this->attachments->uploadedFile ?? [];
 
         if ($this->communication->mail_account_id) {
-            $mailAccount = app(MailAccount::class)->query()
+            $mailAccount = resolve_static(MailAccount::class, 'query')
                 ->whereKey($this->communication->mail_account_id)
                 ->first();
 
@@ -252,7 +252,7 @@ class Communication extends CommunicationList
         try {
             $tag = CreateTag::make([
                 'name' => $name,
-                'type' => app(CommunicationModel::class)->getMorphClass(),
+                'type' => morph_alias(CommunicationModel::class),
             ])
                 ->checkPermission()
                 ->validate()
@@ -290,7 +290,7 @@ class Communication extends CommunicationList
     #[Renderless]
     public function createDocuments(): ?BinaryFileResponse
     {
-        $communication = app(CommunicationModel::class)->query()
+        $communication = resolve_static(CommunicationModel::class, 'query')
             ->whereKey($this->communication->id)
             ->with([
                 'media' => fn ($query) => $query->where('collection_name', 'attachments')
@@ -302,7 +302,7 @@ class Communication extends CommunicationList
         try {
             /** @var PrintableView $file */
             $file = Printing::make([
-                'model_type' => app(CommunicationModel::class)->getMorphClass(),
+                'model_type' => morph_alias(CommunicationModel::class),
                 'model_id' => $this->communication->id,
                 'view' => 'communication',
             ])
