@@ -71,6 +71,7 @@ abstract class PrintableView extends Component
 
         View::share('client', $client);
         View::share('subject', $this->getSubject());
+        View::share('printView', Str::kebab(class_basename($this)));
 
         $this->imagick?->clear();
         $this->imagick?->destroy();

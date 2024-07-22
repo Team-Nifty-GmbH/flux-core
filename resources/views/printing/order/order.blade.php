@@ -176,8 +176,11 @@
                 <div class="flex justify-end mt-10">
                     <div>
                         <h2 class="text-xl text-right">{{__('Signature')}}</h2>
-                        <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents($media->getPath())) }}"
-                             alt="{{ __('Signature') }}"></div>
+                        <img
+                            src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents($media->getPath())) }}"
+                            alt="{{ __('Signature') }}"
+                        />
+                    </div>
                 </div>
             @endif
         @show

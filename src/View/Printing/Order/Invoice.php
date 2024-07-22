@@ -16,7 +16,6 @@ class Invoice extends OrderView
         return view('print::order.invoice', [
             'model' => $this->model,
             'summary' => $this->summary,
-            'printView' => Str::kebab(class_basename($this)),
         ]);
     }
 

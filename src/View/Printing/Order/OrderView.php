@@ -62,7 +62,6 @@ class OrderView extends PrintableView
         return view('print::order.order', [
             'model' => $this->model,
             'summary' => $this->summary,
-            'printView' => Str::kebab(class_basename($this)),
         ]);
     }
 
