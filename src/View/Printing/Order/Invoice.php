@@ -5,6 +5,7 @@ namespace FluxErp\View\Printing\Order;
 use FluxErp\States\Order\Draft;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 
 class Invoice extends OrderView
 {
@@ -15,6 +16,7 @@ class Invoice extends OrderView
         return view('print::order.invoice', [
             'model' => $this->model,
             'summary' => $this->summary,
+            'printView' => Str::kebab(class_basename($this)),
         ]);
     }
 

@@ -6,31 +6,34 @@ export default function($wire, $refs) {
     return {
         signaturePad: null,
         isEmpty: true,
-        existingData: null,
         tempData: null,
         prevWidth: 700,
         debounceId: null,
         error: false,
         id: null,
+        resizeFuncRef: null,
         async init() {
             // init signature pad
             this.signaturePad = new SignaturePad($refs.canvas, { backgroundColor: 'rgba(255, 255, 255, 1)' });
-            // resize event listener
-            window.addEventListener('resize', this.resizeCanvas.bind(this));
-            this.resizeCanvas();
-            // if signature is already saved - just display it on canvas but don't allow to draw
+
+            // if signature is already saved - order->print will inject it
             if ($wire.signature.stagedFiles.length > 0) {
                 this.id = $wire.signature.id;
-                this.existingData = await $wire.downloadSignatureAsUrlData(this.id);
-                await this.signaturePad.fromDataURL(this.existingData);
                 this.signaturePad.off();
                 return;
             }
+            // resize func ref - to remove event listener
+            this.resizeFuncRef = this.resizeCanvas.bind(this);
+            // resize event listener
+            window.addEventListener('resize', this.resizeFuncRef);
+            this.resizeCanvas();
             // if signature is not saved - allow to draw and clear after first stroke
             this.signaturePad.addEventListener('afterUpdateStroke', this.strokeHandler.bind(this));
         },
         destroy() {
-            window.removeEventListener('resize', this.resizeCanvas.bind(this));
+            if (this.resizeFuncRef !== null) {
+                window.removeEventListener('resize', this.resizeFuncRef);
+            }
         },
         clear() {
             this.signaturePad.clear();
@@ -60,6 +63,14 @@ export default function($wire, $refs) {
                 this.error = false;
                 // clear buttons for save and clean
                 this.isEmpty = true;
+                // signature pad disappears after successful upload - x-show
+                if (this.debounceId !== null) {
+                    clearTimeout(this.debounceId);
+                }
+                // remove resize event listener
+                if (this.resizeFuncRef !== null) {
+                    window.removeEventListener('resize', this.resizeFuncRef);
+                }
                 // disable signature pad on successful upload
                 this.signaturePad.off();
             } else {
@@ -70,8 +81,7 @@ export default function($wire, $refs) {
             if (this.signaturePad.isEmpty()) {
                 return;
             }
-            this.existingData = this.signaturePad.toDataURL();
-            const data = await (await fetch(this.existingData)).blob();
+            const data = await (await fetch(this.signaturePad.toDataURL())).blob();
             await $wire.upload('signature.file', data, this.upload.bind(this));
         },
         resizeCanvas() {
@@ -108,9 +118,7 @@ export default function($wire, $refs) {
             this.debounceId = setTimeout(this.refreshCanvas.bind(this), 500);
         },
         async refreshCanvas() {
-            if (this.existingData !== null) {
-                await this.signaturePad.fromDataURL(this.existingData);
-            } else if (!this.signaturePad.isEmpty() && this.tempData !== null) {
+            if (!this.signaturePad.isEmpty() && this.tempData !== null) {
                 await this.signaturePad.fromDataURL(this.tempData);
             }
         }

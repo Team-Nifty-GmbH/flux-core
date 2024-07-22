@@ -6,6 +6,7 @@ use FluxErp\Models\Order;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 
 class OrderView extends PrintableView
 {
@@ -61,6 +62,7 @@ class OrderView extends PrintableView
         return view('print::order.order', [
             'model' => $this->model,
             'summary' => $this->summary,
+            'printView' => Str::kebab(class_basename($this)),
         ]);
     }
 

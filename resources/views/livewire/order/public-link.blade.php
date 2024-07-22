@@ -2,7 +2,7 @@
     @if(!is_null($className))
         <div>
             {{ $order->print()->renderView($className) }}
-            <div x-data="signature($wire,$refs)" class="bg-gray-100 mt-12 lg:pt-10 lg:pr-10 ">
+            <div x-cloak x-show="id === null" x-data="signature($wire,$refs)" class="bg-gray-100 mt-12 lg:pt-10 lg:pr-10 ">
                 <div class="flex flex-col items-center lg:items-end">
                     <div class="flex flex-col lg:flex-row w-full items-center justify-between">
                         <div class="flex-1 justify-center">

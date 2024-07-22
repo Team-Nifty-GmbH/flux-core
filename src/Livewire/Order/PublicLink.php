@@ -6,7 +6,6 @@ use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Traits\Livewire\WithFileUploads;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -16,7 +15,7 @@ use WireUi\Traits\Actions;
 
 class PublicLink extends Component
 {
-    use Actions,WithFileUploads;
+    use Actions, WithFileUploads;
 
     public Order $order;
 
@@ -50,7 +49,7 @@ class PublicLink extends Component
     {
         // add to which type it belongs
         if (($this->signature->stagedFiles || $this->signature->id) && ! is_null($this->className)) {
-            $this->signature->model_type = Relation::getMorphAlias(Order::class);
+            $this->signature->model_type = morph_alias(Order::class);
             $this->signature->model_id = $this->order->id;
             $this->signature->collection_name = 'signature';
             $this->signature->disk = 'local';

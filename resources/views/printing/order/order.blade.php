@@ -3,11 +3,11 @@
         $isNet = $model->priceList->is_net;
         $currency = $model->currency->iso;
         $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
-        $media = $model->getMedia('signature')->first();
+        $media = $model->getMedia('signature',['order_type' => $printView])->first();
     @endphp
     <x-print.first-page-header :address="$model->addressInvoice">
         <x-slot:right-block>
-                <div class="inline-block">
+            <div class="inline-block">
                 @section('first-page-right-block')
                     <div class="inline-block">
                         @section('first-page-right-block.labels')
@@ -24,19 +24,19 @@
                     </div>
                     <div class="pl-6 text-right inline-block">
                         @section('first-page-right-block.values')
-                        <div>
-                            {{ $model->order_number }}
-                        </div>
-                        <div>
-                            {{ $model->addressInvoice->contact->customer_number }}
-                        </div>
-                        <div>
-                            {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
-                        </div>
+                            <div>
+                                {{ $model->order_number }}
+                            </div>
+                            <div>
+                                {{ $model->addressInvoice->contact->customer_number }}
+                            </div>
+                            <div>
+                                {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
+                            </div>
                         @show
                     </div>
                 @show
-                </div>
+            </div>
         </x-slot:right-block>
     </x-print.first-page-header>
     <main>
@@ -133,37 +133,37 @@
         @section('total')
             <table class="w-full pb-16 text-xs">
                 <tbody class="break-inside-avoid">
-                    <tr>
-                        <td colspan="2" class="border-b-2 border-black font-semibold">
-                            {{ __('Total') }}
-                        </td>
-                    </tr>
+                <tr>
+                    <td colspan="2" class="border-b-2 border-black font-semibold">
+                        {{ __('Total') }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-right">
+                        {{ __('Sum net') }}
+                    </td>
+                    <td class="text-right w-0 whitespace-nowrap pl-12">
+                        {{ $formatter->formatCurrency($model->total_net_price, $currency) }}
+                    </td>
+                </tr>
+                @foreach($model->total_vats ?? [] as $vat)
                     <tr>
                         <td class="text-right">
-                            {{ __('Sum net') }}
+                            {{ __('Plus ') }} {{ format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT) }}
                         </td>
                         <td class="text-right w-0 whitespace-nowrap pl-12">
-                            {{ $formatter->formatCurrency($model->total_net_price, $currency) }}
+                            {{ $formatter->formatCurrency($vat['total_vat_price'], $currency) }}
                         </td>
                     </tr>
-                    @foreach($model->total_vats ?? [] as $vat)
-                        <tr>
-                            <td class="text-right">
-                                {{ __('Plus ') }} {{ format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT) }}
-                            </td>
-                            <td class="text-right w-0 whitespace-nowrap pl-12">
-                                {{ $formatter->formatCurrency($vat['total_vat_price'], $currency) }}
-                            </td>
-                        </tr>
-                    @endforeach
-                    <tr class="font-bold">
-                        <td class="text-right">
-                            {{ __('Total Gross') }}
-                        </td>
-                        <td class="text-right w-0 whitespace-nowrap pl-12">
-                            {{ $formatter->formatCurrency($model->total_gross_price, $currency) }}
-                        </td>
-                    </tr>
+                @endforeach
+                <tr class="font-bold">
+                    <td class="text-right">
+                        {{ __('Total Gross') }}
+                    </td>
+                    <td class="text-right w-0 whitespace-nowrap pl-12">
+                        {{ $formatter->formatCurrency($model->total_gross_price, $currency) }}
+                    </td>
+                </tr>
                 </tbody>
             </table>
         @show
@@ -172,13 +172,13 @@
                 {!! $model->footer !!}
                 {!! $model->vatRates->pluck('footer_text')->implode('<br>') !!}
             </div>
-             @if($media && file_exists($media->getPath()))
-            <div class="flex justify-end mt-10">
-                <div>
-                    <h2 class="text-xl text-right">{{__('Signature')}}</h2>
-                    <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents($media->getPath())) }}"
-                        alt="{{ __('Signature') }}"></div>
-            </div>
+            @if($media && file_exists($media->getPath()))
+                <div class="flex justify-end mt-10">
+                    <div>
+                        <h2 class="text-xl text-right">{{__('Signature')}}</h2>
+                        <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents($media->getPath())) }}"
+                             alt="{{ __('Signature') }}"></div>
+                </div>
             @endif
         @show
     </main>
