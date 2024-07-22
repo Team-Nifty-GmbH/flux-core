@@ -48,6 +48,8 @@ class Communication extends Model implements HasMedia, OffersPrinting
             'bcc' => 'array',
             'communication_type_enum' => CommunicationTypeEnum::class,
             'date' => 'datetime',
+            'started_at' => 'datetime',
+            'ended_at' => 'datetime',
             'is_seen' => 'boolean',
         ];
     }

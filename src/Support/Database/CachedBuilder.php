@@ -16,7 +16,7 @@ class CachedBuilder extends Builder
         // get the result for this specific query from the cache
         $modelQueryCacheResult = data_get(
             Cache::get(static::cacheKey($this->getModel())),
-            $this->queryCacheKey(),
+            $this->queryCacheKey($columns),
         );
 
         if ($modelQueryCacheResult) {
@@ -32,7 +32,7 @@ class CachedBuilder extends Builder
             array_merge(
                 Cache::get(static::cacheKey($this->getModel()), []),
                 [
-                    $this->queryCacheKey() => $result,
+                    $this->queryCacheKey($columns) => $result,
                 ],
             ),
             $this->getModel()->getModelQueryCacheTtl(),
@@ -50,8 +50,8 @@ class CachedBuilder extends Builder
             ->replace('\\', '-');
     }
 
-    protected function queryCacheKey(): string
+    protected function queryCacheKey(array|string $columns): string
     {
-        return md5($this->toSql() . serialize($this->getBindings()));
+        return md5($this->toSql() . serialize($this->getBindings()) . serialize($columns));
     }
 }

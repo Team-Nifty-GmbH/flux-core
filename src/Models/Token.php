@@ -20,6 +20,8 @@ class Token extends Authenticatable
         'updated_by',
     ];
 
+    public ?string $token = null;
+
     protected static function booted(): void
     {
         static::deleting(function (Token $model) {

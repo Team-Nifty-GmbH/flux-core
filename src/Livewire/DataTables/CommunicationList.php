@@ -20,6 +20,12 @@ class CommunicationList extends BaseDataTable
         'communication_type_enum',
     ];
 
+    public array $formatters = [
+        'total_time_ms' => 'time',
+        'started_at' => 'datetime',
+        'ended_at' => 'datetime',
+    ];
+
     public function getFormatters(): array
     {
         return array_merge(parent::getFormatters(), [
