@@ -164,7 +164,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     {
         return [
             'date_of_birth' => 'date',
-            'is_formal_salutation' => 'boolean',
+            'has_formal_salutation' => 'boolean',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
             'is_dark_mode' => 'boolean',

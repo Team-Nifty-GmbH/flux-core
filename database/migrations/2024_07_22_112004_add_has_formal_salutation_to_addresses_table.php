@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
-            $table->boolean('is_formal_salutation')->default(true)->after('password');
+            $table->boolean('has_formal_salutation')->default(true)->after('password');
         });
 
         $this->migrateSalutations();
@@ -20,7 +20,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
-            $table->dropColumn('is_formal_salutation');
+            $table->dropColumn('has_formal_salutation');
         });
     }
 

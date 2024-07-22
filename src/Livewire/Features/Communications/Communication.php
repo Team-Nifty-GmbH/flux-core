@@ -305,7 +305,10 @@ class Communication extends CommunicationList
                 'model_type' => app(CommunicationModel::class)->getMorphClass(),
                 'model_id' => $this->communication->id,
                 'view' => 'communication',
-            ])->checkPermission()->validate()->execute();
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
 
             $filename = $file->getSubject() . '.pdf';
             $file->savePDF($path = sys_get_temp_dir() . '/' . $filename);

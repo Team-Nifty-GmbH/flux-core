@@ -1050,7 +1050,7 @@
     "salutation.informal.family": "Liebe Familie :lastname",
     "salutation.informal.mr": "Lieber :firstname",
     "salutation.informal.mrs": "Liebe :firstname",
-    "salutation.informal.no_salutation": "Hallo :firstname :company",
+    "salutation.informal.no_salutation": "Hallo :firstname",
     "Sat": "Sa",
     "Saturdays": "Samstags",
     "Save": "Speichern",

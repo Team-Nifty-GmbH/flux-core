@@ -1,8 +1,8 @@
 @use('\FluxErp\Enums\SalutationEnum')
 @props([
     'onlyPostal' => false,
-    'countries' => app(\FluxErp\Models\Country::class)->select(['id', 'name'])->pluck('name', 'id')->toArray(),
-    'languages' => app(\FluxErp\Models\Language::class)->select(['id', 'name'])->pluck('name', 'id')->toArray(),
+    'countries' => resolve_static(\FluxErp\Models\Country::class, 'query')->select(['id', 'name'])->pluck('name', 'id')->toArray(),
+    'languages' => resolve_static(\FluxErp\Models\Language::class, 'query')->select(['id', 'name'])->pluck('name', 'id')->toArray(),
 ])
 <div class="table w-full table-auto gap-1.5" x-ref="address">
     <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
@@ -20,7 +20,7 @@
     <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <div></div>
         <div class="col-span-2 w-full">
-            <x-checkbox :label="__('Formal salutation')" x-bind:disabled="!$wire.edit" wire:model="address.is_formal_salutation"/>
+            <x-checkbox :label="__('Formal salutation')" x-bind:disabled="!$wire.edit" wire:model="address.has_formal_salutation"/>
         </div>
     </div>
     <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
