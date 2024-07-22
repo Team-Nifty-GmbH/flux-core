@@ -47,4 +47,14 @@ class UpdateCommunication extends FluxAction
 
         return $communication->withoutRelations()->fresh();
     }
+
+    protected function prepareForValidation(): void
+    {
+        $model = resolve_static(Communication::class, 'query')
+            ->whereKey(data_get($this->data, 'id'))
+            ->first(['started_at', 'ended_at']);
+
+        $this->data['started_at'] ??= $model->started_at;
+        $this->data['started_at'] ??= $model->ended_at;
+    }
 }

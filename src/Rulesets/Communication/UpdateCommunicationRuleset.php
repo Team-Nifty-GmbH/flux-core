@@ -34,7 +34,7 @@ class UpdateCommunicationRuleset extends FluxRuleset
             'bcc' => 'array',
             'communication_type_enum' => Rule::enum(CommunicationTypeEnum::class),
             'date' => 'nullable|date',
-            'started_at' => 'required_with:ended_at|nullable|date:Y-m-d H:i:s',
+            'started_at' => 'nullable|date:Y-m-d H:i:s',
             'ended_at' => 'nullable|date:Y-m-d H:i:s|after:started_at',
             'total_time_ms' => 'nullable|integer',
             'subject' => 'string|max:255|nullable',
