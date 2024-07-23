@@ -6,7 +6,12 @@ use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Traits\Livewire\WithFileUploads;
+use FluxErp\View\Layouts\Clear;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Ramsey\Uuid\Uuid;
@@ -17,34 +22,32 @@ class PublicLink extends Component
 {
     use Actions, WithFileUploads;
 
-    public Order $order;
-
     public MediaForm $signature;
 
+    #[Locked]
     public ?string $className;
 
-    #[Url]
-    public ?string $orderType = null;
+    #[Locked]
+    public ?int $orderId;
 
-    public function mount(): void
+    #[Url(as: 'print-view')]
+    public ?string $printView = null;
+
+    public function mount(Order $order): void
     {
-        $queryClass = implode('', array_map('ucfirst', explode('-', $this->orderType)));
+        $this->className = data_get($order->resolvePrintViews(), $this->printView) ?? abort(404);
+        $this->orderId = $order->id;
 
-        if (class_exists('FluxErp\\View\\Printing\\Order\\' . $queryClass)) {
-            $this->className = 'FluxErp\\View\\Printing\\Order\\' . $queryClass;
+        $media = app(Media::class)->query()
+            ->where('model_id', $order->id)
+            ->where('collection_name', 'signature')
+            ->whereJsonContains('custom_properties->order_type', $this->printView)
+            ->first();
 
-            $media = app(Media::class)->query()
-                ->where('model_id', $this->order->id)
-                ->where('collection_name', 'signature')
-                ->whereJsonContains('custom_properties->order_type', $this->orderType)
-                ->first();
-
-            $this->signature->fill($media ?? []);
-        } else {
-            abort(404);
-        }
+        $this->signature->fill($media ?? []);
     }
 
+    #[Renderless]
     public function save(): bool
     {
         // add to which type it belongs
@@ -53,8 +56,8 @@ class PublicLink extends Component
             $this->signature->model_id = $this->order->id;
             $this->signature->collection_name = 'signature';
             $this->signature->disk = 'local';
-            $this->signature->custom_properties = ['order_type' => $this->orderType];
-            $this->signature->stagedFiles[0]['name'] = 'signature-' . $this->orderType;
+            $this->signature->custom_properties = ['order_type' => $this->printView];
+            $this->signature->stagedFiles[0]['name'] = 'signature-' . $this->printView;
             $this->signature->stagedFiles[0]['file_name'] = data_get(
                 $this->signature->stagedFiles[0],
                 'temporary_filename',
@@ -84,12 +87,23 @@ class PublicLink extends Component
         $fileContent = file_get_contents($media->getPath());
         $base64File = base64_encode($fileContent);
 
-        return "data:image/png;base64,$base64File";
+        return 'data:image/png;base64,' . $base64File;
 
     }
 
-    public function render()
+    public function render(): View
     {
-        return view('flux::livewire.order.public-link')->layout('flux::layouts.empty');
+        // This ensures livewire recognizes the content and wraps the view around it
+        // override the x-layouts.print with an empty div
+        Clear::$includeAfter = 'flux::livewire.order.public-link';
+
+        Blade::component('layouts.print', Clear::class);
+
+        return resolve_static(Order::class, 'query')
+            ->whereKey($this->orderId)
+            ->firstOrFail()
+            ->print()
+            ->renderView($this->className)
+            ->layout('flux::layouts.printing');
     }
 }

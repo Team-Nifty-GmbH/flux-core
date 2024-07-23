@@ -5,6 +5,7 @@ namespace FluxErp\Livewire;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Models\Media;
 use Illuminate\Support\Facades\URL;
+use Illuminate\View\View;
 use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
@@ -37,20 +38,24 @@ class PublicLinkGenerator extends Component
 
     }
 
-    public function setPublicLink(string $orderType): void
+    public function setPublicLink(string $printView): void
     {
-
-        $key = array_search($orderType, $this->unsignedDocuments);
+        $key = array_search($printView, $this->unsignedDocuments);
         if ($key !== false) {
             unset($this->unsignedDocuments[$key]);
         }
         $this->unsignedDocuments = array_values($this->unsignedDocuments);
 
-        $this->generatedUrls[$orderType] = URL::signedRoute('order.public', ['order' => $this->order->uuid, 'orderType' => $orderType]);
-
+        $this->generatedUrls[$printView] = URL::signedRoute(
+            'order.public',
+            [
+                'order' => $this->order->uuid,
+                'print-view' => $printView
+            ]
+        );
     }
 
-    public function render()
+    public function render(): View
     {
         return view('flux::livewire.public-link-generator');
     }

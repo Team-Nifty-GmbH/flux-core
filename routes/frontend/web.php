@@ -212,7 +212,5 @@ Route::middleware('web')
             Route::get('/media-private/{media}/{filename}', function (Media $media) {
                 return $media;
             })->name('media.private');
-            Route::get('/order-public/{order:uuid}', PublicLink::class)->name('order.public');
         });
-
     });
