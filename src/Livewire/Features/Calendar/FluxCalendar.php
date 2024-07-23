@@ -33,6 +33,7 @@ class FluxCalendar extends CalendarComponent
 
     protected string $view = 'flux::livewire.features.calendar.flux-calendar';
 
+    #[Renderless]
     public function getMyCalendars(): Collection
     {
         $calendarables = model_info_all()
@@ -44,6 +45,7 @@ class FluxCalendar extends CalendarComponent
             $calendarables->merge(parent::getMyCalendars()) : parent::getMyCalendars()->merge($calendarables);
     }
 
+    #[Renderless]
     public function getEvents(array $info, array $calendarAttributes): array
     {
         if ($calendarAttributes['model_type'] ?? false) {
@@ -152,7 +154,8 @@ class FluxCalendar extends CalendarComponent
                 return false;
             }
 
-            $actionResult = $this->event->getActionResult();
+            $actionResult = data_get($this->event->getActionResult(), 'created')
+                ?? data_get($this->event->getActionResult(), 'updated');
 
             $result = match (true) {
                 is_array($actionResult) => array_values($actionResult),
@@ -284,7 +287,8 @@ class FluxCalendar extends CalendarComponent
                 collect($this->selectableCalendars)
                     ->firstWhere('model_type', data_get($eventInfo, 'event.extendedProps.calendar_type')),
                 'id'
-            )
+            ),
+            false
         );
 
         parent::onEventClick($eventInfo);
