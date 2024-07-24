@@ -211,7 +211,7 @@
         </ul>
     </div>
     <div class="w-1/2 flex flex-col gap-3">
-        <div x-show="! selection.file_name && selected" class="flex flex-col gap-3" x-cloak>
+        <div x-ref="upload" x-show="! selection.file_name && selected" class="flex flex-col gap-3" x-cloak>
             <div>
                 @can('action.media.upload')
                     <x-button x-show="! selection.is_static" negative :label="__('Delete')" x-on:click="deleteFolder(selection)" />
@@ -225,36 +225,37 @@
                 <x-input x-bind:disabled="selection.is_static" :label="__('Name')" x-model="selection.name" />
             @endcan
             @can('action.media.upload')
-                <div class="relative flex flex-col items-center justify-center"
-                     x-on:drop="isDropping = false"
-                     x-on:drop.prevent="handleFileDrop($event)"
-                     x-on:dragover.prevent="isDropping = true"
-                     x-on:dragleave.prevent="isDropping = false"
-                >
-                    <div class="absolute top-0 bottom-0 left-0 right-0 z-30 flex items-center justify-center bg-blue-500 opacity-90"
-                         x-show="isDropping"
-                    >
-                        <span class="text-3xl text-white">{{ __('Release file to upload!') }}</span>
-                    </div>
-                    <label class="order-2 flex w-full cursor-pointer select-none flex-col items-center justify-center rounded-md border-dashed border-gray-300 bg-gray-50 p-10 shadow hover:bg-slate-50"
-                           for="file-upload"
-                    >
-                        <div class="pb-3">
-                            <x-heroicons name="arrow-up-on-square" class="h-12 w-12" />
-                        </div>
-                        <p>{{ __('Click here to select files to upload') }}</p>
-                        <em class="italic text-slate-400">{{ __('(Or drag files to the page)') }}</em>
-                        <div class="mt-3 h-[2px] w-1/2 bg-gray-200" x-show="isUploading">
-                            <div
-                                class="h-[2px] bg-blue-500"
-                                style="transition: width 1s"
-                                x-bind:style="`width: ${progress}%;`"
-                            >
-                            </div>
-                        </div>
-                    </label>
-                    <input type="file" id="file-upload"  class="hidden" multiple x-on:change="handleFileSelect($event)"/>
-                </div>
+{{--                <div class="relative flex flex-col items-center justify-center"--}}
+{{--                     x-on:drop="isDropping = false"--}}
+{{--                     x-on:drop.prevent="handleFileDrop($event)"--}}
+{{--                     x-on:dragover.prevent="isDropping = true"--}}
+{{--                     x-on:dragleave.prevent="isDropping = false"--}}
+{{--                >--}}
+{{--                    <div class="absolute top-0 bottom-0 left-0 right-0 z-30 flex items-center justify-center bg-blue-500 opacity-90"--}}
+{{--                         x-show="isDropping"--}}
+{{--                    >--}}
+{{--                        <span class="text-3xl text-white">{{ __('Release file to upload!') }}</span>--}}
+{{--                    </div>--}}
+{{--                    <label class="order-2 flex w-full cursor-pointer select-none flex-col items-center justify-center rounded-md border-dashed border-gray-300 bg-gray-50 p-10 shadow hover:bg-slate-50"--}}
+{{--                           for="file-upload"--}}
+{{--                    >--}}
+{{--                        <div class="pb-3">--}}
+{{--                            <x-heroicons name="arrow-up-on-square" class="h-12 w-12" />--}}
+{{--                        </div>--}}
+{{--                        <p>{{ __('Click here to select files to upload') }}</p>--}}
+{{--                        <em class="italic text-slate-400">{{ __('(Or drag files to the page)') }}</em>--}}
+{{--                        <div class="mt-3 h-[2px] w-1/2 bg-gray-200" x-show="isUploading">--}}
+{{--                            <div--}}
+{{--                                class="h-[2px] bg-blue-500"--}}
+{{--                                style="transition: width 1s"--}}
+{{--                                x-bind:style="`width: ${progress}%;`"--}}
+{{--                            >--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+{{--                    </label>--}}
+{{--                    <input type="file" id="file-upload"  class="hidden" multiple x-on:change="handleFileSelect($event)"/>--}}
+{{--                </div>--}}
+                <input x-data="filePond($refs.upload)" type="file"/>
             @endcan
         </div>
         <div x-show="selection.file_name && selected" x-cloak class="flex flex-col gap-3">
