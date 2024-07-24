@@ -153,7 +153,6 @@ class Order extends OrderPositionList
         $this->getAvailableStates(['payment_state', 'delivery_state', 'state']);
 
         $this->isSelectable = ! $this->order->is_locked;
-        $this->printLayouts = $this->getPrintLayouts();
 
         if (in_array($value, [OrderTypeEnum::PurchaseSubscription->value, OrderTypeEnum::Subscription->value])) {
             $this->fillSchedule();
@@ -980,6 +979,7 @@ class Order extends OrderPositionList
             ])
             ->firstOrFail()
             ->append('avatar_url');
+        $this->printLayouts = array_keys($order->resolvePrintViews());
 
         $this->order->fill($order);
         $this->order->users = $order->users->pluck('id')->toArray();
