@@ -23,6 +23,8 @@ abstract class PrintableView extends Component
 {
     public PDF $pdf;
 
+    private static ?string $layout = 'flux::layouts.printing';
+
     private ?\Imagick $imagick = null;
 
     abstract public function getModel(): ?Model;
@@ -38,6 +40,11 @@ abstract class PrintableView extends Component
         $this->preview = $preview;
 
         return $this;
+    }
+
+    public static function setLayout(?string $layout): void
+    {
+        static::$layout = $layout;
     }
 
     protected function hydrateSharedData(): void
@@ -72,6 +79,7 @@ abstract class PrintableView extends Component
         View::share('client', $client);
         View::share('subject', $this->getSubject());
         View::share('printView', Str::kebab(class_basename($this)));
+        View::share('printLayout', static::$layout);
 
         $this->imagick?->clear();
         $this->imagick?->destroy();
@@ -86,7 +94,7 @@ abstract class PrintableView extends Component
         $this->hydrateSharedData();
         File::ensureDirectoryExists(storage_path('fonts'));
 
-        $this->pdf = PdfFacade::loadHTML($this->render())
+        $this->pdf = PdfFacade::loadHTML($this->renderWithLayout())
             ->setOption('isFontSubsettingEnabled', true)
             ->setOption('isPhpEnabled', true)
             ->setOption('defaultMediaType', 'print');
@@ -129,11 +137,16 @@ abstract class PrintableView extends Component
         return $this;
     }
 
-    public function renderAndHydrate(): \Illuminate\View\View
+    protected function renderWithLayout(): \Illuminate\View\View
+    {
+        return is_null(static::$layout) ? $this->render() : view(static::$layout, ['slot' => $this->render()]);
+    }
+
+    public function renderAndHydrate(): \Illuminate\View\View|string
     {
         $this->hydrateSharedData();
 
-        return $this->render();
+        return $this->renderWithLayout();
     }
 
     public function streamPDF(?string $fileName = null): Response

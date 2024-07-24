@@ -136,6 +136,6 @@
 <body class="text-xs">
     <x-print.header />
     <x-print.footer />
-    {{ $slot }}
+    {!! $slot !!}
 </body>
 </html>

@@ -20,7 +20,7 @@ Route::middleware('web')
     ->group(function () {
         Route::middleware('signed')->group(function () {
             Route::get('/login-link', LoginLinkController::class)->name('login-link');
-            Route::get('/order-public/{order:uuid}', PublicLink::class)->name('order.public');
+            Route::get('/signature-public/{uuid}', PublicLink::class)->name('signature.public');
         });
 
         Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function () {

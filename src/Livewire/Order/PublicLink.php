@@ -6,10 +6,10 @@ use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Traits\Livewire\WithFileUploads;
-use FluxErp\View\Layouts\Clear;
+use FluxErp\View\Printing\PrintableView;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
@@ -28,18 +28,21 @@ class PublicLink extends Component
     public ?string $className;
 
     #[Locked]
-    public ?int $orderId;
+    public ?string $uuid;
 
     #[Url(as: 'print-view')]
     public ?string $printView = null;
 
-    public function mount(Order $order): void
+    #[Url]
+    public ?string $model = null;
+
+    public function mount(): void
     {
-        $this->className = data_get($order->resolvePrintViews(), $this->printView) ?? abort(404);
-        $this->orderId = $order->id;
+        $model = $this->getModel();
+        $this->className = data_get($model->resolvePrintViews(), $this->printView) ?? abort(404);
 
         $media = app(Media::class)->query()
-            ->where('model_id', $order->id)
+            ->where('model_id', $model->id)
             ->where('collection_name', 'signature')
             ->whereJsonContains('custom_properties->order_type', $this->printView)
             ->first();
@@ -47,13 +50,12 @@ class PublicLink extends Component
         $this->signature->fill($media ?? []);
     }
 
-    #[Renderless]
     public function save(): bool
     {
         // add to which type it belongs
         if (($this->signature->stagedFiles || $this->signature->id) && ! is_null($this->className)) {
-            $this->signature->model_type = morph_alias(Order::class);
-            $this->signature->model_id = $this->order->id;
+            $this->signature->model_type = $this->model;
+            $this->signature->model_id = $this->getModel()->getKey();
             $this->signature->collection_name = 'signature';
             $this->signature->disk = 'local';
             $this->signature->custom_properties = ['order_type' => $this->printView];
@@ -76,34 +78,27 @@ class PublicLink extends Component
         return true;
     }
 
-    public function downloadSignatureAsUrlData(Media $media): string|bool
-    {
-        if (! file_exists($media->getPath())) {
-            $this->notification()->error(__('File not found!'));
-
-            return false;
-        }
-
-        $fileContent = file_get_contents($media->getPath());
-        $base64File = base64_encode($fileContent);
-
-        return 'data:image/png;base64,' . $base64File;
-
-    }
-
-    public function render(): View
+    #[Layout('flux::layouts.printing')]
+    public function render(): string
     {
         // This ensures livewire recognizes the content and wraps the view around it
         // override the x-layouts.print with an empty div
-        Clear::$includeAfter = 'flux::livewire.order.public-link';
+        PrintableView::setLayout(null);
 
-        Blade::component('layouts.print', Clear::class);
+        return Blade::render(
+            '<div>{!! $view !!} @include(\'flux::livewire.order.public-link\')</div>',
+            [
+                'view' => $this->getModel()
+                    ->print()
+                    ->renderView($this->className)
+            ]
+        );
+    }
 
-        return resolve_static(Order::class, 'query')
-            ->whereKey($this->orderId)
-            ->firstOrFail()
-            ->print()
-            ->renderView($this->className)
-            ->layout('flux::layouts.printing');
+    protected function getModel()
+    {
+        return morphed_model($this->model)::query()
+            ->where('uuid', $this->uuid)
+            ->firstOrFail();
     }
 }
