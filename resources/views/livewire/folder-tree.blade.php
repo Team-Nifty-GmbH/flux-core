@@ -1,6 +1,5 @@
 <div x-data="{
         ...folderTree(),
-        levels: [],
         loadLevels() {
             $wire.getTree().then((result) => this.levels = result);
         },
