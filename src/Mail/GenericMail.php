@@ -86,6 +86,7 @@ class GenericMail extends Mailable
     public function content(): Content
     {
         return new Content(
+            html: $this->mailMessageForm->html_body,
             text: $this->mailMessageForm->text_body,
             markdown: 'flux::emails.generic',
         );
