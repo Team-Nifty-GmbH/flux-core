@@ -70,7 +70,7 @@ class CreateOrder extends FluxAction
         if (! data_get($this->data, 'address_invoice_id', false)
             && $contactId = data_get($this->data, 'contact_id', false)
         ) {
-            $contact = app(Contact::class)->query()
+            $contact = resolve_static(Contact::class, 'query')
                 ->whereKey($contactId)
                 ->with(['invoiceAddress', 'mainAddress', 'addresses'])
                 ->first();
@@ -80,7 +80,7 @@ class CreateOrder extends FluxAction
         } elseif (! data_get($this->data, 'contact_id', false)
             && $addressInvoiceId = data_get($this->data, 'address_invoice_id', false)
         ) {
-            $addressInvoice = app(Address::class)->query()
+            $addressInvoice = resolve_static(Address::class, 'query')
                 ->whereKey($addressInvoiceId)
                 ->with('contact')
                 ->first();
@@ -88,10 +88,10 @@ class CreateOrder extends FluxAction
             $contact = $addressInvoice->contact;
             $this->data['contact_id'] = $contact->id;
         } else {
-            $contact = app(Contact::class)->query()
+            $contact = resolve_static(Contact::class, 'query')
                 ->whereKey($this->data['contact_id'] ?? null)
                 ->first();
-            $addressInvoice = app(Address::class)->query()
+            $addressInvoice = resolve_static(Address::class, 'query')
                 ->whereKey($this->data['address_invoice_id'] ?? null)
                 ->first();
         }
@@ -113,7 +113,7 @@ class CreateOrder extends FluxAction
             ?? resolve_static(PaymentType::class, 'default')?->id;
         $this->data['client_id'] ??= $contact->client_id;
 
-        $paymentType = app(PaymentType::class)->query()
+        $paymentType = resolve_static(PaymentType::class, 'query')
             ->whereKey(data_get($this->data, 'payment_type_id'))
             ->first();
 
@@ -173,7 +173,7 @@ class CreateOrder extends FluxAction
         $this->data = $validator->validate();
 
         if ($this->data['invoice_number'] ?? false) {
-            $isPurchase = app(OrderType::class)->query()
+            $isPurchase = resolve_static(OrderType::class, 'query')
                 ->whereKey($this->data['order_type_id'])
                 ->whereIn('order_type_enum', [OrderTypeEnum::Purchase->value, OrderTypeEnum::PurchaseRefund->value])
                 ->exists();
@@ -184,7 +184,7 @@ class CreateOrder extends FluxAction
                 ])->errorBag('createOrder');
             }
 
-            if (app(Order::class)->query()
+            if (resolve_static(Order::class, 'query')
                 ->where('client_id', $this->data['client_id'])
                 ->where('invoice_number', $this->data['invoice_number'])
                 ->when($isPurchase, fn (Builder $query) => $query->where('contact_id', $this->data['contact_id']))

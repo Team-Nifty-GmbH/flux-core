@@ -26,7 +26,7 @@ class CreateProductBundleProduct extends FluxAction
         $productBundleProduct = app(ProductBundleProduct::class, ['attributes' => $this->data]);
         $productBundleProduct->save();
 
-        app(Product::class)->query()
+        resolve_static(Product::class, 'query')
             ->whereKey($this->data['product_id'])
             ->first()
             ->update([

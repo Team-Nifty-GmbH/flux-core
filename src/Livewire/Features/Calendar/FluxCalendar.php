@@ -245,7 +245,7 @@ class FluxCalendar extends CalendarComponent
     #[Renderless]
     public function updatedCalendarEventStatus($value): void
     {
-        $calendarEvent = app(CalendarEvent::class)->query()
+        $calendarEvent = resolve_static(CalendarEvent::class, 'query')
             ->whereKey($this->calendarEvent['id'])
             ->firstOrFail();
 

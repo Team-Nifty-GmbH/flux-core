@@ -33,7 +33,7 @@ class InitAddressTypes extends Command
                         $data['client_id'] = $client->id;
 
                         // Gather necessary foreign keys.
-                        $addressType = app(AddressType::class)->query()
+                        $addressType = resolve_static(AddressType::class, 'query')
                             ->where('address_type_code', $data['address_type_code'])
                             ->where('client_id', $client->id)
                             ->firstOrNew();

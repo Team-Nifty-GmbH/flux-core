@@ -55,7 +55,7 @@ class OrderPositionList extends BaseDataTable
 
     public function mount(): void
     {
-        $this->isLocked = app(Order::class)->query()
+        $this->isLocked = resolve_static(Order::class, 'query')
             ->select('is_locked')
             ->whereKey($this->orderId)
             ->value('is_locked');

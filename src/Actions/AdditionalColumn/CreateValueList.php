@@ -41,7 +41,7 @@ class CreateValueList extends FluxAction
             ])->errorBag('createValueList');
         }
 
-        if (app(AdditionalColumn::class)->query()
+        if (resolve_static(AdditionalColumn::class, 'query')
             ->where('name', $this->data['name'])
             ->where('model_type', $this->data['model_type'])
             ->exists()

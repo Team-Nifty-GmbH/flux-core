@@ -23,7 +23,7 @@ class UpdateProductOption extends FluxAction
 
     public function performAction(): Model
     {
-        $productOption = app(ProductOption::class)->query()
+        $productOption = resolve_static(ProductOption::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

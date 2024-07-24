@@ -21,7 +21,7 @@ class DeleteCalendarEvent extends FluxAction
 
     public function performAction(): ?bool
     {
-        $event = app(CalendarEvent::class)->query()
+        $event = resolve_static(CalendarEvent::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

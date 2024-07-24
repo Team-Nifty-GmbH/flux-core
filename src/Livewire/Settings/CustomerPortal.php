@@ -42,7 +42,7 @@ class CustomerPortal extends Component
             return $value !== Dashboard::class;
         });
 
-        $this->calendars = app(Calendar::class)->query()
+        $this->calendars = resolve_static(Calendar::class, 'query')
             ->where('is_public', true)
             ->get()
             ->toArray();

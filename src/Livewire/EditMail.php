@@ -118,7 +118,7 @@ class EditMail extends Component
     public function send(): bool
     {
         if ($this->mailMessage->mail_account_id) {
-            $mailAccount = app(MailAccount::class)->query()
+            $mailAccount = resolve_static(MailAccount::class, 'query')
                 ->whereKey($this->mailMessage->mail_account_id)
                 ->first();
 

@@ -21,7 +21,7 @@ class DeleteStockPosting extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(StockPosting::class)->query()
+        return resolve_static(StockPosting::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

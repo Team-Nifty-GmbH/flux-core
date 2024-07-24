@@ -23,7 +23,7 @@ class UpdatePaymentType extends FluxAction
 
     public function performAction(): Model
     {
-        $paymentType = app(PaymentType::class)->query()
+        $paymentType = resolve_static(PaymentType::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -36,7 +36,7 @@ class UpdatePaymentType extends FluxAction
     protected function validateData(): void
     {
         if (($this->data['is_default'] ?? false)
-            && ! app(PaymentType::class)->query()
+            && ! resolve_static(PaymentType::class, 'query')
                 ->whereKeyNot($this->data['id'] ?? 0)
                 ->where('is_default', true)
                 ->exists()

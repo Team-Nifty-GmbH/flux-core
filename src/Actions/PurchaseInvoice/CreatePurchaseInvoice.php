@@ -43,8 +43,7 @@ class CreatePurchaseInvoice extends FluxAction
         }
 
         if (data_get($file, 'id')) {
-            $media = app(Media::class)
-                ->query()
+            $media = resolve_static(Media::class, 'query')
                 ->whereKey(data_get($file, 'id'))
                 ->first()
                 ->copy($purchaseInvoice, 'purchase_invoice');
@@ -77,8 +76,7 @@ class CreatePurchaseInvoice extends FluxAction
         $filePath = match (true) {
             is_string($media) && is_file($media) => $media,
             is_a($media, \SplFileInfo::class) => $media->getRealPath(),
-            (bool) data_get($media, 'id') => app(Media::class)
-                ->query()
+            (bool) data_get($media, 'id') => resolve_static(Media::class, 'query')
                 ->whereKey(data_get($media, 'id'))
                 ->first()
                 ?->getPath(),
@@ -105,7 +103,7 @@ class CreatePurchaseInvoice extends FluxAction
             && data_get($this->data, 'contact_id')
             && data_get($this->data, 'client_id')
         ) {
-            if (app(Order::class)->query()
+            if (resolve_static(Order::class, 'query')
                 ->where('client_id', $this->data['client_id'])
                 ->where('invoice_number', $this->data['invoice_number'])
                 ->where('contact_id', $this->data['contact_id'])

@@ -55,7 +55,7 @@ class SepaMandates extends SepaMandateList
     protected function getViewData(): array
     {
         return array_merge(parent::getViewData(), [
-            'contactBankConnections' => app(ContactBankConnection::class)->query()
+            'contactBankConnections' => resolve_static(ContactBankConnection::class, 'query')
                 ->where('contact_id', $this->contact->id)
                 ->get(['id', 'iban', 'bank_name']),
         ]);
@@ -174,7 +174,7 @@ class SepaMandates extends SepaMandateList
     #[Renderless]
     public function createDocuments(): ?BinaryFileResponse
     {
-        $sepaMandate = app(SepaMandate::class)->query()
+        $sepaMandate = resolve_static(SepaMandate::class, 'query')
             ->whereKey($this->sepaMandate->id)
             ->with([
                 'contact.mainAddress',

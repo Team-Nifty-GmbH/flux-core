@@ -24,7 +24,7 @@ class StockPosting extends Model
         static::creating(function (StockPosting $stockPosting) {
             Cache::lock('stock-posting-' . $stockPosting->warehouse_id . '-' . $stockPosting->product_id, 10)
                 ->block(5, function () use ($stockPosting) {
-                    $latestPosting = app(StockPosting::class)->query()
+                    $latestPosting = resolve_static(StockPosting::class, 'query')
                         ->where('warehouse_id', '=', $stockPosting->warehouse_id)
                         ->where('product_id', '=', $stockPosting->product_id)
                         ->latest('id')

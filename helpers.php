@@ -49,7 +49,14 @@ if (! function_exists('route_to_permission')) {
         }
 
         try {
-            $permission = \Spatie\Permission\Models\Permission::findByName($route->getPermissionName(), $guard[1] ?? $defaultGuard);
+            $permission = resolve_static(
+                \Spatie\Permission\Models\Permission::class,
+                'findByName',
+                [
+                    'name' => $route->getPermissionName(),
+                    'guardName' => $guard[1] ?? $defaultGuard,
+                ]
+            );
         } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
             $permission = null;
         }
@@ -130,7 +137,7 @@ if (! function_exists('qualify_model')) {
             && class_exists($model)
             && is_a($model, \Illuminate\Database\Eloquent\Model::class, true)
         ) {
-            return get_class(app($model));
+            return resolve_static($model, 'class');
         }
 
         $model = ltrim($model, '\\/');
@@ -190,15 +197,15 @@ if (! function_exists('event_subscribers')) {
         ?string $modelType = null
     ): Illuminate\Database\Eloquent\Collection {
         if (
-            app(\FluxErp\Models\EventSubscription::class)->query()
+            resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
                 ->where('event', $event)
                 ->whereNull('user_id')
                 ->exists()
         ) {
-            return app(\FluxErp\Models\User::class)->all();
+            return resolve_static(\FluxErp\Models\User::class, 'query')->get();
         }
 
-        $subscriberIds = app(\FluxErp\Models\EventSubscription::class)->query()
+        $subscriberIds = resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
             ->whereNot('user_id', auth()->id())
             ->where(function ($query) use ($event, $modelId, $modelType) {
                 $query->where(function ($query) use ($event) {
@@ -220,7 +227,9 @@ if (! function_exists('event_subscribers')) {
             ->pluck('user_id')
             ->toArray();
 
-        return app(\FluxErp\Models\User::class)->query()->whereIntegerInRaw('id', $subscriberIds)->get();
+        return resolve_static(\FluxErp\Models\User::class, 'query')
+            ->whereIntegerInRaw('id', $subscriberIds)
+            ->get();
     }
 }
 

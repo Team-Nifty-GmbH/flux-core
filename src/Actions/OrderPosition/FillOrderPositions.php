@@ -50,14 +50,16 @@ class FillOrderPositions extends FluxAction
 
         // Delete all order positions that were not updated on given orderId
         if (! $this->data['simulate']) {
-            app(OrderPosition::class)->query()
+            resolve_static(OrderPosition::class, 'query')
                 ->where('order_id', $this->data['order_id'])
                 ->whereIntegerNotInRaw('id', $ids)
                 ->delete();
         }
 
         if (! $this->data['simulate']) {
-            $order = app(Order::class)->query()->whereKey($this->data['order_id'])->first();
+            $order = resolve_static(Order::class, 'query')
+                ->whereKey($this->data['order_id'])
+                ->first();
             Event::dispatch('order.calculating-prices', $order);
             $order->calculatePrices()->save();
             Event::dispatch('order.calculated-prices', $order);
@@ -95,7 +97,7 @@ class FillOrderPositions extends FluxAction
             throw ValidationException::withMessages($errors)->errorBag('fillOrderPositions');
         }
 
-        $deletedOrderPositions = app(OrderPosition::class)->query()
+        $deletedOrderPositions = resolve_static(OrderPosition::class, 'query')
             ->whereIntegerNotInRaw('order_positions.id', array_column($orderPositions, 'id'))
             ->where('order_positions.order_id', $this->data['order_id'])
             ->whereHas('descendants')
@@ -130,7 +132,7 @@ class FillOrderPositions extends FluxAction
         // Fill validated id if exists in order position or order respectively
         if (is_int($orderPosition['id'] ?? false)
             && ($validated['order_id'] ?? false)
-            && app(OrderPosition::class)->query()
+            && resolve_static(OrderPosition::class, 'query')
                 ->whereKey($orderPosition['id'])
                 ->where('order_id', $validated['order_id'])
                 ->exists()
@@ -291,7 +293,7 @@ class FillOrderPositions extends FluxAction
 
         // Check Bundle
         if (($validated['product_id'] ?? false)
-            && app(Product::class)->query()
+            && resolve_static(Product::class, 'query')
                 ->whereKey($validated['product_id'])
                 ->where('is_bundle', true)
                 ->exists()
@@ -367,7 +369,7 @@ class FillOrderPositions extends FluxAction
         unset($data['children']);
 
         if (is_int($data['id'] ?? false)) {
-            $orderPosition = app(OrderPosition::class)->query()
+            $orderPosition = resolve_static(OrderPosition::class, 'query')
                 ->whereKey($data['id'])
                 ->first();
 

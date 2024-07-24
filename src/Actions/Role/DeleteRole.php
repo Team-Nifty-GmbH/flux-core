@@ -22,7 +22,7 @@ class DeleteRole extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Role::class)->query()
+        return resolve_static(Role::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -32,7 +32,7 @@ class DeleteRole extends FluxAction
     {
         parent::validateData();
 
-        if (app(Role::class)->query()
+        if (resolve_static(Role::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->name === 'Super Admin'

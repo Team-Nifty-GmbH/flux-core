@@ -28,7 +28,7 @@ class SyncCalendarEventInvites extends FluxAction
 
     public function performAction(): Model
     {
-        $calendarEvent = app(CalendarEvent::class)->query()
+        $calendarEvent = resolve_static(CalendarEvent::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

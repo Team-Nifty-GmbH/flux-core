@@ -21,7 +21,7 @@ class SerialNumbers extends Component
 
     protected function getListeners(): array
     {
-        $addresses = app(Address::class)->query()
+        $addresses = resolve_static(Address::class, 'query')
             ->where('contact_id', Auth::user()->contact_id)
             ->get();
 
@@ -56,7 +56,7 @@ class SerialNumbers extends Component
 
     public function updatedSearch(): void
     {
-        $this->serialNumbers = app(SerialNumber::class)->search($this->search)
+        $this->serialNumbers = resolve_static(SerialNumber::class, 'search', ['query' => $this->search])
             ->get()
             ->load('product');
     }

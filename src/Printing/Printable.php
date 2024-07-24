@@ -66,12 +66,14 @@ class Printable
 
     public function printView(string $view, ...$arguments): PrintableView
     {
-        return (new $view($this->dataSet))->preview($this->preview)->print(...$arguments);
+        /** @var PrintableView $view */
+        return $view::make($this->dataSet)->preview($this->preview)->print(...$arguments);
     }
 
     public function renderView(string $view): View|Factory
     {
-        return (new $view($this->dataSet))->renderAndHydrate();
+        /** @var PrintableView $view */
+        return $view::make($this->dataSet)->renderAndHydrate();
     }
 
     public static function injectPageCount(PDF $PDF): void

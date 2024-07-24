@@ -22,7 +22,7 @@ class UpdateMedia extends FluxAction
 
     public function performAction(): Model
     {
-        $media = app(Media::class)->query()
+        $media = resolve_static(Media::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

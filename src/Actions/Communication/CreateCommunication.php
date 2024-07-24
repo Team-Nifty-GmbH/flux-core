@@ -51,7 +51,7 @@ class CreateCommunication extends FluxAction
         $communicatable->save();
 
         if ($tags) {
-            $communication->attachTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
+            $communication->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
         foreach ($attachments as $attachment) {

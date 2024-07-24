@@ -22,7 +22,7 @@ class DeleteWorkTime extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(WorkTime::class)->query()
+        return resolve_static(WorkTime::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -32,7 +32,7 @@ class DeleteWorkTime extends FluxAction
     {
         parent::validateData();
 
-        if (app(WorkTime::class)->query()
+        if (resolve_static(WorkTime::class, 'query')
             ->whereKey($this->data['id'])
             ->whereNotNull('order_position_id')
             ->exists()

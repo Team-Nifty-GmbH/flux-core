@@ -21,7 +21,7 @@ class DeleteTag extends FluxAction
 
     public function performAction(): mixed
     {
-        return app(Tag::class)->query()
+        return resolve_static(Tag::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

@@ -54,20 +54,20 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         return array_merge(
             parent::getViewData(),
             [
-                'priceLists' => app(PriceList::class)->query()
+                'priceLists' => resolve_static(PriceList::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'paymentTypes' => app(PaymentType::class)->query()
+                'paymentTypes' => resolve_static(PaymentType::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'languages' => app(Language::class)->query()
+                'languages' => resolve_static(Language::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'clients' => app(Client::class)->query()
+                'clients' => resolve_static(Client::class, 'query')
                     ->where('is_active', true)
                     ->get(['id', 'name'])
                     ->toArray(),
-                'orderTypes' => app(OrderType::class)->query()
+                'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->where('is_hidden', false)
                     ->where('is_active', true)
                     ->get(['id', 'name'])
@@ -99,7 +99,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     #[Renderless]
     public function fetchContactData(): void
     {
-        $contact = app(Contact::class)->query()
+        $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->order->contact_id)
             ->first();
 
@@ -130,7 +130,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
     public function openCreateDocumentsModal(): void
     {
-        $this->orders = app(Order::class)->query()
+        $this->orders = resolve_static(Order::class, 'query')
             ->whereIntegerInRaw('id', $this->selected)
             ->get(['id', 'order_type_id']);
 
@@ -150,7 +150,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $printIds = [];
         $mailMessages = [];
         foreach ($this->orders as $order) {
-            $order = app(Order::class)->query()
+            $order = resolve_static(Order::class, 'query')
                 ->whereKey($order->id)
                 ->first();
 
@@ -244,7 +244,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         }
 
         if ($downloadIds) {
-            $files = app(Media::class)->query()
+            $files = resolve_static(Media::class, 'query')
                 ->whereIntegerInRaw('id', $downloadIds)
                 ->get();
 

@@ -22,7 +22,7 @@ class UpdateVatRate extends FluxAction
 
     public function performAction(): Model
     {
-        $vatRate = app(VatRate::class)->query()
+        $vatRate = resolve_static(VatRate::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

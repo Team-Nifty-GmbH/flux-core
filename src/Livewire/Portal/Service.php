@@ -45,8 +45,7 @@ class Service extends Component
         $this->contactData = Auth::user()->toArray();
 
         if ($serialNumberId) {
-            $this->serialNumber = app(SerialNumber::class)
-                ->query()
+            $this->serialNumber = resolve_static(SerialNumber::class, 'query')
                 ->whereKey($serialNumberId)
                 ->firstOrFail()
                 ->toArray();

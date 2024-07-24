@@ -41,12 +41,12 @@ class Permissions extends Component
 
     public function boot(): void
     {
-        $this->roles = app(Role::class)->query()
+        $this->roles = resolve_static(Role::class, 'query')
             ->orderBy('name')
             ->get()
             ->toArray();
 
-        $this->users = app(User::class)->query()
+        $this->users = resolve_static(User::class, 'query')
             ->where('is_active', true)
             ->get()
             ->toArray();
@@ -76,8 +76,9 @@ class Permissions extends Component
 
     public function getPermissions(): void
     {
-        $query = $this->searchPermission ?
-            app(Permission::class)->search($this->searchPermission) : app(Permission::class)->query();
+        $query = $this->searchPermission
+            ? resolve_static(Permission::class, 'search', ['query' => $this->searchPermission])
+            : resolve_static(Permission::class, 'query');
 
         $this->permissions = data_get($query
             ->where('guard_name', $this->selectedRole['guard_name'])
@@ -110,7 +111,7 @@ class Permissions extends Component
     public function toggleUsers(int $roleId): void
     {
         $this->showToggleUsers = true;
-        $role = app(Role::class)->query()
+        $role = resolve_static(Role::class, 'query')
             ->whereKey($roleId)
             ->first();
 
@@ -121,7 +122,7 @@ class Permissions extends Component
 
     public function saveToggleUsers(): void
     {
-        $role = app(Role::class)->query()
+        $role = resolve_static(Role::class, 'query')
             ->whereKey($this->selectedRole['id'])
             ->first();
 

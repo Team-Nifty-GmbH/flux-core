@@ -27,7 +27,7 @@ class UpdateUser extends FluxAction
     {
         $mailAccounts = Arr::pull($this->data, 'mail_accounts');
 
-        $user = app(User::class)->query()
+        $user = resolve_static(User::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -63,7 +63,7 @@ class UpdateUser extends FluxAction
         parent::validateData();
 
         if ($this->data['parent_id'] ?? false) {
-            $user = app(User::class)->query()
+            $user = resolve_static(User::class, 'query')
                 ->whereKey($this->data['id'])
                 ->first();
 

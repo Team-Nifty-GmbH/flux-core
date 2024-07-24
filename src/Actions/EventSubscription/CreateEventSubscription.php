@@ -54,7 +54,7 @@ class CreateEventSubscription extends FluxAction
         $this->data['event'] = $eventClass ?: $eloquentEvent;
         $this->data['user_id'] ??= Auth::id();
 
-        if (app(EventSubscription::class)->query()
+        if (resolve_static(EventSubscription::class, 'query')
             ->where('event', $this->data['event'])
             ->where('user_id', $this->data['user_id'])
             ->where('model_type', $this->data['model_type'])

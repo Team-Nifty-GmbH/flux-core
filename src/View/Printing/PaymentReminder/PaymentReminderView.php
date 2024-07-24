@@ -18,7 +18,7 @@ class PaymentReminderView extends PrintableView
     public function __construct(PaymentReminder $paymentReminder)
     {
         $this->model = $paymentReminder;
-        $this->paymentReminderText = app(PaymentReminderText::class)
+        $this->paymentReminderText = resolve_static(PaymentReminderText::class, 'query')
             ->where('reminder_level', '<=', $this->model->reminder_level)
             ->orderBy('reminder_level', 'desc')
             ->first();

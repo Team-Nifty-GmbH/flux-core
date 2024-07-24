@@ -32,7 +32,7 @@ class WorkTime extends Component
 
     public function mount(): void
     {
-        $this->activeWorkTimes = app(WorkTimeModel::class)->query()
+        $this->activeWorkTimes = resolve_static(WorkTimeModel::class, 'query')
             ->with('workTimeType:id,name')
             ->where('user_id', auth()->id())
             ->where('is_daily_work_time', false)
@@ -40,14 +40,14 @@ class WorkTime extends Component
             ->get()
             ->toArray();
 
-        $this->dailyWorkTime->fill(app(WorkTimeModel::class)->query()
+        $this->dailyWorkTime->fill(resolve_static(WorkTimeModel::class, 'query')
             ->where('user_id', auth()->id())
             ->where('is_daily_work_time', true)
             ->where('is_pause', false)
             ->where('is_locked', false)
             ->first() ?? []);
 
-        $this->dailyWorkTimePause->fill(app(WorkTimeModel::class)->query()
+        $this->dailyWorkTimePause->fill(resolve_static(WorkTimeModel::class, 'query')
             ->where('user_id', auth()->id())
             ->where('is_daily_work_time', true)
             ->where('is_pause', true)
@@ -58,7 +58,7 @@ class WorkTime extends Component
     public function render(): Factory|Application|View
     {
         return view('flux::livewire.work-time', [
-            'workTimeTypes' => app(WorkTimeType::class)->query()
+            'workTimeTypes' => resolve_static(WorkTimeType::class, 'query')
                 ->select(['id', 'name', 'is_billable'])
                 ->get()
                 ->toArray(),

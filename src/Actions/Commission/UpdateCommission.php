@@ -23,7 +23,7 @@ class UpdateCommission extends FluxAction
 
     public function performAction(): Model
     {
-        $commission = app(Commission::class)->query()
+        $commission = resolve_static(Commission::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

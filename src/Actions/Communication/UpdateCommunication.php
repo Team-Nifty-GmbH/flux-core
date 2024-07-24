@@ -27,7 +27,7 @@ class UpdateCommunication extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags');
 
-        $communication = app(Communication::class)->query()
+        $communication = resolve_static(Communication::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -42,7 +42,7 @@ class UpdateCommunication extends FluxAction
         $communication->save();
 
         if (! is_null($tags)) {
-            $communication->syncTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
+            $communication->syncTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
         return $communication->withoutRelations()->fresh();

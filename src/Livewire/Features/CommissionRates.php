@@ -63,7 +63,7 @@ class CommissionRates extends BaseDataTable
 
     public function mount(): void
     {
-        $this->categories = app(Category::class)->query()
+        $this->categories = resolve_static(Category::class, 'query')
             ->where('model_type', app(Product::class)->getMorphClass())
             ->get(['id', 'name'])
             ->toArray();
@@ -111,7 +111,7 @@ class CommissionRates extends BaseDataTable
     public function show(?int $id = null): void
     {
         if ($id) {
-            $this->commissionRate = app(CommissionRate::class)->query()
+            $this->commissionRate = resolve_static(CommissionRate::class, 'query')
                 ->whereKey($id)
                 ->first()
                 ->toArray();

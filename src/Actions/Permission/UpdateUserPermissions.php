@@ -27,7 +27,7 @@ class UpdateUserPermissions extends FluxAction
 
     public function performAction(): array
     {
-        $user = app(User::class)->query()
+        $user = resolve_static(User::class, 'query')
             ->whereKey($this->data['user_id'])
             ->first();
 
