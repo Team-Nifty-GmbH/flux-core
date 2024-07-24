@@ -153,6 +153,7 @@ class Order extends OrderPositionList
         $this->getAvailableStates(['payment_state', 'delivery_state', 'state']);
 
         $this->isSelectable = ! $this->order->is_locked;
+        $this->printLayouts = $this->getPrintLayouts();
 
         if (in_array($value, [OrderTypeEnum::PurchaseSubscription->value, OrderTypeEnum::Subscription->value])) {
             $this->fillSchedule();
