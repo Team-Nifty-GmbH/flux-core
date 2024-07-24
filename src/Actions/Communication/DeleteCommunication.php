@@ -21,7 +21,7 @@ class DeleteCommunication extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Communication::class)->query()
+        return resolve_static(Communication::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

@@ -165,7 +165,7 @@ class Communication extends CommunicationList
         $this->communication->attachments = $this->attachments->uploadedFile ?? [];
 
         if ($this->communication->mail_account_id) {
-            $mailAccount = app(MailAccount::class)->query()
+            $mailAccount = resolve_static(MailAccount::class, 'query')
                 ->whereKey($this->communication->mail_account_id)
                 ->first();
 
@@ -244,7 +244,7 @@ class Communication extends CommunicationList
         try {
             $tag = CreateTag::make([
                 'name' => $name,
-                'type' => app(CommunicationModel::class)->getMorphClass(),
+                'type' => morph_alias(CommunicationModel::class),
             ])
                 ->checkPermission()
                 ->validate()

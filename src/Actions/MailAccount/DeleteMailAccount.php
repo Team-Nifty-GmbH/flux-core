@@ -21,7 +21,7 @@ class DeleteMailAccount extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(MailAccount::class)->query()
+        return resolve_static(MailAccount::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

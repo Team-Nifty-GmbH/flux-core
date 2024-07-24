@@ -28,7 +28,7 @@ class UpdateContact extends FluxAction
     {
         $discountGroups = Arr::pull($this->data, 'discount_groups');
 
-        $contact = app(Contact::class)->query()
+        $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -50,7 +50,7 @@ class UpdateContact extends FluxAction
         $this->data = $validator->validate();
 
         $errors = [];
-        $contact = app(Contact::class)->query()
+        $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -58,7 +58,7 @@ class UpdateContact extends FluxAction
         $this->data['client_id'] = $this->data['client_id'] ?? $contact->client_id;
 
         if (array_key_exists('customer_number', $this->data)) {
-            $customerNumberExists = app(Contact::class)->query()
+            $customerNumberExists = resolve_static(Contact::class, 'query')
                 ->where('id', '!=', $this->data['id'])
                 ->where('client_id', '=', $this->data['client_id'])
                 ->where('customer_number', $this->data['customer_number'])
@@ -72,7 +72,7 @@ class UpdateContact extends FluxAction
         }
 
         if (array_key_exists('creditor_number', $this->data) && ! is_null($this->data['creditor_number'])) {
-            $customerNumberExists = app(Contact::class)->query()
+            $customerNumberExists = resolve_static(Contact::class, 'query')
                 ->where('id', '!=', $this->data['id'])
                 ->where('client_id', '=', $this->data['client_id'])
                 ->where('creditor_number', $this->data['creditor_number'])
@@ -86,7 +86,7 @@ class UpdateContact extends FluxAction
         }
 
         if (array_key_exists('debtor_number', $this->data) && ! is_null($this->data['debtor_number'])) {
-            $customerNumberExists = app(Contact::class)->query()
+            $customerNumberExists = resolve_static(Contact::class, 'query')
                 ->where('id', '!=', $this->data['id'])
                 ->where('client_id', '=', $this->data['client_id'])
                 ->where('debtor_number', $this->data['debtor_number'])
@@ -99,7 +99,7 @@ class UpdateContact extends FluxAction
             }
         }
 
-        $clientPaymentTypeExists = app(PaymentType::class)->query()
+        $clientPaymentTypeExists = resolve_static(PaymentType::class, 'query')
             ->whereKey($this->data['payment_type_id'])
             ->where('client_id', $this->data['client_id'])
             ->exists();

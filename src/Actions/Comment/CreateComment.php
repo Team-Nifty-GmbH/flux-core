@@ -44,7 +44,7 @@ class CreateComment extends FluxAction
             })
             ->toArray();
 
-        $mentionedUsers = app(User::class)->query()
+        $mentionedUsers = resolve_static(User::class, 'query')
             ->where(function ($query) use ($mentions) {
                 $query->whereIn('id', $mentions[App::getAlias(User::class)] ?? [])
                     ->orWhereHas('roles', function ($query) use ($mentions) {
@@ -56,7 +56,7 @@ class CreateComment extends FluxAction
             ->get();
 
         foreach ($mentionedUsers as $mention) {
-            $eventSubscription = app(EventSubscription::class)->query()
+            $eventSubscription = resolve_static(EventSubscription::class, 'query')
                 ->where('event', eloquent_model_event('created', App::getAlias(Comment::class)))
                 ->where('user_id', $mention->id)
                 ->where('model_type', $this->data['model_type'])

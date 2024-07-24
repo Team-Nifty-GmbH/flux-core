@@ -24,7 +24,7 @@ class UpdateFormBuilderForm extends FluxAction
     {
         $this->data['slug'] = Str::slug($this->data['slug'] ?? $this->data['name']);
 
-        $formBuilderForm = app(FormBuilderForm::class)->query()
+        $formBuilderForm = resolve_static(FormBuilderForm::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

@@ -21,7 +21,7 @@ class DeleteLedgerAccount extends FluxAction
 
     public function performAction(): mixed
     {
-        return app(LedgerAccount::class)->query()
+        return resolve_static(LedgerAccount::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

@@ -45,12 +45,12 @@ class Ticket extends Component
             ];
         }, $states->toArray());
 
-        $this->ticketTypes = app(TicketType::class)->query()
+        $this->ticketTypes = resolve_static(TicketType::class, 'query')
             ->select(['id', 'name'])
             ->get()
             ->toArray();
 
-        $ticketModel = app(TicketModel::class)->query()
+        $ticketModel = resolve_static(TicketModel::class, 'query')
             ->with([
                 'users:id',
                 'users.media',
@@ -63,7 +63,7 @@ class Ticket extends Component
         $ticketModel->state = $ticketModel->state ?:
             resolve_static(TicketModel::class, 'getDefaultStateFor', ['state']);
 
-        $this->additionalColumns = app(AdditionalColumn::class)->query()
+        $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
             ->where('is_frontend_visible', true)
             ->where(function (Builder $query) use ($ticketModel) {
                 $query->where('model_type', app(TicketModel::class)->getMorphClass())
@@ -110,7 +110,7 @@ class Ticket extends Component
 
     public function updateAdditionalColumns(?int $id): void
     {
-        $this->additionalColumns = app(AdditionalColumn::class)->query()
+        $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
             ->where('is_frontend_visible', true)
             ->where(function (Builder $query) use ($id) {
                 $query->where('model_type', app(TicketModel::class)->getMorphClass())

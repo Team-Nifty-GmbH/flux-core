@@ -25,7 +25,7 @@ class UpdateClient extends FluxAction
     public function performAction(): Model
     {
         $bankConnections = Arr::pull($this->data, 'bank_connections');
-        $client = app(Client::class)->query()
+        $client = resolve_static(Client::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -44,7 +44,7 @@ class UpdateClient extends FluxAction
         $this->rules['client_code'] .= ',' . ($this->data['id'] ?? 0);
 
         if (($this->data['is_default'] ?? false)
-            && ! app(Client::class)->query()
+            && ! resolve_static(Client::class, 'query')
                 ->whereKeyNot($this->data['id'] ?? 0)
                 ->where('is_default', true)
                 ->exists()

@@ -39,9 +39,10 @@ class ProductList extends Component
     protected function getProducts(): LengthAwarePaginator
     {
         if (! $this->search) {
-            $builder = app(Product::class)->query();
+            $builder = resolve_static(Product::class, 'query');
         } else {
-            $builder = app(Product::class)->search($this->search)->toEloquentBuilder();
+            $builder = resolve_static(Product::class, 'search', ['query' => $this->search])
+                ->toEloquentBuilder();
         }
 
         $result = $builder

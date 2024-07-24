@@ -23,7 +23,7 @@ class DeleteUser extends FluxAction
 
     public function performAction(): ?bool
     {
-        $user = app(User::class)->query()
+        $user = resolve_static(User::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

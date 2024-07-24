@@ -31,11 +31,11 @@ class UpdateOrderPosition extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags', []);
 
-        $orderPosition = app(OrderPosition::class)->query()
+        $orderPosition = resolve_static(OrderPosition::class, 'query')
             ->whereKey($this->data['id'] ?? null)
             ->firstOrNew();
 
-        $order = app(Order::class)->query()
+        $order = resolve_static(Order::class, 'query')
             ->whereKey(data_get($this->data, 'order_id', $orderPosition->order_id))
             ->select(['id', 'client_id', 'price_list_id'])
             ->first();
@@ -46,12 +46,12 @@ class UpdateOrderPosition extends FluxAction
         if (is_int($this->data['sort_number'] ?? false)
             && $orderPosition->sort_number !== $this->data['sort_number']
         ) {
-            $currentHighestSortNumber = app(OrderPosition::class)->query()
+            $currentHighestSortNumber = resolve_static(OrderPosition::class, 'query')
                 ->where('order_id', $this->data['order_id'])
                 ->max('sort_number');
             $this->data['sort_number'] = min($this->data['sort_number'], $currentHighestSortNumber + 1);
 
-            app(OrderPosition::class)->query()->where('order_id', $this->data['order_id'])
+            resolve_static(OrderPosition::class, 'query')->where('order_id', $this->data['order_id'])
                 ->where('sort_number', '>=', $this->data['sort_number'])
                 ->increment('sort_number');
         }
@@ -60,7 +60,7 @@ class UpdateOrderPosition extends FluxAction
 
         $product = null;
         if ($orderPosition->isDirty('product_id') && $orderPosition->product_id) {
-            $product = app(Product::class)->query()
+            $product = resolve_static(Product::class, 'query')
                 ->whereKey($this->data['product_id'])
                 ->with([
                     'bundleProducts:id,name',
@@ -132,7 +132,7 @@ class UpdateOrderPosition extends FluxAction
 
         if ($this->data['id'] ?? false) {
             $errors = [];
-            $orderPosition = app(OrderPosition::class)->query()
+            $orderPosition = resolve_static(OrderPosition::class, 'query')
                 ->whereKey($this->data['id'])
                 ->first();
 
@@ -148,7 +148,7 @@ class UpdateOrderPosition extends FluxAction
             if ($this->data['price_id'] ?? false) {
                 // Check if the new price exists in the current price list
 
-                if (app(Price::class)->query()
+                if (resolve_static(Price::class, 'query')
                     ->whereKey($this->data['price_id'])
                     ->where(
                         'price_list_id',

@@ -21,7 +21,7 @@ class DeleteEventSubscription extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(EventSubscription::class)->query()
+        return resolve_static(EventSubscription::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

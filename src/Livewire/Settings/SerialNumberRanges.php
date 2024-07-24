@@ -45,7 +45,7 @@ class SerialNumberRanges extends SerialNumberRangeList
                         'value' => $modelInfo->morphClass,
                     ])
                     ->toArray(),
-                'clients' => app(Client::class)->query()
+                'clients' => resolve_static(Client::class, 'query')
                     ->select('id', 'name')
                     ->get()
                     ->toArray(),

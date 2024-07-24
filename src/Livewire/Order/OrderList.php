@@ -49,20 +49,20 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         return array_merge(
             parent::getViewData(),
             [
-                'priceLists' => app(PriceList::class)->query()
+                'priceLists' => resolve_static(PriceList::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'paymentTypes' => app(PaymentType::class)->query()
+                'paymentTypes' => resolve_static(PaymentType::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'languages' => app(Language::class)->query()
+                'languages' => resolve_static(Language::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'clients' => app(Client::class)->query()
+                'clients' => resolve_static(Client::class, 'query')
                     ->where('is_active', true)
                     ->get(['id', 'name'])
                     ->toArray(),
-                'orderTypes' => app(OrderType::class)->query()
+                'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->where('is_hidden', false)
                     ->where('is_active', true)
                     ->get(['id', 'name'])
@@ -94,7 +94,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     #[Renderless]
     public function fetchContactData(): void
     {
-        $contact = app(Contact::class)->query()
+        $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->order->contact_id)
             ->first();
 
@@ -121,6 +121,16 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         $this->redirect(route('orders.id', $this->order->id), true);
 
         return null;
+    }
+
+    #[Renderless]
+    public function createDocuments(): null|MediaStream|Media
+    {
+        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
+        $this->loadData();
+        $this->selected = [];
+
+        return $response;
     }
 
     protected function getTo(OffersPrinting $item, array $documents): array
@@ -170,15 +180,5 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
             ->with('orderType')
             ->get(['id', 'order_type_id'])
             ->printLayouts();
-    }
-
-    #[Renderless]
-    public function createDocuments(): null|MediaStream|Media
-    {
-        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
-        $this->loadData();
-        $this->selected = [];
-
-        return $response;
     }
 }

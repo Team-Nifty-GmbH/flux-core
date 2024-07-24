@@ -22,7 +22,7 @@ class DeleteCategory extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Category::class)->query()
+        return resolve_static(Category::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -33,7 +33,7 @@ class DeleteCategory extends FluxAction
         parent::validateData();
 
         $errors = [];
-        $category = app(Category::class)->query()
+        $category = resolve_static(Category::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

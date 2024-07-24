@@ -111,11 +111,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             }
 
             if ($contactUpdates) {
-                app(Contact::class)->query()
+                resolve_static(Contact::class, 'query')
                     ->whereKey($address->contact_id)
                     ->update($contactUpdates);
 
-                app(Address::class)->query()
+                resolve_static(Address::class, 'query')
                     ->where('contact_id', $address->contact_id)
                     ->where('id', '!=', $address->id)
                     ->update($addressesUpdates);
@@ -125,7 +125,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         static::deleted(function (Address $address) {
             $contactUpdates = [];
             $addressesUpdates = [];
-            $mainAddress = app(Address::class)
+            $mainAddress = resolve_static(Address::class, 'query')
                 ->where('contact_id', $address->contact_id)
                 ->where('is_main_address', true)
                 ->first();
@@ -151,7 +151,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             }
 
             if ($contactUpdates) {
-                app(Contact::class)->query()
+                resolve_static(Contact::class, 'query')
                     ->whereKey($address->contact_id)
                     ->update($contactUpdates);
 

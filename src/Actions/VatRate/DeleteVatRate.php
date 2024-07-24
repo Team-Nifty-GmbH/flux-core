@@ -21,7 +21,7 @@ class DeleteVatRate extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(VatRate::class)->query()
+        return resolve_static(VatRate::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

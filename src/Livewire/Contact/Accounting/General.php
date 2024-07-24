@@ -21,19 +21,19 @@ class General extends Component
         return view(
             'flux::livewire.contact.accounting.general',
             [
-                'paymentTypes' => app(PaymentType::class)->query()
+                'paymentTypes' => resolve_static(PaymentType::class, 'query')
                     ->where('is_sales', true)
                     ->where('is_active', true)
                     ->orderByDesc('is_default')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'purchasePaymentTypes' => app(PaymentType::class)->query()
+                'purchasePaymentTypes' => resolve_static(PaymentType::class, 'query')
                     ->where('is_purchase', true)
                     ->where('is_active', true)
                     ->orderByDesc('is_default')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'priceLists' => app(PriceList::class)->query()
+                'priceLists' => resolve_static(PriceList::class, 'query')
                     ->orderByDesc('is_default')
                     ->get(['id', 'name'])
                     ->toArray(),

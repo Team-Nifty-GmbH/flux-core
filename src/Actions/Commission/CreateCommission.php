@@ -25,7 +25,7 @@ class CreateCommission extends FluxAction
     public function performAction(): Commission
     {
         if (! array_key_exists('commission_rate', $this->data)) {
-            $commissionRateModel = app(CommissionRate::class)->query()
+            $commissionRateModel = resolve_static(CommissionRate::class, 'query')
                 ->whereKey($this->data['commission_rate_id'])
                 ->first();
 
@@ -40,7 +40,7 @@ class CreateCommission extends FluxAction
         }
 
         if (! array_key_exists('total_net_price', $this->data)) {
-            $orderPosition = app(OrderPosition::class)->query()
+            $orderPosition = resolve_static(OrderPosition::class, 'query')
                 ->whereKey($this->data['order_position_id'])
                 ->first();
 

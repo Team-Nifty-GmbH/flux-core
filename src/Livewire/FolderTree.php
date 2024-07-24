@@ -123,7 +123,7 @@ class FolderTree extends Component
 
         $model = app($this->modelType)->query()->whereKey($this->modelId)->first();
 
-        app(MediaModel::class)->query()
+        resolve_static(MediaModel::class, 'query')
             ->where('model_type', app($this->modelType)->getMorphClass())
             ->where('model_id', $this->modelId)
             ->where('collection_name', 'LIKE', $collection['collection_name'] . '%')

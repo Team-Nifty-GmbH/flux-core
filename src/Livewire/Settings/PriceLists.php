@@ -74,7 +74,7 @@ class PriceLists extends PriceListList
         return array_merge(
             parent::getViewData(),
             [
-                'priceLists' => app(PriceList::class)->query()
+                'priceLists' => resolve_static(PriceList::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
                 'roundingMethods' => RoundingMethodEnum::valuesLocalized(),
@@ -228,7 +228,7 @@ class PriceLists extends PriceListList
 
         $this->discountedCategories[] = [
             'id' => $this->newCategoryDiscount['category_id'],
-            'name' => app(Category::class)->query()
+            'name' => resolve_static(Category::class, 'query')
                 ->whereKey($this->newCategoryDiscount['category_id'])
                 ->value('name'),
             'discounts' => [

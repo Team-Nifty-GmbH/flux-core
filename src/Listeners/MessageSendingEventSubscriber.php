@@ -50,7 +50,9 @@ class MessageSendingEventSubscriber
         $communicationForm->communication_type_enum = CommunicationTypeEnum::Mail->value;
         $communicationForm->save();
 
-        $communication = app(Communication::class)->query()->whereKey($communicationForm->id)->first();
+        $communication = resolve_static(Communication::class, 'query')
+            ->whereKey($communicationForm->id)
+            ->first();
 
         $communicatable = morphed_model($communicationForm->communicatable_type)::query()
             ->whereKey($communicationForm->communicatable_id)

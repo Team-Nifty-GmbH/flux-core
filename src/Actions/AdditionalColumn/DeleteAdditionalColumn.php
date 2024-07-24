@@ -21,7 +21,7 @@ class DeleteAdditionalColumn extends FluxAction
 
     public function performAction(): ?bool
     {
-        $additionalColumn = app(AdditionalColumn::class)->query()
+        $additionalColumn = resolve_static(AdditionalColumn::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

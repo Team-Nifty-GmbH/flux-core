@@ -21,7 +21,7 @@ class UpdatePurchaseInvoicePosition extends FluxAction
 
     public function performAction(): PurchaseInvoicePosition
     {
-        $purchaseInvoicePosition = app(PurchaseInvoicePosition::class)->query()
+        $purchaseInvoicePosition = resolve_static(PurchaseInvoicePosition::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

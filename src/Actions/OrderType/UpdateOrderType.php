@@ -23,7 +23,7 @@ class UpdateOrderType extends FluxAction
 
     public function performAction(): Model
     {
-        $orderType = app(OrderType::class)->query()
+        $orderType = resolve_static(OrderType::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

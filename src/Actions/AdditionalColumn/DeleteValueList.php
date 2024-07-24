@@ -22,7 +22,7 @@ class DeleteValueList extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(AdditionalColumn::class)->query()
+        return resolve_static(AdditionalColumn::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -32,7 +32,7 @@ class DeleteValueList extends FluxAction
     {
         parent::validateData();
 
-        if (app(AdditionalColumn::class)->query()
+        if (resolve_static(AdditionalColumn::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->modelValues()

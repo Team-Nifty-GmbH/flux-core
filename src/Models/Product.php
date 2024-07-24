@@ -180,11 +180,13 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
 
     public function getChildProductOptions(): Collection
     {
-        return app(ProductOptionGroup::class)
-            ->query()
-            ->whereHas('productOptions.products', function (Builder $query) {
-                return $query->whereIntegerInRaw('product_id', $this->children->pluck('id'));
-            })
+        return resolve_static(ProductOptionGroup::class, 'query')
+            ->whereHas(
+                'productOptions.products',
+                function (Builder $query) {
+                    return $query->whereIntegerInRaw('product_id', $this->children->pluck('id'));
+                }
+            )
             ->with([
                 'productOptions' => fn ($query) => $query
                     ->whereHas('products', function (Builder $query) {

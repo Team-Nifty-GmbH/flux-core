@@ -28,7 +28,7 @@ class UpdatePurchaseInvoice extends FluxAction
     public function performAction(): PurchaseInvoice
     {
         $positions = data_get($this->data, 'purchase_invoice_positions');
-        $purchaseInvoice = app(PurchaseInvoice::class)->query()
+        $purchaseInvoice = resolve_static(PurchaseInvoice::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -54,7 +54,7 @@ class UpdatePurchaseInvoice extends FluxAction
     {
         parent::validateData();
 
-        $purchaseInvoice = app(PurchaseInvoice::class)->query()
+        $purchaseInvoice = resolve_static(PurchaseInvoice::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -63,7 +63,7 @@ class UpdatePurchaseInvoice extends FluxAction
         $clientId = data_get($this->data, 'client_id', $purchaseInvoice->client_id);
 
         if ($invoiceNumber && $contactId && $clientId) {
-            if (app(Order::class)->query()
+            if (resolve_static(Order::class, 'query')
                 ->where('client_id', $clientId)
                 ->where('invoice_number', $invoiceNumber)
                 ->where('contact_id', $contactId)

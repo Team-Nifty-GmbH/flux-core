@@ -19,7 +19,7 @@ class PermissionController extends BaseController
 
     public function showUserPermissions(string $id): JsonResponse
     {
-        $user = app(User::class)->query()
+        $user = resolve_static(User::class, 'query')
             ->whereKey($id)
             ->first();
 

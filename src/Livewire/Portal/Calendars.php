@@ -19,7 +19,7 @@ class Calendars extends CalendarComponent
 
     public function getCalendars(): array
     {
-        return app(Calendar::class)->query()
+        return resolve_static(Calendar::class, 'query')
             ->where('is_public', true)
             ->get()
             ->map(function (Calendar $calendar) {
@@ -34,7 +34,9 @@ class Calendars extends CalendarComponent
 
     public function getEvents(array $info, array $calendarAttributes): array
     {
-        $calendar = app(Calendar::class)->query()->find($calendarAttributes['id']);
+        $calendar = resolve_static(Calendar::class, 'query')
+            ->whereKey($calendarAttributes['id'])
+            ->first();
 
         return $calendar->calendarEvents()
             ->where(function ($query) use ($info) {
@@ -59,21 +61,18 @@ class Calendars extends CalendarComponent
             ?->toArray();
     }
 
-    public function attendEvent($eventId)
+    public function attendEvent(CalendarEvent $event): void
     {
-        $event = app(CalendarEvent::class)->query()->find($eventId);
-
-        $event->invites()->create([
-            'inviteable_type' => auth()->user()->getMorphClass(),
-            'inviteable_id' => auth()->user()->getKey(),
-            'status' => 'accepted',
-        ]);
+        $event->invites()
+            ->create([
+                'inviteable_type' => auth()->user()->getMorphClass(),
+                'inviteable_id' => auth()->user()->getKey(),
+                'status' => 'accepted',
+            ]);
     }
 
-    public function notAttendEvent($eventId)
+    public function notAttendEvent(CalendarEvent $event): void
     {
-        $event = app(CalendarEvent::class)->query()->find($eventId);
-
         $event->invites()
             ->where('inviteable_type', auth()->user()->getMorphClass())
             ->where('inviteable_id', auth()->user()->getKey())

@@ -144,7 +144,7 @@ class Order extends OrderPositionList
 
         $this->fetchOrder($id);
 
-        $orderType = app(OrderType::class)->query()
+        $orderType = resolve_static(OrderType::class, 'query')
             ->whereKey($this->order->order_type_id)
             ->first();
 
@@ -213,14 +213,14 @@ class Order extends OrderPositionList
                 ->when(function () {
                     return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
                         && $this->order->invoice_date
-                        && app(OrderType::class)->query()
+                        && resolve_static(OrderType::class, 'query')
                             ->whereKey($this->order->order_type_id)
                             ->whereIn('order_type_enum', [
                                 OrderTypeEnum::Order->value,
                                 OrderTypeEnum::SplitOrder->value,
                             ])
                             ->exists()
-                        && app(OrderType::class)->query()
+                        && resolve_static(OrderType::class, 'query')
                             ->where('order_type_enum', OrderTypeEnum::Retoure->value)
                             ->where('is_active', true)
                             ->exists();
@@ -236,11 +236,11 @@ class Order extends OrderPositionList
                 ->when(function () {
                     return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
                         && ! $this->order->invoice_date
-                        && app(OrderType::class)->query()
+                        && resolve_static(OrderType::class, 'query')
                             ->whereKey($this->order->order_type_id)
                             ->where('order_type_enum', OrderTypeEnum::Order->value)
                             ->exists()
-                        && app(OrderType::class)->query()
+                        && resolve_static(OrderType::class, 'query')
                             ->where('order_type_enum', OrderTypeEnum::SplitOrder->value)
                             ->where('is_active', true)
                             ->where('is_hidden', false)
@@ -291,23 +291,23 @@ class Order extends OrderPositionList
             parent::getViewData(),
             [
                 'additionalModelActions' => $this->getAdditionalModelActions(),
-                'vatRates' => app(VatRate::class)->query()
+                'vatRates' => resolve_static(VatRate::class, 'query')
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
-                'priceLists' => app(PriceList::class)->query()
+                'priceLists' => resolve_static(PriceList::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'paymentTypes' => app(PaymentType::class)->query()
+                'paymentTypes' => resolve_static(PaymentType::class, 'query')
                     ->where('client_id', $this->order->client_id)
                     ->get(['id', 'name'])
                     ->toArray(),
-                'languages' => app(Language::class)->query()
+                'languages' => resolve_static(Language::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'clients' => app(Client::class)->query()
+                'clients' => resolve_static(Client::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'orderTypes' => app(OrderType::class)->query()
+                'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->where('is_hidden', false)
                     ->where('is_active', true)
                     ->get(['id', 'name'])
@@ -332,7 +332,7 @@ class Order extends OrderPositionList
                         ]
                     )
                 ),
-                'contactBankConnections' => app(ContactBankConnection::class)->query()
+                'contactBankConnections' => resolve_static(ContactBankConnection::class, 'query')
                     ->where('contact_id', $this->order->contact_id)
                     ->select(['id', 'contact_id', 'iban'])
                     ->pluck('iban', 'id')
@@ -387,7 +387,7 @@ class Order extends OrderPositionList
 
     public function updatedOrderAddressInvoiceId(): void
     {
-        $this->order->address_invoice = app(Address::class)->query()
+        $this->order->address_invoice = resolve_static(Address::class, 'query')
             ->whereKey($this->order->address_invoice_id)
             ->with('contact')
             ->first()
@@ -402,7 +402,7 @@ class Order extends OrderPositionList
 
     public function updatedOrderAddressDeliveryId(): void
     {
-        $this->order->address_delivery = app(Address::class)->query()
+        $this->order->address_delivery = resolve_static(Address::class, 'query')
             ->whereKey($this->order->address_delivery_id)
             ->first()
             ->toArray();
@@ -463,7 +463,7 @@ class Order extends OrderPositionList
         $this->replicateOrder->fill($this->order->toArray());
         $this->fetchContactData();
 
-        $this->replicateOrderTypes = app(OrderType::class)->query()
+        $this->replicateOrderTypes = resolve_static(OrderType::class, 'query')
             ->where('order_type_enum', $orderTypeEnum)
             ->where('is_active', true)
             ->where('is_hidden', false)
@@ -511,7 +511,7 @@ class Order extends OrderPositionList
     {
         $orderVariable = ! $replicate ? 'order' : 'replicateOrder';
 
-        $contact = app(Contact::class)->query()
+        $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->{$orderVariable}->contact_id)
             ->with('mainAddress:id,contact_id')
             ->first();
@@ -524,7 +524,7 @@ class Order extends OrderPositionList
         $this->{$orderVariable}->payment_type_id = $contact->payment_type_id;
 
         if (! $replicate) {
-            $this->order->address_invoice = app(Address::class)->query()
+            $this->order->address_invoice = resolve_static(Address::class, 'query')
                 ->whereKey($this->order->address_invoice_id)
                 ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
                 ->first()
@@ -609,7 +609,7 @@ class Order extends OrderPositionList
                 app(Product::class)->addGlobalScope('bundleProducts', function (Builder $builder) {
                     $builder->with('bundleProducts');
                 });
-                $product = app(Product::class)->query()
+                $product = resolve_static(Product::class, 'query')
                     ->whereHas('bundleProducts')
                     ->whereKey($this->orderPosition->product_id)
                     ->first();
@@ -702,7 +702,7 @@ class Order extends OrderPositionList
 
     public function fillSchedule(): void
     {
-        $schedule = app(Schedule::class)->query()
+        $schedule = resolve_static(Schedule::class, 'query')
             ->where('class', ProcessSubscriptionOrderJob::class)
             ->whereJsonContains('parameters->order', $this->order->id)
             ->first();
@@ -710,13 +710,13 @@ class Order extends OrderPositionList
         if ($schedule) {
             $this->schedule->fill($schedule->toArray());
         } else {
-            $defaultOrderType = app(OrderType::class)->query()
+            $defaultOrderType = resolve_static(OrderType::class, 'query')
                 ->whereKey($this->order->order_type_id)
                 ->first()
                 ->order_type_enum === OrderTypeEnum::PurchaseSubscription ?
                 OrderTypeEnum::Purchase->value : OrderTypeEnum::Order->value;
 
-            $this->schedule->parameters['orderType'] = app(OrderType::class)->query()
+            $this->schedule->parameters['orderType'] = resolve_static(OrderType::class, 'query')
                 ->where('order_type_enum', $defaultOrderType)
                 ->where('is_active', true)
                 ->where('is_hidden', false)
@@ -754,7 +754,7 @@ class Order extends OrderPositionList
 
     public function takeOrderPositions(array $positionIds): void
     {
-        $orderPositions = app(OrderPosition::class)->query()
+        $orderPositions = resolve_static(OrderPosition::class, 'query')
             ->whereIntegerInRaw('order_positions.id', $positionIds)
             ->where('order_positions.order_id', $this->order->id)
             ->leftJoin('order_positions AS descendants', 'order_positions.id', '=', 'descendants.origin_position_id')
@@ -966,7 +966,7 @@ class Order extends OrderPositionList
 
     protected function fetchOrder(int $id): void
     {
-        $order = app(OrderModel::class)->query()
+        $order = resolve_static(OrderModel::class, 'query')
             ->whereKey($id)
             ->with([
                 'priceList:id,name,is_net',
@@ -982,8 +982,6 @@ class Order extends OrderPositionList
 
         $this->order->fill($order);
         $this->order->users = $order->users->pluck('id')->toArray();
-
-        $this->printLayouts = $this->getPrintLayouts();
 
         $invoice = $order->invoice();
         if ($invoice) {

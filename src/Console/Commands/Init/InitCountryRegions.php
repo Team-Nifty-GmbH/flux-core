@@ -27,14 +27,14 @@ class InitCountryRegions extends Command
             if ($jsonCountryRegions) {
                 foreach ($jsonCountryRegions as $jsonCountryRegion) {
                     // Gather necessary foreign keys.
-                    $countryId = app(Country::class)->query()
+                    $countryId = resolve_static(Country::class, 'query')
                         ->where('iso_alpha2', $jsonCountryRegion->country_iso_alpha2)
                         ->first()
                         ?->id;
 
                     // Save to database, if all foreign keys are found.
                     if ($countryId) {
-                        app(CountryRegion::class)->query()
+                        resolve_static(CountryRegion::class, 'query')
                             ->updateOrCreate([
                                 'name' => $jsonCountryRegion->name,
                             ], [

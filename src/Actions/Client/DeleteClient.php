@@ -21,7 +21,7 @@ class DeleteClient extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Client::class)->query()
+        return resolve_static(Client::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

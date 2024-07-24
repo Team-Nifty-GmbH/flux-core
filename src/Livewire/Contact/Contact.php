@@ -32,7 +32,7 @@ class Contact extends Component
 
     public function mount(?int $id = null): void
     {
-        $contact = app(ContactModel::class)->query()
+        $contact = resolve_static(ContactModel::class, 'query')
             ->with(['mainAddress', 'categories:id'])
             ->whereKey($id)
             ->firstOrFail();
@@ -57,7 +57,7 @@ class Contact extends Component
     #[Renderless]
     public function contactUpdated(): void
     {
-        $this->contact->fill(app(ContactModel::class)->query()->whereKey($this->contact->id)->first());
+        $this->contact->fill(resolve_static(ContactModel::class, 'query')->whereKey($this->contact->id)->first());
     }
 
     #[Renderless]
@@ -140,7 +140,7 @@ class Contact extends Component
     #[Renderless]
     public function reloadContact(): void
     {
-        $contact = app(ContactModel::class)->query()
+        $contact = resolve_static(ContactModel::class, 'query')
             ->with(['mainAddress', 'categories:id'])
             ->whereKey($this->contact->id)
             ->firstOrFail();
@@ -163,7 +163,7 @@ class Contact extends Component
             return;
         }
 
-        $this->avatar = app(ContactModel::class)->query()
+        $this->avatar = resolve_static(ContactModel::class, 'query')
             ->whereKey($this->contact->id)
             ->first()
             ->getAvatarUrl();

@@ -88,7 +88,7 @@ class ModelFilter
         }
 
         if (! is_null($filter)) {
-            $additionalColumns = app(AdditionalColumn::class)->query()
+            $additionalColumns = resolve_static(AdditionalColumn::class, 'query')
                 ->where('model_type', $model)
                 ->get()
                 ->pluck('name')

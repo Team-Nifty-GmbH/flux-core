@@ -60,7 +60,7 @@ class AddressTypes extends AddressTypeList
         return array_merge(
             parent::getViewData(),
             [
-                'clients' => app(Client::class)->query()
+                'clients' => resolve_static(Client::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
             ]);

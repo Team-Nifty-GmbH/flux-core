@@ -74,7 +74,9 @@ class Cart extends Component
 
         foreach ($products as $product) {
             if ($productId = is_array($product) ? data_get($product, 'id') : $product) {
-                $productModel = app(Product::class)->whereKey($productId)->first();
+                $productModel = resolve_static(Product::class, 'query')
+                    ->whereKey($productId)
+                    ->first();
             }
 
             $data = [
@@ -161,8 +163,7 @@ class Cart extends Component
     {
         try {
             if ($this->selectedWatchlist) {
-                $cart = app(CartModel::class)
-                    ->query()
+                $cart = resolve_static(CartModel::class, 'query')
                     ->whereKey($this->selectedWatchlist)
                     ->where('is_watchlist', true)
                     ->first();
@@ -233,8 +234,7 @@ class Cart extends Component
 
     protected function getWatchLists(): void
     {
-        $this->watchlists = app(CartModel::class)
-            ->query()
+        $this->watchlists = resolve_static(CartModel::class, 'query')
             ->where(function (Builder $query) {
                 $query->where(fn (Builder $query) => $query
                     ->where('authenticatable_type', auth()->user()?->getMorphClass())

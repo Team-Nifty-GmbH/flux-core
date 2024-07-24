@@ -3,6 +3,7 @@
 namespace FluxErp\Actions;
 
 use FluxErp\Models\Permission;
+use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Support\Arrayable;
@@ -15,11 +16,15 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class FluxAction
 {
+    use Makeable;
+
     protected array $data;
 
     protected array $rules = [];
 
     protected mixed $result = null;
+
+    protected bool $keepEmptyStrings = false;
 
     protected static Dispatcher $dispatcher;
 
@@ -29,13 +34,14 @@ abstract class FluxAction
 
     abstract public function performAction(): mixed;
 
-    public function __construct(array $data)
+    public function __construct(array $data = [], bool $keepEmptyStrings = false)
     {
         $this->setEventDispatcher();
 
         $this->fireActionEvent(event: 'booting', halt: false);
 
         static::bootTraits();
+        $this->keepEmptyStrings = $keepEmptyStrings;
         $this->boot($data);
 
         $this->fireActionEvent(event: 'booted', halt: false);
@@ -59,18 +65,19 @@ abstract class FluxAction
 
     protected function boot(array $data): void
     {
-        $this->setData($data[0] ?? [], $data[1] ?? false);
-    }
-
-    public static function make(...$data): static
-    {
-        return app(static::class, ['data' => $data]);
+        $this->setData($data, $this->keepEmptyStrings ?? false);
     }
 
     public static function canPerformAction(bool $throwException = true): bool
     {
         try {
-            Permission::findByName('action.' . static::name());
+            resolve_static(
+                Permission::class,
+                'findByName',
+                [
+                    'name' => 'action.' . static::name(),
+                ]
+            );
         } catch (PermissionDoesNotExist) {
             return true;
         }

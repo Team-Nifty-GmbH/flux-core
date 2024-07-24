@@ -31,7 +31,7 @@ class CreateAddress extends FluxAction
         $tags = Arr::pull($this->data, 'tags');
 
         if (! data_get($this->data, 'is_main_address', false)
-            && ! app(Address::class)->query()
+            && ! resolve_static(Address::class, 'query')
                 ->where('contact_id', $this->data['contact_id'])
                 ->where('is_main_address', true)
                 ->exists()
@@ -40,7 +40,7 @@ class CreateAddress extends FluxAction
         }
 
         if (! data_get($this->data, 'is_invoice_address', false)
-            && ! app(Address::class)->query()
+            && ! resolve_static(Address::class, 'query')
                 ->where('contact_id', $this->data['contact_id'])
                 ->where('is_invoice_address', true)
                 ->exists()
@@ -49,7 +49,7 @@ class CreateAddress extends FluxAction
         }
 
         if (! data_get($this->data, 'is_delivery_address', false)
-            && ! app(Address::class)->query()
+            && ! resolve_static(Address::class, 'query')
                 ->where('contact_id', $this->data['contact_id'])
                 ->where('is_delivery_address', true)
                 ->exists()
@@ -65,7 +65,7 @@ class CreateAddress extends FluxAction
         $address->save();
 
         if ($tags) {
-            $address->attachTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
+            $address->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
         if (resolve_static(CreateContactOption::class, 'canPerformAction', [false])) {
@@ -78,7 +78,7 @@ class CreateAddress extends FluxAction
         }
 
         if ($this->data['address_types'] ?? false) {
-            $addressTypes = app(AddressType::class)->query()
+            $addressTypes = resolve_static(AddressType::class, 'query')
                 ->whereIntegerInRaw('id', $this->data['address_types'])
                 ->where('is_unique', true)
                 ->whereHas(

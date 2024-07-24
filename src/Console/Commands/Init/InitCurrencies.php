@@ -28,7 +28,7 @@ class InitCurrencies extends Command
                 foreach ($jsonCurrencies as $jsonCurrency) {
                     // Save to database.
                     $isDefault = $isDefault ? false : $jsonCurrency->is_default;
-                    app(Currency::class)->query()
+                    resolve_static(Currency::class, 'query')
                         ->updateOrCreate([
                             'iso' => $jsonCurrency->iso,
                         ], [
@@ -39,8 +39,8 @@ class InitCurrencies extends Command
                 }
             }
 
-            if (! app(Currency::class)->query()->where('is_default')->exists()) {
-                app(Currency::class)->query()
+            if (! resolve_static(Currency::class, 'query')->where('is_default')->exists()) {
+                resolve_static(Currency::class, 'query')
                     ->first()
                     ->update(['is_default' => true]);
             }

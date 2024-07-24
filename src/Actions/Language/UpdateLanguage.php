@@ -23,7 +23,7 @@ class UpdateLanguage extends FluxAction
 
     public function performAction(): Model
     {
-        $language = app(Language::class)->query()
+        $language = resolve_static(Language::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -39,7 +39,7 @@ class UpdateLanguage extends FluxAction
         $this->rules['iso_name'] .= ',' . ($this->data['id'] ?? 0);
 
         if (($this->data['is_default'] ?? false)
-            && ! app(Language::class)->query()
+            && ! resolve_static(Language::class, 'query')
                 ->whereKeyNot($this->data['id'] ?? 0)
                 ->where('is_default', true)
                 ->exists()

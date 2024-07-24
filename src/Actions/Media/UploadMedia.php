@@ -98,7 +98,7 @@ class UploadMedia extends FluxAction
     {
         parent::validateData();
 
-        if (app(Media::class)->query()
+        if (resolve_static(Media::class, 'query')
             ->where('model_type', $this->data['model_type'])
             ->where('model_id', $this->data['model_id'])
             ->where('collection_name', $this->data['collection_name'])

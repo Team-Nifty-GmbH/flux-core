@@ -22,7 +22,7 @@ class DeleteWarehouse extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Warehouse::class)->query()
+        return resolve_static(Warehouse::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -32,7 +32,7 @@ class DeleteWarehouse extends FluxAction
     {
         parent::validateData();
 
-        if (app(Warehouse::class)->query()
+        if (resolve_static(Warehouse::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->stockPostings()

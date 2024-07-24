@@ -35,7 +35,7 @@ class CreateTicket extends FluxAction
             $meta = $ticket->getDirtyMeta();
 
             $additionalColumns = Arr::keyBy(
-                app(AdditionalColumn::class)->query()
+                resolve_static(AdditionalColumn::class, 'query')
                     ->where('model_type', app(TicketType::class)->getMorphClass())
                     ->where('model_id', $ticket->ticket_type_id)
                     ->select(['id', 'name'])
@@ -58,7 +58,7 @@ class CreateTicket extends FluxAction
 
         $ticket->getSerialNumber(
             'ticket_number',
-            Auth::user()?->client_id ?? app(Client::class)->query()->where('is_active', true)->first()?->id
+            Auth::user()?->client_id ?? resolve_static(Client::class, 'query')->where('is_active', true)->first()?->id
         );
 
         $ticket->save();
@@ -75,7 +75,7 @@ class CreateTicket extends FluxAction
         if ($this->data['ticket_type_id'] ?? false) {
             $this->rules = array_merge(
                 $this->rules,
-                app(TicketType::class)->query()
+                resolve_static(TicketType::class, 'query')
                     ->whereKey($this->data['ticket_type_id'])
                     ->first()
                     ?->hasAdditionalColumnsValidationRules() ?? []

@@ -22,7 +22,7 @@ class UpdateRole extends FluxAction
 
     public function performAction(): Model
     {
-        $role = app(Role::class)->query()
+        $role = resolve_static(Role::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

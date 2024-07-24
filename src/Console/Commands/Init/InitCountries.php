@@ -28,24 +28,24 @@ class InitCountries extends Command
             if ($jsonCountries) {
                 foreach ($jsonCountries as $jsonCountry) {
                     // Gather necessary foreign keys.
-                    $languageId = app(Language::class)->query()
+                    $languageId = resolve_static(Language::class, 'query')
                         ->where('language_code', $jsonCountry->language_code)
                         ->first()
                         ?->id;
-                    $currencyId = app(Currency::class)->query()
+                    $currencyId = resolve_static(Currency::class, 'query')
                         ->where('iso', $jsonCountry->currency_iso)
                         ->first()
                         ?->id;
 
                     // Check for default country according to env 'DEFAULT_LOCALE'.
                     $isDefault = $jsonCountry->language_code === config('app.locale') &&
-                        count(app(Country::class)->query()
+                        count(resolve_static(Country::class, 'query')
                             ->where('is_default', true)
                             ->get()) === 0;
 
                     // Save to database, if all foreign keys are found.
                     if ($languageId && $currencyId) {
-                        app(Country::class)->query()
+                        resolve_static(Country::class, 'query')
                             ->updateOrCreate([
                                 'iso_alpha2' => $jsonCountry->iso_alpha2,
                             ], [

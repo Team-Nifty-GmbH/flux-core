@@ -126,7 +126,7 @@ class PriceHelper
         }
 
         if (! $this->price && $this->useDefault) {
-            $this->price = app(Price::class)->query()
+            $this->price = resolve_static(Price::class, 'query')
                 ->where('product_id', $this->product->id)
                 ->whereRelation('priceList', 'is_default', true)
                 ->first();
@@ -152,7 +152,7 @@ class PriceHelper
         }
 
         if ($this->contact) {
-            $discounts = app(Discount::class)->query()
+            $discounts = resolve_static(Discount::class, 'query')
                 ->join('discount_discount_group AS ddg', 'discounts.id', 'ddg.discount_id')
                 ->join('contact_discount_group AS cdg', 'ddg.discount_group_id', '=', 'cdg.discount_group_id')
                 ->where('cdg.contact_id', $this->contact->id)

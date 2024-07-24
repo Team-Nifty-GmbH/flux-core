@@ -152,7 +152,7 @@ class Comments extends Component
 
     public function toggleSticky(int $id): void
     {
-        $comment = app(Comment::class)->query()->whereKey($id)->first();
+        $comment = resolve_static(Comment::class, 'query')->whereKey($id)->first();
 
         try {
             UpdateComment::make([
@@ -263,7 +263,7 @@ class Comments extends Component
             return;
         }
 
-        $this->users = app(User::class)->query()
+        $this->users = resolve_static(User::class, 'query')
             ->select('id', 'name')
             ->where('is_active', true)
             ->orderBy('firstname')
@@ -277,7 +277,7 @@ class Comments extends Component
             })
             ->toArray();
 
-        $this->roles = app(Role::class)->query()
+        $this->roles = resolve_static(Role::class, 'query')
             ->select(['id', 'name'])
             ->whereRelation('users', 'is_active', true)
             ->orderBy('name')

@@ -27,7 +27,7 @@ class UpdateTicket extends FluxAction
     {
         $users = Arr::pull($this->data, 'users');
 
-        $ticket = app(Ticket::class)->query()
+        $ticket = resolve_static(Ticket::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -46,7 +46,7 @@ class UpdateTicket extends FluxAction
         if ($this->data['ticket_type_id'] ?? false) {
             $this->rules = array_merge(
                 $this->rules,
-                app(TicketType::class)->query()
+                resolve_static(TicketType::class, 'query')
                     ->whereKey($this->data['ticket_type_id'])
                     ->first()
                     ?->hasAdditionalColumnsValidationRules() ?? []
