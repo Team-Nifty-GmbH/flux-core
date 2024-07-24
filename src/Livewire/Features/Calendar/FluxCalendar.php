@@ -154,11 +154,10 @@ class FluxCalendar extends CalendarComponent
                 return false;
             }
 
-            $actionResult = data_get($this->event->getActionResult(), 'created')
-                ?? data_get($this->event->getActionResult(), 'updated');
+            $actionResult = $this->event->getActionResult();
 
             $result = match (true) {
-                is_array($actionResult) => array_values($actionResult),
+                is_array($actionResult) => array_values(array_filter($actionResult)),
                 default => Arr::wrap($actionResult),
             };
         }

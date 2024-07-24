@@ -20,16 +20,16 @@ class CalendarEvent extends BaseCalendarEvent implements HasMedia
         return $this->belongsTo(Calendar::class);
     }
 
-    public function invitedUsers(): MorphToMany
+    public function invited(): MorphToMany
     {
-        return $this->morphedByMany(User::class, 'model', 'calendar_event_invites')
+        return $this->morphedByMany(User::class, 'inviteable')
             ->using(CalendarEventInvite::class)
             ->withPivot(['status', 'model_calendar_id']);
     }
 
     public function invitedAddresses(): MorphToMany
     {
-        return $this->morphedByMany(Address::class, 'model', 'calendar_event_invites')
+        return $this->morphedByMany(Address::class, 'inviteable', 'inviteables')
             ->using(CalendarEventInvite::class)
             ->withPivot(['status', 'model_calendar_id']);
     }
