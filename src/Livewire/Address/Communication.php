@@ -1,11 +1,11 @@
 <?php
 
-namespace FluxErp\Livewire\Contact;
+namespace FluxErp\Livewire\Address;
 
 use FluxErp\Livewire\Features\Communications\Communication as BaseCommunication;
-use FluxErp\Models\Contact;
+use FluxErp\Models\Address;
 
 class Communication extends BaseCommunication
 {
-    protected ?string $modelType = Contact::class;
+    protected ?string $modelType = Address::class;
 }
