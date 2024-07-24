@@ -124,7 +124,7 @@ class Communication extends Model implements HasMedia, OffersPrinting
     public function getPrintViews(): array
     {
         return [
-            'communication' => CommunicationView::class,
+            'communicationadfasdfdsafsafsfdsfsdfsdfsdfsdfsdfsdfsdfdsfsd' => CommunicationView::class,
         ];
     }
 }

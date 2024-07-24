@@ -34,7 +34,7 @@ class GenericMail extends Mailable
     public function build(): void
     {
         if ($this->mailMessageForm->mail_account_id) {
-            $mailAccount = app(MailAccount::class)->query()
+            $mailAccount = resolve_static(MailAccount::class, 'query')
                 ->whereKey($this->mailMessageForm->mail_account_id)
                 ->first();
 

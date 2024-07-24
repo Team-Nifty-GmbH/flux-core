@@ -67,8 +67,8 @@ class PaymentReminder extends OrderList
     protected function getAttachments(OffersPrinting $item): array
     {
         return [
-            'name' => $item->order->invoice()->file_name,
             'id' => $item->order->invoice()->id,
+            'name' => $item->order->invoice()->file_name,
         ];
     }
 
@@ -109,10 +109,10 @@ class PaymentReminder extends OrderList
     {
         return html_entity_decode($item->getPaymentReminderText()?->mail_subject ?? '') ?:
             __(
-                'Payment Reminder :level for invoice :invoice-number',
+                'Payment Reminder :level for invoice :invoice_number',
                 [
                     'level' => $item->reminder_level,
-                    'invoice-number' => $item->order->invoice_number,
+                    'invoice_number' => $item->order->invoice_number,
                 ]
             );
     }
@@ -129,7 +129,11 @@ class PaymentReminder extends OrderList
     protected function getBladeParameters(OffersPrinting $item): array|SerializableClosure|null
     {
         return new SerializableClosure(
-            fn () => ['paymentReminder' => app(PaymentReminderModel::class)->whereKey($item->getKey())->first()]
+            fn () => [
+                'paymentReminder' => resolve_static(PaymentReminderModel::class, 'query')
+                    ->whereKey($item->getKey())
+                    ->first(),
+            ]
         );
     }
 
@@ -162,10 +166,11 @@ class PaymentReminder extends OrderList
                     ->validate()
                     ->execute();
 
-                $reminderTextExists[$paymentReminder->reminder_level] ??= app(PaymentReminderText::class)
-                    ->where('reminder_level', '<=', $paymentReminder->reminder_level)
-                    ->orderBy('reminder_level', 'desc')
-                    ->exists();
+                $reminderTextExists[$paymentReminder->reminder_level] ??=
+                    resolve_static(PaymentReminderText::class, 'query')
+                        ->where('reminder_level', '<=', $paymentReminder->reminder_level)
+                        ->orderBy('reminder_level', 'desc')
+                        ->exists();
 
                 if (! data_get($reminderTextExists, $paymentReminder->reminder_level)) {
                     $this->notification()
@@ -188,7 +193,7 @@ class PaymentReminder extends OrderList
             }
         }
 
-        $response = $this->createDocumentFromItems($documents);
+        $response = $this->createDocumentFromItems($documents, true);
 
         $this->loadData();
         $this->selected = [];

@@ -82,11 +82,12 @@ class EditMail extends Component
     #[Renderless]
     public function createMany(Collection|array $mailMessages): void
     {
-        $this->sessionKey = null;
+        $sessionKey = $this->sessionKey;
         $this->create($mailMessages[0]);
+        $this->sessionKey = $sessionKey;
         $this->mailMessage->reset('attachments');
 
-        if (! $this->sessionKey) {
+        if (! $sessionKey) {
             $this->mailMessages = $mailMessages;
         }
 
@@ -160,6 +161,7 @@ class EditMail extends Component
         } else {
             $this->mailMessages = $this->mailMessages ?: session()->pull($this->sessionKey);
         }
+
         $single = count($this->mailMessages) === 1;
 
         $bcc = $this->mailMessage->bcc;
@@ -236,12 +238,10 @@ class EditMail extends Component
 
     protected function getBladeParameters(array|CommunicationForm $mailMessage): array|SerializableClosure|null
     {
-        if (data_get($mailMessage, 'blade_parameters_serialized')
-            && is_string($bladeParameters = data_get($mailMessage, 'blade_parameters'))
-        ) {
+        $bladeParameters = data_get($mailMessage, 'blade_parameters');
+
+        if (data_get($mailMessage, 'blade_parameters_serialized') && is_string($bladeParameters)) {
             $bladeParameters = unserialize($bladeParameters);
-        } else {
-            $bladeParameters = data_get($mailMessage, 'blade_parameters');
         }
 
         return $bladeParameters;

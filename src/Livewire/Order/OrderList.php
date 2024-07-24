@@ -127,17 +127,17 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     {
         $to = [];
 
+        // add invoice address email if an invoice is being send
         $to[] = in_array('invoice', $documents) && $item->contact->invoiceAddress
             ? $item->contact->invoiceAddress->email_primary
             : $item->contact->mainAddress->email_primary;
 
-        if (array_keys($this->selectedPrintLayouts['email']) !== ['invoice']
-            && $item->contact->mainAddress->email_primary
-        ) {
+        // add primary email address if more than just the invoice is added
+        if (array_diff($documents, ['invoice'])) {
             $to[] = $item->contact->mainAddress->email_primary;
         }
 
-        return $to;
+        return array_values(array_unique(array_filter($to)));
     }
 
     protected function getSubject(OffersPrinting $item): string
@@ -155,22 +155,27 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     protected function getBladeParameters(OffersPrinting $item): array|SerializableClosure|null
     {
         return new SerializableClosure(
-            fn () => ['order' => app(Order::class)->whereKey($item->getKey())->first()]
+            fn () => [
+                'order' => resolve_static(Order::class, 'query')
+                    ->whereKey($item->getKey())
+                    ->first(),
+            ]
         );
     }
 
     protected function getPrintLayouts(): array
     {
-        return app(Order::class)->query()
+        return resolve_static(Order::class, 'query')
             ->whereIntegerInRaw('id', $this->selected)
             ->with('orderType')
             ->get(['id', 'order_type_id'])
             ->printLayouts();
     }
 
+    #[Renderless]
     public function createDocuments(): null|MediaStream|Media
     {
-        $response = $this->createDocumentFromItems($this->getSelectedModels());
+        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
         $this->loadData();
         $this->selected = [];
 

@@ -22,9 +22,9 @@ class OrderConfirmation extends Mailable
     {
         return new Envelope(
             subject: __(
-                'Order Confirmation for order :order-number',
+                'Order Confirmation for order :order_number',
                 [
-                    'order-number' => $this->order->order_number,
+                    'order_number' => $this->order->order_number,
                 ]
             ),
         );

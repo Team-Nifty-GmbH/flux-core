@@ -5,8 +5,8 @@ namespace FluxErp\Livewire\Features\Communications;
 use FluxErp\Actions\Communication\CreateCommunication;
 use FluxErp\Actions\Communication\DeleteCommunication;
 use FluxErp\Actions\Communication\UpdateCommunication;
-use FluxErp\Actions\Printing;
 use FluxErp\Actions\Tag\CreateTag;
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Livewire\DataTables\CommunicationList;
 use FluxErp\Livewire\Forms\CommunicationForm;
@@ -15,22 +15,23 @@ use FluxErp\Mail\GenericMail;
 use FluxErp\Models\Address;
 use FluxErp\Models\Communication as CommunicationModel;
 use FluxErp\Models\MailAccount;
+use FluxErp\Models\Media;
+use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithFileUploads;
-use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
+use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Communication extends CommunicationList
 {
-    use WithFileUploads;
+    use CreatesDocuments, WithFileUploads;
 
     protected ?string $includeBefore = 'flux::livewire.features.communications.communication';
 
@@ -42,18 +43,6 @@ class Communication extends CommunicationList
     public CommunicationForm $communication;
 
     public MediaForm $attachments;
-
-    #[Locked]
-    public array $printLayouts = [];
-
-    public array $selectedPrintLayouts = [];
-
-    public function mount(): void
-    {
-        parent::mount();
-
-        $this->printLayouts = array_keys((app(CommunicationModel::class))->getPrintViews());
-    }
 
     protected function getTableActions(): array
     {
@@ -126,8 +115,8 @@ class Communication extends CommunicationList
     #[Renderless]
     public function save(): bool
     {
-        $this->communication->communicatable_type = morph_alias($this->modelType);
-        $this->communication->communicatable_id = $this->modelId;
+        $this->communication->communicatable_type ??= morph_alias($this->modelType);
+        $this->communication->communicatable_id ??= $this->modelId;
 
         try {
             $this->communication->save();
@@ -233,6 +222,9 @@ class Communication extends CommunicationList
     #[Renderless]
     public function setTo(Address $address): void
     {
+        $this->communication->communicatable_type = morph_alias(Address::class);
+        $this->communication->communicatable_id = $address->id;
+
         $this->communication->to = [
             implode(
                 "\n",
@@ -280,64 +272,44 @@ class Communication extends CommunicationList
             $this->attachments->fill($communication->getMedia('attachments'));
         }
 
-        $this->selectedPrintLayouts = [];
-
-        $this->js(<<<'JS'
-            $openModal('create-preview');
-        JS);
+        $this->openCreateDocumentsModal();
     }
 
     #[Renderless]
-    public function createDocuments(): ?BinaryFileResponse
+    public function createDocuments(): null|MediaStream|Media
     {
-        $communication = app(CommunicationModel::class)->query()
-            ->whereKey($this->communication->id)
-            ->with([
-                'media' => fn ($query) => $query->where('collection_name', 'attachments')
-                    ->select(['id', 'file_name']),
-            ])
-            ->first();
+        $response = $this->createDocumentFromItems(
+            resolve_static(CommunicationModel::class, 'query')
+                ->whereKey($this->communication->id)
+                ->first()
+        );
+        $this->loadData();
 
-        // create the documents
-        try {
-            /** @var PrintableView $file */
-            $file = Printing::make([
-                'model_type' => app(CommunicationModel::class)->getMorphClass(),
-                'model_id' => $this->communication->id,
-                'view' => 'communication',
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
+        return $response;
+    }
 
-            $filename = $file->getSubject() . '.pdf';
-            $file->savePDF($path = sys_get_temp_dir() . '/' . $filename);
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        return Arr::wrap($item->to);
+    }
 
-            return null;
-        }
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return $item->subject;
+    }
 
-        if ($this->selectedPrintLayouts['print']['communication'] ?? false) {
-            // TODO: add to print queue for spooler
-        }
+    protected function getHtmlBody(OffersPrinting $item): string
+    {
+        return $item->html_body ?? $item->text_body ?? '';
+    }
 
-        if ($this->selectedPrintLayouts['email']['communication'] ?? false) {
-            $this->dispatch('create', $communication)->to('edit-mail');
-        }
-
-        if ($this->selectedPrintLayouts['download']['communication'] ?? false) {
-            $headers = [
-                'Content-type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename=' . $filename,
-                'Pragma' => 'no-cache',
-                'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-                'Expires' => '0',
-            ];
-
-            return response()->download($path, $filename, $headers);
-        }
-
-        return null;
+    protected function getPrintLayouts(): array
+    {
+        return array_keys(
+            resolve_static(CommunicationModel::class, 'query')
+                ->whereKey($this->communication->id)
+                ->first(['id'])
+                ->resolvePrintViews()
+        );
     }
 }

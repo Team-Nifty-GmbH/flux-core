@@ -31,6 +31,16 @@ trait CreatesDocuments
         'force' => [],
     ];
 
+    abstract protected function getTo(OffersPrinting $item, array $documents): array;
+
+    abstract protected function getSubject(OffersPrinting $item): string;
+
+    abstract protected function getHtmlBody(OffersPrinting $item): string;
+
+    abstract protected function getPrintLayouts(): array;
+
+    abstract public function createDocuments(): null|MediaStream|Media;
+
     public function renderCreateDocumentsModal(): View
     {
         return view('flux::livewire.create-documents-modal');
@@ -49,7 +59,6 @@ trait CreatesDocuments
         JS);
     }
 
-    #[Renderless]
     protected function createDocumentFromItems(
         Collection|OffersPrinting $items,
         bool $async = false,
@@ -67,7 +76,7 @@ trait CreatesDocuments
         foreach ($items as $item) {
             match ($item) {
                 is_a($item, OffersPrinting::class, true) => $item->fresh(),
-                is_int($item) && $model => $item = app($model)->query()->whereKey($item)->first(),
+                is_int($item) && $model => $item = resolve_static($model, 'query')->whereKey($item)->first(),
                 default => null,
             };
 
@@ -91,7 +100,7 @@ trait CreatesDocuments
                 $isForce = in_array($createDocument, data_get($this->selectedPrintLayouts, 'force', []));
                 $isEmail = in_array($createDocument, data_get($this->selectedPrintLayouts, 'email', []));
 
-                if ((! $media && ($isDownload || $isPrint)) || $isForce || ! $async) {
+                if ((! $media && ($isDownload || $isPrint)) || $isForce || (! $async && ! $media)) {
                     try {
                         /** @var PrintableView $file */
                         $file = Printing::make([
@@ -144,7 +153,7 @@ trait CreatesDocuments
 
                 $mailAttachments[] = $this->getAttachments($item);
                 $mailMessages[] = [
-                    'to' => array_unique($this->getTo($item, $createDocuments)),
+                    'to' => $this->getTo($item, $createDocuments),
                     'cc' => $this->getCc($item),
                     'bcc' => $this->getBcc($item),
                     'subject' => $this->getSubject($item),
@@ -157,6 +166,7 @@ trait CreatesDocuments
                 ];
             }
         }
+
         if ($mailMessages) {
             $sessionKey = 'mail_' . Str::uuid()->toString();
             session()->put($sessionKey, $mailMessages);
@@ -164,7 +174,7 @@ trait CreatesDocuments
         }
 
         if ($downloadIds) {
-            $files = app(Media::class)->query()
+            $files = resolve_static(Media::class, 'query')
                 ->whereIntegerInRaw('id', $downloadIds)
                 ->get();
 
@@ -221,14 +231,4 @@ trait CreatesDocuments
     {
         return [];
     }
-
-    abstract protected function getTo(OffersPrinting $item, array $documents): array;
-
-    abstract protected function getSubject(OffersPrinting $item): string;
-
-    abstract protected function getHtmlBody(OffersPrinting $item): string;
-
-    abstract protected function getPrintLayouts(): array;
-
-    abstract public function createDocuments(): null|MediaStream|Media;
 }
