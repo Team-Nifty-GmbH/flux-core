@@ -6,7 +6,6 @@ export default function($wire, $refs) {
     return {
         signaturePad: null,
         isEmpty: true,
-        tempData: null,
         prevWidth: 700,
         debounceId: null,
         error: false,
@@ -37,7 +36,6 @@ export default function($wire, $refs) {
         },
         clear() {
             this.signaturePad.clear();
-            this.tempData = null;
             this.isEmpty = true;
         },
         get iconName() {
@@ -50,10 +48,6 @@ export default function($wire, $refs) {
         strokeHandler() {
             if (this.isEmpty) {
                 this.isEmpty = false;
-            }
-            // save temp data on stroke end for resize canvas purposes
-            if (!this.signaturePad.isEmpty()) {
-                this.tempData = this.signaturePad.toDataURL();
             }
         },
         async upload(_) {
@@ -87,13 +81,11 @@ export default function($wire, $refs) {
         resizeCanvas() {
             if (window.innerWidth < 700) {
                 // going to small screen - resize canvas to fit the screen
-                const width = $refs.canvas.offsetWidth;
-                const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                $refs.canvas.width = (width * ratio) - (this.prevWidth - window.innerWidth);
-                $refs.canvas.height = $refs.canvas.offsetHeight * ratio;
+                const width = $refs.canvas.width;
+                $refs.canvas.width = (width) - (this.prevWidth - window.innerWidth);
                 this.prevWidth = window.innerWidth;
                 const ctx = $refs.canvas.getContext('2d');
-                ctx.scale(ratio, ratio);
+                ctx.scale(1, 1);
                 ctx.fillStyle = 'rgba(255, 255, 255, 1)';
                 ctx.fillRect(0, 0, $refs.canvas.width, $refs.canvas.height);
                 // redraw signature on resize - since canvas removes all data on resize
@@ -101,11 +93,9 @@ export default function($wire, $refs) {
             } else if (window.innerWidth >= 700 && this.prevWidth !== 700) {
                 // going to big screen - resize canvas to default size
                 this.prevWidth = 700;
-                const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                $refs.canvas.width = 500 * ratio;
-                $refs.canvas.height = $refs.canvas.offsetHeight * ratio;
+                $refs.canvas.width = 500;
                 const ctx = $refs.canvas.getContext('2d');
-                ctx.scale(ratio, ratio);
+                ctx.scale(1, 1);
                 ctx.fillStyle = 'rgba(255, 255, 255, 1)';
                 ctx.fillRect(0, 0, $refs.canvas.width, $refs.canvas.height);
                 this.debounce();
@@ -115,11 +105,11 @@ export default function($wire, $refs) {
             if (this.debounceId) {
                 clearTimeout(this.debounceId);
             }
-            this.debounceId = setTimeout(this.refreshCanvas.bind(this), 500);
+            this.debounceId = setTimeout(this.refreshCanvas.bind(this), 200);
         },
         async refreshCanvas() {
-            if (!this.signaturePad.isEmpty() && this.tempData !== null) {
-                await this.signaturePad.fromDataURL(this.tempData);
+            if (!this.signaturePad.isEmpty()) {
+                this.clear();
             }
         }
     };
