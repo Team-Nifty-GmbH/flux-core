@@ -53,20 +53,7 @@ export default function($wire, $refs) {
         async upload(_) {
             const res = await $wire.save();
             if (res) {
-                this.id = $wire.entangle('signature.id');
-                this.error = false;
-                // clear buttons for save and clean
-                this.isEmpty = true;
-                // signature pad disappears after successful upload - x-show
-                if (this.debounceId !== null) {
-                    clearTimeout(this.debounceId);
-                }
-                // remove resize event listener
-                if (this.resizeFuncRef !== null) {
-                    window.removeEventListener('resize', this.resizeFuncRef);
-                }
-                // disable signature pad on successful upload
-                this.signaturePad.off();
+                window.location.reload();
             } else {
                 this.error = true;
             }

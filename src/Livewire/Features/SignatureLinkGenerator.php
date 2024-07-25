@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire;
+namespace FluxErp\Livewire\Features;
 
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\SignablePrintView;
@@ -59,7 +59,7 @@ class SignatureLinkGenerator extends Component
 
     public function render(): View
     {
-        return view('flux::livewire.signature-link-generator');
+        return view('flux::livewire.features.signature-link-generator');
     }
 
     protected function getModel(): OffersPrinting

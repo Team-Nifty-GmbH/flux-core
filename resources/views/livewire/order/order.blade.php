@@ -668,7 +668,7 @@
                                                 @endforeach
                                             </x-dropdown>
                                         </div>
-                                        <livewire:signature-link-generator :model-type="\FluxErp\Models\Order::class" wire:model="order.id"/>
+                                        <livewire:features.signature-link-generator :model-type="\FluxErp\Models\Order::class" wire:model="order.id"/>
                                     @endif
                                     @foreach($additionalModelActions as $modelAction)
                                         {{$modelAction}}

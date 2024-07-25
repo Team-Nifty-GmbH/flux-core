@@ -2,7 +2,7 @@
 
 use FluxErp\Http\Controllers\AssetController;
 use FluxErp\Http\Controllers\LoginLinkController;
-use FluxErp\Livewire\Order\SignaturePublicLink;
+use FluxErp\Livewire\Features\SignaturePublicLink;
 use Illuminate\Support\Facades\Route;
 
 /*

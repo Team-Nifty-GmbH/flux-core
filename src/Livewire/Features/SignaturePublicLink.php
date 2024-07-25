@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire\Order;
+namespace FluxErp\Livewire\Features;
 
 use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\Media;
@@ -31,6 +31,8 @@ class SignaturePublicLink extends Component
 
     #[Url]
     public ?string $model = null;
+
+    public $signatureUpload = null;
 
     public function mount(): void
     {
@@ -69,6 +71,11 @@ class SignaturePublicLink extends Component
             }
         }
 
+        activity()
+            ->performedOn($this->getModel())
+            ->event('signature_added')
+            ->log(__(':view signature has been added', ['view' => $this->printView]));
+
         return true;
     }
 
@@ -80,7 +87,7 @@ class SignaturePublicLink extends Component
         PrintableView::setLayout(null);
 
         return Blade::render(
-            '<div>{!! $view !!} @include(\'flux::livewire.order.public-link\')</div>',
+            '<div>{!! $view !!} @include(\'flux::livewire.features.signature-public-link\')</div>',
             [
                 'view' => $this->getModel()->print()->renderView($this->getPrintClass()),
             ]

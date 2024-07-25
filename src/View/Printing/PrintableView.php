@@ -153,6 +153,19 @@ abstract class PrintableView extends Component
             $this->beforePrinting();
         }
 
+        if (! $this->preview) {
+            $model = $this->getModel();
+            activity()
+                ->performedOn($model)
+                ->event('pdf_created')
+                ->log(
+                    __(
+                        ':view PDF created',
+                        ['view' => data_get(array_flip($model->resolvePrintViews()), static::class)]
+                    )
+                );
+        }
+
         return $this;
     }
 
