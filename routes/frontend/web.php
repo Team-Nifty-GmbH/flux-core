@@ -30,7 +30,6 @@ use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
-use FluxErp\Livewire\Order\PublicLink;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Livewire\Product\ProductList;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumber;

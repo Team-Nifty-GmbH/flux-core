@@ -5,7 +5,6 @@ namespace FluxErp\View\Printing\Order;
 use FluxErp\States\Order\Draft;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 
 class Invoice extends OrderView
 {

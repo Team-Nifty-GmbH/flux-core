@@ -6,7 +6,6 @@ use FluxErp\Models\Order;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Str;
 
 class OrderView extends PrintableView
 {

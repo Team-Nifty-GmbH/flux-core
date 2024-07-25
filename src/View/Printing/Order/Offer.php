@@ -2,7 +2,9 @@
 
 namespace FluxErp\View\Printing\Order;
 
-class Offer extends OrderView
+use FluxErp\Contracts\SignablePrintView;
+
+class Offer extends OrderView implements SignablePrintView
 {
     public function getSubject(): string
     {

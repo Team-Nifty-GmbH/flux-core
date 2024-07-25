@@ -120,7 +120,7 @@
 
             body {
                 max-width: 80rem;
-                margin: 25mm auto 0;
+                margin: 0 auto !important;
                 padding: 20mm;
                 background: white;
                 box-shadow: 0 0 10px rgba(0,0,0,0.5);
@@ -137,5 +137,15 @@
     <x-print.header />
     <x-print.footer />
     {!! $slot !!}
+    @if($signaturePath)
+        <div class="flex justify-end mt-10">
+            <div>
+                <img
+                    src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents($signaturePath)) }}"
+                    alt="{{ __('Signature') }}"
+                />
+            </div>
+        </div>
+    @endif
 </body>
 </html>

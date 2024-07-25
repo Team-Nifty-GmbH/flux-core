@@ -1,13 +1,13 @@
-<div>
-    @if($signedUrls)
+<div class="text-sm">
+    @if($signedViews)
         <div class="mb-4 flex flex-col">
             <p>{{__('Signed Documents')}}:</p>
-            @foreach($signedUrls as $url)
-                <p class="mt-2">{{__($url)}}</p>
+            @foreach($signedViews as $signedView)
+                <p class="mt-2">{{__($signedView)}}</p>
             @endforeach
         </div>
     @endif
-    @if($unsignedDocuments)
+    @if($unsignedViews)
         <div class="dropdown-full-w">
             <x-dropdown width="w-full">
                 <x-slot name="trigger">
@@ -15,16 +15,16 @@
                         {{ __('Add Signature') }}
                     </x-button>
                 </x-slot>
-                @foreach($unsignedDocuments as $doc)
+                @foreach($unsignedViews as $unsignedView)
                     <x-dropdown.item
-                        wire:click="setPublicLink('{{$doc}}')">
-                        {{ __($doc) }}
+                        wire:click="setPublicLink('{{$unsignedView}}')">
+                        {{ __($unsignedView) }}
                     </x-dropdown.item>
                 @endforeach
             </x-dropdown>
         </div>
     @endif
-    @if(!empty($generatedUrls))
+    @if($generatedUrls)
         <div class="mt-4">
             @foreach($generatedUrls as $label => $link)
                 <x-input
