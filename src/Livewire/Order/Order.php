@@ -97,15 +97,6 @@ class Order extends OrderPositionList
     #[Url]
     public string $tab = 'order.order-positions';
 
-    public function createDocuments(): null|MediaStream|Media
-    {
-        return $this->createDocumentFromItems(
-            resolve_static(OrderModel::class, 'query')
-                ->whereKey($this->order->id)
-                ->first()
-        );
-    }
-
     public function getListeners(): array
     {
         return array_merge(
@@ -114,20 +105,6 @@ class Order extends OrderPositionList
                 'order:add-products' => 'addProducts',
             ]
         );
-    }
-
-    #[Renderless]
-    public function addProducts(array|int $products): void
-    {
-        foreach (Arr::wrap($products) as $product) {
-            if (is_array($product)) {
-                $this->orderPosition->fill($product);
-            } else {
-                $this->orderPosition->product_id = $product;
-            }
-
-            $this->quickAdd();
-        }
     }
 
     public function mount(?string $id = null): void
@@ -557,11 +534,69 @@ class Order extends OrderPositionList
         );
     }
 
+    #[Renderless]
     public function updatedOrderState(): void
     {
         $this->getAvailableStates('state');
+    }
 
-        $this->skipRender();
+    #[Renderless]
+    public function showProduct(Product $product): void
+    {
+        $this->js(<<<JS
+            \$openDetailModal('{$product->getUrl()}');
+        JS);
+    }
+
+    public function takeOrderPositions(array $positionIds): void
+    {
+        $orderPositions = resolve_static(OrderPosition::class, 'query')
+            ->whereIntegerInRaw('order_positions.id', $positionIds)
+            ->where('order_positions.order_id', $this->order->id)
+            ->leftJoin('order_positions AS descendants', 'order_positions.id', '=', 'descendants.origin_position_id')
+            ->selectRaw(
+                'order_positions.id' .
+                ', order_positions.amount' .
+                ', order_positions.name' .
+                ', order_positions.description' .
+                ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount' .
+                ', order_positions.amount - SUM(COALESCE(descendants.amount, 0)) AS totalAmount'
+            )
+            ->groupBy([
+                'order_positions.id',
+                'order_positions.amount',
+                'order_positions.name',
+                'order_positions.description',
+            ])
+            ->where('order_positions.is_bundle_position', false)
+            ->havingRaw('order_positions.amount > descendantAmount')
+            ->get();
+
+        foreach ($orderPositions as $orderPosition) {
+            $this->replicateOrder->order_positions[] = [
+                'id' => $orderPosition->id,
+                'amount' => $orderPosition->totalAmount,
+                'name' => $orderPosition->name,
+                'description' => $orderPosition->description,
+            ];
+        }
+    }
+
+    #[Renderless]
+    public function deleteOrderPosition(): void
+    {
+        $selected = $this->selected;
+        $this->selected = [$this->orderPositionIndex];
+
+        $this->deleteSelectedOrderPositions();
+
+        $this->selected = $selected;
+    }
+
+    #[Renderless]
+    public function recalculateReplicateOrderPositions(): void
+    {
+        $this->replicateOrder->order_positions = array_values($this->replicateOrder->order_positions);
     }
 
     #[Renderless]
@@ -638,6 +673,20 @@ class Order extends OrderPositionList
     }
 
     #[Renderless]
+    public function addProducts(array|int $products): void
+    {
+        foreach (Arr::wrap($products) as $product) {
+            if (is_array($product)) {
+                $this->orderPosition->fill($product);
+            } else {
+                $this->orderPosition->product_id = $product;
+            }
+
+            $this->quickAdd();
+        }
+    }
+
+    #[Renderless]
     public function changedProductId(?Product $product = null): void
     {
         $this->orderPosition->fillFormProduct($product);
@@ -689,17 +738,6 @@ class Order extends OrderPositionList
         $this->reset('selected');
     }
 
-    #[Renderless]
-    public function deleteOrderPosition(): void
-    {
-        $selected = $this->selected;
-        $this->selected = [$this->orderPositionIndex];
-
-        $this->deleteSelectedOrderPositions();
-
-        $this->selected = $selected;
-    }
-
     public function fillSchedule(): void
     {
         $schedule = resolve_static(Schedule::class, 'query')
@@ -745,51 +783,13 @@ class Order extends OrderPositionList
         return true;
     }
 
-    public function showProduct(Product $product): void
+    public function createDocuments(): null|MediaStream|Media
     {
-        $this->js(<<<JS
-            \$openDetailModal('{$product->getUrl()}');
-        JS);
-    }
-
-    public function takeOrderPositions(array $positionIds): void
-    {
-        $orderPositions = resolve_static(OrderPosition::class, 'query')
-            ->whereIntegerInRaw('order_positions.id', $positionIds)
-            ->where('order_positions.order_id', $this->order->id)
-            ->leftJoin('order_positions AS descendants', 'order_positions.id', '=', 'descendants.origin_position_id')
-            ->selectRaw(
-                'order_positions.id' .
-                ', order_positions.amount' .
-                ', order_positions.name' .
-                ', order_positions.description' .
-                ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount' .
-                ', order_positions.amount - SUM(COALESCE(descendants.amount, 0)) AS totalAmount'
-            )
-            ->groupBy([
-                'order_positions.id',
-                'order_positions.amount',
-                'order_positions.name',
-                'order_positions.description',
-            ])
-            ->where('order_positions.is_bundle_position', false)
-            ->havingRaw('order_positions.amount > descendantAmount')
-            ->get();
-
-        foreach ($orderPositions as $orderPosition) {
-            $this->replicateOrder->order_positions[] = [
-                'id' => $orderPosition->id,
-                'amount' => $orderPosition->totalAmount,
-                'name' => $orderPosition->name,
-                'description' => $orderPosition->description,
-            ];
-        }
-    }
-
-    #[Renderless]
-    public function recalculateReplicateOrderPositions(): void
-    {
-        $this->replicateOrder->order_positions = array_values($this->replicateOrder->order_positions);
+        return $this->createDocumentFromItems(
+            resolve_static(OrderModel::class, 'query')
+                ->whereKey($this->order->id)
+                ->first()
+        );
     }
 
     protected function getAvailableStates(array|string $fieldNames): void
@@ -816,6 +816,35 @@ class Order extends OrderPositionList
                     )
                 )
                 ->toArray();
+        }
+    }
+
+    protected function fetchOrder(int $id): void
+    {
+        $order = resolve_static(OrderModel::class, 'query')
+            ->whereKey($id)
+            ->with([
+                'priceList:id,name,is_net',
+                'addresses',
+                'client:id,name',
+                'contact.media',
+                'contact.contactBankConnections:id,contact_id,iban',
+                'currency:id,iso,name,symbol',
+                'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
+            ])
+            ->firstOrFail()
+            ->append('avatar_url');
+        $this->printLayouts = array_keys($order->resolvePrintViews());
+
+        $this->order->fill($order);
+        $this->order->users = $order->users->pluck('id')->toArray();
+
+        $invoice = $order->invoice();
+        if ($invoice) {
+            $this->order->invoice = [
+                'url' => $invoice->getUrl(),
+                'mime_type' => $invoice->mime_type,
+            ];
         }
     }
 
@@ -924,23 +953,6 @@ class Order extends OrderPositionList
         );
     }
 
-    protected function getTo(OffersPrinting $item, array $documents): array
-    {
-        $to = [];
-
-        // add invoice address email if an invoice is being send
-        $to[] = in_array('invoice', $documents) && $item->contact->invoiceAddress
-            ? $item->contact->invoiceAddress->email_primary
-            : $item->contact->mainAddress->email_primary;
-
-        // add primary email address if more than just the invoice is added
-        if (array_diff($documents, ['invoice'])) {
-            $to[] = $item->contact->mainAddress->email_primary;
-        }
-
-        return array_values(array_unique(array_filter($to)));
-    }
-
     protected function getResultFromQuery(Builder $query): array
     {
         $tree = to_flat_tree($query->get()->toArray());
@@ -962,35 +974,6 @@ class Order extends OrderPositionList
         }
 
         return $tree;
-    }
-
-    protected function fetchOrder(int $id): void
-    {
-        $order = resolve_static(OrderModel::class, 'query')
-            ->whereKey($id)
-            ->with([
-                'priceList:id,name,is_net',
-                'addresses',
-                'client:id,name',
-                'contact.media',
-                'contact.contactBankConnections:id,contact_id,iban',
-                'currency:id,iso,name,symbol',
-                'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
-            ])
-            ->firstOrFail()
-            ->append('avatar_url');
-        $this->printLayouts = array_keys($order->resolvePrintViews());
-
-        $this->order->fill($order);
-        $this->order->users = $order->users->pluck('id')->toArray();
-
-        $invoice = $order->invoice();
-        if ($invoice) {
-            $this->order->invoice = [
-                'url' => $invoice->getUrl(),
-                'mime_type' => $invoice->mime_type,
-            ];
-        }
     }
 
     protected function getSelectedActions(): array
@@ -1042,5 +1025,22 @@ class Order extends OrderPositionList
                 ->first(['id', 'order_type_id'])
                 ->resolvePrintViews()
         );
+    }
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        $to = [];
+
+        // add invoice address email if an invoice is being send
+        $to[] = in_array('invoice', $documents) && $item->contact->invoiceAddress
+            ? $item->contact->invoiceAddress->email_primary
+            : $item->contact->mainAddress->email_primary;
+
+        // add primary email address if more than just the invoice is added
+        if (array_diff($documents, ['invoice'])) {
+            $to[] = $item->contact->mainAddress->email_primary;
+        }
+
+        return array_values(array_unique(array_filter($to)));
     }
 }
