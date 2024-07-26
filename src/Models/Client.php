@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Laravel\Scout\EngineManager;
 use Laravel\Scout\Engines\Engine;
-use Laravel\Scout\Searchable;
+use FluxErp\Traits\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 
 class Client extends Model implements HasMedia

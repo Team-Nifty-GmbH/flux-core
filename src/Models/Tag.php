@@ -2,7 +2,7 @@
 
 namespace FluxErp\Models;
 
-use Laravel\Scout\Searchable;
+use FluxErp\Traits\Scout\Searchable;
 use Spatie\Tags\Tag as BaseTag;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
