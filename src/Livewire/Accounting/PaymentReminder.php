@@ -3,21 +3,28 @@
 namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\PaymentReminder\CreatePaymentReminder;
-use FluxErp\Actions\Printing;
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\DataTables\OrderList;
+use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentReminder as PaymentReminderModel;
 use FluxErp\Models\PaymentReminderText;
+use FluxErp\Traits\Livewire\CreatesDocuments;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Laravel\SerializableClosure\SerializableClosure;
+use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PaymentReminder extends OrderList
 {
+    use CreatesDocuments;
+
+    protected ?string $includeBefore = 'flux::livewire.create-documents-modal';
+
     public array $enabledCols = [
         'payment_reminder_current_level',
         'payment_reminder_next_date',
@@ -53,30 +60,119 @@ class PaymentReminder extends OrderList
             DataTableButton::make()
                 ->color('primary')
                 ->label(__('Create Payment Reminder'))
-                ->wireClick('createNextPaymentReminder'),
+                ->wireClick('openCreateDocumentsModal'),
         ];
     }
 
-    public function createNextPaymentReminder(): void
+    protected function getAttachments(OffersPrinting $item): array
+    {
+        return [
+            'id' => $item->order->invoice()->id,
+            'name' => $item->order->invoice()->file_name,
+        ];
+    }
+
+    protected function getCommunicatableType(OffersPrinting $item): string
+    {
+        return morph_alias(Order::class);
+    }
+
+    protected function getCommunicatableId(OffersPrinting $item): int
+    {
+        return $item->order_id;
+    }
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        return Arr::wrap($item->getPaymentReminderText()?->mail_to
+            ?: $item->order->contact->invoiceAddress->email_primary
+        );
+    }
+
+    protected function getCc(OffersPrinting $item): array
+    {
+        return Arr::wrap($item->getPaymentReminderText()?->mail_cc);
+    }
+
+    protected function getCreateAttachmentArray(OffersPrinting $item, string $view): array
+    {
+        return [
+            'model_type' => $item->getMorphClass(),
+            'model_id' => $item->getKey(),
+            'view' => $view,
+            'name' => __($view),
+            'attach_relation' => 'order',
+        ];
+    }
+
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return html_entity_decode($item->getPaymentReminderText()?->mail_subject ?? '') ?:
+            __(
+                'Payment Reminder :level for invoice :invoice_number',
+                [
+                    'level' => $item->reminder_level,
+                    'invoice_number' => $item->order->invoice_number,
+                ]
+            );
+    }
+
+    protected function getHtmlBody(OffersPrinting $item): string
+    {
+        return html_entity_decode(
+            $item->getPaymentReminderText()?->mail_body
+                    ?? $item->getPaymentReminderText()?->reminder_body
+                    ?? ''
+        );
+    }
+
+    protected function getBladeParameters(OffersPrinting $item): array|SerializableClosure|null
+    {
+        return new SerializableClosure(
+            fn () => [
+                'paymentReminder' => resolve_static(PaymentReminderModel::class, 'query')
+                    ->whereKey($item->getKey())
+                    ->first(),
+            ]
+        );
+    }
+
+    protected function getPrintLayouts(): array
+    {
+        return [
+            'payment-reminder',
+        ];
+    }
+
+    public function createDocuments(): null|MediaStream|Media
     {
         $orders = $this->getSelectedModels();
 
-        $mailMessages = [];
+        try {
+            resolve_static(CreatePaymentReminder::class, 'canPerformAction', [true]);
+        } catch (UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return null;
+        }
+
+        $documents = collect();
+        $reminderTextExists = [];
         foreach ($orders as $order) {
             try {
                 $paymentReminder = CreatePaymentReminder::make([
                     'order_id' => $order->id,
                 ])
-                    ->checkPermission()
                     ->validate()
                     ->execute();
 
-                $paymentReminderText = app(PaymentReminderText::class)
-                    ->where('reminder_level', '<=', $paymentReminder->reminder_level)
-                    ->orderBy('reminder_level', 'desc')
-                    ->first();
+                $reminderTextExists[$paymentReminder->reminder_level] ??=
+                    resolve_static(PaymentReminderText::class, 'query')
+                        ->where('reminder_level', '<=', $paymentReminder->reminder_level)
+                        ->orderBy('reminder_level', 'desc')
+                        ->exists();
 
-                if (! $paymentReminderText) {
+                if (! data_get($reminderTextExists, $paymentReminder->reminder_level)) {
                     $this->notification()
                         ->error(
                             __(
@@ -91,58 +187,17 @@ class PaymentReminder extends OrderList
                     continue;
                 }
 
-                $paymentReminderPdf = Printing::make([
-                    'model_type' => app(PaymentReminderModel::class)->getMorphClass(),
-                    'model_id' => $paymentReminder->id,
-                    'view' => 'payment-reminder',
-                ])
-                    ->validate()
-                    ->execute()
-                    ->attachToModel($order);
-
-                $mailMessages[] = [
-                    'to' => Arr::wrap($paymentReminderText->mail_to
-                        ?: $order->contact->invoiceAddress->email_primary
-                    ),
-                    'cc' => Arr::wrap($paymentReminderText->mail_cc),
-                    'subject' => html_entity_decode($paymentReminderText->mail_subject) ?:
-                        __(
-                            'Payment Reminder :level for invoice :invoice-number',
-                            [
-                                'level' => $paymentReminder->reminder_level,
-                                'invoice-number' => $order->invoice_number,
-                            ]
-                        ),
-                    'attachments' => [
-                        [
-                            'name' => $paymentReminderPdf->file_name,
-                            'id' => $paymentReminderPdf->id,
-                        ],
-                        [
-                            'name' => $order->invoice()->file_name,
-                            'id' => $order->invoice()->id,
-                        ],
-                    ],
-                    'html_body' => html_entity_decode(
-                        $paymentReminderText->mail_body ?? $paymentReminderText->reminder_body
-                    ),
-                    'blade_parameters_serialized' => true,
-                    'blade_parameters' => serialize(['paymentReminder' => $paymentReminder]),
-                    'communicatable_type' => app(Order::class)->getMorphClass(),
-                    'communicatable_id' => $order->id,
-                ];
-            } catch (ValidationException|UnauthorizedException $e) {
+                $documents->push($paymentReminder);
+            } catch (ValidationException $e) {
                 exception_to_notifications($e, $this);
             }
         }
 
-        if ($mailMessages) {
-            $sessionKey = 'mail_' . Str::uuid()->toString();
-            session()->put($sessionKey, count($mailMessages) > 1 ? $mailMessages : $mailMessages[0]);
-            $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
-        }
+        $response = $this->createDocumentFromItems($documents, true);
 
-        $this->selected = [];
         $this->loadData();
+        $this->selected = [];
+
+        return $response;
     }
 }

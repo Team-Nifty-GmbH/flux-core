@@ -55,6 +55,11 @@ class AddressList extends BaseDataTable
         return $builder->with('contact.media');
     }
 
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['contact_id']);
+    }
+
     protected function itemToArray($item): array
     {
         $returnArray = parent::itemToArray($item);
