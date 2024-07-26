@@ -47,6 +47,7 @@ class ProductList extends Component
 
         $result = $builder
             ->webshop()
+            ->when(! $this->search, fn (Builder $query) => $query->whereNull('parent_id'))
             ->when($this->orderBy, function (Builder $query, string $orderBy) {
                 $query->orderByDesc($orderBy);
             })

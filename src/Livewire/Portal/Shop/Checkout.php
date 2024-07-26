@@ -5,9 +5,11 @@ namespace FluxErp\Livewire\Portal\Shop;
 use FluxErp\Actions\Comment\CreateComment;
 use FluxErp\Events\PortalOrderCreated;
 use FluxErp\Livewire\Forms\AddressForm;
+use FluxErp\Mail\OrderConfirmation;
 use FluxErp\Models\Address;
 use FluxErp\Models\Order;
 use FluxErp\Rulesets\Address\PostalAddressRuleset;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Renderless;
@@ -108,6 +110,11 @@ class Checkout extends Cart
 
         $this->notification()->success('Order placed successfully!');
         event(new PortalOrderCreated($order));
+
+        if (auth('address')->check()) {
+            Mail::to(auth('address')->user())->queue(new OrderConfirmation($order));
+        }
+
         $this->redirect(route('portal.checkout-finish'), true);
     }
 }

@@ -37,9 +37,6 @@ class Cart extends Component
     #[Rule('required_if:selectedWatchlist,0')]
     public ?string $watchlistName = null;
 
-    #[Locked]
-    public ?int $cartId = null;
-
     public function mount(): void
     {
         $this->getWatchLists();
@@ -50,8 +47,6 @@ class Cart extends Component
     {
         return [
             'echo-private:' . $this->cart()->broadcastChannel() . ',.CartUpdated' => 'refresh',
-            'echo-private:' . app(CartModel::class)->broadcastChannel()
-                . $this->cartId . ',.CartDeleted' => 'refresh',
             'cart:add' => 'add',
             'cart:remove' => 'remove',
             'cart:refresh' => 'refresh',
@@ -226,10 +221,7 @@ class Cart extends Component
     #[Computed(persist: true)]
     public function cart(): ?CartModel
     {
-        $cart = cart();
-        $this->cartId = $cart->id;
-
-        return $cart;
+        return cart();
     }
 
     protected function getWatchLists(): void

@@ -245,7 +245,6 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
             })
             ->where('is_active_export_to_web_shop', true)
             ->where('is_active', true)
-            ->whereNull('parent_id')
             ->select(array_map(
                 fn (string $column) => $this->getTable() . '.' . $column,
                 [
