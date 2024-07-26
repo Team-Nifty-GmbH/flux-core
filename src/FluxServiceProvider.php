@@ -16,6 +16,7 @@ use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
+use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
@@ -151,6 +152,20 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function registerMarcos(): void
     {
+        if (! Arr::hasMacro('sortByPattern')) {
+            Arr::macro('sortByPattern', function (array $array, array $pattern) {
+                $sortedAttributes = [];
+                foreach ($pattern as $key) {
+                    if (array_key_exists($key, $array)) {
+                        $sortedAttributes[$key] = Arr::pull($array, $key);
+                    }
+                }
+
+                // Merge the sorted attributes with the remaining attributes
+                return array_merge($sortedAttributes, $array);
+            });
+        }
+
         if (! Str::hasMacro('iban')) {
             Str::macro('iban', function (?string $iban) {
                 return trim(chunk_split($iban ?? '', 4, ' '));
@@ -237,9 +252,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views/vendor/wireui', 'wireui');
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
-        $this->mergeConfigFrom(__DIR__ . '/../config/scout.php', 'scout');
         config(['auth' => require __DIR__ . '/../config/auth.php']);
-        config(['activitylog' => require __DIR__ . '/../config/activitylog.php']);
+        config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
         config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
         config(['wireui.heroicons.alias' => 'heroicons']);
         config(['wireui.modal' => [
@@ -252,26 +266,26 @@ class FluxServiceProvider extends ServiceProvider
         config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
         config([
             'scout.meilisearch.index-settings' => [
-                Address::class => [
+                resolve_static(Address::class, 'class') => [
                     'filterableAttributes' => [
                         'is_main_address',
                         'contact_id',
                     ],
                     'sortableAttributes' => ['*'],
                 ],
-                Category::class => [
+                resolve_static(Category::class, 'class') => [
                     'filterableAttributes' => [
                         'model_type',
                     ],
                 ],
-                LedgerAccount::class => [
+                resolve_static(LedgerAccount::class, 'class') => [
                     'filterableAttributes' => [
                         'ledger_account_type_enum',
                         'is_automatic',
                     ],
                     'sortableAttributes' => ['*'],
                 ],
-                Order::class => [
+                resolve_static(Order::class, 'class') => [
                     'filterableAttributes' => [
                         'parent_id',
                         'contact_id',
@@ -279,7 +293,7 @@ class FluxServiceProvider extends ServiceProvider
                     ],
                     'sortableAttributes' => ['*'],
                 ],
-                Permission::class => [
+                resolve_static(Permission::class, 'class') => [
                     'filterableAttributes' => [
                         'guard_name',
                     ],
@@ -287,33 +301,33 @@ class FluxServiceProvider extends ServiceProvider
                         'name',
                     ],
                 ],
-                Product::class => [
+                resolve_static(Product::class, 'class') => [
                     'filterableAttributes' => [
                         'is_active',
                         'parent_id',
                     ],
                     'sortableAttributes' => ['*'],
                 ],
-                Project::class => [
+                resolve_static(Project::class, 'class') => [
                     'filterableAttributes' => [
                         'parent_id',
                         'state',
                     ],
                     'sortableAttributes' => ['*'],
                 ],
-                SerialNumber::class => [
+                resolve_static(SerialNumber::class, 'class') => [
                     'filterableAttributes' => [
                         'address_id',
                     ],
                 ],
-                Task::class => [
+                resolve_static(Task::class, 'class') => [
                     'filterableAttributes' => [
                         'project_id',
                         'state',
                     ],
                     'sortableAttributes' => ['*'],
                 ],
-                Ticket::class => [
+                resolve_static(Ticket::class, 'class') => [
                     'filterableAttributes' => [
                         'authenticatable_type',
                         'authenticatable_id',
@@ -321,7 +335,7 @@ class FluxServiceProvider extends ServiceProvider
                     ],
                     'sortableAttributes' => ['*'],
                 ],
-                User::class => [
+                resolve_static(User::class, 'class') => [
                     'filterableAttributes' => [
                         'is_active',
                     ],

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Scout\Searchable;
+use FluxErp\Traits\Scout\Searchable;
 use TeamNiftyGmbH\DataTable\Casts\Money;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
