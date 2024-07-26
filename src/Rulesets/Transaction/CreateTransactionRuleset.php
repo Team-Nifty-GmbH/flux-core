@@ -22,28 +22,28 @@ class CreateTransactionRuleset extends FluxRuleset
             'bank_connection_id' => [
                 'required',
                 'integer',
-                new ModelExists(BankConnection::class),
+                app(ModelExists::class, ['model' => BankConnection::class]),
             ],
             'currency_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Currency::class),
+                app(ModelExists::class, ['model' => Currency::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Transaction::class),
+                app(ModelExists::class, ['model' => Transaction::class]),
             ],
             'order_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'value_date' => 'required|date_format:Y-m-d',
             'booking_date' => 'required|date_format:Y-m-d',
             'amount' => [
                 'required',
-                new Numeric(),
+                app(Numeric::class),
             ],
             'purpose' => 'string|nullable',
             'type' => 'string|nullable',
@@ -52,7 +52,7 @@ class CreateTransactionRuleset extends FluxRuleset
             'counterpart_iban' => [
                 'string',
                 'nullable',
-                new Iban(),
+                app(Iban::class),
             ],
             'counterpart_bic' => 'string|nullable',
             'counterpart_bank_name' => 'string|nullable',

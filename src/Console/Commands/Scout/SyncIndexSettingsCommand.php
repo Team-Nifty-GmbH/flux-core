@@ -47,7 +47,7 @@ class SyncIndexSettingsCommand extends BaseSyncIndexSettingsCommand
                     }
 
                     if (class_exists($name)) {
-                        $model = new $name;
+                        $model = app($name);
                     }
 
                     $uses = class_uses_recursive($model);

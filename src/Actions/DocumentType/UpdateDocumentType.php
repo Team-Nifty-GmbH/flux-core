@@ -16,7 +16,7 @@ class UpdateDocumentType extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateDocumentTypeRequest())->rules();
+        $this->rules = app(UpdateDocumentTypeRequest::class)->rules();
     }
 
     public static function models(): array

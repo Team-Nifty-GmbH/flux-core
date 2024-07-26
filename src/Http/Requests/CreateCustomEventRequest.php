@@ -18,12 +18,12 @@ class CreateCustomEventRequest extends BaseFormRequest
             'model_type' => [
                 'string',
                 'nullable',
-                new ClassExists(instanceOf: Model::class),
+                app(ClassExists::class, ['instanceOf' => Model::class]),
             ],
             'model_id' => [
                 'required_with:model_type',
                 'integer',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
         ];
     }

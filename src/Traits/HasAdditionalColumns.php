@@ -279,7 +279,7 @@ trait HasAdditionalColumns
      */
     public function setFallbackValue(string $key, mixed $value = null): self
     {
-        ($this->fallbackValues ??= new Collection)->put($key, $value);
+        ($this->fallbackValues ??= collect())->put($key, $value);
 
         return $this;
     }
@@ -701,7 +701,7 @@ trait HasAdditionalColumns
             return $this->metaChanges;
         }
 
-        return $this->metaChanges = new Collection;
+        return $this->metaChanges = new Collection();
     }
 
     /**

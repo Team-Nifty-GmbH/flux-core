@@ -17,7 +17,7 @@ class DocumentTypeController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new DocumentType();
+        $this->model = app(DocumentType::class);
     }
 
     public function create(CreateDocumentTypeRequest $request, DocumentTypeService $documentTypeService): JsonResponse

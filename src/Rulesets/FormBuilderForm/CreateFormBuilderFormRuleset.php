@@ -17,12 +17,12 @@ class CreateFormBuilderFormRuleset extends FluxRuleset
             'model_type' => [
                 'required_with:model_id',
                 'string',
-                new MorphClassExists(),
+                app(MorphClassExists::class),
             ],
             'model_id' => [
                 'required_with:model_type',
                 'integer',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',

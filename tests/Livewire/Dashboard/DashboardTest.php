@@ -21,7 +21,7 @@ class DashboardTest extends BaseSetup
     {
         parent::setUp();
 
-        $this->components[] = new class extends Component
+        $this->components[] = new class() extends Component
         {
             use Widgetable;
 
@@ -44,7 +44,7 @@ class DashboardTest extends BaseSetup
             }
         };
 
-        $this->components[] = new class extends Component
+        $this->components[] = new class() extends Component
         {
             use Widgetable;
 

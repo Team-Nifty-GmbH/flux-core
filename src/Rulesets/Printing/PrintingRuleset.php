@@ -16,12 +16,12 @@ class PrintingRuleset extends FluxRuleset
             'model_type' => [
                 'required',
                 'string',
-                new MorphClassExists(uses: Printable::class, implements: OffersPrinting::class),
+                app(MorphClassExists::class, ['uses' => Printable::class, 'implements' => OffersPrinting::class]),
             ],
             'model_id' => [
                 'required',
                 'integer',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
             'view' => 'required|string',
             'html' => 'exclude_if:preview,true|boolean',

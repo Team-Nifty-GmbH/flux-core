@@ -83,7 +83,7 @@ class Countries extends CountryList
         $function = ($this->selectedCountry['id'] ?? false) ? 'update' : 'create';
 
         try {
-            $response = (new CountryService())->{$function}($this->selectedCountry);
+            $response = app(CountryService::class)->{$function}($this->selectedCountry);
         } catch (ValidationException $e) {
             exception_to_notifications($e, $this);
 

@@ -18,7 +18,7 @@ class CreateTicketTypeRuleset extends FluxRuleset
             'model_type' => [
                 'string',
                 'nullable',
-                new MorphClassExists(),
+                app(MorphClassExists::class),
             ],
         ];
     }

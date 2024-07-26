@@ -20,18 +20,18 @@ class CreateEventSubscriptionRuleset extends FluxRuleset
             'user_id' => [
                 'sometimes',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'model_type' => [
                 'required',
                 'string',
-                new MorphClassExists(),
+                app(MorphClassExists::class),
             ],
             'model_id' => [
                 'present',
                 'integer',
                 'nullable',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
             'is_broadcast' => 'required|boolean|accepted_if:is_notifiable,false,0',
             'is_notifiable' => 'required|boolean|accepted_if:is_broadcast,false,0',

@@ -75,9 +75,9 @@ class Product extends Component
     {
         $validated = $this->validate();
 
-        (new SerialNumberService())->update($validated['serialNumber']);
+        app(SerialNumberService::class)->update($validated['serialNumber']);
 
-        (new CommentService())->create([
+        app(CommentService::class)->create([
             'model_id' => $this->serialNumber['id'],
             'model_type' => app(SerialNumber::class)->getMorphClass(),
             'comment' => $this->comment,

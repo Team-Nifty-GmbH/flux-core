@@ -6,6 +6,7 @@ use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\View\Printing\PrintableView;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
@@ -50,16 +51,26 @@ class SignaturePublicLink extends Component
     {
         // add to which type it belongs
         if ($this->signature->stagedFiles || $this->signature->id) {
-            $this->signature->model_type = $this->model;
-            $this->signature->model_id = $this->getModel()->getKey();
-            $this->signature->collection_name = 'signature';
-            $this->signature->disk = 'local';
-            $this->signature->stagedFiles[0]['name'] = 'signature-' . $this->printView;
-            $this->signature->stagedFiles[0]['file_name'] = data_get(
-                $this->signature->stagedFiles[0],
-                'temporary_filename',
-                Uuid::uuid4()->toString()
-            ) . '.png';
+            $this->signature->fill([
+                'name' => 'signature-' . $this->printView,
+                'model_type' => $this->model,
+                'model_id' => $this->getModel()->getKey(),
+                'collection_name' => 'signature',
+                'disk' => 'local',
+                'stagedFiles' => [
+                    array_merge(
+                        $this->signature->stagedFiles[0],
+                        [
+                            'name' => 'signature-' . $this->printView,
+                            'file_name' => data_get(
+                                $this->signature->stagedFiles[0],
+                                'temporary_filename',
+                                Uuid::uuid4()->toString()
+                            ) . '.png',
+                        ]
+                    ),
+                ],
+            ]);
 
             try {
                 $this->signature->save();
@@ -94,7 +105,7 @@ class SignaturePublicLink extends Component
         );
     }
 
-    protected function getModel()
+    protected function getModel(): Model
     {
         return Cache::store('array')->rememberForever(
             'flux-erp.signature-public-link.' . $this->uuid,
@@ -104,7 +115,7 @@ class SignaturePublicLink extends Component
         );
     }
 
-    protected function getPrintClass()
+    protected function getPrintClass(): string
     {
         return data_get($this->getModel()->resolvePrintViews(), $this->printView) ?? abort(404);
     }

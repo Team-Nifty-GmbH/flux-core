@@ -108,11 +108,11 @@ class QueryBuilder
         foreach ($additionalColumns as $additionalColumn) {
             $alias = $modelName . '.' . $additionalColumn;
             $additionalColumnsFilters[] = AllowedFilter::custom(
-                $additionalColumn, new AdditionalColumnFilter(), $alias
+                $additionalColumn, app(AdditionalColumnFilter::class), $alias
             );
 
             $additionalColumnsSorts[] = AllowedSort::custom(
-                $additionalColumn, new AdditionalColumnSort(), $alias
+                $additionalColumn, app(AdditionalColumnSort::class), $alias
             );
         }
 

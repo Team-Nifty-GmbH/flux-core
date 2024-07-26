@@ -191,48 +191,48 @@ class FillOrderPositions extends FluxAction
             $priceValidator = Validator::make($orderPosition, [
                 'unit_gross_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['unit_gross_price'])),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'unit_net_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['unit_net_price'])),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'total_gross_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['total_gross_price'])),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'total_net_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['total_net_price'])),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'total_base_gross_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['total_base_gross_price'])),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'total_base_net_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['total_base_net_price'])),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'discount_percentage' => [
-                    new Numeric(0, 1),
+                    app(Numeric::class, ['min' => 0, 'max' => 1]),
                     'nullable',
                 ],
                 'margin' => [
-                    new Numeric(),
+                    app(Numeric::class),
                     'nullable',
                 ],
                 'provision' => [
-                    new Numeric(),
+                    app(Numeric::class),
                     'nullable',
                 ],
                 'vat_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['vat_price'])),
                     'nullable',
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'vat_rate_percentage' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['vat_rate_percentage'])),
-                    new Numeric(0, 1),
+                    app(Numeric::class, ['min' => 0, 'max' => 1]),
                 ],
             ]);
 

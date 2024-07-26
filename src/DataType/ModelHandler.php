@@ -39,12 +39,12 @@ class ModelHandler implements HandlerInterface
 
         // Return blank instances.
         if (! str_contains($serializedValue, '#')) {
-            return new $serializedValue();
+            return app($serializedValue);
         }
 
         // Fetch specific instances.
         [$class, $id] = explode('#', $serializedValue);
 
-        return (new $class())->findOrFail($id);
+        return app($class)->findOrFail($id);
     }
 }

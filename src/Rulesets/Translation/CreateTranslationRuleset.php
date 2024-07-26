@@ -18,11 +18,18 @@ class CreateTranslationRuleset extends FluxRuleset
             'key' => [
                 'required',
                 'string',
-                new UniqueInFieldDependence(LanguageLine::class, 'group', false),
+                app(
+                    UniqueInFieldDependence::class,
+                    [
+                        'model' => LanguageLine::class,
+                        'dependingField' => 'group',
+                        'ignoreSelf' => false,
+                    ]
+                ),
             ],
             'text' => [
                 'required',
-                new ArrayIsKeyValuePair(),
+                app(ArrayIsKeyValuePair::class),
             ],
         ];
     }

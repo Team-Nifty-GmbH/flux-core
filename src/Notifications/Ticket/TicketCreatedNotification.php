@@ -36,7 +36,7 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
     {
         $notification = $this->toArray($notifiable);
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject($notification['title'])
             ->line($notification['description'])
             ->action($notification['accept']['label'] ?? '', $notification['accept']['url'] ?? '');
@@ -67,7 +67,7 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
 
         $notification = $this->toArray($notifiable);
 
-        return (new WebPushMessage)
+        return (new WebPushMessage())
             ->icon($notification['img'])
             ->title($notification['title'])
             ->body($notification['description'])

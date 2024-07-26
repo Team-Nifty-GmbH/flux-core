@@ -37,7 +37,7 @@ class CreateOrderPosition extends FluxAction
                         && ! data_get($this->data, 'vat_rate_id', false)
                         && ! data_get($this->data, 'product_id', false)
                     ),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
             ]
         );

@@ -1,9 +1,9 @@
 <div class="text-sm">
     @if($signedViews)
         <div class="mb-4 flex flex-col">
-            <p>{{__('Signed Documents')}}:</p>
+            <p>{{ __('Signed Documents') }}:</p>
             @foreach($signedViews as $signedView)
-                <p class="mt-2">{{__($signedView)}}</p>
+                <p class="mt-2">{{ __($signedView) }}</p>
             @endforeach
         </div>
     @endif
@@ -17,7 +17,7 @@
                 </x-slot>
                 @foreach($unsignedViews as $unsignedView)
                     <x-dropdown.item
-                        wire:click="setPublicLink('{{$unsignedView}}')">
+                        wire:click="setPublicLink('{{ $unsignedView }}')">
                         {{ __($unsignedView) }}
                     </x-dropdown.item>
                 @endforeach
@@ -29,16 +29,16 @@
             @foreach($generatedUrls as $label => $link)
                 <x-input
                     class="mb-2"
-                    label="{{__($label)}}"
+                    label="{{ __($label) }}"
                     readonly
                     value="{{$link}}"
                     type="text"
-                    x-ref="link{{implode('', array_map('ucfirst', explode('-', $label)))}}"
+                    x-ref="link{{  implode('', array_map('ucfirst', explode('-', $label))) }}"
                 >
                     <x-slot:append>
                         <div class="absolute inset-y-0 right-0 flex items-center p-0.5">
                             <x-button
-                                x-on:click="$refs.link{{implode('', array_map('ucfirst', explode('-', $label)))}}.select(); document.execCommand('copy');"
+                                x-on:click="$refs.link{{  implode('', array_map('ucfirst', explode('-', $label))) }}.select(); document.execCommand('copy');"
                                 class="h-full rounded-r-md"
                                 icon="clipboard-copy"
                                 primary

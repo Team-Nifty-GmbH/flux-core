@@ -174,7 +174,7 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
 
     public static function fromCalendarEvent(array $event): Model
     {
-        $task = new static;
+        $task = new static();
         $task->forceFill([
             'id' => $event['id'],
             'name' => $event['title'],

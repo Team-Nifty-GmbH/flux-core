@@ -3,6 +3,7 @@
     "rules": {
         "concat_space": {
             "spacing": "one"
-        }
+        },
+        "new_with_parentheses": true
     }
 }

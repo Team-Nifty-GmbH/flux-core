@@ -28,7 +28,7 @@ class DeleteIndexCommand extends BaseDeleteIndexCommand
                 ModelFinder::all(flux_path('src/Models'), flux_path('src'), 'FluxErp')
                     ->merge(ModelFinder::all())
                     ->filter(fn ($model) => in_array(Searchable::class, class_uses_recursive($model)))
-                    ->map(fn ($model) => (new $model)->searchableAs())->unique()->toArray()
+                    ->map(fn ($model) => app($model)->searchableAs())->unique()->toArray()
             );
 
         foreach ($indexes as $index) {

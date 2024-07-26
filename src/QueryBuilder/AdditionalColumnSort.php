@@ -12,7 +12,7 @@ class AdditionalColumnSort implements Sort
     {
         $exploded = explode('.', $property);
         $className = $exploded[0];
-        $table = (new $className)->getTable();
+        $table = app($className)->getTable();
 
         $direction = $descending ? 'DESC' : 'ASC';
 

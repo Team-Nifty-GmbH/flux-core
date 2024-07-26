@@ -15,7 +15,7 @@ class CreateDocumentType extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateDocumentTypeRequest())->rules();
+        $this->rules = app(CreateDocumentTypeRequest::class)->rules();
     }
 
     public static function models(): array
@@ -25,7 +25,7 @@ class CreateDocumentType extends FluxAction
 
     public function performAction(): DocumentType
     {
-        $documentType = new DocumentType($this->data);
+        $documentType = app(DocumentType::class, ['attributes' => $this->data]);
         $documentType->save();
 
         return $documentType->fresh();
@@ -34,7 +34,7 @@ class CreateDocumentType extends FluxAction
     protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new DocumentType());
+        $validator->addModel(app(DocumentType::class));
 
         $this->data = $validator->validate();
     }

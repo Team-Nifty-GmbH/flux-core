@@ -8,6 +8,6 @@ trait HasClientAssignment
 {
     public static function bootHasClientAssignment(): void
     {
-        static::addGlobalScope(new UserClientScope());
+        static::addGlobalScope(app(UserClientScope::class));
     }
 }

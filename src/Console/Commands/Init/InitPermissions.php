@@ -126,7 +126,7 @@ class InitPermissions extends Command
                 continue;
             }
 
-            $componentInstance = new $component;
+            $componentInstance = new $component();
 
             foreach ($componentInstance->renderingWithTabs()->getTabsToRender() as $tab) {
                 $permission = app(Permission::class)->findOrCreate('tab.' . $tab->component, 'web');

@@ -18,11 +18,11 @@ class CreateCategoryRuleset extends FluxRuleset
             'model_type' => [
                 'required',
                 'string',
-                new MorphClassExists(),
+                app(MorphClassExists::class),
             ],
             'parent_id' => [
                 'integer',
-                new ModelExists(Category::class),
+                app(ModelExists::class, ['model' => Category::class]),
             ],
             'name' => 'required|string',
             'sort_number' => 'required|integer',

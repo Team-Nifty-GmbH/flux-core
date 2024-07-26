@@ -571,7 +571,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('permission', Permissions::class);
         $this->app['router']->aliasMiddleware('localization', Localization::class);
 
-        Bus::pipeThrough([new SetJobAuthenticatedUserMiddleware()]);
+        Bus::pipeThrough([app(SetJobAuthenticatedUserMiddleware::class)]);
     }
 
     private function registerExtensions(): void

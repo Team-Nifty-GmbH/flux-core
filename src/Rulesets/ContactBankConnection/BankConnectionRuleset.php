@@ -16,7 +16,7 @@ class BankConnectionRuleset extends FluxRuleset
             'iban' => [
                 'nullable',
                 'string',
-                new Iban(),
+                app(Iban::class),
             ],
             'account_holder' => 'string|nullable',
             'bank_name' => 'string|nullable',

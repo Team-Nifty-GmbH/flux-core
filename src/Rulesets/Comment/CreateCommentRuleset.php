@@ -3,7 +3,6 @@
 namespace FluxErp\Rulesets\Comment;
 
 use FluxErp\Models\Comment;
-use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
@@ -20,17 +19,17 @@ class CreateCommentRuleset extends FluxRuleset
             'model_type' => [
                 'required',
                 'string',
-                new MorphClassExists(uses: Commentable::class),
+                app(MorphClassExists::class, ['uses' => Commentable::class]),
             ],
             'model_id' => [
                 'required',
                 'integer',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Comment::class),
+                app(MorphExists::class, ['model' => Comment::class]),
             ],
             'comment' => 'required|string',
             'is_internal' => 'sometimes|required|boolean',
