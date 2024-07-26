@@ -18,15 +18,15 @@
                             </template>
                         </div>
                         <template x-if="error">
-                            <p class="text-2xl">{{__("Upload Failed")}}</p>
+                            <p class="text-2xl">{{ __("Upload Failed") }}</p>
                         </template>
                         <template x-if="id && !error">
-                            <p class="text-2xl">{{__("Signature saved")}}</p>
+                            <p class="text-2xl">{{ __("Signature saved") }}</p>
                         </template>
                     </div>
                 </div>
                 <div class="flex flex-col items-end pt-10 lg:pt-0">
-                    <h1 class="text-xl mb-2">{{__('Sign here')}}</h1>
+                    <h1 class="text-xl mb-2">{{ __('Sign here') }}</h1>
                     <canvas x-ref="canvas" height="200" width="500" class="rounded-md h-auto" />
                 </div>
             </div>

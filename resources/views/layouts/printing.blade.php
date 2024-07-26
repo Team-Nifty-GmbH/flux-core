@@ -118,14 +118,14 @@
                         display: none;
                     }
 
-            body {
-                max-width: 80rem;
-                margin: 0 auto !important;
-                padding: 20mm;
-                background: white;
-                box-shadow: 0 0 10px rgba(0,0,0,0.5);
-                border-radius: 10px;
-            }
+                    body {
+                        max-width: 80rem;
+                        margin: 0 auto !important;
+                        padding: 20mm;
+                        background: white;
+                        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                        border-radius: 10px;
+                    }
 
                     html {
                         background: #f5f5f5;

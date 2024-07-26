@@ -14,7 +14,7 @@ class CreateCustomEvent extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = app(CreateCustomEventRequest::class)->rules();
+        $this->rules = (new CreateCustomEventRequest())->rules();
     }
 
     public static function models(): array

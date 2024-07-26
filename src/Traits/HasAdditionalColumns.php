@@ -700,7 +700,7 @@ trait HasAdditionalColumns
             return $this->metaChanges;
         }
 
-        return $this->metaChanges = new Collection();
+        return $this->metaChanges = collect();
     }
 
     /**
