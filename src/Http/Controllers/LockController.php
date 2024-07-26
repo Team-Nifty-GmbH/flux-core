@@ -21,7 +21,7 @@ class LockController extends BaseController
 
     public function showUserLocks(Request $request): JsonResponse
     {
-        $locks = app(Lock::class)->query()
+        $locks = resolve_static(Lock::class, 'query')
             ->where('created_by', Auth::id())
             ->get();
 
@@ -32,7 +32,7 @@ class LockController extends BaseController
     {
         $perPage = $request->per_page > 500 || $request->per_page < 1 ? 25 : $request->per_page;
 
-        $locks = app(Lock::class)->query()
+        $locks = resolve_static(Lock::class, 'query')
             ->paginate($perPage);
 
         return ResponseHelper::createResponseFromBase(statusCode: 200, data: $locks);
@@ -97,7 +97,7 @@ class LockController extends BaseController
                 $instance->lock()->create();
             }
         } else {
-            app(Lock::class)->query()
+            resolve_static(Lock::class, 'query')
                 ->where('model_type', $modelClass)
                 ->whereIntegerInRaw('model_id', $instances->pluck('id')->toArray())
                 ->where('created_by', $request->user()->id)

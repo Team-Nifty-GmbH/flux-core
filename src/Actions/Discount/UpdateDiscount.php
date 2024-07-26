@@ -23,7 +23,7 @@ class UpdateDiscount extends FluxAction
 
     public function performAction(): Model
     {
-        $discount = app(Discount::class)->query()
+        $discount = resolve_static(Discount::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

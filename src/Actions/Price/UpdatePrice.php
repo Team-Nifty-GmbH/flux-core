@@ -22,7 +22,7 @@ class UpdatePrice extends FluxAction
 
     public function performAction(): Model
     {
-        $price = app(Price::class)->query()
+        $price = resolve_static(Price::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

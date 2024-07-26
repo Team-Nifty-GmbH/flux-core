@@ -13,7 +13,7 @@ trait WithAddressAuth
 
     public function mountWithAddressAuth(): void
     {
-        $this->customerClient = app(Client::class)->query()
+        $this->customerClient = resolve_static(Client::class, 'query')
             ->whereKey(Auth::user()->contact->client_id)
             ?->first()
             ->toArray();

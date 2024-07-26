@@ -28,7 +28,7 @@ class UpdateCart extends FluxAction
             unset($this->data['is_portal_public'], $this->data['is_public']);
         }
 
-        $cart = app(Cart::class)->query()
+        $cart = resolve_static(Cart::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

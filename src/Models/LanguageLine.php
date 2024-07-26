@@ -3,7 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\CacheModelQueries;
-use Laravel\Scout\Searchable;
+use FluxErp\Traits\Scout\Searchable;
 use Spatie\TranslationLoader\LanguageLine as SpatieLanguageLine;
 
 class LanguageLine extends SpatieLanguageLine

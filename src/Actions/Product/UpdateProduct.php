@@ -46,7 +46,7 @@ class UpdateProduct extends FluxAction
         $suppliers = Arr::pull($this->data, 'suppliers');
         $tags = Arr::pull($this->data, 'tags');
 
-        $product = app(Product::class)->query()
+        $product = resolve_static(Product::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -59,7 +59,7 @@ class UpdateProduct extends FluxAction
         $product->save();
 
         if (! is_null($tags)) {
-            $product->syncTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
+            $product->syncTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
         if (! is_null($productOptions)) {
@@ -138,7 +138,7 @@ class UpdateProduct extends FluxAction
         $this->data = $validator->validate();
 
         if ($this->data['parent_id'] ?? false) {
-            $product = app(Product::class)->query()
+            $product = resolve_static(Product::class, 'query')
                 ->whereKey($this->data['id'])
                 ->first();
 

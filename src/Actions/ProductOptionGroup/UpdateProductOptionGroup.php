@@ -30,7 +30,7 @@ class UpdateProductOptionGroup extends FluxAction
     {
         $productOptions = Arr::pull($this->data, 'product_options');
 
-        $productOptionGroup = app(ProductOptionGroup::class)->query()
+        $productOptionGroup = resolve_static(ProductOptionGroup::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

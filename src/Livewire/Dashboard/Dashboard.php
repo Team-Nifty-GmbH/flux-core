@@ -69,7 +69,13 @@ class Dashboard extends Component
                 $name = $widget['component_name'];
 
                 try {
-                    $permissionExists = app(Permission::class)->findByName('widget.' . $name)->exists;
+                    $permissionExists = resolve_static(
+                        Permission::class,
+                        'findByName',
+                        [
+                            'name' => 'widget.' . $name,
+                        ]
+                    )->exists;
                 } catch (PermissionDoesNotExist) {
                     $permissionExists = false;
                 }

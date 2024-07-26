@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
@@ -19,8 +20,8 @@ use Spatie\MediaLibrary\HasMedia;
 
 class SepaMandate extends Model implements HasMedia, OffersPrinting
 {
-    use Filterable, HasClientAssignment, HasPackageFactory, HasSerialNumberRange, HasUserModification, HasUuid,
-        InteractsWithMedia, Printable, SoftDeletes;
+    use Communicatable, Filterable, HasClientAssignment, HasPackageFactory, HasSerialNumberRange, HasUserModification,
+        HasUuid, InteractsWithMedia, Printable, SoftDeletes;
 
     protected $guarded = [
         'id',

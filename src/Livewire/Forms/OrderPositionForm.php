@@ -115,7 +115,7 @@ class OrderPositionForm extends Form
             $this->product_id = $product->id;
         }
 
-        $product = $product ?: app(Product::class)->query()
+        $product = $product ?: resolve_static(Product::class, 'query')
             ->whereKey($this->product_id)
             ->first();
 

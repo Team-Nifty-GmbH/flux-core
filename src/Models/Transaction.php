@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Scout\Searchable;
+use FluxErp\Traits\Scout\Searchable;
 use TeamNiftyGmbH\DataTable\Casts\Money;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
@@ -34,7 +34,7 @@ class Transaction extends Model implements InteractsWithDataTables
         static::saved(function (Transaction $transaction) {
             $originalOrderId = $transaction->getRawOriginal('order_id');
             if ($originalOrderId) {
-                app(Order::class)->query()
+                resolve_static(Order::class, 'query')
                     ->whereKey($originalOrderId)
                     ->first()
                     ->calculatePaymentState()

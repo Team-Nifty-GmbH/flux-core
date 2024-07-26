@@ -58,7 +58,7 @@ class OrderTypes extends OrderTypeList
             parent::getViewData(),
             [
                 'printViews' => $printViews,
-                'clients' => app(Client::class)->query()
+                'clients' => resolve_static(Client::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
                 'enum' => OrderTypeEnum::values(),

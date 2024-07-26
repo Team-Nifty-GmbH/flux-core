@@ -140,7 +140,7 @@ class TransactionList extends BaseTransactionList
 
     public function assignOrders(array $orderIds): void
     {
-        $orders = app(Order::class)->query()
+        $orders = resolve_static(Order::class, 'query')
             ->whereIntegerInRaw('id', $orderIds)
             ->with('contact.invoiceAddress:id,name')
             ->get(['id', 'invoice_number', 'invoice_date', 'balance', 'contact_id', 'total_gross_price'])
@@ -192,7 +192,7 @@ class TransactionList extends BaseTransactionList
         }
 
         // First remove all deleted children
-        $children = app(Transaction::class)->query()
+        $children = resolve_static(Transaction::class, 'query')
             ->whereKey($this->transactionForm->id)
             ->first()
             ->children()

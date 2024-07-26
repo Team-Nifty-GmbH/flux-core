@@ -37,7 +37,7 @@ class Notifications extends Component
         $this->notifications = config('notifications.model_notifications');
 
         $notificationSettings = data_get($this->notifications, '*.*');
-        $anonymousNotificationSettings = app(NotificationSetting::class)->query()
+        $anonymousNotificationSettings = resolve_static(NotificationSetting::class, 'query')
             ->whereNull('notifiable_id')
             ->select([
                 'id',
@@ -122,7 +122,7 @@ class Notifications extends Component
         $this->detailModal = true;
         $this->notification = data_get($this->notificationSettings, $notification);
 
-        $notificationSettings = app(NotificationSetting::class)->query()
+        $notificationSettings = resolve_static(NotificationSetting::class, 'query')
             ->whereNull('notifiable_id')
             ->where('notification_type', $notification)
             ->get();

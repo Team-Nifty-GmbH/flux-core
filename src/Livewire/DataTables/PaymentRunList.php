@@ -29,7 +29,7 @@ class PaymentRunList extends BaseDataTable
     {
         parent::mount();
 
-        $this->accounts = app(BankConnection::class)->query()
+        $this->accounts = resolve_static(BankConnection::class, 'query')
             ->get(['id', 'name', 'iban'])
             ->toArray();
     }
@@ -79,7 +79,7 @@ class PaymentRunList extends BaseDataTable
 
     public function removeOrder(int $id): bool
     {
-        $paymentRun = app(PaymentRun::class)->query()
+        $paymentRun = resolve_static(PaymentRun::class, 'query')
             ->whereKey($this->paymentRunForm->id)
             ->first();
         $paymentRun->orders()->detach($id);

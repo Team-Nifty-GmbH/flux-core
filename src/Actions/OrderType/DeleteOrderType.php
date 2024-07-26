@@ -21,7 +21,7 @@ class DeleteOrderType extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(OrderType::class)->query()
+        return resolve_static(OrderType::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

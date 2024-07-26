@@ -21,7 +21,7 @@ class DeleteCartItem extends FluxAction
 
     public function performAction(): mixed
     {
-        return app(CartItem::class)->query()
+        return resolve_static(CartItem::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

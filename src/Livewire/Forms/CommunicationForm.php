@@ -75,7 +75,7 @@ class CommunicationForm extends FluxForm
         if ($this->id) {
             $message = $values instanceof Communication
                 ? $values->load(['mailFolder:id,slug', 'mailAccount:id,email'])
-                : app(Communication::class)->query()
+                : resolve_static(Communication::class, 'query')
                     ->whereKey($this->id)
                     ->with(['mailFolder:id,slug', 'mailAccount:id,email'])
                     ->first();

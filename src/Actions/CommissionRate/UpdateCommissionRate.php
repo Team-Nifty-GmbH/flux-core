@@ -23,7 +23,7 @@ class UpdateCommissionRate extends FluxAction
 
     public function performAction(): Model
     {
-        $commissionRate = app(CommissionRate::class)->query()
+        $commissionRate = resolve_static(CommissionRate::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

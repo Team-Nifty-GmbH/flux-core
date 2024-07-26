@@ -48,7 +48,7 @@ class PaymentTypes extends PaymentTypeList
         return array_merge(
             parent::getViewData(),
             [
-                'clients' => app(Client::class)->query()
+                'clients' => resolve_static(Client::class, 'query')
                     ->select(['id', 'name'])
                     ->get()
                     ->toArray(),

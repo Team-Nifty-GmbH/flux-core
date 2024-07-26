@@ -21,7 +21,7 @@ class DeleteProductCrossSelling extends FluxAction
 
     public function performAction(): bool
     {
-        return app(ProductCrossSelling::class)->query()
+        return resolve_static(ProductCrossSelling::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

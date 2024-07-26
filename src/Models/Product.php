@@ -26,7 +26,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Laravel\Scout\Searchable;
+use FluxErp\Traits\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -180,11 +180,13 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
 
     public function getChildProductOptions(): Collection
     {
-        return app(ProductOptionGroup::class)
-            ->query()
-            ->whereHas('productOptions.products', function (Builder $query) {
-                return $query->whereIntegerInRaw('product_id', $this->children->pluck('id'));
-            })
+        return resolve_static(ProductOptionGroup::class, 'query')
+            ->whereHas(
+                'productOptions.products',
+                function (Builder $query) {
+                    return $query->whereIntegerInRaw('product_id', $this->children->pluck('id'));
+                }
+            )
             ->with([
                 'productOptions' => fn ($query) => $query
                     ->whereHas('products', function (Builder $query) {
@@ -243,7 +245,6 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
             })
             ->where('is_active_export_to_web_shop', true)
             ->where('is_active', true)
-            ->whereNull('parent_id')
             ->select(array_map(
                 fn (string $column) => $this->getTable() . '.' . $column,
                 [

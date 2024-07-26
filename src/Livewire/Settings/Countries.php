@@ -64,11 +64,15 @@ class Countries extends CountryList
 
     public function showEditModal(?int $countryId = null): void
     {
-        $this->selectedCountry = app(Country::class)->query()->whereKey($countryId)->first()?->toArray() ?: [
-            'language_id' => null,
-            'currency_id' => null,
-            'is_active' => true,
-        ];
+        $this->selectedCountry = resolve_static(Country::class, 'query')
+            ->whereKey($countryId)
+            ->first()
+            ?->toArray()
+            ?: [
+                'language_id' => null,
+                'currency_id' => null,
+                'is_active' => true,
+            ];
 
         $this->editModal = true;
         $this->resetErrorBag();

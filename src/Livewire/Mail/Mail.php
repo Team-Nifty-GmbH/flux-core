@@ -49,7 +49,7 @@ class Mail extends CommunicationList
         ];
 
         foreach ($this->mailAccounts as $mailAccount) {
-            $mailFolders = app(MailFolder::class)->query()
+            $mailFolders = resolve_static(MailFolder::class, 'query')
                 ->where('parent_id', null)
                 ->where('mail_account_id', $mailAccount['id'])
                 ->get(['id', 'name', 'parent_id']);
@@ -108,7 +108,7 @@ class Mail extends CommunicationList
 
     public function getNewMessages(): void
     {
-        $mailAccounts = app(MailAccount::class)->query()
+        $mailAccounts = resolve_static(MailAccount::class, 'query')
             ->whereIntegerInRaw('id', array_column($this->mailAccounts, 'id'))
             ->get();
 

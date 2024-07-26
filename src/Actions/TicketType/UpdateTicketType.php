@@ -24,7 +24,7 @@ class UpdateTicketType extends FluxAction
 
     public function performAction(): Model
     {
-        $ticketType = app(TicketType::class)->query()
+        $ticketType = resolve_static(TicketType::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

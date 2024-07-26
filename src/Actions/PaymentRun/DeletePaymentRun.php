@@ -21,7 +21,7 @@ class DeletePaymentRun extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(PaymentRun::class)->query()
+        return resolve_static(PaymentRun::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

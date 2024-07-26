@@ -10,7 +10,7 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Laravel\Scout\Searchable;
+use FluxErp\Traits\Scout\Searchable;
 
 class Warehouse extends Model
 {

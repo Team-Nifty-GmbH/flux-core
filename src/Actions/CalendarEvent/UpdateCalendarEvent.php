@@ -27,7 +27,7 @@ class UpdateCalendarEvent extends FluxAction
         $confirmOption = Arr::pull($this->data, 'confirm_option');
         $repeat = Arr::pull($this->data, 'repeat');
 
-        $calendarEvent = app(CalendarEvent::class)->query()
+        $calendarEvent = resolve_static(CalendarEvent::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

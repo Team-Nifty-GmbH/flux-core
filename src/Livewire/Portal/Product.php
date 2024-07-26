@@ -31,7 +31,7 @@ class Product extends Component
 
     public function boot(): void
     {
-        $this->additionalColumns = app(AdditionalColumn::class)->query()
+        $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
             ->where('model_type', app(SerialNumber::class)->getMorphClass())
             ->get()
             ->toArray();
@@ -53,7 +53,7 @@ class Product extends Component
             ->pluck('id')
             ->toArray();
 
-        $serialNumber = app(SerialNumber::class)->query()
+        $serialNumber = resolve_static(SerialNumber::class, 'query')
             ->whereKey($id)
             ->whereIn('address_id', $addresses)
             ->with('product')

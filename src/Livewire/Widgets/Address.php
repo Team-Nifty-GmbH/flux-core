@@ -15,7 +15,7 @@ class Address extends Component
 
     public function mount(int $modelId): void
     {
-        $address = app(AddressModel::class)->query()
+        $address = resolve_static(AddressModel::class, 'query')
             ->whereKey($modelId)
             ->with([
                 'contact.media',
@@ -28,7 +28,7 @@ class Address extends Component
         $this->address['label'] = $address->getLabel();
         $this->address['description'] = $address->getDescription();
 
-        $this->address['total_net'] = app(Order::class)->query()
+        $this->address['total_net'] = resolve_static(Order::class, 'query')
             ->whereNotNull('invoice_number')
             ->where('contact_id', $this->address['contact_id'])
             ->sum('total_net_price');
