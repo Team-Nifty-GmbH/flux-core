@@ -41,13 +41,13 @@ class SyncCalendarEventInvites extends FluxAction
             $calendarEvent->invitedAddresses()->sync($invitedAddresses);
         }
 
-        if (array_key_exists('invited_users', $this->data)) {
-            $invitedUsers = Arr::keyBy($this->data['invited_users'], 'id');
+        if (array_key_exists('invited', $this->data)) {
+            $invitedUsers = Arr::keyBy($this->data['invited'], 'id');
             $invitedUsers = Arr::map($invitedUsers, function ($value) {
                 return Arr::only($value, ['status']);
             });
 
-            $calendarEvent->invitedUsers()->sync($invitedUsers);
+            $calendarEvent->invited()->sync($invitedUsers);
         }
 
         return $calendarEvent;
