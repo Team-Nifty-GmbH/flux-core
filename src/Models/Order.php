@@ -31,6 +31,7 @@ use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
 use FluxErp\View\Printing\Order\Retoure;
+use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -45,7 +46,6 @@ use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Casts\Money;
 use TeamNiftyGmbH\DataTable\Casts\Percentage;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
@@ -376,6 +376,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
         $this->addMediaCollection('payment-reminders')
             ->acceptsMimeTypes(['application/pdf']);
+
+        $this->addMediaCollection('signature')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png'])
+            ->useDisk('local');
     }
 
     public function calculatePrices(): static

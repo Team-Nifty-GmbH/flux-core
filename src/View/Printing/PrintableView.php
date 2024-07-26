@@ -8,6 +8,7 @@ use Dompdf\Canvas;
 use Dompdf\FontMetrics;
 use Dompdf\Options;
 use FluxErp\Actions\Media\UploadMedia;
+use FluxErp\Contracts\SignablePrintView;
 use FluxErp\Models\Client;
 use FluxErp\Printing\Printable;
 use FluxErp\Traits\Makeable;
@@ -26,6 +27,10 @@ abstract class PrintableView extends Component
 
     public PDF $pdf;
 
+    public bool $preview = false;
+
+    private static ?string $layout = 'flux::layouts.printing';
+
     private ?\Imagick $imagick = null;
 
     abstract public function getModel(): ?Model;
@@ -34,8 +39,6 @@ abstract class PrintableView extends Component
 
     abstract public function getSubject(): string;
 
-    public bool $preview = false;
-
     public function preview(bool $preview = true): static
     {
         $this->preview = $preview;
@@ -43,9 +46,21 @@ abstract class PrintableView extends Component
         return $this;
     }
 
+    public static function setLayout(?string $layout): void
+    {
+        static::$layout = $layout;
+    }
+
+    public static function getLayout(): ?string
+    {
+        return static::$layout;
+    }
+
     protected function hydrateSharedData(): void
     {
-        $client = $this->getModel()?->client ?? Client::query()->first();
+        $model = $this->getModel();
+
+        $client = $model?->client ?? Client::query()->first();
 
         $logo = $client->getFirstMedia('logo');
         $logoSmall = $client->getFirstMedia('logo_small');
@@ -72,8 +87,21 @@ abstract class PrintableView extends Component
             $client->logo_small = 'data:image/' . $mimeTypeLogoSmall . ';base64,' . base64_encode($logoSmallContent);
         }
 
+        $signaturePath = null;
+        if (is_a(static::class, SignablePrintView::class, true)) {
+            $viewAlias = data_get(array_flip($model->resolvePrintViews()), static::class);
+            $signaturePath = $model->media()
+                ->where('collection_name', 'signature')
+                ->where('name', 'signature-' . $viewAlias)
+                ->first()
+                ?->getPath();
+        }
+
+        View::share('signaturePath', $signaturePath);
         View::share('client', $client);
         View::share('subject', $this->getSubject());
+        View::share('printView', Str::kebab(class_basename($this)));
+        View::share('printLayout', static::$layout);
 
         $this->imagick?->clear();
         $this->imagick?->destroy();
@@ -88,7 +116,7 @@ abstract class PrintableView extends Component
         $this->hydrateSharedData();
         File::ensureDirectoryExists(storage_path('fonts'));
 
-        $this->pdf = PdfFacade::loadHTML($this->render())
+        $this->pdf = PdfFacade::loadHTML($this->renderWithLayout())
             ->setOption('isFontSubsettingEnabled', true)
             ->setOption('isPhpEnabled', true)
             ->setOption('defaultMediaType', 'print');
@@ -128,14 +156,32 @@ abstract class PrintableView extends Component
             $this->beforePrinting();
         }
 
+        if (! $this->preview) {
+            $model = $this->getModel();
+            activity()
+                ->performedOn($model)
+                ->event('pdf_created')
+                ->log(
+                    __(
+                        ':view PDF created',
+                        ['view' => data_get(array_flip($model->resolvePrintViews()), static::class)]
+                    )
+                );
+        }
+
         return $this;
     }
 
-    public function renderAndHydrate(): \Illuminate\View\View
+    protected function renderWithLayout(): \Illuminate\View\View
+    {
+        return is_null(static::$layout) ? $this->render() : view(static::$layout, ['slot' => $this->render()]);
+    }
+
+    public function renderAndHydrate(): \Illuminate\View\View|string
     {
         $this->hydrateSharedData();
 
-        return $this->render();
+        return $this->renderWithLayout();
     }
 
     public function streamPDF(?string $fileName = null): Response

@@ -18,19 +18,25 @@ class UpdateTranslationRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(LanguageLine::class),
+                app(ModelExists::class, ['model' => LanguageLine::class]),
             ],
             'group' => 'sometimes|required|string',
             'key' => [
                 'sometimes',
                 'required',
                 'string',
-                new UniqueInFieldDependence(LanguageLine::class, 'group'),
+                app(
+                    UniqueInFieldDependence::class,
+                    [
+                        'model' => LanguageLine::class,
+                        'dependingField' => 'group',
+                    ]
+                ),
             ],
             'text' => [
                 'sometimes',
                 'required',
-                new ArrayIsKeyValuePair(),
+                app(ArrayIsKeyValuePair::class),
             ],
         ];
     }

@@ -65,7 +65,7 @@ class CommentsTest extends BaseSetup
 
     public function test_renders_successfully()
     {
-        $class = new class extends Comments
+        $class = new class() extends Comments
         {
             public function mount(Order $orderModel): void
             {

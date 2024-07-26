@@ -96,7 +96,7 @@ class Notifications extends Component
 
         $anonymousNotificationSettings = array_values($this->dirtyNotificationChannels);
 
-        $notificationSettingsService = new NotificationSettingsService();
+        $notificationSettingsService = app(NotificationSettingsService::class);
         $response = $notificationSettingsService->update($anonymousNotificationSettings, true);
 
         if ($response['status'] !== 200) {

@@ -15,7 +15,7 @@ class DiscountRuleset extends FluxRuleset
             'discounts.*.is_percentage' => 'required|boolean',
             'discounts.*.discount' => [
                 'required',
-                new Numeric(),
+                app(Numeric::class),
             ],
         ];
     }

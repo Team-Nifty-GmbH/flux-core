@@ -17,7 +17,7 @@ class AdditionalColumnFilter implements Filter
         }
 
         $className = $exploded[0];
-        $table = (new $className)->getTable();
+        $table = app($className)->getTable();
 
         $exact = resolve_static(AdditionalColumn::class, 'query')
             ->where('model_type', $className)

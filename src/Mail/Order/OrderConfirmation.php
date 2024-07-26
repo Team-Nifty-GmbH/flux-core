@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Mail;
+namespace FluxErp\Mail\Order;
 
 use FluxErp\Models\Order;
 use Illuminate\Bus\Queueable;
@@ -15,7 +15,7 @@ class OrderConfirmation extends Mailable
 
     public function __construct(public Order $order)
     {
-        $this->when($locale = $this->order?->addressInvoice?->language?->iso_name, fn() => $this->locale($locale));
+        $this->when($locale = $this->order?->addressInvoice?->language?->iso_name, fn () => $this->locale($locale));
     }
 
     public function envelope(): Envelope

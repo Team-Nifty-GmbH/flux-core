@@ -21,15 +21,15 @@ class CreateBankConnectionRuleset extends FluxRuleset
             'currency_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Currency::class),
+                app(ModelExists::class, ['model' => Currency::class]),
             ],
             'ledger_account_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(LedgerAccount::class),
+                app(ModelExists::class, ['model' => LedgerAccount::class]),
             ],
             'name' => 'required|string|max:255',
-            'iban' => ['nullable', 'string', new Iban(), 'unique:bank_connections,iban'],
+            'iban' => ['nullable', 'string', app(Iban::class), 'unique:bank_connections,iban'],
             'credit_limit' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
         ];

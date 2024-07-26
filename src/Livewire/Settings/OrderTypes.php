@@ -47,7 +47,7 @@ class OrderTypes extends OrderTypeList
     public function getViewData(): array
     {
         $printViews = [];
-        foreach ((new Order())->getAvailableViews() as $view) {
+        foreach (app(Order::class)->getAvailableViews() as $view) {
             $printViews[] = [
                 'value' => $view,
                 'label' => __($view),

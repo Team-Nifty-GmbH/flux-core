@@ -17,17 +17,17 @@ class UpdateCartItemRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(CartItem::class),
+                app(ModelExists::class, ['model' => CartItem::class]),
             ],
             'amount' => [
                 'sometimes',
                 'required',
-                new Numeric(1),
+                app(Numeric::class, ['min' => 1]),
             ],
             'price' => [
                 'sometimes',
                 'required',
-                new Numeric(),
+                app(Numeric::class),
             ],
         ];
     }

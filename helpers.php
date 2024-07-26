@@ -357,7 +357,7 @@ if (! function_exists('meilisearch_import_sync')) {
 
         $client = new \MeiliSearch\Client(config('scout.meilisearch.host'), config('scout.meilisearch.key'));
         $from = $client->getTasks((new \MeiliSearch\Contracts\TasksQuery())
-            ->setIndexUids([(new $model())->searchableAs()])
+            ->setIndexUids([app($model)->searchableAs()])
             ->setLimit(1))
             ->getFrom();
 
@@ -369,7 +369,7 @@ if (! function_exists('meilisearch_import_sync')) {
             ['model' => $model]
         );
         $from = $client->getTasks((new \MeiliSearch\Contracts\TasksQuery())
-            ->setIndexUids([(new $model())->searchableAs()])
+            ->setIndexUids([app($model)->searchableAs()])
             ->setLimit(1))
             ->getFrom();
         $client->waitForTask($from);

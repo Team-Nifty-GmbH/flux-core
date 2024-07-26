@@ -20,17 +20,17 @@ class CreateCommentRuleset extends FluxRuleset
             'model_type' => [
                 'required',
                 'string',
-                new MorphClassExists(uses: Commentable::class),
+                app(MorphClassExists::class, ['uses' => Commentable::class]),
             ],
             'model_id' => [
                 'required',
                 'integer',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Comment::class),
+                app(ModelExists::class, ['model' => Comment::class]),
             ],
             'comment' => 'required|string',
             'is_internal' => 'sometimes|required|boolean',

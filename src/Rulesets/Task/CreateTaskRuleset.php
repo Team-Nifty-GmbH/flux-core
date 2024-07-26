@@ -23,24 +23,24 @@ class CreateTaskRuleset extends FluxRuleset
             'project_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Project::class),
+                app(ModelExists::class, ['model' => Project::class]),
             ],
             'responsible_user_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'model_type' => [
                 'required_with:model_id',
                 'string',
                 'nullable',
-                new MorphClassExists(),
+                app(MorphClassExists::class),
             ],
             'model_id' => [
                 'required_with:model_type',
                 'integer',
                 'nullable',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
             'name' => 'required|string',
             'description' => 'string|nullable',

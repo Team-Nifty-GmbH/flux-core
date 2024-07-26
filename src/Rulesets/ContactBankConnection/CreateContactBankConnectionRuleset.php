@@ -19,9 +19,9 @@ class CreateContactBankConnectionRuleset extends FluxRuleset
             'contact_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
-            'iban' => ['required', 'string', new Iban()],
+            'iban' => ['required', 'string', app(Iban::class)],
         ];
     }
 

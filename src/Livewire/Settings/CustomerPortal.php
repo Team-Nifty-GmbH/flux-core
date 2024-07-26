@@ -83,7 +83,7 @@ class CustomerPortal extends Component
         $validated = $this->validate();
 
         $isNew = ! ($this->setting['id'] ?? false);
-        $response = (new SettingService())->{$isNew ? 'create' : 'update'}($validated['setting']);
+        $response = app(SettingService::class)->{$isNew ? 'create' : 'update'}($validated['setting']);
 
         if (! $isNew && $response['status'] !== 200) {
             $this->notification()->error(

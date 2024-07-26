@@ -14,11 +14,11 @@ class GetPrintViewsRequest extends BaseFormRequest
             'model_type' => [
                 'required',
                 'string',
-                new MorphClassExists(uses: Printable::class),
+                app(MorphClassExists::class, ['uses' => Printable::class]),
             ],
             'model_id' => [
                 'integer',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
         ];
     }

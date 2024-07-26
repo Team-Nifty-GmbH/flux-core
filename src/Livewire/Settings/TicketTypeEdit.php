@@ -101,7 +101,7 @@ class TicketTypeEdit extends Component
 
         $validated = $this->validate();
 
-        $ticketTypeService = new TicketTypeService();
+        $ticketTypeService = app(TicketTypeService::class);
         $response = $ticketTypeService->{$this->isNew ? 'create' : 'update'}($validated['ticketType']);
 
         if (! $this->isNew && $response['status'] > 299) {
