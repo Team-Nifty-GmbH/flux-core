@@ -12,10 +12,12 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Laravel\SerializableClosure\SerializableClosure;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use WireUi\Traits\Actions;
 
 trait CreatesDocuments
@@ -31,6 +33,9 @@ trait CreatesDocuments
         'force' => [],
     ];
 
+    #[Locked]
+    public array $previewData = [];
+
     abstract protected function getTo(OffersPrinting $item, array $documents): array;
 
     abstract protected function getSubject(OffersPrinting $item): string;
@@ -43,7 +48,10 @@ trait CreatesDocuments
 
     public function renderCreateDocumentsModal(): View
     {
-        return view('flux::livewire.create-documents-modal');
+        return view(
+            'flux::livewire.create-documents-modal',
+            ['supportsDocumentPreview' => $this->supportsDocumentPreview()]
+        );
     }
 
     #[Renderless]
@@ -57,6 +65,56 @@ trait CreatesDocuments
         $this->js(<<<'JS'
             $openModal('create-documents');
         JS);
+    }
+
+    #[Renderless]
+    public function openPreview(string $printView, string $modelType, int|string $modelId): void
+    {
+        if (! in_array($printView, $this->getPrintLayouts())) {
+            throw new \InvalidArgumentException('Invalid print view');
+        }
+
+        if (! $this->supportsDocumentPreview()) {
+            throw new \BadMethodCallException('Document preview is not supported');
+        }
+
+        $this->previewData = [
+            'model_type' => $modelType,
+            'model_id' => $modelId,
+            'view' => $printView,
+            'preview' => true,
+        ];
+        $route = route('print.render', $this->previewData);
+
+        $this->js(<<<JS
+            document.getElementById('preview-iframe').src = '$route';
+            \$openModal(document.getElementById('preview'));
+        JS);
+    }
+
+
+    #[Renderless]
+    public function downloadPreview(): ?StreamedResponse
+    {
+        if (! $this->supportsDocumentPreview()) {
+            throw new \BadMethodCallException('Document preview is not supported');
+        }
+
+        try {
+            $pdf = Printing::make($this->previewData)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return null;
+        }
+
+        return response()->streamDownload(
+            fn () => print ($pdf->pdf->output()),
+            Str::finish($pdf->getFileName(), '.pdf')
+        );
     }
 
     protected function createDocumentFromItems(
@@ -190,6 +248,11 @@ trait CreatesDocuments
         }
 
         return null;
+    }
+
+    protected function supportsDocumentPreview(): bool
+    {
+        return false;
     }
 
     protected function getBladeParameters(): array|SerializableClosure|null

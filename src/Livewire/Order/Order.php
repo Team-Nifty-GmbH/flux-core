@@ -510,31 +510,6 @@ class Order extends OrderPositionList
     }
 
     #[Renderless]
-    public function downloadPreview(string $view): ?StreamedResponse
-    {
-        try {
-            $pdf = Printing::make([
-                'model_type' => app(OrderModel::class)->getMorphClass(),
-                'model_id' => $this->order->id,
-                'view' => $view,
-                'preview' => true,
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return null;
-        }
-
-        return response()->streamDownload(
-            fn () => print ($pdf->pdf->output()),
-            Str::finish($pdf->getFileName(), '.pdf')
-        );
-    }
-
-    #[Renderless]
     public function updatedOrderState(): void
     {
         $this->getAvailableStates('state');
@@ -834,10 +809,14 @@ class Order extends OrderPositionList
             ])
             ->firstOrFail()
             ->append('avatar_url');
-        $this->printLayouts = array_keys($order->resolvePrintViews());
 
         $this->order->fill($order);
         $this->order->users = $order->users->pluck('id')->toArray();
+
+        $this->printLayouts = array_map(
+            fn (string $layout) => ['layout' => $layout, 'label' => __($layout)],
+            $this->getPrintLayouts()
+        );
 
         $invoice = $order->invoice();
         if ($invoice) {
@@ -1025,6 +1004,11 @@ class Order extends OrderPositionList
                 ->first(['id', 'order_type_id'])
                 ->resolvePrintViews()
         );
+    }
+
+    protected function supportsDocumentPreview(): bool
+    {
+        return true;
     }
 
     protected function getTo(OffersPrinting $item, array $documents): array
