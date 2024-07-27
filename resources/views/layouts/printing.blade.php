@@ -138,7 +138,7 @@
 <body class="text-xs">
     <x-flux::print.header />
     <x-flux::print.footer />
-    {{ $slot }}
+    {!! $slot !!}
     @if($signaturePath)
         <div class="flex justify-end mt-10">
             <div>
