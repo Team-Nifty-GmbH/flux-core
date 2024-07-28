@@ -3,6 +3,7 @@
 namespace FluxErp\Tests\Livewire;
 
 use FluxErp\Livewire\Cart;
+use FluxErp\Models\Currency;
 use FluxErp\Models\PriceList;
 use Livewire\Livewire;
 
@@ -13,6 +14,9 @@ class CartTest extends BaseSetup
         parent::setUp();
 
         PriceList::factory()->create([
+            'is_default' => true,
+        ]);
+        Currency::factory()->create([
             'is_default' => true,
         ]);
     }

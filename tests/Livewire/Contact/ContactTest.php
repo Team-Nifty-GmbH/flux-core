@@ -38,4 +38,19 @@ class ContactTest extends TestCase
         Livewire::test(Contact::class, ['id' => $this->contact->id])
             ->assertStatus(200);
     }
+
+    public function test_switch_tabs()
+    {
+        $component = Livewire::test(Contact::class, ['id' => $this->contact->id]);
+
+        foreach (Livewire::new(Contact::class)->getTabs() as $tab) {
+            $component
+                ->set('tab', $tab->component)
+                ->assertStatus(200);
+
+            if ($tab->isLivewireComponent) {
+                $component->assertSeeLivewire($tab->component);
+            }
+        }
+    }
 }

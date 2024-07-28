@@ -68,4 +68,19 @@ class OrderTest extends BaseSetup
         Livewire::test(OrderView::class, ['id' => $this->order->id])
             ->assertStatus(200);
     }
+
+    public function test_switch_tabs()
+    {
+        $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+
+        foreach (Livewire::new(OrderView::class)->getTabs() as $tab) {
+            $component
+                ->set('tab', $tab->component)
+                ->assertStatus(200);
+
+            if ($tab->isLivewireComponent) {
+                $component->assertSeeLivewire($tab->component);
+            }
+        }
+    }
 }
