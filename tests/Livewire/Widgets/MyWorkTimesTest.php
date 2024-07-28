@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Widgets;
+namespace FluxErp\Tests\Livewire\Widgets;
 
 use FluxErp\Livewire\Widgets\MyWorkTimes;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class MyWorkTimesTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(MyWorkTimes::class)
             ->assertStatus(200);

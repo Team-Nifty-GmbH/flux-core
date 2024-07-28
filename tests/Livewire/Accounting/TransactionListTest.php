@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Accounting;
+namespace FluxErp\Tests\Livewire\Accounting;
 
 use FluxErp\Livewire\Accounting\TransactionList;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class TransactionListTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(TransactionList::class)
             ->assertStatus(200);

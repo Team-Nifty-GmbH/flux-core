@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\DataTables\Products;
+namespace FluxErp\Tests\Livewire\DataTables\Products;
 
 use FluxErp\Livewire\DataTables\Products\MediaGrid;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class MediaGridTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(MediaGrid::class)
             ->assertStatus(200);

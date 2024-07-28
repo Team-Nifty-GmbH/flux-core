@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Contact\Accounting;
+namespace FluxErp\Tests\Livewire\Contact\Accounting;
 
 use FluxErp\Livewire\Contact\Accounting\SepaMandates;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class SepaMandatesTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(SepaMandates::class)
             ->assertStatus(200);

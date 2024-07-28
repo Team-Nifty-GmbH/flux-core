@@ -34,7 +34,10 @@ class Checkout extends Cart
 
     public function mount(): void
     {
-        $this->deliveryAddress->fill(auth()->user()->contact->deliveryAddress->toArray());
+        $this->deliveryAddress->fill(
+            auth()->user()->contact->deliveryAddress?->toArray()
+            ?? auth()->user()->toArray()
+        );
     }
 
     public function render(): View

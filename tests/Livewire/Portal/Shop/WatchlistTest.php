@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Portal\Shop;
+namespace FluxErp\Tests\Livewire\Portal\Shop;
 
 use FluxErp\Livewire\Portal\Shop\Watchlist;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class WatchlistTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(Watchlist::class)
             ->assertStatus(200);

@@ -1,17 +1,17 @@
 <?php
 
-namespace Tests\Feature\Livewire\Features\Calendar;
+namespace FluxErp\Tests\Livewire\Features\Calendar;
 
 use FluxErp\Livewire\Features\Calendar\FluxCalendar;
+use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class FluxCalendarTest extends TestCase
+class FluxCalendarTest extends BaseSetup
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
-        Livewire::test(FluxCalendar::class)
+        Livewire::actingAs($this->user)
+            ->test(FluxCalendar::class)
             ->assertStatus(200);
     }
 }

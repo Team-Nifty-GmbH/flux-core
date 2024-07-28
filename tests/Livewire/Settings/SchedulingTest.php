@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Settings;
+namespace FluxErp\Tests\Livewire\Settings;
 
 use FluxErp\Livewire\Settings\Scheduling;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class SchedulingTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(Scheduling::class)
             ->assertStatus(200);

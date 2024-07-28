@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Accounting;
+namespace FluxErp\Tests\Livewire\Accounting;
 
 use FluxErp\Livewire\Accounting\DirectDebit;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class DirectDebitTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(DirectDebit::class)
             ->assertStatus(200);

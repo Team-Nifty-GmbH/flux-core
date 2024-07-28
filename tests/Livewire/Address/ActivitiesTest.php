@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Address;
+namespace FluxErp\Tests\Livewire\Address;
 
 use FluxErp\Livewire\Address\Activities;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class ActivitiesTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(Activities::class)
             ->assertStatus(200);

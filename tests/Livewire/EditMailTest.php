@@ -3,15 +3,15 @@
 namespace Tests\Feature\Livewire;
 
 use FluxErp\Livewire\EditMail;
+use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class EditMailTest extends TestCase
+class EditMailTest extends BaseSetup
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
-        Livewire::test(EditMail::class)
+        Livewire::actingAs($this->user)
+            ->test(EditMail::class)
             ->assertStatus(200);
     }
 }

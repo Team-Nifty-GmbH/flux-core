@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Contact;
+namespace FluxErp\Tests\Livewire\Contact;
 
 use FluxErp\Livewire\Contact\Accounting;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class AccountingTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(Accounting::class)
             ->assertStatus(200);

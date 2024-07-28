@@ -1,17 +1,30 @@
 <?php
 
-namespace Tests\Feature\Livewire\Product;
+namespace FluxErp\Tests\Livewire\Product;
 
+use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Livewire\Product\WarehouseList;
+use FluxErp\Models\Product;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class WarehouseListTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    private Product $product;
+
+    protected function setUp(): void
     {
-        Livewire::test(WarehouseList::class)
+        parent::setUp();
+
+        $this->product = Product::factory()->create();
+    }
+
+    public function test_renders_successfully()
+    {
+        $form = new ProductForm(Livewire::new(WarehouseList::class), 'product');
+        $form->fill($this->product);
+
+        Livewire::test(WarehouseList::class, ['product' => $form])
             ->assertStatus(200);
     }
 }

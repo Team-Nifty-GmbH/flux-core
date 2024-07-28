@@ -1,17 +1,16 @@
 <?php
 
-namespace Tests\Feature\Livewire\Features;
+namespace FluxErp\Tests\Livewire\Features;
 
 use FluxErp\Livewire\Features\CommissionRates;
+use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class CommissionRatesTest extends TestCase
+class CommissionRatesTest extends BaseSetup
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
-        Livewire::test(CommissionRates::class)
+        Livewire::test(CommissionRates::class, ['userId' => $this->user->id])
             ->assertStatus(200);
     }
 }

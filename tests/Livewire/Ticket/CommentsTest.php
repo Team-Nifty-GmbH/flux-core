@@ -1,17 +1,17 @@
 <?php
 
-namespace Tests\Feature\Livewire\Ticket;
+namespace FluxErp\Tests\Livewire\Ticket;
 
 use FluxErp\Livewire\Ticket\Comments;
+use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class CommentsTest extends TestCase
+class CommentsTest extends BaseSetup
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
-        Livewire::test(Comments::class)
+        Livewire::actingAs($this->user)
+            ->test(Comments::class)
             ->assertStatus(200);
     }
 }

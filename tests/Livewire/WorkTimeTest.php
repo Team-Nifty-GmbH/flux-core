@@ -3,13 +3,12 @@
 namespace Tests\Feature\Livewire;
 
 use FluxErp\Livewire\WorkTime;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class WorkTimeTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(WorkTime::class)
             ->assertStatus(200);

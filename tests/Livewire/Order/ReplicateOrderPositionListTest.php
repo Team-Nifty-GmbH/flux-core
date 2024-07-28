@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Order;
+namespace FluxErp\Tests\Livewire\Order;
 
 use FluxErp\Livewire\Order\ReplicateOrderPositionList;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class ReplicateOrderPositionListTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(ReplicateOrderPositionList::class)
             ->assertStatus(200);

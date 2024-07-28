@@ -1,17 +1,17 @@
 <?php
 
-namespace Tests\Feature\Livewire\Widgets;
+namespace FluxErp\Tests\Livewire\Widgets;
 
 use FluxErp\Livewire\Widgets\MyResponsibleTasks;
+use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class MyResponsibleTasksTest extends TestCase
+class MyResponsibleTasksTest extends BaseSetup
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
-        Livewire::test(MyResponsibleTasks::class)
+        Livewire::actingAs($this->user)
+            ->test(MyResponsibleTasks::class)
             ->assertStatus(200);
     }
 }

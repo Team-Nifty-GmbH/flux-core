@@ -1,15 +1,23 @@
 <?php
 
-namespace Tests\Feature\Livewire;
+namespace FluxErp\Tests\Livewire;
 
 use FluxErp\Livewire\Cart;
+use FluxErp\Models\PriceList;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class CartTest extends TestCase
+class CartTest extends BaseSetup
 {
-    /** @test */
-    public function renders_successfully()
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        PriceList::factory()->create([
+            'is_default' => true,
+        ]);
+    }
+
+    public function test_renders_successfully()
     {
         Livewire::test(Cart::class)
             ->assertStatus(200);

@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Auth;
+namespace FluxErp\Tests\Livewire\Auth;
 
 use FluxErp\Livewire\Auth\Login;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class LoginTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(Login::class)
             ->assertStatus(200);

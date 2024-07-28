@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Settings;
+namespace FluxErp\Tests\Livewire\Settings;
 
 use FluxErp\Livewire\Settings\VatRates;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class VatRatesTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(VatRates::class)
             ->assertStatus(200);

@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Product;
+namespace FluxErp\Tests\Livewire\Product;
 
 use FluxErp\Livewire\Product\ProductList;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class ProductListTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(ProductList::class)
             ->assertStatus(200);

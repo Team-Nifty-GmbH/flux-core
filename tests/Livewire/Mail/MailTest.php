@@ -1,17 +1,17 @@
 <?php
 
-namespace Tests\Feature\Livewire\Mail;
+namespace FluxErp\Tests\Livewire\Mail;
 
 use FluxErp\Livewire\Mail\Mail;
+use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class MailTest extends TestCase
+class MailTest extends BaseSetup
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
-        Livewire::test(Mail::class)
+        Livewire::actingAs($this->user)
+            ->test(Mail::class)
             ->assertStatus(200);
     }
 }

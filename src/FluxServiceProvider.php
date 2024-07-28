@@ -56,6 +56,7 @@ use Illuminate\Support\Str;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Scout\Builder;
+use Livewire\Component;
 use Livewire\Livewire;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -377,7 +378,11 @@ class FluxServiceProvider extends ServiceProvider
         $livewireNamespace = 'FluxErp\\Livewire\\';
 
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
-            Livewire::component($alias, $class);
+            if (is_a($class, Component::class, true)
+                && ! (new \ReflectionClass($class))->isAbstract()
+            ) {
+                Livewire::component($alias, $class);
+            }
         }
     }
 

@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\Livewire\Auth;
+namespace FluxErp\Tests\Livewire\Auth;
 
 use FluxErp\Livewire\Auth\Logout;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 class LogoutTest extends TestCase
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
         Livewire::test(Logout::class)
             ->assertStatus(200);

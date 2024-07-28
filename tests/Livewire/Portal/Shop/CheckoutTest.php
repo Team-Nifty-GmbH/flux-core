@@ -1,17 +1,17 @@
 <?php
 
-namespace Tests\Feature\Livewire\Portal\Shop;
+namespace FluxErp\Tests\Livewire\Portal\Shop;
 
 use FluxErp\Livewire\Portal\Shop\Checkout;
+use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class CheckoutTest extends TestCase
+class CheckoutTest extends BaseSetup
 {
-    /** @test */
-    public function renders_successfully()
+    public function test_renders_successfully()
     {
-        Livewire::test(Checkout::class)
+        Livewire::actingAs($this->address)
+            ->test(Checkout::class)
             ->assertStatus(200);
     }
 }
