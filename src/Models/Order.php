@@ -128,8 +128,8 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             }
 
             if ($order->isDirty('iban')
-                && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
                 && $order->iban
+                && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
             ) {
                 $order->contact_bank_connection_id = null;
             }
@@ -145,7 +145,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                 $order->bic = $order->contactBankConnection->bic;
             }
 
-            if ($order->isDirty('iban')) {
+            if ($order->isDirty('iban') && $order->iban) {
                 $order->iban = str_replace(' ', '', strtoupper($order->iban));
             }
         });
