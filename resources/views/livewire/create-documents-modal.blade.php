@@ -1,3 +1,6 @@
+@props([
+    'supportsDocumentPreview' => false,
+])
 @if($supportsDocumentPreview)
     <x-modal.card id="preview" max-width="6xl" :title="__('Preview')" x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'">
         <iframe id="preview-iframe" src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E" loading="lazy" class="w-full min-h-screen"></iframe>
