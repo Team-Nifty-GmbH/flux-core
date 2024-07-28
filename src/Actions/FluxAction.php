@@ -34,7 +34,7 @@ abstract class FluxAction
 
     abstract public function performAction(): mixed;
 
-    public function __construct(array $data = [], bool $keepEmptyStrings = false)
+    public function __construct(Arrayable|array $data = [], bool $keepEmptyStrings = false)
     {
         $this->setEventDispatcher();
 
@@ -42,6 +42,7 @@ abstract class FluxAction
 
         static::bootTraits();
         $this->keepEmptyStrings = $keepEmptyStrings;
+        $data = $data instanceof Arrayable ? $data->toArray() : $data;
         $this->boot($data);
 
         $this->fireActionEvent(event: 'booted', halt: false);
