@@ -20,7 +20,7 @@ class NotificationEloquentEventSubscriber
     public function sendNotification($event, $model): void
     {
         $eventType = explode('.', explode(':', $event)[0])[1];
-        $notification = config('notifications.model_notifications.' . $model[0]->getMorphClass() . '.' . $eventType);
+        $notification = config('notifications.model_notifications.' . get_class($model[0]) . '.' . $eventType);
 
         if (! $notification) {
             return;
