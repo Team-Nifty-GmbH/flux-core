@@ -37,6 +37,8 @@ module.exports = {
     },
     plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
     safelist: [
+        'tippy-box',
+        'suggestion-item',
         'ring-offset-2',
         'indent-icon',
         'md:col-span-1',
