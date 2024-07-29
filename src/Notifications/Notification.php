@@ -24,8 +24,9 @@ class Notification extends BaseNotification
 
     public static function defaultChannels(mixed $notifiable = null): array
     {
-        return method_exists($notifiable, 'getMorphClass')
-            && $notifiable?->getMorphClass() !== morph_alias(User::class)
+        return (is_object($notifiable) || is_string($notifiable))
+            && method_exists($notifiable, 'getMorphClass')
+            && $notifiable->getMorphClass() !== morph_alias(User::class)
                 ? [
                     BroadcastChannel::class,
                     DatabaseChannel::class,

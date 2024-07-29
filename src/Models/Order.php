@@ -59,7 +59,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         'currency',
     ];
 
-    public string $detailRouteName = 'orders.id';
+    protected ?string $detailRouteName = 'orders.id';
 
     protected $guarded = [
         'id',
@@ -518,5 +518,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         $printViews = $this->printableResolvePrintViews();
 
         return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
+    }
+
+    public function getPortalDetailRoute(): string
+    {
+        return route('portal.orders.id', ['id' => $this->id]);
     }
 }

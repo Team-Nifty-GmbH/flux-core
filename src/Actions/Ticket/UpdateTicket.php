@@ -2,9 +2,12 @@
 
 namespace FluxErp\Actions\Ticket;
 
+use FluxErp\Actions\EventSubscription\CreateEventSubscription;
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\Comment;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
+use FluxErp\Models\User;
 use FluxErp\Rulesets\Ticket\UpdateTicketRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -35,7 +38,22 @@ class UpdateTicket extends FluxAction
         $ticket->save();
 
         if (is_array($users)) {
-            $ticket->users()->sync($users);
+            $sync = $ticket->users()->sync($users);
+
+            foreach (data_get($sync, 'attached', []) as $user) {
+                CreateEventSubscription::make([
+                    'event' => eloquent_model_event(
+                        'created',
+                        resolve_static(Comment::class, 'class')
+                    ),
+                    'subscribable_id' => $user,
+                    'subscribable_type' => morph_alias(User::class),
+                    'model_type' => $ticket->getMorphClass(),
+                    'model_id' => $ticket->id,
+                    'is_broadcast' => false,
+                    'is_notifiable' => true,
+                ])->execute();
+            }
         }
 
         return $ticket->refresh();

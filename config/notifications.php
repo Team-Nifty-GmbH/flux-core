@@ -11,10 +11,10 @@ return [
     */
 
     'model_notifications' => [
-        morph_alias(\FluxErp\Models\Comment::class) => [
+        \FluxErp\Models\Comment::class => [
             'created' => \FluxErp\Notifications\Comment\CommentCreatedNotification::class,
         ],
-        morph_alias(\FluxErp\Models\Ticket::class) => [
+        \FluxErp\Models\Ticket::class => [
             'created' => \FluxErp\Notifications\Ticket\TicketCreatedNotification::class,
         ],
     ],
