@@ -1,17 +1,34 @@
-import FilePondPluginImagePreview from "filepond-plugin-image-preview";
-import { create, registerPlugin } from "filepond";
+import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
+import { create, registerPlugin } from 'filepond';
 
-export default function($ref) {
+export default function($wire, $ref, label) {
     return {
-        init() {
+        selectedFiles: [],
+        loadFilePond() {
             registerPlugin(FilePondPluginImagePreview);
 
-            const inputElement = $ref.querySelector('input[type="file"]');
+            const inputElement = $ref.querySelector('#filepond-drop');
+            if (!inputElement) {
+                return;
+            }
+            create(inputElement, {
+                allowMultiple: true,
+                labelIdle: label,
+                onaddfile: (error, file) => {
+                    console.log(file);
+                    this.selectedFiles.push(file);
+                },
+                onremovefile: (error, file) => {
+                    this.selectedFiles = this.selectedFiles.filter((f) => f.id !== file.id);
+                }
+            });
 
-            // wait for Alpine to finish rendering the component - next event loop tick
-                create(inputElement, {
-                    allowMultiple: true
-                });
-        }
+        },
+        async uploadSelectedFiles(collectionName) {
+
+        },
+        get isEmpty() {
+            return this.selectedFiles.length === 0;
+        },
     };
 }

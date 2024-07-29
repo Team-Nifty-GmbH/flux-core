@@ -69,7 +69,3 @@
         @apply h-96
     }
 }
-
-.filepond--root {
-    @apply min-h-48;
-}

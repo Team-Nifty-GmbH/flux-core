@@ -1,12 +1,14 @@
 <div x-data="{
         ...folderTree(),
-        loadLevels() {
-            $wire.getTree().then((result) => this.levels = result);
+        ...filePond($wire,$refs.upload, '{{__('Upload with drag and drop…')}}'),
+        async loadLevels() {
+            this.levels = await $wire.getTree();
         },
-        loadModel(modelType, modelId) {
-            $wire.set('modelType', modelType, true);
-            $wire.set('modelId', modelId, true);
-            this.loadLevels();
+        async loadModel(modelType, modelId) {
+            await Promise.all([
+            $wire.set('modelType', modelType, true),
+            $wire.set('modelId', modelId, true),
+            this.loadLevels()]);
         },
         selectionProxy: {},
         selection: {},
@@ -213,48 +215,31 @@
         <div x-ref="upload" x-show="! selection.file_name && selected" class="flex flex-col gap-3" x-cloak>
             <div>
                 @can('action.media.upload')
-                    <x-button x-show="! selection.is_static" negative :label="__('Delete')" x-on:click="deleteFolder(selection)" />
+                    <x-button x-show="! selection.is_static" negative :label="__('Delete')"
+                              x-on:click="deleteFolder(selection)" />
                 @endcan
                 @can('action.media.upload')
                     <x-button :label="__('Add folder')" x-on:click="addFolder(selectionProxy.children, selection)" />
                 @endcan
-                <x-button spinner :label="__('Download folder')" x-on:click="$wire.downloadCollection(selection.collection_name)" />
+                <x-button spinner :label="__('Download folder')"
+                          x-on:click="$wire.downloadCollection(selection.collection_name)" />
             </div>
             @can('action.media.update')
-                <x-input x-bind:disabled="selection.is_static" :label="__('Name')" x-model="selection.name" />
+                <div class="flex flex-col space-y-3 md:flex-row  md:space-x-3 items-end justify-end">
+                    <div class="md:flex-1 w-full p-0">
+                        <x-input class="flex-1" x-bind:disabled="selection.is_static" :label="__('Name')"
+                                 x-model="selection.name" />
+                    </div>
+                    <x-button primary :label="__('Save')" x-on:click="save()" />
+                </div>
             @endcan
             @can('action.media.upload')
-{{--                <div class="relative flex flex-col items-center justify-center"--}}
-{{--                     x-on:drop="isDropping = false"--}}
-{{--                     x-on:drop.prevent="handleFileDrop($event)"--}}
-{{--                     x-on:dragover.prevent="isDropping = true"--}}
-{{--                     x-on:dragleave.prevent="isDropping = false"--}}
-{{--                >--}}
-{{--                    <div class="absolute top-0 bottom-0 left-0 right-0 z-30 flex items-center justify-center bg-blue-500 opacity-90"--}}
-{{--                         x-show="isDropping"--}}
-{{--                    >--}}
-{{--                        <span class="text-3xl text-white">{{ __('Release file to upload!') }}</span>--}}
-{{--                    </div>--}}
-{{--                    <label class="order-2 flex w-full cursor-pointer select-none flex-col items-center justify-center rounded-md border-dashed border-gray-300 bg-gray-50 p-10 shadow hover:bg-slate-50"--}}
-{{--                           for="file-upload"--}}
-{{--                    >--}}
-{{--                        <div class="pb-3">--}}
-{{--                            <x-heroicons name="arrow-up-on-square" class="h-12 w-12" />--}}
-{{--                        </div>--}}
-{{--                        <p>{{ __('Click here to select files to upload') }}</p>--}}
-{{--                        <em class="italic text-slate-400">{{ __('(Or drag files to the page)') }}</em>--}}
-{{--                        <div class="mt-3 h-[2px] w-1/2 bg-gray-200" x-show="isUploading">--}}
-{{--                            <div--}}
-{{--                                class="h-[2px] bg-blue-500"--}}
-{{--                                style="transition: width 1s"--}}
-{{--                                x-bind:style="`width: ${progress}%;`"--}}
-{{--                            >--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </label>--}}
-{{--                    <input type="file" id="file-upload"  class="hidden" multiple x-on:change="handleFileSelect($event)"/>--}}
-{{--                </div>--}}
-                <input x-data="filePond($refs.upload)" type="file"/>
+                <div class="flex flex-col items-end">
+                    <div class="w-full mb-4">
+                        <input x-init="loadFilePond()" id="filepond-drop" type="file" />
+                    </div>
+                    <x-button x-cloak x-show="isEmpty"  x-on:click="uploadSelectedFiles(selectionProxy.collection_name)" primary :label="__('Upload')" />
+                </div>
             @endcan
         </div>
         <div x-show="selection.file_name && selected" x-cloak class="flex flex-col gap-3">
@@ -273,11 +258,11 @@
                     <x-input :label="__('File')" disabled x-bind:value="selection.file_name" />
                     <x-input :label="__('Disk')" disabled x-bind:value="selection.disk" />
                     <x-input x-show="selection?.disk === 'public'"
-                        :label="__('Link')"
-                        readonly
-                        x-ref="originalLink"
-                        type="text"
-                        x-bind:value="selection.original_url"
+                             :label="__('Link')"
+                             readonly
+                             x-ref="originalLink"
+                             type="text"
+                             x-bind:value="selection.original_url"
                     >
                         <x-slot:append>
                             <div class="absolute inset-y-0 right-0 flex items-center p-0.5">
@@ -293,10 +278,10 @@
                     </x-input>
                 @endcan
                 <object class="object-contain"
-                    x-bind:type="selection.mime_type"
-                    x-bind:data="selection.original_url + '#zoom=85&scrollbar=0&toolbar=0&navpanes=0'"
-                    width="100%"
-                    height="200px"
+                        x-bind:type="selection.mime_type"
+                        x-bind:data="selection.original_url + '#zoom=85&scrollbar=0&toolbar=0&navpanes=0'"
+                        width="100%"
+                        height="200px"
                 >
                     <div class="flex items-center justify-center w-full h-48 bg-gray-200 text-gray-400">
                         {{ __('Your browser does not support preview for this file.') }}
@@ -304,10 +289,5 @@
                 </object>
             </div>
         </div>
-        @can('action.media.update')
-            <div x-show="selected" class="w-full flex justify-end">
-                <x-button primary :label="__('Save')" x-on:click="save()" />
-            </div>
-        @endcan
     </div>
 </div>
