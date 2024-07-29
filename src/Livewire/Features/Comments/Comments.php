@@ -98,12 +98,12 @@ class Comments extends Component
 
     public function saveComment(string $comment, bool $sticky, bool $internal = true): void
     {
-        if (Auth::user()->getMorphClass() !== app(User::class)->getMorphClass()) {
+        if (Auth::user()->getMorphClass() !== morph_alias(User::class)) {
             $internal = false;
         }
 
         $comment = [
-            'model_type' => app($this->modelType)->getMorphClass(),
+            'model_type' => morph_alias($this->modelType),
             'model_id' => $this->modelId,
             'comment' => $comment,
             'is_sticky' => $sticky,

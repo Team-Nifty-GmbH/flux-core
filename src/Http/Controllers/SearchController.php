@@ -11,6 +11,8 @@ class SearchController extends Controller
 {
     public function __invoke(Request $request, $model)
     {
+        // check if $model is a morph alias
+        $model = morphed_model($model) ?? $model;
         $model = qualify_model(str_replace('/', '\\', $model));
 
         if (! class_exists($model) || ! in_array(Searchable::class, class_uses_recursive(app($model)))) {
@@ -23,16 +25,17 @@ class SearchController extends Controller
             $selected = $request->get('selected');
             $optionValue = $request->get('option-value') ?: (app($model))->getKeyName();
 
-            $query = app($model)->query();
+            $query = resolve_static($model, 'query');
             is_array($selected)
                 ? $query->whereIn($optionValue, $selected)
                 : $query->where($optionValue, $selected);
         } elseif ($request->has('search')) {
             $query = ! is_string($request->get('search'))
-                ? app($model)->query()->limit(20)
-                : app($model)->search($request->get('search'))->toEloquentBuilder();
+                ? resolve_static($model, 'query')->limit(20)
+                : resolve_static($model, 'search', ['query' => $request->get('search')])
+                    ->toEloquentBuilder();
         } else {
-            $query = app($model)->query();
+            $query = resolve_static($model, 'query');
         }
 
         if ($request->has('with')) {
