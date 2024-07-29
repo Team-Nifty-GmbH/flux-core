@@ -44,7 +44,6 @@
         "lodash.kebabcase": "^4.1.1",
         "postcss": "^8.4.32",
         "postcss-import": "^15.1.0",
-        "pulltorefreshjs": "^0.1.22",
         "pusher-js": "^8.4.0-rc2",
         "qs": "^6.11.2",
         "sortablejs": "^1.15.2",

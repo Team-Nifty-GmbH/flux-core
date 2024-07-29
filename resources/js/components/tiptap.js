@@ -25,7 +25,7 @@ export default function (content, searchModel = ['user', 'role']) {
                             HTMLAttributes: { 'class': 'mention' },
                             suggestion: {
                                 items: async ({ query }) => {
-                                    return await  Promise.all(searchModel.map(async model => {
+                                    return (await Promise.all(searchModel.map(async model => {
                                         return (await axios.get(`/search/${model}?search=${query}`)).data.map(item => {
                                             return {
                                                 id: model + ':' + item.id,
@@ -33,9 +33,7 @@ export default function (content, searchModel = ['user', 'role']) {
                                                 src: item.src,
                                             };
                                         });
-                                    })).then(items => {
-                                        return items.flat();
-                                    });
+                                    }))).flat();
                                 },
 
                                 render: () => {

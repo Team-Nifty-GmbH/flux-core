@@ -13,7 +13,6 @@ class SearchController extends Controller
     {
         // check if $model is a morph alias
         $model = morphed_model($model) ?? $model;
-
         $model = qualify_model(str_replace('/', '\\', $model));
 
         if (! class_exists($model) || ! in_array(Searchable::class, class_uses_recursive(app($model)))) {
