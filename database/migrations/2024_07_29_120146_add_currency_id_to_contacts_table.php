@@ -11,7 +11,7 @@ return new class() extends Migration
         Schema::table('contacts', function (Blueprint $table) {
             $table->foreignId('currency_id')
                 ->nullable()
-                ->after('payment_type_id')
+                ->after('agent_id')
                 ->constrained()
                 ->nullOnDelete();
         });
