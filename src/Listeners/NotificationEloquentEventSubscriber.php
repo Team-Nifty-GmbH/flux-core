@@ -20,12 +20,13 @@ class NotificationEloquentEventSubscriber
     public function sendNotification($event, $model): void
     {
         $eventType = explode('.', explode(':', $event)[0])[1];
-        $notification = config('notifications.model_notifications.' . get_class($model[0]) . '.' . $eventType);
+        $notification = config('notifications.model_notifications.' . $model[0]->getMorphClass() . '.' . $eventType);
 
         if (! $notification) {
             return;
         }
 
+        $notification = resolve_static($notification, 'class');
         $this->model = $model[0];
 
         // Subscribers to the morph model.
