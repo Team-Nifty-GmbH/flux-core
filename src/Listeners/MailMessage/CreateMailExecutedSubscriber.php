@@ -28,17 +28,13 @@ class CreateMailExecutedSubscriber
             $this->createPurchaseInvoice($message);
         }
 
-        if ($message->mailFolder->creates_ticket) {
-            $this->createTicket($message);
-        }
-
         $matches = [];
         preg_match(
             '/\[flux:comment:(\w+):(\d+)]/',
             $message->text_body ?? $message->html_body ?? $message->subject,
             $matches
         );
-        if (count($matches) === 3) {
+        if (count($matches) === 3 && $message->mailFolder->creates_ticket) {
             $model = $matches[1];
             $id = $matches[2];
 
@@ -51,6 +47,8 @@ class CreateMailExecutedSubscriber
                 ])->validate()->execute();
             } catch (\Throwable) {
             }
+        } elseif ($message->mailFolder->creates_ticket) {
+            $this->createTicket($message);
         }
     }
 
