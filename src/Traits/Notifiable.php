@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits;
 
+use FluxErp\Models\EventSubscription;
 use FluxErp\Models\NotificationSetting;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Notifications\Notifiable as BaseNotifiable;
@@ -11,6 +12,11 @@ trait Notifiable
 {
     use BaseNotifiable {
         BaseNotifiable::routeNotificationFor as protected baseRouteNotificationFor;
+    }
+
+    public function eventSubscriptions(): MorphMany
+    {
+        return $this->morphMany(EventSubscription::class, 'subscribable');
     }
 
     public function notificationSettings(): MorphMany

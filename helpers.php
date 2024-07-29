@@ -195,20 +195,21 @@ if (! function_exists('event_subscribers')) {
         string $event,
         ?int $modelId = null,
         ?string $modelType = null
-    ): Illuminate\Database\Eloquent\Collection {
+    ): Illuminate\Support\Collection {
         if (
             resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
                 ->where('event', $event)
-                ->whereNull('user_id')
+                ->whereNull('subscribable_id')
                 ->exists()
         ) {
             return resolve_static(\FluxErp\Models\User::class, 'query')->get();
         }
 
-        $subscriberIds = resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
-            ->whereNot('user_id', auth()->id())
-            ->where(function ($query) use ($event, $modelId, $modelType) {
-                $query->where(function ($query) use ($event) {
+        return resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
+            ->whereNot(fn ($query) => $query->where('subscribable_type', auth()->user()->getMorphClass())
+                ->where('subscribable_id', auth()->id()))
+            ->where(function (Illuminate\Database\Eloquent\Builder $query) use ($event, $modelId, $modelType) {
+                $query->where(function (Illuminate\Database\Eloquent\Builder $query) use ($event) {
                     $query->where('event', $event)
                         ->whereNull('model_id');
                 })
@@ -223,13 +224,9 @@ if (! function_exists('event_subscribers')) {
                     })
                     ->orWhere('event', '*');
             })
-            ->get()
-            ->pluck('user_id')
-            ->toArray();
-
-        return resolve_static(\FluxErp\Models\User::class, 'query')
-            ->whereIntegerInRaw('id', $subscriberIds)
-            ->get();
+            ->with('subscribable')
+            ->get(['subscribable_id', 'subscribable_type'])
+            ->pluck('subscribable');
     }
 }
 
