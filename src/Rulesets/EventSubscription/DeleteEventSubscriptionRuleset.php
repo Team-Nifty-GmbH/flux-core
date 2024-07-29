@@ -18,7 +18,9 @@ class DeleteEventSubscriptionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                (new ModelExists(EventSubscription::class))->where('user_id', auth()->id()),
+                app(ModelExists::class, ['model' => EventSubscription::class])
+                    ->where('subscribable_type', auth()->user()->getMorphClass())
+                    ->where('subscribable_id', auth()->id()),
             ],
         ];
     }
