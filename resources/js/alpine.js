@@ -2,6 +2,7 @@ import folderTree from './components/folder-tree';
 import setupEditor from './components/tiptap';
 import workTime from './components/work-time.js';
 import notifications from './components/wireui/notifications';
+import signature from './components/signature-pad.js';
 import PullToRefresh from "pulltorefreshjs";
 import addressMap from "./components/address-map";
 import filePond from "./components/file-pond";
@@ -10,6 +11,7 @@ window.folderTree = folderTree;
 window.setupEditor = setupEditor;
 window.workTime = workTime;
 window.addressMap = addressMap;
+window.signature = signature;
 window.filePond = filePond;
 
 window.addEventListener('alpine:init', () => {
@@ -162,9 +164,13 @@ Alpine.directive('tribute', (el, { modifiers, expression }, { evaluate }) => {
     tribute.attach(el);
 })
 
-document.addEventListener('livewire:navigated', function() {
-    wireNavigation();
-}, {once: true});
+document.addEventListener(
+    'livewire:navigated',
+    function() {
+        wireNavigation();
+    },
+    {once: true}
+);
 
 document.addEventListener('livewire:init', () => {
     wireNavigation();

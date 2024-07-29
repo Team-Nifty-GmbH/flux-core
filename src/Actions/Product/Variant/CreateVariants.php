@@ -25,8 +25,7 @@ class CreateVariants extends FluxAction
 
     public function performAction(): Collection
     {
-        $parentProduct = app(Product::class)
-            ->query()
+        $parentProduct = resolve_static(Product::class, 'query')
             ->whereKey($this->data['parent_id'])
             ->with(['clients:id', 'categories:id', 'prices:id,price_list_id,price', 'tags:id'])
             ->first();
@@ -56,7 +55,7 @@ class CreateVariants extends FluxAction
             $product['name'] = data_get($product, 'name') . ' - '
                 . implode(
                     ' ',
-                    app(ProductOption::class)->query()
+                    resolve_static(ProductOption::class, 'query')
                         ->whereIntegerInRaw('id', $variantCreate)
                         ->pluck('name')
                         ->toArray()
@@ -73,8 +72,7 @@ class CreateVariants extends FluxAction
 
     protected function variantExists(array $configuration): bool
     {
-        return app(Product::class)
-            ->query()
+        return resolve_static(Product::class, 'query')
             ->where('parent_id', data_get($this->data, 'parent_id'))
             ->whereHas('productOptions', function (Builder $query) use ($configuration) {
                 return $query

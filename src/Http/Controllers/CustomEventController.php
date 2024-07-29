@@ -19,7 +19,7 @@ class CustomEventController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->model = new CustomEvent();
+        $this->model = app(CustomEvent::class);
     }
 
     public function create(CreateCustomEventRequest $request, CustomEventService $customEventService): JsonResponse

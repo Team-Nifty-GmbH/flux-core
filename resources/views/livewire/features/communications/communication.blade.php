@@ -13,6 +13,7 @@
         }
     }
 }">
+    {{ $this->renderCreateDocumentsModal() }}
     <x-modal name="edit-communication" max-width="5xl">
         <x-card :title="__('Edit Communication')" class="flex flex-col gap-4">
             <div>
@@ -38,13 +39,15 @@
                         'method' => 'POST',
                         'params' => [
                             'fields' => ['id', 'name', 'zip', 'city', 'street'],
-                            'where' => [
+                            'where' => $this->modelType === morph_alias(\FluxErp\Models\Contact::class)
+                            ? [
                                 [
                                     'contact_id',
                                     '=',
                                     $contactId,
                                 ],
-                            ],
+                            ]
+                            : [],
                         ],
                     ]"
                 />
@@ -232,7 +235,4 @@
             </x-slot:footer>
         </x-card>
     </x-modal>
-    <div wire:ignore>
-        @include('tall-datatables::livewire.data-table')
-    </div>
 </div>

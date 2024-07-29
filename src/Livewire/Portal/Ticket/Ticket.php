@@ -25,11 +25,11 @@ class Ticket extends Component
 
     public function mount(int $id): void
     {
-        $ticket = app(TicketModel::class)->query()
+        $ticket = resolve_static(TicketModel::class, 'query')
             ->whereKey($id)
             ->firstOrFail();
 
-        $this->additionalColumns = app(AdditionalColumn::class)->query()
+        $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
             ->where(function (Builder $query) use ($ticket) {
                 $query->where('model_type', app(TicketModel::class)->getMorphClass())
                     ->when($ticket->ticket_type_id, function (Builder $query) use ($ticket) {

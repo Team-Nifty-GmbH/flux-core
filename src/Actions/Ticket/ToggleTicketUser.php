@@ -26,7 +26,7 @@ class ToggleTicketUser extends FluxAction
 
     public function performAction(): array
     {
-        $ticket = app(Ticket::class)->query()
+        $ticket = resolve_static(Ticket::class, 'query')
             ->whereKey($this->data['ticket_id'])
             ->first();
 

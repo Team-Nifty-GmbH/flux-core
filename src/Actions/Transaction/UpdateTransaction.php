@@ -22,7 +22,7 @@ class UpdateTransaction extends FluxAction
 
     public function performAction(): Model
     {
-        $transaction = app(Transaction::class)->query()
+        $transaction = resolve_static(Transaction::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

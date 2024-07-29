@@ -25,7 +25,7 @@ class UpdateTask extends FluxAction
 
     public function performAction(): Model
     {
-        $task = app(Task::class)->query()
+        $task = resolve_static(Task::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -50,7 +50,7 @@ class UpdateTask extends FluxAction
         }
 
         if (! is_null($tags)) {
-            $task->syncTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
+            $task->syncTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
         return $task->withoutRelations()->fresh();

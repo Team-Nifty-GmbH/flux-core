@@ -58,14 +58,14 @@ class CreateMailMessage extends FluxAction
 
         if ($mailMessage->mailAccount->is_auto_assign) {
             if ($mailMessage->from_mail && $mailMessage->mailAccount->email !== $mailMessage->from_mail) {
-                $addresses = app(Address::class)->query()
+                $addresses = resolve_static(Address::class, 'query')
                     ->where('email', $mailMessage->from_mail)
                     ->get()
                     ->each(
                         fn (Address $address) => $address->mailMessages()->attach($mailMessage->id)
                     );
 
-                app(ContactOption::class)->query()
+                resolve_static(ContactOption::class, 'query')
                     ->where('value', $mailMessage->from_mail)
                     ->whereIntegerNotInRaw('address_id', $addresses->pluck('id')->toArray())
                     ->with('address')
@@ -78,14 +78,18 @@ class CreateMailMessage extends FluxAction
                     );
             }
 
-            app(Order::class)->search(
-                $mailMessage->subject,
-                function (Indexes $meilisearch, string $query, array $options) {
-                    return $meilisearch->search(
-                        $query,
-                        $options + ['attributesToSearchOn' => ['invoice_number', 'order_number', 'commission']]
-                    );
-                }
+            resolve_static(
+                Order::class,
+                'search',
+                [
+                    'query' => $mailMessage->subject,
+                    'callback' => function (Indexes $meilisearch, string $query, array $options) {
+                        return $meilisearch->search(
+                            $query,
+                            $options + ['attributesToSearchOn' => ['invoice_number', 'order_number', 'commission']]
+                        );
+                    },
+                ]
             )
                 ->first()
                 ?->communications()

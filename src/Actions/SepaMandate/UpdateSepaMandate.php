@@ -24,7 +24,7 @@ class UpdateSepaMandate extends FluxAction
 
     public function performAction(): Model
     {
-        $sepaMandate = app(SepaMandate::class)->query()
+        $sepaMandate = resolve_static(SepaMandate::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -39,11 +39,11 @@ class UpdateSepaMandate extends FluxAction
         parent::validateData();
 
         if ($this->data['contact_bank_connection_id'] ?? false) {
-            $sepaMandate = app(SepaMandate::class)->query()
+            $sepaMandate = resolve_static(SepaMandate::class, 'query')
                 ->whereKey($this->data['id'])
                 ->first();
 
-            $contactBankConnectionExists = app(ContactBankConnection::class)->query()
+            $contactBankConnectionExists = resolve_static(ContactBankConnection::class, 'query')
                 ->whereKey($this->data['contact_bank_connection_id'])
                 ->where('contact_id', $sepaMandate->contact_id)
                 ->exists();

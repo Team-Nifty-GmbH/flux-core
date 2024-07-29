@@ -51,7 +51,7 @@ class CreateCommunication extends FluxAction
         $communicatable->save();
 
         if ($tags) {
-            $communication->attachTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
+            $communication->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
         foreach ($attachments as $attachment) {
@@ -67,8 +67,8 @@ class CreateCommunication extends FluxAction
         }
 
         if ($this->data['communicatable_type'] === morph_alias(Address::class)) {
-            $communication->loadMissing('communicatable.contact');
-            $communication->communicatable->contact->communications()->attach($communication->id);
+            $communication->loadMissing('addresses');
+            $communication->addresses->first()->contact->communications()->attach($communication->id);
         }
 
         return $communication->fresh();

@@ -18,7 +18,7 @@ class Order extends Component
 
     public function mount(int $modelId): void
     {
-        $order = app(OrderModel::class)->query()
+        $order = resolve_static(OrderModel::class, 'query')
             ->whereKey($modelId)
             ->with([
                 'contact.media',
@@ -41,7 +41,7 @@ class Order extends Component
 
     public function loadOrderPositions(): void
     {
-        $positions = app(OrderPosition::class)->query()
+        $positions = resolve_static(OrderPosition::class, 'query')
             ->where('order_id', $this->order['id'])
             ->whereNull('parent_id')
             ->with('currency')

@@ -11,7 +11,7 @@ class PermissionRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'permissions' => 'array',
+            'permissions' => 'nullable|array',
             'permissions.*' => [
                 'required',
                 'integer',

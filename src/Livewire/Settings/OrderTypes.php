@@ -47,7 +47,7 @@ class OrderTypes extends OrderTypeList
     public function getViewData(): array
     {
         $printViews = [];
-        foreach ((new Order())->getAvailableViews() as $view) {
+        foreach (app(Order::class)->getAvailableViews() as $view) {
             $printViews[] = [
                 'value' => $view,
                 'label' => __($view),
@@ -58,7 +58,7 @@ class OrderTypes extends OrderTypeList
             parent::getViewData(),
             [
                 'printViews' => $printViews,
-                'clients' => app(Client::class)->query()
+                'clients' => resolve_static(Client::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
                 'enum' => OrderTypeEnum::values(),

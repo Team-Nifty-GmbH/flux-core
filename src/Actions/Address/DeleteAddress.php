@@ -21,7 +21,7 @@ class DeleteAddress extends FluxAction
 
     public function performAction(): ?bool
     {
-        $address = app(Address::class)->query()
+        $address = resolve_static(Address::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

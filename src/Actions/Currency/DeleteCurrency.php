@@ -24,7 +24,7 @@ class DeleteCurrency extends FluxAction
 
     public function performAction(): ?bool
     {
-        $currency = app(Currency::class)->query()
+        $currency = resolve_static(Currency::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -38,7 +38,7 @@ class DeleteCurrency extends FluxAction
     {
         parent::validateData();
 
-        if (app(Currency::class)->query()
+        if (resolve_static(Currency::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->countries()

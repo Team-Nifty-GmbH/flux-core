@@ -25,7 +25,7 @@ class UpdateProductCrossSelling extends FluxAction
         $products = $this->data['products'] ?? null;
         unset($this->data['products']);
 
-        $productCrossSelling = app(ProductCrossSelling::class)->query()
+        $productCrossSelling = resolve_static(ProductCrossSelling::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

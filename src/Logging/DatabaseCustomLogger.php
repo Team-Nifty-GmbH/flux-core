@@ -13,6 +13,6 @@ class DatabaseCustomLogger
     {
         $logger = new Logger('DatabaseLoggingHandler');
 
-        return $logger->pushHandler(new DatabaseLoggingHandler());
+        return $logger->pushHandler(app(DatabaseLoggingHandler::class));
     }
 }

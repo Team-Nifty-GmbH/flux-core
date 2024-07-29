@@ -22,7 +22,7 @@ class DeletePermission extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Permission::class)->query()
+        return resolve_static(Permission::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -32,7 +32,7 @@ class DeletePermission extends FluxAction
     {
         parent::validateData();
 
-        if (app(Permission::class)->query()
+        if (resolve_static(Permission::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->is_locked

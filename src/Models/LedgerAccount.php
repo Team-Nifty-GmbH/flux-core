@@ -8,7 +8,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Laravel\Scout\Searchable;
+use FluxErp\Traits\Scout\Searchable;
 
 class LedgerAccount extends Model
 {

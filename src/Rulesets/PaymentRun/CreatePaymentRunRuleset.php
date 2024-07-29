@@ -35,7 +35,7 @@ class CreatePaymentRunRuleset extends FluxRuleset
             ],
             'iban' => [
                 'nullable',
-                new Iban(),
+                app(Iban::class),
             ],
             'instructed_execution_date' => 'date',
             'is_instant_payment' => 'boolean',

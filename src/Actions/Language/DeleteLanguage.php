@@ -24,7 +24,7 @@ class DeleteLanguage extends FluxAction
 
     public function performAction(): ?bool
     {
-        $language = app(Language::class)->query()
+        $language = resolve_static(Language::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -39,7 +39,7 @@ class DeleteLanguage extends FluxAction
         parent::validateData();
 
         $errors = [];
-        $language = app(Language::class)->query()
+        $language = resolve_static(Language::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

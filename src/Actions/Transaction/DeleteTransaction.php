@@ -21,7 +21,7 @@ class DeleteTransaction extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Transaction::class)->query()
+        return resolve_static(Transaction::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

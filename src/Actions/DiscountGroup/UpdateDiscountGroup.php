@@ -25,7 +25,7 @@ class UpdateDiscountGroup extends FluxAction
     {
         $discounts = Arr::pull($this->data, 'discounts');
 
-        $discountGroup = app(DiscountGroup::class)->query()
+        $discountGroup = resolve_static(DiscountGroup::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

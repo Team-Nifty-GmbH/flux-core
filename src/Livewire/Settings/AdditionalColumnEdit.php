@@ -87,7 +87,7 @@ class AdditionalColumnEdit extends Component
 
         $this->fieldTypes = Helper::getHtmlInputFieldTypes();
 
-        $availableValidationRules = (new AvailableValidationRule())->availableValidationRules;
+        $availableValidationRules = app(AvailableValidationRule::class)->availableValidationRules;
 
         $this->availableValidationRules = array_filter($availableValidationRules, function ($item) {
             return ! str_contains($item, ':');
@@ -169,7 +169,7 @@ class AdditionalColumnEdit extends Component
 
         $validated = $this->validate();
 
-        $additionalColumnService = new AdditionalColumnService();
+        $additionalColumnService = app(AdditionalColumnService::class);
         $response = $additionalColumnService->{$this->isNew ? 'create' : 'update'}($validated['additionalColumn']);
 
         if ($response['status'] > 299) {

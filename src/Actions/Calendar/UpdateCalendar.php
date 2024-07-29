@@ -22,7 +22,7 @@ class UpdateCalendar extends FluxAction
 
     public function performAction(): Model
     {
-        $calendar = app(Calendar::class)->query()
+        $calendar = resolve_static(Calendar::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

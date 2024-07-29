@@ -24,7 +24,7 @@ class UpdateWorkTime extends FluxAction
 
     public function performAction(): Model
     {
-        $workTime = app(WorkTime::class)->query()
+        $workTime = resolve_static(WorkTime::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -55,7 +55,7 @@ class UpdateWorkTime extends FluxAction
 
         if ($workTime->is_daily_work_time && $workTime->is_locked && ! $workTime->is_pause) {
             // if a daily work time pause is currently running delete it
-            $pauseTime = app(WorkTime::class)->query()
+            $pauseTime = resolve_static(WorkTime::class, 'query')
                 ->where('user_id', $workTime->user_id)
                 ->where('is_daily_work_time', true)
                 ->where('is_locked', false)
@@ -69,7 +69,7 @@ class UpdateWorkTime extends FluxAction
             }
 
             // end all active work times for this user
-            app(WorkTime::class)->query()
+            resolve_static(WorkTime::class, 'query')
                 ->where('user_id', $workTime->user_id)
                 ->where('is_locked', false)
                 ->where('id', '!=', $workTime->id)
@@ -96,7 +96,7 @@ class UpdateWorkTime extends FluxAction
     {
         parent::validateData();
 
-        $workTime = app(WorkTime::class)->query()
+        $workTime = resolve_static(WorkTime::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

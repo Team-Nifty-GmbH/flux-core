@@ -2,8 +2,6 @@
 
 namespace FluxErp\View\Components\Address;
 
-use FluxErp\Models\Country;
-use FluxErp\Models\Language;
 use Illuminate\View\Component;
 
 class Address extends Component
@@ -25,9 +23,6 @@ class Address extends Component
      */
     public function render()
     {
-        return view('flux::components.address.address', [
-            'languages' => app(Language::class)->all(['id', 'name'])->toArray(),
-            'countries' => app(Country::class)->all(['id', 'name'])->toArray(),
-        ]);
+        return view('flux::components.address.address');
     }
 }

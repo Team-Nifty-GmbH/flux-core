@@ -22,7 +22,7 @@ class UpdateWarehouse extends FluxAction
 
     public function performAction(): Model
     {
-        $warehouse = app(Warehouse::class)->query()
+        $warehouse = resolve_static(Warehouse::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -35,7 +35,7 @@ class UpdateWarehouse extends FluxAction
     protected function prepareForValidation(): void
     {
         if (($this->data['is_default'] ?? false)
-            && ! app(Warehouse::class)->query()
+            && ! resolve_static(Warehouse::class, 'query')
                 ->whereKeyNot($this->data['id'] ?? 0)
                 ->where('is_default', true)
                 ->exists()

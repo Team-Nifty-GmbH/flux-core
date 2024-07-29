@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Enums\SalutationEnum;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
@@ -34,7 +35,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\UnauthorizedException;
 use Laravel\Sanctum\HasApiTokens;
-use Laravel\Scout\Searchable;
+use FluxErp\Traits\Scout\Searchable;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
@@ -110,11 +111,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             }
 
             if ($contactUpdates) {
-                app(Contact::class)->query()
+                resolve_static(Contact::class, 'query')
                     ->whereKey($address->contact_id)
                     ->update($contactUpdates);
 
-                app(Address::class)->query()
+                resolve_static(Address::class, 'query')
                     ->where('contact_id', $address->contact_id)
                     ->where('id', '!=', $address->id)
                     ->update($addressesUpdates);
@@ -124,7 +125,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         static::deleted(function (Address $address) {
             $contactUpdates = [];
             $addressesUpdates = [];
-            $mainAddress = app(Address::class)
+            $mainAddress = resolve_static(Address::class, 'query')
                 ->where('contact_id', $address->contact_id)
                 ->where('is_main_address', true)
                 ->first();
@@ -150,7 +151,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             }
 
             if ($contactUpdates) {
-                app(Contact::class)->query()
+                resolve_static(Contact::class, 'query')
                     ->whereKey($address->contact_id)
                     ->update($contactUpdates);
 
@@ -163,6 +164,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     {
         return [
             'date_of_birth' => 'date',
+            'has_formal_salutation' => 'boolean',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
             'is_dark_mode' => 'boolean',
@@ -190,6 +192,17 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
                 $this->country?->name,
             ])
         );
+    }
+
+    public function salutation(): ?string
+    {
+        try {
+            $enum = SalutationEnum::from($this->salutation ?? '');
+        } catch (\Throwable) {
+            $enum = SalutationEnum::NO_SALUTATION;
+        }
+
+        return $enum->salutation($this);
     }
 
     public function addressTypes(): BelongsToMany

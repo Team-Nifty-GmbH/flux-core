@@ -21,7 +21,7 @@ class DeleteContactOption extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(ContactOption::class)->query()
+        return resolve_static(ContactOption::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

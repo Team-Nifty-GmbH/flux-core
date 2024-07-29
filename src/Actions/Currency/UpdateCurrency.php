@@ -22,7 +22,7 @@ class UpdateCurrency extends FluxAction
 
     public function performAction(): Model
     {
-        $currency = app(Currency::class)->query()
+        $currency = resolve_static(Currency::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -37,7 +37,7 @@ class UpdateCurrency extends FluxAction
         $this->rules['iso'] .= ',' . ($this->data['id'] ?? 0);
 
         if (($this->data['is_default'] ?? false)
-            && ! app(Currency::class)->query()
+            && ! resolve_static(Currency::class, 'query')
                 ->whereKeyNot($this->data['id'] ?? 0)
                 ->where('is_default', true)
                 ->exists()

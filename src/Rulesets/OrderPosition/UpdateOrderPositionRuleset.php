@@ -29,37 +29,37 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 'integer',
-                new ModelExists(OrderPosition::class),
+                app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
             'client_id' => [
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'ledger_account_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(LedgerAccount::class),
+                app(ModelExists::class, ['model' => LedgerAccount::class]),
             ],
             'order_id' => [
                 'integer',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(OrderPosition::class),
+                app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
             'price_id' => [
                 'exclude_if:is_free_text,true',
                 'integer',
                 'nullable',
-                new ModelExists(Price::class),
+                app(ModelExists::class, ['model' => Price::class]),
             ],
             'price_list_id' => [
                 'exclude_if:is_free_text,true',
                 'exclude_if:is_bundle_position,true',
                 'integer',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'product_id' => [
                 Rule::when(
@@ -69,18 +69,18 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 ),
                 'nullable',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'supplier_contact_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'vat_rate_id' => [
                 'exclude_if:is_free_text,true',
                 'integer',
                 'nullable',
-                new ModelExists(VatRate::class),
+                app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'warehouse_id' => [
                 'exclude_if:is_free_text,true',
@@ -88,7 +88,7 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'required_with:product_id',
                 'integer',
                 'nullable',
-                new ModelExists(Warehouse::class),
+                app(ModelExists::class, ['model' => Warehouse::class]),
             ],
 
             'amount' => 'sometimes|numeric|nullable|exclude_if:is_free_text,true',
@@ -99,13 +99,13 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'nullable',
             ],
             'discount_percentage' => [
-                new Numeric(0, 1),
+                app(Numeric::class, ['min' => 0, 'max' => 1]),
                 'nullable',
             ],
             'margin' => 'exclude_if:is_free_text,true|sometimes|numeric|nullable',
             'provision' => 'numeric|nullable',
             'purchase_price' => [
-                new Numeric(),
+                app(Numeric::class),
                 'nullable',
             ],
             'unit_price' => 'numeric|nullable',

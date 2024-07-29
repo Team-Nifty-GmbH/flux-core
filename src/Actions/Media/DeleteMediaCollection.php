@@ -21,7 +21,7 @@ class DeleteMediaCollection extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Media::class)->query()
+        return resolve_static(Media::class, 'query')
             ->where('model_type', $this->data['model_type'])
             ->where('model_id', $this->data['model_id'])
             ->where('collection_name', 'LIKE', $this->data['collection_name'] . '.%')

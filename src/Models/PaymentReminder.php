@@ -64,4 +64,12 @@ class PaymentReminder extends Model implements OffersPrinting
             'payment-reminder' => PaymentReminderView::class,
         ];
     }
+
+    public function getPaymentReminderText(): ?PaymentReminderText
+    {
+        return app(PaymentReminderText::class)
+            ->where('reminder_level', '<=', $this->reminder_level)
+            ->orderBy('reminder_level', 'desc')
+            ->first();
+    }
 }

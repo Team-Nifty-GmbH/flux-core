@@ -174,12 +174,10 @@ The result of your views `getSubject` will be available in all blade files as `$
 If your printable class has an `client` property or relation you can access it in the blade file like this:
 
 ```blade
-<x-layouts.print>
-    <div>
-        <h1>{{ $client->name }}</h1>
-        <h2>{{ $subject }}</h2>
-    </div>
-</x-layouts.print>
+<div>
+    <h1>{{ $client->name }}</h1>
+    <h2>{{ $subject }}</h2>
+</div>
 ```
 
 # Registering the view
@@ -221,11 +219,9 @@ public function register(): void
 The blade file will look like this:
 
 ```blade
-<x-layouts.print>
-    <div>
-        <!-- An unexamined life is not worth living. - Socrates -->
-    </div>
-</x-layouts.print>
+<div>
+    <!-- An unexamined life is not worth living. - Socrates -->
+</div>
 ```
 
 You can use tailwind to design your PDFs.

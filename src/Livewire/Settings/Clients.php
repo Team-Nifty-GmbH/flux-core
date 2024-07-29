@@ -40,12 +40,12 @@ class Clients extends ClientList
         return array_merge(
             parent::getViewData(),
             [
-                'bankConnections' => app(BankConnection::class)->query()
+                'bankConnections' => resolve_static(BankConnection::class, 'query')
                     ->where('is_active', true)
                     ->select(['bank_connections.id', 'name'])
                     ->get()
                     ->toArray(),
-                'countries' => app(Country::class)->query()
+                'countries' => resolve_static(Country::class, 'query')
                     ->orderBy('iso_alpha2', 'ASC')
                     ->select(['id', 'name', 'iso_alpha2'])
                     ->get()

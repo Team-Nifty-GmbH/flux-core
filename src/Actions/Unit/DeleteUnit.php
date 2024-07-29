@@ -21,7 +21,7 @@ class DeleteUnit extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Unit::class)->query()
+        return resolve_static(Unit::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

@@ -29,27 +29,27 @@ class CreateOrderPositionRuleset extends FluxRuleset
             'client_id' => [
                 'required_without:order_id',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'ledger_account_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(LedgerAccount::class),
+                app(ModelExists::class, ['model' => LedgerAccount::class]),
             ],
             'order_id' => [
                 'required',
                 'integer',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'origin_position_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(OrderPosition::class),
+                app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(OrderPosition::class),
+                app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
             'price_id' => [
                 'exclude_if:is_free_text,true',
@@ -57,14 +57,14 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'exclude_without:product_id',
                 'integer',
                 'nullable',
-                new ModelExists(Price::class),
+                app(ModelExists::class, ['model' => Price::class]),
             ],
             'price_list_id' => [
                 'exclude_if:is_free_text,true',
                 'exclude_if:is_bundle_position,true',
                 'integer',
                 'nullable',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'product_id' => [
                 Rule::when(
@@ -74,12 +74,12 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 ),
                 'integer',
                 'nullable',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'supplier_contact_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'vat_rate_id' => [
                 'exclude_if:is_free_text,true',
@@ -87,40 +87,40 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 Rule::when(
                     fn (Fluent $data) => (! $data->is_free_text
                         && ! $data->is_bundle_position)
-                        && ! app(Product::class)->whereKey($data->product_id)->exists(),
+                        && ! resolve_static(Product::class, 'query')->whereKey($data->product_id)->exists(),
                     'required'
                 ),
                 'integer',
                 'nullable',
-                new ModelExists(VatRate::class),
+                app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'warehouse_id' => [
                 'exclude_if:is_free_text,true',
                 'integer',
                 'nullable',
-                new ModelExists(Warehouse::class),
+                app(ModelExists::class, ['model' => Warehouse::class]),
             ],
 
             'amount' => [
                 'exclude_if:is_free_text,true',
-                new Numeric(),
+                app(Numeric::class),
                 'nullable',
             ],
             'discount_percentage' => [
-                new Numeric(0, 1),
+                app(Numeric::class, ['min' => 0, 'max' => 1]),
                 'nullable',
             ],
             'margin' => [
                 'exclude_if:is_free_text,true',
-                new Numeric(),
+                app(Numeric::class),
                 'nullable',
             ],
             'provision' => [
-                new Numeric(),
+                app(Numeric::class),
                 'nullable',
             ],
             'purchase_price' => [
-                new Numeric(),
+                app(Numeric::class),
                 'nullable',
                 'exclude_if:is_free_text,true',
             ],

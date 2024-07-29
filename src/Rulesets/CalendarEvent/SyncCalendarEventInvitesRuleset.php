@@ -28,7 +28,7 @@ class SyncCalendarEventInvitesRuleset extends FluxRuleset
         return array_merge(
             parent::getRules(),
             resolve_static(InvitedAddressRuleset::class, 'getRules'),
-            resolve_static(InvitedUserRuleset::class, 'getRules')
+            resolve_static(InvitedRuleset::class, 'getRules')
         );
     }
 }

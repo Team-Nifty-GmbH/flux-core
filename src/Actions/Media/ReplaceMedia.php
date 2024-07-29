@@ -26,7 +26,7 @@ class ReplaceMedia extends FluxAction
 
     public function performAction(): Model
     {
-        $mediaItem = app(Media::class)->query()
+        $mediaItem = resolve_static(Media::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -94,7 +94,7 @@ class ReplaceMedia extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->data['media_type'] = data_get($this->data, 'media_type');
-        $this->data['model_type'] = app(Media::class)->query()
+        $this->data['model_type'] = resolve_static(Media::class, 'query')
             ->whereKey($this->data['id'] ?? null)
             ->first()
             ?->model_type;
@@ -104,7 +104,7 @@ class ReplaceMedia extends FluxAction
     {
         parent::validateData();
 
-        $mediaItem = app(Media::class)->query()
+        $mediaItem = resolve_static(Media::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -116,7 +116,7 @@ class ReplaceMedia extends FluxAction
         $this->data['name'] = $this->data['name'] ?? $this->data['file_name'];
         $this->data['collection_name'] ??= 'default';
 
-        if (app(Media::class)->query()
+        if (resolve_static(Media::class, 'query')
             ->where('model_type', $mediaItem->model_type)
             ->where('model_id', $mediaItem->model_id)
             ->where('collection_name', $mediaItem->collection_name)

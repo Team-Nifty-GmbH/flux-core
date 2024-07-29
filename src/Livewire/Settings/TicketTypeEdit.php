@@ -56,7 +56,7 @@ class TicketTypeEdit extends Component
             ->sortBy('label')
             ->toArray();
 
-        $this->roles = app(Role::class)->query()
+        $this->roles = resolve_static(Role::class, 'query')
             ->where('guard_name', 'web')
             ->get(['id', 'name'])
             ->toArray();
@@ -79,7 +79,7 @@ class TicketTypeEdit extends Component
 
         $this->isNew = ! array_key_exists('id', $this->ticketType);
 
-        $this->ticketType['roles'] = $this->isNew ? [] : app(TicketType::class)->query()
+        $this->ticketType['roles'] = $this->isNew ? [] : resolve_static(TicketType::class, 'query')
             ->join('role_ticket_type AS rtt', 'ticket_types.id', '=', 'rtt.ticket_type_id')
             ->whereKey($this->ticketType['id'])
             ->pluck('rtt.role_id')
@@ -101,7 +101,7 @@ class TicketTypeEdit extends Component
 
         $validated = $this->validate();
 
-        $ticketTypeService = new TicketTypeService();
+        $ticketTypeService = app(TicketTypeService::class);
         $response = $ticketTypeService->{$this->isNew ? 'create' : 'update'}($validated['ticketType']);
 
         if (! $this->isNew && $response['status'] > 299) {

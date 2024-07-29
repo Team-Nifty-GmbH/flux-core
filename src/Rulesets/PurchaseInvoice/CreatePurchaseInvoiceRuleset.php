@@ -26,32 +26,32 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
             'client_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'contact_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'currency_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Currency::class),
+                app(ModelExists::class, ['model' => Currency::class]),
             ],
             'lay_out_user_id' => [
                 'nullable',
                 'integer',
-                (new ModelExists(User::class))->where('is_active', true),
+                app(ModelExists::class, ['model' => User::class])->where('is_active', true),
             ],
             'order_type_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(OrderType::class),
+                app(ModelExists::class, ['model' => OrderType::class]),
             ],
             'payment_type_id' => [
                 'nullable',
                 'integer',
-                (new ModelExists(PaymentType::class))
+                app(ModelExists::class, ['model' => PaymentType::class])
                     ->where('is_purchase', true)
                     ->where('is_active', true),
             ],
@@ -64,9 +64,9 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
             'media' => 'required',
             'media.id' => [
                 'integer',
-                new ModelExists(Media::class),
+                app(ModelExists::class, ['model' => Media::class]),
             ],
-            'media_type' => ['sometimes', new MediaUploadType()],
+            'media_type' => ['sometimes', app(MediaUploadType::class)],
         ];
     }
 

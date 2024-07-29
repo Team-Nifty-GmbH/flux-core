@@ -23,7 +23,7 @@ class DeleteComment extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Comment::class)->query()
+        return resolve_static(Comment::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -33,7 +33,7 @@ class DeleteComment extends FluxAction
     {
         parent::validateData();
 
-        $comment = app(Comment::class)->query()
+        $comment = resolve_static(Comment::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

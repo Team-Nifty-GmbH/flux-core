@@ -13,7 +13,7 @@ class InitLanguages extends Command
 
     public function handle(): void
     {
-        $locale = app(Language::class)->query()
+        $locale = resolve_static(Language::class, 'query')
             ->where('language_code', config('app.locale'))
             ->firstOrNew();
         if (! $locale->exists) {
@@ -25,7 +25,7 @@ class InitLanguages extends Command
             $locale->save();
         }
 
-        $fallback = app(Language::class)->query()
+        $fallback = resolve_static(Language::class, 'query')
             ->where('language_code', config('app.fallback_locale'))
             ->firstOrNew();
         if (! $fallback->exists) {
@@ -52,7 +52,7 @@ class InitLanguages extends Command
                     $jsonLanguage['name'] = __($jsonLanguage['name']);
 
                     // Save to database.
-                    $language = app(Language::class)->query()
+                    $language = resolve_static(Language::class, 'query')
                         ->where('language_code', $jsonLanguage['language_code'])
                         ->firstOrNew();
 

@@ -37,7 +37,7 @@ class CreateProject extends FluxAction
         $this->data = $validator->validate();
 
         if ($this->data['parent_id'] ?? false) {
-            $parentProject = app(Project::class)->query()
+            $parentProject = resolve_static(Project::class, 'query')
                 ->whereKey($this->data['parent_id'])
                 ->first();
 

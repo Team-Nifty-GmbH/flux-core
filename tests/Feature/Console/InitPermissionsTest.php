@@ -39,14 +39,14 @@ class InitPermissionsTest extends BaseSetup
                 continue;
             }
 
-            $componentInstance = new $component;
+            $componentInstance = new $component();
             foreach ($componentInstance->getTabs() as $tab) {
                 $componentTabs[] = 'tab.' . $tab->component;
             }
         }
 
         // Add Custom Widget
-        Livewire::component('custom-widget-that-never-exists', new class extends Component
+        Livewire::component('custom-widget-that-never-exists', new class() extends Component
         {
             use Widgetable;
 

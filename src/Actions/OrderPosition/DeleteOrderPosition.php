@@ -21,7 +21,7 @@ class DeleteOrderPosition extends FluxAction
 
     public function performAction(): ?bool
     {
-        $orderPosition = app(OrderPosition::class)->query()
+        $orderPosition = resolve_static(OrderPosition::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

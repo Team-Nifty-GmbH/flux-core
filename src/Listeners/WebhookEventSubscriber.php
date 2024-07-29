@@ -12,7 +12,7 @@ class WebhookEventSubscriber
      */
     public function sendWebhook($event): void
     {
-        $setting = app(Setting::class)->query()
+        $setting = resolve_static(Setting::class, 'query')
             ->where('key', 'webhooks')
             ->first();
 

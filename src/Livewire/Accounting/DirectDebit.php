@@ -42,7 +42,7 @@ class DirectDebit extends OrderList
 
     protected function getBuilder(Builder $builder): Builder
     {
-        $orderTypes = app(OrderType::class)->query()
+        $orderTypes = resolve_static(OrderType::class, 'query')
             ->where('is_active', true)
             ->get(['id', 'order_type_enum'])
             ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase()

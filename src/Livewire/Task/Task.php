@@ -29,7 +29,7 @@ class Task extends Component
 
     public function mount(string $id): void
     {
-        $task = app(TaskModel::class)->query()
+        $task = resolve_static(TaskModel::class, 'query')
             ->whereKey($id)
             ->firstOrFail();
 
@@ -89,7 +89,7 @@ class Task extends Component
 
     public function resetForm(): void
     {
-        $task = app(TaskModel::class)->query()
+        $task = resolve_static(TaskModel::class, 'query')
             ->whereKey($this->task->id)
             ->firstOrFail();
 

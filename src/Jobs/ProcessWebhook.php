@@ -84,7 +84,7 @@ class ProcessWebhook implements ShouldQueue
             ],
         ];
 
-        $client = new Client();
+        $client = app(Client::class);
         $client->post($this->url, [
             'body' => json_encode($body),
         ]);

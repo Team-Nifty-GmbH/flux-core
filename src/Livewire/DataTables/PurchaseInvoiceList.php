@@ -100,13 +100,13 @@ class PurchaseInvoiceList extends BaseDataTable
         return array_merge(
             parent::getViewData(),
             [
-                'clients' => app(Client::class)->query()->pluck('name', 'id'),
-                'currencies' => app(Currency::class)->query()->pluck('name', 'id'),
-                'orderTypes' => app(OrderType::class)->query()
+                'clients' => resolve_static(Client::class, 'query')->pluck('name', 'id'),
+                'currencies' => resolve_static(Currency::class, 'query')->pluck('name', 'id'),
+                'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->whereIn('order_type_enum', $purchaseOrderTypes)
                     ->pluck('name', 'id'),
-                'paymentTypes' => app(PaymentType::class)->query()->where('is_purchase', true)->pluck('name', 'id'),
-                'vatRates' => app(VatRate::class)->query()->pluck('name', 'id'),
+                'paymentTypes' => resolve_static(PaymentType::class, 'query')->where('is_purchase', true)->pluck('name', 'id'),
+                'vatRates' => resolve_static(VatRate::class, 'query')->pluck('name', 'id'),
             ]
         );
     }

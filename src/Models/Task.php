@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Str;
-use Laravel\Scout\Searchable;
+use FluxErp\Traits\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
 use Spatie\ModelStates\HasStates;
@@ -174,7 +174,7 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
 
     public static function fromCalendarEvent(array $event): Model
     {
-        $task = new static;
+        $task = new static();
         $task->forceFill([
             'id' => $event['id'],
             'name' => $event['title'],

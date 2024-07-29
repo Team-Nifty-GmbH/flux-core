@@ -21,13 +21,20 @@ class UpdateAdditionalColumnRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(AdditionalColumn::class),
+                app(ModelExists::class, ['model' => AdditionalColumn::class]),
             ],
             'name' => [
                 'sometimes',
                 'required',
                 'string',
-                new UniqueInFieldDependence(AdditionalColumn::class, ['model_type', 'model_id'], true),
+                app(
+                    UniqueInFieldDependence::class,
+                    [
+                        'model' => AdditionalColumn::class,
+                        'dependingField' => ['model_type', 'model_id'],
+                        'ignoreSelf' => true,
+                    ]
+                ),
             ],
             'field_type' => [
                 'sometimes',
@@ -40,11 +47,11 @@ class UpdateAdditionalColumnRuleset extends FluxRuleset
             'validations.*' => [
                 'required',
                 'string',
-                new AvailableValidationRule(),
+                app(AvailableValidationRule::class),
             ],
             'values' => [
                 'array',
-                new ArrayIsList(),
+                app(ArrayIsList::class),
             ],
             'is_customer_editable' => 'boolean',
             'is_translatable' => 'boolean',

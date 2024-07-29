@@ -36,7 +36,7 @@ class AdditionalColumns extends Component
         if ($this->model instanceof Model) {
             $additionalColumns = $this->model->additionalColumns?->toArray();
         } elseif ($this->id) {
-            $additionalColumns = app($this->model)->query()
+            $additionalColumns = resolve_static($this->model, 'query')
                 ->whereKey($this->id)
                 ->first()
                 ?->additionalColumns

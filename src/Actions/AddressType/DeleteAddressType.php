@@ -22,7 +22,7 @@ class DeleteAddressType extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(AddressType::class)->query()
+        return resolve_static(AddressType::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -33,7 +33,7 @@ class DeleteAddressType extends FluxAction
         parent::validateData();
 
         $errors = [];
-        $addressType = app(AddressType::class)->query()
+        $addressType = resolve_static(AddressType::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

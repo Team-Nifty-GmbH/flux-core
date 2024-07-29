@@ -21,7 +21,7 @@ class DeleteSerialNumber extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(SerialNumber::class)->query()
+        return resolve_static(SerialNumber::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

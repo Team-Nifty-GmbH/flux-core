@@ -17,18 +17,18 @@ class CreateCartItemRuleset extends FluxRuleset
             'cart_id' => [
                 'required',
                 'integer',
-                new ModelExists(Cart::class),
+                app(ModelExists::class, ['model' => Cart::class]),
             ],
             'product_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'vat_rate_id' => [
                 'required_without:product_id',
                 'nullable',
                 'integer',
-                new ModelExists(VatRate::class),
+                app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'name' => [
                 'required_without:product_id',

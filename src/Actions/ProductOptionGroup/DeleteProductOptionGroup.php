@@ -23,7 +23,7 @@ class DeleteProductOptionGroup extends FluxAction
 
     public function performAction(): array|bool|null
     {
-        $productOptionGroup = app(ProductOptionGroup::class)->query()
+        $productOptionGroup = resolve_static(ProductOptionGroup::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

@@ -28,7 +28,7 @@ class UpdateRoleUsers extends FluxAction
 
     public function performAction(): array
     {
-        $role = app(Role::class)->query()
+        $role = resolve_static(Role::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

@@ -53,7 +53,7 @@ class SerialNumber extends Component
     public function mount(int $id): void
     {
         if ($id > 0) {
-            $serialNumber = app(SerialNumberModel::class)->query()
+            $serialNumber = resolve_static(SerialNumberModel::class, 'query')
                 ->whereKey($id)
                 ->with('product')
                 ->firstOrFail();
@@ -68,7 +68,7 @@ class SerialNumber extends Component
         }
 
         if (request('addressId')) {
-            $address = app(Address::class)->query()
+            $address = resolve_static(Address::class, 'query')
                 ->whereKey(request('addressId'))
                 ->firstOrFail();
 
@@ -110,7 +110,7 @@ class SerialNumber extends Component
 
     public function updatedSerialNumberProductId(int $id): void
     {
-        $this->serialNumber['product'] = app(Product::class)->query()
+        $this->serialNumber['product'] = resolve_static(Product::class, 'query')
             ->whereKey($id)
             ->first()
             ?->toArray();

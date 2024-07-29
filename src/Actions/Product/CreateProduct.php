@@ -51,7 +51,7 @@ class CreateProduct extends FluxAction
         }
 
         if ($tags) {
-            $product->attachTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
+            $product->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
         if ($clients) {
@@ -100,7 +100,7 @@ class CreateProduct extends FluxAction
     public function prepareForValidation(): void
     {
         if (! data_get($this->data, 'prices') && data_get($this->data, 'parent_id')) {
-            $this->data['prices'] = app(Price::class)->query()
+            $this->data['prices'] = resolve_static(Price::class, 'query')
                 ->where('product_id', data_get($this->data, 'parent_id'))
                 ->get()
                 ->toArray();

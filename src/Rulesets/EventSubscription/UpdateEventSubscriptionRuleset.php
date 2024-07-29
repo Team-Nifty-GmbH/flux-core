@@ -18,19 +18,20 @@ class UpdateEventSubscriptionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                (new ModelExists(EventSubscription::class))->where('user_id', auth()->id()),
+                app(ModelExists::class, ['model' => EventSubscription::class])
+                    ->where('user_id', auth()->id()),
             ],
             'event' => 'required|string',
             'model_type' => [
                 'required',
                 'string',
-                new MorphClassExists(),
+                app(MorphClassExists::class),
             ],
             'model_id' => [
                 'present',
                 'integer',
                 'nullable',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
             'is_broadcast' => 'required|boolean|accepted_if:is_notifiable,false,0',
             'is_notifiable' => 'required|boolean|accepted_if:is_broadcast,false,0',

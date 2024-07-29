@@ -14,6 +14,9 @@ class OrderForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    #[Locked]
+    public ?string $uuid = null;
+
     public ?int $approval_user_id = null;
 
     public ?int $parent_id = null;

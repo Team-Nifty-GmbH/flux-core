@@ -19,7 +19,7 @@ class RoleController extends BaseController
 
     public function showUserRoles(string $id): JsonResponse
     {
-        $user = app(User::class)->query()
+        $user = resolve_static(User::class, 'query')
             ->whereKey($id)
             ->first();
 

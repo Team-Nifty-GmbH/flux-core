@@ -64,11 +64,15 @@ class Countries extends CountryList
 
     public function showEditModal(?int $countryId = null): void
     {
-        $this->selectedCountry = app(Country::class)->query()->whereKey($countryId)->first()?->toArray() ?: [
-            'language_id' => null,
-            'currency_id' => null,
-            'is_active' => true,
-        ];
+        $this->selectedCountry = resolve_static(Country::class, 'query')
+            ->whereKey($countryId)
+            ->first()
+            ?->toArray()
+            ?: [
+                'language_id' => null,
+                'currency_id' => null,
+                'is_active' => true,
+            ];
 
         $this->editModal = true;
         $this->resetErrorBag();
@@ -83,7 +87,7 @@ class Countries extends CountryList
         $function = ($this->selectedCountry['id'] ?? false) ? 'update' : 'create';
 
         try {
-            $response = (new CountryService())->{$function}($this->selectedCountry);
+            $response = app(CountryService::class)->{$function}($this->selectedCountry);
         } catch (ValidationException $e) {
             exception_to_notifications($e, $this);
 

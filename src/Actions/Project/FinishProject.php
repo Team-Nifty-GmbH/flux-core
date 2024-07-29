@@ -23,7 +23,7 @@ class FinishProject extends FluxAction
 
     public function performAction(): Model
     {
-        $project = app(Project::class)->query()
+        $project = resolve_static(Project::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

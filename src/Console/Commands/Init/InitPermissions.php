@@ -36,7 +36,7 @@ class InitPermissions extends Command
         $this->registerWidgetPermissions();
         $this->registerTabPermissions();
 
-        app(Permission::class)->query()->whereIntegerInRaw('id', array_keys($this->currentPermissions))->delete();
+        resolve_static(Permission::class, 'query')->whereIntegerInRaw('id', array_keys($this->currentPermissions))->delete();
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 
@@ -126,7 +126,7 @@ class InitPermissions extends Command
                 continue;
             }
 
-            $componentInstance = new $component;
+            $componentInstance = new $component();
 
             foreach ($componentInstance->renderingWithTabs()->getTabsToRender() as $tab) {
                 $permission = app(Permission::class)->findOrCreate('tab.' . $tab->component, 'web');

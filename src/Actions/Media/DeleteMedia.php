@@ -21,7 +21,7 @@ class DeleteMedia extends FluxAction
 
     public function performAction(): ?bool
     {
-        $mediaItem = app(Media::class)->query()
+        $mediaItem = resolve_static(Media::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
