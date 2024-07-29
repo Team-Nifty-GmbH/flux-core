@@ -10,6 +10,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\HtmlString;
 use NotificationChannels\WebPush\WebPushMessage;
 
 class CommentCreatedNotification extends Notification implements HasToastNotification, ShouldQueue
@@ -25,7 +26,15 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
 
     public function toMail(object $notifiable): MailMessage
     {
-        return $this->toToastNotification($notifiable)->toMail();
+        return $this->toToastNotification($notifiable)
+            ->toMail()
+            ->line(new HtmlString(
+                    '<span>[flux:comment:'
+                    . $this->model->model->getMorphClass() . ':'
+                    . $this->model->model->getKey()
+                    . ']</span>'
+                )
+            );
     }
 
     public function toArray(object $notifiable): array
