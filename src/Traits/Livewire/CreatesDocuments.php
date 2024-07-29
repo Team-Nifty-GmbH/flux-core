@@ -92,7 +92,6 @@ trait CreatesDocuments
         JS);
     }
 
-
     #[Renderless]
     public function downloadPreview(): ?StreamedResponse
     {

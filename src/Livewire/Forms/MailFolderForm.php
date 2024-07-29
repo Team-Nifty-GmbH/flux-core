@@ -14,6 +14,10 @@ class MailFolderForm extends FluxForm
 
     public ?string $name = null;
 
+    public ?bool $creates_ticket = false;
+
+    public ?bool $creates_purchase_invoice = false;
+
     public bool $is_active = true;
 
     protected function getActions(): array

@@ -90,6 +90,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
         return $this->hasMany(ContactBankConnection::class);
     }
 
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
     public function deliveryAddress(): BelongsTo
     {
         return $this->belongsTo(Address::class, 'delivery_address_id');

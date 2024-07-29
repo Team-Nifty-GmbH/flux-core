@@ -41,6 +41,8 @@
                         <x-card>
                             <div class="flex flex-col gap-1.5">
                                 <x-input wire:model="mailFolder.name" :label="__('Name')" :disabled="true" />
+                                <x-toggle wire:model="mailFolder.creates_purchase_invoice" :label="__('Creates Purchase Invoice')" />
+                                <x-toggle wire:model="mailFolder.creates_ticket" :label="__('Creates Ticket')" />
                                 <x-toggle wire:model="mailFolder.is_active" :label="__('Active')" />
                             </div>
                             <x-slot:footer>
