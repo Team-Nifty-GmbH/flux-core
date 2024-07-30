@@ -9,7 +9,6 @@ testbench.yaml
 node_modules
 reports
 vite.config.js
-tailwind.config.js
 postcss.config.js
 package.json
 package-lock.json
