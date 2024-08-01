@@ -6,7 +6,7 @@
             <x-input :label="__('Email')" wire:model="user.email"/>
             <x-input :label="__('User code')" wire:model="user.user_code"/>
             <x-input
-                :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')->symbol"
+                :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
                 type="number"
                 :label="__('Cost Per Hour')"
                 wire:model="user.cost_per_hour"
