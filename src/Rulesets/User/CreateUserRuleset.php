@@ -16,7 +16,7 @@ class CreateUserRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:users,uuid',
+            'uuid' => 'nullable|string|uuid|unique:users,uuid',
             'language_id' => [
                 'nullable',
                 'integer',
@@ -32,6 +32,7 @@ class CreateUserRuleset extends FluxRuleset
             'lastname' => 'required|string',
             'password' => ['required', Password::min(8)->mixedCase()->numbers()],
             'user_code' => 'required|string|unique:users,user_code',
+            'cost_per_hour' => 'nullable|numeric',
             'is_active' => 'sometimes|boolean',
         ];
     }

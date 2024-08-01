@@ -35,6 +35,7 @@ class UpdateUserRuleset extends FluxRuleset
             'lastname' => 'sometimes|required|string',
             'password' => ['sometimes', 'required', Password::min(8)->mixedCase()->numbers()],
             'user_code' => 'sometimes|required|string|unique:users,user_code',
+            'cost_per_hour' => 'nullable|numeric',
             'is_active' => 'sometimes|required|boolean',
         ];
     }

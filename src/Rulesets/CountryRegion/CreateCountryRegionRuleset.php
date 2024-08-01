@@ -14,7 +14,7 @@ class CreateCountryRegionRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:country_regions,uuid',
+            'uuid' => 'nullable|string|uuid|unique:country_regions,uuid',
             'country_id' => [
                 'required',
                 'integer',

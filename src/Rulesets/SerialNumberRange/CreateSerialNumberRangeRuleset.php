@@ -17,7 +17,7 @@ class CreateSerialNumberRangeRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:serial_number_ranges,uuid',
+            'uuid' => 'nullable|string|uuid|unique:serial_number_ranges,uuid',
             'client_id' => [
                 'required',
                 'integer',

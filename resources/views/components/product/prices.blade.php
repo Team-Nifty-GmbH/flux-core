@@ -47,6 +47,7 @@
                 <div class="flex gap-1.5">
                     <span x-text="priceList.name"></span>
                     <x-badge x-show="priceList.is_default" primary label="{{ __('Default') }}" />
+                    <x-badge x-show="priceList.is_purchase" negative label="{{ __('Purchase Price') }}" />
                     <x-badge x-show="priceList.parent && ! priceList.price_id" warning x-text="'{{ __('Inherited from :parent_name') }}'.replace(':parent_name', priceList.parent?.name)" />
                     <div x-show="priceList.parent">
                         <x-toggle

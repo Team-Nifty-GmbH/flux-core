@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\RoundingMethodEnum;
+use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class PriceList extends Model
 {
-    use HasDefault, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use CacheModelQueries, HasDefault, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -28,7 +29,29 @@ class PriceList extends Model
             'rounding_method_enum' => RoundingMethodEnum::class,
             'is_net' => 'boolean',
             'is_default' => 'boolean',
+            'is_purchase' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(
+            function (Model $model) {
+                if ($model->isDirty('is_purchase')) {
+                    if ($model->is_purchase) {
+                        $model->setUpdatedDefault();
+                    }
+                }
+
+                // if a default column is given at least one model has to be default
+                if (
+                    ! $model->is_purchase
+                    && static::query()->where('is_purchase', true)->doesntExist()
+                ) {
+                    $model->is_purchase = true;
+                }
+            }
+        );
     }
 
     public function categoryDiscounts(): BelongsToMany

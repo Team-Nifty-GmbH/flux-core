@@ -151,10 +151,13 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         );
     }
 
-    public function purchasePrice(float|int $amount): float
+    public function purchasePrice(float|int $amount = 1): Price
     {
-        // TODO: add calculation for purchase price
-        return 0;
+        return PriceHelper::make($this)
+            ->setPriceList(resolve_static(PriceList::class, 'query')
+                ->where('is_purchase', true)
+                ->first()
+            )->price();
     }
 
     public function stockPostings(): HasMany

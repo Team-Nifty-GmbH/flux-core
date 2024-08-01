@@ -12,7 +12,7 @@ class CreateMailAccountRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:mail_accounts,uuid',
+            'uuid' => 'nullable|string|uuid|unique:mail_accounts,uuid',
             'protocol' => 'required|string|max:255|in:imap,pop3,nntp',
             'email' => 'required|string|unique:mail_accounts,email',
             'password' => 'required|string|max:255',

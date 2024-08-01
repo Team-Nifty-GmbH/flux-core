@@ -18,7 +18,7 @@ class CreateTransactionRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:transactions,uuid',
+            'uuid' => 'nullable|string|uuid|unique:transactions,uuid',
             'bank_connection_id' => [
                 'required',
                 'integer',

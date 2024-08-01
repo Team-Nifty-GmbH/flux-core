@@ -2,6 +2,8 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\Money;
+use FluxErp\Casts\Percentage;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
@@ -43,8 +45,6 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
-use TeamNiftyGmbH\DataTable\Casts\Money;
-use TeamNiftyGmbH\DataTable\Casts\Percentage;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
@@ -170,6 +170,8 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             'shipping_costs_vat_rate_percentage' => Percentage::class,
             'total_base_gross_price' => Money::class,
             'total_base_net_price' => Money::class,
+            'total_purchase_price' => Money::class,
+            'total_cost' => Money::class,
             'margin' => Money::class,
             'total_gross_price' => Money::class,
             'total_net_price' => Money::class,
@@ -233,6 +235,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->belongsTo(Client::class);
     }
 
+    public function commissions(): HasMany
+    {
+        return $this->hasMany(Commission::class);
+    }
+
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
@@ -288,6 +295,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->belongsTo(PriceList::class);
     }
 
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
     public function purchaseInvoice(): HasOne
     {
         return $this->hasOne(PurchaseInvoice::class);
@@ -296,6 +308,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function responsibleUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
+    public function tasks(): HasManyThrough
+    {
+        return $this->hasManyThrough(Task::class, Project::class);
     }
 
     public function transactions(): HasMany
@@ -386,6 +403,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     {
         return $this->calculateTotalGrossPrice()
             ->calculateTotalNetPrice()
+            ->calculateMargin()
             ->calculateTotalVats();
     }
 
@@ -478,6 +496,31 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this;
     }
 
+    public function calculateMargin(): static
+    {
+        $this->total_purchase_price = $this->orderPositions()
+            ->where('is_alternative', false)
+            ->sum('purchase_price');
+
+        $this->margin = bcround(
+            bcsub($this->total_net_price, $this->total_purchase_price, 9),
+            2
+        );
+
+        $variableCosts = 0;
+        $variableCosts = bcadd($variableCosts, $this->commissions()->sum('commission'));
+        $variableCosts = bcadd($variableCosts, $this->workTimes()->sum('total_cost'));
+        $variableCosts = bcadd($variableCosts, $this->projects()->sum('total_cost'));
+        $this->total_cost = $variableCosts;
+
+        $this->gross_profit = bcround(
+            bcsub($this->margin, $this->total_cost, 9),
+            2
+        );
+
+        return $this;
+    }
+
     public function getLabel(): ?string
     {
         return $this->orderType?->name . ' - ' . $this->order_number . ' - ' . data_get($this->address_invoice, 'name');
@@ -518,5 +561,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         $printViews = $this->printableResolvePrintViews();
 
         return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
+    }
+
+    public function costColumn(): ?string
+    {
+        return 'total_cost';
     }
 }

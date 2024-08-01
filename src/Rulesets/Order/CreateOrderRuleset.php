@@ -27,7 +27,7 @@ class CreateOrderRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:orders,uuid',
+            'uuid' => 'nullable|string|uuid|unique:orders,uuid',
             'approval_user_id' => [
                 'integer',
                 'nullable',

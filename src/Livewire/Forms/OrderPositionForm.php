@@ -125,6 +125,7 @@ class OrderPositionForm extends Form
         $this->product_number = $product->product_number;
         $this->ean_code = $product->ean;
         $this->unit_gram_weight = $product->weight_gram;
+        $this->purchase_price = $product->purchasePrice(1)->price;
 
         $this->calculate();
 

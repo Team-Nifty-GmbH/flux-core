@@ -104,6 +104,8 @@ class OrderInvoiceAddedSubscriber
                 }
             }
         }
+
+        $order->calculateMargin()->save();
     }
 
     public function subscribe(): array

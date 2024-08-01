@@ -19,7 +19,7 @@ class CreateTicketRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:tickets,uuid',
+            'uuid' => 'nullable|string|uuid|unique:tickets,uuid',
             'authenticatable_type' => [
                 'required',
                 'string',
