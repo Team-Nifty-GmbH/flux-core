@@ -22,7 +22,7 @@ class DeleteProject extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Project::class)->query()
+        return resolve_static(Project::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -32,7 +32,7 @@ class DeleteProject extends FluxAction
     {
         parent::validateData();
 
-        if (app(Project::class)->query()
+        if (resolve_static(Project::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->children()

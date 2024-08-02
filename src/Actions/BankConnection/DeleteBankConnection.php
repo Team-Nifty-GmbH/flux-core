@@ -21,7 +21,7 @@ class DeleteBankConnection extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(BankConnection::class)->query()
+        return resolve_static(BankConnection::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

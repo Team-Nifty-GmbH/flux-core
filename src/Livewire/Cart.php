@@ -17,7 +17,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Lazy;
-use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -37,9 +36,6 @@ class Cart extends Component
     #[Rule('required_if:selectedWatchlist,0')]
     public ?string $watchlistName = null;
 
-    #[Locked]
-    public ?int $cartId = null;
-
     public function mount(): void
     {
         $this->getWatchLists();
@@ -50,8 +46,6 @@ class Cart extends Component
     {
         return [
             'echo-private:' . $this->cart()->broadcastChannel() . ',.CartUpdated' => 'refresh',
-            'echo-private:' . app(CartModel::class)->broadcastChannel()
-                . $this->cartId . ',.CartDeleted' => 'refresh',
             'cart:add' => 'add',
             'cart:remove' => 'remove',
             'cart:refresh' => 'refresh',
@@ -74,7 +68,9 @@ class Cart extends Component
 
         foreach ($products as $product) {
             if ($productId = is_array($product) ? data_get($product, 'id') : $product) {
-                $productModel = app(Product::class)->whereKey($productId)->first();
+                $productModel = resolve_static(Product::class, 'query')
+                    ->whereKey($productId)
+                    ->first();
             }
 
             $data = [
@@ -161,8 +157,7 @@ class Cart extends Component
     {
         try {
             if ($this->selectedWatchlist) {
-                $cart = app(CartModel::class)
-                    ->query()
+                $cart = resolve_static(CartModel::class, 'query')
                     ->whereKey($this->selectedWatchlist)
                     ->where('is_watchlist', true)
                     ->first();
@@ -225,16 +220,12 @@ class Cart extends Component
     #[Computed(persist: true)]
     public function cart(): ?CartModel
     {
-        $cart = cart();
-        $this->cartId = $cart->id;
-
-        return $cart;
+        return cart();
     }
 
     protected function getWatchLists(): void
     {
-        $this->watchlists = app(CartModel::class)
-            ->query()
+        $this->watchlists = resolve_static(CartModel::class, 'query')
             ->where(function (Builder $query) {
                 $query->where(fn (Builder $query) => $query
                     ->where('authenticatable_type', auth()->user()?->getMorphClass())

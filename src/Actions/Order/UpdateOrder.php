@@ -31,7 +31,7 @@ class UpdateOrder extends FluxAction
         $addresses = Arr::pull($this->data, 'addresses', []);
         $users = Arr::pull($this->data, 'users');
 
-        $order = app(Order::class)->query()
+        $order = resolve_static(Order::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
         if ($order->shipping_costs_net_price) {
@@ -73,7 +73,7 @@ class UpdateOrder extends FluxAction
 
         $this->data = $validator->validate();
 
-        $order = app(Order::class)->query()
+        $order = resolve_static(Order::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -86,12 +86,12 @@ class UpdateOrder extends FluxAction
         if (($this->data['invoice_number'] ?? false)
             || $updatedOrderType
         ) {
-            $isPurchase = app(OrderType::class)->query()
+            $isPurchase = resolve_static(OrderType::class, 'query')
                 ->whereKey($updatedOrderType ?: $order->order_type_id)
                 ->whereIn('order_type_enum', [OrderTypeEnum::Purchase->value, OrderTypeEnum::PurchaseRefund->value])
                 ->exists();
 
-            if (app(Order::class)->query()
+            if (resolve_static(Order::class, 'query')
                 ->where('id', '!=', $this->data['id'])
                 ->where('client_id', $order->client_id)
                 ->where('invoice_number', $this->data['invoice_number'] ?? $order->invoice_number)

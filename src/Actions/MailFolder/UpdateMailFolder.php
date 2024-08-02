@@ -24,7 +24,7 @@ class UpdateMailFolder extends FluxAction
 
     public function performAction(): Model
     {
-        $mailFolder = app(MailFolder::class)->query()
+        $mailFolder = resolve_static(MailFolder::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

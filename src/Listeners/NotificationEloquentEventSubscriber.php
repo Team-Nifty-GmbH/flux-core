@@ -26,6 +26,7 @@ class NotificationEloquentEventSubscriber
             return;
         }
 
+        $notification = resolve_static($notification, 'class');
         $this->model = $model[0];
 
         // Subscribers to the morph model.
@@ -39,7 +40,7 @@ class NotificationEloquentEventSubscriber
         }
 
         // Anonymous subscribers.
-        $anonymousNotifiables = app(NotificationSetting::class)->query()
+        $anonymousNotifiables = resolve_static(NotificationSetting::class, 'query')
             ->where('notification_type', $notification)
             ->where('is_active', true)
             ->whereNull('notifiable_id')
@@ -69,7 +70,14 @@ class NotificationEloquentEventSubscriber
             return;
         }
 
-        Notification::send($this->notifiables, new $notification($this->model, $event));
+        $notification = new $notification($this->model);
+        foreach ($this->notifiables as $notifiable) {
+            if (! $notifiable) {
+                continue;
+            }
+
+            $notifiable->notify($notification, $event);
+        }
     }
 
     /**

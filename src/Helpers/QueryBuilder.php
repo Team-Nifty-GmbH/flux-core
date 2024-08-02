@@ -97,7 +97,7 @@ class QueryBuilder
 
         $modelFilters = self::calculateFilters($model);
 
-        $additionalColumns = app(AdditionalColumn::class)->query()
+        $additionalColumns = resolve_static(AdditionalColumn::class, 'query')
             ->where('model_type', $modelName)
             ->get()
             ->pluck('name')
@@ -108,11 +108,11 @@ class QueryBuilder
         foreach ($additionalColumns as $additionalColumn) {
             $alias = $modelName . '.' . $additionalColumn;
             $additionalColumnsFilters[] = AllowedFilter::custom(
-                $additionalColumn, new AdditionalColumnFilter(), $alias
+                $additionalColumn, app(AdditionalColumnFilter::class), $alias
             );
 
             $additionalColumnsSorts[] = AllowedSort::custom(
-                $additionalColumn, new AdditionalColumnSort(), $alias
+                $additionalColumn, app(AdditionalColumnSort::class), $alias
             );
         }
 

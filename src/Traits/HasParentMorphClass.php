@@ -29,7 +29,7 @@ trait HasParentMorphClass
         }
 
         if (Relation::requiresMorphMap()) {
-            throw new ClassMorphViolationException(new $parentClass);
+            throw new ClassMorphViolationException(new $parentClass());
         }
 
         return $parentClass;

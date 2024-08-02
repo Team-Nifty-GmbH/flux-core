@@ -22,7 +22,7 @@ class DeleteTicketType extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(TicketType::class)->query()
+        return resolve_static(TicketType::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();
@@ -32,7 +32,7 @@ class DeleteTicketType extends FluxAction
     {
         parent::validateData();
 
-        if (app(TicketType::class)->query()
+        if (resolve_static(TicketType::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->tickets()

@@ -21,17 +21,17 @@ class CreateSerialNumberRangeRuleset extends FluxRuleset
             'client_id' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'model_type' => [
                 'required',
                 'string',
-                new MorphClassExists(HasSerialNumberRange::class),
+                app(MorphClassExists::class, ['model' => HasSerialNumberRange::class]),
             ],
             'model_id' => [
                 'sometimes',
                 'integer',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
             'type' => 'required|string',
             'start_number' => 'integer|min:1',

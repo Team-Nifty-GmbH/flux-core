@@ -8,8 +8,6 @@ use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Country;
-use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
@@ -47,8 +45,7 @@ class Addresses extends Component
 
         $this->address->fill(
             $this->addressId
-                ? app(Address::class)
-                    ->query()
+                ? resolve_static(Address::class, 'query')
                     ->whereKey($this->addressId)
                     ->with(['contactOptions', 'tags:id', 'permissions:id'])
                     ->first()
@@ -108,19 +105,7 @@ class Addresses extends Component
 
     public function render(): Application|Factory|View
     {
-        return view(
-            'flux::livewire.contact.addresses',
-            [
-                'countries' => app(Country::class)->query()
-                    ->where('is_active', true)
-                    ->orderByDesc('is_default')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'languages' => app(Language::class)->query()
-                    ->get(['id', 'name'])
-                    ->toArray(),
-            ]
-        );
+        return view('flux::livewire.contact.addresses');
     }
 
     public function select(Address $address): void
@@ -173,7 +158,7 @@ class Addresses extends Component
             fn ($address) => $address['id'] !== $this->addressId
         ));
 
-        $address = app(Address::class)->query()
+        $address = resolve_static(Address::class, 'query')
             ->whereKey($this->addresses[0]['id'])
             ->first();
         $this->select($address);
@@ -225,12 +210,16 @@ class Addresses extends Component
         return [
             TabButton::make('address.address')
                 ->label(__('Address')),
-            TabButton::make('address.permissions')
-                ->label(__('Permissions')),
             TabButton::make('address.comments')
                 ->label(__('Comments'))
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
+            TabButton::make('address.communication')
+                ->label(__('Communication'))
+                ->isLivewireComponent()
+                ->wireModel('address.id'),
+            TabButton::make('address.permissions')
+                ->label(__('Permissions')),
             TabButton::make('address.additional-columns')
                 ->label(__('Additional columns')),
             TabButton::make('address.activities')
@@ -245,7 +234,7 @@ class Addresses extends Component
     {
         $this->address->permissions ??= [];
 
-        return app(Permission::class)->query()
+        return resolve_static(Permission::class, 'query')
             ->where('guard_name', 'address')
             ->get(['id', 'name'])
             ->map(function (Permission $permission) {
@@ -262,7 +251,7 @@ class Addresses extends Component
     {
         if (! $this->address->id) {
             $this->select(
-                app(Address::class)->query()
+                resolve_static(Address::class, 'query')
                     ->whereKey($this->addresses[0]['id'])
                     ->with('contactOptions')
                     ->first()
@@ -271,7 +260,7 @@ class Addresses extends Component
             return;
         }
 
-        $address = app(Address::class)->query()
+        $address = resolve_static(Address::class, 'query')
             ->whereKey($this->address->id)
             ->with('contactOptions')
             ->first();
@@ -284,8 +273,12 @@ class Addresses extends Component
 
     public function loadAddresses(): void
     {
-        $addresses = app(Address::class)->query()
+        $addresses = resolve_static(Address::class, 'query')
             ->where('contact_id', $this->contact->id)
+            ->orderByDesc('is_main_address')
+            ->orderByDesc('is_invoice_address')
+            ->orderByDesc('is_delivery_address')
+            ->orderByDesc('is_active')
             ->get([
                 'id',
                 'contact_id',

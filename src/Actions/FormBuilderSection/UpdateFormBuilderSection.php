@@ -21,7 +21,7 @@ class UpdateFormBuilderSection extends FluxAction
 
     public function performAction(): FormBuilderSection
     {
-        $formBuilderSection = app(FormBuilderSection::class)->query()
+        $formBuilderSection = resolve_static(FormBuilderSection::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

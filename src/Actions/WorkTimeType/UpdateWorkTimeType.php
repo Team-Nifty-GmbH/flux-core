@@ -23,7 +23,7 @@ class UpdateWorkTimeType extends FluxAction
 
     public function performAction(): Model
     {
-        $workTimeType = app(WorkTimeType::class)->query()
+        $workTimeType = resolve_static(WorkTimeType::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

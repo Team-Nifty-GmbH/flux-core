@@ -8,6 +8,7 @@ use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Communication\UpdateCommunicationRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 
 class UpdateCommunication extends FluxAction
 {
@@ -26,17 +27,34 @@ class UpdateCommunication extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags');
 
-        $communication = app(Communication::class)->query()
+        $communication = resolve_static(Communication::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
+
+        $startedAt = data_get($this->data, 'started_at');
+        $endedAt = data_get($this->data, 'ended_at');
+
+        if (is_null(data_get($this->data, 'total_time_ms')) && $startedAt && $endedAt) {
+            $this->data['total_time_ms'] = Carbon::parse($endedAt)->diffInMilliseconds(Carbon::parse($startedAt));
+        }
 
         $communication->fill($this->data);
         $communication->save();
 
         if (! is_null($tags)) {
-            $communication->syncTags(app(Tag::class)->query()->whereIntegerInRaw('id', $tags)->get());
+            $communication->syncTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
         return $communication->withoutRelations()->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $model = resolve_static(Communication::class, 'query')
+            ->whereKey(data_get($this->data, 'id'))
+            ->first(['started_at', 'ended_at']);
+
+        $this->data['started_at'] ??= $model->started_at;
+        $this->data['ended_at'] ??= $model->ended_at;
     }
 }

@@ -23,7 +23,7 @@ class DeleteMailFolder extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(MailFolder::class)->query()
+        return resolve_static(MailFolder::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

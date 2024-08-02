@@ -98,12 +98,12 @@ class Comments extends Component
 
     public function saveComment(string $comment, bool $sticky, bool $internal = true): void
     {
-        if (Auth::user()->getMorphClass() !== app(User::class)->getMorphClass()) {
+        if (Auth::user()->getMorphClass() !== morph_alias(User::class)) {
             $internal = false;
         }
 
         $comment = [
-            'model_type' => app($this->modelType)->getMorphClass(),
+            'model_type' => morph_alias($this->modelType),
             'model_id' => $this->modelId,
             'comment' => $comment,
             'is_sticky' => $sticky,
@@ -152,7 +152,7 @@ class Comments extends Component
 
     public function toggleSticky(int $id): void
     {
-        $comment = app(Comment::class)->query()->whereKey($id)->first();
+        $comment = resolve_static(Comment::class, 'query')->whereKey($id)->first();
 
         try {
             UpdateComment::make([
@@ -263,7 +263,7 @@ class Comments extends Component
             return;
         }
 
-        $this->users = app(User::class)->query()
+        $this->users = resolve_static(User::class, 'query')
             ->select('id', 'name')
             ->where('is_active', true)
             ->orderBy('firstname')
@@ -277,7 +277,7 @@ class Comments extends Component
             })
             ->toArray();
 
-        $this->roles = app(Role::class)->query()
+        $this->roles = resolve_static(Role::class, 'query')
             ->select(['id', 'name'])
             ->whereRelation('users', 'is_active', true)
             ->orderBy('name')

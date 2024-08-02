@@ -23,7 +23,7 @@ class UpdateProductProperty extends FluxAction
 
     public function performAction(): Model
     {
-        $productProperty = app(ProductProperty::class)->query()
+        $productProperty = resolve_static(ProductProperty::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

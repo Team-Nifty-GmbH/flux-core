@@ -20,8 +20,7 @@ class Watchlist extends Component
         return view(
             'flux::livewire.portal.shop.watchlist',
             [
-                'carts' => app(Cart::class)
-                    ->query()
+                'carts' => resolve_static(Cart::class, 'query')
                     ->where('is_watchlist', true)
                     ->with([
                         'products' => fn (HasManyThrough $query) => $query->webshop(),
@@ -53,8 +52,7 @@ class Watchlist extends Component
     {
         try {
             DeleteCartItem::make([
-                'id' => app(CartItem::class)
-                    ->query()
+                'id' => resolve_static(CartItem::class, 'query')
                     ->where('cart_id', $cart->id)
                     ->where('product_id', $productId)
                     ->value('id'),

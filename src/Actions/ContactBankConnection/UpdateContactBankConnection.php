@@ -22,7 +22,7 @@ class UpdateContactBankConnection extends FluxAction
 
     public function performAction(): Model
     {
-        $contactBankConnection = app(ContactBankConnection::class)->query()
+        $contactBankConnection = resolve_static(ContactBankConnection::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

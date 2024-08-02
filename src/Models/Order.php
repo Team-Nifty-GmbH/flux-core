@@ -25,12 +25,14 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Printable;
+use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
 use FluxErp\View\Printing\Order\Retoure;
+use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -39,13 +41,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Casts\Money;
 use TeamNiftyGmbH\DataTable\Casts\Percentage;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
@@ -128,8 +128,8 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             }
 
             if ($order->isDirty('iban')
-                && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
                 && $order->iban
+                && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
             ) {
                 $order->contact_bank_connection_id = null;
             }
@@ -145,7 +145,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                 $order->bic = $order->contactBankConnection->bic;
             }
 
-            if ($order->isDirty('iban')) {
+            if ($order->isDirty('iban') && $order->iban) {
                 $order->iban = str_replace(' ', '', strtoupper($order->iban));
             }
         });
@@ -376,6 +376,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
         $this->addMediaCollection('payment-reminders')
             ->acceptsMimeTypes(['application/pdf']);
+
+        $this->addMediaCollection('signature')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png'])
+            ->useDisk('local');
     }
 
     public function calculatePrices(): static

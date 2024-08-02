@@ -63,7 +63,7 @@ class Helper
         } else {
             $class = $namespace . '\\' . ucfirst($classString);
 
-            return class_exists($class) ? get_class(new $class) : false;
+            return class_exists($class) ? get_class(app($class)) : false;
         }
     }
 
@@ -278,7 +278,7 @@ class Helper
 
                     if ($item instanceof Model) {
                         return [
-                            $key => (new $item)->forceFill(
+                            $key => (new $item())->forceFill(
                                 array_merge(
                                     $item->toArray(),
                                     [

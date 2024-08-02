@@ -43,13 +43,13 @@ class ModelCollectionHandler implements HandlerInterface
 
         $data = json_decode($serializedValue, true);
 
-        $collection = new $data['class']();
+        $collection = app($data['class']);
         $models = $this->loadModels($data['items']);
 
         // Repopulate collection keys with loaded models.
         foreach ($data['items'] as $key => $item) {
             if (is_null($item['key'])) {
-                $collection[$key] = new $item['class']();
+                $collection[$key] = app($item['class']);
             } elseif (isset($models[$item['class']][$item['key']])) {
                 $collection[$key] = $models[$item['class']][$item['key']];
             }
@@ -75,7 +75,7 @@ class ModelCollectionHandler implements HandlerInterface
 
         // Iterate list of classes and load all records matching a key.
         foreach ($classes as $class => $keys) {
-            $model = new $class();
+            $model = app($class);
             $results[$class] = $model->whereIn($model->getKeyName(), $keys)->get()->keyBy($model->getKeyName());
         }
 

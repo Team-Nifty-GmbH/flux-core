@@ -25,8 +25,9 @@ class EventSubscriptionController extends BaseController
 
     public function getUserSubscriptions(Request $request): JsonResponse
     {
-        $subscriptions = app(EventSubscription::class)->query()
-            ->where('user_id', $request->user()->id)
+        $subscriptions = resolve_static(EventSubscription::class, 'query')
+            ->where('subscribable_type', $request->user()->getMorphClass())
+            ->where('subscribable_id', $request->user()->id)
             ->orderBy('event')
             ->get();
 

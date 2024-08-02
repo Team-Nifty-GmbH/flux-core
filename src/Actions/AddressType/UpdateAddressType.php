@@ -23,7 +23,7 @@ class UpdateAddressType extends FluxAction
 
     public function performAction(): Model
     {
-        $addressType = app(AddressType::class)->query()
+        $addressType = resolve_static(AddressType::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

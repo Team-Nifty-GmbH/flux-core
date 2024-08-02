@@ -120,7 +120,7 @@ class TranslationEdit extends Component
 
         $validated = $this->validate();
 
-        $translationService = new TranslationService();
+        $translationService = app(TranslationService::class);
         $response = $translationService->{$this->isNew ? 'create' : 'update'}($validated['translation']);
 
         if (! $this->isNew && $response['status'] > 299) {

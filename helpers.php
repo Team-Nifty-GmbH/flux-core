@@ -49,7 +49,14 @@ if (! function_exists('route_to_permission')) {
         }
 
         try {
-            $permission = \Spatie\Permission\Models\Permission::findByName($route->getPermissionName(), $guard[1] ?? $defaultGuard);
+            $permission = resolve_static(
+                \Spatie\Permission\Models\Permission::class,
+                'findByName',
+                [
+                    'name' => $route->getPermissionName(),
+                    'guardName' => $guard[1] ?? $defaultGuard,
+                ]
+            );
         } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
             $permission = null;
         }
@@ -130,7 +137,7 @@ if (! function_exists('qualify_model')) {
             && class_exists($model)
             && is_a($model, \Illuminate\Database\Eloquent\Model::class, true)
         ) {
-            return get_class(app($model));
+            return resolve_static($model, 'class');
         }
 
         $model = ltrim($model, '\\/');
@@ -188,20 +195,21 @@ if (! function_exists('event_subscribers')) {
         string $event,
         ?int $modelId = null,
         ?string $modelType = null
-    ): Illuminate\Database\Eloquent\Collection {
+    ): Illuminate\Support\Collection {
         if (
-            app(\FluxErp\Models\EventSubscription::class)->query()
+            resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
                 ->where('event', $event)
-                ->whereNull('user_id')
+                ->whereNull('subscribable_id')
                 ->exists()
         ) {
-            return app(\FluxErp\Models\User::class)->all();
+            return resolve_static(\FluxErp\Models\User::class, 'query')->get();
         }
 
-        $subscriberIds = app(\FluxErp\Models\EventSubscription::class)->query()
-            ->whereNot('user_id', auth()->id())
-            ->where(function ($query) use ($event, $modelId, $modelType) {
-                $query->where(function ($query) use ($event) {
+        return resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
+            ->whereNot(fn ($query) => $query->where('subscribable_type', auth()->user()->getMorphClass())
+                ->where('subscribable_id', auth()->id()))
+            ->where(function (Illuminate\Database\Eloquent\Builder $query) use ($event, $modelId, $modelType) {
+                $query->where(function (Illuminate\Database\Eloquent\Builder $query) use ($event) {
                     $query->where('event', $event)
                         ->whereNull('model_id');
                 })
@@ -216,11 +224,9 @@ if (! function_exists('event_subscribers')) {
                     })
                     ->orWhere('event', '*');
             })
-            ->get()
-            ->pluck('user_id')
-            ->toArray();
-
-        return app(\FluxErp\Models\User::class)->query()->whereIntegerInRaw('id', $subscriberIds)->get();
+            ->with('subscribable')
+            ->get(['subscribable_id', 'subscribable_type'])
+            ->pluck('subscribable');
     }
 }
 
@@ -348,7 +354,7 @@ if (! function_exists('meilisearch_import_sync')) {
 
         $client = new \MeiliSearch\Client(config('scout.meilisearch.host'), config('scout.meilisearch.key'));
         $from = $client->getTasks((new \MeiliSearch\Contracts\TasksQuery())
-            ->setIndexUids([(new $model())->searchableAs()])
+            ->setIndexUids([app($model)->searchableAs()])
             ->setLimit(1))
             ->getFrom();
 
@@ -360,7 +366,7 @@ if (! function_exists('meilisearch_import_sync')) {
             ['model' => $model]
         );
         $from = $client->getTasks((new \MeiliSearch\Contracts\TasksQuery())
-            ->setIndexUids([(new $model())->searchableAs()])
+            ->setIndexUids([app($model)->searchableAs()])
             ->setLimit(1))
             ->getFrom();
         $client->waitForTask($from);

@@ -79,8 +79,7 @@ trait HasAdditionalColumns
     public static function bootHasAdditionalColumns(): void
     {
         foreach (
-            app(AdditionalColumn::class)
-                ->query()
+            resolve_static(AdditionalColumn::class, 'query')
                 ->whereNotNull('model_id')
                 ->where('model_type', app(static::class)->getMorphClass())
                 ->get() as $column
@@ -227,7 +226,7 @@ trait HasAdditionalColumns
 
     protected static function additionalColumnsQuery(): Builder
     {
-        return app(AdditionalColumn::class)->query()
+        return resolve_static(AdditionalColumn::class, 'query')
             ->where('model_type', morph_alias(static::class))
             ->whereNull('model_id');
     }
@@ -279,7 +278,7 @@ trait HasAdditionalColumns
      */
     public function setFallbackValue(string $key, mixed $value = null): self
     {
-        ($this->fallbackValues ??= new Collection)->put($key, $value);
+        ($this->fallbackValues ??= collect())->put($key, $value);
 
         return $this;
     }
@@ -701,7 +700,7 @@ trait HasAdditionalColumns
             return $this->metaChanges;
         }
 
-        return $this->metaChanges = new Collection;
+        return $this->metaChanges = collect();
     }
 
     /**

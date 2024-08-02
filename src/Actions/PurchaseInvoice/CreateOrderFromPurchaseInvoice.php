@@ -36,7 +36,7 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
         if (
             ! $layOutUserId
             && data_get($this->data, 'iban')
-            && app(ContactBankConnection::class)->query()
+            && resolve_static(ContactBankConnection::class, 'query')
                 ->where('contact_id', $this->data['contact_id'])
                 ->where('iban', data_get($this->data, 'iban'))
                 ->doesntExist()
@@ -78,7 +78,7 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
 
     public function prepareForValidation(): void
     {
-        $this->purchaseInvoice = app(PurchaseInvoice::class)->query()
+        $this->purchaseInvoice = resolve_static(PurchaseInvoice::class, 'query')
             ->whereKey($this->data['id'] ?? null)
             ->with('purchaseInvoicePositions')
             ->first();
@@ -92,10 +92,10 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
 
         if (
             ! data_get($this->data, 'iban')
-            && app(PaymentType::class)->query()
+            && resolve_static(PaymentType::class, 'query')
                 ->whereKey($this->data['payment_type_id'])
                 ->value('requires_manual_transfer')
-            && app(ContactBankConnection::class)->query()
+            && resolve_static(ContactBankConnection::class, 'query')
                 ->where('contact_id', $this->data['contact_id'])
                 ->doesntExist()
         ) {

@@ -3,8 +3,6 @@
 namespace FluxErp\Rulesets\EventSubscription;
 
 use FluxErp\Models\EventSubscription;
-use FluxErp\Models\User;
-use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
@@ -17,21 +15,26 @@ class CreateEventSubscriptionRuleset extends FluxRuleset
     {
         return [
             'event' => 'required|string',
-            'user_id' => [
+            'subscribable_type' => [
+                'required',
+                'string',
+                app(MorphClassExists::class),
+            ],
+            'subscribable_id' => [
                 'sometimes',
                 'integer',
-                new ModelExists(User::class),
+                app(MorphExists::class, ['modelAttribute' => 'subscribable_type']),
             ],
             'model_type' => [
                 'required',
                 'string',
-                new MorphClassExists(),
+                app(MorphClassExists::class),
             ],
             'model_id' => [
                 'present',
                 'integer',
                 'nullable',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
             'is_broadcast' => 'required|boolean|accepted_if:is_notifiable,false,0',
             'is_notifiable' => 'required|boolean|accepted_if:is_broadcast,false,0',

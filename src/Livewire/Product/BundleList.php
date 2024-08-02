@@ -139,7 +139,12 @@ class BundleList extends ProductBundleProductList
             return;
         }
 
-        if (app(Product::class)->query()->whereKey($this->product->id)->first()->bundleProducts()->count() === 0) {
+        if (resolve_static(Product::class, 'query')
+            ->whereKey($this->product->id)
+            ->first()
+            ->bundleProducts()
+            ->count() === 0
+        ) {
             $this->product->is_bundle = false;
             $this->js(<<<'JS'
                 Livewire.navigate(window.location.href);

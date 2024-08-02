@@ -23,7 +23,7 @@ class UpdateCountryRegion extends FluxAction
 
     public function performAction(): Model
     {
-        $countryRegion = app(CountryRegion::class)->query()
+        $countryRegion = resolve_static(CountryRegion::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

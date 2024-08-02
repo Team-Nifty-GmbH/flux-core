@@ -19,12 +19,12 @@ class DeleteMediaCollectionRuleset extends FluxRuleset
             'model_type' => [
                 'required',
                 'string',
-                new MorphClassExists(),
+                app(MorphClassExists::class),
             ],
             'model_id' => [
                 'required',
                 'integer',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
             'collection_name' => 'required|string',
         ];

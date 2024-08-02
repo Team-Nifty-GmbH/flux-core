@@ -3,8 +3,8 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Laravel\Scout\Searchable;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 
 class Permission extends SpatiePermission

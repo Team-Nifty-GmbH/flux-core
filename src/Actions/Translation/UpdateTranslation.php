@@ -22,7 +22,7 @@ class UpdateTranslation extends FluxAction
 
     public function performAction(): Model
     {
-        $languageLine = app(LanguageLine::class)->query()
+        $languageLine = resolve_static(LanguageLine::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

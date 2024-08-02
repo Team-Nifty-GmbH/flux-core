@@ -17,14 +17,14 @@ class ReplaceMediaRuleset extends FluxRuleset
         return [
             'id' => [
                 'required',
-                new ModelExists(Media::class),
+                app(ModelExists::class, ['model' => Media::class]),
             ],
             'media' => 'required',
-            'media_type' => ['sometimes', new MediaUploadType()],
+            'media_type' => ['sometimes', app(MediaUploadType::class)],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Media::class),
+                app(ModelExists::class, ['model' => Media::class]),
             ],
             'name' => 'sometimes|required|string',
             'file_name' => 'sometimes|required|string',

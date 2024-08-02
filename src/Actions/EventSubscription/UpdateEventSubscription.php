@@ -26,7 +26,7 @@ class UpdateEventSubscription extends FluxAction
 
     public function performAction(): Model
     {
-        $eventSubscription = app(EventSubscription::class)->query()
+        $eventSubscription = resolve_static(EventSubscription::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -57,12 +57,14 @@ class UpdateEventSubscription extends FluxAction
         }
 
         $this->data['event'] = $eventClass ?: $eloquentEvent;
-        $this->data['user_id'] ??= Auth::id();
+        $this->data['subscribable_id'] ??= Auth::id();
+        $this->data['subscribable_type'] ??= Auth::user()->getMorphClass();
 
-        if (app(EventSubscription::class)->query()
+        if (resolve_static(EventSubscription::class, 'query')
             ->whereKeyNot($this->data['id'])
             ->where('event', $this->data['event'])
-            ->where('user_id', $this->data['user_id'])
+            ->where('subscribable_type', $this->data['subscribable_type'])
+            ->where('subscribable_id', $this->data['subscribable_id'])
             ->where('model_type', $this->data['model_type'])
             ->where(function (Builder $query) {
                 return $query->where('model_id', $this->data['model_id'])

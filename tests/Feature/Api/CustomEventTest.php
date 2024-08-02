@@ -84,7 +84,7 @@ class CustomEventTest extends BaseSetup
     {
         $customEvent = [
             'name' => str_replace([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], '', Str::random(32)),
-            'model_type' => get_class($this->user),
+            'model_type' => $this->user->getMorphClass(),
             'model_id' => $this->user->id,
         ];
 

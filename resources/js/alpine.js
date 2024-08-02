@@ -3,7 +3,7 @@ import setupEditor from './components/tiptap';
 import workTime from './components/work-time.js';
 import dashboard from './components/dashboard';
 import notifications from './components/wireui/notifications';
-import PullToRefresh from "pulltorefreshjs";
+import signature from './components/signature-pad.js';
 import addressMap from "./components/address-map";
 
 window.folderTree = folderTree;
@@ -11,6 +11,7 @@ window.setupEditor = setupEditor;
 window.workTime = workTime;
 window.dashboard = dashboard;
 window.addressMap = addressMap;
+window.signature = signature;
 
 window.addEventListener('alpine:init', () => {
     window.Alpine.data('wireui_notifications', notifications);
@@ -162,9 +163,13 @@ Alpine.directive('tribute', (el, { modifiers, expression }, { evaluate }) => {
     tribute.attach(el);
 })
 
-document.addEventListener('livewire:navigated', function() {
-    wireNavigation();
-}, {once: true});
+document.addEventListener(
+    'livewire:navigated',
+    function() {
+        wireNavigation();
+    },
+    {once: true}
+);
 
 document.addEventListener('livewire:init', () => {
     wireNavigation();
@@ -189,19 +194,6 @@ function wireNavigation() {
     links.forEach(link => {
         link.setAttribute('wire:navigate', 'true');
     });
-
-    const standalone =
-        navigator.standalone ||
-        window.matchMedia("(display-mode: standalone)").matches;
-    if (standalone) {
-        PullToRefresh.init({
-            distThreshold: 100,
-            distMax: 120,
-            onRefresh() {
-                window.location.reload();
-            },
-        });
-    }
 }
 
 Livewire.directive('flux-confirm', ({ el, directive }) => {

@@ -23,22 +23,22 @@ class CreateTicketRuleset extends FluxRuleset
             'authenticatable_type' => [
                 'required',
                 'string',
-                new MorphClassExists(implements: Authenticatable::class),
+                app(MorphClassExists::class, ['implements' => Authenticatable::class]),
             ],
             'authenticatable_id' => [
                 'required',
                 'integer',
-                new MorphExists('authenticatable_type'),
+                app(MorphExists::class, ['modelAttribute' => 'authenticatable_type']),
             ],
             'model_type' => [
                 'required_with:model_id',
                 'string',
-                new MorphClassExists(),
+                app(MorphClassExists::class),
             ],
             'model_id' => [
                 'required_with:model_type',
                 'integer',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
             'ticket_type_id' => [
                 'integer',

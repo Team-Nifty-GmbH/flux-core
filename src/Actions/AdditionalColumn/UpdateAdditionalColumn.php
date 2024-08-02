@@ -35,7 +35,7 @@ class UpdateAdditionalColumn extends FluxAction
             $this->data['validations'] = null;
         }
 
-        $additionalColumn = app(AdditionalColumn::class)->query()
+        $additionalColumn = resolve_static(AdditionalColumn::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -49,7 +49,7 @@ class UpdateAdditionalColumn extends FluxAction
     {
         parent::validateData();
 
-        $additionalColumn = app(AdditionalColumn::class)->query()
+        $additionalColumn = resolve_static(AdditionalColumn::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

@@ -21,7 +21,7 @@ class DeleteTask extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Task::class)->query()
+        return resolve_static(Task::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

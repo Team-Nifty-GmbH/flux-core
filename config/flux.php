@@ -5,6 +5,8 @@ return [
 
     'license_key' => env('FLUX_LICENSE_KEY'),
 
+    'formal_salutation' => env('FLUX_FORMAL_SALUTATION', true),
+
     'portal_domain' => env(
         'PORTAL_DOMAIN',
         'portal.' . preg_replace('(^https?://)', '', env('APP_URL'))

@@ -50,14 +50,16 @@ class FillOrderPositions extends FluxAction
 
         // Delete all order positions that were not updated on given orderId
         if (! $this->data['simulate']) {
-            app(OrderPosition::class)->query()
+            resolve_static(OrderPosition::class, 'query')
                 ->where('order_id', $this->data['order_id'])
                 ->whereIntegerNotInRaw('id', $ids)
                 ->delete();
         }
 
         if (! $this->data['simulate']) {
-            $order = app(Order::class)->query()->whereKey($this->data['order_id'])->first();
+            $order = resolve_static(Order::class, 'query')
+                ->whereKey($this->data['order_id'])
+                ->first();
             Event::dispatch('order.calculating-prices', $order);
             $order->calculatePrices()->save();
             Event::dispatch('order.calculated-prices', $order);
@@ -95,7 +97,7 @@ class FillOrderPositions extends FluxAction
             throw ValidationException::withMessages($errors)->errorBag('fillOrderPositions');
         }
 
-        $deletedOrderPositions = app(OrderPosition::class)->query()
+        $deletedOrderPositions = resolve_static(OrderPosition::class, 'query')
             ->whereIntegerNotInRaw('order_positions.id', array_column($orderPositions, 'id'))
             ->where('order_positions.order_id', $this->data['order_id'])
             ->whereHas('descendants')
@@ -130,7 +132,7 @@ class FillOrderPositions extends FluxAction
         // Fill validated id if exists in order position or order respectively
         if (is_int($orderPosition['id'] ?? false)
             && ($validated['order_id'] ?? false)
-            && app(OrderPosition::class)->query()
+            && resolve_static(OrderPosition::class, 'query')
                 ->whereKey($orderPosition['id'])
                 ->where('order_id', $validated['order_id'])
                 ->exists()
@@ -191,48 +193,48 @@ class FillOrderPositions extends FluxAction
             $priceValidator = Validator::make($orderPosition, [
                 'unit_gross_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['unit_gross_price'])),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'unit_net_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['unit_net_price'])),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'total_gross_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['total_gross_price'])),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'total_net_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['total_net_price'])),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'total_base_gross_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['total_base_gross_price'])),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'total_base_net_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['total_base_net_price'])),
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'discount_percentage' => [
-                    new Numeric(0, 1),
+                    app(Numeric::class, ['min' => 0, 'max' => 1]),
                     'nullable',
                 ],
                 'margin' => [
-                    new Numeric(),
+                    app(Numeric::class),
                     'nullable',
                 ],
                 'provision' => [
-                    new Numeric(),
+                    app(Numeric::class),
                     'nullable',
                 ],
                 'vat_price' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['vat_price'])),
                     'nullable',
-                    new Numeric(),
+                    app(Numeric::class),
                 ],
                 'vat_rate_percentage' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['vat_rate_percentage'])),
-                    new Numeric(0, 1),
+                    app(Numeric::class, ['min' => 0, 'max' => 1]),
                 ],
             ]);
 
@@ -291,7 +293,7 @@ class FillOrderPositions extends FluxAction
 
         // Check Bundle
         if (($validated['product_id'] ?? false)
-            && app(Product::class)->query()
+            && resolve_static(Product::class, 'query')
                 ->whereKey($validated['product_id'])
                 ->where('is_bundle', true)
                 ->exists()
@@ -367,7 +369,7 @@ class FillOrderPositions extends FluxAction
         unset($data['children']);
 
         if (is_int($data['id'] ?? false)) {
-            $orderPosition = app(OrderPosition::class)->query()
+            $orderPosition = resolve_static(OrderPosition::class, 'query')
                 ->whereKey($data['id'])
                 ->first();
 

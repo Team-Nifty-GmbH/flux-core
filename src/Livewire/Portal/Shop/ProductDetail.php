@@ -34,8 +34,7 @@ class ProductDetail extends Component
         $this->fillProductForm($product);
 
         if ($this->variant) {
-            $variant = app(Product::class)
-                ->query()
+            $variant = resolve_static(Product::class, 'query')
                 ->where('parent_id', $product->id)
                 ->whereKey($this->variant)
                 ->with('productOptions:id,product_option_group_id')
@@ -57,8 +56,7 @@ class ProductDetail extends Component
 
         // check if exactly one product exists that has all selected options
         try {
-            $product = app(Product::class)
-                ->query()
+            $product = resolve_static(Product::class, 'query')
                 ->where('parent_id', $this->productForm->parent_id ?? $this->productForm->id)
                 ->whereHas('productOptions', function (Builder $query) {
                     return $query
@@ -80,8 +78,7 @@ class ProductDetail extends Component
 
     public function downloadMedia(array|int $media, ?string $collectionName = null): void
     {
-        $media = app(MediaModel::class)
-            ->query()
+        $media = resolve_static(MediaModel::class, 'query')
             ->whereIntegerInRaw('id', Arr::wrap($media))
             ->get();
 

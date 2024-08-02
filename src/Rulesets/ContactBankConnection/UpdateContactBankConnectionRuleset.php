@@ -18,14 +18,14 @@ class UpdateContactBankConnectionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(ContactBankConnection::class),
+                app(ModelExists::class, ['model' => ContactBankConnection::class]),
             ],
             'contact_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
-            'iban' => ['string', new Iban()],
+            'iban' => ['string', app(Iban::class)],
         ];
     }
 

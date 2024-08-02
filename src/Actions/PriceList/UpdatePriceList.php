@@ -27,7 +27,7 @@ class UpdatePriceList extends FluxAction
 
     public function performAction(): Model
     {
-        $priceList = app(PriceList::class)->query()
+        $priceList = resolve_static(PriceList::class, 'query')
             ->whereKey($this->data['id'])
             ->with(['discount'])
             ->first();
@@ -74,7 +74,7 @@ class UpdatePriceList extends FluxAction
             ($this->data['parent_id'] ?? false)
             && Helper::checkCycle(
                 model: PriceList::class,
-                item: app(PriceList::class)->query()->whereKey($this->data['id'])->first(),
+                item: resolve_static(PriceList::class, 'query')->whereKey($this->data['id'])->first(),
                 parentId: $this->data['parent_id']
             )
         ) {
@@ -85,7 +85,7 @@ class UpdatePriceList extends FluxAction
 
         // Check price_list_code unique
         if (($this->data['price_list_code'] ?? false)
-            && app(PriceList::class)->query()
+            && resolve_static(PriceList::class, 'query')
                 ->where('id', '!=', $this->data['id'])
                 ->where('price_list_code', $this->data['price_list_code'])
                 ->exists()

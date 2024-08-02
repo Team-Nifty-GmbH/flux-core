@@ -33,7 +33,7 @@ class SerialNumberRangeTest extends BaseSetup
             ->hasAttached(factory: $this->dbClient, relationship: 'clients')
             ->create();
 
-        $this->serialNumberRanges = new Collection();
+        $this->serialNumberRanges = collect();
         foreach ($this->products as $product) {
             $this->serialNumberRanges->push(SerialNumberRange::factory()->create([
                 'model_type' => app(Product::class)->getMorphClass(),

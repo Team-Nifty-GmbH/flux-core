@@ -2,6 +2,7 @@
 
 use FluxErp\Http\Controllers\AssetController;
 use FluxErp\Http\Controllers\LoginLinkController;
+use FluxErp\Livewire\Features\SignaturePublicLink;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +20,7 @@ Route::middleware('web')
     ->group(function () {
         Route::middleware('signed')->group(function () {
             Route::get('/login-link', LoginLinkController::class)->name('login-link');
+            Route::get('/signature-public/{uuid}', SignaturePublicLink::class)->name('signature.public');
         });
 
         Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function () {

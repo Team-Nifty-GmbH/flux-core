@@ -12,7 +12,7 @@ class ContactOptionController extends Controller
 {
     public function index(string $addressId): JsonResponse
     {
-        $contactOptions = app(ContactOption::class)->query()
+        $contactOptions = resolve_static(ContactOption::class, 'query')
             ->where('address_id', $addressId)
             ->orderBy('type', 'ASC')
             ->orderBy('label', 'ASC')

@@ -21,7 +21,7 @@ class DeleteTranslation extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(LanguageLine::class)->query()
+        return resolve_static(LanguageLine::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

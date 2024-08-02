@@ -27,7 +27,7 @@ class UpdateNotificationSetting extends FluxAction
 
     public function performAction(): Model
     {
-        $notificationSetting = app(NotificationSetting::class)->query()
+        $notificationSetting = resolve_static(NotificationSetting::class, 'query')
             ->firstOrNew([
                 'notifiable_type' => ! $this->data['is_anonymous'] ? Auth::user()->getMorphClass() : null,
                 'notifiable_id' => ! $this->data['is_anonymous'] ? Auth::id() : null,

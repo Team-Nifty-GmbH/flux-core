@@ -22,7 +22,7 @@ class UpdateBankConnection extends FluxAction
 
     public function performAction(): Model
     {
-        $bankConnection = app(BankConnection::class)->query()
+        $bankConnection = resolve_static(BankConnection::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

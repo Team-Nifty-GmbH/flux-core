@@ -21,7 +21,7 @@ class DeleteSchedule extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(Schedule::class)->query()
+        return resolve_static(Schedule::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

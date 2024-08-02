@@ -4,19 +4,21 @@ namespace FluxErp\Models;
 
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\CommunicationTypeEnum;
+use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Printable;
+use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\View\Printing\Communication\CommunicationView;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
-use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
@@ -48,6 +50,8 @@ class Communication extends Model implements HasMedia, OffersPrinting
             'bcc' => 'array',
             'communication_type_enum' => CommunicationTypeEnum::class,
             'date' => 'datetime',
+            'started_at' => 'datetime',
+            'ended_at' => 'datetime',
             'is_seen' => 'boolean',
         ];
     }
@@ -71,6 +75,11 @@ class Communication extends Model implements HasMedia, OffersPrinting
     public function addresses(): MorphToMany
     {
         return $this->morphedByMany(Address::class, 'communicatable', 'communicatable');
+    }
+
+    public function communicatables(): HasMany
+    {
+        return $this->hasMany(Communicatable::class);
     }
 
     public function contacts(): MorphToMany

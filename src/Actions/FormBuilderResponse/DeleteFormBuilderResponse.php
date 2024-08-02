@@ -21,7 +21,7 @@ class DeleteFormBuilderResponse extends FluxAction
 
     public function performAction(): ?bool
     {
-        return app(FormBuilderResponse::class)->query()
+        return resolve_static(FormBuilderResponse::class, 'query')
             ->whereKey($this->data['id'])
             ->first()
             ->delete();

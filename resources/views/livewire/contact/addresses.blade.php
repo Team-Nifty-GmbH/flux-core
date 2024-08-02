@@ -19,8 +19,8 @@
                                 x-bind:class="$wire.address.id === addressItem.id && 'rounded-lg ring-2 ring-inset ring-primary-500 bg-blue-100 dark:bg-secondary-700'"
                                 class="dark:hover:bg-secondary-800 cursor-pointer space-y-2 p-1.5 hover:bg-blue-50"
                             >
-                                <div class="flex w-full justify-between gap-1.5">
-                                    <div class="text-sm dark:text-gray-50 text-ellipsis whitespace-nowrap">
+                                <div class="flex w-full justify-between gap-1.5 dark:text-gray-50" x-bind:class="! addressItem.is_active && 'text-secondary-400 dark:text-gray-200'">
+                                    <div class="text-sm text-ellipsis whitespace-nowrap">
                                         <div class="font-semibold" x-text="addressItem.company"></div>
                                         <div x-text="((addressItem.firstname || '') + ' ' + (addressItem.lastname || '')).trim()"></div>
                                         <div x-text="addressItem.street"></div>

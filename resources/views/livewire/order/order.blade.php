@@ -7,54 +7,11 @@
             document.getElementsByTagName('head')[0].appendChild(meta);
         },
         orderPositions: [],
-        preview: null,
         formatter: @js(resolve_static(\FluxErp\Models\Order::class, 'typeScriptAttributes')),
     }"
 >
     @section('modals')
-        <x-modal.card id="preview" max-width="6xl" :title="__('Preview')">
-            <iframe id="preview-iframe" src="#" loading="lazy" class="w-full min-h-screen"></iframe>
-            <x-slot:footer>
-                <div class="flex justify-end gap-x-4">
-                    <div class="flex">
-                        <x-button flat :label="__('Cancel')" x-on:click="close" />
-                        <x-button spinner primary :label="__('Download')" wire:click="downloadPreview(preview)" />
-                    </div>
-                </div>
-            </x-slot:footer>
-        </x-modal.card>
-        <x-modal name="create-documents">
-            <x-card :title="__('Create Documents')">
-                <div class="grid grid-cols-4 gap-1.5">
-                    <div class="font-semibold text-sm">{{ __('Print') }}</div>
-                    <div class="font-semibold text-sm">{{ __('Email') }}</div>
-                    <div class="font-semibold text-sm">{{ __('Download') }}</div>
-                    <div class="font-semibold text-sm">{{ __('Force Create') }}</div>
-                    @foreach($printLayouts as $printLayout)
-                        <div class="text-ellipsis overflow-hidden">
-                            <x-checkbox wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}" :label="__($printLayout)" />
-                        </div>
-                        <div class="text-ellipsis overflow-hidden">
-                            <x-checkbox class="truncate" wire:model.boolean="selectedPrintLayouts.email.{{ $printLayout }}" :label="__($printLayout)" />
-                        </div>
-                        <div class="text-ellipsis overflow-hidden">
-                            <x-checkbox class="truncate" wire:model.boolean="selectedPrintLayouts.download.{{ $printLayout }}" :label="__($printLayout)" />
-                        </div>
-                        <div class="text-ellipsis overflow-hidden">
-                            <x-checkbox class="truncate" wire:model.boolean="selectedPrintLayouts.force.{{ $printLayout }}" :label="__($printLayout)" />
-                        </div>
-                    @endforeach
-                </div>
-                <x-slot:footer>
-                    <div class="flex justify-end gap-x-4">
-                        <div class="flex">
-                            <x-button flat :label="__('Cancel')" x-on:click="close" />
-                            <x-button primary :label="__('Continue')" spinner wire:click="createDocuments().then(() => { close(); });" />
-                        </div>
-                    </div>
-                </x-slot:footer>
-            </x-card>
-        </x-modal>
+        {{ $this->renderCreateDocumentsModal() }}
         <x-modal name="replicate-order">
             <x-card>
                 <section x-data="{
@@ -650,7 +607,7 @@
                                             primary
                                             class="w-full"
                                             icon="document-text"
-                                            x-on:click="$openModal('create-documents')"
+                                            wire:click="openCreateDocumentsModal()"
                                             :label="__('Create Documents')"
                                         />
                                         <div class="dropdown-full-w">
@@ -660,14 +617,15 @@
                                                         {{ __('Preview') }}
                                                     </x-button>
                                                 </x-slot>
-                                                @foreach($printLayouts as $printLayout)
+                                                <template x-for="printLayout in $wire.printLayouts">
                                                     <x-dropdown.item
-                                                        x-on:click="const previewNode = document.getElementById('preview'); document.getElementById('preview-iframe').src = '{{ route('print.render', ['model_id' => $order->id, 'view' => $printLayout, 'model_type' => app(\FluxErp\Models\Order::class)->getMorphClass()]) }}'; $openModal(previewNode); preview = '{{ $printLayout }}';">
-                                                        {{ __($printLayout) }}
+                                                        x-on:click="$wire.openPreview(printLayout.layout, '{{ morph_alias(\FluxErp\Models\Order::class) }}', $wire.order.id)">
+                                                        <span x-text="printLayout.label"></span>
                                                     </x-dropdown.item>
-                                                @endforeach
+                                                </template>
                                             </x-dropdown>
                                         </div>
+                                        <livewire:features.signature-link-generator :model-type="\FluxErp\Models\Order::class" wire:model="order.id"/>
                                     @endif
                                     @foreach($additionalModelActions as $modelAction)
                                         {{$modelAction}}

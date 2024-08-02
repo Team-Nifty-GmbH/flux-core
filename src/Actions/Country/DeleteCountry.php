@@ -24,7 +24,7 @@ class DeleteCountry extends FluxAction
 
     public function performAction(): ?bool
     {
-        $country = app(Country::class)->query()
+        $country = resolve_static(Country::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
@@ -43,7 +43,7 @@ class DeleteCountry extends FluxAction
         parent::validateData();
 
         $errors = [];
-        $country = app(Country::class)->query()
+        $country = resolve_static(Country::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

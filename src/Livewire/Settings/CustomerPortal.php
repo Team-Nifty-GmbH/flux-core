@@ -42,7 +42,7 @@ class CustomerPortal extends Component
             return $value !== Dashboard::class;
         });
 
-        $this->calendars = app(Calendar::class)->query()
+        $this->calendars = resolve_static(Calendar::class, 'query')
             ->where('is_public', true)
             ->get()
             ->toArray();
@@ -83,7 +83,7 @@ class CustomerPortal extends Component
         $validated = $this->validate();
 
         $isNew = ! ($this->setting['id'] ?? false);
-        $response = (new SettingService())->{$isNew ? 'create' : 'update'}($validated['setting']);
+        $response = app(SettingService::class)->{$isNew ? 'create' : 'update'}($validated['setting']);
 
         if (! $isNew && $response['status'] !== 200) {
             $this->notification()->error(

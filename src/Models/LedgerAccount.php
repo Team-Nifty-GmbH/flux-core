@@ -6,9 +6,9 @@ use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Laravel\Scout\Searchable;
 
 class LedgerAccount extends Model
 {

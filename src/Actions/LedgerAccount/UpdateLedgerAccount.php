@@ -22,7 +22,7 @@ class UpdateLedgerAccount extends FluxAction
 
     public function performAction(): Model
     {
-        $ledgerAccount = app(LedgerAccount::class)->query()
+        $ledgerAccount = resolve_static(LedgerAccount::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 

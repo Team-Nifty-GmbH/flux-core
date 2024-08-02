@@ -27,12 +27,12 @@ class CreateAdditionalColumnRuleset extends FluxRuleset
             'model_type' => [
                 'required',
                 'string',
-                new MorphClassExists(),
+                app(MorphClassExists::class),
             ],
             'model_id' => [
                 'integer',
                 'nullable',
-                new MorphExists(),
+                app(MorphExists::class),
             ],
             'field_type' => [
                 'required',
@@ -44,11 +44,11 @@ class CreateAdditionalColumnRuleset extends FluxRuleset
             'validations.*' => [
                 'required',
                 'string',
-                new AvailableValidationRule(),
+                app(AvailableValidationRule::class),
             ],
             'values' => [
                 'array',
-                new ArrayIsList(),
+                app(ArrayIsList::class),
             ],
             'is_customer_editable' => 'boolean',
             'is_translatable' => 'boolean',

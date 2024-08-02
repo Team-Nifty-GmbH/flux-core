@@ -199,7 +199,7 @@ class MailAccounts extends MailAccountList
             $builder->with('children')->where('mail_account_id', $this->mailAccount->id);
         });
 
-        $this->folders = app(MailFolder::class)->query()
+        $this->folders = resolve_static(MailFolder::class, 'query')
             ->where('parent_id', null)
             ->get()
             ->toArray();

@@ -11,6 +11,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +21,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Laravel\Scout\EngineManager;
 use Laravel\Scout\Engines\Engine;
-use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 
 class Client extends Model implements HasMedia

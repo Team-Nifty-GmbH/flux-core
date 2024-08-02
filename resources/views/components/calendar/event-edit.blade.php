@@ -318,7 +318,7 @@
                                 xs
                                 label="?"
                             />
-                            <x-badge md x-text="invited.label" />
+                            <x-badge md x-text="invited.label ?? invited.name" />
                         </div>
                     </template>
                     <x-select

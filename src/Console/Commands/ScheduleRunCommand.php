@@ -28,7 +28,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
         $dispatcher->dispatch(new ScheduleTasksRegistering($schedule));
 
         $overdueEvents = [];
-        $repeatables = app(ScheduleModel::class)->query()
+        $repeatables = resolve_static(ScheduleModel::class, 'query')
             ->where(fn (Builder $query) => $query->where('ends_at', '>', now()->toDateTimeString())
                 ->orWhereNull('ends_at')
             )
@@ -49,10 +49,10 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             $event = match ($repeatable->type) {
                 RepeatableTypeEnum::Command => $schedule->command($repeatable->class, $repeatable->parameters ?? []),
                 RepeatableTypeEnum::Job => $schedule->job($repeatable->parameters ?
-                        new $repeatable->class(...$repeatable->parameters) : new $repeatable->class
+                        new $repeatable->class(...$repeatable->parameters) : new $repeatable->class()
                 ),
                 RepeatableTypeEnum::Invokable => $schedule->call($repeatable->parameters ?
-                    new $repeatable->class(...$repeatable->parameters) : new $repeatable->class
+                    new $repeatable->class(...$repeatable->parameters) : new $repeatable->class()
                 ),
                 RepeatableTypeEnum::Shell => $schedule->exec($repeatable->class, $repeatable->parameters ?? []),
                 default => null
