@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class RemoveNullablesOnCountriesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('countries', function (Blueprint $table) {
             $table->string('iso_alpha3')->nullable()->change();
@@ -20,12 +15,7 @@ class RemoveNullablesOnCountriesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('countries', function (Blueprint $table) {
             $table->string('iso_alpha3')->nullable(false)->change();

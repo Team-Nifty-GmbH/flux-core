@@ -14,10 +14,8 @@ class ProductTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         $units = Unit::all(['id']);
         $vatRates = VatRate::all(['id']);

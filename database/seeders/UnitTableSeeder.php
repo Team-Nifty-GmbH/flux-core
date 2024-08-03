@@ -9,10 +9,8 @@ class UnitTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         Unit::factory()->count(5)->create();
     }

@@ -5,6 +5,7 @@ namespace FluxErp\Database\Seeders;
 use FluxErp\Models\Comment;
 use FluxErp\Models\User;
 use FluxErp\Traits\Commentable;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -12,7 +13,9 @@ use Spatie\Activitylog\Facades\CauserResolver;
 
 class CommentTableSeeder extends Seeder
 {
-    public function run()
+    use WithoutModelEvents;
+
+    public function run(): void
     {
         $models = get_subclasses_of(Model::class, 'FluxErp\\Models\\');
         $users = User::all();

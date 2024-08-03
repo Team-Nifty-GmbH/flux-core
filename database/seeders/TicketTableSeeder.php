@@ -30,15 +30,17 @@ class TicketTableSeeder extends Seeder
         );
 
         for ($i = 0; $i < 20; $i++) {
-            $user = $users->random();
+            Ticket::factory()->create(function () use ($users, $ticketTypes) {
+                $user = $users->random();
 
-            Ticket::factory()->create([
-                'authenticatable_type' => morph_alias(get_class($user)),
-                'authenticatable_id' => $user->id,
-                'ticket_type_id' => rand(0, 1) ?
-                    ($ticketTypes->isNotEmpty() ? $ticketTypes->random()->id : null) :
-                    null,
-            ]);
+                return [
+                    'authenticatable_type' => morph_alias(get_class($user)),
+                    'authenticatable_id' => $user->id,
+                    'ticket_type_id' => rand(0, 1) ?
+                        ($ticketTypes->isNotEmpty() ? $ticketTypes->random()->id : null) :
+                        null,
+                ];
+            });
         }
     }
 }

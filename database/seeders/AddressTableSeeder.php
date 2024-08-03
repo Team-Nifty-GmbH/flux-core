@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AddressTableSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $clients = Client::all();
         $password = Hash::make('password');

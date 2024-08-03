@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
             $table->string('login_name')->unique()->nullable()->after('department');
@@ -20,12 +15,7 @@ return new class() extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
             $table->dropColumn(['login_name', 'login_password', 'can_login']);

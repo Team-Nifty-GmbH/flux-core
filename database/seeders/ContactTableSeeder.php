@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 
 class ContactTableSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $clients = Client::all();
 

@@ -6,24 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 class AddPaymentTypeIdForeignKeyOnContactsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('contacts', function (Blueprint $table) {
             $table->foreign('payment_type_id')->references('id')->on('payment_types');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('contacts', function (Blueprint $table) {
             $table->dropForeign('contacts_payment_type_id_foreign');

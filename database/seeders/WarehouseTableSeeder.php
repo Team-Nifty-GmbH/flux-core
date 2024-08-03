@@ -10,10 +10,8 @@ class WarehouseTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         $addresses = Address::all();
         foreach ($addresses as $address) {

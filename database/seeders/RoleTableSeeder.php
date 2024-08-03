@@ -9,10 +9,8 @@ class RoleTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         $guards = array_keys(config('auth.guards'));
 

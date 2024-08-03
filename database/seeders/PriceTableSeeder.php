@@ -11,10 +11,8 @@ class PriceTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         for ($i = 0; $i < 30; $i++) {
             Price::factory()->create([

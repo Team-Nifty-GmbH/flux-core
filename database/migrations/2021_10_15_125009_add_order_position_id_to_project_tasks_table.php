@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class AddOrderPositionIdToProjectTasksTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('project_tasks', function (Blueprint $table) {
             $table->unsignedBigInteger('order_position_id')->after('user_id')->nullable();
@@ -20,12 +15,7 @@ class AddOrderPositionIdToProjectTasksTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('project_tasks', function (Blueprint $table) {
             $table->dropForeign('project_tasks_order_position_id_foreign');

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 
 class UserTableSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $languages = Language::all('id');
         $password = Hash::make('password');

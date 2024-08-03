@@ -10,10 +10,8 @@ class ClientTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         $countries = Country::all();
 

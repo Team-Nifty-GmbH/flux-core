@@ -10,10 +10,8 @@ class ContactOptionTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         foreach (Address::all() as $address) {
             $address->contactOptions()->saveMany(ContactOption::factory()->count(3)->make());

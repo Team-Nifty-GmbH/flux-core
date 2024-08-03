@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateCountryRegionsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('country_regions', function (Blueprint $table) {
             $table->id();
@@ -38,12 +33,7 @@ class CreateCountryRegionsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('country_regions');
     }

@@ -9,7 +9,7 @@ use Illuminate\Database\Seeder;
 
 class CountryTableSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $languages = Language::all();
         $currencies = Currency::all();

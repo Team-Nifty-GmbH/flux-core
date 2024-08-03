@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 
 class CountryRegionTableSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $countries = Country::all();
 

@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 
 class CategoryTableSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $categories = Category::factory()->count(10)->create(['model_type' => morph_alias(Task::class)]);
 

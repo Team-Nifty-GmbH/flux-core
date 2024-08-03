@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 class ChangeTranslatableColumnsToJsonOnDocumentTypesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('document_types', function (Blueprint $table) {
             $table->json('name')->change();
@@ -24,12 +19,7 @@ class ChangeTranslatableColumnsToJsonOnDocumentTypesTable extends Migration
         $this->migrateTranslatable();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         $this->rollbackTranslatable();
 

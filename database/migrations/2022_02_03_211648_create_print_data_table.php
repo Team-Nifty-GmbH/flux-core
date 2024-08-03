@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreatePrintDataTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('print_data', function (Blueprint $table) {
             $table->id();
@@ -27,12 +22,7 @@ class CreatePrintDataTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('print_data');
     }

@@ -10,10 +10,8 @@ class DiscountTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         $discounts = Discount::all(['id']);
         $orderPositions = OrderPosition::all(['id']);

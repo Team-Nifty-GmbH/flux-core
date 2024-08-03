@@ -9,10 +9,8 @@ class ProductOptionGroupTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         ProductOptionGroup::factory()->count(10)->create();
     }

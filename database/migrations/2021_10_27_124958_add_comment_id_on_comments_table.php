@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class AddCommentIdOnCommentsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('comments', function (Blueprint $table) {
             $table->unsignedBigInteger('comment_id')->nullable()->after('model_id');
@@ -20,12 +15,7 @@ class AddCommentIdOnCommentsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('comments', function (Blueprint $table) {
             $table->dropForeign('comments_comment_id_foreign');
