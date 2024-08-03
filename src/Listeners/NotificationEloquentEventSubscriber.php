@@ -26,6 +26,7 @@ class NotificationEloquentEventSubscriber
             return;
         }
 
+        $notification = resolve_static($notification, 'class');
         $this->model = $model[0];
 
         // Subscribers to the morph model.
@@ -69,7 +70,14 @@ class NotificationEloquentEventSubscriber
             return;
         }
 
-        Notification::send($this->notifiables, new $notification($this->model, $event));
+        $notification = new $notification($this->model);
+        foreach ($this->notifiables as $notifiable) {
+            if (! $notifiable) {
+                continue;
+            }
+
+            $notifiable->notify($notification, $event);
+        }
     }
 
     /**

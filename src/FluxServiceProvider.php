@@ -25,6 +25,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\Project;
+use FluxErp\Models\Role;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
@@ -253,6 +254,8 @@ class FluxServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views/vendor/wireui', 'wireui');
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
+        config(['permission.models.role' => resolve_static(Role::class, 'class')]);
+        config(['permission.models.permission' => resolve_static(Permission::class, 'class')]);
         config(['auth' => require __DIR__ . '/../config/auth.php']);
         config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
         config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);

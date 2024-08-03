@@ -32,7 +32,8 @@ class EventSubscriptionTest extends BaseSetup
         ]);
 
         $this->eventSubscriptions = EventSubscription::factory()->count(3)->create([
-            'user_id' => $this->user->id,
+            'subscribable_type' => $this->user->getMorphClass(),
+            'subscribable_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
             'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[0]->id,
@@ -70,7 +71,11 @@ class EventSubscriptionTest extends BaseSetup
         $dbUserSubscriptions = json_decode($response->getContent())->data;
         $this->assertNotEmpty($dbUserSubscriptions);
         $this->assertEquals($this->eventSubscriptions[0]->id, $dbUserSubscriptions[0]->id);
-        $this->assertEquals($this->eventSubscriptions[0]->user_id, $dbUserSubscriptions[0]->user_id);
+        $this->assertEquals(
+            $this->eventSubscriptions[0]->subscribable_type,
+            $dbUserSubscriptions[0]->subscribable_type
+        );
+        $this->assertEquals($this->eventSubscriptions[0]->subscribable_id, $dbUserSubscriptions[0]->subscribable_id);
         $this->assertEquals($this->eventSubscriptions[0]->event, $dbUserSubscriptions[0]->event);
         $this->assertEquals($this->eventSubscriptions[0]->model_type, $dbUserSubscriptions[0]->model_type);
         $this->assertEquals($this->eventSubscriptions[0]->model_id, $dbUserSubscriptions[0]->model_id);
@@ -82,7 +87,8 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $subscription = [
-            'user_id' => $this->user->id,
+            'subscribable_type' => $this->user->getMorphClass(),
+            'subscribable_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
             'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[2]->id,
@@ -98,7 +104,8 @@ class EventSubscriptionTest extends BaseSetup
             ->whereKey($eventSubscription->id)
             ->first();
 
-        $this->assertEquals($subscription['user_id'], $dbEventSubscription->user_id);
+        $this->assertEquals($subscription['subscribable_type'], $dbEventSubscription->subscribable_type);
+        $this->assertEquals($subscription['subscribable_id'], $dbEventSubscription->subscribable_id);
         $this->assertEquals(class_basename($subscription['event']), class_basename($dbEventSubscription->event));
         $this->assertEquals($subscription['model_type'], $dbEventSubscription->model_type);
         $this->assertEquals($subscription['model_id'], $dbEventSubscription->model_id);
@@ -112,7 +119,8 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $subscription = [
-            'user_id' => $this->user->id,
+            'subscribable_type' => $this->user->getMorphClass(),
+            'subscribable_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
             'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[0]->id,
@@ -128,7 +136,8 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $subscription = [
-            'user_id' => $this->user->id,
+            'subscribable_type' => $this->user->getMorphClass(),
+            'subscribable_id' => $this->user->id,
             'event' => 'InvalidEvent',
             'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => null,
@@ -146,7 +155,8 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $subscription = [
-            'user_id' => $this->user->id,
+            'subscribable_type' => $this->user->getMorphClass(),
+            'subscribable_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
             'model_type' => 'InvalidModelType',
             'model_id' => $this->comments[2]->id,
@@ -164,7 +174,8 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $subscription = [
-            'user_id' => $this->user->id,
+            'subscribable_type' => $this->user->getMorphClass(),
+            'subscribable_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
             'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => ++$this->comments[2]->id,
@@ -182,7 +193,8 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $subscription = [
-            'user_id' => $this->user->id,
+            'subscribable_type' => $this->user->getMorphClass(),
+            'subscribable_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
             'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[0]->id,
@@ -204,7 +216,8 @@ class EventSubscriptionTest extends BaseSetup
 
         $subscription = [
             'id' => $this->eventSubscriptions[0]->id,
-            'user_id' => $this->user->id,
+            'subscribable_type' => $this->user->getMorphClass(),
+            'subscribable_id' => $this->user->id,
             'event' => 'eloquent.deleted: FluxErp\Models\Comment',
             'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[1]->id,
@@ -221,7 +234,8 @@ class EventSubscriptionTest extends BaseSetup
             ->first();
 
         $this->assertEquals($subscription['id'], $dbEventSubscription->id);
-        $this->assertEquals($subscription['user_id'], $dbEventSubscription->user_id);
+        $this->assertEquals($subscription['subscribable_type'], $dbEventSubscription->subscribable_type);
+        $this->assertEquals($subscription['subscribable_id'], $dbEventSubscription->subscribable_id);
         $this->assertEquals(class_basename($subscription['event']), class_basename($dbEventSubscription->event));
         $this->assertEquals($subscription['model_type'], $dbEventSubscription->model_type);
         $this->assertEquals($subscription['model_id'], $dbEventSubscription->model_id);
@@ -235,7 +249,8 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $subscription = [
-            'user_id' => $this->user->id,
+            'subscribable_type' => $this->user->getMorphClass(),
+            'subscribable_id' => $this->user->id,
             'event' => class_basename('eloquent.created: FluxErp\Models\Comment'),
             'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[1]->id,
@@ -254,7 +269,8 @@ class EventSubscriptionTest extends BaseSetup
 
         $subscription = [
             'id' => ++$this->eventSubscriptions[2]->id,
-            'user_id' => $this->user->id,
+            'subscribable_type' => $this->user->getMorphClass(),
+            'subscribable_id' => $this->user->id,
             'event' => class_basename('eloquent.created: FluxErp\Models\Comment'),
             'model_type' => app(Comment::class)->getMorphClass(),
             'model_id' => $this->comments[1]->id,
