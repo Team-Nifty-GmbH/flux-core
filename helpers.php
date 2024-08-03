@@ -206,8 +206,15 @@ if (! function_exists('event_subscribers')) {
         }
 
         return resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
-            ->whereNot(fn ($query) => $query->where('subscribable_type', auth()->user()->getMorphClass())
-                ->where('subscribable_id', auth()->id()))
+            ->when(
+                auth()->user(),
+                function (Illuminate\Database\Eloquent\Builder $query) {
+                    $query->whereNot(function (Illuminate\Database\Eloquent\Builder $query) {
+                        $query->where('subscribable_type', auth()->user()->getMorphClass())
+                            ->where('subscribable_id', auth()->id());
+                    });
+                }
+            )
             ->where(function (Illuminate\Database\Eloquent\Builder $query) use ($event, $modelId, $modelType) {
                 $query->where(function (Illuminate\Database\Eloquent\Builder $query) use ($event) {
                     $query->where('event', $event)
