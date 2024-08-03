@@ -10,7 +10,7 @@ class ProjectTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $clients = Client::all();
+        $clients = Client::all(['id']);
 
         Project::factory()->count(10)->create([
             'client_id' => $clients->random()->id,

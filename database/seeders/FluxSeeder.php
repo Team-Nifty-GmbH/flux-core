@@ -3,6 +3,7 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Console\Commands\Init\InitPermissions;
+use FluxErp\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Facades\CauserResolver;
@@ -17,7 +18,8 @@ class FluxSeeder extends Seeder
     public function run(): void
     {
         $this->call(LanguageTableSeeder::class);
-        Artisan::call(InitPermissions::class);
+        // Artisan::call(InitPermissions::class);
+        Role::findOrCreate('Super Admin');
         $this->call(UserTableSeeder::class);
         CauserResolver::resolveUsing(function () {
             return \FluxErp\Models\User::query()->inRandomOrder()->first();
@@ -26,7 +28,7 @@ class FluxSeeder extends Seeder
         $this->call(CurrencyTableSeeder::class);
         $this->call(CountryTableSeeder::class);
         $this->call(CountryRegionTableSeeder::class);
-        $this->call(WorkTimeTypeTableSeeder::class);
+        $this->call(PriceListTableSeeder::class);
 
         $this->call(ClientTableSeeder::class);
         $this->call(PaymentTypeTableSeeder::class);
@@ -41,7 +43,10 @@ class FluxSeeder extends Seeder
         $this->call(ContactOptionTableSeeder::class);
         $this->call(CategoryTableSeeder::class);
         $this->call(ProjectTableSeeder::class);
-        $this->call(ProjectTaskTableSeeder::class);
+        $this->call(TaskTableSeeder::class);
+
+        $this->call(WorkTimeTypeTableSeeder::class);
+        $this->call(WorkTimeTableSeeder::class);
 
         $this->call(ContactBankConnectionTableSeeder::class);
         $this->call(BankConnectionTableSeeder::class);
@@ -55,7 +60,6 @@ class FluxSeeder extends Seeder
         $this->call(ProductCrossSellingTableSeeder::class);
         $this->call(WarehouseTableSeeder::class);
         $this->call(StockPostingTableSeeder::class);
-        $this->call(PriceListTableSeeder::class);
         $this->call(PriceTableSeeder::class);
         $this->call(OrderTableSeeder::class);
         $this->call(OrderPositionTableSeeder::class);
@@ -65,10 +69,9 @@ class FluxSeeder extends Seeder
         $this->call(RoleTableSeeder::class);
         $this->call(CalendarTableSeeder::class);
         $this->call(CalendarEventTableSeeder::class);
-        $this->call(CommentTableSeeder::class);
-
         $this->call(TicketTypeTableSeeder::class);
         $this->call(TicketTableSeeder::class);
+        $this->call(CommentTableSeeder::class);
 
         $this->call(FormBuilderFormTableSeeder::class);
         $this->call(FormBuilderSectionTableSeeder::class);

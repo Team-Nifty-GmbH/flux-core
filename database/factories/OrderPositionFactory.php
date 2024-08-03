@@ -40,7 +40,7 @@ class OrderPositionFactory extends Factory
             'unit_gram_weight' => $this->faker->numberBetween(1, 999),
 
             'name' => $this->faker->jobTitle(),
-            'description' => $this->faker->text(),
+            'description' => $this->faker->paragraph(),
 
             'is_net' => $this->faker->boolean(90),
             'is_free_text' => $this->faker->boolean(15),

@@ -21,10 +21,16 @@ class ContactOptionFactory extends Factory
      */
     public function definition(): array
     {
+        $type = $this->faker->randomElement(['phone', 'email', 'website']);
+
         return [
-            'type' => $this->faker->randomElement(['phone', 'email', 'website']),
+            'type' => $type,
             'label' => $this->faker->jobTitle(),
-            'value' => $this->faker->email(),
+            'value' => match($type) {
+                'email' => $this->faker->email(),
+                'phone' => $this->faker->phoneNumber(),
+                'website' => $this->faker->url(),
+            },
         ];
     }
 }

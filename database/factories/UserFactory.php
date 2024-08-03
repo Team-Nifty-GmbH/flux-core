@@ -4,7 +4,6 @@ namespace FluxErp\Database\Factories;
 
 use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class UserFactory extends Factory
 {
@@ -22,27 +21,12 @@ class UserFactory extends Factory
      */
     public function definition()
     {
-        $i = 0;
-        while (User::query()
-            ->where('user_code', $userCode = Str::upper($this->faker->firstName()))
-            ->exists() && $i < 100) {
-            $i++;
-        }
-
-        if ($i === 100) {
-            $userCode .= '_' . Str::uuid();
-        }
-
-        $firstname = $this->faker->firstName();
-        $lastname = $this->faker->lastName();
-
         return [
             'email' => $this->faker->safeEmail(),
-            'firstname' => $firstname,
-            'lastname' => $lastname,
-            'name' => $firstname . ' ' . $lastname,
+            'firstname' => $this->faker->firstName(),
+            'lastname' => $this->faker->lastName(),
             'password' => 'password',
-            'user_code' => $userCode,
+            'user_code' => $this->faker->unique()->userName(),
             'is_active' => $this->faker->boolean(75),
         ];
     }
