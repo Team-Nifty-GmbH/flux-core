@@ -2,9 +2,12 @@
 
 namespace FluxErp\Livewire\Contact;
 
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Contact as ContactModel;
+use FluxErp\Models\Media;
+use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
@@ -14,12 +17,13 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
 
 class Contact extends Component
 {
-    use Actions, WithFileUploads, WithTabs;
+    use Actions, CreatesDocuments, WithFileUploads, WithTabs;
 
     public ContactForm $contact;
 
@@ -167,5 +171,32 @@ class Contact extends Component
             ->whereKey($this->contact->id)
             ->first()
             ->getAvatarUrl();
+    }
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        return [$item->invoiceAddress->email_primary ?? $item->mainAddress->email_primary];
+    }
+
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return __('Balance Statement :date', ['date' => now()->format('d.m.Y')]);
+    }
+
+    protected function getHtmlBody(OffersPrinting $item): string
+    {
+        return '';
+    }
+
+    protected function getPrintLayouts(): array
+    {
+        return array_keys(app(ContactModel::class)->resolvePrintViews());
+    }
+
+    public function createDocuments(): null|MediaStream|Media
+    {
+        return $this->createDocumentFromItems(
+            resolve_static(ContactModel::class, 'query')->whereKey($this->contact->id)->firstOrFail(),
+        );
     }
 }
