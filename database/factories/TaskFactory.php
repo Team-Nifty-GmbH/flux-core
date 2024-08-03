@@ -8,11 +8,6 @@ use Illuminate\Support\Carbon;
 
 class TaskFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Task::class;
 
     /**

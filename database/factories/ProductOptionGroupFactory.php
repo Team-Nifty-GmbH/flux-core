@@ -7,19 +7,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductOptionGroupFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = ProductOptionGroup::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    public function definition(): array
     {
         return [
             'name' => $this->faker->randomElement(['color', 'material', 'size', 'gender']),

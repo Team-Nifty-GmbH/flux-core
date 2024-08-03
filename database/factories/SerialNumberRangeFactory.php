@@ -10,11 +10,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class SerialNumberRangeFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = SerialNumberRange::class;
 
     /**
@@ -22,7 +17,7 @@ class SerialNumberRangeFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition()
+    public function definition(): array
     {
         return [
             'current_number' => rand(min: 1, max: 10000),
