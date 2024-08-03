@@ -51,14 +51,16 @@
     <div class="flex flex-col sm:flex-row gap-4 justify-between">
         <x-card :title="__('Invoice Address')">
             <p>
-                {!! implode('</p><p>', auth()->user()->contact->invoiceAddress?->postalAddress() ?? [])  !!}
+                {!! implode('</p><p>', auth()->user()->contact->invoiceAddress?->postal_address ?? [])  !!}
             </p>
         </x-card>
         <x-card :title="__('Delivery Address')">
             <x-slot:action>
                 <x-button xs x-on:click="$openModal('edit-delivery-address')" :label="__('Edit delivery address')" />
             </x-slot:action>
-            {!! implode('</p><p>', $this->deliveryAddress->postalAddress() ?? [])  !!}
+            <p>
+                {!! implode('</p><p>', $this->deliveryAddress->postal_address ?? [])  !!}
+            </p>
         </x-card>
     </div>
     <x-card>
