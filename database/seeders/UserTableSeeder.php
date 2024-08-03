@@ -22,7 +22,7 @@ class UserTableSeeder extends Seeder
             ])
             ->each(function (User $user) {
                 $user->assignRole('Super Admin');
-                foreach(Widget::all() as $widget) {
+                foreach (Widget::all() as $widget) {
                     $user->widgets()->create([
                         'name' => $widget['label'],
                         'component_name' => $widget['component_name'],

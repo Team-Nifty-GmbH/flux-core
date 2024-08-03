@@ -71,9 +71,9 @@ class OrderTableSeeder extends Seeder
 
                 if ($order->is_locked) {
                     $order->setAttribute(
-                            'invoice_date',
-                            faker()->dateTimeBetween(now()->startOfYear(), now()->endOfYear())
-                        )
+                        'invoice_date',
+                        faker()->dateTimeBetween(now()->startOfYear(), now()->endOfYear())
+                    )
                         ->getSerialNumber('invoice_number', $order->client_id)
                         ->save();
                 }

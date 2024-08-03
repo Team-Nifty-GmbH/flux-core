@@ -26,7 +26,7 @@ class ContactOptionFactory extends Factory
         return [
             'type' => $type,
             'label' => $this->faker->jobTitle(),
-            'value' => match($type) {
+            'value' => match ($type) {
                 'email' => $this->faker->email(),
                 'phone' => $this->faker->phoneNumber(),
                 'website' => $this->faker->url(),
