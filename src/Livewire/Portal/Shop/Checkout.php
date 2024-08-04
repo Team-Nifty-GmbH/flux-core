@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Portal\Shop;
 use FluxErp\Actions\Comment\CreateComment;
 use FluxErp\Events\PortalOrderCreated;
 use FluxErp\Livewire\Forms\AddressForm;
-use FluxErp\Mail\OrderConfirmation;
+use FluxErp\Mail\Order\OrderConfirmation;
 use FluxErp\Models\Address;
 use FluxErp\Models\Order;
 use FluxErp\Rulesets\Address\PostalAddressRuleset;
