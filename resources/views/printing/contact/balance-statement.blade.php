@@ -58,13 +58,13 @@
                 </th>
             </tr>
             </thead>
-            @foreach ($model->orders()->whereNot('balance', 0)->get() as $order)
+            @foreach ($model->orders()->whereNot('balance', 0)->get(['id', 'order_number', 'invoice_date', 'invoice_number', 'total_gross_price', 'balance']) as $order)
                 <tbody class="bg-uneven">
                 <tr>
                     <td class="pos py-4 align-top">
                         {{ $order->order_number }}
                     </td>
-                    <td class="py-4 align-top" style="padding-left: {{ $order->depth * 15 }}px">
+                    <td class="py-4 align-top">
                         {{ $order->invoice_date->locale(app()->getLocale())->isoFormat('L') }}
                     </td>
                     <td class="pos py-4 align-top">
