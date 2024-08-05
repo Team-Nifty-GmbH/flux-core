@@ -4,6 +4,7 @@ namespace FluxErp\Database\Factories;
 
 use FluxErp\Models\PriceList;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class PriceListFactory extends Factory
 {
@@ -23,7 +24,7 @@ class PriceListFactory extends Factory
     {
         return [
             'name' => $this->faker->jobTitle(),
-            'price_list_code' => $this->faker->unique()->countryCode(),
+            'price_list_code' => Str::uuid()->toString(),
             'is_net' => $this->faker->boolean(),
         ];
     }

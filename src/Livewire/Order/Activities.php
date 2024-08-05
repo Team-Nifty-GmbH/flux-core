@@ -3,7 +3,6 @@
 namespace FluxErp\Livewire\Order;
 
 use FluxErp\Livewire\Features\Activities as BaseActivities;
-use FluxErp\Livewire\Forms\OrderForm;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -14,7 +13,7 @@ class Activities extends BaseActivities
     public string $modelType = \FluxErp\Models\Order::class;
 
     #[Modelable]
-    public OrderForm $order;
+    public int $modelId;
 
     public bool $initialized = false;
 
@@ -23,8 +22,6 @@ class Activities extends BaseActivities
         if ($this->initialized) {
             $this->skipRender();
         }
-
-        $this->modelId = $this->order->id;
     }
 
     public function render(): View|Factory|Application
