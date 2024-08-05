@@ -45,6 +45,7 @@ class BaseSetup extends TestCase
                 'client_id' => $this->dbClient->id,
                 'language_id' => $language->id,
                 'can_login' => true,
+                'is_active' => true,
             ]);
 
             $this->actingAs($this->address, 'address');

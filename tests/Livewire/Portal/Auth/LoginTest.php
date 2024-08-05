@@ -53,6 +53,7 @@ class LoginTest extends BaseSetup
 
         Livewire::test(Login::class)
             ->set('email', $this->address->email)
+            ->set('password')
             ->call('login')
             ->assertNoRedirect()
             ->assertDispatched('wireui:notification');
