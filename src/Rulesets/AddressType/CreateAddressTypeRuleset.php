@@ -15,7 +15,7 @@ class CreateAddressTypeRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:address_types,uuid',
+            'uuid' => 'nullable|string|uuid|unique:address_types,uuid',
             'client_id' => [
                 'required',
                 'integer',

@@ -20,7 +20,7 @@ class CreateContactRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:contacts,uuid',
+            'uuid' => 'nullable|string|uuid|unique:contacts,uuid',
             'client_id' => [
                 'required',
                 'integer',

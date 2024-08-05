@@ -15,7 +15,7 @@ class CreatePaymentTypeRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:payment_types,uuid',
+            'uuid' => 'nullable|string|uuid|unique:payment_types,uuid',
             'client_id' => [
                 'required',
                 'integer',

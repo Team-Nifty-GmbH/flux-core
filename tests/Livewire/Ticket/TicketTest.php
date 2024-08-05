@@ -30,4 +30,19 @@ class TicketTest extends BaseSetup
         Livewire::test(TicketView::class, ['id' => $this->ticket->id])
             ->assertStatus(200);
     }
+
+    public function test_switch_tabs()
+    {
+        $component = Livewire::test(TicketView::class, ['id' => $this->ticket->id]);
+
+        foreach (Livewire::new(TicketView::class)->getTabs() as $tab) {
+            $component
+                ->set('tab', $tab->component)
+                ->assertStatus(200);
+
+            if ($tab->isLivewireComponent) {
+                $component->assertSeeLivewire($tab->component);
+            }
+        }
+    }
 }

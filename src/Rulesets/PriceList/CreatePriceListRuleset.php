@@ -13,7 +13,7 @@ class CreatePriceListRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:price_lists,uuid',
+            'uuid' => 'nullable|string|uuid|unique:price_lists,uuid',
             'parent_id' => [
                 'nullable',
                 'integer',
@@ -23,6 +23,7 @@ class CreatePriceListRuleset extends FluxRuleset
             'price_list_code' => 'required|string|unique:price_lists,price_list_code',
             'is_net' => 'required|boolean',
             'is_default' => 'boolean',
+            'is_purchase' => 'boolean',
         ];
     }
 

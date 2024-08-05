@@ -19,7 +19,7 @@ class CreatePaymentRunRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:payments,uuid',
+            'uuid' => 'nullable|string|uuid|unique:payments,uuid',
             'bank_connection_id' => [
                 'nullable',
                 'integer',

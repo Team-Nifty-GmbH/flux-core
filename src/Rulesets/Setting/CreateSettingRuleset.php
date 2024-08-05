@@ -14,7 +14,7 @@ class CreateSettingRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:settings,uuid',
+            'uuid' => 'nullable|string|uuid|unique:settings,uuid',
             'key' => 'required|string|unique:settings,key',
             'model_type' => [
                 'required_with:model_id',

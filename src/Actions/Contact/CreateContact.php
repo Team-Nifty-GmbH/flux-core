@@ -66,7 +66,7 @@ class CreateContact extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['client_id'] ??= resolve_static(Client::class, 'default')?->id;
+        $this->data['client_id'] ??= Client::default()?->id;
     }
 
     protected function validateData(): void

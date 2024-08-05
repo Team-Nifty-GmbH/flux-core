@@ -11,4 +11,13 @@ trait Trackable
     {
         return $this->morphMany(WorkTime::class, 'trackable');
     }
+
+    /**
+     * adds the calculated costs to the column
+     * override per model if applicable
+     */
+    public function costColumn(): ?string
+    {
+        return null;
+    }
 }

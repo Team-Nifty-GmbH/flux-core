@@ -5,6 +5,11 @@
             <x-input :label="__('Lastname')" wire:model="user.lastname"/>
             <x-input :label="__('Email')" wire:model="user.email"/>
             <x-input :label="__('User code')" wire:model="user.user_code"/>
+            <x-inputs.number
+                :prefix="\FluxErp\Models\Currency::default()?->symbol"
+                :label="__('Cost Per Hour')"
+                wire:model="user.cost_per_hour"
+            />
         </div>
         <x-select
             wire:model="user.language_id"

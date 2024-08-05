@@ -14,7 +14,7 @@ class CreateClientRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:clients,uuid',
+            'uuid' => 'nullable|string|uuid|unique:clients,uuid',
             'country_id' => [
                 'nullable',
                 'integer',
