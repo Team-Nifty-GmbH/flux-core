@@ -22,14 +22,11 @@ class AddressesTest extends BaseSetup
 
     public function test_switch_tabs()
     {
-        $client = Client::factory()->create([
-            'is_default' => true,
-        ]);
         $contact = Contact::factory()->create([
-            'client_id' => $client->id,
+            'client_id' => $this->dbClient->id,
         ]);
         $address = Address::factory()->create([
-            'client_id' => $client->id,
+            'client_id' => $this->dbClient->id,
             'contact_id' => $contact->id,
             'is_main_address' => true,
             'is_invoice_address' => true,
