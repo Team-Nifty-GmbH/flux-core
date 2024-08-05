@@ -92,7 +92,7 @@ class CreateTicket extends FluxAction
                 'created',
                 resolve_static(Comment::class, 'class')
             ),
-            'subscribable_id' => $ticket->authenticatable->getKey(),
+            'subscribable_id' => $ticket->authenticatable_id,
             'subscribable_type' => $ticket->authenticatable->getMorphClass(),
             'model_type' => $ticket->getMorphClass(),
             'model_id' => $ticket->id,
