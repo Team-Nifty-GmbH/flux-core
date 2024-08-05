@@ -47,16 +47,22 @@
                             </div>
                         </div>
                         <div class="flex-auto space-y-2" x-cloak x-show="$wire.orderPosition.is_free_text !== true">
-                            <x-input type="number" min="0" :label="__('Amount')" wire:model="orderPosition.amount" x-ref="amount"></x-input>
+                            <x-input type="number" min="0" :label="__('Amount')" wire:model="orderPosition.amount" x-ref="amount" />
                             <x-input
                                     :prefix="$order->currency['symbol']"
                                     type="number"
                                     :label="__('Unit price :type', ['type' => ($orderPosition->is_net ?? true) ? __('net') : __('gross')])"
                                     wire:model="orderPosition.unit_price"
                                     x-on:change="$el.value = parseNumber($el.value)"
-                            >
-                            </x-input>
-                            <x-input type="number" :label="__('Discount')" wire:model="orderPosition.discount_percentage"></x-input>
+                            />
+                            <x-input
+                                :prefix="$order->currency['symbol']"
+                                type="number"
+                                :label="__('Purchase Price')"
+                                wire:model="orderPosition.purchase_price"
+                                x-on:change="$el.value = parseNumber($el.value)"
+                            />
+                            <x-input type="number" :label="__('Discount')" wire:model="orderPosition.discount_percentage" />
                             <x-select
                                 :options="$vatRates"
                                 option-value="id"

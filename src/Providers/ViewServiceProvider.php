@@ -107,7 +107,7 @@ class ViewServiceProvider extends ServiceProvider
                 if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
                     View::share(
                         'defaultCurrency',
-                        resolve_static(Currency::class, 'default') ?? app(Currency::class)
+                        Currency::default() ?? app(Currency::class)
                     );
                 } else {
                     View::share('defaultCurrency', app(Currency::class));

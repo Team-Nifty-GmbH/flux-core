@@ -14,7 +14,7 @@ class CreateProductOptionRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:product_options,uuid',
+            'uuid' => 'nullable|string|uuid|unique:product_options,uuid',
             'product_option_group_id' => [
                 'required',
                 'integer',

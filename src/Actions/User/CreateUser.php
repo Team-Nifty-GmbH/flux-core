@@ -27,7 +27,7 @@ class CreateUser extends FluxAction
 
         $this->data['is_active'] = $this->data['is_active'] ?? true;
         $this->data['language_id'] = $this->data['language_id'] ??
-            resolve_static(Language::class, 'default')?->id;
+            Language::default()?->id;
 
         $user = app(User::class, ['attributes' => $this->data]);
         $user->save();

@@ -63,6 +63,10 @@ class OrderForm extends FluxForm
 
     public ?string $total_base_gross_price = null;
 
+    #[Locked]
+    public ?float $gross_profit = 0;
+
+    #[Locked]
     public ?float $margin = 0;
 
     public ?string $total_net_price = null;

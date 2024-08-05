@@ -5,7 +5,6 @@ namespace FluxErp\Tests\Livewire\Portal\Auth;
 use FluxErp\Livewire\Portal\Auth\Login;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Tests\Livewire\BaseSetup;
-use FluxErp\Tests\TestCase;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 
@@ -54,6 +53,7 @@ class LoginTest extends BaseSetup
 
         Livewire::test(Login::class)
             ->set('email', $this->address->email)
+            ->set('password')
             ->call('login')
             ->assertNoRedirect()
             ->assertDispatched('wireui:notification');

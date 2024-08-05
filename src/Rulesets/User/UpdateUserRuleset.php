@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\User;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rules\Password;
@@ -35,6 +36,10 @@ class UpdateUserRuleset extends FluxRuleset
             'lastname' => 'sometimes|required|string',
             'password' => ['sometimes', 'required', Password::min(8)->mixedCase()->numbers()],
             'user_code' => 'sometimes|required|string|unique:users,user_code',
+            'cost_per_hour' => [
+                'nullable',
+                new Numeric(),
+            ],
             'is_active' => 'sometimes|required|boolean',
         ];
     }

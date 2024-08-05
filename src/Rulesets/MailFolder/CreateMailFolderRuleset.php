@@ -14,7 +14,7 @@ class CreateMailFolderRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:mail_accounts,uuid',
+            'uuid' => 'nullable|string|uuid|unique:mail_accounts,uuid',
             'mail_account_id' => [
                 'required',
                 'integer',

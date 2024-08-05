@@ -604,7 +604,7 @@ return [
         'purchase_invoice_positions.*unit_price' => 'Einheitspreis',
         'purchase_invoice_positions.*vat_rate_id' => 'Mehrwertsteuersatz-ID',
         'purchase_payment_type_id' => 'Kaufzahlungstyp-ID',
-        'purchase_price' => 'Kaufpreis',
+        'purchase_price' => 'Einkaufspreis',
         'purchase_steps' => 'Kaufschritte',
         'purchase_unit_id' => 'Kaufeinheiten-ID',
         'purpose' => 'Zweck',
