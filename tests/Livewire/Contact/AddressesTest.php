@@ -6,10 +6,8 @@ use FluxErp\Livewire\Contact\Addresses;
 use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Tests\Livewire\BaseSetup;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
 class AddressesTest extends BaseSetup

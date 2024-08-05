@@ -200,7 +200,7 @@ class WorkTimeList extends BaseDataTable
                     $orderPosition = CreateOrderPosition::make([
                         'name' => $workTime->name,
                         'description' => $description,
-                        'warehouse_id' => resolve_static(Warehouse::class, 'default')?->id,
+                        'warehouse_id' => Warehouse::default()?->id,
                         'order_id' => $order->id,
                         'product_id' => $product->id,
                         'amount' => $billingAmount,

@@ -5,7 +5,6 @@ namespace FluxErp\Tests\Livewire\Portal\Auth;
 use FluxErp\Livewire\Portal\Auth\Login;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Tests\Livewire\BaseSetup;
-use FluxErp\Tests\TestCase;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 

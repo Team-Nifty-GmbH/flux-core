@@ -5,7 +5,6 @@ namespace FluxErp\Tests\Livewire\Ticket;
 use FluxErp\Livewire\Ticket\Activities;
 use FluxErp\Models\Ticket;
 use FluxErp\Tests\Livewire\BaseSetup;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
 class ActivitiesTest extends BaseSetup

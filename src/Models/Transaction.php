@@ -28,7 +28,7 @@ class Transaction extends Model implements InteractsWithDataTables
         static::saving(function (Transaction $transaction) {
             $transaction->currency_id = $transaction->currency_id
                 ?? Auth::user()?->currency_id
-                ?? resolve_static(Currency::class, 'default')?->id;
+                ?? Currency::default()?->id;
         });
 
         static::saved(function (Transaction $transaction) {

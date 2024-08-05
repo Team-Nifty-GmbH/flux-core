@@ -4,7 +4,6 @@ namespace FluxErp\Tests\Livewire\Address;
 
 use FluxErp\Livewire\Address\Comments;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;

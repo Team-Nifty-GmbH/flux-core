@@ -43,7 +43,6 @@ class PriceList extends Model
                     }
                 }
 
-                // if a default column is given at least one model has to be default
                 if (
                     ! $model->is_purchase
                     && static::query()->where('is_purchase', true)->doesntExist()

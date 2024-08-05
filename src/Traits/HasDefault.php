@@ -57,7 +57,7 @@ trait HasDefault
     {
         return Cache::rememberForever(
             'default_' . morph_alias(static::class),
-            fn () => static::query()->where(static::$defaultColumn, true)->first()
+            fn () => resolve_static(static::class, 'query')->where(static::$defaultColumn, true)->first()
         );
     }
 

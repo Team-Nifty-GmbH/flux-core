@@ -12,6 +12,7 @@ use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
+use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
@@ -502,7 +503,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             ->where('is_alternative', false)
             ->sum('purchase_price');
 
-        $this->margin = bcround(
+        $this->margin = Rounding::round(
             bcsub($this->total_net_price, $this->total_purchase_price, 9),
             2
         );
@@ -513,7 +514,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         $variableCosts = bcadd($variableCosts, $this->projects()->sum('total_cost'));
         $this->total_cost = $variableCosts;
 
-        $this->gross_profit = bcround(
+        $this->gross_profit = Rounding::round(
             bcsub($this->margin, $this->total_cost, 9),
             2
         );

@@ -129,7 +129,7 @@ class OrderPositionForm extends Form
 
         $this->calculate();
 
-        $this->warehouse_id ??= resolve_static(Warehouse::class, 'default')?->id;
+        $this->warehouse_id ??= Warehouse::default()?->id;
     }
 
     public function validate($rules = null, $messages = [], $attributes = []): void

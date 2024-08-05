@@ -74,13 +74,15 @@ class WorkTime extends Model
     {
         $this->total_cost = bcmul(
             $this->user->cost_per_hour,
-            $this->total_time_ms / 1000 / 60 / 60,
+            bcdiv($this->total_time_ms, 3600000),
             2
         );
 
-        if ($this->model && method_exists($this->model, 'costColumn') && $this->model->costColumn()) {
-            $this->model->{$this->model->costColumn()} = bcadd(
-                $this->model->{$this->model->costColumn()},
+        if ($this->model && method_exists($this->model, 'costColumn')
+            && $costColumn = $this->model->costColumn()
+        ) {
+            $this->model->{$costColumn} = bcadd(
+                $this->model->{$costColumn},
                 $this->total_cost,
                 2
             );

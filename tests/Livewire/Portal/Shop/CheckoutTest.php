@@ -21,6 +21,7 @@ class CheckoutTest extends BaseSetup
             'is_default' => true,
         ]);
     }
+
     public function test_renders_successfully()
     {
         Livewire::actingAs($this->address)
