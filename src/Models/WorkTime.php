@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
@@ -72,10 +73,12 @@ class WorkTime extends Model
 
     public function calculateTotalCost(): static
     {
-        $this->total_cost = bcmul(
-            $this->user->cost_per_hour,
-            bcdiv($this->total_time_ms, 3600000),
-            2
+        $this->total_cost = Rounding::round(
+            bcmul(
+                $this->user->cost_per_hour,
+                bcdiv($this->total_time_ms, 3600000),
+                9
+            )
         );
 
         if ($this->model && method_exists($this->model, 'costColumn')
