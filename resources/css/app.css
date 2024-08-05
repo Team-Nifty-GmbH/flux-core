@@ -4,6 +4,9 @@
 @import "/node_modules/@fontsource/inter/latin-900.css";
 @import "/node_modules/leaflet/dist/leaflet.css";
 
+@import '/node_modules/gridstack/dist/gridstack.min.css';
+@import '/node_modules/gridstack/dist/gridstack-extra.min.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -78,3 +81,33 @@
         @apply py-2 px-3 focus:outline-none ease-in-out duration-150 relative text-secondary-600 dark:text-secondary-400 flex items-center justify-between cursor-pointer focus:bg-primary-100 focus:text-primary-800 hover:text-white dark:focus:bg-secondary-700 hover:bg-primary-500 dark:hover:bg-secondary-700;
     }
 }
+
+.grid-stack {
+    @apply w-full
+}
+
+
+.grid-stack-item-content {
+    @apply text-white m-0 rounded shadow-md bg-white dark:bg-secondary-800;
+}
+
+.grid-stack > .grid-stack-item > .grid-stack-item-content {
+    @apply overflow-hidden;
+}
+
+::-webkit-scrollbar {
+    width: .5rem;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-gray-200 dark:bg-gray-700 rounded;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+}
+
