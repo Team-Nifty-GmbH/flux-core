@@ -61,7 +61,7 @@ class CreateMailExecutedSubscriber
 
     protected function createPurchaseInvoice(Communication $message): void
     {
-        $contact = $this->address->contact;
+        $contact = $this->address?->contact;
 
         foreach ($message->getMedia('attachments') as $attachment) {
             try {

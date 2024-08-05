@@ -68,7 +68,7 @@ class CreateTicket extends FluxAction
 
         if (is_array($users)) {
             if ($ticket->authenticatable->getMorphClass() === morph_alias(User::class)) {
-                $users = array_filter($users, fn (int $user) => $user !== $ticket->authenticatable->getKey());
+                $users = array_filter($users, fn (int $user) => $user !== $ticket->authenticatable_id);
             }
 
             foreach (data_get($ticket->users()->sync($users), 'attached', []) as $user) {
