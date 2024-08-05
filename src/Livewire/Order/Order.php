@@ -344,7 +344,7 @@ class Order extends OrderPositionList
             TabButton::make('order.activities')
                 ->label(__('Activities'))
                 ->isLivewireComponent()
-                ->wireModel('order'),
+                ->wireModel('order.id'),
         ];
     }
 

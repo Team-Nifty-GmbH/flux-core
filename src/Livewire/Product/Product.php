@@ -122,7 +122,7 @@ class Product extends Component
             TabButton::make('product.activities')
                 ->label(__('Activities'))
                 ->isLivewireComponent()
-                ->wireModel('product'),
+                ->wireModel('product.id'),
         ];
     }
 

@@ -216,7 +216,7 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
             $expires
         );
 
-        Mail::to($this->email)->queue(new MagicLoginLink($plaintext, $expires));
+        Mail::to($this->email)->queue(MagicLoginLink::make($plaintext, $expires));
     }
 
     public static function guardNames(): array
