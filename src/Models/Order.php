@@ -60,7 +60,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         'currency',
     ];
 
-    public string $detailRouteName = 'orders.id';
+    protected ?string $detailRouteName = 'orders.id';
 
     protected $guarded = [
         'id',
@@ -543,6 +543,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function getAvatarUrl(): ?string
     {
         return $this->contact?->getAvatarUrl() ?: self::icon()->getUrl();
+    }
+
+    public function getPortalDetailRoute(): string
+    {
+        return route('portal.orders.id', ['id' => $this->id]);
     }
 
     public function getPrintViews(): array

@@ -46,7 +46,7 @@ trait Notifiable
             'channel'
         );
 
-        $defaultChannels = array_diff($notification::defaultChannels(), $inactiveChannels);
+        $defaultChannels = array_diff($notification::defaultChannels($this), $inactiveChannels);
 
         return array_values(array_unique(array_merge($activeChannels, $defaultChannels)));
     }

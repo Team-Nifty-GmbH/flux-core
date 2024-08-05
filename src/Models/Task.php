@@ -40,7 +40,7 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
         'id',
     ];
 
-    public string $detailRouteName = 'tasks.id';
+    protected ?string $detailRouteName = 'tasks.id';
 
     protected static function booted(): void
     {

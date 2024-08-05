@@ -27,6 +27,8 @@ class CreateMailFolderRuleset extends FluxRuleset
             ],
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255',
+            'can_create_ticket' => 'boolean',
+            'can_create_purchase_invoice' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

@@ -56,7 +56,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         'id',
     ];
 
-    protected string $detailRouteName = 'contacts.id?';
+    protected ?string $detailRouteName = 'contacts.id?';
 
     public static string $iconName = 'user';
 
@@ -172,6 +172,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             'is_active' => 'boolean',
             'can_login' => 'boolean',
         ];
+    }
+
+    public function routeNotificationForMail(): ?string
+    {
+        return $this->email ?? $this->email_primary;
     }
 
     protected function password(): Attribute
