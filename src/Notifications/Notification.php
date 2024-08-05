@@ -22,9 +22,9 @@ class Notification extends BaseNotification
             : static::defaultChannels($notifiable);
     }
 
-    public static function defaultChannels(mixed $notifiable = null): array
+    public static function defaultChannels(object $notifiable = null): array
     {
-        return (is_object($notifiable) || is_string($notifiable))
+        return is_object($notifiable)
             && method_exists($notifiable, 'getMorphClass')
             && $notifiable->getMorphClass() !== morph_alias(User::class)
                 ? [

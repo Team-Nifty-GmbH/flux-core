@@ -9,15 +9,15 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('mail_folders', function (Blueprint $table) {
-            $table->boolean('creates_ticket')->after('slug')->default(false);
-            $table->boolean('creates_purchase_invoice')->after('creates_ticket')->default(false);
+            $table->boolean('can_create_ticket')->after('slug')->default(false);
+            $table->boolean('can_create_purchase_invoice')->after('can_create_ticket')->default(false);
         });
     }
 
     public function down(): void
     {
         Schema::table('mail_folders', function (Blueprint $table) {
-            $table->dropColumn(['creates_ticket', 'creates_purchase_invoice']);
+            $table->dropColumn(['can_create_ticket', 'can_create_purchase_invoice']);
         });
     }
 };

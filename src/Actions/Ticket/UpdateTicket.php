@@ -12,6 +12,7 @@ use FluxErp\Rulesets\Ticket\UpdateTicketRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class UpdateTicket extends FluxAction
 {
@@ -38,21 +39,25 @@ class UpdateTicket extends FluxAction
         $ticket->save();
 
         if (is_array($users)) {
-            $sync = $ticket->users()->sync($users);
-
-            foreach (data_get($sync, 'attached', []) as $user) {
-                CreateEventSubscription::make([
-                    'event' => eloquent_model_event(
-                        'created',
-                        resolve_static(Comment::class, 'class')
-                    ),
-                    'subscribable_id' => $user,
-                    'subscribable_type' => morph_alias(User::class),
-                    'model_type' => $ticket->getMorphClass(),
-                    'model_id' => $ticket->id,
-                    'is_broadcast' => false,
-                    'is_notifiable' => true,
-                ])->execute();
+            foreach (data_get($ticket->users()->sync($users), 'attached', []) as $user) {
+                try {
+                    CreateEventSubscription::make([
+                        'event' => eloquent_model_event(
+                            'created',
+                            resolve_static(Comment::class, 'class')
+                        ),
+                        'subscribable_id' => $user,
+                        'subscribable_type' => morph_alias(User::class),
+                        'model_type' => $ticket->getMorphClass(),
+                        'model_id' => $ticket->id,
+                        'is_broadcast' => false,
+                        'is_notifiable' => true,
+                    ])->validate()->execute();
+                } catch (ValidationException $e) {
+                    if (! data_get($e->errors(), 'subscription') || count($e->errors()) !== 1) {
+                        throw $e;
+                    }
+                }
             }
         }
 

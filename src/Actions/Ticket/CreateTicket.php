@@ -67,6 +67,10 @@ class CreateTicket extends FluxAction
         $ticket->save();
 
         if (is_array($users)) {
+            if ($ticket->authenticatable->getMorphClass() === morph_alias(User::class)) {
+                $users = array_filter($users, fn (int $user) => $user !== $ticket->authenticatable->getKey());
+            }
+
             foreach (data_get($ticket->users()->sync($users), 'attached', []) as $user) {
                 CreateEventSubscription::make([
                     'event' => eloquent_model_event(
@@ -79,7 +83,7 @@ class CreateTicket extends FluxAction
                     'model_id' => $ticket->id,
                     'is_broadcast' => false,
                     'is_notifiable' => true,
-                ])->execute();
+                ])->validate()->execute();
             }
         }
 
@@ -94,7 +98,7 @@ class CreateTicket extends FluxAction
             'model_id' => $ticket->id,
             'is_broadcast' => false,
             'is_notifiable' => true,
-        ])->execute();
+        ])->validate()->execute();
 
         return $ticket->refresh();
     }

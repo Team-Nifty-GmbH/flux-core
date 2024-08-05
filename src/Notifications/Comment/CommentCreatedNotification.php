@@ -32,7 +32,9 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
 
     public function via(object $notifiable): array
     {
-        if ($this->model->is_internal && ! is_a($notifiable, User::class, true)) {
+        if ($this->model->is_internal
+            && ! is_a($notifiable, resolve_static(User::class, 'class'), true)
+        ) {
             return [];
         }
 
@@ -45,7 +47,7 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
             ->toMail()
             ->when(
                 $ticketAccount = resolve_static(MailAccount::class, 'query')
-                    ->whereHas('mailFolders', fn ($query) => $query->where('creates_ticket', true))
+                    ->whereHas('mailFolders', fn ($query) => $query->where('can_create_ticket', true))
                     ->value('email'),
                 fn (MailMessage $mail) => $mail->replyTo($ticketAccount)
             )

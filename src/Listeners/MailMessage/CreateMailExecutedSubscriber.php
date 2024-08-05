@@ -24,7 +24,7 @@ class CreateMailExecutedSubscriber
         $message = $event->getResult();
         $this->address = $this->findAddress($message);
 
-        if ($message->mailFolder->creates_purchase_invoice && $message->media()->count() !== 0) {
+        if ($message->mailFolder->can_create_purchase_invoice && $message->media()->count() !== 0) {
             $this->createPurchaseInvoice($message);
         }
 
@@ -34,7 +34,7 @@ class CreateMailExecutedSubscriber
             $message->text_body ?? $message->html_body ?? $message->subject,
             $matches
         );
-        if (count($matches) === 3 && $message->mailFolder->creates_ticket) {
+        if (count($matches) === 3 && $message->mailFolder->can_create_ticket) {
             $model = $matches[1];
             $id = $matches[2];
 
@@ -47,7 +47,7 @@ class CreateMailExecutedSubscriber
                 ])->validate()->execute();
             } catch (\Throwable) {
             }
-        } elseif ($message->mailFolder->creates_ticket) {
+        } elseif ($message->mailFolder->can_create_ticket) {
             $this->createTicket($message);
         }
     }
