@@ -112,7 +112,7 @@ class Checkout extends Cart
         event(new PortalOrderCreated($order));
 
         if (auth('address')->check()) {
-            Mail::to(auth('address')->user())->queue(new OrderConfirmation($order->refresh()));
+            Mail::to(auth('address')->user())->queue(OrderConfirmation::make($order->refresh()));
         }
 
         $this->redirect(route('portal.checkout-finish'), true);
