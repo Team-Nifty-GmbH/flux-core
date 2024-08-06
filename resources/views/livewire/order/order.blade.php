@@ -644,6 +644,15 @@
                                         </span>
                                     </div>
                                 </div>
+                                <div class="flex justify-between p-2.5">
+                                    <div>
+                                        {{ __('Gross Profit') }}
+                                    </div>
+                                    <div>
+                                        <span x-html="formatters.coloredMoney($wire.order.gross_profit ?? 0)">
+                                        </span>
+                                    </div>
+                                </div>
                                 <div x-cloak x-show="$wire.order.total_net_price !== ($wire.order.total_base_net_price ?? '0.0000000000')">
                                     <div class="flex justify-between p-2.5">
                                         <div>

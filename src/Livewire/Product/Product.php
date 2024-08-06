@@ -122,7 +122,7 @@ class Product extends Component
             TabButton::make('product.activities')
                 ->label(__('Activities'))
                 ->isLivewireComponent()
-                ->wireModel('product'),
+                ->wireModel('product.id'),
         ];
     }
 
@@ -187,6 +187,7 @@ class Product extends Component
                 'rounding_mode',
                 'is_net',
                 'is_default',
+                'is_purchase',
             ])
             ->map(function (PriceList $priceList) use ($priceListHelper) {
                 $price = $priceListHelper
@@ -204,6 +205,7 @@ class Product extends Component
                     'name' => $priceList->name,
                     'is_net' => $priceList->is_net,
                     'is_default' => $priceList->is_default,
+                    'is_purchase' => $priceList->is_purchase,
                     'is_editable' => ! is_null(data_get($price, 'id')) || ! is_null($price?->parent) || is_null($price),
                 ];
             });

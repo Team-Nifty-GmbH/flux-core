@@ -19,7 +19,6 @@ export default defineConfig({
                 '.{{ relative_path }}/resources/js/web-push.js',
                 './vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js',
                 './vendor/team-nifty-gmbh/tall-calendar/resources/js/index.js',
-                './vendor/team-nifty-gmbh/tall-calendar/resources/css/calendar.css',
                 './vendor/wireui/wireui/ts/index.ts',
             ],
             refresh: false

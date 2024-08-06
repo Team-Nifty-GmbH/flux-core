@@ -344,7 +344,7 @@ class Order extends OrderPositionList
             TabButton::make('order.activities')
                 ->label(__('Activities'))
                 ->isLivewireComponent()
-                ->wireModel('order'),
+                ->wireModel('order.id'),
         ];
     }
 
@@ -906,6 +906,7 @@ class Order extends OrderPositionList
                 'amount',
                 'amount_bundle',
                 'discount_percentage',
+                'purchase_price',
                 'total_base_gross_price',
                 'total_base_net_price',
                 'total_gross_price',

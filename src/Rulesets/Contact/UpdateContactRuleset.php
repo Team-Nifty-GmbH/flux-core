@@ -4,6 +4,7 @@ namespace FluxErp\Rulesets\Contact;
 
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
@@ -32,6 +33,11 @@ class UpdateContactRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 new ModelExists(User::class),
+            ],
+            'currency_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(Currency::class),
             ],
             'payment_type_id' => [
                 'integer',

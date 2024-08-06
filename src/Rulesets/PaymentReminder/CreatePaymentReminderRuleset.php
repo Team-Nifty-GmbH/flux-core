@@ -15,7 +15,7 @@ class CreatePaymentReminderRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:payment_reminders,uuid',
+            'uuid' => 'nullable|string|uuid|unique:payment_reminders,uuid',
             'order_id' => [
                 'required',
                 'integer',

@@ -37,6 +37,10 @@ class SignaturePublicLink extends Component
 
     public function mount(): void
     {
+        if (! $this->uuid || ! $this->printView || ! $this->model) {
+            abort(404);
+        }
+
         $this->signature->fill(
             resolve_static(Media::class, 'query')
                 ->where('model_id', $this->getModel()->id)

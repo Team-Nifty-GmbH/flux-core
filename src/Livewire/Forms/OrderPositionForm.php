@@ -125,10 +125,11 @@ class OrderPositionForm extends Form
         $this->product_number = $product->product_number;
         $this->ean_code = $product->ean;
         $this->unit_gram_weight = $product->weight_gram;
+        $this->purchase_price = $product->purchasePrice(1)->price;
 
         $this->calculate();
 
-        $this->warehouse_id ??= resolve_static(Warehouse::class, 'default')?->id;
+        $this->warehouse_id ??= Warehouse::default()?->id;
     }
 
     public function validate($rules = null, $messages = [], $attributes = []): void

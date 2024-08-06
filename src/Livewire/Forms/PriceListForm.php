@@ -32,6 +32,8 @@ class PriceListForm extends FluxForm
 
     public ?bool $is_default = false;
 
+    public ?bool $is_purchase = false;
+
     public ?array $discount = [
         'discount' => null,
         'is_percentage' => true,

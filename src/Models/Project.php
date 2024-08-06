@@ -33,7 +33,7 @@ class Project extends Model implements InteractsWithDataTables
         'id',
     ];
 
-    public string $detailRouteName = 'projects.id';
+    protected ?string $detailRouteName = 'projects.id';
 
     protected static function booted(): void
     {
@@ -115,5 +115,9 @@ class Project extends Model implements InteractsWithDataTables
         );
 
         $this->save();
+
+        if ($this->order) {
+            $this->order->calculateMargin()->save();
+        }
     }
 }

@@ -12,7 +12,7 @@ class CreateWorkTimeTypeRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:work_time_types,uuid',
+            'uuid' => 'nullable|string|uuid|unique:work_time_types,uuid',
             'name' => 'required|string',
             'is_billable' => 'boolean',
         ];

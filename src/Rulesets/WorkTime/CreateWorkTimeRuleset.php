@@ -19,7 +19,7 @@ class CreateWorkTimeRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:work_times,uuid',
+            'uuid' => 'nullable|string|uuid|unique:work_times,uuid',
             'contact_id' => [
                 'nullable',
                 'integer',

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\Money;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\States\Task\TaskState;
@@ -39,7 +40,7 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
         'id',
     ];
 
-    public string $detailRouteName = 'tasks.id';
+    protected ?string $detailRouteName = 'tasks.id';
 
     protected static function booted(): void
     {
@@ -61,6 +62,7 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
             'due_date' => 'date',
             'state' => TaskState::class,
             'time_budget' => TimeDuration::class,
+            'total_cost' => Money::class,
         ];
     }
 
@@ -184,5 +186,10 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
         ]);
 
         return $task;
+    }
+
+    public function costColumn(): string
+    {
+        return 'total_cost';
     }
 }

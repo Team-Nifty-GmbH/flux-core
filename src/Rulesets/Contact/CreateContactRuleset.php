@@ -4,6 +4,7 @@ namespace FluxErp\Rulesets\Contact;
 
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
@@ -19,7 +20,7 @@ class CreateContactRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:contacts,uuid',
+            'uuid' => 'nullable|string|uuid|unique:contacts,uuid',
             'client_id' => [
                 'required',
                 'integer',
@@ -29,6 +30,11 @@ class CreateContactRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 new ModelExists(User::class),
+            ],
+            'currency_id' => [
+                'integer',
+                'nullable',
+                new ModelExists(Currency::class),
             ],
             'payment_type_id' => [
                 'integer',

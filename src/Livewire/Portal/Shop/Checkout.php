@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Portal\Shop;
 use FluxErp\Actions\Comment\CreateComment;
 use FluxErp\Events\PortalOrderCreated;
 use FluxErp\Livewire\Forms\AddressForm;
-use FluxErp\Mail\OrderConfirmation;
+use FluxErp\Mail\Order\OrderConfirmation;
 use FluxErp\Models\Address;
 use FluxErp\Models\Order;
 use FluxErp\Rulesets\Address\PostalAddressRuleset;
@@ -34,7 +34,10 @@ class Checkout extends Cart
 
     public function mount(): void
     {
-        $this->deliveryAddress->fill(auth()->user()->contact->deliveryAddress->toArray());
+        $this->deliveryAddress->fill(
+            auth()->user()->contact->deliveryAddress?->toArray()
+            ?? auth()->user()->toArray()
+        );
     }
 
     public function render(): View
@@ -112,7 +115,7 @@ class Checkout extends Cart
         event(new PortalOrderCreated($order));
 
         if (auth('address')->check()) {
-            Mail::to(auth('address')->user())->queue(new OrderConfirmation($order->refresh()));
+            Mail::to(auth('address')->user())->queue(OrderConfirmation::make($order->refresh()));
         }
 
         $this->redirect(route('portal.checkout-finish'), true);

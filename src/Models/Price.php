@@ -2,6 +2,8 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\Money;
+use FluxErp\Casts\Percentage;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
@@ -11,8 +13,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use TeamNiftyGmbH\DataTable\Casts\Money;
-use TeamNiftyGmbH\DataTable\Casts\Percentage;
 
 class Price extends Model
 {

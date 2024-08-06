@@ -15,7 +15,7 @@ class CreateStockPostingRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:stock_postings,uuid',
+            'uuid' => 'nullable|string|uuid|unique:stock_postings,uuid',
             'warehouse_id' => [
                 'required',
                 'integer',

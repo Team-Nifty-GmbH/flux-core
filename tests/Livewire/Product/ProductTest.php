@@ -34,4 +34,19 @@ class ProductTest extends TestCase
         Livewire::test(ProductView::class, ['id' => $this->product->id])
             ->assertStatus(200);
     }
+
+    public function test_switch_tabs()
+    {
+        $component = Livewire::test(ProductView::class, ['id' => $this->product->id]);
+
+        foreach (Livewire::new(ProductView::class)->getTabs() as $tab) {
+            $component
+                ->set('tab', $tab->component)
+                ->assertStatus(200);
+
+            if ($tab->isLivewireComponent) {
+                $component->assertSeeLivewire($tab->component);
+            }
+        }
+    }
 }

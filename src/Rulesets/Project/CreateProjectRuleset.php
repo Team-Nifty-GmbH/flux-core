@@ -19,7 +19,7 @@ class CreateProjectRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:projects,uuid',
+            'uuid' => 'nullable|string|uuid|unique:projects,uuid',
             'client_id' => [
                 'required',
                 'integer',
