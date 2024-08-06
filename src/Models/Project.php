@@ -113,6 +113,7 @@ class Project extends Model implements InteractsWithDataTables
             $this->tasks()->sum('progress'),
             $this->tasks()->count()
         );
+        $this->total_cost = $this->tasks()->sum('total_cost');
 
         $this->save();
 
