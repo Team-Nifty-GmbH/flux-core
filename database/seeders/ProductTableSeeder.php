@@ -12,9 +12,6 @@ use Illuminate\Database\Seeder;
 
 class ProductTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $units = Unit::all(['id']);

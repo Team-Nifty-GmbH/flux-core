@@ -9,9 +9,6 @@ class BankConnectionFactory extends Factory
 {
     protected $model = BankConnection::class;
 
-    /**
-     * Define the model's default state.
-     */
     public function definition(): array
     {
         return [

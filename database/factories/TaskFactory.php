@@ -10,9 +10,6 @@ class TaskFactory extends Factory
 {
     protected $model = Task::class;
 
-    /**
-     * Define the model's default state.
-     */
     public function definition(): array
     {
         /** @var \DateTime $startDate */

@@ -10,14 +10,11 @@ use Illuminate\Database\Seeder;
 
 class PaymentNoticeTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $clients = Client::all();
-        $paymentType = PaymentType::all();
-        $documentType = DocumentType::all();
+        $clients = Client::all(['id']);
+        $paymentType = PaymentType::all(['id']);
+        $documentType = DocumentType::all(['id']);
 
         for ($i = 0; $i < 15; $i++) {
             PaymentNotice::factory()->create([

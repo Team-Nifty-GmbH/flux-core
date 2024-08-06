@@ -7,9 +7,6 @@ use Illuminate\Database\Seeder;
 
 class RoleTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $guards = array_keys(config('auth.guards'));

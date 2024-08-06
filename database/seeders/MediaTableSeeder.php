@@ -10,9 +10,6 @@ use Illuminate\Http\UploadedFile;
 
 class MediaTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $models = get_subclasses_of(Model::class, 'FluxErp\\Models\\');

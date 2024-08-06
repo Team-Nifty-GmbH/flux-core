@@ -14,9 +14,6 @@ use Illuminate\Database\Seeder;
 
 class OrderTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $clients = Client::all(['id']);

@@ -8,12 +8,9 @@ use Illuminate\Database\Seeder;
 
 class ProductOptionTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $groups = ProductOptionGroup::all();
+        $groups = ProductOptionGroup::all(['id']);
         foreach ($groups as $group) {
             ProductOption::factory()->count(3)->create([
                 'product_option_group_id' => $group->id,

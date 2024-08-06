@@ -10,9 +10,6 @@ class WorkTimeFactory extends Factory
 {
     protected $model = WorkTime::class;
 
-    /**
-     * Define the model's default state.
-     */
     public function definition(): array
     {
         return [

@@ -5,18 +5,10 @@ namespace FluxErp\Database\Factories;
 use FluxErp\Models\SerialNumberRange;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory
- */
 class SerialNumberRangeFactory extends Factory
 {
     protected $model = SerialNumberRange::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

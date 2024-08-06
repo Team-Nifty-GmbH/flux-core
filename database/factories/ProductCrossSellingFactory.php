@@ -9,11 +9,6 @@ class ProductCrossSellingFactory extends Factory
 {
     protected $model = ProductCrossSelling::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

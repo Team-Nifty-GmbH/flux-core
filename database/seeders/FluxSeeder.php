@@ -18,7 +18,7 @@ class FluxSeeder extends Seeder
     public function run(): void
     {
         $this->call(LanguageTableSeeder::class);
-        // Artisan::call(InitPermissions::class);
+        Artisan::call(InitPermissions::class);
         Role::findOrCreate('Super Admin');
         $this->call(UserTableSeeder::class);
         CauserResolver::resolveUsing(function () {

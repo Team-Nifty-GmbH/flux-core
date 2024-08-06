@@ -10,9 +10,6 @@ use Illuminate\Database\Seeder;
 
 class TicketTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $ticketTypes = TicketType::all(['id']);
@@ -34,7 +31,7 @@ class TicketTableSeeder extends Seeder
                 $user = $users->random();
 
                 return [
-                    'authenticatable_type' => morph_alias(get_class($user)),
+                    'authenticatable_type' => $user->getMorphClass(),
                     'authenticatable_id' => $user->id,
                     'ticket_type_id' => rand(0, 1) ?
                         ($ticketTypes->isNotEmpty() ? $ticketTypes->random()->id : null) :

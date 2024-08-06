@@ -12,7 +12,7 @@ class AddressTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $clients = Client::all();
+        $clients = Client::all(['id']);
         $password = Hash::make('password');
 
         foreach ($clients as $client) {

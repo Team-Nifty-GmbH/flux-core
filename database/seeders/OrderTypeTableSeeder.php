@@ -10,12 +10,9 @@ use Illuminate\Support\Str;
 
 class OrderTypeTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $clients = Client::all();
+        $clients = Client::all(['id']);
 
         foreach ($clients as $client) {
             foreach (OrderTypeEnum::cases() as $orderType) {

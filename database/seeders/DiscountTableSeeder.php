@@ -8,9 +8,6 @@ use Illuminate\Database\Seeder;
 
 class DiscountTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $discounts = Discount::all(['id']);

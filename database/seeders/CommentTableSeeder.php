@@ -18,7 +18,7 @@ class CommentTableSeeder extends Seeder
     public function run(): void
     {
         $models = get_subclasses_of(Model::class, 'FluxErp\\Models\\');
-        $users = User::all();
+        $users = User::all(['id']);
 
         foreach ($models as $model) {
             if (! in_array(Commentable::class, class_uses($model))) {

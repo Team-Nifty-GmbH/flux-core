@@ -9,11 +9,6 @@ class ContactOptionFactory extends Factory
 {
     protected $model = ContactOption::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         $type = $this->faker->randomElement(['phone', 'email', 'website']);

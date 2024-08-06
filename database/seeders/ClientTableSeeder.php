@@ -8,12 +8,9 @@ use Illuminate\Database\Seeder;
 
 class ClientTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $countries = Country::all();
+        $countries = Country::all(['id']);
 
         for ($i = 0; $i < 3; $i++) {
             Client::factory()->create([

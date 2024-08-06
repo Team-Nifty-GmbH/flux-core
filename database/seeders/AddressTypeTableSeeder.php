@@ -8,12 +8,9 @@ use Illuminate\Database\Seeder;
 
 class AddressTypeTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $clients = Client::all();
+        $clients = Client::all(['id']);
 
         foreach ($clients as $client) {
             $invoiceAddressType = AddressType::query()

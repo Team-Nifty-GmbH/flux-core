@@ -9,9 +9,6 @@ class WidgetFactory extends Factory
 {
     protected $model = Widget::class;
 
-    /**
-     * Define the model's default state.
-     */
     public function definition(): array
     {
         return [
