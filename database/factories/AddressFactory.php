@@ -15,7 +15,7 @@ class AddressFactory extends Factory
         return [
             'company' => $this->faker->boolean ? $this->faker->company() : null,
             'title' => $this->faker->boolean ? $this->faker->randomElement(['Dr.', 'Pr.', 'Dipl.']) : null,
-            'salutation' => $this->faker->boolean ? $this->faker->randomElement(SalutationEnum::cases()) : null,
+            'salutation' => $this->faker->boolean ? $this->faker->randomElement(SalutationEnum::cases())->value : null,
             'firstname' => $this->faker->firstName(),
             'lastname' => $this->faker->lastName(),
             'addition' => $this->faker->boolean ? $this->faker->realText(maxNbChars: 20) : null,
