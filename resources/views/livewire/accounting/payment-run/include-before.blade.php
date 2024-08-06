@@ -56,7 +56,8 @@
                         :label="__('Execution Date')"
                         :min="now()->format('Y-m-d')"
                     />
-                    <x-toggle wire:model="paymentRunForm.is_single_booking" :label="__('Single Booking')" />
+                    <x-toggle wire:model="paymentRunForm.is_collective" :label="__('Collective')" />
+                    <x-toggle x-bind:disabled="! $wire.paymentRunForm.is_collective" wire:model="paymentRunForm.is_single_booking" :label="__('Single Booking')" />
                     <div x-cloak x-show="$wire.paymentRunForm.payment_run_type_enum === 'money_transfer'">
                         <x-toggle wire:model="paymentRunForm.is_instant_payment" :label="__('Is Instant Payment')" />
                     </div>
