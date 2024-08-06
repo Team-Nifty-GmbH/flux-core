@@ -112,7 +112,7 @@ class AddressTest extends BaseSetup
         $this->assertEquals($this->addresses[0]->contact_id, $jsonAddress->contact_id);
         $this->assertEquals($this->addresses[0]->company, $jsonAddress->company);
         $this->assertEquals($this->addresses[0]->title, $jsonAddress->title);
-        $this->assertEquals($this->addresses[0]->salutation?->value, $jsonAddress->salutation);
+        $this->assertEquals($this->addresses[0]->salutation, $jsonAddress->salutation);
         $this->assertEquals($this->addresses[0]->firstname, $jsonAddress->firstname);
         $this->assertEquals($this->addresses[0]->lastname, $jsonAddress->lastname);
         $this->assertEquals($this->addresses[0]->addition, $jsonAddress->addition);
