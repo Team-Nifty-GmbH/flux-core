@@ -31,6 +31,12 @@ class CreateEventSubscription extends FluxAction
         return $eventSubscription->fresh();
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->data['subscribable_id'] ??= Auth::id();
+        $this->data['subscribable_type'] ??= Auth::user()->getMorphClass();
+    }
+
     protected function validateData(): void
     {
         parent::validateData();
@@ -52,8 +58,6 @@ class CreateEventSubscription extends FluxAction
         }
 
         $this->data['event'] = $eventClass ?: $eloquentEvent;
-        $this->data['subscribable_id'] ??= Auth::id();
-        $this->data['subscribable_type'] ??= Auth::user()->getMorphClass();
 
         if (resolve_static(EventSubscription::class, 'query')
             ->where('event', $this->data['event'])

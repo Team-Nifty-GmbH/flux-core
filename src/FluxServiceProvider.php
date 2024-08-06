@@ -6,6 +6,7 @@ use FluxErp\Console\Commands\Init\InitEnv;
 use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Menu;
+use FluxErp\Facades\ProductType;
 use FluxErp\Facades\Repeatable;
 use FluxErp\Facades\Widget;
 use FluxErp\Helpers\Composer;
@@ -150,6 +151,8 @@ class FluxServiceProvider extends ServiceProvider
         Repeatable::autoDiscover(flux_path('src/Repeatable'), 'FluxErp\Repeatable');
         // Register repeatable artisan commands, jobs and invokable classes (in "Repeatable" directory) from app
         Repeatable::autoDiscover();
+
+        ProductType::register('product', 'flux::livewire.product.product', true);
     }
 
     protected function registerMarcos(): void

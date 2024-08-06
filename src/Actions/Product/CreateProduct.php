@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Product;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Price\CreatePrice;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
+use FluxErp\Facades\ProductType;
 use FluxErp\Models\Price;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tag;
@@ -99,6 +100,8 @@ class CreateProduct extends FluxAction
 
     public function prepareForValidation(): void
     {
+        $this->data['product_type'] ??= data_get(ProductType::getDefault(), 'type');
+
         if (! data_get($this->data, 'prices') && data_get($this->data, 'parent_id')) {
             $this->data['prices'] = resolve_static(Price::class, 'query')
                 ->where('product_id', data_get($this->data, 'parent_id'))

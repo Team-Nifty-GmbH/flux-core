@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Product;
 
 use FluxErp\Actions\Tag\CreateTag;
+use FluxErp\Facades\ProductType;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProductForm;
@@ -40,6 +41,8 @@ class Product extends Component
     #[Url]
     public string $tab = 'product.general';
 
+    protected string $view = 'flux::livewire.product.product';
+
     public function mount(int $id): void
     {
         $product = resolve_static(ProductModel::class, 'query')
@@ -60,11 +63,17 @@ class Product extends Component
         $this->product->fill($product);
 
         $this->additionalColumns = $product->getAdditionalColumns()->toArray();
+
+        $this->view = data_get(
+            ProductType::get($product->product_type) ?? ProductType::getDefault(),
+            'view',
+            $this->view
+        );
     }
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.product.product', [
+        return view($this->view, [
             'vatRates' => $this->vatRates(),
         ]);
     }

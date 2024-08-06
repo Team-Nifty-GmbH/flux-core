@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\Product;
 
 use FluxErp\Enums\TimeUnitEnum;
+use FluxErp\Facades\ProductType;
 use FluxErp\Models\Product;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
@@ -10,6 +11,7 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rulesets\ProductCrossSelling\CreateProductCrossSellingRuleset;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class CreateProductRuleset extends FluxRuleset
@@ -49,6 +51,10 @@ class CreateProductRuleset extends FluxRuleset
             ],
 
             'product_number' => 'string|nullable|unique:products,product_number',
+            'product_type' => [
+                Rule::in(ProductType::all()->keys()),
+                'nullable'
+            ],
             'description' => 'string|nullable',
             'weight_gram' => 'numeric|nullable',
             'dimension_length_mm' => 'numeric|nullable',

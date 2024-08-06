@@ -11,6 +11,7 @@ class ProductList extends BaseDataTable
     public array $enabledCols = [
         'name',
         'product_number',
+        'product_type',
         'is_active',
         'categories.name',
     ];

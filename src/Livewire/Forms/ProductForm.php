@@ -31,6 +31,8 @@ class ProductForm extends FluxForm
 
     public ?string $product_number = null;
 
+    public ?string $product_type = null;
+
     public ?string $description = null;
 
     public ?float $weight_gram = null;
