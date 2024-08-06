@@ -9,14 +9,14 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('order_payment_run', function (Blueprint $table) {
-            $table->boolean('is_successful')->default(false)->after('amount');
+            $table->boolean('success')->default(false)->after('amount');
         });
     }
 
     public function down(): void
     {
         Schema::table('order_payment_run', function (Blueprint $table) {
-            $table->dropColumn('is_successful');
+            $table->dropColumn('success');
         });
     }
 };
