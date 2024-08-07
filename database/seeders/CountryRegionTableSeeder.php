@@ -10,7 +10,7 @@ class CountryRegionTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $countries = Country::all();
+        $countries = Country::all(['id']);
 
         foreach ($countries as $country) {
             CountryRegion::factory()->count(3)->create([

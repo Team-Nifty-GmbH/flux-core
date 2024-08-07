@@ -12,9 +12,6 @@ use TeamNiftyGmbH\Calendar\Database\Seeders\CalendarTableSeeder;
 
 class FluxSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         $this->call(LanguageTableSeeder::class);
