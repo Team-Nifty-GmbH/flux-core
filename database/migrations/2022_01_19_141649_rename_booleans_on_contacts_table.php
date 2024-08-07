@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class RenameBooleansOnContactsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('contacts', function (Blueprint $table) {
             $table->renameColumn('is_sensitive_reminder', 'has_sensitive_reminder');
@@ -19,12 +14,7 @@ class RenameBooleansOnContactsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('contacts', function (Blueprint $table) {
             $table->renameColumn('has_sensitive_reminder', 'is_sensitive_reminder');

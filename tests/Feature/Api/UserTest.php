@@ -165,7 +165,10 @@ class UserTest extends BaseSetup
         $defaultLanguage = Language::default();
 
         $this->assertNotEmpty($user);
-        $this->assertEquals($user['name'], $dbUser->name);
+        $this->assertEquals($user['firstname'], $dbUser->firstname);
+        $this->assertEquals($user['lastname'], $dbUser->lastname);
+        $this->assertEquals($user['firstname'] . ' ' . $user['lastname'], $dbUser->name);
+        $this->assertEquals($user['email'], $dbUser->email);
         $this->assertTrue(Hash::check($user['password'], $dbUser->password));
         $this->assertEquals($user['user_code'], $dbUser->user_code);
         $this->assertEquals($user['is_active'], $dbUser->is_active);

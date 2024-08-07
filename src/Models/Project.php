@@ -109,9 +109,12 @@ class Project extends Model implements InteractsWithDataTables
 
     public function calculateProgress(): void
     {
-        $taskProgress = $this->tasks()->pluck('tasks.progress')->toArray();
+        $this->progress = bcdiv(
+            $this->tasks()->sum('progress'),
+            $this->tasks()->count()
+        );
         $this->total_cost = $this->tasks()->sum('total_cost');
-        $this->progress = bcdiv(array_sum($taskProgress), count($taskProgress));
+
         $this->save();
 
         if ($this->order) {

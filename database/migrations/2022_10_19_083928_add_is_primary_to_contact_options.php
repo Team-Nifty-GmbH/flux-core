@@ -6,24 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('contact_options', function (Blueprint $table) {
             $table->boolean('is_primary')->default(false)->after('value')->index();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('contact_options', function (Blueprint $table) {
             $table->dropColumn('is_primary');

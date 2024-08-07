@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('meta', function (Blueprint $table) {
             $table->id();
@@ -38,12 +33,7 @@ return new class() extends Migration
         Schema::dropIfExists('model_has_values');
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::create('model_has_values', function (Blueprint $table) {
             $table->unsignedBigInteger('model_id');

@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 class RefactorEventNotificationsTableAndRenameTableToEventSubscriptions extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         $this->renameEventNotificationsTableToEventSubscriptions();
 
@@ -22,12 +17,7 @@ class RefactorEventNotificationsTableAndRenameTableToEventSubscriptions extends 
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('event_subscriptions', function (Blueprint $table) {
             $table->dropColumn(['is_notifiable', 'is_broadcast']);

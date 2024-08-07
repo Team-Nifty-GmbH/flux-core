@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class AddFieldsAndRelationsToOrderPositionsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('order_positions', function (Blueprint $table) {
             // Foreign Keys
@@ -132,12 +127,7 @@ class AddFieldsAndRelationsToOrderPositionsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('order_positions', function (Blueprint $table) {
             $table->dropForeign('order_positions_client_id_foreign');

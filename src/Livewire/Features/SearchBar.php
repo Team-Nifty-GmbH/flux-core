@@ -2,13 +2,13 @@
 
 namespace FluxErp\Livewire\Features;
 
+use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
-use Laravel\Scout\Searchable;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\Actions;

@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 class ChangeValueToJsonOnModelHasValuesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('model_has_values', function (Blueprint $table) {
             $table->json('value')->change();
@@ -21,12 +16,7 @@ class ChangeValueToJsonOnModelHasValuesTable extends Migration
         $this->migrateName();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         $this->rollbackName();
 

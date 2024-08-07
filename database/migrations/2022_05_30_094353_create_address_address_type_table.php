@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateAddressAddressTypeTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('address_address_type', function (Blueprint $table) {
             $table->unsignedBigInteger('address_id')
@@ -25,12 +20,7 @@ class CreateAddressAddressTypeTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('address_address_type');
     }

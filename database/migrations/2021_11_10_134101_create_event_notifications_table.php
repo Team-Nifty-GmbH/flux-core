@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateEventNotificationsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('event_notifications', function (Blueprint $table) {
             $table->id();
@@ -25,12 +20,7 @@ class CreateEventNotificationsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('event_notifications');
     }

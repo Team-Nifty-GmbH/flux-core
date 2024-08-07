@@ -10,19 +10,14 @@ use Illuminate\Database\Seeder;
 
 class SerialNumberTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $models = [
             Address::class,
         ];
 
         foreach ($models as $model) {
-            $records = $model::all();
+            $records = $model::all(['id']);
 
             foreach ($records as $record) {
                 for ($i = 0; $i < rand(0, 10); $i++) {
