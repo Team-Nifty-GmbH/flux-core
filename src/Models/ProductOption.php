@@ -5,8 +5,8 @@ namespace FluxErp\Models;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
-use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ProductOption extends Model
 {
-    use Filterable, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
+    use Filterable, HasPackageFactory, HasTranslations, HasUuid, LogsActivity, SoftDeletes;
 
     protected $guarded = [
         'id',

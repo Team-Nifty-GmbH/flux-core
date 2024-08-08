@@ -8,9 +8,9 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -26,7 +26,7 @@ use Spatie\MediaLibrary\HasMedia;
 class Client extends Model implements HasMedia
 {
     use CacheModelQueries, Commentable, Filterable, HasClientAssignment, HasDefault, HasPackageFactory,
-        HasUserModification, HasUuid, InteractsWithMedia, Searchable, SoftDeletes;
+        HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
 
     protected $appends = [
         'logo_url',

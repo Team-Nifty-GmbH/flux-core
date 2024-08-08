@@ -7,8 +7,8 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -24,8 +24,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Category extends Model implements InteractsWithDataTables, Sortable
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification,
-        HasUuid, Searchable, SortableTrait;
+    use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUuid,
+        LogsActivity, Searchable, SortableTrait;
 
     protected $guarded = [
         'id',

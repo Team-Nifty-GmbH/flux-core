@@ -2,7 +2,7 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasUserModification;
+use FluxErp\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use TeamNiftyGmbH\Calendar\Models\Calendar as BaseCalendar;
@@ -10,7 +10,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Calendar extends BaseCalendar
 {
-    use BroadcastsEvents, HasUserModification;
+    use BroadcastsEvents, LogsActivity;
 
     protected $guarded = [
         'id',

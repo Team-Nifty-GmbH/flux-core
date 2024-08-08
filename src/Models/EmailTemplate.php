@@ -3,8 +3,8 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class EmailTemplate extends Model
 {
-    use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use HasPackageFactory, HasUuid, LogsActivity, SoftDeletes;
 
     protected $guarded = [
         'id',

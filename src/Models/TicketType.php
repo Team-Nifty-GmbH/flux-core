@@ -6,8 +6,8 @@ use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TicketType extends Model
 {
-    use CacheModelQueries, HasAdditionalColumns, HasCustomEvents, HasPackageFactory, HasUserModification, HasUuid,
+    use CacheModelQueries, HasAdditionalColumns, HasCustomEvents, HasPackageFactory, HasUuid, LogsActivity,
         SoftDeletes;
 
     protected $guarded = [

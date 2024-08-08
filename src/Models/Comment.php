@@ -3,9 +3,9 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -18,7 +18,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Comment extends Model implements HasMedia
 {
-    use BroadcastsEvents, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, SoftDeletes;
+    use BroadcastsEvents, HasPackageFactory, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes;
 
     protected $appends = [
         'user',

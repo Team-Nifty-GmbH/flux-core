@@ -12,9 +12,9 @@ use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasRelatedModel;
 use FluxErp\Traits\HasSerialNumberRange;
-use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
@@ -31,8 +31,8 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 class Ticket extends Model implements HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
-        HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
-        InteractsWithMedia, Searchable, SoftDeletes, Trackable;
+        HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUuid, InteractsWithMedia,
+        LogsActivity, Searchable, SoftDeletes, Trackable;
 
     protected $guarded = [
         'id',

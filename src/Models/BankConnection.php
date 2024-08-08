@@ -5,14 +5,14 @@ namespace FluxErp\Models;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class BankConnection extends Model
 {
-    use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid;
+    use Filterable, HasClientAssignment, HasPackageFactory, HasUuid, LogsActivity;
 
     protected $guarded = [
         'id',
