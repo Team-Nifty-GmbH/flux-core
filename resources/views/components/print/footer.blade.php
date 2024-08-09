@@ -21,6 +21,11 @@
                     <div>
                         {{ $client->phone ?? '' }}
                     </div>
+                    <div>
+                        <div>
+                            {{ $client->vat_id }}
+                        </div>
+                    </div>
                 </address>
                 @foreach($client->bankConnections as $bankConnection)
                     <div class="float-right text-left pl-3">

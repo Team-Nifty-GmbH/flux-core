@@ -20,6 +20,7 @@
                 <x-input :label="__('Fax')" :placeholder="__('Fax')" wire:model="client.fax"/>
                 <x-input :label="__('Email')" :placeholder="__('Email')" wire:model="client.email"/>
                 <x-input :label="__('Website')" :placeholder="__('Website')" wire:model="client.website"/>
+                <x-input :label="__('Vat Id')" :placeholder="__('Vat Id')" wire:model="client.vat_id"/>
                 <x-select
                     :label="__('Bank Connections')"
                     multiselect
