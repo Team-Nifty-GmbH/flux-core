@@ -13,6 +13,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -31,7 +32,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class OrderPosition extends Model implements InteractsWithDataTables, Sortable
 {
     use Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
-        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, SoftDeletes, SortableTrait;
+        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, LogsActivity, SoftDeletes, SortableTrait;
 
     protected $appends = [
         'unit_price',

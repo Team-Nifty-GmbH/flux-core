@@ -127,11 +127,11 @@ class OrderForm extends FluxForm
 
     public ?string $created_at = null;
 
-    public ?array $created_by = null;
+    public ?string $created_by = null;
 
     public ?string $updated_at = null;
 
-    public ?array $updated_by = null;
+    public ?string $updated_by = null;
 
     public array $users = [];
 

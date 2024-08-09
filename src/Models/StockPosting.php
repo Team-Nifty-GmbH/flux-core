@@ -6,6 +6,7 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Cache;
 
 class StockPosting extends Model
 {
-    use Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     protected $guarded = [
         'id',

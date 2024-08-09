@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class Email extends Model
 {
-    use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     protected $guarded = [
         'id',

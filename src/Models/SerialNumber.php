@@ -10,6 +10,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +21,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class SerialNumber extends Model implements HasMedia, InteractsWithDataTables
 {
     use Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasUserModification,
-        HasUuid, InteractsWithMedia, Searchable;
+        HasUuid, InteractsWithMedia, LogsActivity, Searchable;
 
     protected $guarded = [
         'id',

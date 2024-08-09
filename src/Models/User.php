@@ -9,6 +9,7 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasCart;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\HasWidgets;
 use FluxErp\Traits\InteractsWithMedia;
@@ -41,8 +42,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 class User extends Authenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, CacheModelQueries, Commentable, Filterable, HasApiTokens, HasCalendars, HasCart,
-        HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles, HasUuid,
-        HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
+        HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles,
+        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable,
+        SoftDeletes;
 
     protected $hidden = [
         'password',
