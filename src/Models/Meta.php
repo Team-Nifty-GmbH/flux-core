@@ -50,8 +50,6 @@ class Meta extends Model
 
     /**
      * Set forced type to be used.
-     *
-     * @param  ?string  $value
      */
     public function forceType(?string $value): self
     {
@@ -100,8 +98,6 @@ class Meta extends Model
 
     /**
      * Retrieve the underlying serialized value.
-     *
-     * @return ?string
      */
     public function getRawValueAttribute(): ?string
     {
@@ -135,8 +131,6 @@ class Meta extends Model
     /**
      * Query records where value equals the serialized version of the given value.
      * If `$type` is omited the type will be taken from the data type registry.
-     *
-     * @param  ?string  $type
      */
     public function scopeWhereValue(Builder $query, mixed $value, mixed $operator = '=', ?string $type = null): void
     {
@@ -156,7 +150,6 @@ class Meta extends Model
      * If `$type` is omited the type will be taken from the data type registry.
      *
      * @param  Builder<Meta>  $query
-     * @param  ?string  $type
      */
     public function scopeWhereValueIn(Builder $query, array $values, ?string $type = null): void
     {

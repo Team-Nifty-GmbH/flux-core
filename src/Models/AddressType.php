@@ -5,7 +5,6 @@ namespace FluxErp\Models;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasTranslations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
@@ -15,15 +14,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AddressType extends Model
 {
-    use CacheModelQueries, HasClientAssignment, HasPackageFactory, HasTranslations, HasUserModification, HasUuid,
-        SoftDeletes;
+    use CacheModelQueries, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
-    ];
-
-    public array $translatable = [
-        'name',
     ];
 
     protected function casts(): array

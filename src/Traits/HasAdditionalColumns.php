@@ -329,8 +329,6 @@ trait HasAdditionalColumns
 
     /**
      * Get the forced typecast for the given meta key if there is any.
-     *
-     * @return ?string
      */
     public function getCastForMetaKey(string $key): ?string
     {
@@ -553,8 +551,6 @@ trait HasAdditionalColumns
 
     /**
      * Find current Meta model for the given key.
-     *
-     * @return ?Meta
      */
     public function findMeta(string $key): ?Meta
     {
@@ -689,8 +685,6 @@ trait HasAdditionalColumns
     /**
      * Reset the meta changes collection for the given key.
      * Resets the entire collection if nothing is passed.
-     *
-     * @param  ?string  $key
      */
     public function resetMetaChanges(?string $key = null): Collection
     {

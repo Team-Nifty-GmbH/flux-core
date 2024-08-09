@@ -66,12 +66,6 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         'id',
     ];
 
-    public array $translatable = [
-        'header',
-        'footer',
-        'logistic_note',
-    ];
-
     public static string $iconName = 'shopping-bag';
 
     protected static function booted(): void

@@ -5,7 +5,6 @@ namespace FluxErp\Models;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasTranslations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
@@ -18,17 +17,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class DocumentType extends Model
 {
-    use Filterable, HasClientAssignment, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, SoftDeletes;
+    use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
-    ];
-
-    public $translatable = [
-        'name',
-        'description',
-        'additional_header',
-        'additional_footer',
     ];
 
     protected function casts(): array
