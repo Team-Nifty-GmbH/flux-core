@@ -15,7 +15,6 @@ return new class() extends Migration
         });
         DB::table('address_types')->update([
             'name_migration' => DB::raw("
-            NULLIF(
                 SUBSTRING(
                     COALESCE(
                         NULLIF(
@@ -39,9 +38,7 @@ return new class() extends Migration
                     ),
                     1,
                     255
-                ),
-                ''
-            )
+                )
         "),
         ]);
         Schema::table('address_types', function (Blueprint $table) {
@@ -55,7 +52,6 @@ return new class() extends Migration
         });
         DB::table('categories')->update([
             'name_migration' => DB::raw("
-            NULLIF(
                 SUBSTRING(
                     COALESCE(
                         NULLIF(
@@ -79,9 +75,7 @@ return new class() extends Migration
                     ),
                     1,
                     255
-                ),
-                ''
-            )
+                )
         "),
         ]);
         Schema::table('categories', function (Blueprint $table) {
@@ -95,7 +89,6 @@ return new class() extends Migration
         });
         DB::table('countries')->update([
             'name_migration' => DB::raw("
-            NULLIF(
                 SUBSTRING(
                     COALESCE(
                         NULLIF(
@@ -119,9 +112,7 @@ return new class() extends Migration
                     ),
                     1,
                     255
-                ),
-                ''
-            )
+                )
         "),
         ]);
         Schema::table('countries', function (Blueprint $table) {
@@ -135,7 +126,6 @@ return new class() extends Migration
         });
         DB::table('country_regions')->update([
             'name_migration' => DB::raw("
-            NULLIF(
                 SUBSTRING(
                     COALESCE(
                         NULLIF(
@@ -159,9 +149,7 @@ return new class() extends Migration
                     ),
                     1,
                     255
-                ),
-                ''
-            )
+                )
         "),
         ]);
         Schema::table('country_regions', function (Blueprint $table) {
@@ -175,7 +163,6 @@ return new class() extends Migration
         });
         DB::table('languages')->update([
             'name_migration' => DB::raw("
-            NULLIF(
                 SUBSTRING(
                     COALESCE(
                         NULLIF(
@@ -199,9 +186,7 @@ return new class() extends Migration
                     ),
                     1,
                     255
-                ),
-                ''
-            )
+                )
         "),
         ]);
         Schema::table('languages', function (Blueprint $table) {
@@ -234,8 +219,7 @@ return new class() extends Migration
                         )
                     ),
                     'null'
-                ),
-                NULL
+                )
             )
         "),
             'footer_migration' => DB::raw("
@@ -256,8 +240,7 @@ return new class() extends Migration
                         )
                     ),
                     'null'
-                ),
-                NULL
+                )
             )
         "),
             'logistic_note_migration' => DB::raw("
@@ -278,8 +261,7 @@ return new class() extends Migration
                         )
                     ),
                     'null'
-                ),
-                NULL
+                )
             )
         "),
         ]);
@@ -302,7 +284,6 @@ return new class() extends Migration
         });
         DB::table('payment_types')->update([
             'name_migration' => DB::raw("
-            NULLIF(
                 SUBSTRING(
                     COALESCE(
                         NULLIF(
@@ -326,38 +307,29 @@ return new class() extends Migration
                     ),
                     1,
                     255
-                ),
-                ''
-            )
+                )
         "),
             'description_migration' => DB::raw("
-            NULLIF(
-                SUBSTRING(
-                    COALESCE(
-                        NULLIF(
-                            JSON_UNQUOTE(
-                                JSON_EXTRACT(
-                                    description,
-                                    CONCAT(
-                                        '$.',
-                                        JSON_UNQUOTE(
-                                            JSON_EXTRACT(
-                                                JSON_KEYS(description),
-                                                '$[0]'
-                                            )
+                COALESCE(
+                    NULLIF(
+                        JSON_UNQUOTE(
+                            JSON_EXTRACT(
+                                description,
+                                CONCAT(
+                                    '$.',
+                                    JSON_UNQUOTE(
+                                        JSON_EXTRACT(
+                                            JSON_KEYS(description),
+                                            '$[0]'
                                         )
                                     )
                                 )
-                            ),
-                            'null'
+                            )
                         ),
-                        ''
+                        'null'
                     ),
-                    1,
-                    255
-                ),
-                ''
-            )
+                    ''
+                )
         "),
         ]);
         Schema::table('payment_types', function (Blueprint $table) {
@@ -373,7 +345,6 @@ return new class() extends Migration
         });
         DB::table('product_option_groups')->update([
             'name_migration' => DB::raw("
-            NULLIF(
                 SUBSTRING(
                     COALESCE(
                         NULLIF(
@@ -397,9 +368,7 @@ return new class() extends Migration
                     ),
                     1,
                     255
-                ),
-                ''
-            )
+                )
         "),
         ]);
         Schema::table('product_option_groups', function (Blueprint $table) {
@@ -413,7 +382,6 @@ return new class() extends Migration
         });
         DB::table('product_options')->update([
             'name_migration' => DB::raw("
-            NULLIF(
                 SUBSTRING(
                     COALESCE(
                         NULLIF(
@@ -437,9 +405,7 @@ return new class() extends Migration
                     ),
                     1,
                     255
-                ),
-                ''
-            )
+                )
         "),
         ]);
         Schema::table('product_options', function (Blueprint $table) {
@@ -453,7 +419,6 @@ return new class() extends Migration
         });
         DB::table('product_properties')->update([
             'name_migration' => DB::raw("
-            NULLIF(
                 SUBSTRING(
                     COALESCE(
                         NULLIF(
@@ -477,9 +442,7 @@ return new class() extends Migration
                     ),
                     1,
                     255
-                ),
-                ''
-            )
+                )
         "),
         ]);
         Schema::table('product_properties', function (Blueprint $table) {
@@ -494,7 +457,6 @@ return new class() extends Migration
         });
         DB::table('products')->update([
             'name_migration' => DB::raw("
-            NULLIF(
                 SUBSTRING(
                     COALESCE(
                         NULLIF(
@@ -518,9 +480,7 @@ return new class() extends Migration
                     ),
                     1,
                     255
-                ),
-                ''
-            )
+                )
         "),
             'description_migration' => DB::raw("
             COALESCE(
@@ -540,8 +500,7 @@ return new class() extends Migration
                         )
                     ),
                     'null'
-                ),
-                NULL
+                )
             )
         "),
         ]);
@@ -560,7 +519,6 @@ return new class() extends Migration
         });
         DB::table('ticket_types')->update([
             'name_migration' => DB::raw("
-            NULLIF(
                 SUBSTRING(
                     COALESCE(
                         NULLIF(
@@ -584,9 +542,7 @@ return new class() extends Migration
                     ),
                     1,
                     255
-                ),
-                ''
-            )
+                )
         "),
         ]);
         Schema::table('ticket_types', function (Blueprint $table) {
@@ -600,7 +556,6 @@ return new class() extends Migration
         });
         DB::table('work_time_types')->update([
             'name_migration' => DB::raw("
-            NULLIF(
                 SUBSTRING(
                     COALESCE(
                         NULLIF(
@@ -624,9 +579,7 @@ return new class() extends Migration
                     ),
                     1,
                     255
-                ),
-                ''
-            )
+                )
         "),
         ]);
         Schema::table('work_time_types', function (Blueprint $table) {
