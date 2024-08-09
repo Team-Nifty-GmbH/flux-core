@@ -479,6 +479,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                         $totalVats->get($this->shipping_costs_vat_rate_percentage)['total_vat_price'] ?? 0,
                         9
                     ),
+                    'total_net_price' => bcadd(
+                        $this->shipping_costs_net_price,
+                        $totalVats->get($this->shipping_costs_vat_rate_percentage)['total_net_price'] ?? 0,
+                        9
+                    ),
                     'vat_rate_percentage' => $this->shipping_costs_vat_rate_percentage,
                 ]
             );
