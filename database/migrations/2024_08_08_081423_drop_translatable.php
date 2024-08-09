@@ -39,7 +39,7 @@ return new class() extends Migration
                     1,
                     255
                 )
-        "),
+            "),
         ]);
         Schema::table('address_types', function (Blueprint $table) {
             $table->dropColumn('name');
@@ -76,7 +76,7 @@ return new class() extends Migration
                     1,
                     255
                 )
-        "),
+            "),
         ]);
         Schema::table('categories', function (Blueprint $table) {
             $table->dropColumn('name');
@@ -113,7 +113,7 @@ return new class() extends Migration
                     1,
                     255
                 )
-        "),
+            "),
         ]);
         Schema::table('countries', function (Blueprint $table) {
             $table->dropColumn('name');
@@ -150,7 +150,7 @@ return new class() extends Migration
                     1,
                     255
                 )
-        "),
+            "),
         ]);
         Schema::table('country_regions', function (Blueprint $table) {
             $table->dropColumn('name');
@@ -187,7 +187,7 @@ return new class() extends Migration
                     1,
                     255
                 )
-        "),
+            "),
         ]);
         Schema::table('languages', function (Blueprint $table) {
             $table->dropColumn('name');
@@ -202,7 +202,6 @@ return new class() extends Migration
         });
         DB::table('orders')->update([
             'header_migration' => DB::raw("
-            COALESCE(
                 NULLIF(
                     JSON_UNQUOTE(
                         JSON_EXTRACT(
@@ -220,10 +219,8 @@ return new class() extends Migration
                     ),
                     'null'
                 )
-            )
-        "),
+            "),
             'footer_migration' => DB::raw("
-            COALESCE(
                 NULLIF(
                     JSON_UNQUOTE(
                         JSON_EXTRACT(
@@ -241,10 +238,8 @@ return new class() extends Migration
                     ),
                     'null'
                 )
-            )
-        "),
+            "),
             'logistic_note_migration' => DB::raw("
-            COALESCE(
                 NULLIF(
                     JSON_UNQUOTE(
                         JSON_EXTRACT(
@@ -262,8 +257,7 @@ return new class() extends Migration
                     ),
                     'null'
                 )
-            )
-        "),
+            "),
         ]);
         Schema::table('orders', function (Blueprint $table) {
             $table->dropColumn('header');
@@ -272,9 +266,6 @@ return new class() extends Migration
             $table->renameColumn('header_migration', 'header');
             $table->renameColumn('footer_migration', 'footer');
             $table->renameColumn('logistic_note_migration', 'logistic_note');
-            $table->longText('header')->nullable()->change();
-            $table->longText('footer')->nullable()->change();
-            $table->longText('logistic_note')->nullable()->change();
         });
 
         // Payment Types table
@@ -308,29 +299,26 @@ return new class() extends Migration
                     1,
                     255
                 )
-        "),
+            "),
             'description_migration' => DB::raw("
-                COALESCE(
-                    NULLIF(
-                        JSON_UNQUOTE(
-                            JSON_EXTRACT(
-                                description,
-                                CONCAT(
-                                    '$.',
-                                    JSON_UNQUOTE(
-                                        JSON_EXTRACT(
-                                            JSON_KEYS(description),
-                                            '$[0]'
-                                        )
+                NULLIF(
+                    JSON_UNQUOTE(
+                        JSON_EXTRACT(
+                            description,
+                            CONCAT(
+                                '$.',
+                                JSON_UNQUOTE(
+                                    JSON_EXTRACT(
+                                        JSON_KEYS(description),
+                                        '$[0]'
                                     )
                                 )
                             )
-                        ),
-                        'null'
+                        )
                     ),
-                    ''
+                    'null'
                 )
-        "),
+            "),
         ]);
         Schema::table('payment_types', function (Blueprint $table) {
             $table->dropColumn('name');
@@ -369,7 +357,7 @@ return new class() extends Migration
                     1,
                     255
                 )
-        "),
+            "),
         ]);
         Schema::table('product_option_groups', function (Blueprint $table) {
             $table->dropColumn('name');
@@ -406,7 +394,7 @@ return new class() extends Migration
                     1,
                     255
                 )
-        "),
+            "),
         ]);
         Schema::table('product_options', function (Blueprint $table) {
             $table->dropColumn('name');
@@ -443,7 +431,7 @@ return new class() extends Migration
                     1,
                     255
                 )
-        "),
+            "),
         ]);
         Schema::table('product_properties', function (Blueprint $table) {
             $table->dropColumn('name');
@@ -452,38 +440,34 @@ return new class() extends Migration
 
         // Products table
         Schema::table('products', function (Blueprint $table) {
-            $table->string('name_migration')->after('name');
+            $table->string('name_migration')->nullable()->after('name');
             $table->longText('description_migration')->nullable()->after('description');
         });
         DB::table('products')->update([
             'name_migration' => DB::raw("
                 SUBSTRING(
-                    COALESCE(
-                        NULLIF(
-                            JSON_UNQUOTE(
-                                JSON_EXTRACT(
-                                    name,
-                                    CONCAT(
-                                        '$.',
-                                        JSON_UNQUOTE(
-                                            JSON_EXTRACT(
-                                                JSON_KEYS(name),
-                                                '$[0]'
-                                            )
+                    NULLIF(
+                        JSON_UNQUOTE(
+                            JSON_EXTRACT(
+                                name,
+                                CONCAT(
+                                    '$.',
+                                    JSON_UNQUOTE(
+                                        JSON_EXTRACT(
+                                            JSON_KEYS(name),
+                                            '$[0]'
                                         )
                                     )
                                 )
-                            ),
-                            'null'
+                            )
                         ),
-                        ''
+                        'null'
                     ),
                     1,
                     255
                 )
-        "),
+            "),
             'description_migration' => DB::raw("
-            COALESCE(
                 NULLIF(
                     JSON_UNQUOTE(
                         JSON_EXTRACT(
@@ -501,16 +485,13 @@ return new class() extends Migration
                     ),
                     'null'
                 )
-            )
-        "),
+            "),
         ]);
         Schema::table('products', function (Blueprint $table) {
             $table->dropColumn('name');
             $table->dropColumn('description');
             $table->renameColumn('name_migration', 'name');
             $table->renameColumn('description_migration', 'description');
-            $table->string('name')->nullable()->change();
-            $table->longText('description')->nullable()->change();
         });
 
         // Ticket Types table
@@ -543,7 +524,7 @@ return new class() extends Migration
                     1,
                     255
                 )
-        "),
+            "),
         ]);
         Schema::table('ticket_types', function (Blueprint $table) {
             $table->dropColumn('name');
@@ -580,7 +561,7 @@ return new class() extends Migration
                     1,
                     255
                 )
-        "),
+            "),
         ]);
         Schema::table('work_time_types', function (Blueprint $table) {
             $table->dropColumn('name');
@@ -612,7 +593,7 @@ return new class() extends Migration
             'description' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', description)"),
         ]);
         Schema::table('products', function (Blueprint $table) {
-            $table->json('name')->change();
+            $table->json('name')->nullable()->change();
             $table->json('description')->nullable()->change();
         });
 
@@ -669,7 +650,7 @@ return new class() extends Migration
         ]);
         Schema::table('order_types', function (Blueprint $table) {
             $table->json('name')->change();
-            $table->json('description')->change();
+            $table->json('description')->nullable()->change();
         });
 
         // Languages table
