@@ -38,6 +38,16 @@
             </div>
         @show
     </x-card>
+    <x-card class="space-y-2.5" :title="__('Product Properties')">
+        @section('product-properties')
+            <x-button
+                primary
+                x-show="edit"
+                :label="__('Add')"
+                wire:click="addProductProperties()"
+            />
+        @show
+    </x-card>
     <x-card class="flex flex-col gap-1.5" :title="__('Assignment')">
         <x-select
             multiselect

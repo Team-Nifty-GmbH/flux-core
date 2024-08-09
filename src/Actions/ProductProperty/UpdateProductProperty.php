@@ -32,12 +32,4 @@ class UpdateProductProperty extends FluxAction
 
         return $productProperty->withoutRelations()->fresh();
     }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(ProductProperty::class));
-
-        $this->data = $validator->validate();
-    }
 }

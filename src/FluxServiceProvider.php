@@ -515,6 +515,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.address-types');
                 Menu::register(route: 'settings.categories');
                 Menu::register(route: 'settings.product-option-groups');
+                Menu::register(route: 'settings.product-properties');
                 Menu::register(route: 'settings.clients');
                 Menu::register(route: 'settings.bank-connections');
                 Menu::register(route: 'settings.countries');
