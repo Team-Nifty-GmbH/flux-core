@@ -25,14 +25,14 @@ trait HasUserModification
 
     public function setCreatedAt($value): static
     {
-        $this->{$this->getCreatedByColumn()} = auth()->user()->getMorphClass() . ':' . auth()->id();
+        $this->{$this->getCreatedByColumn()} = auth()->user();
 
         return parent::setCreatedAt($value);
     }
 
     public function setUpdatedAt($value): static
     {
-        $this->{$this->getUpdatedByColumn()} = auth()->user()->getMorphClass() . ':' . auth()->id();
+        $this->{$this->getUpdatedByColumn()} = auth()->user();
 
         return parent::setUpdatedAt($value);
     }
