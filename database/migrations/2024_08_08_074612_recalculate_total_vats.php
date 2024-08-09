@@ -37,15 +37,13 @@ return new class() extends Migration
                             FROM order_positions op
                             JOIN orders o ON o.id = op.order_id
                             WHERE o.id = orders.id
+                            WHERE op.is_alternative != 1
                             GROUP BY op.order_id, op.vat_rate_percentage
                         ) as vat_data
                     )
-                ")
+                "),
             ]);
     }
 
-    public function down(): void
-    {
-
-    }
+    public function down(): void {}
 };
