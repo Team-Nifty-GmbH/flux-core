@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
@@ -18,7 +19,7 @@ use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class SerialNumberRange extends Model
 {
-    use Filterable, HasClientAssignment, HasPackageFactory, HasUuid, LogsActivity, SoftDeletes;
+    use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     protected $guarded = [
         'id',

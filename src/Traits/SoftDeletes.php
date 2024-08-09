@@ -26,9 +26,13 @@ trait SoftDeletes
 
     protected function runSoftDelete(): void
     {
-        $this->{$this->getDeletedByColumn()} = auth()->user()->getMorphClass() . ':' . auth()->id();
-
         $this->runSoftDeleteBase();
+        $query = $this->setKeysForSaveQuery($this->newModelQuery());
+
+        $this->{$this->getDeletedByColumn()} = auth()->user();
+        $this->update([
+            $this->getDeletedByColumn() => auth()->user(),
+        ]);
     }
 
     public function restore(): bool

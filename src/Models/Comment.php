@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
@@ -18,7 +19,8 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Comment extends Model implements HasMedia
 {
-    use BroadcastsEvents, HasPackageFactory, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes;
+    use BroadcastsEvents, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+        SoftDeletes;
 
     protected $appends = [
         'user',

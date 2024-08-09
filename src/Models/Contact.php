@@ -14,6 +14,7 @@ use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasSerialNumberRange;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Lockable;
@@ -36,8 +37,8 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 class Contact extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use BroadcastsEvents, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
-        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUuid,
-        InteractsWithMedia, Lockable, LogsActivity, Printable, SoftDeletes;
+        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
+        HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable, SoftDeletes;
 
     protected $guarded = [
         'id',

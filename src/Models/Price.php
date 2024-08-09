@@ -6,6 +6,7 @@ use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Price extends Model
 {
-    use HasFrontendAttributes, HasPackageFactory, HasUuid, LogsActivity, SoftDeletes;
+    use HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     protected $appends = [
         'base_price',

@@ -12,6 +12,7 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
@@ -33,8 +34,8 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasPackageFactory, HasStates, HasTags, HasUuid, InteractsWithMedia, LogsActivity, Searchable,
-        SoftDeletes, Trackable;
+        HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+        Searchable, SoftDeletes, Trackable;
 
     protected $guarded = [
         'id',

@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTranslations;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
@@ -16,7 +17,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class PaymentNotice extends Model
 {
-    use HasClientAssignment, HasPackageFactory, HasTranslations, HasUuid, LogsActivity, SoftDeletes;
+    use HasClientAssignment, HasPackageFactory, HasTranslations, HasUserModification, HasUuid, LogsActivity,
+        SoftDeletes;
 
     protected $guarded = [
         'id',

@@ -4,6 +4,7 @@ namespace FluxErp\Casts;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class MorphTo implements CastsAttributes
 {
@@ -17,7 +18,11 @@ class MorphTo implements CastsAttributes
 
         $model = morph_to(type: $value, returnBuilder: true);
 
-        return $this->value ? $model->value($this->value) : $model->first();
+        return Cache::remember(
+            'morph_to:',
+            86400,
+            fn () => $this->value && $model ? $model->value($this->value) : $model?->first()
+        );
     }
 
     public function set(Model $model, string $key, mixed $value, array $attributes): ?string

@@ -14,6 +14,7 @@ use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasSerialNumberRange;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Lockable;
@@ -34,8 +35,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Product extends Model implements HasMedia, InteractsWithDataTables
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
-        HasPackageFactory, HasSerialNumberRange, HasTags, HasUuid, InteractsWithMedia, Lockable, LogsActivity,
-        Searchable, SoftDeletes;
+        HasPackageFactory, HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable,
+        LogsActivity, Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',
