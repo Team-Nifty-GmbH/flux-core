@@ -194,6 +194,65 @@ return new class() extends Migration
             $table->renameColumn('name_migration', 'name');
         });
 
+        // Order Types table
+        Schema::table('order_types', function (Blueprint $table) {
+            $table->string('name_migration')->after('name');
+            $table->string('description_migration')->nullable()->after('description');
+        });
+        DB::table('order_types')->update([
+            'name_migration' => DB::raw("
+                SUBSTRING(
+                    COALESCE(
+                        NULLIF(
+                            JSON_UNQUOTE(
+                                JSON_EXTRACT(
+                                    name,
+                                    CONCAT(
+                                        '$.',
+                                        JSON_UNQUOTE(
+                                            JSON_EXTRACT(
+                                                JSON_KEYS(name),
+                                                '$[0]'
+                                            )
+                                        )
+                                    )
+                                )
+                            ),
+                            'null'
+                        ),
+                        ''
+                    ),
+                    1,
+                    255
+                )
+            "),
+            'description_migration' => DB::raw("
+                NULLIF(
+                    JSON_UNQUOTE(
+                        JSON_EXTRACT(
+                            description,
+                            CONCAT(
+                                '$.',
+                                JSON_UNQUOTE(
+                                    JSON_EXTRACT(
+                                        JSON_KEYS(description),
+                                        '$[0]'
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    'null'
+                )
+            "),
+        ]);
+        Schema::table('order_types', function (Blueprint $table) {
+            $table->dropColumn('name');
+            $table->dropColumn('description');
+            $table->renameColumn('name_migration', 'name');
+            $table->renameColumn('description_migration', 'description');
+        });
+
         // Orders table
         Schema::table('orders', function (Blueprint $table) {
             $table->longText('header_migration')->nullable()->after('header');
