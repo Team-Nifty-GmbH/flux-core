@@ -19,7 +19,7 @@ class MorphTo implements CastsAttributes
         $model = morph_to(type: $value, returnBuilder: true);
 
         return Cache::remember(
-            'morph_to:',
+            'morph_to:' . $value . ($this->value ? ':' . $this->value : ''),
             86400,
             fn () => $this->value && $model ? $model->value($this->value) : $model?->first()
         );

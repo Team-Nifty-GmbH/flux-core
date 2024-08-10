@@ -61,7 +61,7 @@ class Comment extends Model implements HasMedia
                 : null;
         }
 
-        return Attribute::get(fn() => $userData);
+        return Attribute::get(fn () => $userData);
     }
 
     public static function restoring($callback): void

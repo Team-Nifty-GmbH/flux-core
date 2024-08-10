@@ -30,9 +30,10 @@ trait SoftDeletes
         $this->runSoftDeleteBase();
         $query = $this->setKeysForSaveQuery($this->newModelQuery());
 
-        $this->{$this->getDeletedByColumn()} = auth()->user();
         $query->update([
-            $this->getDeletedByColumn() => auth()->user(),
+            $this->getDeletedByColumn() => auth()->user()
+                ? auth()->user()->getMorphClass() . ':' . auth()->user()->getKey()
+                : null,
         ]);
     }
 
