@@ -147,7 +147,14 @@
             @foreach($model->total_vats ?? [] as $vat)
                 <tr>
                     <td class="text-right">
-                        {{ __('Plus ') }} {{ format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT) }}
+                        {{ __(
+                                'Plus :percentage VAT from :total_net',
+                                [
+                                    'percentage' => format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT),
+                                    'total_net' => $formatter->formatCurrency($vat['total_net_price'], $currency)
+                                ]
+                            )
+                        }}
                     </td>
                     <td class="text-right w-0 whitespace-nowrap pl-12">
                         {{ $formatter->formatCurrency($vat['total_vat_price'], $currency) }}

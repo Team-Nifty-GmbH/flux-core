@@ -35,6 +35,7 @@ class UpdateClientRuleset extends FluxRuleset
             'email' => 'email|nullable',
             'website' => 'string|nullable',
             'creditor_identifier' => 'string|nullable',
+            'vat_id' => 'string|nullable',
             'sepa_text' => 'string|nullable',
             'opening_hours' => 'array|nullable',
             'terms_and_conditions' => 'string|nullable',
