@@ -25,7 +25,7 @@ class ChangeNameToJsonOnCategoriesTable extends Migration
         });
     }
 
-    private function migrateName()
+    private function migrateName(): void
     {
         $categories = DB::table('categories')->get()->toArray();
 
@@ -37,7 +37,7 @@ class ChangeNameToJsonOnCategoriesTable extends Migration
         DB::table('categories')->upsert($categories, ['id']);
     }
 
-    private function rollbackName()
+    private function rollbackName(): void
     {
         $categories = DB::table('categories')->get()->toArray();
 

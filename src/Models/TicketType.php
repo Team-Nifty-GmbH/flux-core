@@ -23,10 +23,6 @@ class TicketType extends Model
         'id',
     ];
 
-    public array $translatable = [
-        'name',
-    ];
-
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_ticket_type');
