@@ -738,12 +738,12 @@
                             <div class="flex gap-0.5">
                                 <div class="">{{ __('Created At') }}:</div>
                                 <div x-text="window.formatters.datetime($wire.order.created_at)"></div>
-                                <div x-text="$wire.order.created_by?.name || '{{ __('Unknown') }}'"></div>
+                                <div x-text="$wire.order.created_by || '{{ __('Unknown') }}'"></div>
                             </div>
                             <div class="flex gap-0.5">
                                 <div class="">{{ __('Updated At') }}:</div>
                                 <div x-text="window.formatters.datetime($wire.order.updated_at)"></div>
-                                <div x-text="$wire.order.updated_by?.name || '{{ __('Unknown') }}'"></div>
+                                <div x-text="$wire.order.updated_by || '{{ __('Unknown') }}'"></div>
                             </div>
                         </div>
                     </x-card>

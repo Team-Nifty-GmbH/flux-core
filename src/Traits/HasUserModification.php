@@ -4,6 +4,7 @@ namespace FluxErp\Traits;
 
 use FluxErp\Casts\MorphTo;
 use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @mixin \Illuminate\Database\Eloquent\Model
@@ -45,5 +46,19 @@ trait HasUserModification
     public function getCreatedByColumn(): string
     {
         return static::CREATED_BY;
+    }
+
+    public function getCreatedBy(): ?Model
+    {
+        $user = $this->getRawOriginal($this->getCreatedByColumn());
+
+        return $user ? morph_to($user) : null;
+    }
+
+    public function getUpdatedBy(): ?Model
+    {
+        $user = $this->getRawOriginal($this->getUpdatedByColumn());
+
+        return $user ? morph_to($user) : null;
     }
 }

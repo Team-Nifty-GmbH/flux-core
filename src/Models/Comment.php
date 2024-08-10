@@ -51,10 +51,17 @@ class Comment extends Model implements HasMedia
 
     public function user(): Attribute
     {
-        $user = $this->created_by?->only('id', 'name', 'email', 'user_code');
-        $user['avatar_url'] = $this->created_by?->getAvatarUrl();
+        $user = $this->getCreatedBy();
 
-        return Attribute::get(fn () => $user);
+        $userData = null;
+        if ($user) {
+            $userData = $user->only('id', 'name', 'email', 'user_code');
+            $userData['avatar_url'] = method_exists($user, 'getAvatarUrl')
+                ? $user->getAvatarUrl()
+                : null;
+        }
+
+        return Attribute::get(fn() => $userData);
     }
 
     public static function restoring($callback): void

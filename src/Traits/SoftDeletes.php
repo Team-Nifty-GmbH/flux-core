@@ -3,6 +3,7 @@
 namespace FluxErp\Traits;
 
 use FluxErp\Casts\MorphTo;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes as BaseSoftDeletes;
 
 trait SoftDeletes
@@ -45,5 +46,12 @@ trait SoftDeletes
     public function getDeletedByColumn(): string
     {
         return static::DELETED_BY;
+    }
+
+    public function getDeletedBy(): ?Model
+    {
+        $user = $this->getRawOriginal($this->getDeletedByColumn());
+
+        return $user ? morph_to($user) : null;
     }
 }
