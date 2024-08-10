@@ -24,8 +24,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Category extends Model implements InteractsWithDataTables, Sortable
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification,
-        HasUuid, Searchable, SortableTrait;
+    use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification, HasUuid, Searchable,
+        SortableTrait;
 
     protected $guarded = [
         'id',
@@ -33,10 +33,6 @@ class Category extends Model implements InteractsWithDataTables, Sortable
 
     protected $hidden = [
         'pivot',
-    ];
-
-    public $translatable = [
-        'name',
     ];
 
     public array $sortable = [

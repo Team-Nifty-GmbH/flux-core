@@ -7,7 +7,6 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasTranslations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
@@ -17,16 +16,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PaymentType extends Model
 {
-    use CacheModelQueries, Filterable, HasClientAssignment, HasDefault, HasPackageFactory, HasTranslations,
-        HasUserModification, HasUuid, SoftDeletes;
+    use CacheModelQueries, Filterable, HasClientAssignment, HasDefault, HasPackageFactory, HasUserModification, HasUuid,
+        SoftDeletes;
 
     protected $guarded = [
         'id',
-    ];
-
-    public $translatable = [
-        'name',
-        'description',
     ];
 
     protected function casts(): array
