@@ -3,130 +3,102 @@
     $currency = $model->currency->iso;
     $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
 @endphp
-<x-print.first-page-header :address="$model->addressInvoice">
-    <x-slot:right-block>
-        <div class="inline-block">
-            @section('first-page-right-block')
-                <div class="inline-block">
-                    @section('first-page-right-block.labels')
-                        <div class="font-semibold">
-                            {{ __('Order no.') }}:
-                        </div>
-                        <div class="font-semibold">
-                            {{ __('Customer no.') }}:
-                        </div>
-                        <div class="font-semibold">
-                            {{ __('Order Date') }}:
-                        </div>
-                    @show
-                </div>
-                <div class="pl-6 text-right inline-block">
-                    @section('first-page-right-block.values')
-                        <div>
-                            {{ $model->order_number }}
-                        </div>
-                        <div>
-                            {{ $model->addressInvoice->contact->customer_number }}
-                        </div>
-                        <div>
-                            {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
-                        </div>
-                    @show
-                </div>
-            @show
-        </div>
-    </x-slot:right-block>
-</x-print.first-page-header>
-<main>
-    <div class="pt-10 pb-4 prose prose-xs">
-        {!! $model->header !!}
-    </div>
-    <div class="pb-6">
-        <table class="w-full table-auto text-xs">
-            <thead class="border-b-2 border-black">
-            <tr>
-                <th class="pr-8 text-left font-normal">
-                    {{ __('Pos.') }}
-                </th>
-                <th class="pr-8 text-left font-normal">
-                    {{ __('Name') }}
-                </th>
-                <th class="pr-8 text-center font-normal">
-                    {{ __('Amount') }}
-                </th>
-                <th class="text-right font-normal uppercase">
-                    {{ __('Sum') }}
-                </th>
-            </tr>
-            </thead>
-            @foreach ($model->orderPositions as $position)
-                <tbody class="bg-uneven">
-                <tr>
-                    <td class="pos py-4 pr-8 align-top">
-                        {{ $position->total_net_price ? $position->slug_position : '' }}
-                    </td>
-                    <td class="py-4 pr-8 align-top" style="padding-left: {{ $position->depth * 15 }}px">
-                        @if($position->is_alternative)
-                            <x-badge color="warning" class="mb-2">
-                                {{ __('Alternative') }}
-                            </x-badge>
-                        @endif
-                        <p class="font-italic text-xs">
-                            {{ $position->product_number }}
-                        </p>
-                        <p class="font-semibold">
-                            {{ $position->name }}
-                        </p>
-                        <div class="prose prose-xs">
-                            {!! $position->description !!}
-                        </div>
-                    </td>
-                    <td class="py-4 pr-8 text-center align-top">
-                        {{ format_number($position->amount) }}
-                    </td>
-                    <td class="py-4 text-right align-top">
-                        @if($position->total_base_net_price > $position->total_net_price)
-                            <div class="text-xs whitespace-nowrap">
-                                <div class="line-through">
-                                    {{ $formatter->formatCurrency($isNet ? $position->total_base_net_price : $position->total_base_gross_price, $currency) }}
-                                </div>
-                                <div>
-                                    -{{ format_number(diff_percentage($position->total_base_net_price, $position->total_net_price), NumberFormatter::PERCENT) }}
-                                </div>
+@section('first-page-header')
+    <x-flux::print.first-page-header :address="$model->addressInvoice">
+        <x-slot:right-block>
+            <div class="inline-block">
+                @section('first-page-right-block')
+                    <div class="inline-block">
+                        @section('first-page-right-block.labels')
+                            <div class="font-semibold">
+                                {{ __('Order no.') }}:
                             </div>
-                        @endif
-                        {{ $position->total_net_price ? $formatter->formatCurrency($isNet ? $position->total_net_price : $position->total_gross_price, $currency) : null }}
-                    </td>
-                </tr>
-                </tbody>
-            @endforeach
-        </table>
+                            <div class="font-semibold">
+                                {{ __('Customer no.') }}:
+                            </div>
+                            <div class="font-semibold">
+                                {{ __('Order Date') }}:
+                            </div>
+                        @show
+                    </div>
+                    <div class="pl-6 text-right inline-block">
+                        @section('first-page-right-block.values')
+                            <div>
+                                {{ $model->order_number }}
+                            </div>
+                            <div>
+                                {{ $model->addressInvoice->contact->customer_number }}
+                            </div>
+                            <div>
+                                {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
+                            </div>
+                        @show
+                    </div>
+                @show
+            </div>
+        </x-slot:right-block>
+    </x-flux::print.first-page-header>
+@show
+<main>
+    @section('header')
+        <div class="pt-10 pb-4 prose prose-xs">
+            {!! $model->header !!}
+        </div>
+    @show
+    <div class="pb-6">
+        @section('positions')
+            <table class="w-full table-auto text-xs">
+                <thead class="border-b-2 border-black">
+                @section('positions.header')
+                    <tr>
+                        <th class="pr-8 text-left font-normal">
+                            {{ __('Pos.') }}
+                        </th>
+                        <th class="pr-8 text-left font-normal">
+                            {{ __('Name') }}
+                        </th>
+                        <th class="pr-8 text-center font-normal">
+                            {{ __('Amount') }}
+                        </th>
+                        <th class="text-right font-normal uppercase">
+                            {{ __('Sum') }}
+                        </th>
+                    </tr>
+                @show
+                </thead>
+                @foreach ($model->orderPositions as $position)
+                    <x-flux::print.order.order-position :position="$position" :is-net="$isNet" :currency="$currency" :formatter="$formatter" />
+                @endforeach
+            </table>
+        @show
     </div>
     @if($summary)
-        <div class="pb-6">
-            <table class="w-full">
-                <tbody class="break-inside-avoid">
-                <tr>
-                    <td colspan="3" class="border-b border-black font-semibold">
-                        {{ __('Summary') }}
-                    </td>
-                </tr>
-                @foreach($summary as $summaryItem)
+        @section('summary')
+            <div class="pb-6">
+                <table class="w-full">
+                    <tbody class="break-inside-avoid">
                     <tr>
-                        <td>
-                            {{ $summaryItem->slug_position }}
-                        </td>
-                        <td class="whitespace-nowrap">
-                            {{ $summaryItem->name }}
-                        </td>
-                        <td class="text-right float-right">
-                            {{ $formatter->formatCurrency($summaryItem->total_net_price, $currency) }}
+                        <td colspan="3" class="border-b border-black font-semibold">
+                            {{ __('Summary') }}
                         </td>
                     </tr>
-                @endforeach
-                </tbody>
-            </table>
-        </div>
+                    @foreach($summary as $summaryItem)
+                        <tr>
+                            <td>
+                                {{ $summaryItem->slug_position }}
+                            </td>
+                            <td class="whitespace-nowrap">
+                                {{ $summaryItem->name }}
+                            </td>
+                            <td class="text-right float-right">
+                                {{ $formatter->formatCurrency($summaryItem->total_net_price, $currency) }}
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @show
     @endif
     @section('total')
         <table class="w-full pb-16 text-xs">
