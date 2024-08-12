@@ -70,18 +70,12 @@
         isFolder(level) {
             return level.hasOwnProperty('children') && ! level.hasOwnProperty('file_name');
         },
-        isDropping: false,
         isUploading: false,
         progress: 0,
         filesArray: $wire.entangle('filesArray', true),
         handleFileSelect(event) {
             if (event.target.files.length) {
                 this.uploadFiles(event.target.files, event)
-            }
-        },
-        handleFileDrop(event) {
-            if (event.dataTransfer.files.length > 0) {
-                this.uploadFiles(event.dataTransfer.files, event)
             }
         },
         uploadError(message) {
@@ -93,7 +87,7 @@
                 icon: 'error'
             });
         },
-        uploadSuccess(success, files) {
+        async uploadSuccess(success) {
             this.isUploading = false
             this.progress = 0
             this.showLevel(null, this.selectionProxy);
@@ -102,28 +96,15 @@
                 this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
             });
         },
-        uploadProgress(progress) {
-            this.progress = progress
-        },
-        uploadFiles(files, event) {
+        async uploadFiles(files) {
             this.isUploading = true;
-            let $this = this;
-            $wire.set('collection', this.selectionProxy.collection_name);
-            $wire.uploadMultiple('files', files,
-                function(success) {
-                    let uploadedFiles = event.target.files?.length ? event.target.files : event.dataTransfer.files;
-                    $this.uploadSuccess(success, uploadedFiles);
-                },
-                function(error) {
-                   $this.uploadError();
-                },
+            await $wire.set('collection', this.selectionProxy.collection_name);
+            await $wire.uploadMultiple('files', files,
+                this.uploadSuccess.bind(this),
+                this.uploadError.bind(this),
                 function(event) {
-                    $this.uploadProgress(event);
                 }
             )
-        },
-        removeUpload(index) {
-            $wire.removeUpload('files', index)
         },
         save() {
             $wire.save(this.selection).then(() => {
@@ -200,7 +181,7 @@
      x-on:folder-tree-select="treeSelect($event.detail)"
 >
     <div class="min-w-0 overflow-auto">
-        <ul class="flex flex-col gap-1" wire:ignore>
+        <ul class="flex flex-col gap-1">
             <template x-for="(level, i) in levels" :key="level.id">
                 <li x-html="renderLevel(level, i)"></li>
             </template>
@@ -238,7 +219,10 @@
                     <div class="w-full mb-4">
                         <input x-init="loadFilePond()" id="filepond-drop" type="file" />
                     </div>
-                    <x-button x-cloak x-show="isEmpty"  x-on:click="uploadSelectedFiles(selectionProxy.collection_name)" primary :label="__('Upload')" />
+                    <x-button x-show="isEmpty" x-cloak
+                              x-on:click="uploadFiles(selectedFiles.map((file)=>file.file))"
+                              primary
+                              :label="__('Upload')" />
                 </div>
             @endcan
         </div>

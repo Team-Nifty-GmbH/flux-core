@@ -15,16 +15,12 @@ export default function($wire, $ref, label) {
                 allowMultiple: true,
                 labelIdle: label,
                 onaddfile: (error, file) => {
-                    console.log(file);
                     this.selectedFiles.push(file);
                 },
                 onremovefile: (error, file) => {
                     this.selectedFiles = this.selectedFiles.filter((f) => f.id !== file.id);
-                }
+                },
             });
-
-        },
-        async uploadSelectedFiles(collectionName) {
 
         },
         get isEmpty() {
