@@ -12,7 +12,7 @@ class Invoice extends OrderView
 
     public function render(): View|Factory
     {
-        return view('flux::printing.order.invoice', [
+        return view('print::order.invoice', [
             'model' => $this->model,
             'summary' => $this->summary,
         ]);

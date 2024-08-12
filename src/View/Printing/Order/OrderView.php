@@ -58,7 +58,7 @@ class OrderView extends PrintableView
 
     public function render(): View|Factory
     {
-        return view('flux::printing.order.order', [
+        return view('print::order.order', [
             'model' => $this->model,
             'summary' => $this->summary,
         ]);

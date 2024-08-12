@@ -24,7 +24,7 @@ class PaymentReminderView extends PrintableView
 
     public function render(): View|Factory
     {
-        return view('flux::printing.payment-reminder.payment-reminder', [
+        return view('print::payment-reminder.payment-reminder', [
             'model' => $this->model,
             'text' => Blade::render(
                 html_entity_decode($this->model->getPaymentReminderText()?->reminder_body ?? ''),

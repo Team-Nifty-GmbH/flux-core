@@ -17,7 +17,7 @@ class Retoure extends OrderView
 
     public function render(): View|Factory
     {
-        return view('flux::printing.order.retoure', [
+        return view('print::order.retoure', [
             'model' => $this->model,
             'summary' => $this->summary,
         ]);

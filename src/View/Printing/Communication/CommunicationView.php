@@ -23,7 +23,7 @@ class CommunicationView extends PrintableView
 
     public function render(): View|Factory
     {
-        return view('flux::printing.communication.communication', [
+        return view('print::communication.communication', [
             'model' => $this->model,
         ]);
     }
