@@ -9,6 +9,7 @@ use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,7 +17,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
-use FluxErp\Traits\Scout\Searchable;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Spatie\ModelInfo\ModelInfo;
@@ -24,8 +24,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Category extends Model implements InteractsWithDataTables, Sortable
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification,
-        HasUuid, Searchable, SortableTrait;
+    use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification, HasUuid, Searchable,
+        SortableTrait;
 
     protected $guarded = [
         'id',
@@ -33,10 +33,6 @@ class Category extends Model implements InteractsWithDataTables, Sortable
 
     protected $hidden = [
         'pivot',
-    ];
-
-    public $translatable = [
-        'name',
     ];
 
     public array $sortable = [

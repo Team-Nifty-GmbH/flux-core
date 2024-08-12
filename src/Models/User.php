@@ -14,6 +14,7 @@ use FluxErp\Traits\HasWidgets;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\MonitorsQueue;
 use FluxErp\Traits\Notifiable;
+use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -28,7 +29,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
-use FluxErp\Traits\Scout\Searchable;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
@@ -216,7 +216,7 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
             $expires
         );
 
-        Mail::to($this->email)->queue(new MagicLoginLink($plaintext, $expires));
+        Mail::to($this->email)->queue(MagicLoginLink::make($plaintext, $expires));
     }
 
     public static function guardNames(): array

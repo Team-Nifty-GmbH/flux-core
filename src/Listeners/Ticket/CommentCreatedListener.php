@@ -14,7 +14,7 @@ class CommentCreatedListener
 {
     public function handle(Comment $comment): void
     {
-        if ($comment->model_type !== app(Ticket::class)->getMorphClass() || $comment->is_internal) {
+        if ($comment->model_type !== morph_alias(Ticket::class) || $comment->is_internal) {
             return;
         }
 

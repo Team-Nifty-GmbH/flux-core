@@ -30,6 +30,15 @@
             />
             <x-select
                 x-bind:disabled="! $wire.$parent.$parent.edit"
+                wire:model="contact.currency_id"
+                :clearable="false"
+                :label="__('Currency')"
+                :options="$currencies"
+                option-label="name"
+                option-value="id"
+            />
+            <x-select
+                x-bind:disabled="! $wire.$parent.$parent.edit"
                 :label="__('Commission Agent')"
                 wire:model="contact.agent_id"
                 option-value="id"

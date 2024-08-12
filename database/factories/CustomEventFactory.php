@@ -13,11 +13,6 @@ class CustomEventFactory extends Factory
 {
     protected $model = CustomEvent::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         $i = 0;

@@ -25,7 +25,7 @@ class CreateOrderPositionRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:order_positions,uuid',
+            'uuid' => 'nullable|string|uuid|unique:order_positions,uuid',
             'client_id' => [
                 'required_without:order_id',
                 'integer',

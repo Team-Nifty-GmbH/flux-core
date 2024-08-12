@@ -7,19 +7,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class OrderPositionFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = OrderPosition::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    public function definition(): array
     {
         return [
             'amount' => $this->faker->boolean() ?
@@ -40,7 +30,7 @@ class OrderPositionFactory extends Factory
             'unit_gram_weight' => $this->faker->numberBetween(1, 999),
 
             'name' => $this->faker->jobTitle(),
-            'description' => $this->faker->text(),
+            'description' => $this->faker->paragraph(),
 
             'is_net' => $this->faker->boolean(90),
             'is_free_text' => $this->faker->boolean(15),

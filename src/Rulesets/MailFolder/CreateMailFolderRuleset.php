@@ -14,7 +14,7 @@ class CreateMailFolderRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:mail_accounts,uuid',
+            'uuid' => 'nullable|string|uuid|unique:mail_accounts,uuid',
             'mail_account_id' => [
                 'required',
                 'integer',
@@ -27,6 +27,8 @@ class CreateMailFolderRuleset extends FluxRuleset
             ],
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255',
+            'can_create_ticket' => 'boolean',
+            'can_create_purchase_invoice' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

@@ -3,29 +3,61 @@
 namespace FluxErp\Notifications\Comment;
 
 use FluxErp\Contracts\HasToastNotification;
+use FluxErp\Models\Address;
+use FluxErp\Models\Comment;
+use FluxErp\Models\MailAccount;
+use FluxErp\Models\User;
 use FluxErp\Notifications\Notification;
 use FluxErp\Support\Notification\ToastNotification\NotificationAction;
 use FluxErp\Support\Notification\ToastNotification\ToastNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\HtmlString;
 use NotificationChannels\WebPush\WebPushMessage;
 
 class CommentCreatedNotification extends Notification implements HasToastNotification, ShouldQueue
 {
     use Queueable;
 
-    public Model $model;
+    public Comment $model;
 
-    public function __construct(Model $model)
+    public ?string $route = null;
+
+    public function __construct(Comment $model)
     {
         $this->model = $model;
+        $this->route = request()->header('referer');
+    }
+
+    public function via(object $notifiable): array
+    {
+        if ($this->model->is_internal
+            && ! is_a($notifiable, resolve_static(User::class, 'class'), true)
+        ) {
+            return [];
+        }
+
+        return parent::via($notifiable);
     }
 
     public function toMail(object $notifiable): MailMessage
     {
-        return $this->toToastNotification($notifiable)->toMail();
+        return $this->toToastNotification($notifiable)
+            ->toMail()
+            ->when(
+                $ticketAccount = resolve_static(MailAccount::class, 'query')
+                    ->whereHas('mailFolders', fn ($query) => $query->where('can_create_ticket', true))
+                    ->value('email'),
+                fn (MailMessage $mail) => $mail->replyTo($ticketAccount)
+            )
+            ->line(new HtmlString(
+                '<span>[flux:comment:'
+                . $this->model->model->getMorphClass() . ':'
+                . $this->model->model->getKey()
+                . ']</span>'
+            )
+            );
     }
 
     public function toArray(object $notifiable): array
@@ -47,8 +79,11 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
         return ToastNotification::make()
             ->notifiable($notifiable)
             ->title(__(
-                ':username commented on your post',
-                ['username' => $this->model->createdBy?->getLabel() ?? __('Unknown')],
+                ':username commented on :model',
+                [
+                    'username' => $this->model->createdBy?->getLabel() ?? __('Unknown'),
+                    'model' => __('your ' . $this->model->model->getMorphClass()),
+                ],
             ))
             ->icon('chat')
             ->when(
@@ -61,11 +96,16 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
             ->description($this->model->comment)
             ->when(
                 $this->model->model && method_exists($this->model->model, 'detailRoute'),
-                function (ToastNotification $toast) {
+                function (ToastNotification $toast) use ($notifiable) {
                     return $toast->accept(
                         NotificationAction::make()
                             ->label(__('View'))
-                            ->url($this->model->model->setDetailRouteParams(['tab' => 'comments'])->detailRoute())
+                            ->url(
+                                $notifiable instanceof Address
+                                    && method_exists($this->model->model, 'getPortalDetailRoute')
+                                ? $this->model->model->getPortalDetailRoute()
+                                : $this->route
+                            )
                     );
                 }
             );

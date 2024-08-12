@@ -17,6 +17,7 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\Lockable;
 use FluxErp\Traits\MonitorsQueue;
 use FluxErp\Traits\Notifiable;
+use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -35,7 +36,6 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\UnauthorizedException;
 use Laravel\Sanctum\HasApiTokens;
-use FluxErp\Traits\Scout\Searchable;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
@@ -56,7 +56,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         'id',
     ];
 
-    protected string $detailRouteName = 'contacts.id?';
+    protected ?string $detailRouteName = 'contacts.id?';
 
     public static string $iconName = 'user';
 
@@ -172,6 +172,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             'is_active' => 'boolean',
             'can_login' => 'boolean',
         ];
+    }
+
+    public function routeNotificationForMail(): ?string
+    {
+        return $this->email ?? $this->email_primary;
     }
 
     protected function password(): Attribute
@@ -360,6 +365,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         }
 
         // dont queue mail as the address isnt used as auth in the regular app url
-        Mail::to($this->email)->send(new MagicLoginLink($login['token'], $login['expires']));
+        Mail::to($this->email)->send(MagicLoginLink::make($login['token'], $login['expires']));
     }
 }

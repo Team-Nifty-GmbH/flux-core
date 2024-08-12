@@ -14,7 +14,7 @@ class CreateDiscountRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:discounts,uuid',
+            'uuid' => 'nullable|string|uuid|unique:discounts,uuid',
             'model_type' => [
                 'required_with:model_id',
                 'string',

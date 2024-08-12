@@ -12,7 +12,7 @@ class CreateVatRateRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:vat_rates,uuid',
+            'uuid' => 'nullable|string|uuid|unique:vat_rates,uuid',
             'name' => 'required|string',
             'rate_percentage' => 'required|numeric|lt:1|min:0',
             'footer_text' => 'string|nullable',

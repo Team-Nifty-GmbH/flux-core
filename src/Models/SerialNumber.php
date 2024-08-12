@@ -10,10 +10,10 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use FluxErp\Traits\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -26,7 +26,7 @@ class SerialNumber extends Model implements HasMedia, InteractsWithDataTables
         'id',
     ];
 
-    public string $detailRouteName = 'products.serial-numbers.id?';
+    protected ?string $detailRouteName = 'products.serial-numbers.id?';
 
     public static string $iconName = 'tag';
 

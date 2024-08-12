@@ -28,7 +28,7 @@
                 </x-dropdown>
             </div>
             <div class="mt-1 text-sm dark:text-gray-50">
-                <p class="prose prose-sm" x-html="comment.comment"></p>
+                <p class="prose prose-sm dark:text-gray-50" x-html="comment.comment"></p>
                 <div class="flex gap-1">
                     <template x-for="file in comment.media">
                         <x-button xs icon="paper-clip" x-on:click="$wire.download(file.id)" rounded>

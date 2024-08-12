@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 class ChangeNameToJsonOnProjectCategoryTemplatesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('project_category_templates', function (Blueprint $table) {
             $table->json('name')->change();
@@ -21,12 +16,7 @@ class ChangeNameToJsonOnProjectCategoryTemplatesTable extends Migration
         $this->migrateName();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         $this->rollbackName();
 

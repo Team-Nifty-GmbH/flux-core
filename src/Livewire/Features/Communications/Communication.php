@@ -189,7 +189,7 @@ class Communication extends CommunicationList
             Mail::to($this->communication->to)
                 ->cc($this->communication->cc)
                 ->bcc($this->communication->bcc)
-                ->send(new GenericMail($this->communication));
+                ->send(GenericMail::make($this->communication));
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
 

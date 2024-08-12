@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 class ChangeNameToJsonOnProjectTasksTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('project_tasks', function (Blueprint $table) {
             $table->json('name')->change();
@@ -21,12 +16,7 @@ class ChangeNameToJsonOnProjectTasksTable extends Migration
         $this->migrateName();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         $this->rollbackName();
 

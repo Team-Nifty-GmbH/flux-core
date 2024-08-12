@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
@@ -24,6 +25,12 @@ class WorkTime extends Model
         static::creating(function (WorkTime $workTime) {
             $workTime->started_at = $workTime->started_at ?? now();
             $workTime->user_id = $workTime->user_id ?? auth()->id();
+        });
+
+        static::saving(function (WorkTime $workTime) {
+            if ($workTime->is_locked) {
+                $workTime->calculateTotalCost();
+            }
         });
     }
 
@@ -62,5 +69,29 @@ class WorkTime extends Model
     public function workTimeType(): BelongsTo
     {
         return $this->belongsTo(WorkTimeType::class);
+    }
+
+    public function calculateTotalCost(): static
+    {
+        $this->total_cost = Rounding::round(
+            bcmul(
+                $this->user->cost_per_hour,
+                bcdiv($this->total_time_ms, 3600000),
+                9
+            )
+        );
+
+        if ($this->model && method_exists($this->model, 'costColumn')
+            && $costColumn = $this->model->costColumn()
+        ) {
+            $this->model->{$costColumn} = bcadd(
+                $this->model->{$costColumn},
+                $this->total_cost,
+                2
+            );
+            $this->model->save();
+        }
+
+        return $this;
     }
 }

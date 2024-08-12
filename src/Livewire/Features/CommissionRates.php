@@ -37,10 +37,10 @@ class CommissionRates extends BaseDataTable
     public bool $orderAsc = true;
 
     #[Locked]
-    public ?int $userId;
+    public ?int $userId = null;
 
     #[Locked]
-    public ?int $contactId;
+    public ?int $contactId = null;
 
     public array $commissionRate = [
         'user_id' => null,

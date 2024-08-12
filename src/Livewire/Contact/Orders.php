@@ -25,6 +25,9 @@ class Orders extends OrderList
     {
         return [
             DataTableButton::make()
+                ->label(__('Balance Statement'))
+                ->wireClick('$parent.openCreateDocumentsModal()'),
+            DataTableButton::make()
                 ->icon('plus')
                 ->color('primary')
                 ->label(__('New order'))

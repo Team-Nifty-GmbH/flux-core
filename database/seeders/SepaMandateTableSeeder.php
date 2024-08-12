@@ -13,6 +13,7 @@ class SepaMandateTableSeeder extends Seeder
     {
         $clients = Client::all(['id']);
         $contactBankConnections = ContactBankConnection::all(['id', 'contact_id']);
+
         foreach ($contactBankConnections as $contactBankConnection) {
             SepaMandate::factory()->count(rand(0, 3))->create([
                 'contact_bank_connection_id' => $contactBankConnection->id,

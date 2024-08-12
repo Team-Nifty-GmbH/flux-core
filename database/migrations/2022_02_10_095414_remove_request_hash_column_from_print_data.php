@@ -6,24 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 class RemoveRequestHashColumnFromPrintData extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('print_data', function (Blueprint $table) {
             $table->dropColumn('request_hash');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('print_data', function (Blueprint $table) {
             $table->string('request_hash')->unique()->index()->after('template_name');

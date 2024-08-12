@@ -14,7 +14,7 @@ class CreateLedgerAccountRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:ledger_accounts,uuid',
+            'uuid' => 'nullable|string|uuid|unique:ledger_accounts,uuid',
             'name' => 'required|string|max:255',
             'number' => 'required|numeric|unique:ledger_accounts,number',
             'description' => 'nullable|string|max:255',

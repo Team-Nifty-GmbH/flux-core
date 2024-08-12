@@ -3,6 +3,7 @@
 namespace FluxErp\Mail;
 
 use Carbon\Carbon;
+use FluxErp\Traits\Makeable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\URL;
 
 class MagicLoginLink extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Makeable, Queueable, SerializesModels;
 
     private string $plaintextToken;
 

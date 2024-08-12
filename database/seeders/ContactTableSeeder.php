@@ -8,9 +8,9 @@ use Illuminate\Database\Seeder;
 
 class ContactTableSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        $clients = Client::all();
+        $clients = Client::all(['id']);
 
         foreach ($clients as $client) {
             Contact::factory()->count(10)->create([

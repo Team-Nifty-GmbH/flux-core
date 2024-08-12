@@ -7,9 +7,18 @@ use Illuminate\Support\Facades\Cache;
 
 class CachedBuilder extends Builder
 {
+    protected bool $withoutCache = false;
+
+    public function withoutCache(bool $withoutCache = true): static
+    {
+        $this->withoutCache = $withoutCache;
+
+        return $this;
+    }
+
     public function get($columns = ['*'])
     {
-        if (! method_exists($this->getModel(), 'getModelQueryCacheTtl')) {
+        if (! method_exists($this->getModel(), 'getModelQueryCacheTtl') || $this->withoutCache) {
             return parent::get($columns);
         }
 

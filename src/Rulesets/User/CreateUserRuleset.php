@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\User;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rules\Password;
@@ -16,7 +17,7 @@ class CreateUserRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:users,uuid',
+            'uuid' => 'nullable|string|uuid|unique:users,uuid',
             'language_id' => [
                 'nullable',
                 'integer',
@@ -32,6 +33,10 @@ class CreateUserRuleset extends FluxRuleset
             'lastname' => 'required|string',
             'password' => ['required', Password::min(8)->mixedCase()->numbers()],
             'user_code' => 'required|string|unique:users,user_code',
+            'cost_per_hour' => [
+                'nullable',
+                new Numeric(),
+            ],
             'is_active' => 'sometimes|boolean',
         ];
     }

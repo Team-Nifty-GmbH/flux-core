@@ -6,7 +6,6 @@ use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
-use FluxErp\Actions\Printing;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
@@ -43,7 +42,6 @@ use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 use WireUi\Traits\Actions;
@@ -346,7 +344,7 @@ class Order extends OrderPositionList
             TabButton::make('order.activities')
                 ->label(__('Activities'))
                 ->isLivewireComponent()
-                ->wireModel('order'),
+                ->wireModel('order.id'),
         ];
     }
 
@@ -908,6 +906,7 @@ class Order extends OrderPositionList
                 'amount',
                 'amount_bundle',
                 'discount_percentage',
+                'purchase_price',
                 'total_base_gross_price',
                 'total_base_net_price',
                 'total_gross_price',

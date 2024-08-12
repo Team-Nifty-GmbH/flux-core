@@ -19,7 +19,9 @@ class TranslationEdit extends Component
 {
     use Actions;
 
-    public array $translation;
+    public array $translation = [
+        'group' => '*',
+    ];
 
     public string $locale;
 
@@ -85,6 +87,8 @@ class TranslationEdit extends Component
                 array_keys(resolve_static(CreateTranslationRuleset::class, 'getRules')),
                 null
             );
+
+        $this->translation['group'] ??= '*';
 
         $this->locale = $locale;
 

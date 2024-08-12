@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('additional_columns', function (Blueprint $table) {
             $table->string('field_type')->default('text')->after('model_type');
@@ -23,12 +18,7 @@ return new class() extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('additional_columns', function (Blueprint $table) {
             $table->dropIndex('additional_columns_name_model_type_unique');

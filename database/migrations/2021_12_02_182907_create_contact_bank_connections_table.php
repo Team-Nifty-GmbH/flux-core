@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateContactBankConnectionsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('contact_bank_connections', function (Blueprint $table) {
             $table->id();
@@ -41,12 +36,7 @@ class CreateContactBankConnectionsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('contact_bank_connections');
     }

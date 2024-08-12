@@ -21,7 +21,7 @@ class CreateProductRuleset extends FluxRuleset
         return [
             'name' => 'required|string',
 
-            'uuid' => 'string|uuid|unique:products,uuid',
+            'uuid' => 'nullable|string|uuid|unique:products,uuid',
             'parent_id' => [
                 'integer',
                 'nullable',

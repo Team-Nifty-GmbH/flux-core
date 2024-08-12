@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class AddCreatedByAndUpdatedByToProjectCategoriesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('project_categories', function (Blueprint $table) {
             $table->unsignedBigInteger('created_by')->after('created_at')->nullable();
@@ -19,12 +14,7 @@ class AddCreatedByAndUpdatedByToProjectCategoriesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('project_categories', function (Blueprint $table) {
             $table->dropColumn(['created_by', 'updated_by']);

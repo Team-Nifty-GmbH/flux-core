@@ -16,7 +16,7 @@ class CreateSepaMandateRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:sepa_mandates,uuid',
+            'uuid' => 'nullable|string|uuid|unique:sepa_mandates,uuid',
             'client_id' => [
                 'required',
                 'integer',
