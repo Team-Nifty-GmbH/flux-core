@@ -23,7 +23,7 @@ class BalanceStatement extends PrintableView
 
     public function render(): View|Factory
     {
-        return view('print::contact.balance-statement', [
+        return view('flux::printing.contact.balance-statement', [
             'model' => $this->model,
         ]);
     }

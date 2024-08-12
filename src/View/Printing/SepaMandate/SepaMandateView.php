@@ -23,7 +23,7 @@ class SepaMandateView extends PrintableView
 
     public function render(): View|Factory
     {
-        return view('print::sepa-mandate.sepa-mandate', [
+        return view('flux::printing.sepa-mandate.sepa-mandate', [
             'model' => $this->model,
         ]);
     }

@@ -9,7 +9,7 @@ class Refund extends Invoice
 {
     public function render(): View|Factory
     {
-        return view('print::order.refund', [
+        return view('flux::printing.order.refund', [
             'model' => $this->model,
             'summary' => $this->summary,
         ]);

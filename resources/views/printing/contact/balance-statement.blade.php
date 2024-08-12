@@ -2,7 +2,7 @@
     $currency = $model->currency?->iso ?? resolve_static(\FluxErp\Models\Currency::class, 'default')->iso;
     $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
 @endphp
-<x-print.first-page-header :address="$model->invoiceAddress ?? $model->mainAddress">
+<x-flux::print.first-page-header :address="$model->invoiceAddress ?? $model->mainAddress">
     <x-slot:right-block>
         <div class="inline-block">
             @section('first-page-right-block')
@@ -29,7 +29,7 @@
             @show
         </div>
     </x-slot:right-block>
-</x-print.first-page-header>
+</x-flux::print.first-page-header>
 <main>
     <div class="pt-10 pb-4 prose prose-xs">
         {!! $model->header !!}
