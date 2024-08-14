@@ -47,7 +47,7 @@ class OrderController extends BaseController
 
     public function toggleLock(string $id, Request $request): JsonResponse
     {
-       $order = ToggleLock::make(array_merge($request->all(), ['id' => $id]))
+        $order = ToggleLock::make(array_merge($request->all(), ['id' => $id]))
             ->validate()
             ->execute();
 
