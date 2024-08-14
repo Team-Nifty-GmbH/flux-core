@@ -54,6 +54,7 @@ class OrderDetail extends Component
                     'addressDelivery',
                     'orderPositions',
                     'currency:id,iso',
+                    'agent:id,name',
                 ]
             )
             ->first();
