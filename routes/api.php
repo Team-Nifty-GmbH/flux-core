@@ -303,6 +303,7 @@ Route::prefix('api')
                 Route::get('/orders', [OrderController::class, 'index']);
                 Route::post('/orders', [OrderController::class, 'create']);
                 Route::put('/orders', [OrderController::class, 'update']);
+                Route::put('/orders/{id}/toggle-lock', [OrderController::class, 'toggleLock']);
                 Route::delete('/orders/{id}', [OrderController::class, 'delete']);
 
                 //OrderPositions

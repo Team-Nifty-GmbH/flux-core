@@ -80,18 +80,18 @@
     </h2>
     <h1 class="py-5 text-5xl font-semibold">
         {{ __(':order_type :order_number dated :order_date', [
-            'order_type' => $order['order_type']['name'],
-            'order_number' => $order['order_number'],
-            'order_date' => \Illuminate\Support\Carbon::parse($order['order_date'])->isoFormat('L')
+            'order_type' => data_get($order, 'order_type.name'),
+            'order_number' => data_get($order, 'order_number'),
+            'order_date' => \Illuminate\Support\Carbon::parse(data_get($order, 'order_date'))->isoFormat('L')
         ]) }}
     </h1>
     <div class="flex justify-end pb-5 gap-1.5">
         @if($order['invoice_number'])
-            <x-button primary :label="__('Download invoice')" wire:click="downloadInvoice" spinner="downloadInvoice"/>
+            <x-button primary :label="__('Download invoice')" wire:click="downloadInvoice()" spinner="downloadInvoice"/>
         @endif
 
         @if($order['parent_id'])
-            <x-button primary :href="route('portal.orders.id', $order['parent_id'])">{{ __('Show parent') }}</x-button>
+            <x-button primary :href="route('portal.orders.id', data_get($order, 'parent_id'))">{{ __('Show parent') }}</x-button>
         @endif
         <x-button primary :label="__('New Ticket')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal').querySelector('[wireui-modal]')).open();" spinner="downloadInvoice"/>
     </div>
@@ -99,13 +99,13 @@
         <div class="flex gap-8">
             <x-card :title="__('Invoice Address')">
                 <div>
-                    {{ $order['address_invoice']['company'] ?? '' }}
+                    {{ data_get($order, 'address_invoice.company', '') }}
                 </div>
                 <div>
-                    {{ trim(($order['address_invoice']['firstname'] ?? '') . ' ' . ($order['address_invoice']['lastname'] ?? '')) }}
+                    {{ Str::squish(data_get($order, 'address_invoice.firstname', '') . ' ' . data_get($order, 'address_invoice.lastname', '')) }}
                 </div>
                 <div>
-                    {{ $order['address_invoice']['street'] ?? '' }}
+                    {{ data_get($order, 'address_invoice.street', '') }}
                 </div>
                 <div>
                     {{ trim(($order['address_invoice']['zip'] ?? '') . ' ' . ($order['address_invoice']['city'] ?? '')) }}
@@ -144,19 +144,19 @@
                         {{ __('Commission') }}:
                     </div>
                     <div>
-                        {{ $order['commission'] }}
+                        {{ data_get($order, 'commission') }}
                     </div>
                     <div class="text-right">
                         {{ __('Customer no.') }}:
                     </div>
                     <div>
-                        {{ $order['address_invoice']['contact']['customer_number'] }}
+                        {{ data_get($order, 'address_invoice.contact.customer_number') }}
                     </div>
                     <div class="text-right">
                         {{ __('Logistics note') }}:
                     </div>
                     <div>
-                        {{ $order['logistic_note'] }}
+                        {{ data_get($order, 'logistic_note') }}
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-5">
@@ -164,19 +164,19 @@
                         {{ __('Clerk') }}:
                     </div>
                     <div>
-                        {{ $order['user_created']['name'] ?? '' }}
+                        {{ data_get($order, 'user_created.name') }}
                     </div>
                     <div class="text-right">
                         {{ __('Responsible representative') }}:
                     </div>
                     <div>
-                        {{ $order['commission'] }}
+                        {{ data_get($order, 'agent.name') }}
                     </div>
                     <div class="text-right">
                         {{ __('Performance/Delivery date') }}:
                     </div>
                     <div>
-                        {{ $order['system_delivery_date'] }}
+                        {{ data_get($order, 'system_delivery_date') }}
                     </div>
                 </div>
             </div>
@@ -233,7 +233,7 @@
                     </template>
                     <div class="flex justify-between py-2.5">
                         <div>
-                            {{ __('Total gross') }}
+                            {{ __('Total Gross') }}
                         </div>
                         <div>
                             <span x-text="formatters.money(order.total_gross_price)"></span>
@@ -246,8 +246,8 @@
                     {{ __('Payment information') }}
                 </h2>
                 <x-card>
-                    {!! $order['footer'] !!}<br/>
-                    {!! is_array($order['payment_texts']) ? nl2br(implode('<br />', $order['payment_texts'])) : $order['payment_texts'] !!}
+                    {!! data_get($order, 'footer') !!}<br/>
+                    {!! is_array(data_get($order, 'payment_texts')) ? nl2br(implode('<br />', data_get($order, 'payment_texts'))) : data_get($order, 'payment_texts') !!}
                 </x-card>
             </div>
         </div>
