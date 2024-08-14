@@ -55,15 +55,17 @@
                         <th class="text-right font-normal uppercase">
                             {{ __('Payments') }}
                         </th>
-                        <th class="text-right font-normal uppercase font-semibold">
+                        <th class="text-right uppercase font-semibold">
                             {{ __('Balance') }}
                         </th>
                     </tr>
                 @show
                 </thead>
-                @foreach ($model->orders()->whereNot('balance', 0)->get(['id', 'order_number', 'invoice_date', 'invoice_number', 'total_gross_price', 'balance']) as $order)
-                    <x-flux::print.order.order :order="$order" :currency="$currency" :formatter="$formatter" />
-                @endforeach
+                @section('positions.body')
+                    @foreach ($model->orders()->whereNot('balance', 0)->get(['id', 'order_number', 'invoice_date', 'invoice_number', 'total_gross_price', 'balance']) as $order)
+                        <x-flux::print.order.order :order="$order" :currency="$currency" :formatter="$formatter" />
+                    @endforeach
+                @show
             </table>
         @show
     </div>
