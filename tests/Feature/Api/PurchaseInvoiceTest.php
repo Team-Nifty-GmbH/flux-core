@@ -86,7 +86,7 @@ class PurchaseInvoiceTest extends BaseSetup
             ->has(PurchaseInvoicePosition::factory()->count(2)->set('vat_rate_id', $vatRates->random()->id))
             ->count(3)
             ->afterCreating(function (PurchaseInvoice $purchaseInvoice) {
-                $purchaseInvoice->addMedia(UploadedFile::fake()->image($purchaseInvoice->invoice_number . '.jpeg'))
+                $purchaseInvoice->addMedia(UploadedFile::fake()->image($purchaseInvoice->invoice_number.'.jpeg'))
                     ->toMediaCollection('purchase_invoice');
             })
             ->create([
@@ -130,7 +130,7 @@ class PurchaseInvoiceTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/purchase-invoices/' . $this->purchaseInvoices[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/purchase-invoices/'.$this->purchaseInvoices[0]->id);
         $response->assertStatus(200);
 
         $purchaseInvoice = json_decode($response->getContent())->data;
@@ -161,7 +161,7 @@ class PurchaseInvoiceTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/purchase-invoices/' . ++$this->purchaseInvoices[2]->id);
+        $response = $this->actingAs($this->user)->get('/api/purchase-invoices/'.++$this->purchaseInvoices[2]->id);
         $response->assertStatus(404);
     }
 
@@ -467,7 +467,7 @@ class PurchaseInvoiceTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/purchase-invoices/' . $this->purchaseInvoices[1]->id);
+            ->delete('/api/purchase-invoices/'.$this->purchaseInvoices[1]->id);
         $response->assertStatus(204);
 
         $purchaseInvoice = $this->purchaseInvoices[1]->fresh();
@@ -481,7 +481,7 @@ class PurchaseInvoiceTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/purchase-invoices/' . ++$this->purchaseInvoices[2]->id);
+            ->delete('/api/purchase-invoices/'.++$this->purchaseInvoices[2]->id);
         $response->assertStatus(404);
     }
 

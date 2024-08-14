@@ -46,7 +46,7 @@ class SignaturePublicLink extends Component
                 ->where('model_id', $this->getModel()->id)
                 ->where('model_type', $this->model)
                 ->where('collection_name', 'signature')
-                ->where('name', 'signature-' . $this->printView)
+                ->where('name', 'signature-'.$this->printView)
                 ->firstOr(fn () => [])
         );
     }
@@ -56,7 +56,7 @@ class SignaturePublicLink extends Component
         // add to which type it belongs
         if ($this->signature->stagedFiles || $this->signature->id) {
             $this->signature->fill([
-                'name' => 'signature-' . $this->printView,
+                'name' => 'signature-'.$this->printView,
                 'model_type' => $this->model,
                 'model_id' => $this->getModel()->getKey(),
                 'collection_name' => 'signature',
@@ -65,12 +65,12 @@ class SignaturePublicLink extends Component
                     array_merge(
                         $this->signature->stagedFiles[0],
                         [
-                            'name' => 'signature-' . $this->printView,
+                            'name' => 'signature-'.$this->printView,
                             'file_name' => data_get(
                                 $this->signature->stagedFiles[0],
                                 'temporary_filename',
                                 Uuid::uuid4()->toString()
-                            ) . '.png',
+                            ).'.png',
                         ]
                     ),
                 ],
@@ -112,7 +112,7 @@ class SignaturePublicLink extends Component
     protected function getModel(): Model
     {
         return Cache::store('array')->rememberForever(
-            'flux-erp.signature-public-link.' . $this->uuid,
+            'flux-erp.signature-public-link.'.$this->uuid,
             fn () => morphed_model($this->model)::query()
                 ->where('uuid', $this->uuid)
                 ->firstOrFail()

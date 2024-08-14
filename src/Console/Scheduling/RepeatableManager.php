@@ -96,12 +96,12 @@ class RepeatableManager
                 continue;
             }
 
-            $cacheKey = md5($directory . implode($namespaces));
+            $cacheKey = md5($directory.implode($namespaces));
 
             // try to obtain the repeatables from cache
             // if the cache is not available, we will iterate over the directory
             try {
-                $repeatables = Cache::get('flux.repeatable.' . $cacheKey);
+                $repeatables = Cache::get('flux.repeatable.'.$cacheKey);
             } catch (\Throwable) {
                 $repeatables = null;
             }
@@ -123,9 +123,9 @@ class RepeatableManager
                         DIRECTORY_SEPARATOR
                     );
                     $subNameSpace = ! empty($relativePath)
-                        ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
+                        ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath).'\\'
                         : '';
-                    $class = $namespaces[$key] . '\\' . $subNameSpace . $file->getBasename('.php');
+                    $class = $namespaces[$key].'\\'.$subNameSpace.$file->getBasename('.php');
 
                     if (! class_exists($class) || ! is_a($class, Repeatable::class, true)) {
                         continue;
@@ -144,7 +144,7 @@ class RepeatableManager
             }
 
             try {
-                Cache::put('flux.repeatable.' . $cacheKey, $repeatables);
+                Cache::put('flux.repeatable.'.$cacheKey, $repeatables);
             } catch (\Throwable) {
                 // Ignore exceptions during cache put
             }

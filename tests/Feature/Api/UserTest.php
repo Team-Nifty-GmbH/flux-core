@@ -46,7 +46,7 @@ class UserTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/users/' . $this->users[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/users/'.$this->users[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -73,7 +73,7 @@ class UserTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/users/' . ++$this->users[1]->id);
+        $response = $this->actingAs($this->user)->get('/api/users/'.++$this->users[1]->id);
         $response->assertStatus(404);
     }
 
@@ -167,7 +167,7 @@ class UserTest extends BaseSetup
         $this->assertNotEmpty($user);
         $this->assertEquals($user['firstname'], $dbUser->firstname);
         $this->assertEquals($user['lastname'], $dbUser->lastname);
-        $this->assertEquals($user['firstname'] . ' ' . $user['lastname'], $dbUser->name);
+        $this->assertEquals($user['firstname'].' '.$user['lastname'], $dbUser->name);
         $this->assertEquals($user['email'], $dbUser->email);
         $this->assertTrue(Hash::check($user['password'], $dbUser->password));
         $this->assertEquals($user['user_code'], $dbUser->user_code);
@@ -273,7 +273,7 @@ class UserTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/users/' . $this->users[0]->id);
+        $response = $this->actingAs($this->user)->delete('/api/users/'.$this->users[0]->id);
         $response->assertStatus(204);
 
         $dbUser = User::query()->withTrashed()->whereKey($this->users[0]->id)->first();
@@ -285,7 +285,7 @@ class UserTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/users/' . $this->user->id);
+        $response = $this->actingAs($this->user)->delete('/api/users/'.$this->user->id);
         $response->assertStatus(422);
 
         $dbUser = User::query()->whereKey($this->users[0]->id)->first();
@@ -297,7 +297,7 @@ class UserTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/users/' . $this->users[1]->id + 1);
+        $response = $this->actingAs($this->user)->delete('/api/users/'.$this->users[1]->id + 1);
         $response->assertStatus(422);
     }
 }

@@ -67,8 +67,8 @@ class ModelFilter
             );
 
             array_walk($includeAttributes, function (&$item, $key, $prefix) {
-                $item = $prefix . $item;
-            }, $includeItem . '.');
+                $item = $prefix.$item;
+            }, $includeItem.'.');
             $relatedAllowedFilters = array_merge($relatedAllowedFilters, $includeAttributes);
         }
 
@@ -319,7 +319,7 @@ class ModelFilter
         }
 
         if (count($this->collectionFilters) > 0) {
-            $filteredCollection = new Collection();
+            $filteredCollection = new Collection;
             foreach ($this->collectionFilters as $collectionFilter) {
                 $filteredCollection = $filteredCollection->merge(
                     $this->addWhereClauses(query: $collection, params: $collectionFilter, collection: true)
@@ -493,34 +493,34 @@ class ModelFilter
         foreach ($filters as $filter) {
             $conditions = '';
             foreach ($filter as $condition) {
-                $conditions .= implode('|', $condition) . ',';
+                $conditions .= implode('|', $condition).',';
             }
 
-            $urlParams .= 'filter[' . $i . ']=' . rtrim($conditions, ',') . '&';
+            $urlParams .= 'filter['.$i.']='.rtrim($conditions, ',').'&';
             $i++;
         }
 
         if (! is_null($includes) && count($includes) > 0) {
-            $urlParams .= 'include=' . implode(',', $includes) . '&';
+            $urlParams .= 'include='.implode(',', $includes).'&';
         }
 
         if ($searchString) {
-            $urlParams .= 'search=' . $searchString . '&';
+            $urlParams .= 'search='.$searchString.'&';
         }
 
         if (count($sorts) === 1) {
-            $urlParams .= 'sort=' . implode('|', $sorts[0]);
+            $urlParams .= 'sort='.implode('|', $sorts[0]);
         } elseif (count($sorts) > 1) {
             $j = 0;
             foreach ($sorts as $sort) {
-                $args = implode('|', $sort) . ',';
-                $urlParams .= 'sort[' . $j . ']=' . rtrim($args, ',') . '&';
+                $args = implode('|', $sort).',';
+                $urlParams .= 'sort['.$j.']='.rtrim($args, ',').'&';
                 $j++;
             }
         }
 
         if ($urlParams) {
-            $urlParams = '?' . rtrim($urlParams, '&');
+            $urlParams = '?'.rtrim($urlParams, '&');
         }
 
         return $urlParams;

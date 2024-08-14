@@ -56,17 +56,17 @@ class UserClientScope implements Scope
         ) {
             // ucs = UserClientScope
             $builder->leftJoin(
-                $relation->getTable() . ' AS ucs',
-                'ucs.' . $relation->getForeignPivotKeyName(),
+                $relation->getTable().' AS ucs',
+                'ucs.'.$relation->getForeignPivotKeyName(),
                 '=',
                 $relation->getQualifiedParentKeyName()
             )
                 ->where(fn (Builder $query) => $query
                     ->whereIntegerInRaw(
-                        'ucs.' . $relation->getRelatedPivotKeyName(),
+                        'ucs.'.$relation->getRelatedPivotKeyName(),
                         static::$clients
                     )
-                    ->orWhereNull('ucs.' . $relation->getForeignPivotKeyName())
+                    ->orWhereNull('ucs.'.$relation->getForeignPivotKeyName())
                 );
         }
     }

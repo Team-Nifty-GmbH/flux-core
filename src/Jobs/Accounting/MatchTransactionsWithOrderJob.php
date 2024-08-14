@@ -68,7 +68,7 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
                                 : null
                             )
                             ?? Order::query()
-                                ->where('invoice_number', 'like', '%' . $word . '%')
+                                ->where('invoice_number', 'like', '%'.$word.'%')
                                 ->whereRaw('ROUND(balance, 2) = ?', $transaction->amount)
                                 ->orderByRaw('ABS(DATEDIFF(invoice_date, ?))', [$bookingDate])
                                 ->first()
@@ -85,7 +85,7 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
                                 ->orderByRaw('ABS(DATEDIFF(invoice_date, ?))', [$bookingDate])
                                 ->first()
                             ?? Order::query()
-                                ->where('invoice_number', 'like', '%' . $word . '%')
+                                ->where('invoice_number', 'like', '%'.$word.'%')
                                 ->whereRaw('ROUND(total_gross_price, 2) = ?', $transaction->amount)
                                 ->sole();
                     } catch (MultipleRecordsFoundException|ModelNotFoundException) {
@@ -116,7 +116,7 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
                         function (Builder $query) use ($transaction) {
                             return $query->whereRaw(
                                 'LOWER(addresses.name) like ?',
-                                '%' . strtolower($transaction->counterpart_name) . '%'
+                                '%'.strtolower($transaction->counterpart_name).'%'
                             );
                         }
                     )

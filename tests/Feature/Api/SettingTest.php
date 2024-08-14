@@ -26,7 +26,7 @@ class SettingTest extends BaseSetup
     {
         parent::setUp();
         $this->settings = Setting::factory()->create([
-            'key' => 'A' . Str::random(32),
+            'key' => 'A'.Str::random(32),
             'settings' => [
                 'string' => 'Key',
                 'integer' => 1,
@@ -34,7 +34,7 @@ class SettingTest extends BaseSetup
             ],
         ]);
         $this->settings2 = Setting::factory()->create([
-            'key' => 'Z' . Str::random(32),
+            'key' => 'Z'.Str::random(32),
             'settings' => [
                 'settings' => 'settings',
             ],

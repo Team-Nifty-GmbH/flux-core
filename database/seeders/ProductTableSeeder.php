@@ -45,7 +45,7 @@ class ProductTableSeeder extends Seeder
                     ['value' => rand(5, 100)]
                 );
 
-            $product->addMediaFromUrl('https://picsum.photos/seed/' . $product->id . '/200/300')
+            $product->addMediaFromUrl('https://picsum.photos/seed/'.$product->id.'/200/300')
                 ->toMediaCollection('images');
 
             if ($product->is_bundle && $products->count()) {

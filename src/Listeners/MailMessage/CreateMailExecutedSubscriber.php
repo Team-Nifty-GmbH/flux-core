@@ -55,7 +55,7 @@ class CreateMailExecutedSubscriber
     public function subscribe(): array
     {
         return [
-            'action.executed: ' . resolve_static(CreateMailMessage::class, 'class') => 'handle',
+            'action.executed: '.resolve_static(CreateMailMessage::class, 'class') => 'handle',
         ];
     }
 
@@ -131,7 +131,7 @@ class CreateMailExecutedSubscriber
             if (! $address) {
                 $address = resolve_static(Address::class, 'query')
                     ->with('contact')
-                    ->where('url', 'like', '%' . Str::after($email, '@'))
+                    ->where('url', 'like', '%'.Str::after($email, '@'))
                     ->first();
             }
         }

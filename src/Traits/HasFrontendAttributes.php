@@ -10,7 +10,7 @@ trait HasFrontendAttributes
 
     public static function getLivewireComponentWidget(): string
     {
-        $default = 'widgets.' . strtolower(class_basename(self::class));
+        $default = 'widgets.'.strtolower(class_basename(self::class));
 
         return livewire_component_exists($default) ? $default : 'widgets.generic';
     }

@@ -5,13 +5,17 @@ namespace FluxErp\Livewire;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\DeleteMediaCollection;
 use FluxErp\Actions\Media\UpdateMedia;
+use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Models\Media as MediaModel;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -26,7 +30,7 @@ class FolderTree extends Component
 
     public ?int $modelId = null;
 
-    public $files = [];
+    public array $files = [];
 
     public array $latestUploads = [];
 
@@ -54,18 +58,40 @@ class FolderTree extends Component
         ];
     }
 
-    public function updatedFiles(): void
+    public function updatedFiles(): JsonResponse
     {
         try {
             resolve_static(UpdateMedia::class, 'canPerformAction', [false]);
         } catch (UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return;
+            return ResponseHelper::badRequest(422);
         }
 
-        $this->validate($this->getRules());
+        try {
+            $this->validate($this->getRules());
+        } catch (ValidationException $e) {
+            // Handle the validation exception
+            exception_to_notifications($e, $this);
 
+            return ResponseHelper::badRequest(422);
+        }
+
+        return ResponseHelper::ok(200);
+    }
+
+    #[Renderless]
+    public function submitFiles(string $collection, array $tempFileNames): void
+    {
+        // set the folder name
+        $this->collection = $collection;
+        // filter out files array by deleted files on front end
+        $this->files = array_filter($this->files, function ($file) use ($tempFileNames) {
+            return in_array($file->getFilename(), $tempFileNames);
+        });
+
+        // validation took place in updatedFiles method
+        // so we can safely save the files
         try {
             $media = $this->saveFileUploadsToMediaLibrary(
                 name: 'files',
@@ -77,6 +103,7 @@ class FolderTree extends Component
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
         }
+
     }
 
     public function mount(?string $modelType = null, ?int $modelId = null): void
@@ -126,7 +153,7 @@ class FolderTree extends Component
         resolve_static(MediaModel::class, 'query')
             ->where('model_type', app($this->modelType)->getMorphClass())
             ->where('model_id', $this->modelId)
-            ->where('collection_name', 'LIKE', $collection['collection_name'] . '%')
+            ->where('collection_name', 'LIKE', $collection['collection_name'].'%')
             ->get()
             ->each(function (MediaModel $media) use ($newCollectionName, $model, $collection) {
                 $collectionName = $media->collection_name;

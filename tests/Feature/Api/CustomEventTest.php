@@ -39,7 +39,7 @@ class CustomEventTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/custom-events/' . $this->customEvent->id);
+        $response = $this->actingAs($this->user)->get('/api/custom-events/'.$this->customEvent->id);
         $response->assertStatus(200);
 
         $customEvent = json_decode($response->getContent())->data;
@@ -56,7 +56,7 @@ class CustomEventTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/custom-events/' . ++$this->customEvent->id);
+        $response = $this->actingAs($this->user)->get('/api/custom-events/'.++$this->customEvent->id);
         $response->assertStatus(404);
     }
 
@@ -108,7 +108,7 @@ class CustomEventTest extends BaseSetup
     public function test_create_custom_event_validation_fails()
     {
         $customEvent = [
-            'name' => Str::random(32) . rand(),
+            'name' => Str::random(32).rand(),
             'model_type' => get_class($this->user),
             'model_id' => $this->user->id,
         ];
@@ -167,7 +167,7 @@ class CustomEventTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/custom-events/' . $this->customEvent->id);
+        $response = $this->actingAs($this->user)->delete('/api/custom-events/'.$this->customEvent->id);
         $response->assertStatus(204);
 
         $this->assertFalse(CustomEvent::query()->whereKey($this->customEvent->id)->exists());
@@ -178,7 +178,7 @@ class CustomEventTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/custom-events/' . ++$this->customEvent->id);
+        $response = $this->actingAs($this->user)->delete('/api/custom-events/'.++$this->customEvent->id);
         $response->assertStatus(404);
     }
 

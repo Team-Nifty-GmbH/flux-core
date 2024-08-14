@@ -18,7 +18,7 @@ class CacheKeyWrittenListener
      */
     public function handle(KeyWritten $event): void
     {
-        $keyIndexName = Str::slug(config('app.name')) . ':cache-keys';
+        $keyIndexName = Str::slug(config('app.name')).':cache-keys';
         if ($event->key === $keyIndexName || ! Str::startsWith($event->key, config('app.name'))) {
             return;
         }

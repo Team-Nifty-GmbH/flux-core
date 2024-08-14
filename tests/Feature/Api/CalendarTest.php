@@ -39,7 +39,7 @@ class CalendarTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/calendars/' . $this->calendars[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/calendars/'.$this->calendars[0]->id);
         $response->assertStatus(200);
 
         $jsonCalendar = json_decode($response->getContent())->data;
@@ -185,7 +185,7 @@ class CalendarTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/calendars/' . $this->calendars[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/calendars/'.$this->calendars[2]->id);
         $response->assertStatus(204);
 
         $this->assertFalse(Calendar::query()->whereKey($this->calendars[2]->id)->exists());
@@ -196,7 +196,7 @@ class CalendarTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/calendars/' . ++$this->calendars[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/calendars/'.++$this->calendars[2]->id);
         $response->assertStatus(404);
     }
 }

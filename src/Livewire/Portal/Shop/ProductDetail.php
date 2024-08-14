@@ -87,7 +87,7 @@ class ProductDetail extends Component
                 'portal.media.download-multiple',
                 [
                     'ids' => $media->pluck('id')->implode(','),
-                    'filename' => $this->productForm->name . ($collectionName ? ' - ' . $collectionName : ''),
+                    'filename' => $this->productForm->name.($collectionName ? ' - '.$collectionName : ''),
                 ]
             )
             : $this->redirectRoute(

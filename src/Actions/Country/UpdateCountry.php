@@ -35,7 +35,7 @@ class UpdateCountry extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->rules['iso_alpha2'] = $this->rules['iso_alpha2'] . ',' . ($this->data['id'] ?? 0);
+        $this->rules['iso_alpha2'] = $this->rules['iso_alpha2'].','.($this->data['id'] ?? 0);
     }
 
     protected function validateData(): void

@@ -45,11 +45,11 @@ class MenuManager
         ?\Closure $closure = null): void
     {
         data_set($this->registeredGroups, $path, [
-            'label' => $label ?? data_get($this->registeredGroups, $path . '.label'),
-            'icon' => $icon ?? data_get($this->registeredGroups, $path . '.icon'),
-            'order' => $order ?? data_get($this->registeredGroups, $path . '.order'),
-            'children' => data_get($this->registeredGroups, $path . '.children', []),
-            'closure' => array_merge(data_get($this->registeredGroups, $path . '.closure', []), [$closure]),
+            'label' => $label ?? data_get($this->registeredGroups, $path.'.label'),
+            'icon' => $icon ?? data_get($this->registeredGroups, $path.'.icon'),
+            'order' => $order ?? data_get($this->registeredGroups, $path.'.order'),
+            'children' => data_get($this->registeredGroups, $path.'.children', []),
+            'closure' => array_merge(data_get($this->registeredGroups, $path.'.closure', []), [$closure]),
         ]);
     }
 
@@ -86,7 +86,7 @@ class MenuManager
             }
 
             if (! $resolvedRoute) {
-                throw new RouteNotFoundException('No route found for ' . $route);
+                throw new RouteNotFoundException('No route found for '.$route);
             }
 
             $routeName = $resolvedRoute->getName()
@@ -102,7 +102,7 @@ class MenuManager
             $guard = str_replace('auth:', '', $guard);
 
             $path = str_contains($routeName, '.') && ! str_ends_with($routeName, '.')
-                ? Str::beforeLast($routeName, '.') . '.children.' . Str::afterLast($routeName, '.')
+                ? Str::beforeLast($routeName, '.').'.children.'.Str::afterLast($routeName, '.')
                 : (str_ends_with($routeName, '.') ? rtrim($routeName, '.') : $routeName);
 
             data_set($this->resolved, $path, array_merge(

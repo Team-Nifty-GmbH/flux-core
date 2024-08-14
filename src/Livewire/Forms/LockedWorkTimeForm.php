@@ -74,7 +74,7 @@ class LockedWorkTimeForm extends FluxForm
                 $workTime['paused_time_ms'] = 0;
             } else {
                 if (preg_match('/^[0-9]+$/', $this->paused_time)) {
-                    $this->paused_time = $this->paused_time . ':00';
+                    $this->paused_time = $this->paused_time.':00';
                 }
 
                 if (preg_match('/^[0-9]+:[0-5][0-9]$/', $this->paused_time)) {
@@ -109,7 +109,7 @@ class LockedWorkTimeForm extends FluxForm
             $minutes = ($pauseInMinutes = (int) ($this->paused_time_ms / 60000)) % 60;
             $hours = ($pauseInMinutes - $minutes) / 60;
 
-            $this->paused_time = $hours . ':' . sprintf('%02d', $minutes);
+            $this->paused_time = $hours.':'.sprintf('%02d', $minutes);
             $this->original_paused_time = $this->paused_time;
         }
     }

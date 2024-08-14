@@ -21,23 +21,23 @@ class InvalidFilter extends HttpException
             $scheme = 'column|operator|value';
         }
 
-        $message = 'Invalid Filter scheme: expected: ' . $scheme . ', requested: \'' . $item . '\'';
+        $message = 'Invalid Filter scheme: expected: '.$scheme.', requested: \''.$item.'\'';
 
         return new static($message);
     }
 
     public static function filterNotAllowed(string $column, Collection $allowed): static
     {
-        $message = 'Requested filter \'' . $column . '\' not allowed. Allowed filters are \'' .
-            $allowed->implode(', ') . '\'';
+        $message = 'Requested filter \''.$column.'\' not allowed. Allowed filters are \''.
+            $allowed->implode(', ').'\'';
 
         return new static($message);
     }
 
     public static function operatorNotAllowed(string $operator, array $allowed): static
     {
-        $message = 'Requested operator \'' . $operator . '\' not allowed. Allowed operators are \'' .
-            implode(', ', $allowed) . '\'';
+        $message = 'Requested operator \''.$operator.'\' not allowed. Allowed operators are \''.
+            implode(', ', $allowed).'\'';
 
         return new static($message);
     }

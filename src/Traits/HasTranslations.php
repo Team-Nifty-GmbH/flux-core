@@ -122,7 +122,7 @@ trait HasTranslations
                 )
             );
             foreach ($validationLocales as $locale) {
-                $localKey = 'locales.' . $locale . '.';
+                $localKey = 'locales.'.$locale.'.';
                 $localRules = $translatableRules;
 
                 $localRules = Arr::prependKeysWith($localRules, $localKey);

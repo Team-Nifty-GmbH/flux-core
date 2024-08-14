@@ -47,7 +47,7 @@ class ProductOptionGroupTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->get('/api/product-option-groups/'
-            . $this->productOptionGroups[0]->id);
+            .$this->productOptionGroups[0]->id);
         $response->assertStatus(200);
 
         $productOptionGroup = json_decode($response->getContent())->data;
@@ -62,7 +62,7 @@ class ProductOptionGroupTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->get('/api/product-option-groups/'
-            . $this->productOptionGroups[2]->id + 100);
+            .$this->productOptionGroups[2]->id + 100);
         $response->assertStatus(404);
     }
 
@@ -156,7 +156,7 @@ class ProductOptionGroupTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/product-option-groups/' . $this->productOptionGroups[0]->id);
+            ->delete('/api/product-option-groups/'.$this->productOptionGroups[0]->id);
         $response->assertStatus(204);
 
         $this->assertFalse(ProductOptionGroup::query()->whereKey($this->productOptionGroups[0]->id)->exists());
@@ -168,7 +168,7 @@ class ProductOptionGroupTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/product-option-groups/' . ++$this->productOptionGroups[2]->id);
+            ->delete('/api/product-option-groups/'.++$this->productOptionGroups[2]->id);
         $response->assertStatus(404);
     }
 
@@ -184,7 +184,7 @@ class ProductOptionGroupTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/product-option-groups/' . $this->productOptionGroups[1]->id);
+            ->delete('/api/product-option-groups/'.$this->productOptionGroups[1]->id);
         $response->assertStatus(207);
     }
 }

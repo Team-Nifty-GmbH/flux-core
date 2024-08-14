@@ -83,7 +83,7 @@ class Ticket extends Model implements HasMedia, InteractsWithDataTables
 
     public function getLabel(): ?string
     {
-        return $this->title . ' ' . $this->ticket_number;
+        return $this->title.' '.$this->ticket_number;
     }
 
     public function getDescription(): ?string

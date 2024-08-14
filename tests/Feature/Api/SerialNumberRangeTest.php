@@ -59,7 +59,7 @@ class SerialNumberRangeTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/serial-number-ranges/' . $this->serialNumberRanges[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/serial-number-ranges/'.$this->serialNumberRanges[0]->id);
         $response->assertStatus(200);
 
         $serialNumberRange = json_decode($response->getContent())->data;
@@ -79,7 +79,7 @@ class SerialNumberRangeTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->get('/api/serial-number-ranges/' . $this->serialNumberRanges[2]->id + 10000);
+            ->get('/api/serial-number-ranges/'.$this->serialNumberRanges[2]->id + 10000);
         $response->assertStatus(404);
     }
 
@@ -219,7 +219,7 @@ class SerialNumberRangeTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/serial-number-ranges/' . $this->serialNumberRanges[0]->id);
+            ->delete('/api/serial-number-ranges/'.$this->serialNumberRanges[0]->id);
         $response->assertStatus(204);
 
         $this->assertFalse(SerialNumberRange::query()->whereKey($this->serialNumberRanges[0]->id)->exists());
@@ -231,7 +231,7 @@ class SerialNumberRangeTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/serial-number-ranges/' . ++$this->serialNumberRanges[2]->id);
+            ->delete('/api/serial-number-ranges/'.++$this->serialNumberRanges[2]->id);
         $response->assertStatus(404);
     }
 }

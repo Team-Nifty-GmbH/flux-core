@@ -35,26 +35,26 @@ class MakeWidget extends Command
         $stub = $this->getStubContents();
         $stub = str_replace(['{{class}}', '{{kebab-case class}}'], [$className, $kebabCaseClassName], $stub);
 
-        $fileName = $className . '.php';
-        $filePath = app_path('Livewire/Widgets/' . $fileName);
+        $fileName = $className.'.php';
+        $filePath = app_path('Livewire/Widgets/'.$fileName);
 
-        $viewPath = resource_path('views/livewire/widgets/' . $kebabCaseClassName . '.blade.php');
+        $viewPath = resource_path('views/livewire/widgets/'.$kebabCaseClassName.'.blade.php');
         $viewContents = '<div></div>';
 
         File::ensureDirectoryExists(pathinfo($filePath, PATHINFO_DIRNAME));
         File::ensureDirectoryExists(pathinfo($viewPath, PATHINFO_DIRNAME));
 
-        $filesystem = new Filesystem();
+        $filesystem = new Filesystem;
         $filesystem->ensureDirectoryExists(app_path('Http/Livewire/Widgets'));
         $filesystem->put($filePath, $stub);
         $filesystem->put($viewPath, $viewContents);
 
-        $this->info('Widget component created successfully: ' . $fileName);
-        $this->info('Widget view created successfully: ' . $viewPath);
+        $this->info('Widget component created successfully: '.$fileName);
+        $this->info('Widget view created successfully: '.$viewPath);
     }
 
     private function getStubContents(): false|string
     {
-        return file_get_contents(__DIR__ . '/stubs/UserWidgetComponent.stub');
+        return file_get_contents(__DIR__.'/stubs/UserWidgetComponent.stub');
     }
 }

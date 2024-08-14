@@ -38,7 +38,7 @@ class BroadcastActionExecuted implements ShouldBroadcast
 
     public function broadcastAs(): string
     {
-        $default = class_basename($this->action) . 'Executed';
+        $default = class_basename($this->action).'Executed';
 
         return method_exists($this->action, 'broadcastAs')
             ? ($this->action->broadcastAs() ?: $default)

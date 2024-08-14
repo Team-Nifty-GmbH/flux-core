@@ -41,7 +41,7 @@ class UpdateClient extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->rules['client_code'] .= ',' . ($this->data['id'] ?? 0);
+        $this->rules['client_code'] .= ','.($this->data['id'] ?? 0);
 
         if (($this->data['is_default'] ?? false)
             && ! resolve_static(Client::class, 'query')

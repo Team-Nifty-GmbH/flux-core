@@ -51,7 +51,7 @@ class ContactBankConnectionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->get('/api/contact-bank-connections/' . $this->contactBankConnections[0]->id);
+            ->get('/api/contact-bank-connections/'.$this->contactBankConnections[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -76,7 +76,7 @@ class ContactBankConnectionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->get('/api/contact-bank-connections/' . ++$this->contactBankConnections[2]->id);
+            ->get('/api/contact-bank-connections/'.++$this->contactBankConnections[2]->id);
         $response->assertStatus(404);
     }
 
@@ -259,7 +259,7 @@ class ContactBankConnectionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/contact-bank-connections/' . $this->contactBankConnections[1]->id);
+            ->delete('/api/contact-bank-connections/'.$this->contactBankConnections[1]->id);
         $response->assertStatus(204);
 
         $bankConnection = $this->contactBankConnections[1]->fresh();
@@ -273,7 +273,7 @@ class ContactBankConnectionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/contact-bank-connections/' . ++$this->contactBankConnections[2]->id);
+            ->delete('/api/contact-bank-connections/'.++$this->contactBankConnections[2]->id);
         $response->assertStatus(404);
     }
 }

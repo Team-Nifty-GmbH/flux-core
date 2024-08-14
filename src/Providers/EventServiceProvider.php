@@ -38,7 +38,7 @@ class EventServiceProvider extends ServiceProvider
         Logout::class => [
             LogoutListener::class,
         ],
-        'eloquent.created: ' . Comment::class => [
+        'eloquent.created: '.Comment::class => [
             CommentCreatedListener::class,
         ],
         KeyWritten::class => [

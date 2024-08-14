@@ -20,7 +20,7 @@ class ClientFactory extends Factory
         }
 
         if ($i === 100) {
-            $clientCode .= '_' . Str::uuid();
+            $clientCode .= '_'.Str::uuid();
         }
 
         return [

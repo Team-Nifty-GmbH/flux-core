@@ -22,7 +22,7 @@ class Printable
     {
         if (! class_implements($dataSet, OffersPrinting::class)) {
             throw new InvalidArgumentException(
-                get_class($this->dataSet) . ' doesnt implement PrintableInterface'
+                get_class($this->dataSet).' doesnt implement PrintableInterface'
             );
         }
 
@@ -50,7 +50,7 @@ class Printable
             return $this->renderView($this->getViewClass($viewName));
         }
 
-        throw new InvalidArgumentException('Method ' . $name . ' doesnt exist');
+        throw new InvalidArgumentException('Method '.$name.' doesnt exist');
     }
 
     public function getViewClass(string $name): string
@@ -58,7 +58,7 @@ class Printable
         $view = $this->views[$name] ?? null;
 
         if (! $view) {
-            throw new InvalidArgumentException('No view found for ' . $name);
+            throw new InvalidArgumentException('No view found for '.$name);
         }
 
         return resolve_static($view, 'class');
@@ -92,6 +92,6 @@ class Printable
 
     private static function insertNullByteBeforeEachCharacter(string $string): string
     {
-        return "\u{0000}" . substr(chunk_split($string, 1, "\u{0000}"), 0, -1);
+        return "\u{0000}".substr(chunk_split($string, 1, "\u{0000}"), 0, -1);
     }
 }

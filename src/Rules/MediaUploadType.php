@@ -20,7 +20,7 @@ class MediaUploadType implements DataAwareRule, InvokableRule
      */
     public function __invoke($attribute, $value, $fail): void
     {
-        $method = 'addMediaFrom' . ucfirst(strtolower($value));
+        $method = 'addMediaFrom'.ucfirst(strtolower($value));
 
         $model = $this->data['model_type'] ?? null;
 

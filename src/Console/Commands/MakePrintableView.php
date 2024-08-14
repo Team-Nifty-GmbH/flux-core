@@ -18,7 +18,7 @@ class MakePrintableView extends ComponentMakeCommand
     {
         $class = $this->argument('class');
         if (! in_array(OffersPrinting::class, class_implements($class))) {
-            $this->error('The class must implement ' . OffersPrinting::class . ' interface.');
+            $this->error('The class must implement '.OffersPrinting::class.' interface.');
 
             return;
         }
@@ -35,12 +35,12 @@ class MakePrintableView extends ComponentMakeCommand
     {
         return file_exists($customPath = $this->laravel->basePath(trim($stub, '/')))
             ? $customPath
-            : __DIR__ . $stub;
+            : __DIR__.$stub;
     }
 
     public function getDefaultNamespace($rootNamespace): string
     {
-        return $rootNamespace . '\View\Printing';
+        return $rootNamespace.'\View\Printing';
     }
 
     public function viewPath($path = ''): string
@@ -54,7 +54,7 @@ class MakePrintableView extends ComponentMakeCommand
             return str_replace(
                 ['DummyView', '{{ view }}'],
                 "<<<'blade'
-    <div>\n    <!-- " . Inspiring::quotes()->random() . " -->\n</div>
+    <div>\n    <!-- ".Inspiring::quotes()->random()." -->\n</div>
     blade",
                 parent::buildClass($name)
             );
@@ -62,12 +62,12 @@ class MakePrintableView extends ComponentMakeCommand
 
         return str_replace(
             [
-                'view(\'components.' . $this->getView() . '\')',
+                'view(\'components.'.$this->getView().'\')',
                 '{{ printableClass }}',
                 '{{ printableVariable }}',
             ],
             [
-                'view(\'printing.' . $this->getView() . '\')',
+                'view(\'printing.'.$this->getView().'\')',
                 Str::start($this->argument('class'), '\\'),
                 lcfirst(class_basename($this->argument('class'))),
             ],
@@ -78,7 +78,7 @@ class MakePrintableView extends ComponentMakeCommand
     protected function writeView($onSuccess = null): void
     {
         $path = $this->viewPath(
-            str_replace('.', '/', 'printing.' . $this->getView()) . '.blade.php'
+            str_replace('.', '/', 'printing.'.$this->getView()).'.blade.php'
         );
 
         if (! $this->files->isDirectory(dirname($path))) {
@@ -94,7 +94,7 @@ class MakePrintableView extends ComponentMakeCommand
         file_put_contents(
             $path,
             '<div>
-        <!-- ' . Inspiring::quotes()->random() . ' -->
+        <!-- '.Inspiring::quotes()->random().' -->
     </div>'
         );
 

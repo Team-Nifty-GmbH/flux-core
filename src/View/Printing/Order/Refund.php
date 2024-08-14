@@ -17,6 +17,6 @@ class Refund extends Invoice
 
     public function getSubject(): string
     {
-        return __('Refund') . ' ' . ($this->model->invoice_number ?: __('Preview'));
+        return __('Refund').' '.($this->model->invoice_number ?: __('Preview'));
     }
 }

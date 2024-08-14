@@ -112,7 +112,7 @@ class SerialNumberTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/serial-numbers/' . $this->serialNumbers[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/serial-numbers/'.$this->serialNumbers[0]->id);
         $response->assertStatus(200);
 
         $serialNumber = json_decode($response->getContent())->data;
@@ -130,7 +130,7 @@ class SerialNumberTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/serial-numbers/' . $this->serialNumbers[2]->id + 10000);
+        $response = $this->actingAs($this->user)->get('/api/serial-numbers/'.$this->serialNumbers[2]->id + 10000);
         $response->assertStatus(404);
     }
 
@@ -319,7 +319,7 @@ class SerialNumberTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/serial-numbers/' . $this->serialNumbers[0]->id);
+        $response = $this->actingAs($this->user)->delete('/api/serial-numbers/'.$this->serialNumbers[0]->id);
         $response->assertStatus(204);
 
         $this->assertFalse(SerialNumber::query()->whereKey($this->serialNumbers[0]->id)->exists());
@@ -330,7 +330,7 @@ class SerialNumberTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/serial-numbers/' . ++$this->serialNumbers[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/serial-numbers/'.++$this->serialNumbers[2]->id);
         $response->assertStatus(404);
     }
 }

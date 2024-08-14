@@ -46,7 +46,7 @@ class ServiceTest extends PortalSetup
     {
         $this->get(route('portal.service', ['serialNumberId' => null]))
             ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
+            ->assertRedirect($this->portalDomain.'/login');
     }
 
     public function test_portal_service_without_permission()

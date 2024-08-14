@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
+return new class extends Migration
 {
     public function up(): void
     {
@@ -24,10 +24,10 @@ return new class() extends Migration
 
         DB::statement(
             'INSERT INTO meta '
-            . '(additional_column_id, model_type, model_id, `key`, value, created_at, updated_at)'
-            . '(SELECT additional_column_id, ac.model_type, model_has_values.model_id, ac.name, model_has_values.value,'
-            . 'now(), now() '
-            . 'FROM model_has_values JOIN additional_columns ac ON ac.id = model_has_values.additional_column_id)'
+            .'(additional_column_id, model_type, model_id, `key`, value, created_at, updated_at)'
+            .'(SELECT additional_column_id, ac.model_type, model_has_values.model_id, ac.name, model_has_values.value,'
+            .'now(), now() '
+            .'FROM model_has_values JOIN additional_columns ac ON ac.id = model_has_values.additional_column_id)'
         );
 
         Schema::dropIfExists('model_has_values');
@@ -47,8 +47,8 @@ return new class() extends Migration
 
         DB::statement(
             'INSERT INTO model_has_values '
-            . '(model_id, additional_column_id, value)'
-            . '(SELECT model_id, additional_column_id, value FROM meta WHERE additional_column_id IS NOT NULL)'
+            .'(model_id, additional_column_id, value)'
+            .'(SELECT model_id, additional_column_id, value FROM meta WHERE additional_column_id IS NOT NULL)'
         );
 
         Schema::dropIfExists('metadata');

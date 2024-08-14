@@ -28,7 +28,7 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
         $this->app->bind(DefaultUrlGenerator::class, UrlGenerator::class);
 
         $this->app->singleton(Registry::class, function () {
-            $registry = new Registry();
+            $registry = new Registry;
             $dataTypeHandlers = [
                 BooleanHandler::class,
                 NullHandler::class,
@@ -43,7 +43,7 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
             ];
 
             foreach ($dataTypeHandlers as $handler) {
-                $registry->addHandler(new $handler());
+                $registry->addHandler(new $handler);
             }
 
             return $registry;

@@ -73,7 +73,7 @@ abstract class PrintableView extends Component
             }
 
             $logoContent = file_get_contents($logoPath);
-            $client->logo = 'data:image/' . $mimeTypeLogo . ';base64,' . base64_encode($logoContent);
+            $client->logo = 'data:image/'.$mimeTypeLogo.';base64,'.base64_encode($logoContent);
         }
 
         if ($logoSmallPath = $logoSmall?->getPath()) {
@@ -84,7 +84,7 @@ abstract class PrintableView extends Component
             }
 
             $logoSmallContent = file_get_contents($logoSmallPath);
-            $client->logo_small = 'data:image/' . $mimeTypeLogoSmall . ';base64,' . base64_encode($logoSmallContent);
+            $client->logo_small = 'data:image/'.$mimeTypeLogoSmall.';base64,'.base64_encode($logoSmallContent);
         }
 
         $signaturePath = null;
@@ -92,7 +92,7 @@ abstract class PrintableView extends Component
             $viewAlias = data_get(array_flip($model->resolvePrintViews()), static::class);
             $signaturePath = $model->media()
                 ->where('collection_name', 'signature')
-                ->where('name', 'signature-' . $viewAlias)
+                ->where('name', 'signature-'.$viewAlias)
                 ->first()
                 ?->getPath();
         }
@@ -217,8 +217,8 @@ abstract class PrintableView extends Component
             'model_type' => $model->getMorphClass(),
             'model_id' => $model->getKey(),
             'collection_name' => $this->getCollectionName(),
-            'file_name' => now()->format('Y-m-d_H-i-s') . '_' . Str::finish($this->getFileName(), '.pdf'),
-            'name' => now()->format('Y-m-d_H-i-s') . '_' . $this->getFileName(),
+            'file_name' => now()->format('Y-m-d_H-i-s').'_'.Str::finish($this->getFileName(), '.pdf'),
+            'name' => now()->format('Y-m-d_H-i-s').'_'.$this->getFileName(),
             'media' => $resource,
             'media_type' => 'stream',
         ];

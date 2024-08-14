@@ -67,7 +67,7 @@ class ContactTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/contacts/' . $this->contacts[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/contacts/'.$this->contacts[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -101,7 +101,7 @@ class ContactTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/contacts/' . ++$this->contacts[2]->id);
+        $response = $this->actingAs($this->user)->get('/api/contacts/'.++$this->contacts[2]->id);
         $response->assertStatus(404);
     }
 
@@ -147,7 +147,7 @@ class ContactTest extends BaseSetup
     {
         $contact = [
             'client_id' => $this->contacts[0]->client_id,
-            'customer_number' => 'Not Existing Customer Number' . Str::random(),
+            'customer_number' => 'Not Existing Customer Number'.Str::random(),
             'contact_id' => $this->contacts[0]->id,
             'iban' => $this->faker->iban(),
         ];
@@ -188,7 +188,7 @@ class ContactTest extends BaseSetup
             'client_id' => $this->contacts[0]->client_id,
             'payment_type_id' => $this->paymentTypes[1]->id,
             'price_list_id' => null,
-            'customer_number' => 'Not Existing Customer Number' . Str::random(),
+            'customer_number' => 'Not Existing Customer Number'.Str::random(),
             'creditor_number' => Str::random(),
             'payment_target_days' => rand(1, 1024),
             'payment_reminder_days_1' => rand(1, 1024),
@@ -278,7 +278,7 @@ class ContactTest extends BaseSetup
             'client_id' => $this->contacts[2]->client_id,
             'payment_type_id' => $this->paymentTypes[2]->id,
             'price_list_id' => null,
-            'customer_number' => 'Not Existing Customer Number' . Str::random(),
+            'customer_number' => 'Not Existing Customer Number'.Str::random(),
             'creditor_number' => Str::random(),
             'payment_target_days' => rand(1, 1024),
             'payment_reminder_days_1' => rand(1, 1024),
@@ -402,7 +402,7 @@ class ContactTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/contacts/' . $this->contacts[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/contacts/'.$this->contacts[2]->id);
         $response->assertStatus(204);
 
         $contact = $this->contacts[2]->fresh();
@@ -415,7 +415,7 @@ class ContactTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/contacts/' . ++$this->contacts[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/contacts/'.++$this->contacts[2]->id);
         $response->assertStatus(404);
     }
 }

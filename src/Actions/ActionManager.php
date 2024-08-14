@@ -61,10 +61,10 @@ class ActionManager
             return;
         }
 
-        $cacheKey = md5($path . $namespace);
+        $cacheKey = md5($path.$namespace);
 
         try {
-            $actions = Cache::get('flux.actions.' . $cacheKey);
+            $actions = Cache::get('flux.actions.'.$cacheKey);
         } catch (\Throwable) {
             $actions = null;
         }
@@ -83,9 +83,9 @@ class ActionManager
             if ($file->isFile() && $file->getExtension() === 'php') {
                 $relativePath = ltrim(str_replace($path, '', $file->getPath()), DIRECTORY_SEPARATOR);
                 $subNameSpace = ! empty($relativePath)
-                    ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath) . '\\'
+                    ? str_replace(DIRECTORY_SEPARATOR, '\\', $relativePath).'\\'
                     : '';
-                $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
+                $class = $namespace.'\\'.$subNameSpace.$file->getBasename('.php');
 
                 if (! class_exists($class) || ! is_a($class, FluxAction::class, true)) {
                     continue;
@@ -104,7 +104,7 @@ class ActionManager
         }
 
         try {
-            Cache::put('flux.actions.' . $cacheKey, $actions);
+            Cache::put('flux.actions.'.$cacheKey, $actions);
         } catch (\Throwable) {
             // Ignore exceptions during cache put
         }

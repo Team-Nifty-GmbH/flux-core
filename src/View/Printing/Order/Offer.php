@@ -8,6 +8,6 @@ class Offer extends OrderView implements SignablePrintView
 {
     public function getSubject(): string
     {
-        return __('Offer') . ' ' . ($this->model->order_number ?: __('Preview'));
+        return __('Offer').' '.($this->model->order_number ?: __('Preview'));
     }
 }

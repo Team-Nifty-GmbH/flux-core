@@ -57,6 +57,6 @@ class RefactorClientsTable extends Migration
 
     private function moveCountryId($after)
     {
-        DB::statement('ALTER TABLE clients MODIFY COLUMN country_id BIGINT UNSIGNED AFTER ' . $after);
+        DB::statement('ALTER TABLE clients MODIFY COLUMN country_id BIGINT UNSIGNED AFTER '.$after);
     }
 }

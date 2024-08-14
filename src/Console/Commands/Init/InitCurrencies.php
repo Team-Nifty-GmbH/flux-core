@@ -13,7 +13,7 @@ class InitCurrencies extends Command
 
     public function handle(): void
     {
-        $path = resource_path() . '/init-files/currencies.json';
+        $path = resource_path().'/init-files/currencies.json';
         if (! file_exists($path)) {
             return;
         }

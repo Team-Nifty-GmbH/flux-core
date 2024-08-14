@@ -56,8 +56,8 @@ class SerialNumberRange extends Model
     public function getCurrentStyled(): array|string|Translator|Application|null
     {
         return __(
-            $this->prefix .
-            str_pad((string) $this->current_number, $this->length ?? 0, '0', STR_PAD_LEFT) .
+            $this->prefix.
+            str_pad((string) $this->current_number, $this->length ?? 0, '0', STR_PAD_LEFT).
             $this->suffix,
             $this->variables()
         );

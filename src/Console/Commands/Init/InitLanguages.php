@@ -37,7 +37,7 @@ class InitLanguages extends Command
             $fallback->save();
         }
 
-        $path = resource_path() . '/init-files/languages.json';
+        $path = resource_path().'/init-files/languages.json';
         if (! file_exists($path)) {
             return;
         }

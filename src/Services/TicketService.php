@@ -44,7 +44,7 @@ class TicketService
     {
         return ResponseHelper::createArrayResponse(
             statusCode: 200,
-            statusMessage: 'user ' . (
+            statusMessage: 'user '.(
                 ToggleTicketUser::make($data)->validate()->execute()['attached'] ? 'attached' : 'detached'
             )
         );

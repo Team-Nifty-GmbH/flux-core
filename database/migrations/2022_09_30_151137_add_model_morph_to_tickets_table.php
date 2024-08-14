@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -70,7 +70,7 @@ return new class() extends Migration
     {
         $addressClass = str_replace('\\', '\\\\', FluxErp\Models\Address::class);
         DB::statement('UPDATE tickets SET
-                   authenticatable_type = ' . '\'' . $addressClass . '\'' . ',
+                   authenticatable_type = '.'\''.$addressClass.'\''.',
                    authenticatable_id = address_id'
         );
     }
@@ -80,7 +80,7 @@ return new class() extends Migration
         $addressClass = str_replace('\\', '\\\\', FluxErp\Models\Address::class);
         DB::statement('UPDATE tickets SET
                    address_id = authenticatable_id
-               WHERE authenticatable_type = ' . '\'' . $addressClass . '\''
+               WHERE authenticatable_type = '.'\''.$addressClass.'\''
         );
     }
 };

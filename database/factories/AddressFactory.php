@@ -28,7 +28,7 @@ class AddressFactory extends Factory
             'url' => $this->faker->boolean ? $this->faker->url : null,
             'date_of_birth' => $this->faker->boolean ? $this->faker->date : null,
             'department' => $this->faker->boolean ? $this->faker->realText(maxNbChars: 20) : null,
-            'email' => uniqid() . $this->faker->unique()->safeEmail(),
+            'email' => uniqid().$this->faker->unique()->safeEmail(),
             'password' => 'password',
             'is_active' => $this->faker->boolean(90),
             'is_main_address' => $this->faker->boolean,

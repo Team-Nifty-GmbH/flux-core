@@ -66,7 +66,7 @@ class TicketTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/tickets/' . $this->tickets[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/tickets/'.$this->tickets[0]->id);
         $response->assertStatus(200);
 
         $ticket = json_decode($response->getContent())->data;
@@ -223,7 +223,7 @@ class TicketTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/tickets/' . $this->tickets[0]->id);
+        $response = $this->actingAs($this->user)->delete('/api/tickets/'.$this->tickets[0]->id);
         $response->assertStatus(204);
 
         $this->assertFalse(Ticket::query()->whereKey($this->tickets[0]->id)->exists());
@@ -234,7 +234,7 @@ class TicketTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/tickets/' . ++$this->tickets[4]->id);
+        $response = $this->actingAs($this->user)->delete('/api/tickets/'.++$this->tickets[4]->id);
         $response->assertStatus(404);
     }
 

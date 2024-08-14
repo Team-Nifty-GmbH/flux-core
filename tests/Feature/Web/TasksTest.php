@@ -46,13 +46,13 @@ class TasksTest extends BaseSetup
     {
         $this->user->givePermissionTo(Permission::findOrCreate('tasks.{id}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/tasks/' . $this->task->id)
+        $this->actingAs($this->user, 'web')->get('/tasks/'.$this->task->id)
             ->assertStatus(200);
     }
 
     public function test_tasks_id_no_user()
     {
-        $this->get('/tasks/' . $this->task->id)
+        $this->get('/tasks/'.$this->task->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -61,7 +61,7 @@ class TasksTest extends BaseSetup
     {
         Permission::findOrCreate('tasks.{id}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/tasks/' . $this->task->id)
+        $this->actingAs($this->user, 'web')->get('/tasks/'.$this->task->id)
             ->assertStatus(403);
     }
 
@@ -71,7 +71,7 @@ class TasksTest extends BaseSetup
 
         $this->user->givePermissionTo(Permission::findOrCreate('tasks.{id}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/tasks/' . $this->task->id)
+        $this->actingAs($this->user, 'web')->get('/tasks/'.$this->task->id)
             ->assertStatus(404);
     }
 }

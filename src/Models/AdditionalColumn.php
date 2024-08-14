@@ -26,8 +26,8 @@ class AdditionalColumn extends Model
     protected static function booted(): void
     {
         static::created(function (AdditionalColumn $additionalColumn) {
-            Cache::store('array')->forget('meta_casts_' . $additionalColumn->model_type);
-            Cache::store('array')->forget('meta_additional_columns_' . $additionalColumn->model_type);
+            Cache::store('array')->forget('meta_casts_'.$additionalColumn->model_type);
+            Cache::store('array')->forget('meta_additional_columns_'.$additionalColumn->model_type);
         });
     }
 

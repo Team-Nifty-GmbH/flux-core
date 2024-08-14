@@ -73,7 +73,7 @@ class ProductTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/products/' . $this->products[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/products/'.$this->products[0]->id);
         $response->assertStatus(200);
 
         $product = json_decode($response->getContent())->data;
@@ -90,7 +90,7 @@ class ProductTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/products/' . $this->products[2]->id + 10000);
+        $response = $this->actingAs($this->user)->get('/api/products/'.$this->products[2]->id + 10000);
         $response->assertStatus(404);
     }
 
@@ -452,7 +452,7 @@ class ProductTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/products/' . $this->products[0]->id);
+        $response = $this->actingAs($this->user)->delete('/api/products/'.$this->products[0]->id);
         $response->assertStatus(204);
 
         $this->assertFalse(Product::query()->whereKey($this->products[0]->id)->exists());
@@ -463,7 +463,7 @@ class ProductTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/products/' . ++$this->products[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/products/'.++$this->products[2]->id);
         $response->assertStatus(404);
     }
 
@@ -475,7 +475,7 @@ class ProductTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/products/' . $this->products[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/products/'.$this->products[2]->id);
         $response->assertStatus(423);
     }
 }

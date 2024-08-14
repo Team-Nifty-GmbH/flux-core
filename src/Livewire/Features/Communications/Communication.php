@@ -230,9 +230,9 @@ class Communication extends CommunicationList
                 "\n",
                 array_filter([
                     $address->company,
-                    trim($address->firstname . ' ' . $address->lastname),
+                    trim($address->firstname.' '.$address->lastname),
                     $address->street,
-                    trim($address->zip . ' ' . $address->city),
+                    trim($address->zip.' '.$address->city),
                 ])
             ),
         ];

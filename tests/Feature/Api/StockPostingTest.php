@@ -67,7 +67,7 @@ class StockPostingTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/stock-postings/' . $this->stockPostings[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/stock-postings/'.$this->stockPostings[0]->id);
         $response->assertStatus(200);
 
         $stockPosting = json_decode($response->getContent())->data;
@@ -85,7 +85,7 @@ class StockPostingTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/stock-postings/' . $this->stockPostings[2]->id + 10000);
+        $response = $this->actingAs($this->user)->get('/api/stock-postings/'.$this->stockPostings[2]->id + 10000);
         $response->assertStatus(404);
     }
 
@@ -202,7 +202,7 @@ class StockPostingTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/stock-postings/' . $this->stockPostings[0]->id);
+        $response = $this->actingAs($this->user)->delete('/api/stock-postings/'.$this->stockPostings[0]->id);
         $response->assertStatus(204);
 
         $this->assertFalse(StockPosting::query()->whereKey($this->stockPostings[0]->id)->exists());
@@ -213,7 +213,7 @@ class StockPostingTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/stock-postings/' . ++$this->stockPostings[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/stock-postings/'.++$this->stockPostings[2]->id);
         $response->assertStatus(404);
     }
 }

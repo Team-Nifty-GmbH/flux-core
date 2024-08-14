@@ -20,7 +20,7 @@ class LanguageFactory extends Factory
         }
 
         if ($i === 100) {
-            $languageCode .= '_' . Str::uuid();
+            $languageCode .= '_'.Str::uuid();
         }
 
         return [

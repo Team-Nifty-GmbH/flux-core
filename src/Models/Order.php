@@ -525,7 +525,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
     public function getLabel(): ?string
     {
-        return $this->orderType?->name . ' - ' . $this->order_number . ' - ' . data_get($this->address_invoice, 'name');
+        return $this->orderType?->name.' - '.$this->order_number.' - '.data_get($this->address_invoice, 'name');
     }
 
     public function getDescription(): ?string

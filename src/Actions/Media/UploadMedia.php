@@ -41,7 +41,7 @@ class UploadMedia extends FluxAction
         $file = $this->data['media'];
 
         if ($this->data['media_type'] ?? false) {
-            $fileAdder = $modelInstance->{'addMediaFrom' . $this->data['media_type']}($file);
+            $fileAdder = $modelInstance->{'addMediaFrom'.$this->data['media_type']}($file);
         } else {
             $fileAdder = $modelInstance->addMedia($file instanceof UploadedFile ? $file->path() : $file);
         }
@@ -88,7 +88,7 @@ class UploadMedia extends FluxAction
         $this->data['file_name'] ??= match (true) {
             data_get($this->data, 'media') instanceof UploadedFile => $this->data['media']->getClientOriginalName(),
             file_exists(data_get($this->data, 'media', '')) => basename($this->data['media']),
-            default => hash('sha512', microtime() . Str::uuid()),
+            default => hash('sha512', microtime().Str::uuid()),
         };
         $this->data['name'] ??= $this->data['file_name'];
         $this->data['collection_name'] ??= 'default';

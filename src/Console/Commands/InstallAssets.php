@@ -46,7 +46,7 @@ class InstallAssets extends Command
         $this->updateNodePackages(function ($packages) {
             return data_get(
                 json_decode(
-                    file_get_contents(__DIR__ . '/../../../stubs/tailwind/package.json'),
+                    file_get_contents(__DIR__.'/../../../stubs/tailwind/package.json'),
                     true
                 ),
                 'devDependencies'
@@ -79,7 +79,7 @@ class InstallAssets extends Command
 
         file_put_contents(
             base_path('package.json'),
-            json_encode($packages, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . PHP_EOL
+            json_encode($packages, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT).PHP_EOL
         );
     }
 
@@ -91,12 +91,12 @@ class InstallAssets extends Command
             try {
                 $process->setTty(true);
             } catch (RuntimeException $e) {
-                $this->output->writeln('  <bg=yellow;fg=black> WARN </> ' . $e->getMessage() . PHP_EOL);
+                $this->output->writeln('  <bg=yellow;fg=black> WARN </> '.$e->getMessage().PHP_EOL);
             }
         }
 
         $process->run(function ($type, $line) {
-            $this->output->write('    ' . $line);
+            $this->output->write('    '.$line);
         });
     }
 
@@ -130,10 +130,10 @@ class InstallAssets extends Command
                 $oldContent = file_get_contents($basePath($file));
             }
 
-            $content = file_get_contents(__DIR__ . '/../../../stubs/tailwind/' . $file);
+            $content = file_get_contents(__DIR__.'/../../../stubs/tailwind/'.$file);
             $content = str_replace(
                 '{{ relative_path }}',
-                substr(realpath(__DIR__ . '/../../../'), strlen($basePath())),
+                substr(realpath(__DIR__.'/../../../'), strlen($basePath())),
                 $content
             );
 

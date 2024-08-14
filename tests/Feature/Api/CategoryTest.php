@@ -54,7 +54,7 @@ class CategoryTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/categories/' . $this->categories[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/categories/'.$this->categories[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -75,7 +75,7 @@ class CategoryTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/project-categories/' . ++$this->categories[1]->id);
+        $response = $this->actingAs($this->user)->get('/api/project-categories/'.++$this->categories[1]->id);
         $response->assertStatus(404);
     }
 
@@ -513,7 +513,7 @@ class CategoryTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/categories/' . $this->categories[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/categories/'.$this->categories[1]->id);
         $response->assertStatus(204);
 
         $this->assertFalse(Category::query()->whereKey($this->categories[1]->id)->exists());
@@ -524,7 +524,7 @@ class CategoryTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/categories/' . ++$this->categories[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/categories/'.++$this->categories[1]->id);
         $response->assertStatus(404);
     }
 
@@ -533,7 +533,7 @@ class CategoryTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/categories/' . $this->categories[0]->id);
+        $response = $this->actingAs($this->user)->delete('/api/categories/'.$this->categories[0]->id);
         $response->assertStatus(423);
     }
 
@@ -562,7 +562,7 @@ class CategoryTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/categories/' . $this->categories[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/categories/'.$this->categories[1]->id);
         $response->assertStatus(423);
     }
 }

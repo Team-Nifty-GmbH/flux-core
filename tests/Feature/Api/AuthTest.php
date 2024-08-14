@@ -31,7 +31,7 @@ class AuthTest extends TestCase
 
         $this->password = 'password';
 
-        $this->user = new User();
+        $this->user = new User;
         $this->user->language_id = $language->id;
         $this->user->email = 'TestUser';
         $this->user->firstname = 'TestUserFirstname';
@@ -42,7 +42,7 @@ class AuthTest extends TestCase
 
         $this->interfaceUserPassword = Str::random();
 
-        $this->interfaceUser = new InterfaceUser();
+        $this->interfaceUser = new InterfaceUser;
         $this->interfaceUser->name = Str::random();
         $this->interfaceUser->password = $this->interfaceUserPassword;
         $this->interfaceUser->is_active = true;
@@ -110,7 +110,7 @@ class AuthTest extends TestCase
     {
         $response = $this->post('/api/auth/token', [
             'email' => $this->interfaceUser->name,
-            'password' => Str::random() . $this->interfaceUserPassword,
+            'password' => Str::random().$this->interfaceUserPassword,
         ]);
 
         $response->assertStatus(401);

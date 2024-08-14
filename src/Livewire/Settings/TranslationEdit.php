@@ -148,7 +148,7 @@ class TranslationEdit extends Component
             return;
         }
 
-        (new TranslationService())->delete($this->translation['id']);
+        (new TranslationService)->delete($this->translation['id']);
 
         $this->skipRender();
         $this->dispatch('closeModal', $this->translation, true);

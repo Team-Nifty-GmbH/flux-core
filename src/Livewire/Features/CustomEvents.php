@@ -73,6 +73,6 @@ class CustomEvents extends Component
     {
         Event::dispatch($event, empty($additionalData) ? $this->record : $additionalData);
 
-        $this->notification()->success(__('Event dispatched: ') . $event);
+        $this->notification()->success(__('Event dispatched: ').$event);
     }
 }

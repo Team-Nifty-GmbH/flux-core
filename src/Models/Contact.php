@@ -202,7 +202,7 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
         return $this->getAllDiscountsQuery()
             ->get()
             ->sortByDesc('discount')
-            ->unique(fn ($item) => $item->model_id . $item->model_type . $item->is_percentage)
+            ->unique(fn ($item) => $item->model_id.$item->model_type.$item->is_percentage)
             ->values();
     }
 

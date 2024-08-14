@@ -79,7 +79,7 @@ class SepaMandateTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/sepa-mandates/' . $this->sepaMandates[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/sepa-mandates/'.$this->sepaMandates[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -111,7 +111,7 @@ class SepaMandateTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/sepa-mandates/' . ++$this->sepaMandates[2]->id);
+        $response = $this->actingAs($this->user)->get('/api/sepa-mandates/'.++$this->sepaMandates[2]->id);
         $response->assertStatus(404);
     }
 
@@ -350,7 +350,7 @@ class SepaMandateTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/sepa-mandates/' . $this->sepaMandates[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/sepa-mandates/'.$this->sepaMandates[2]->id);
         $response->assertStatus(204);
 
         $sepaMandate = $this->sepaMandates[2]->fresh();
@@ -363,7 +363,7 @@ class SepaMandateTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/sepa-mandates/' . ++$this->sepaMandates[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/sepa-mandates/'.++$this->sepaMandates[2]->id);
         $response->assertStatus(404);
     }
 }

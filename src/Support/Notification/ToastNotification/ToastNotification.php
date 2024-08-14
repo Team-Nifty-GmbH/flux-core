@@ -307,8 +307,8 @@ class ToastNotification implements Arrayable
 
     public function toMail(): MailMessage
     {
-        $mailMessage = (new MailMessage())
-            ->greeting(__('Hello') . ' ' . $this->notifiable?->name)
+        $mailMessage = (new MailMessage)
+            ->greeting(__('Hello').' '.$this->notifiable?->name)
             ->subject($this->title ?? '')
             ->line(new HtmlString($this->description ?? ''));
 
@@ -328,7 +328,7 @@ class ToastNotification implements Arrayable
             return null;
         }
 
-        return (new WebPushMessage())
+        return (new WebPushMessage)
             ->icon($this->img)
             ->title($this->title)
             ->body($this->description)

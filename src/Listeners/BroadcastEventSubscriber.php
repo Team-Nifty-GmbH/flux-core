@@ -10,7 +10,7 @@ class BroadcastEventSubscriber
     public function broadcastEvent($event): void
     {
         $classReflection = new \ReflectionClass(get_class($event));
-        ('FluxErp\\Events\\Broadcast' . $classReflection->getShortName())::dispatch($event->model);
+        ('FluxErp\\Events\\Broadcast'.$classReflection->getShortName())::dispatch($event->model);
     }
 
     /**

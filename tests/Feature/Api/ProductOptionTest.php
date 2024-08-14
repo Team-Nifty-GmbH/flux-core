@@ -45,7 +45,7 @@ class ProductOptionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/product-options/' . $this->productOptions[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/product-options/'.$this->productOptions[0]->id);
         $response->assertStatus(200);
 
         $productOption = json_decode($response->getContent())->data;
@@ -61,7 +61,7 @@ class ProductOptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->get('/api/product-options/' . $this->productOptions[2]->id + 10000);
+            ->get('/api/product-options/'.$this->productOptions[2]->id + 10000);
         $response->assertStatus(404);
     }
 
@@ -160,7 +160,7 @@ class ProductOptionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/product-options/' . $this->productOptions[0]->id);
+        $response = $this->actingAs($this->user)->delete('/api/product-options/'.$this->productOptions[0]->id);
         $response->assertStatus(204);
 
         $this->assertFalse(ProductOption::query()->whereKey($this->productOptions[0]->id)->exists());
@@ -171,7 +171,7 @@ class ProductOptionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/product-options/' . ++$this->productOptions[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/product-options/'.++$this->productOptions[2]->id);
         $response->assertStatus(404);
     }
 }

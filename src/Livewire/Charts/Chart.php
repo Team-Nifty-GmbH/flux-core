@@ -96,8 +96,8 @@ abstract class Chart extends Component
         );
 
         foreach ($properties as $property) {
-            $public[$property->getName()] = method_exists($this, 'get' . strtoupper($property->getName()))
-                ? $this->{'get' . strtoupper($property->getName())}()
+            $public[$property->getName()] = method_exists($this, 'get'.strtoupper($property->getName()))
+                ? $this->{'get'.strtoupper($property->getName())}()
                 : $this->{$property->getName()};
         }
 
@@ -134,7 +134,7 @@ abstract class Chart extends Component
     ): array {
         return $timeFrameEnum
             ->groupQuery($builder, $dateField)
-            ->addSelect(DB::raw('ROUND(' . $aggregateFunction . '(' . $aggregateField . '), 2) as total'))
+            ->addSelect(DB::raw('ROUND('.$aggregateFunction.'('.$aggregateField.'), 2) as total'))
             ->get()
             ->pluck('total', 'group_key')
             ->toArray();

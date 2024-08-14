@@ -101,7 +101,7 @@ class ProjectTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/projects/' . $this->projects[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/projects/'.$this->projects[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -133,7 +133,7 @@ class ProjectTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/projects/' . ++$this->projects[1]->id);
+        $response = $this->actingAs($this->user)->get('/api/projects/'.++$this->projects[1]->id);
         $response->assertStatus(404);
     }
 
@@ -477,7 +477,7 @@ class ProjectTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/projects/' . $this->projects[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/projects/'.$this->projects[1]->id);
         $response->assertStatus(204);
 
         $project = $this->projects[1]->fresh();
@@ -490,7 +490,7 @@ class ProjectTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/projects/' . ++$this->projects[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/projects/'.++$this->projects[1]->id);
         $response->assertStatus(404);
     }
 
@@ -502,7 +502,7 @@ class ProjectTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/projects/' . $this->projects[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/projects/'.$this->projects[1]->id);
         $response->assertStatus(423);
     }
 

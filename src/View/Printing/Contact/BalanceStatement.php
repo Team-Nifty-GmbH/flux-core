@@ -30,7 +30,7 @@ class BalanceStatement extends PrintableView
 
     public function getFileName(): string
     {
-        return $this->getSubject() . '_' . $this->model->contact_number;
+        return $this->getSubject().'_'.$this->model->contact_number;
     }
 
     public function getSubject(): string

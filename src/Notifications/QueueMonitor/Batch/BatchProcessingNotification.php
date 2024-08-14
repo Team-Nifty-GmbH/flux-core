@@ -25,8 +25,8 @@ class BatchProcessingNotification extends Notification implements HasToastNotifi
         return ToastNotification::make()
             ->notifiable($notifiable)
             ->title(__(':job_name is processing', ['job_name' => __($this->model->name)]))
-            ->description($this->model->getProcessedJobs() . ' / ' . $this->model->total_jobs . '<br>'
-                . __(':time remaining', ['time' => $this->model->getRemainingInterval()])
+            ->description($this->model->getProcessedJobs().' / '.$this->model->total_jobs.'<br>'
+                .__(':time remaining', ['time' => $this->model->getRemainingInterval()])
             )
             ->icon('info')
             ->timeout(0)

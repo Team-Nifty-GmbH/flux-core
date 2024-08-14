@@ -89,7 +89,7 @@ class Project extends Model implements InteractsWithDataTables
 
     public function getLabel(): ?string
     {
-        return $this->name . ' (' . $this->project_number . ')';
+        return $this->name.' ('.$this->project_number.')';
     }
 
     public function getDescription(): ?string

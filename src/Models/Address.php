@@ -69,7 +69,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             ) {
                 $name = [
                     $address->company,
-                    trim($address->firstname . ' ' . $address->lastname),
+                    trim($address->firstname.' '.$address->lastname),
                 ];
 
                 $address->name = implode(', ', array_filter($name)) ?: null;
@@ -191,9 +191,9 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         return Attribute::get(
             fn () => array_filter([
                 $this->company,
-                trim($this->firstname . ' ' . $this->lastname),
+                trim($this->firstname.' '.$this->lastname),
                 $this->street,
-                trim($this->zip . ' ' . $this->city),
+                trim($this->zip.' '.$this->city),
                 $this->country?->name,
             ])
         );
@@ -282,7 +282,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     {
         return [
             new PrivateChannel($this->broadcastChannel()),
-            new PrivateChannel((app(Contact::class))->broadcastChannel() . $this->contact_id),
+            new PrivateChannel((app(Contact::class))->broadcastChannel().$this->contact_id),
         ];
     }
 
@@ -333,7 +333,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 
         $plaintext = Str::uuid()->toString();
         $expires = now()->addMinutes(15);
-        Cache::put('login_token_' . $plaintext,
+        Cache::put('login_token_'.$plaintext,
             [
                 'user' => $this,
                 'guard' => 'address',

@@ -62,13 +62,13 @@ class TicketsTest extends BaseSetup
     {
         $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
+        $this->actingAs($this->user, 'web')->get('/tickets/'.$this->ticket->id)
             ->assertStatus(200);
     }
 
     public function test_tickets_id_no_user()
     {
-        $this->get('/tickets/' . $this->ticket->id)
+        $this->get('/tickets/'.$this->ticket->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -77,7 +77,7 @@ class TicketsTest extends BaseSetup
     {
         Permission::findOrCreate('tickets.{id}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
+        $this->actingAs($this->user, 'web')->get('/tickets/'.$this->ticket->id)
             ->assertStatus(403);
     }
 
@@ -87,7 +87,7 @@ class TicketsTest extends BaseSetup
 
         $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
+        $this->actingAs($this->user, 'web')->get('/tickets/'.$this->ticket->id)
             ->assertStatus(404);
     }
 }

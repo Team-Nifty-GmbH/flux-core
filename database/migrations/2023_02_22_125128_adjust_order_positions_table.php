@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -57,7 +57,7 @@ return new class() extends Migration
 
         // SET total_vats
         $vats = DB::table('orders')
-            ->selectRaw('orders.id, shipping_costs_vat_rate_percentage, shipping_costs_vat_price, ' .
+            ->selectRaw('orders.id, shipping_costs_vat_rate_percentage, shipping_costs_vat_price, '.
                 'SUM(vat_price) as total_vat_price, vat_rate_percentage')
             ->join('order_positions', 'orders.id', '=', 'order_positions.order_id')
             ->where('is_positive_operator', false)

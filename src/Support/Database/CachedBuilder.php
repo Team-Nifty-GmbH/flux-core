@@ -54,13 +54,13 @@ class CachedBuilder extends Builder
     {
         $class = is_object($class) ? get_class($class) : $class;
 
-        return 'model-query-cache:' . str(resolve_static($class, 'class'))
+        return 'model-query-cache:'.str(resolve_static($class, 'class'))
             ->lower()
             ->replace('\\', '-');
     }
 
     protected function queryCacheKey(array|string $columns): string
     {
-        return md5($this->toSql() . serialize($this->getBindings()) . serialize($columns));
+        return md5($this->toSql().serialize($this->getBindings()).serialize($columns));
     }
 }

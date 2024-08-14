@@ -32,7 +32,7 @@ class DeleteCountry extends FluxAction
         $country->regions()->delete();
 
         // Rename unique columns on soft-delete.
-        $country->iso_alpha2 = $country->iso_alpha2 . '___' . Hash::make(Str::uuid());
+        $country->iso_alpha2 = $country->iso_alpha2.'___'.Hash::make(Str::uuid());
         $country->save();
 
         return $country->delete();

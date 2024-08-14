@@ -81,16 +81,16 @@ class TabButton implements Htmlable
                 Permission::class,
                 'findByName',
                 [
-                    'name' => 'tab.' . $this->component,
+                    'name' => 'tab.'.$this->component,
                 ]
             );
         } catch (PermissionDoesNotExist) {
             return true;
         }
 
-        if (! auth()->user()->can('tab.' . $this->component)) {
+        if (! auth()->user()->can('tab.'.$this->component)) {
             if ($throwException) {
-                throw UnauthorizedException::forPermissions(['tab.' . $this->component]);
+                throw UnauthorizedException::forPermissions(['tab.'.$this->component]);
             } else {
                 return false;
             }

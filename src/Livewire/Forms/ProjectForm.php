@@ -45,7 +45,7 @@ class ProjectForm extends Form
     public function save(): void
     {
         if (! is_null($this->time_budget) && preg_match('/[0-9]*/', $this->time_budget)) {
-            $this->time_budget = $this->time_budget . ':00';
+            $this->time_budget = $this->time_budget.':00';
         }
 
         $data = $this->toArray();

@@ -43,7 +43,7 @@ class BaseController extends Controller
                 return ResponseHelper::createResponseFromBase(
                     statusCode: 422,
                     data: [
-                        'include' => 'including \'' . implode(',', $notAllowedIncludes) . '\' not allowed',
+                        'include' => 'including \''.implode(',', $notAllowedIncludes).'\' not allowed',
                         'allowed_includes' => array_values($allowedIncludes),
                     ]
                 );

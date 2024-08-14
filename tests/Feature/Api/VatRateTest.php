@@ -39,7 +39,7 @@ class VatRateTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/vat-rates/' . $this->vatRates[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/vat-rates/'.$this->vatRates[0]->id);
         $response->assertStatus(200);
 
         $vatRate = json_decode($response->getContent())->data;
@@ -54,7 +54,7 @@ class VatRateTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/vat-rates/' . $this->vatRates[2]->id + 10000);
+        $response = $this->actingAs($this->user)->get('/api/vat-rates/'.$this->vatRates[2]->id + 10000);
         $response->assertStatus(404);
     }
 
@@ -153,7 +153,7 @@ class VatRateTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/vat-rates/' . $this->vatRates[0]->id);
+        $response = $this->actingAs($this->user)->delete('/api/vat-rates/'.$this->vatRates[0]->id);
 
         $response->assertStatus(204);
         $this->assertFalse(VatRate::query()->whereKey($this->vatRates[0]->id)->exists());
@@ -164,7 +164,7 @@ class VatRateTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/vat-rates/' . ++$this->vatRates[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/vat-rates/'.++$this->vatRates[2]->id);
         $response->assertStatus(404);
     }
 }

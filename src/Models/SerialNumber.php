@@ -52,7 +52,7 @@ class SerialNumber extends Model implements HasMedia, InteractsWithDataTables
 
     public function getLabel(): ?string
     {
-        return $this->serial_number . ' - ' . $this->product?->name;
+        return $this->serial_number.' - '.$this->product?->name;
     }
 
     public function getDescription(): ?string

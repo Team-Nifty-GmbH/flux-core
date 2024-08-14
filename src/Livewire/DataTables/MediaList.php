@@ -54,9 +54,9 @@ class MediaList extends BaseDataTable
                 ->color('negative')
                 ->label(__('Delete'))
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('Delete media') . '|' .
-                        __('Do you really want to delete this media?') . '|' .
-                        __('Cancel') . '|' .
+                    'wire:flux-confirm.icon.error' => __('Delete media').'|'.
+                        __('Do you really want to delete this media?').'|'.
+                        __('Cancel').'|'.
                         __('Delete'),
                     'wire:click' => 'deleteMedia(record.id)',
                 ]),

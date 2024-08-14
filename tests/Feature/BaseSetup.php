@@ -28,7 +28,7 @@ class BaseSetup extends TestCase
 
         $this->defaultLanguageCode = $language->language_code;
 
-        $this->user = new User();
+        $this->user = new User;
         $this->user->language_id = $language->id;
         $this->user->email = 'TestUserThaTWillNeverExist@example.com';
         $this->user->firstname = 'firstname';

@@ -27,7 +27,7 @@ class InstallProcessOutputEvent implements ShouldBroadcastNow
         }
 
         return [
-            new Channel('job-batch.' . $this->batchId),
+            new Channel('job-batch.'.$this->batchId),
         ];
     }
 }

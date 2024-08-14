@@ -21,7 +21,7 @@ class FilesTest extends PortalSetup
     {
         $this->get(route('portal.files'))
             ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
+            ->assertRedirect($this->portalDomain.'/login');
     }
 
     public function test_portal_files_without_permission()

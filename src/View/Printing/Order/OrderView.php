@@ -71,6 +71,6 @@ class OrderView extends PrintableView
 
     public function getSubject(): string
     {
-        return __('Order') . ' ' . $this->model->order_number;
+        return __('Order').' '.$this->model->order_number;
     }
 }

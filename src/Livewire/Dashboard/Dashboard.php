@@ -73,14 +73,14 @@ class Dashboard extends Component
                         Permission::class,
                         'findByName',
                         [
-                            'name' => 'widget.' . $name,
+                            'name' => 'widget.'.$name,
                         ]
                     )->exists;
                 } catch (PermissionDoesNotExist) {
                     $permissionExists = false;
                 }
 
-                return (! $permissionExists || auth()->user()->can('widget.' . $name))
+                return (! $permissionExists || auth()->user()->can('widget.'.$name))
                     && array_key_exists($name, Widget::all());
             }
         );

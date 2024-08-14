@@ -20,9 +20,9 @@ class MorphExists implements DataAwareRule, ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $prefix = strpos($attribute, '.') ? pathinfo($attribute, PATHINFO_FILENAME) . '.' : null;
+        $prefix = strpos($attribute, '.') ? pathinfo($attribute, PATHINFO_FILENAME).'.' : null;
 
-        $model = data_get($this->data, $prefix . $this->modelAttribute);
+        $model = data_get($this->data, $prefix.$this->modelAttribute);
 
         if (! $model) {
             $fail(sprintf('%s is not defined.', $this->modelAttribute))->translate();

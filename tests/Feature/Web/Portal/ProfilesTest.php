@@ -41,7 +41,7 @@ class ProfilesTest extends PortalSetup
     {
         $this->get(route('portal.profiles.id?', ['id' => $this->user->id]))
             ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
+            ->assertRedirect($this->portalDomain.'/login');
     }
 
     public function test_portal_profiles_without_permission()

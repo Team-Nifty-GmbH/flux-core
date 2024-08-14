@@ -91,7 +91,7 @@ class Cart extends Model
             $address = $this->authenticatable ?? auth()->user();
 
             if (! $address instanceof Address) {
-                throw new \InvalidArgumentException('Address must be an instance of ' . Address::class);
+                throw new \InvalidArgumentException('Address must be an instance of '.Address::class);
             }
         }
 

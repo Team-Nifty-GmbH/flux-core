@@ -98,7 +98,7 @@ class AddressTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/addresses/' . $this->addresses[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/addresses/'.$this->addresses[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -141,7 +141,7 @@ class AddressTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/addresses/' . ++$this->addresses[3]->id);
+        $response = $this->actingAs($this->user)->get('/api/addresses/'.++$this->addresses[3]->id);
         $response->assertStatus(404);
     }
 
@@ -468,7 +468,7 @@ class AddressTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/addresses/' . $this->addresses[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/addresses/'.$this->addresses[2]->id);
         $response->assertStatus(204);
 
         $address = $this->addresses[2]->fresh();
@@ -481,7 +481,7 @@ class AddressTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/addresses/' . ++$this->addresses[3]->id);
+        $response = $this->actingAs($this->user)->delete('/api/addresses/'.++$this->addresses[3]->id);
         $response->assertStatus(404);
     }
 }

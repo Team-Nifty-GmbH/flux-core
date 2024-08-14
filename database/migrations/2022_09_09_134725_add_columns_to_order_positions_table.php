@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
+return new class extends Migration
 {
     public function up(): void
     {
@@ -19,13 +19,13 @@ return new class() extends Migration
             $table->decimal('total_base_gross_price', 40, 10)
                 ->nullable()
                 ->after('purchase_price')
-                ->comment('A decimal containing the order-position total price before any discounts.' .
+                ->comment('A decimal containing the order-position total price before any discounts.'.
                     ' Can be net or gross depending on the field is_net.');
 
             $table->decimal('total_base_net_price', 40, 10)
                 ->nullable()
                 ->after('total_base_gross_price')
-                ->comment('A decimal containing the order-position total price before any discounts.' .
+                ->comment('A decimal containing the order-position total price before any discounts.'.
                     ' Can be net or gross depending on the field is_net.');
 
             $table->decimal('total_gross_price', 40, 10)

@@ -35,7 +35,7 @@ class TicketsTest extends PortalSetup
     {
         $this->get(route('portal.tickets'))
             ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
+            ->assertRedirect($this->portalDomain.'/login');
     }
 
     public function test_portal_tickets_without_permission()
@@ -58,7 +58,7 @@ class TicketsTest extends PortalSetup
     {
         $this->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
             ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
+            ->assertRedirect($this->portalDomain.'/login');
     }
 
     public function test_portal_tickets_id_without_permission()

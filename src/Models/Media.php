@@ -38,6 +38,6 @@ class Media extends BaseMedia
     {
         // When using the base method from spatie media this method throws an exception.
         // Thats why we override the method here and return an empty BelongsTo.
-        return new BelongsTo(static::query(), new static(), '', '', '');
+        return new BelongsTo(static::query(), new static, '', '', '');
     }
 }

@@ -25,8 +25,8 @@ class JobProcessingNotification extends Notification implements HasToastNotifica
         return ToastNotification::make()
             ->notifiable($notifiable)
             ->title(__(':job_name is processing', ['job_name' => __($this->model->getJobName())]))
-            ->description(__(':time remaining', ['time' => $this->model->getRemainingInterval()]) .
-                ($this->model->message ? '<br>' . $this->model->message : '')
+            ->description(__(':time remaining', ['time' => $this->model->getRemainingInterval()]).
+                ($this->model->message ? '<br>'.$this->model->message : '')
             )
             ->icon('info')
             ->timeout(0)

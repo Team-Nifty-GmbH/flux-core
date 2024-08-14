@@ -121,7 +121,7 @@ class FluxCalendar extends CalendarComponent
 
         if ($attributes['calendar_type'] ?? false) {
             $action = Action::get(
-                $attributes['calendar_type'] . (($attributes['id'] ?? false) ? '.update' : '.create')
+                $attributes['calendar_type'].(($attributes['id'] ?? false) ? '.update' : '.create')
             );
 
             if (! $action) {
@@ -207,7 +207,7 @@ class FluxCalendar extends CalendarComponent
         $attributes['confirm_option'] = ! $this->calendarEventWasRepeatable ? 'all' : $this->confirmDelete;
 
         if ($attributes['calendar_type'] ?? false) {
-            $action = Action::get($attributes['calendar_type'] . '.delete');
+            $action = Action::get($attributes['calendar_type'].'.delete');
 
             if (! $action) {
                 return false;

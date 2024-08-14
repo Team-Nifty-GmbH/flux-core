@@ -23,7 +23,7 @@ class ProductOptionGroupList extends BaseProductOptionGroupList
         $this->filters = [[
             'name',
             'like',
-            '%' . $this->search . '%',
+            '%'.$this->search.'%',
         ]];
 
         parent::startSearch();

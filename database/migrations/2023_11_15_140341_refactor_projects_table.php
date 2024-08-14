@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
+return new class extends Migration
 {
     public function up(): void
     {
@@ -84,8 +84,8 @@ return new class() extends Migration
 
         DB::statement(
             'UPDATE projects SET project_name = CONCAT(\'{"'
-            . config('app.locale')
-            . '": "\', REPLACE(project_name, \'"\', \'\\\\"\'), \'"}\')'
+            .config('app.locale')
+            .'": "\', REPLACE(project_name, \'"\', \'\\\\"\'), \'"}\')'
         );
 
         Schema::table('projects', function (Blueprint $table) {

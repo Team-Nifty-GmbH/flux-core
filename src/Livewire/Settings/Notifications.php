@@ -58,7 +58,7 @@ class Notifications extends Component
 
                 $userSetting = data_get(
                     $anonymousNotificationSettings,
-                    $notificationSetting . '.' . $channelDriver);
+                    $notificationSetting.'.'.$channelDriver);
 
                 $this->notificationSettings[$notificationSetting][$channelDriver] =
                     [

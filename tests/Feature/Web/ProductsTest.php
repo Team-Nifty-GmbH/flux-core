@@ -77,13 +77,13 @@ class ProductsTest extends BaseSetup
 
         $this->user->givePermissionTo(Permission::findOrCreate('products.{id}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/products/' . $this->product->id)
+        $this->actingAs($this->user, 'web')->get('/products/'.$this->product->id)
             ->assertStatus(200);
     }
 
     public function test_products_id_no_user()
     {
-        $this->get('/products/' . $this->product->id)
+        $this->get('/products/'.$this->product->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -92,7 +92,7 @@ class ProductsTest extends BaseSetup
     {
         Permission::findOrCreate('products.{id}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/products/' . $this->product->id)
+        $this->actingAs($this->user, 'web')->get('/products/'.$this->product->id)
             ->assertStatus(403);
     }
 
@@ -102,7 +102,7 @@ class ProductsTest extends BaseSetup
 
         $this->user->givePermissionTo(Permission::findOrCreate('products.{id}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/products/' . $this->product->id)
+        $this->actingAs($this->user, 'web')->get('/products/'.$this->product->id)
             ->assertStatus(404);
     }
 }

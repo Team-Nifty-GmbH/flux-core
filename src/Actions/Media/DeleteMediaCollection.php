@@ -24,7 +24,7 @@ class DeleteMediaCollection extends FluxAction
         return resolve_static(Media::class, 'query')
             ->where('model_type', $this->data['model_type'])
             ->where('model_id', $this->data['model_id'])
-            ->where('collection_name', 'LIKE', $this->data['collection_name'] . '.%')
+            ->where('collection_name', 'LIKE', $this->data['collection_name'].'.%')
             ->orWhere('collection_name', $this->data['collection_name'])
             ->delete();
     }

@@ -28,7 +28,7 @@ class DeleteLanguage extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
-        $language->language_code = $language->language_code . '___' . Hash::make(Str::uuid());
+        $language->language_code = $language->language_code.'___'.Hash::make(Str::uuid());
         $language->save();
 
         return $language->delete();

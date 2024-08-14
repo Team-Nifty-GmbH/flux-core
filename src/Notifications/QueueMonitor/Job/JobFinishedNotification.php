@@ -42,8 +42,8 @@ class JobFinishedNotification extends Notification implements HasToastNotificati
             ->notifiable($notifiable)
             ->title(__(':job_name is finished', ['job_name' => __($this->model->getJobName())]))
             ->description(
-                __(':time elapsed', ['time' => $this->model->getElapsedInterval()]) .
-                ($this->model->message ? '<br>' . $this->model->message : '')
+                __(':time elapsed', ['time' => $this->model->getElapsedInterval()]).
+                ($this->model->message ? '<br>'.$this->model->message : '')
             )
             ->icon(
                 is_a($this->model->state, Succeeded::class, true)

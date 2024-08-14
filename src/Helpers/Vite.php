@@ -8,7 +8,7 @@ class Vite extends BaseVite
 {
     protected function manifestPath($buildDirectory): string
     {
-        return $buildDirectory . '/manifest.json';
+        return $buildDirectory.'/manifest.json';
     }
 
     public function content($asset, $buildDirectory = null): false|string
@@ -17,7 +17,7 @@ class Vite extends BaseVite
 
         $chunk = $this->chunk($this->manifest($buildDirectory), $asset);
 
-        $path = $buildDirectory . '/' . $chunk['file'];
+        $path = $buildDirectory.'/'.$chunk['file'];
 
         if (! is_file($path) || ! file_exists($path)) {
             throw new \Exception("Unable to locate asset file: {$path}");

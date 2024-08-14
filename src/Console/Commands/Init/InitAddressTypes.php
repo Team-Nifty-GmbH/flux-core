@@ -14,7 +14,7 @@ class InitAddressTypes extends Command
 
     public function handle(): void
     {
-        $path = resource_path() . '/init-files/address-types.json';
+        $path = resource_path().'/init-files/address-types.json';
         if (! file_exists($path)) {
             return;
         }

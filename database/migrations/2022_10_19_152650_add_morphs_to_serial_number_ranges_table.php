@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
+return new class extends Migration
 {
     public function up(): void
     {
@@ -24,7 +24,7 @@ return new class() extends Migration
 
             $table->integer('length')->nullable()->after('description')
                 ->comment('The length of the serial number.'
-                . ' The Serialnumber will be padded with leading zeros.');
+                .' The Serialnumber will be padded with leading zeros.');
         });
 
         DB::statement('UPDATE serial_number_ranges SET model_type = "FluxErp\\\\Models\\\\Product", model_id = product_id');

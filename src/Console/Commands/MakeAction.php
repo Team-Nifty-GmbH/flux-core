@@ -65,12 +65,12 @@ class MakeAction extends GeneratorCommand
     {
         return file_exists($customPath = $this->laravel->basePath(trim($stub, '/')))
             ? $customPath
-            : __DIR__ . $stub;
+            : __DIR__.$stub;
     }
 
     protected function getDefaultNamespace($rootNamespace): string
     {
-        return $rootNamespace . '\Actions';
+        return $rootNamespace.'\Actions';
     }
 
     protected function afterPromptingForMissingArguments(InputInterface $input, OutputInterface $output): void

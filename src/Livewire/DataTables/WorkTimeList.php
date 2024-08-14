@@ -184,18 +184,18 @@ class WorkTimeList extends BaseDataTable
 
                 try {
                     $prefix = ($workTime->workTimeType?->name
-                        ? __('Type') . ': ' . $workTime->workTimeType->name . '<br/>'
+                        ? __('Type').': '.$workTime->workTimeType->name.'<br/>'
                         : ''
                     );
                     $description = $prefix
-                        . __('Date') . ': '
-                        . $workTime->started_at
+                        .__('Date').': '
+                        .$workTime->started_at
                             ->locale($contact->invoiceAddress->language->language_code)
                             ->isoFormat('L')
-                        . '<br/>'
-                        . __('User') . ': ' . $workTime->user->name
-                        . '<br/><br/>'
-                        . $workTime->description;
+                        .'<br/>'
+                        .__('User').': '.$workTime->user->name
+                        .'<br/><br/>'
+                        .$workTime->description;
 
                     $orderPosition = CreateOrderPosition::make([
                         'name' => $workTime->name,
@@ -251,7 +251,7 @@ class WorkTimeList extends BaseDataTable
 
         $this->selected = [];
         $this->notification()->success(
-            count($orderIds) . ' ' . __('Orders created'),
+            count($orderIds).' '.__('Orders created'),
             __('Resulting from :count billable work times', ['count' => $billedWorkTimes])
         );
 

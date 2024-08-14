@@ -105,7 +105,7 @@ class OrderTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/orders/' . $this->orders[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/orders/'.$this->orders[0]->id);
         $response->assertStatus(200);
 
         $order = json_decode($response->getContent())->data;
@@ -123,7 +123,7 @@ class OrderTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/orders/' . $this->orders[2]->id + 10000);
+        $response = $this->actingAs($this->user)->get('/api/orders/'.$this->orders[2]->id + 10000);
         $response->assertStatus(404);
     }
 
@@ -467,7 +467,7 @@ class OrderTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/orders/' . $this->orders[0]->id);
+        $response = $this->actingAs($this->user)->delete('/api/orders/'.$this->orders[0]->id);
         $response->assertStatus(204);
 
         $this->assertFalse(Order::query()->whereKey($this->orders[0]->id)->exists());
@@ -478,7 +478,7 @@ class OrderTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/orders/' . ++$this->orders[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/orders/'.++$this->orders[2]->id);
         $response->assertStatus(404);
     }
 
@@ -490,7 +490,7 @@ class OrderTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/orders/' . $this->orders[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/orders/'.$this->orders[1]->id);
         $response->assertStatus(423);
     }
 }

@@ -25,19 +25,19 @@ class AdditionalColumnFilter implements Filter
             ->whereNotNull('values')
             ->exists();
 
-        $mhvAlias = 'mhv_' . strtolower($exploded[1]);
-        $acAlias = 'ac_' . strtolower($exploded[1]);
+        $mhvAlias = 'mhv_'.strtolower($exploded[1]);
+        $acAlias = 'ac_'.strtolower($exploded[1]);
 
-        $query->join('model_has_values AS ' . $mhvAlias, $table . '.id', '=', $mhvAlias . '.model_id')
-            ->join('additional_columns AS ' . $acAlias, $mhvAlias . '.additional_column_id', '=', $acAlias . '.id')
-            ->where($acAlias . '.model_type', $className)
-            ->where($acAlias . '.name', $exploded[1])
+        $query->join('model_has_values AS '.$mhvAlias, $table.'.id', '=', $mhvAlias.'.model_id')
+            ->join('additional_columns AS '.$acAlias, $mhvAlias.'.additional_column_id', '=', $acAlias.'.id')
+            ->where($acAlias.'.model_type', $className)
+            ->where($acAlias.'.name', $exploded[1])
             ->when($exact, function ($query) use ($value, $mhvAlias) {
                 $query->where(function ($query) use ($value, $mhvAlias) {
-                    $query->where($mhvAlias . '.value', array_shift($value));
+                    $query->where($mhvAlias.'.value', array_shift($value));
 
                     foreach ($value as $item) {
-                        $query->orWhere($mhvAlias . '.value', $item);
+                        $query->orWhere($mhvAlias.'.value', $item);
                     }
 
                     return $query;
@@ -45,15 +45,15 @@ class AdditionalColumnFilter implements Filter
             })
             ->when(! $exact, function ($query) use ($value, $mhvAlias) {
                 $query->where(function ($query) use ($value, $mhvAlias) {
-                    $query->where($mhvAlias . '.value', 'LIKE', '%' . array_shift($value) . '%');
+                    $query->where($mhvAlias.'.value', 'LIKE', '%'.array_shift($value).'%');
 
                     foreach ($value as $item) {
-                        $query->orWhere($mhvAlias . '.value', 'LIKE', '%' . $item . '%');
+                        $query->orWhere($mhvAlias.'.value', 'LIKE', '%'.$item.'%');
                     }
 
                     return $query;
                 });
             })
-            ->select($table . '.*');
+            ->select($table.'.*');
     }
 }

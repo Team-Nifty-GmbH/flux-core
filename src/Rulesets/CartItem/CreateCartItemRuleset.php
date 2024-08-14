@@ -41,7 +41,7 @@ class CreateCartItemRuleset extends FluxRuleset
             ],
             'price' => [
                 'nullable',
-                new Numeric(),
+                new Numeric,
             ],
         ];
     }

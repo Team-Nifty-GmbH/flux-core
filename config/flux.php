@@ -9,7 +9,7 @@ return [
 
     'portal_domain' => env(
         'PORTAL_DOMAIN',
-        'portal.' . preg_replace('(^https?://)', '', env('APP_URL'))
+        'portal.'.preg_replace('(^https?://)', '', env('APP_URL'))
     ),
     'flux_url' => env('FLUX_URL'),
 
@@ -24,7 +24,7 @@ return [
         'reverb_app_key' => env('VITE_REVERB_APP_KEY', env('REVERB_APP_KEY')),
         'reverb_host' => env(
             'VITE_REVERB_HOST',
-            'ws.' . str_replace(['https://', 'http://'], '', env('APP_URL'))
+            'ws.'.str_replace(['https://', 'http://'], '', env('APP_URL'))
         ),
         'reverb_port' => env('VITE_REVERB_PORT', 443),
         'reverb_protocol' => env('VITE_REVERB_SCHEME', 'https'),

@@ -12,7 +12,7 @@ class AuthContextMiddleware
     public function handle(Request $request, Closure $next)
     {
         try {
-            Context::add('user', Auth::user()->getMorphClass() . ':' . Auth::id());
+            Context::add('user', Auth::user()->getMorphClass().':'.Auth::id());
         } catch (\Throwable) {
             Context::forget('user');
         }

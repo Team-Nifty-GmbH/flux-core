@@ -44,7 +44,7 @@ class Helper
             $namespaces[] = $isModel ? 'FluxErp\\Models' : 'FluxErp\\Events';
 
             foreach ($namespaces as $namespace) {
-                $class = $namespace . '\\' . ucfirst($classString);
+                $class = $namespace.'\\'.ucfirst($classString);
 
                 if (! class_exists($class)) {
                     continue;
@@ -61,7 +61,7 @@ class Helper
 
             return false;
         } else {
-            $class = $namespace . '\\' . ucfirst($classString);
+            $class = $namespace.'\\'.ucfirst($classString);
 
             return class_exists($class) ? get_class(app($class)) : false;
         }
@@ -151,10 +151,10 @@ class Helper
         if (in_array($repeatArray['unit'], ['days', 'years'])
             || ($repeatArray['unit'] === 'months' && ($repeatArray['monthly'] ?? false) === 'day')
         ) {
-            return '+' . $repeatArray['interval'] . ' ' . $repeatArray['unit'];
+            return '+'.$repeatArray['interval'].' '.$repeatArray['unit'];
         } elseif ($repeatArray['unit'] === 'weeks') {
             return implode(',', array_map(
-                fn ($item) => 'next ' . $item . ' +' . $repeatArray['interval'] - 1 . ' ' . $repeatArray['unit'],
+                fn ($item) => 'next '.$item.' +'.$repeatArray['interval'] - 1 .' '.$repeatArray['unit'],
                 array_intersect(
                     array_map(
                         fn ($item) => Carbon::parse($repeatArray['start'])->addDays($item)->format('D'),
@@ -164,9 +164,9 @@ class Helper
                 )
             ));
         } elseif ($repeatArray['unit'] === 'months') {
-            return $repeatArray['monthly'] . ' '
-                . Carbon::parse($repeatArray['start'])->format('D') . ' of +'
-                . $repeatArray['interval'] . ' ' . $repeatArray['unit'];
+            return $repeatArray['monthly'].' '
+                .Carbon::parse($repeatArray['start'])->format('D').' of +'
+                .$repeatArray['interval'].' '.$repeatArray['unit'];
         }
 
         return null;
@@ -278,7 +278,7 @@ class Helper
 
                     if ($item instanceof Model) {
                         return [
-                            $key => (new $item())->forceFill(
+                            $key => (new $item)->forceFill(
                                 array_merge(
                                     $item->toArray(),
                                     [
@@ -287,7 +287,7 @@ class Helper
                                             ->format('Y-m-d H:i:s'),
                                         'end' => $start->add($interval)->format('Y-m-d H:i:s'),
                                     ],
-                                    ['id' => data_get($item, 'id') . '|' . $key]
+                                    ['id' => data_get($item, 'id').'|'.$key]
                                 )
                             ),
                         ];
@@ -300,7 +300,7 @@ class Helper
                                         ->format('Y-m-d H:i:s'),
                                     'end' => $start->add($interval)->format('Y-m-d H:i:s'),
                                 ],
-                                ['id' => data_get($item, 'id') . '|' . $key]
+                                ['id' => data_get($item, 'id').'|'.$key]
                             ),
                         ];
                     }

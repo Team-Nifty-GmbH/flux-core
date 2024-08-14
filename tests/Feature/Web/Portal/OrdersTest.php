@@ -69,7 +69,7 @@ class OrdersTest extends PortalSetup
     {
         $this->get(route('portal.orders'))
             ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
+            ->assertRedirect($this->portalDomain.'/login');
     }
 
     public function test_portal_orders_without_permission()
@@ -92,7 +92,7 @@ class OrdersTest extends PortalSetup
     {
         $this->get(route('portal.orders.id', ['id' => $this->order->id]))
             ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
+            ->assertRedirect($this->portalDomain.'/login');
     }
 
     public function test_portal_orders_id_without_permission()

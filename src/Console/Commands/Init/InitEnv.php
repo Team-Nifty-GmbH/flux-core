@@ -49,12 +49,12 @@ class InitEnv extends Command
         $keyValues = array_change_key_case($keyValues, CASE_UPPER);
 
         foreach ($keyValues as $key => $value) {
-            if (! preg_match('/' . $key . '=.*/', $contents)) {
-                $contents .= PHP_EOL . $key . '=' . $value;
+            if (! preg_match('/'.$key.'=.*/', $contents)) {
+                $contents .= PHP_EOL.$key.'='.$value;
             } else {
                 $contents = preg_replace(
-                    '/' . $key . '=.*/',
-                    $key . '=' . $value,
+                    '/'.$key.'=.*/',
+                    $key.'='.$value,
                     $contents
                 );
             }
@@ -97,7 +97,7 @@ class InitEnv extends Command
             'log_channel' => 'database',
             'broadcast_connection' => 'reverb',
             'cache_store' => 'redis',
-            'cache_prefix' => uniqid() . '_',
+            'cache_prefix' => uniqid().'_',
             'queue_connection' => 'redis',
             'session_driver' => 'redis',
             'reverb_app_id' => random_int(100_000, 999_999),
@@ -107,7 +107,7 @@ class InitEnv extends Command
             'reverb_host' => 'localhost',
             'reverb_port' => 8080,
             'scout_driver' => 'meilisearch',
-            'scout_prefix' => uniqid() . '_',
+            'scout_prefix' => uniqid().'_',
         ];
     }
 
@@ -115,7 +115,7 @@ class InitEnv extends Command
     {
         if (preg_match('/\s|[#;\'"\\\\]|[\x00-\x1F\x7F]/', $string)) {
             // Add single quotes around the string
-            return "'" . str_replace("'", "'\"'\"'", $string) . "'";
+            return "'".str_replace("'", "'\"'\"'", $string)."'";
         }
 
         return $string;

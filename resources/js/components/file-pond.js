@@ -3,7 +3,8 @@ import { create, registerPlugin } from 'filepond';
 
 export default function($wire, $ref, label) {
     return {
-        selectedFiles: [],
+        tempFilesId: [],
+        pond:null,
         loadFilePond() {
             registerPlugin(FilePondPluginImagePreview);
 
@@ -11,20 +12,45 @@ export default function($wire, $ref, label) {
             if (!inputElement) {
                 return;
             }
-            create(inputElement, {
+            this.pond = create(inputElement, {
                 allowMultiple: true,
                 labelIdle: label,
-                onaddfile: (error, file) => {
-                    this.selectedFiles.push(file);
+                onremovefile: (error,file) => {
+                    if(error) return;
+                    const ids =  this.pond.getFiles().map(f => f.serverId);
+                    if(ids.length === 0) {
+                        this.tempFilesId = [];
+                    } else {
+                        this.tempFilesId = this.tempFilesId.filter((item) => {
+                            return ids.includes(item);
+                        });
+                    }
                 },
-                onremovefile: (error, file) => {
-                    this.selectedFiles = this.selectedFiles.filter((f) => f.id !== file.id);
-                },
-            });
+                server:{
+                    process: async (fieldName, file, metadata, load, error, progress, abort, transfer, options) => {
+                        const onSuccess = (tempFile) => {
+                            console.log('SUCCESS' ,tempFile);
+                            this.tempFilesId.push(tempFile);
+                            load(tempFile);
+                        }
 
+                        const onError = ()=>{
+                            console.log('ERROR');
+                            error();
+                        }
+
+                        const response = await $wire.upload('files', file, onSuccess, onError, progress);
+
+                    },
+                    revert: null,
+                    remove: null,
+                }
+            });
         },
-        get isEmpty() {
-            return this.selectedFiles.length === 0;
-        },
+        async submitFiles(collectionName){
+            await $wire.submitFiles(collectionName,this.tempFilesId);
+            console.log('submitFiles');
+            await $wire.$refresh();
+        }
     };
 }

@@ -18,7 +18,7 @@ class MorphToMorph extends MorphToMany
         Builder $query, Model $parent, string $name, string $relatedMorph, string $table, string $foreignPivotKey,
         string $relatedPivotKey, string $parentKey, string $relatedKey, $relationName = null, $inverse = false)
     {
-        $this->relatedMorphType = $relatedMorph . '_type';
+        $this->relatedMorphType = $relatedMorph.'_type';
         $this->relatedMorphClass = $inverse ? $parent->getMorphClass() : $query->getModel()->getMorphClass();
 
         parent::__construct(

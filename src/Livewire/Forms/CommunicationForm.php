@@ -89,7 +89,7 @@ class CommunicationForm extends FluxForm
                 ->toArray();
 
             $this->slug = $message->mailAccount ?
-                $message->mailAccount->email . ' -> ' . $message->mailFolder?->slug : null;
+                $message->mailAccount->email.' -> '.$message->mailFolder?->slug : null;
         }
     }
 

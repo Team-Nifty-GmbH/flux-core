@@ -16,13 +16,13 @@ trait HasRelatedModel
     {
         self::relatedModelsChanged(function (Model $model) {
             Cache::putMany([
-                $model->getMorphClass() . '.' . $model->getKey() . '.related.models' => DB::table('model_related')
+                $model->getMorphClass().'.'.$model->getKey().'.related.models' => DB::table('model_related')
                     ->where('model_type', $model->getMorphClass())
                     ->where('model_id', $model->getKey())
                     ->groupBy('related_type')
                     ->pluck('related_type')
                     ->toArray(),
-                $model->getMorphClass() . '.' . $model->getKey() . '.related.by' => DB::table('model_related')
+                $model->getMorphClass().'.'.$model->getKey().'.related.by' => DB::table('model_related')
                     ->where('related_type', $model->getMorphClass())
                     ->where('related_id', $model->getKey())
                     ->groupBy('model_type')
@@ -40,7 +40,7 @@ trait HasRelatedModel
     public function relatedModel(?string $model = null): MorphToMorph
     {
         if (is_null($model)) {
-            $model = Cache::get($this->getMorphClass() . '.' . $this->getKey() . '.related.models');
+            $model = Cache::get($this->getMorphClass().'.'.$this->getKey().'.related.models');
 
             $model = $model ? array_shift($model) : $this->getMorphClass();
         }
@@ -56,7 +56,7 @@ trait HasRelatedModel
     public function relatedBy(?string $model = null): MorphToMorph
     {
         if (is_null($model)) {
-            $model = Cache::get($this->getMorphClass() . '.' . $this->getKey() . '.related.by');
+            $model = Cache::get($this->getMorphClass().'.'.$this->getKey().'.related.by');
 
             $model = $model ? array_shift($model) : $this->getMorphClass();
         }
@@ -72,7 +72,7 @@ trait HasRelatedModel
     public function relatedModels(): Collection
     {
         $models = Cache::rememberForever(
-            $this->getMorphClass() . '.' . $this->getKey() . '.related.models',
+            $this->getMorphClass().'.'.$this->getKey().'.related.models',
             fn () => DB::table('model_related')
                 ->where('model_type', $this->getMorphClass())
                 ->where('model_id', $this->getKey())
@@ -92,7 +92,7 @@ trait HasRelatedModel
     public function relatedByModels(): Collection
     {
         $relatedByModels = Cache::rememberForever(
-            $this->getMorphClass() . '.' . $this->getKey() . '.related.by',
+            $this->getMorphClass().'.'.$this->getKey().'.related.by',
             fn () => DB::table('model_related')
                 ->where('related_type', $this->getMorphClass())
                 ->where('related_id', $this->getKey())
@@ -142,7 +142,7 @@ trait HasRelatedModel
         $payload = [$this];
 
         return ! empty($result) ? $result : static::$dispatcher->{$method}(
-            "eloquent.{$event}: " . static::class, $payload
+            "eloquent.{$event}: ".static::class, $payload
         );
     }
 
@@ -161,9 +161,9 @@ trait HasRelatedModel
         // instances, as well as the relationship instances we need for these.
         $instance = $this->newRelatedInstance(morphed_model($related) ?? $related);
 
-        $foreignPivotKey = $foreignPivotKey ?: $name . '_id';
+        $foreignPivotKey = $foreignPivotKey ?: $name.'_id';
 
-        $relatedPivotKey = $relatedPivotKey ?: $relatedMorph . '_id';
+        $relatedPivotKey = $relatedPivotKey ?: $relatedMorph.'_id';
 
         // Now we're ready to create a new query builder for the related model and
         // the relationship instances for this relation. This relation will set
@@ -198,9 +198,9 @@ trait HasRelatedModel
         ?string $foreignPivotKey = null, ?string $relatedPivotKey = null, ?string $parentKey = null,
         ?string $relatedKey = null): MorphToMorph
     {
-        $foreignPivotKey = $foreignPivotKey ?: $relatedMorph . '_id';
+        $foreignPivotKey = $foreignPivotKey ?: $relatedMorph.'_id';
 
-        $relatedPivotKey = $relatedPivotKey ?: $name . '_id';
+        $relatedPivotKey = $relatedPivotKey ?: $name.'_id';
 
         return $this->morphToMorph(
             $related, $name, $relatedMorph, $table, $foreignPivotKey,

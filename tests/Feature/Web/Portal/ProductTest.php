@@ -39,7 +39,7 @@ class ProductTest extends PortalSetup
     {
         $this->get(route('portal.product', ['id' => $this->serialNumber->id]))
             ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
+            ->assertRedirect($this->portalDomain.'/login');
     }
 
     public function test_portal_product_without_permission()

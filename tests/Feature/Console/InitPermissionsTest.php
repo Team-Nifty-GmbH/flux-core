@@ -39,14 +39,14 @@ class InitPermissionsTest extends BaseSetup
                 continue;
             }
 
-            $componentInstance = new $component();
+            $componentInstance = new $component;
             foreach ($componentInstance->getTabs() as $tab) {
-                $componentTabs[] = 'tab.' . $tab->component;
+                $componentTabs[] = 'tab.'.$tab->component;
             }
         }
 
         // Add Custom Widget
-        Livewire::component('custom-widget-that-never-exists', new class() extends Component
+        Livewire::component('custom-widget-that-never-exists', new class extends Component
         {
             use Widgetable;
 
@@ -66,7 +66,7 @@ class InitPermissionsTest extends BaseSetup
         Widget::register('custom-widget-that-never-exists', 'custom-widget-that-never-exists');
 
         // Add Custom Tab
-        Event::listen('tabs.rendering: ' . Product::class, function (Component $component) {
+        Event::listen('tabs.rendering: '.Product::class, function (Component $component) {
             $component->mergeTabsToRender([
                 TabButton::make('custom-tab-that-never-exists', label: 'Custom Tab'),
             ]);

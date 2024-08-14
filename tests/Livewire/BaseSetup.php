@@ -50,7 +50,7 @@ class BaseSetup extends TestCase
 
             $this->actingAs($this->address, 'address');
         } else {
-            $this->user = new User();
+            $this->user = new User;
             $this->user->language_id = $language->id;
             $this->user->email = faker()->email();
             $this->user->firstname = 'firstname';

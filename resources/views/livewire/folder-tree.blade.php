@@ -73,11 +73,6 @@
         isUploading: false,
         progress: 0,
         filesArray: $wire.entangle('filesArray', true),
-        handleFileSelect(event) {
-            if (event.target.files.length) {
-                this.uploadFiles(event.target.files, event)
-            }
-        },
         uploadError(message) {
             this.isUploading = false;
             this.progress = 0;
@@ -95,16 +90,6 @@
                 this.selectionProxy.children.push(file);
                 this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
             });
-        },
-        async uploadFiles(files) {
-            this.isUploading = true;
-            await $wire.set('collection', this.selectionProxy.collection_name);
-            await $wire.uploadMultiple('files', files,
-                this.uploadSuccess.bind(this),
-                this.uploadError.bind(this),
-                function(event) {
-                }
-            )
         },
         save() {
             $wire.save(this.selection).then(() => {
@@ -178,6 +163,7 @@
     }"
      class="flex gap-2 justify-between"
      x-init="loadLevels();"
+     wire:ignore
      x-on:folder-tree-select="treeSelect($event.detail)"
 >
     <div class="min-w-0 overflow-auto">
@@ -219,8 +205,8 @@
                     <div class="w-full mb-4">
                         <input x-init="loadFilePond()" id="filepond-drop" type="file" />
                     </div>
-                    <x-button x-show="isEmpty" x-cloak
-                              x-on:click="uploadFiles(selectedFiles.map((file)=>file.file))"
+                    <x-button x-show="tempFilesId.length !== 0" x-cloak
+                              x-on:click="submitFiles(selectionProxy.collection_name)"
                               primary
                               :label="__('Upload')" />
                 </div>

@@ -35,7 +35,7 @@ class CreateUserRuleset extends FluxRuleset
             'user_code' => 'required|string|unique:users,user_code',
             'cost_per_hour' => [
                 'nullable',
-                new Numeric(),
+                new Numeric,
             ],
             'is_active' => 'sometimes|boolean',
         ];

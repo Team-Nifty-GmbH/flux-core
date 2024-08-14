@@ -111,7 +111,7 @@ class TaskController extends BaseController
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
             data: $task,
-            statusMessage: 'task ' . $request->finish ? 'finished' : 'reopened'
+            statusMessage: 'task '.$request->finish ? 'finished' : 'reopened'
         );
     }
 }

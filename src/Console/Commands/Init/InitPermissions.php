@@ -73,7 +73,7 @@ class InitPermissions extends Command
             if ($guard[1] === $defaultGuard) {
                 foreach (array_keys(config('auth.guards')) as $additionalGuard) {
                     if ($additionalGuard === $defaultGuard ||
-                        config('auth.guards.' . $additionalGuard)['provider'] !== 'users') {
+                        config('auth.guards.'.$additionalGuard)['provider'] !== 'users') {
                         continue;
                     }
 
@@ -99,7 +99,7 @@ class InitPermissions extends Command
         $this->info('Registering action permissions…');
         foreach (Action::all() as $action) {
             if ($action['class']::hasPermission()) {
-                $permission = app(Permission::class)->findOrCreate('action.' . $action['name'], 'web');
+                $permission = app(Permission::class)->findOrCreate('action.'.$action['name'], 'web');
                 unset($this->currentPermissions[$permission->id]);
             }
         }
@@ -110,7 +110,7 @@ class InitPermissions extends Command
         $this->info('Registering widget permissions…');
         foreach (Widget::all() as $widget) {
             $permission = app(Permission::class)->findOrCreate(
-                'widget.' . $widget['component_name'],
+                'widget.'.$widget['component_name'],
                 'web'
             );
             unset($this->currentPermissions[$permission->id]);
@@ -126,10 +126,10 @@ class InitPermissions extends Command
                 continue;
             }
 
-            $componentInstance = new $component();
+            $componentInstance = new $component;
 
             foreach ($componentInstance->renderingWithTabs()->getTabsToRender() as $tab) {
-                $permission = app(Permission::class)->findOrCreate('tab.' . $tab->component, 'web');
+                $permission = app(Permission::class)->findOrCreate('tab.'.$tab->component, 'web');
                 unset($this->currentPermissions[$permission->id]);
             }
         }

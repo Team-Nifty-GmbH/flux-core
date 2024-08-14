@@ -118,7 +118,7 @@ class Composer extends BaseComposer
     public function installed(bool $direct = false, bool $dev = false, $composerBinary = null): array
     {
         $composer = json_decode(file_get_contents($this->findComposerFile()), true);
-        $composerFlux = json_decode(file_get_contents(__DIR__ . '/../../composer.json'), true);
+        $composerFlux = json_decode(file_get_contents(__DIR__.'/../../composer.json'), true);
 
         $command = collect([
             ...$this->findComposer($composerBinary),
@@ -213,7 +213,7 @@ class Composer extends BaseComposer
 
         if (config('flux.license_key')) {
             $url = Str::of(config('app.url'))->after('://')->before('/')->replace('.', '-')->kebab()->toString();
-            $repoUrl = Str::start($url . '.repo.repman.team-nifty.com', 'https://');
+            $repoUrl = Str::start($url.'.repo.repman.team-nifty.com', 'https://');
             $defaultEnv['COMPOSER_AUTH'] = json_encode([
                 'http-basic' => [
                     Str::after($repoUrl, 'https://') => [

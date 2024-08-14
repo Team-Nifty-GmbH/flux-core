@@ -35,14 +35,14 @@ class Numeric implements InvokableRule
 
         // 0 = equal, 1 = $value > $min, -1 $value < $min
         if (! is_null($this->min) && bccomp($value, $this->min, 9) === -1) {
-            $fail('The :attribute must be at least ' . $this->min . '.')->translate();
+            $fail('The :attribute must be at least '.$this->min.'.')->translate();
 
             return;
         }
 
         // 0 = equal, 1 = $value > $max, -1 $value < $max
         if (! is_null($this->max) && bccomp($value, $this->max, 9) === 1) {
-            $fail('The :attribute must not be greater than ' . $this->max . '.')->translate();
+            $fail('The :attribute must not be greater than '.$this->max.'.')->translate();
         }
     }
 }

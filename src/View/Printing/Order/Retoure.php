@@ -25,6 +25,6 @@ class Retoure extends OrderView
 
     public function getSubject(): string
     {
-        return __('Retoure') . ' ' . $this->model->order_number;
+        return __('Retoure').' '.$this->model->order_number;
     }
 }

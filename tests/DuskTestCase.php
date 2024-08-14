@@ -66,7 +66,7 @@ abstract class DuskTestCase extends TestCase
                 continue;
             }
 
-            if (! static::deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+            if (! static::deleteDirectory($dir.DIRECTORY_SEPARATOR.$item)) {
                 return false;
             }
 
@@ -77,9 +77,9 @@ abstract class DuskTestCase extends TestCase
 
     protected static function installAssets(): void
     {
-        static::deleteDirectory(__DIR__ . '/../public/build/assets/');
+        static::deleteDirectory(__DIR__.'/../public/build/assets/');
 
-        if (file_exists($manifest = __DIR__ . '/../public/build/manifest.json')) {
+        if (file_exists($manifest = __DIR__.'/../public/build/manifest.json')) {
             unlink($manifest);
         }
 
@@ -91,7 +91,7 @@ abstract class DuskTestCase extends TestCase
                 'package.json',
             ],
             force: true,
-            basePath: fn ($path = '') => __DIR__ . '/../' . $path
+            basePath: fn ($path = '') => __DIR__.'/../'.$path
         );
 
         // run npm i and npm run build
@@ -106,8 +106,8 @@ abstract class DuskTestCase extends TestCase
 
     protected function setUp(): void
     {
-        if (file_exists(__DIR__ . '/../../../.env')) {
-            $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
+        if (file_exists(__DIR__.'/../../../.env')) {
+            $dotenv = Dotenv::createImmutable(__DIR__.'/../../..');
             $dotenv->load();
         }
 
@@ -120,7 +120,7 @@ abstract class DuskTestCase extends TestCase
         // check if database exists
         $database = config('database.connections.mysql.database');
         if (! DB::select("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$database'")) {
-            DB::statement('CREATE DATABASE ' . $database);
+            DB::statement('CREATE DATABASE '.$database);
         }
 
         $this->app->make(PermissionRegistrar::class)->forgetCachedPermissions();
@@ -193,7 +193,7 @@ abstract class DuskTestCase extends TestCase
             'is_default' => true,
         ]);
 
-        $this->user = new User();
+        $this->user = new User;
         $this->user->language_id = $language->id;
         $this->user->email = 'testuser@test.de';
         $this->user->firstname = 'TestUserFirstname';

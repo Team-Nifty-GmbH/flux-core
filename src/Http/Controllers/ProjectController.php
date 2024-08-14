@@ -111,7 +111,7 @@ class ProjectController extends BaseController
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
             data: $project,
-            statusMessage: 'project ' . ($request->finish ? 'finished' : 'reopened')
+            statusMessage: 'project '.($request->finish ? 'finished' : 'reopened')
         );
     }
 }

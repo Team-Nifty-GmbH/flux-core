@@ -54,7 +54,7 @@ class WarehouseTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/warehouses/' . $this->warehouses[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/warehouses/'.$this->warehouses[0]->id);
         $response->assertStatus(200);
 
         $warehouse = json_decode($response->getContent())->data;
@@ -69,7 +69,7 @@ class WarehouseTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/warehouses/' . $this->warehouses[2]->id + 10000);
+        $response = $this->actingAs($this->user)->get('/api/warehouses/'.$this->warehouses[2]->id + 10000);
         $response->assertStatus(404);
     }
 
@@ -172,7 +172,7 @@ class WarehouseTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/warehouses/' . $this->warehouses[0]->id);
+        $response = $this->actingAs($this->user)->delete('/api/warehouses/'.$this->warehouses[0]->id);
         $response->assertStatus(204);
 
         $this->assertFalse(Warehouse::query()->whereKey($this->warehouses[0]->id)->exists());
@@ -183,7 +183,7 @@ class WarehouseTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/warehouses/' . ++$this->warehouses[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/warehouses/'.++$this->warehouses[2]->id);
         $response->assertStatus(404);
     }
 }

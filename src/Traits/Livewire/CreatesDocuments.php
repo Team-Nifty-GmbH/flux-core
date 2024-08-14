@@ -225,7 +225,7 @@ trait CreatesDocuments
         }
 
         if ($mailMessages) {
-            $sessionKey = 'mail_' . Str::uuid()->toString();
+            $sessionKey = 'mail_'.Str::uuid()->toString();
             session()->put($sessionKey, $mailMessages);
             $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
         }
@@ -241,7 +241,7 @@ trait CreatesDocuments
 
             return MediaStream::create(
                 __(Str::of(class_basename(static::class))->headline()->snake()->toString())
-                . '_' . now()->toDateString() . '.zip'
+                .'_'.now()->toDateString().'.zip'
             )
                 ->addMedia($files);
         }

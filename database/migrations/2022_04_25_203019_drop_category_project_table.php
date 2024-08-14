@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-return new class() extends Migration
+return new class extends Migration
 {
     public function up(): void
     {
@@ -34,9 +34,9 @@ return new class() extends Migration
     private function migrateCategorizablesTable()
     {
         DB::statement('INSERT INTO categorizables(category_id, categorizable_type, categorizable_id)
-            SELECT category_id, \'' . trim(
+            SELECT category_id, \''.trim(
             json_encode(Project::class, JSON_UNESCAPED_SLASHES), '"'
-        ) . '\', project_id
+        ).'\', project_id
             FROM category_project'
         );
     }
@@ -45,9 +45,9 @@ return new class() extends Migration
     {
         DB::statement('INSERT INTO category_project(category_id, project_id)
             SELECT category_id, categorizable_id
-            FROM categorizables WHERE categorizable_type = \'' . trim(
+            FROM categorizables WHERE categorizable_type = \''.trim(
             json_encode(Project::class, JSON_UNESCAPED_SLASHES), '"'
-        ) . '\''
+        ).'\''
         );
     }
 };
