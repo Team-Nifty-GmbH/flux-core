@@ -135,6 +135,7 @@ abstract class PrintableView extends Component
                 ]
             );
         }
+
         $this->pdf->render();
 
         Printable::injectPageCount($this->pdf);
