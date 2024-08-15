@@ -120,7 +120,10 @@ abstract class PrintableView extends Component
             ->setOption('isFontSubsettingEnabled', true)
             ->setOption('isPhpEnabled', true)
             ->setOption('isRemoteEnabled', true)
-            ->setOption(
+            ->setOption('defaultMediaType', 'print');
+
+        if (! config('dompdf.options.allowed_remote_hosts')) {
+            $this->pdf->setOption(
                 'allowedRemoteHosts',
                 [
                     'localhost',
@@ -130,8 +133,8 @@ abstract class PrintableView extends Component
                     config('app.asset_url'),
                     config('app.frontend_url'),
                 ]
-            )
-            ->setOption('defaultMediaType', 'print');
+            );
+        }
         $this->pdf->render();
 
         Printable::injectPageCount($this->pdf);
