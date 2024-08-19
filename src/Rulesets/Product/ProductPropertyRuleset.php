@@ -17,7 +17,7 @@ class ProductPropertyRuleset extends FluxRuleset
                 'integer',
                 new ModelExists(ProductProperty::class),
             ],
-            'product_properties.*.value' => 'required|string',
+            'product_properties.*.value' => 'string|nullable',
         ];
     }
 }

@@ -11,11 +11,14 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
+use FluxErp\Models\ProductProperty;
+use FluxErp\Models\ProductPropertyGroup;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
@@ -37,6 +40,12 @@ class Product extends Component
     public array $additionalColumns = [];
 
     public ?array $currency = null;
+
+    public array $productProperties = [];
+
+    public array $selectedProductProperties = [];
+
+    public array $displayedProductProperties = [];
 
     #[Url]
     public string $tab = 'product.general';
@@ -61,8 +70,10 @@ class Product extends Component
         $product->append('avatar_url');
 
         $this->product->fill($product);
+        $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
 
         $this->additionalColumns = $product->getAdditionalColumns()->toArray();
+        $this->recalculateDisplayedProductProperties();
 
         $this->view = data_get(
             ProductType::get($product->product_type) ?? ProductType::getDefault(),
@@ -160,6 +171,21 @@ class Product extends Component
 
                 return $productCrossSelling;
             }, $this->productCrossSellings);
+        }
+
+        if ($this->displayedProductProperties) {
+            $productProperties = Arr::flatten(
+                array_filter(data_get($this->displayedProductProperties, '*.text')),
+                1
+            );
+
+            foreach ($productProperties as $productProperty) {
+                data_set(
+                    $this->product->product_properties,
+                    $productProperty['id'] . '.value',
+                    $productProperty['value']
+                );
+            }
         }
 
         try {
@@ -270,5 +296,112 @@ class Product extends Component
         ];
 
         $this->product->suppliers = array_values($this->product->suppliers);
+    }
+
+    #[Renderless]
+    public function showProductPropertiesModal(): void
+    {
+        $this->productProperties = [];
+        $this->selectedProductProperties = array_fill_keys(
+            array_column($this->product->product_properties, 'id'),
+            true
+        );
+
+        $this->js(<<<'JS'
+            $openModal('edit-product-properties-modal');
+        JS);
+    }
+
+    public function loadProductProperties(ProductPropertyGroup $propertyGroup): void
+    {
+        $this->productProperties = $propertyGroup
+            ->productProperties()
+            ->select(['id', 'product_property_group_id', 'name', 'property_type_enum'])
+            ->get()
+            ->map(fn ($productProperty) => array_merge(
+                $productProperty->toArray(),
+                [
+                    'value' => null,
+                    'product_property_group' => [
+                        'id' => $propertyGroup->id,
+                        'name' => $propertyGroup->name,
+                    ],
+                ]
+            ))
+            ->keyBy('id')
+            ->toArray();
+    }
+
+    public function addProductProperties(): bool
+    {
+        $this->selectedProductProperties = array_filter($this->selectedProductProperties);
+
+        if (! $this->selectedProductProperties) {
+            $this->product->product_properties = [];
+
+            return true;
+        }
+
+        $added = [];
+        $keep = [];
+        foreach (array_keys($this->selectedProductProperties) as $id) {
+            if (
+                ($index = array_search(
+                    $id,
+                    array_column($this->product->product_properties, 'id')
+                )) === false
+            ) {
+                $added[] = data_get(
+                    $this->productProperties,
+                    $id,
+                    array_merge(
+                        resolve_static(ProductProperty::class, 'query')
+                            ->whereKey($id)
+                            ->with('productPropertyGroup:id,name')
+                            ->first(['id', 'product_property_group_id', 'name', 'property_type_enum'])
+                            ->toArray(),
+                        ['value' => null]
+                    )
+                );
+            } else {
+                $keep[] = $index;
+            }
+        }
+
+        $this->product->product_properties = Arr::keyBy(
+            array_merge(
+                array_intersect_key($this->product->product_properties, array_flip($keep)),
+                array_filter($added)
+            ),
+            'id'
+        );
+
+        $this->recalculateDisplayedProductProperties();
+
+        return true;
+    }
+
+    protected function recalculateDisplayedProductProperties(): void
+    {
+        $this->displayedProductProperties = [];
+        foreach ($this->product->product_properties as $property) {
+            $this->displayedProductProperties[
+                data_get($property, 'product_property_group.name')
+            ][
+                data_get($property, 'property_type_enum')
+            ][] = [
+                'id' => $property['id'],
+                'name' => $property['name'],
+                'value' => $property['value'],
+            ];
+        }
+
+        ksort($this->displayedProductProperties);
+        array_walk($this->displayedProductProperties, function (&$propertyTypes) {
+            ksort($propertyTypes);
+            array_walk($propertyTypes, function (&$properties) {
+                $properties = Arr::sort($properties, ['name']);
+            });
+        });
     }
 }
