@@ -10,6 +10,8 @@ class ToggleLockRuleset extends FluxRuleset
 {
     protected static ?string $model = Order::class;
 
+    protected static bool $addAdditionalColumnRules = false;
+
     public function rules(): array
     {
         return [
@@ -18,9 +20,7 @@ class ToggleLockRuleset extends FluxRuleset
                 'integer',
                 new ModelExists(Order::class),
             ],
-            'is_locked' => [
-                'boolean',
-            ],
+            'is_locked' => 'boolean',
         ];
     }
 }

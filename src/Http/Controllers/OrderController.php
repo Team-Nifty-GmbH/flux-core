@@ -54,7 +54,7 @@ class OrderController extends BaseController
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
             data: $order,
-            statusMessage: 'order locked toggled'
+            statusMessage: 'order lock toggled'
         );
     }
 }

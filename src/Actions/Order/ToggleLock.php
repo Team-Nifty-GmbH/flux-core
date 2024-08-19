@@ -31,30 +31,4 @@ class ToggleLock extends FluxAction
 
         return $order->withoutRelations()->fresh();
     }
-
-    protected function validateData(): void
-    {
-        parent::validateData();
-
-        $orderPositions = data_get($this->data, 'order_positions', []);
-        $ids = array_column($orderPositions ?? [], 'id');
-
-        if (count($ids) !== count(array_unique($ids))) {
-            throw ValidationException::withMessages([
-                'order_positions' => ['No duplicate order position ids allowed.'],
-            ])->errorBag('replicateOrder');
-        }
-
-        if ($orderPositions) {
-            if (resolve_static(OrderPosition::class, 'query')
-                ->whereIntegerInRaw('id', $ids)
-                ->where('order_id', '!=', $this->data['id'])
-                ->exists()
-            ) {
-                throw ValidationException::withMessages([
-                    'order_positions' => ['Only order positions from given order allowed.'],
-                ])->errorBag('replicateOrder');
-            }
-        }
-    }
 }
