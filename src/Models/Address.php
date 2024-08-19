@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\UnauthorizedException;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
@@ -44,9 +45,9 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendars, HasCart,
-        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid,
-        Lockable, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
+    use BroadcastsEvents, CausesActivity, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens,
+        HasCalendars, HasCart, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags,
+        HasUserModification, HasUuid, Lockable, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'password',

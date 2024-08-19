@@ -8,19 +8,9 @@ use Illuminate\Support\Str;
 
 class LanguageFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Language::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    public function definition(): array
     {
         $i = 0;
         while (Language::query()

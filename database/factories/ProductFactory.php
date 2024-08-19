@@ -7,22 +7,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Product::class;
 
-    /**
-     * Define the model's default state.
-     */
     public function definition(): array
     {
         return [
             'product_number' => $this->faker->word,
             'name' => $this->faker->jobTitle(),
-            'description' => $this->faker->randomHtml(1, 1),
+            'description' => $this->faker->paragraph(),
             'ean' => $this->faker->ean13(),
             'min_delivery_time' => $this->faker->numberBetween(3, 7),
             'max_delivery_time' => $this->faker->numberBetween(7, 15),

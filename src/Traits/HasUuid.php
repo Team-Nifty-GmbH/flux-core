@@ -2,7 +2,7 @@
 
 namespace FluxErp\Traits;
 
-use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Str;
 
 trait HasUuid
 {
@@ -10,7 +10,7 @@ trait HasUuid
     {
         static::creating(function ($model) {
             if (! $model->uuid) {
-                $model->uuid = Uuid::uuid4()->toString();
+                $model->uuid = Str::uuid()->toString();
             }
         });
 

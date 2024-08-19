@@ -16,14 +16,14 @@ class OrderPositionTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $orders = Order::query()->with('orderType')->get();
+        $orders = Order::query()->with('orderType:id,order_type_enum')->get();
         $products = Product::query()
             ->with(['prices'])
             ->get();
-        $suppliers = Contact::all();
-        $warehouses = Warehouse::all();
-        $vatRates = VatRate::all();
-        $clientId = Client::query()->first();
+        $suppliers = Contact::all(['id']);
+        $warehouses = Warehouse::all(['id']);
+        $vatRates = VatRate::all(['id']);
+        $clientId = Client::default()?->id ?? Client::query()->value('id');
 
         foreach ($orders as $order) {
             $multiplier = $order->orderType->order_type_enum->multiplier();

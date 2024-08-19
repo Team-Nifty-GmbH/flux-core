@@ -8,14 +8,9 @@ use Illuminate\Database\Seeder;
 
 class ContactOptionTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        foreach (Address::all() as $address) {
+        foreach (Address::all(['id']) as $address) {
             $address->contactOptions()->saveMany(ContactOption::factory()->count(3)->make());
         }
     }

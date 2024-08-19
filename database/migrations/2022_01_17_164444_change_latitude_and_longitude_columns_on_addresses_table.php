@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class ChangeLatitudeAndLongitudeColumnsOnAddressesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
             $table->decimal('latitude', 8, 6)->nullable()->change();
@@ -19,12 +14,7 @@ class ChangeLatitudeAndLongitudeColumnsOnAddressesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
             $table->float('latitude')->nullable()->change();

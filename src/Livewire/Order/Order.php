@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Order;
 
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\ReplicateOrder;
+use FluxErp\Actions\Order\ToggleLock;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Contracts\OffersPrinting;
@@ -381,6 +382,23 @@ class Order extends OrderPositionList
             ->whereKey($this->order->address_delivery_id)
             ->first()
             ->toArray();
+    }
+
+    public function toggleLock(): void
+    {
+        try {
+            ToggleLock::make(['id' => $this->order->id])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->fetchOrder($this->order->id);
+        $this->forceRender();
     }
 
     #[Renderless]

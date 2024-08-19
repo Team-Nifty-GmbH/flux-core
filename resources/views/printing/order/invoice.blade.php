@@ -1,4 +1,4 @@
-@extends('flux::printing.order.order')
+@extends('print::order.order')
 @section('first-page-right-block.labels')
     @parent
     <div class="font-semibold">

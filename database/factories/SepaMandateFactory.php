@@ -7,19 +7,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SepaMandateFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = SepaMandate::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    public function definition(): array
     {
         return [
             'signed_date' => $this->faker->boolean ? $this->faker->date : null,

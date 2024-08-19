@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateAddressTypesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('address_types', function (Blueprint $table) {
             $table->id()
@@ -50,12 +45,7 @@ class CreateAddressTypesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('address_types');
     }

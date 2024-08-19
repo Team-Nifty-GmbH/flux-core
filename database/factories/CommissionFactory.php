@@ -7,19 +7,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CommissionFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Commission::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    public function definition(): array
     {
         return [
             'commission' => $this->faker->randomFloat(5, 0.01),

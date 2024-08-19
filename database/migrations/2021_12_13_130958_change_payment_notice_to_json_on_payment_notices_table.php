@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 class ChangePaymentNoticeToJsonOnPaymentNoticesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('payment_notices', function (Blueprint $table) {
             $table->json('payment_notice')->change();
@@ -21,12 +16,7 @@ class ChangePaymentNoticeToJsonOnPaymentNoticesTable extends Migration
         $this->migratePaymentNotice();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         $this->rollbackPaymentNotice();
 

@@ -7,24 +7,20 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ContactOptionFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = ContactOption::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
+        $type = $this->faker->randomElement(['phone', 'email', 'website']);
+
         return [
-            'type' => $this->faker->randomElement(['phone', 'email', 'website']),
+            'type' => $type,
             'label' => $this->faker->jobTitle(),
-            'value' => $this->faker->email(),
+            'value' => match ($type) {
+                'email' => $this->faker->email(),
+                'phone' => $this->faker->phoneNumber(),
+                'website' => $this->faker->url(),
+            },
         ];
     }
 }

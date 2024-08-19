@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 
 class CurrencyTableSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         Currency::factory()->count(3)->create();
 

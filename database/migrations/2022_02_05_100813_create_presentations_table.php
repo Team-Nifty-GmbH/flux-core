@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreatePresentationsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('presentations', function (Blueprint $table) {
             $table->id();
@@ -39,12 +34,7 @@ class CreatePresentationsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('presentations');
     }
