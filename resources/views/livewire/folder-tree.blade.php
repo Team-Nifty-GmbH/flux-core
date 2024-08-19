@@ -82,14 +82,16 @@
                 icon: 'error'
             });
         },
-        async uploadSuccess(success) {
+        async uploadSuccess() {
+            console.log('upload success',this.selectionProxy);
             this.isUploading = false
             this.progress = 0
             this.showLevel(null, this.selectionProxy);
-            $wire.get('latestUploads').forEach((file) => {
-                this.selectionProxy.children.push(file);
-                this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
-            });
+             console.log(this.selectionProxy)
+            (await $wire.get('latestUploads')).forEach((file) => {
+                this.folderTree.selectionProxy.children.push(file);
+                this.folderTree.selection = JSON.parse(JSON.stringify(this.folderTree.selectionProxy));
+            },this);
         },
         save() {
             $wire.save(this.selection).then(() => {
@@ -162,8 +164,8 @@
         },
     }"
      class="flex gap-2 justify-between"
-     x-init="loadLevels();"
      wire:ignore
+     x-init="loadLevels();"
      x-on:folder-tree-select="treeSelect($event.detail)"
 >
     <div class="min-w-0 overflow-auto">
@@ -197,7 +199,7 @@
                         <x-input class="flex-1" x-bind:disabled="selection.is_static" :label="__('Name')"
                                  x-model="selection.name" />
                     </div>
-                    <x-button primary :label="__('Save')" x-on:click="save()" />
+                    <x-button x-cloak x-show="!selection.is_static" primary :label="__('Save')" x-on:click="save()" />
                 </div>
             @endcan
             @can('action.media.upload')
@@ -205,8 +207,8 @@
                     <div class="w-full mb-4">
                         <input x-init="loadFilePond()" id="filepond-drop" type="file" />
                     </div>
-                    <x-button x-show="tempFilesId.length !== 0" x-cloak
-                              x-on:click="submitFiles(selectionProxy.collection_name)"
+                    <x-button x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0" x-cloak
+                              x-on:click="submitFiles(selectionProxy.collection_name, uploadSuccess)"
                               primary
                               :label="__('Upload')" />
                 </div>

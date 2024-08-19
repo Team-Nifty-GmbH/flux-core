@@ -54,34 +54,56 @@ class FolderTree extends Component
     public function getRules(): array
     {
         return [
-            'files.*' => 'required|file|max:10240',
+            'files.*'=> 'required|file|max:1024',
         ];
     }
 
-    public function updatedFiles(): JsonResponse
+    public function getRulesSingleFile($index): array
+    {
+        return [
+            'files.'.$index => 'required|file|max:1024',
+        ];
+    }
+
+
+
+
+    #[Renderless]
+    public function updatedFiles(): void
     {
         try {
             resolve_static(UpdateMedia::class, 'canPerformAction', [false]);
         } catch (UnauthorizedException $e) {
             exception_to_notifications($e, $this);
-
-            return ResponseHelper::badRequest(422);
+            return;
         }
-
-        try {
-            $this->validate($this->getRules());
-        } catch (ValidationException $e) {
-            // Handle the validation exception
-            exception_to_notifications($e, $this);
-
-            return ResponseHelper::badRequest(422);
-        }
-
-        return ResponseHelper::ok(200);
     }
 
     #[Renderless]
-    public function submitFiles(string $collection, array $tempFileNames): void
+    public function validateOnDemand(string $fileId):bool
+    {
+
+        $index = array_search($fileId, array_map(function ($item) {
+            return $item->getFilename();
+        } ,$this->files));
+
+        if($index === false) {
+            return false;
+        }
+
+        try {
+            $this->validate($this->getRulesSingleFile($index));
+        } catch (ValidationException $e) {
+            // Handle the validation exception
+            exception_to_notifications($e, $this);
+            return false;
+        }
+
+        return true;
+    }
+
+    #[Renderless]
+    public function submitFiles(string $collection, array $tempFileNames): bool
     {
         // set the folder name
         $this->collection = $collection;
@@ -98,12 +120,14 @@ class FolderTree extends Component
                 modelId: $this->modelId,
                 modelType: app($this->modelType)->getMorphClass(),
             );
-
             $this->latestUploads = $media;
+            $this->files = [];
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
+            return false;
         }
 
+        return true;
     }
 
     public function mount(?string $modelType = null, ?int $modelId = null): void
