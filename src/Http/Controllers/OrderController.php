@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Controllers;
 
+use FluxErp\Actions\Order\ToggleLock;
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Models\Order;
 use FluxErp\Services\OrderService;
@@ -42,5 +43,18 @@ class OrderController extends BaseController
         $response = $orderService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
+    public function toggleLock(string $id, Request $request): JsonResponse
+    {
+        $order = ToggleLock::make(array_merge($request->all(), ['id' => $id]))
+            ->validate()
+            ->execute();
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $order,
+            statusMessage: 'order lock toggled'
+        );
     }
 }

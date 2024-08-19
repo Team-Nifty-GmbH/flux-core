@@ -88,7 +88,7 @@ class PurchaseInvoice extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('purchase_invoice')
-            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png'])
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml'])
             ->singleFile();
     }
 }
