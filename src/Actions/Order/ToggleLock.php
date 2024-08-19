@@ -4,9 +4,7 @@ namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Order;
-use FluxErp\Models\OrderPosition;
 use FluxErp\Rulesets\Order\ToggleLockRuleset;
-use Illuminate\Validation\ValidationException;
 
 class ToggleLock extends FluxAction
 {
