@@ -177,7 +177,7 @@
                         }
                     }
                 }">
-                    <template x-for="(position, index) in $wire.purchaseInvoiceForm.purchase_invoice_positions">
+                    <template x-for="(position, index) in $wire.purchaseInvoiceForm.purchase_invoice_positions" :key="position.id">
                         <x-card>
                             <div class="flex flex-col gap-4">
                                 <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
@@ -221,7 +221,9 @@
                                             :options="$vatRates"
                                             option-key-value
                                             :label="__('Vat Rate')"
+                                            x-model.number="position.vat_rate_id"
                                             x-on:selected="position.vat_rate_id = $event.detail?.value"
+                                            x-init="$el.value = position.vat_rate_id; fillSelectedFromInputValue();"
                                         />
                                     </div>
                                     <x-inputs.number
@@ -246,6 +248,7 @@
                                             option-value="id"
                                             option-label="name"
                                             option-description="number"
+                                            x-init="$el.value = position.ledger_account_id; init();"
                                             x-model.number="position.ledger_account_id"
                                             :async-data="[
                                                 'api' => route('search', \FluxErp\Models\LedgerAccount::class),
