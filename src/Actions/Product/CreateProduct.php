@@ -32,7 +32,7 @@ class CreateProduct extends FluxAction
         $productCrossSellings = Arr::pull($this->data, 'product_cross_sellings', []);
         $productProperties = Arr::mapWithKeys(
             Arr::pull($this->data, 'product_properties', []),
-            fn ($item, $key) => [$item['id'] => $item['value']]
+            fn ($item, $key) => [$item['id'] => ['value' => $item['value']]]
         );
         $bundleProducts = Arr::pull($this->data, 'bundle_products', false);
         $prices = Arr::pull($this->data, 'prices', []);
