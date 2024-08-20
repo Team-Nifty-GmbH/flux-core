@@ -35,7 +35,7 @@ class Clients extends ClientList
 
     public MediaForm $logoSmall;
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         return array_merge(
             parent::getViewData(),
@@ -54,7 +54,7 @@ class Clients extends ClientList
         );
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -68,7 +68,7 @@ class Clients extends ClientList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

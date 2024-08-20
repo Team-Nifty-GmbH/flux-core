@@ -24,7 +24,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
 
     public ProductPropertyGroupForm $productPropertyGroup;
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -38,7 +38,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

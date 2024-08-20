@@ -40,7 +40,7 @@ class MediaGrid extends BaseMediaGrid
         $this->collection = 'images';
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         $rowActions = parent::getRowActions();
         array_splice($rowActions, -1, 0, [
@@ -56,7 +56,7 @@ class MediaGrid extends BaseMediaGrid
         return $rowActions;
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make(icon: 'upload')
@@ -69,7 +69,7 @@ class MediaGrid extends BaseMediaGrid
         ];
     }
 
-    public function getRowAttributes(): ComponentAttributeBag
+    protected function getRowAttributes(): ComponentAttributeBag
     {
         return new ComponentAttributeBag(
             [

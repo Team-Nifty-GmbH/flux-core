@@ -35,7 +35,7 @@ class MediaList extends BaseDataTable
         return $itemArray;
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make(icon: 'save')
@@ -63,7 +63,7 @@ class MediaList extends BaseDataTable
         ];
     }
 
-    public function getLeftAppends(): array
+    protected function getLeftAppends(): array
     {
         return [
             'name' => [

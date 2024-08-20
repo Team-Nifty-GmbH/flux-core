@@ -75,17 +75,11 @@ class Product extends Component
 
         $this->additionalColumns = $product->getAdditionalColumns()->toArray();
         $this->recalculateDisplayedProductProperties();
-
-        $this->view = data_get(
-            ProductType::get($product->product_type) ?? ProductType::getDefault(),
-            'view',
-            $this->view
-        );
     }
 
     public function render(): View|Factory|Application
     {
-        return view($this->view, [
+        return view($this->viewName, [
             'vatRates' => $this->vatRates(),
         ]);
     }
@@ -94,6 +88,20 @@ class Product extends Component
     public function vatRates(): array
     {
         return app(VatRate::class)->all(['id', 'name', 'rate_percentage'])->toArray();
+    }
+
+    #[Computed(persist: true)]
+    public function viewName()
+    {
+        $productType = resolve_static(ProductModel::class, 'query')
+            ->whereKey($this->product->id)
+            ->value('product_type');
+
+        return data_get(
+            ProductType::get($productType) ?? ProductType::getDefault(),
+            'view',
+            $this->view
+        );
     }
 
     #[Renderless]
@@ -203,6 +211,46 @@ class Product extends Component
     }
 
     #[Renderless]
+    public function delete(): bool
+    {
+        try {
+            $this->product->delete();
+
+            $this->redirect(route('products.products'), true);
+
+            return true;
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        return false;
+    }
+
+    public function resetProduct(): void
+    {
+        $product = resolve_static(ProductModel::class, 'query')
+            ->whereKey($this->product->id)
+            ->with([
+                'categories:id',
+                'tags:id',
+                'bundleProducts:id',
+                'vatRate:id,rate_percentage',
+                'parent',
+                'coverMedia',
+                'clients:id',
+            ])
+            ->withCount('children')
+            ->firstOrFail();
+        $product->append('avatar_url');
+
+        $this->product->reset();
+        $this->product->fill($product);
+        $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
+
+        $this->recalculateDisplayedProductProperties();
+    }
+
+    #[Renderless]
     public function getPriceLists(): void
     {
         $product = resolve_static(ProductModel::class, 'query')
@@ -264,22 +312,6 @@ class Product extends Component
     }
 
     #[Renderless]
-    public function delete(): bool
-    {
-        try {
-            $this->product->delete();
-
-            $this->redirect(route('products.products'), true);
-
-            return true;
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-        }
-
-        return false;
-    }
-
-    #[Renderless]
     public function addSupplier(Contact $contact): void
     {
         if (in_array($contact->id, array_column($this->product->suppliers, 'contact_id'))) {
@@ -313,6 +345,7 @@ class Product extends Component
         JS);
     }
 
+    #[Renderless]
     public function loadProductProperties(ProductPropertyGroup $propertyGroup): void
     {
         $this->productProperties = $propertyGroup
@@ -333,6 +366,7 @@ class Product extends Component
             ->toArray();
     }
 
+    #[Renderless]
     public function addProductProperties(): bool
     {
         $this->selectedProductProperties = array_filter($this->selectedProductProperties);

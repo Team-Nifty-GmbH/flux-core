@@ -38,94 +38,6 @@
             </div>
         @show
     </x-card>
-    <x-card class="space-y-2.5" :title="__('Product Properties')">
-        @section('product-properties')
-            <x-modal name="edit-product-properties-modal" max-width="6xl">
-                <x-card :title="__('Edit Product Properties')" x-data="{productPropertyGroup: null}">
-                    <div class="flex gap-4"
-                         x-on:data-table-row-clicked="$wire.loadProductProperties($event.detail.id ?? $event.detail.record.id); productPropertyGroup = $event.detail.record ?? $event.detail;"
-                    >
-                        <div class="flex-grow">
-                            <livewire:product.product-property-group-list />
-                        </div>
-                        <div x-collapse x-show="Object.values($wire.productProperties).length > 0" x-cloak class="w-1/2">
-                            <x-card>
-                                <x-slot:title>
-                                    <span x-text="productPropertyGroup?.name"></span>
-                                </x-slot:title>
-                                <template x-for="productProperty in $wire.productProperties" :key="productProperty.id">
-                                    <div class="flex gap-1.5">
-                                        <x-checkbox
-                                            x-bind:id="'product-property' + productProperty.id"
-                                            x-bind:value="productProperty.id"
-                                            x-model.number="$wire.selectedProductProperties[productProperty.id]"
-                                        />
-                                        <label
-                                            x-text="productProperty.name"
-                                            class="block text-sm font-medium text-gray-700 dark:text-gray-50"
-                                            x-bind:for="'product-property' + productProperty.id"
-                                        >
-                                        </label>
-                                    </div>
-                                </template>
-                            </x-card>
-                        </div>
-                    </div>
-                    <x-slot:footer>
-                        <div class="flex justify-end gap-1.5">
-                            <x-button
-                                flat
-                                :label="__('Cancel')"
-                                x-on:click="close()"
-                            />
-                            <x-button
-                                primary
-                                :label="__('Add')"
-                                wire:click="addProductProperties().then(() => { close(); })"
-                            />
-                        </div>
-                    </x-slot:footer>
-                </x-card>
-            </x-modal>
-            <x-button
-                primary
-                x-show="edit"
-                :label="__('Add')"
-                wire:click="showProductPropertiesModal"
-            />
-            <div class="grid grid-cols-3 gap-x-4">
-                <template x-for="(propertyTypes, group) in $wire.displayedProductProperties" :key="group">
-                    <div class="col-span-1 space-y-2">
-                        <span x-text="group"></span>
-                        <template x-for="(displayedProperties, propertyType) in propertyTypes">
-                            <div>
-                                <div class="flex space-x-1.5" x-cloak x-show="propertyType === 'option'">
-                                    <template x-for="displayedProperty in displayedProperties">
-                                        <x-badge x-text="displayedProperty.name" />
-                                    </template>
-                                </div>
-                                <div class="space-y-2.5" x-cloak x-show="propertyType !== 'option'">
-                                    <template x-for="displayedProperty in displayedProperties">
-                                        <div>
-                                            <x-label
-                                                class="mb-1"
-                                                x-bind:for="'displayed-property-' + displayedProperty.id"
-                                                x-text="displayedProperty.name"
-                                            ></x-label>
-                                            <x-input
-                                                x-model="displayedProperty.value"
-                                                x-bind:id="'displayed-property-' + displayedProperty.id"
-                                            />
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </template>
-            </div>
-        @show
-    </x-card>
     <x-card class="flex flex-col gap-1.5" :title="__('Assignment')">
         <x-select
             multiselect
@@ -191,6 +103,100 @@
                 </div>
             </x-slot:beforeOptions>
         </x-select>
+    </x-card>
+    <x-card class="space-y-2.5 bg-gray-50 dark:bg-secondary-700" :title="__('Product Properties')">
+        @section('product-properties')
+            <x-modal name="edit-product-properties-modal" max-width="6xl">
+                <x-card :title="__('Edit Product Properties')" x-data="{productPropertyGroup: null}">
+                    <div class="flex gap-4"
+                         x-on:data-table-row-clicked="$wire.loadProductProperties($event.detail.id ?? $event.detail.record.id); productPropertyGroup = $event.detail.record ?? $event.detail;"
+                    >
+                        <div class="flex-grow">
+                            <livewire:product.product-property-group-list />
+                        </div>
+                        <div x-collapse x-show="Object.values($wire.productProperties).length > 0" x-cloak class="w-1/2">
+                            <x-card>
+                                <x-slot:title>
+                                    <span x-text="productPropertyGroup?.name"></span>
+                                </x-slot:title>
+                                <template x-for="productProperty in $wire.productProperties" :key="productProperty.id">
+                                    <div class="flex gap-1.5">
+                                        <x-checkbox
+                                            x-bind:id="'product-property' + productProperty.id"
+                                            x-bind:value="productProperty.id"
+                                            x-model.number="$wire.selectedProductProperties[productProperty.id]"
+                                        />
+                                        <label
+                                            x-text="productProperty.name"
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-50"
+                                            x-bind:for="'product-property' + productProperty.id"
+                                        >
+                                        </label>
+                                    </div>
+                                </template>
+                            </x-card>
+                        </div>
+                    </div>
+                    <x-slot:footer>
+                        <div class="flex justify-end gap-1.5">
+                            <x-button
+                                flat
+                                :label="__('Cancel')"
+                                x-on:click="close()"
+                            />
+                            <x-button
+                                primary
+                                :label="__('Edit')"
+                                wire:click="addProductProperties().then(() => { close(); })"
+                            />
+                        </div>
+                    </x-slot:footer>
+                </x-card>
+            </x-modal>
+            <x-button
+                primary
+                x-show="edit"
+                x-cloak
+                :label="__('Edit')"
+                wire:click="showProductPropertiesModal"
+            />
+            <div class="grid grid-cols-3 gap-x-4">
+                <template x-for="(propertyTypes, group) in $wire.displayedProductProperties" :key="group">
+                    <div class="col-span-1 space-y-2">
+                        <x-card>
+                            <x-slot:title>
+                                <span x-text="group"></span>
+                            </x-slot:title>
+                            <template x-for="(displayedProperties, propertyType) in propertyTypes">
+                                <div>
+                                    <div class="flex space-x-1.5" x-cloak x-show="propertyType === 'option'">
+                                        <template x-for="displayedProperty in displayedProperties">
+                                            <x-badge x-text="displayedProperty.name" />
+                                        </template>
+                                    </div>
+                                    <div class="space-y-2.5" x-cloak x-show="propertyType !== 'option'">
+                                        <template x-for="displayedProperty in displayedProperties">
+                                            <div>
+                                                <x-label
+                                                    class="mb-1"
+                                                    x-bind:for="'displayed-property-' + displayedProperty.id"
+                                                    x-text="displayedProperty.name"
+                                                ></x-label>
+                                                <x-input
+                                                    x-model="displayedProperty.value"
+                                                    x-bind:id="'displayed-property-' + displayedProperty.id"
+                                                    x-bind:disabled="!edit"
+                                                />
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </x-card>
+                    </div>
+                </template>
+            </div>
+        @show
     </x-card>
     @if($this->additionalColumns)
         <x-card :title="__('Additional columns')">

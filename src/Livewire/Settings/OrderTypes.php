@@ -30,7 +30,7 @@ class OrderTypes extends OrderTypeList
         $this->headline = __('Order Types');
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -44,7 +44,7 @@ class OrderTypes extends OrderTypeList
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         $printViews = [];
         foreach (app(Order::class)->getAvailableViews() as $view) {

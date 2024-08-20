@@ -41,7 +41,7 @@ class PriceLists extends PriceListList
         $this->headline = __('Price Lists');
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -55,7 +55,7 @@ class PriceLists extends PriceListList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

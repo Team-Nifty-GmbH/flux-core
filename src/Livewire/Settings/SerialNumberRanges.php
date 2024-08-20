@@ -32,7 +32,7 @@ class SerialNumberRanges extends SerialNumberRangeList
         $this->headline = __('Serial Number Ranges');
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         return array_merge(
             parent::getViewData(),
@@ -53,7 +53,7 @@ class SerialNumberRanges extends SerialNumberRangeList
         );
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -67,7 +67,7 @@ class SerialNumberRanges extends SerialNumberRangeList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

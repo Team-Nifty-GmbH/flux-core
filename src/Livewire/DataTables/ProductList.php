@@ -28,7 +28,7 @@ class ProductList extends BaseDataTable
         return $returnArray;
     }
 
-    public function getLeftAppends(): array
+    protected function getLeftAppends(): array
     {
         return [
             'name' => [

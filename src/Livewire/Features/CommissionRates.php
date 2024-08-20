@@ -88,14 +88,14 @@ class CommissionRates extends BaseDataTable
         );
     }
 
-    public function getBottomAppends(): array
+    protected function getBottomAppends(): array
     {
         return [
             'user.name' => 'user.email',
         ];
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()

@@ -77,7 +77,7 @@ class ProductList extends BaseProductList
         $this->product->product_type = data_get(ProductType::getDefault(), 'type');
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -90,7 +90,7 @@ class ProductList extends BaseProductList
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         return array_merge(
             parent::getViewData(),

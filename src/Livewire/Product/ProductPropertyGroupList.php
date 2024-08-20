@@ -24,12 +24,17 @@ class ProductPropertyGroupList extends BaseProductPropertyGroupList
         parent::startSearch();
     }
 
-    public function getRowAttributes(): ComponentAttributeBag
+    protected function getRowAttributes(): ComponentAttributeBag
     {
         return new ComponentAttributeBag([
             'x-bind:class' => <<<'JS'
                 record.id === productPropertyGroup?.id && 'bg-primary-100 dark:bg-primary-800'
             JS,
         ]);
+    }
+
+    protected function allowSoftDeletes(): bool
+    {
+        return false;
     }
 }

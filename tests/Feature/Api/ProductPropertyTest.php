@@ -149,6 +149,7 @@ class ProductPropertyTest extends BaseSetup
     {
         $productProperty = [
             'id' => $this->productProperties[0]->id,
+            'name' => null,
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);

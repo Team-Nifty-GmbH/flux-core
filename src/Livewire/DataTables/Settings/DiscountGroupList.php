@@ -11,7 +11,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class DiscountGroupList extends BaseDiscountGroupList
 {
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()
@@ -32,7 +32,7 @@ class DiscountGroupList extends BaseDiscountGroupList
         ];
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()

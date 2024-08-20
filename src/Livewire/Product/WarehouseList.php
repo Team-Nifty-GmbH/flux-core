@@ -60,7 +60,7 @@ class WarehouseList extends BaseWarehouseList
         ]);
     }
 
-    public function getRowAttributes(): ComponentAttributeBag
+    protected function getRowAttributes(): ComponentAttributeBag
     {
         return new ComponentAttributeBag([
             'x-bind:class' => <<<'JS'

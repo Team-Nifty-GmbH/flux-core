@@ -22,7 +22,7 @@ class AddressTypes extends AddressTypeList
 
     protected ?string $includeBefore = 'flux::livewire.settings.address-types';
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -34,7 +34,7 @@ class AddressTypes extends AddressTypeList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()
@@ -55,7 +55,7 @@ class AddressTypes extends AddressTypeList
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         return array_merge(
             parent::getViewData(),

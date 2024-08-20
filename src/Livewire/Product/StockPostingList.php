@@ -14,7 +14,7 @@ class StockPostingList extends BaseStockPostingList
 
     public int $productId;
 
-    public function getComponentAttributes(): ComponentAttributeBag
+    protected function getComponentAttributes(): ComponentAttributeBag
     {
         return new ComponentAttributeBag([
             'x-init' => <<<'JS'

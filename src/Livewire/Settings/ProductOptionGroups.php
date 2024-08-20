@@ -21,7 +21,7 @@ class ProductOptionGroups extends ProductOptionGroupList
 
     public ProductOptionGroupForm $productOptionGroupForm;
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -35,7 +35,7 @@ class ProductOptionGroups extends ProductOptionGroupList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

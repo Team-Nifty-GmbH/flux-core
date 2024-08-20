@@ -29,7 +29,7 @@ class ProductTypeManager
         if ($default
             && ($key = $this->productTypes->search(fn ($type) => $type['is_default'])) !== false
         ) {
-            $this->productTypes[$key]['is_default'] = false;
+            $this->productTypes->put($key, array_merge($this->productTypes->get($key), ['is_default' => false]));
         }
 
         $this->productTypes[$name] = [
