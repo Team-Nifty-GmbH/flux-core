@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
@@ -22,6 +23,13 @@ class ProductProperty extends Model
     protected $guarded = [
         'id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'property_type_enum' => PropertyTypeEnum::class,
+        ];
+    }
 
     public function productPropertyGroup(): BelongsTo
     {

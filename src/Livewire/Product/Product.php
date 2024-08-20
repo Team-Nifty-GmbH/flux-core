@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Product;
 
 use FluxErp\Actions\Tag\CreateTag;
+use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Facades\ProductType;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
@@ -175,7 +176,7 @@ class Product extends Component
 
         if ($this->displayedProductProperties) {
             $productProperties = Arr::flatten(
-                array_filter(data_get($this->displayedProductProperties, '*.text')),
+                array_filter(data_get($this->displayedProductProperties, '*.' . PropertyTypeEnum::Text->value)),
                 1
             );
 
@@ -345,12 +346,7 @@ class Product extends Component
         $added = [];
         $keep = [];
         foreach (array_keys($this->selectedProductProperties) as $id) {
-            if (
-                ($index = array_search(
-                    $id,
-                    array_column($this->product->product_properties, 'id')
-                )) === false
-            ) {
+            if (! in_array($id, array_column($this->product->product_properties, 'id'))) {
                 $added[] = data_get(
                     $this->productProperties,
                     $id,
@@ -364,7 +360,7 @@ class Product extends Component
                     )
                 );
             } else {
-                $keep[] = $index;
+                $keep[] = $id;
             }
         }
 
