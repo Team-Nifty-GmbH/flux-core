@@ -35,7 +35,7 @@ class ProductTypeManager
         $this->productTypes[$name] = [
             'type' => $name,
             'view' => $view,
-            'is_default' => $default
+            'is_default' => $default,
         ];
     }
 

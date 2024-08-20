@@ -4,7 +4,6 @@ namespace FluxErp\Livewire\Product;
 
 use FluxErp\Livewire\DataTables\ProductPropertyGroupList as BaseProductPropertyGroupList;
 use Illuminate\View\ComponentAttributeBag;
-use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 
 class ProductPropertyGroupList extends BaseProductPropertyGroupList
 {

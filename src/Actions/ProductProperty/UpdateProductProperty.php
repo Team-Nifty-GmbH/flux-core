@@ -6,7 +6,6 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Rulesets\ProductProperty\UpdateProductPropertyRuleset;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 
 class UpdateProductProperty extends FluxAction
 {
