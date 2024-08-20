@@ -22,7 +22,16 @@ class CreateMailExecutedSubscriber
     public function handle(CreateMailMessage $event): void
     {
         $message = $event->getResult();
-        $this->address = $this->findAddress($message);
+
+        $this->address = resolve_static(
+            Address::class,
+            'findAddressByEmail',
+            ['email' => Str::between($message->from, '<', '>')]
+        );
+
+        if ($this->address) {
+            CauserResolver::setCauser($this->address);
+        }
 
         if ($message->mailFolder->can_create_purchase_invoice && $message->media()->count() !== 0) {
             $this->createPurchaseInvoice($message);
@@ -110,7 +119,6 @@ class CreateMailExecutedSubscriber
 
     protected function findAddress(Communication $message): ?Address
     {
-        $email = Str::between($message->from, '<', '>');
 
         $address = null;
         if ($email) {
