@@ -196,15 +196,6 @@ if (! function_exists('event_subscribers')) {
         ?int $modelId = null,
         ?string $modelType = null
     ): Illuminate\Support\Collection {
-        if (
-            resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
-                ->where('event', $event)
-                ->whereNull('subscribable_id')
-                ->exists()
-        ) {
-            return resolve_static(\FluxErp\Models\User::class, 'query')->get();
-        }
-
         return resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
             ->when(
                 auth()->user(),

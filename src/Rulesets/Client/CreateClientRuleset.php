@@ -18,7 +18,7 @@ class CreateClientRuleset extends FluxRuleset
             'country_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Country::class),
+                app(ModelExists::class, ['model' => Country::class]),
             ],
             'name' => 'required|string',
             'client_code' => 'required|string|unique:clients,client_code',

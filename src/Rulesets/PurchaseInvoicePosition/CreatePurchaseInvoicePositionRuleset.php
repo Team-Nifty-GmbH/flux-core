@@ -21,40 +21,40 @@ class CreatePurchaseInvoicePositionRuleset extends FluxRuleset
         return [
             'uuid' => [
                 'string',
-                new Sole(PurchaseInvoicePosition::class),
+                app(Sole::class, ['model' => PurchaseInvoicePosition::class]),
             ],
             'purchase_invoice_id' => [
                 'required',
                 'integer',
-                new ModelExists(PurchaseInvoice::class),
+                app(ModelExists::class, ['model' => PurchaseInvoice::class]),
             ],
             'ledger_account_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(LedgerAccount::class),
+                app(ModelExists::class, ['model' => LedgerAccount::class]),
             ],
             'product_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'vat_rate_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(VatRate::class),
+                app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'name' => 'nullable|string|max:255',
             'amount' => [
                 'required',
-                new Numeric(min: 0),
+                app(Numeric::class, ['min' => 0]),
             ],
             'unit_price' => [
                 'required',
-                new Numeric(min: 0),
+                app(Numeric::class, ['min' => 0]),
             ],
             'total_price' => [
                 'required',
-                new Numeric(min: 0),
+                app(Numeric::class, ['min' => 0]),
             ],
         ];
     }

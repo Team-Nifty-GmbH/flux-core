@@ -31,7 +31,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
     public OrderForm $order;
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -44,7 +44,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         return array_merge(
             parent::getViewData(),

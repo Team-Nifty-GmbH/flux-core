@@ -36,7 +36,7 @@ class MailAccounts extends MailAccountList
 
     public array $folders = [];
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -50,7 +50,7 @@ class MailAccounts extends MailAccountList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

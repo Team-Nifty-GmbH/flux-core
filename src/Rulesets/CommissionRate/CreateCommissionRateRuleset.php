@@ -20,24 +20,24 @@ class CreateCommissionRateRuleset extends FluxRuleset
             'user_id' => [
                 'required',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'contact_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'category_id' => [
                 'exclude_unless:product_id,null',
                 'integer',
                 'nullable',
-                (new ModelExists(Category::class))
-                    ->where('model_type', app(Product::class)->getMorphClass()),
+                app(ModelExists::class, ['model' => Category::class])
+                    ->where('model_type', morph_alias(Product::class)),
             ],
             'product_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'commission_rate' => 'required|numeric|lt:1|min:0',
         ];

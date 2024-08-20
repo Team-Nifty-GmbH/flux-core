@@ -17,11 +17,11 @@ class UpdateSepaMandateRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(SepaMandate::class),
+                app(ModelExists::class, ['model' => SepaMandate::class]),
             ],
             'contact_bank_connection_id' => [
                 'integer',
-                new ModelExists(ContactBankConnection::class),
+                app(ModelExists::class, ['model' => ContactBankConnection::class]),
             ],
             'signed_date' => 'date|nullable',
         ];

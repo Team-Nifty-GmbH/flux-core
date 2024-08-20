@@ -18,7 +18,7 @@ class DeleteVatRateRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(VatRate::class),
+                app(ModelExists::class, ['model' => VatRate::class]),
             ],
         ];
     }

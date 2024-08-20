@@ -18,7 +18,7 @@ class DeleteScheduleRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Schedule::class),
+                app(ModelExists::class, ['model' => Schedule::class]),
             ],
         ];
     }

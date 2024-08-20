@@ -16,11 +16,11 @@ class OrderPositionRuleset extends FluxRuleset
             'order_positions.*.id' => [
                 'required',
                 'integer',
-                new ModelExists(OrderPosition::class),
+                app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
             'order_positions.*.amount' => [
                 'required',
-                new Numeric(min: 0),
+                app(Numeric::class, ['min' => 0]),
             ],
         ];
     }

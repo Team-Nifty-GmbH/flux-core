@@ -18,7 +18,7 @@ class DeleteProjectRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Project::class),
+                app(ModelExists::class, ['model' => Project::class]),
             ],
         ];
     }

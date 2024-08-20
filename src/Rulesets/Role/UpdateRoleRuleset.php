@@ -17,14 +17,14 @@ class UpdateRoleRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Role::class),
+                app(ModelExists::class, ['model' => Role::class]),
             ],
             'name' => 'sometimes|required|string',
             'permissions' => 'array',
             'permissions.*' => [
                 'required',
                 'integer',
-                new ModelExists(Permission::class),
+                app(ModelExists::class, ['model' => Permission::class]),
             ],
         ];
     }

@@ -27,14 +27,14 @@ class UserList extends BaseDataTable
         'name' => 'email',
     ];
 
-    public function getLeftAppends(): array
+    protected function getLeftAppends(): array
     {
         return [
             'name' => 'avatar',
         ];
     }
 
-    public function getBottomAppends(): array
+    protected function getBottomAppends(): array
     {
         return [
             'name' => 'email',

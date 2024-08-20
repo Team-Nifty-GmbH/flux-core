@@ -17,12 +17,12 @@ class UpdateAddressTypeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(AddressType::class),
+                app(ModelExists::class, ['model' => AddressType::class]),
             ],
             'address_type_code' => [
                 'string',
                 'nullable',
-                new UniqueInFieldDependence(AddressType::class, 'client_id'),
+                app(UniqueInFieldDependence::class, ['model' => AddressType::class, 'dependingField' => 'client_id']),
             ],
             'name' => 'sometimes|required|string',
             'is_locked' => 'boolean',

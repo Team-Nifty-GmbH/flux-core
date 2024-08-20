@@ -18,7 +18,7 @@ class DeleteMailFolderRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(MailFolder::class),
+                app(ModelExists::class, ['model' => MailFolder::class]),
             ],
         ];
     }

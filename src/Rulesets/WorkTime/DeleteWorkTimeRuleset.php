@@ -18,7 +18,7 @@ class DeleteWorkTimeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(WorkTime::class),
+                app(ModelExists::class, ['model' => WorkTime::class]),
             ],
         ];
     }

@@ -20,7 +20,7 @@ class BankConnections extends BankConnectionList
 
     protected string $view = 'flux::livewire.settings.bank-connections';
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -33,7 +33,7 @@ class BankConnections extends BankConnectionList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()
@@ -46,7 +46,7 @@ class BankConnections extends BankConnectionList
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         return array_merge(parent::getViewData(), [
             'ledgerAccounts' => resolve_static(LedgerAccount::class, 'query')

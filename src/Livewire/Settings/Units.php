@@ -21,7 +21,7 @@ class Units extends UnitList
 
     protected ?string $includeBefore = 'flux::livewire.settings.units';
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -33,7 +33,7 @@ class Units extends UnitList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

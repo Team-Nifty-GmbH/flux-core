@@ -45,7 +45,7 @@ class TicketTest extends BaseSetup
         ]);
 
         $this->tickets = Ticket::factory()->count(5)->create([
-            'authenticatable_type' => app(Address::class)->getMorphClass(),
+            'authenticatable_type' => morph_alias(Address::class),
             'authenticatable_id' => $this->address->id,
         ]);
 
@@ -99,7 +99,7 @@ class TicketTest extends BaseSetup
     {
         $ticket = [
             'authenticatable_id' => $this->address->id,
-            'authenticatable_type' => app(Address::class)->getMorphClass(),
+            'authenticatable_type' => morph_alias(Address::class),
             'title' => 'Title Test',
             'description' => 'Description Test',
         ];
@@ -140,7 +140,7 @@ class TicketTest extends BaseSetup
     {
         $ticket = [
             'id' => $this->tickets[1]->id,
-            'authenticatable_type' => app(Address::class)->getMorphClass(),
+            'authenticatable_type' => morph_alias(Address::class),
             'authenticatable_id' => $this->address->id,
             'title' => 'Title Update Test',
             'description' => 'Description Update Test',
@@ -176,7 +176,7 @@ class TicketTest extends BaseSetup
         $ticket = [
             'id' => $this->tickets[0]->id,
             'authenticatable_id' => $this->address->id,
-            'authenticatable_type' => app(Address::class)->getMorphClass(),
+            'authenticatable_type' => morph_alias(Address::class),
             'state' => 'waiting_for_customer',
             'title' => Str::random(),
             'description' => Str::random(),

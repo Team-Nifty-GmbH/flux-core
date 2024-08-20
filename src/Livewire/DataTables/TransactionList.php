@@ -36,7 +36,7 @@ class TransactionList extends BaseDataTable
         'amount' => 'coloredMoney',
     ];
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -47,7 +47,7 @@ class TransactionList extends BaseDataTable
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         return array_merge(
             parent::getViewData(),
@@ -58,7 +58,7 @@ class TransactionList extends BaseDataTable
         );
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

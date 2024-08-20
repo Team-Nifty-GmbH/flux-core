@@ -17,7 +17,7 @@ class UpdatePaymentReminderTextRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(PaymentReminderText::class),
+                app(ModelExists::class, ['model' => PaymentReminderText::class]),
             ],
             'mail_to' => 'nullable|array',
             'mail_to.*' => 'email',
@@ -31,7 +31,7 @@ class UpdatePaymentReminderTextRuleset extends FluxRuleset
                 'required',
                 'integer',
                 'min:1',
-                new Sole(PaymentReminderText::class),
+                app(Sole::class, ['model' => PaymentReminderText::class]),
             ],
         ];
     }

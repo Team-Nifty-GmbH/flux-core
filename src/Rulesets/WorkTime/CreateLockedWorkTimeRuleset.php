@@ -16,7 +16,7 @@ class CreateLockedWorkTimeRuleset extends CreateWorkTimeRuleset
                 'parent_id' => [
                     'nullable',
                     'integer',
-                    new ModelExists(WorkTime::class),
+                    app(ModelExists::class, ['model' => WorkTime::class]),
                 ],
                 'started_at' => 'required|date',
                 'ended_at' => 'nullable|date|after:started_at',

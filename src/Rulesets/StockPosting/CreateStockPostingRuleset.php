@@ -19,12 +19,12 @@ class CreateStockPostingRuleset extends FluxRuleset
             'warehouse_id' => [
                 'required',
                 'integer',
-                new ModelExists(Warehouse::class),
+                app(ModelExists::class, ['model' => Warehouse::class]),
             ],
             'product_id' => [
                 'required',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'purchase_price' => 'required|numeric',
             'posting' => 'required|numeric',

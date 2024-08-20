@@ -31,7 +31,7 @@ class BankConnections extends BaseContactBankConnectionList
         return $builder->where('contact_id', $this->contactId);
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -43,7 +43,7 @@ class BankConnections extends BaseContactBankConnectionList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

@@ -15,7 +15,7 @@
             cache-key="order.related.ticket-list"
             :filters="[
                 ['model_id', '=', $order->id],
-                ['model_type', '=', app(\FluxErp\Models\Order::class)->getMorphClass()]
+                ['model_type', '=', morph_alias(\FluxErp\Models\Order::class)]
             ]"
             :model-type="\FluxErp\Models\Order::class"
             :model-id="$order->id"

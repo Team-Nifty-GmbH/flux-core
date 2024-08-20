@@ -16,12 +16,12 @@ class UpdateCategoryRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Category::class),
+                app(ModelExists::class, ['model' => Category::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Category::class),
+                app(ModelExists::class, ['model' => Category::class]),
             ],
             'name' => 'required|string',
             'sort_number' => 'integer|min:0',

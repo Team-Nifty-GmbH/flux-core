@@ -18,7 +18,7 @@ class OrderTypeList extends BaseDataTable
         'print_layouts',
     ];
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()

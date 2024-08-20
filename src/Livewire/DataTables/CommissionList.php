@@ -56,7 +56,7 @@ class CommissionList extends BaseDataTable
         );
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make(label: __('View Order'))

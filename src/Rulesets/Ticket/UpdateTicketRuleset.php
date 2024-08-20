@@ -22,22 +22,22 @@ class UpdateTicketRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Ticket::class),
+                app(ModelExists::class, ['model' => Ticket::class]),
             ],
             'authenticatable_type' => [
                 'required_with:authenticatable_id',
                 'string',
-                new MorphClassExists(implements: Authenticatable::class),
+                app(MorphClassExists::class, ['implements' => Authenticatable::class]),
             ],
             'authenticatable_id' => [
                 'required_with:authenticatable_type',
                 'integer',
-                new MorphExists('authenticatable_type'),
+                app(MorphExists::class, ['modelAttribute' => 'authenticatable_type']),
             ],
             'ticket_type_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(TicketType::class),
+                app(ModelExists::class, ['model' => TicketType::class]),
             ],
             'title' => 'sometimes|required|string',
             'description' => 'string|nullable',

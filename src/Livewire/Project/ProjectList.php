@@ -36,7 +36,7 @@ class ProjectList extends BaseProjectList
         })->toArray();
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()

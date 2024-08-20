@@ -16,7 +16,7 @@ class UpdateVatRateRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(VatRate::class),
+                app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'name' => 'required|string',
             'rate_percentage' => 'required|numeric|lt:1|min:0',

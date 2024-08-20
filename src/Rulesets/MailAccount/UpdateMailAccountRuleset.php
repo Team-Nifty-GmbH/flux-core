@@ -16,7 +16,7 @@ class UpdateMailAccountRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(MailAccount::class),
+                app(ModelExists::class, ['model' => MailAccount::class]),
             ],
             'protocol' => 'sometimes|required|string|max:255|in:imap,pop3,nntp',
             'password' => 'nullable|string|max:255',

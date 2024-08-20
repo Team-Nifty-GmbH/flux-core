@@ -20,14 +20,14 @@ class ReplicateOrderRuleset extends FluxRuleset
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'contact_id' => [
                 'required_without:address_invoice_id',
                 'integer',
                 'nullable',
-                new ModelExists(Contact::class),
-                new ExistsWithForeign(foreignAttribute: 'client_id', table: 'contacts'),
+                app(ModelExists::class, ['model' => Contact::class]),
+                app(ExistsWithForeign::class, ['foreignAttribute' => 'client_id', 'table' => 'contacts']),
             ],
         ];
     }

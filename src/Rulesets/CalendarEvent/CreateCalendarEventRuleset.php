@@ -17,7 +17,7 @@ class CreateCalendarEventRuleset extends FluxRuleset
             'calendar_id' => [
                 'required',
                 'integer',
-                new ModelExists(Calendar::class),
+                app(ModelExists::class, ['model' => Calendar::class]),
             ],
             'title' => 'required|string',
             'description' => 'string|nullable',

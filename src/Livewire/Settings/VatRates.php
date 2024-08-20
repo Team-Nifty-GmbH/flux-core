@@ -28,7 +28,7 @@ class VatRates extends VatRateList
         $this->headline = __('Vat Rates');
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -42,7 +42,7 @@ class VatRates extends VatRateList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

@@ -6,7 +6,7 @@ use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rule;
 
 class UpdateLedgerAccountRuleset extends FluxRuleset
 {
@@ -18,7 +18,7 @@ class UpdateLedgerAccountRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(LedgerAccount::class),
+                app(ModelExists::class, ['model' => LedgerAccount::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'number' => 'sometimes|required|numeric|unique:ledger_accounts,number',
@@ -27,7 +27,7 @@ class UpdateLedgerAccountRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 'string',
-                new Enum(LedgerAccountTypeEnum::class),
+                Rule::enum(LedgerAccountTypeEnum::class),
             ],
             'is_automatic' => 'boolean',
         ];

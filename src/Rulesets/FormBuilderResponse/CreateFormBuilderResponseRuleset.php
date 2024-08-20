@@ -18,12 +18,12 @@ class CreateFormBuilderResponseRuleset extends FluxRuleset
             'form_id' => [
                 'required',
                 'integer',
-                new ModelExists(FormBuilderForm::class),
+                app(ModelExists::class, ['model' => FormBuilderForm::class]),
             ],
             'user_id' => [
                 'required',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
         ];
     }

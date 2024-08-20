@@ -70,7 +70,7 @@ class FolderTree extends Component
             $media = $this->saveFileUploadsToMediaLibrary(
                 name: 'files',
                 modelId: $this->modelId,
-                modelType: app($this->modelType)->getMorphClass(),
+                modelType: morph_alias($this->modelType),
             );
 
             $this->latestUploads = $media;

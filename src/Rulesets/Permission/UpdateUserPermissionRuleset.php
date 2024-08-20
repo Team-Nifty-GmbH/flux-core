@@ -17,7 +17,7 @@ class UpdateUserPermissionRuleset extends FluxRuleset
             'user_id' => [
                 'required',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'sync' => 'sometimes|required|boolean',
             'give' => 'sometimes|required|boolean',
@@ -26,7 +26,7 @@ class UpdateUserPermissionRuleset extends FluxRuleset
             'permissions.*' => [
                 'required',
                 'integer',
-                new ModelExists(Permission::class),
+                app(ModelExists::class, ['model' => Permission::class]),
             ],
         ];
     }

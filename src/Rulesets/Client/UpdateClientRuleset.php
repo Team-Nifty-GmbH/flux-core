@@ -17,12 +17,12 @@ class UpdateClientRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'country_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Country::class),
+                app(ModelExists::class, ['model' => Country::class]),
             ],
             'name' => 'sometimes|required|string',
             'client_code' => 'sometimes|required|string|unique:clients,client_code',

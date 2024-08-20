@@ -18,15 +18,15 @@ class UpdatePriceRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Price::class),
+                app(ModelExists::class, ['model' => Price::class]),
             ],
             'product_id' => [
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'price_list_id' => [
                 'integer',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'price' => 'sometimes|numeric',
         ];

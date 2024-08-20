@@ -21,7 +21,7 @@ class CreateEventSubscriptionRuleset extends FluxRuleset
                 app(MorphClassExists::class),
             ],
             'subscribable_id' => [
-                'sometimes',
+                'required',
                 'integer',
                 app(MorphExists::class, ['modelAttribute' => 'subscribable_type']),
             ],

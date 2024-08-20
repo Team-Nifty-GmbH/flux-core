@@ -75,12 +75,12 @@ class PurchaseInvoiceList extends BaseDataTable
         return response()->download($media->getPath(), $media->file_name);
     }
 
-    public function getLayout(): string
+    protected function getLayout(): string
     {
         return 'tall-datatables::layouts.grid';
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -90,7 +90,7 @@ class PurchaseInvoiceList extends BaseDataTable
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         $purchaseOrderTypes = array_filter(
             OrderTypeEnum::cases(),
@@ -111,7 +111,7 @@ class PurchaseInvoiceList extends BaseDataTable
         );
     }
 
-    public function getRowAttributes(): ComponentAttributeBag
+    protected function getRowAttributes(): ComponentAttributeBag
     {
         return new ComponentAttributeBag(
             [

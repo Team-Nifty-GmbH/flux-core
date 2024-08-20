@@ -19,12 +19,12 @@ class ToggleTicketUserRuleset extends FluxRuleset
             'ticket_id' => [
                 'required',
                 'integer',
-                new ModelExists(Ticket::class),
+                app(ModelExists::class, ['model' => Ticket::class]),
             ],
             'user_id' => [
                 'required',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
         ];
     }
