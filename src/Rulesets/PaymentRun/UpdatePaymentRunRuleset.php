@@ -19,12 +19,12 @@ class UpdatePaymentRunRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(PaymentRun::class),
+                app(ModelExists::class, ['model' => PaymentRun::class]),
             ],
             'bank_connection_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(BankConnection::class),
+                app(ModelExists::class, ['model' => BankConnection::class]),
             ],
             'state' => [
                 'string',

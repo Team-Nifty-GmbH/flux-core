@@ -18,7 +18,7 @@ class DeletePurchaseInvoiceRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(PurchaseInvoice::class),
+                app(ModelExists::class, ['model' => PurchaseInvoice::class]),
             ],
         ];
     }

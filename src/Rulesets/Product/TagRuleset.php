@@ -16,7 +16,8 @@ class TagRuleset extends FluxRuleset
             'tags.*' => [
                 'required',
                 'integer',
-                (new ModelExists(Tag::class))->where('type', app(Product::class)->getMorphClass()),
+                app(ModelExists::class, ['model' => Tag::class])
+                    ->where('type', morph_alias(Product::class)),
             ],
         ];
     }

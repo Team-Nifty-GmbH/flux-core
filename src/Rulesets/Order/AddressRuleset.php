@@ -16,12 +16,12 @@ class AddressRuleset extends FluxRuleset
             'addresses.*.address_id' => [
                 'required',
                 'integer',
-                new ModelExists(Address::class),
+                app(ModelExists::class, ['model' => Address::class]),
             ],
             'addresses.*.address_type_id' => [
                 'required',
                 'integer',
-                new ModelExists(AddressType::class),
+                app(ModelExists::class, ['model' => AddressType::class]),
             ],
         ];
     }

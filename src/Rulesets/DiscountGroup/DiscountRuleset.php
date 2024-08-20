@@ -15,7 +15,7 @@ class DiscountRuleset extends FluxRuleset
             'discounts.*' => [
                 'required',
                 'integer',
-                new ModelExists(Discount::class),
+                app(ModelExists::class, ['model' => Discount::class]),
             ],
         ];
     }

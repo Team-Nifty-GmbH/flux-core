@@ -3,6 +3,8 @@
 namespace FluxErp\Livewire\Product;
 
 use FluxErp\Livewire\DataTables\ProductPropertyGroupList as BaseProductPropertyGroupList;
+use Illuminate\View\ComponentAttributeBag;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 
 class ProductPropertyGroupList extends BaseProductPropertyGroupList
 {
@@ -21,5 +23,14 @@ class ProductPropertyGroupList extends BaseProductPropertyGroupList
         ]];
 
         parent::startSearch();
+    }
+
+    public function getRowAttributes(): ComponentAttributeBag
+    {
+        return new ComponentAttributeBag([
+            'x-bind:class' => <<<'JS'
+                record.id === productPropertyGroup?.id && 'bg-primary-100 dark:bg-primary-800'
+            JS,
+        ]);
     }
 }

@@ -22,25 +22,25 @@ class CreateCartRuleset extends FluxRuleset
                 'required_with:authenticatable_id',
                 'nullable',
                 'string',
-                new MorphClassExists(uses: HasCart::class),
+                app(MorphClassExists::class, ['uses' => HasCart::class]),
             ],
             'authenticatable_id' => [
                 'required_with:authenticatable_type',
                 'nullable',
                 'integer',
-                new MorphExists(modelAttribute: 'authenticatable_type'),
+                app(MorphExists::class, ['modelAttribute' => 'authenticatable_type']),
             ],
             'payment_type_id' => [
                 'nullable',
                 'integer',
-                (new ModelExists(PaymentType::class))
+                app(ModelExists::class, ['model' => PaymentType::class])
                     ->where('is_active', true)
                     ->where('is_sales', true),
             ],
             'price_list_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'session_id' => 'required|string',
             'name' => 'nullable|string|max:255',

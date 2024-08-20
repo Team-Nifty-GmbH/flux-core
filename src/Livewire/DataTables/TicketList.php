@@ -62,7 +62,7 @@ class TicketList extends BaseDataTable
             'ticket_type_id' => null,
         ];
 
-        $modelType = $this->modelType ? app($this->modelType)->getMorphClass() : null;
+        $modelType = $this->modelType ? morph_alias($this->modelType) : null;
 
         $this->ticketTypes = resolve_static(TicketType::class, 'query')
             ->with('additionalModelColumns:id,name,model_type,model_id,field_type,values')
@@ -79,7 +79,7 @@ class TicketList extends BaseDataTable
             ->toArray();
 
         $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
-            ->where('model_type', app(Ticket::class)->getMorphClass())
+            ->where('model_type', morph_alias(Ticket::class))
             ->whereNull('model_id')
             ->select(['id', 'name', 'model_type', 'model_id', 'field_type', 'values'])
             ->get()

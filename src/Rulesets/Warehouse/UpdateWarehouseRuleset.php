@@ -17,12 +17,12 @@ class UpdateWarehouseRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Warehouse::class),
+                app(ModelExists::class, ['model' => Warehouse::class]),
             ],
             'address_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Address::class),
+                app(ModelExists::class, ['model' => Address::class]),
             ],
             'name' => 'sometimes|required|string',
             'is_default' => 'boolean',

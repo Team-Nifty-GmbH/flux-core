@@ -17,7 +17,7 @@ class CreateCalendarRuleset extends FluxRuleset
             'user_id' => [
                 'required',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'name' => 'required|string',
             'description' => 'string|nullable',

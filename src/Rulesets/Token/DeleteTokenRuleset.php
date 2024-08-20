@@ -17,7 +17,7 @@ class DeleteTokenRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Token::class),
+                app(ModelExists::class, ['model' => Token::class]),
             ],
         ];
     }

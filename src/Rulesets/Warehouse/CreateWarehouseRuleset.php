@@ -18,7 +18,7 @@ class CreateWarehouseRuleset extends FluxRuleset
             'address_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Address::class),
+                app(ModelExists::class, ['model' => Address::class]),
             ],
             'name' => 'required|string',
             'is_default' => 'boolean',

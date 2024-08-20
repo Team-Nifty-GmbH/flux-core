@@ -12,7 +12,6 @@ use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rulesets\ProductCrossSelling\CreateProductCrossSellingRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
 
 class CreateProductRuleset extends FluxRuleset
 {
@@ -27,33 +26,33 @@ class CreateProductRuleset extends FluxRuleset
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'vat_rate_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(VatRate::class),
+                app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'unit_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Unit::class),
+                app(ModelExists::class, ['model' => Unit::class]),
             ],
             'purchase_unit_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Unit::class),
+                app(ModelExists::class, ['model' => Unit::class]),
             ],
             'reference_unit_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Unit::class),
+                app(ModelExists::class, ['model' => Unit::class]),
             ],
 
             'product_number' => 'string|nullable|unique:products,product_number',
             'product_type' => [
                 Rule::in(ProductType::all()->keys()),
-                'nullable'
+                'nullable',
             ],
             'description' => 'string|nullable',
             'weight_gram' => 'numeric|nullable',
@@ -65,7 +64,7 @@ class CreateProductRuleset extends FluxRuleset
             'time_unit_enum' => [
                 'nullable',
                 'required_if:is_service,true',
-                new Enum(TimeUnitEnum::class),
+                Rule::enum(TimeUnitEnum::class),
             ],
             'ean' => 'string|nullable',
             'stock' => 'integer|nullable',

@@ -17,11 +17,11 @@ class UpdateProductOptionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(ProductOption::class),
+                app(ModelExists::class, ['model' => ProductOption::class]),
             ],
             'product_option_group_id' => [
                 'integer',
-                new ModelExists(ProductOptionGroup::class),
+                app(ModelExists::class, ['model' => ProductOptionGroup::class]),
             ],
             'name' => 'sometimes|required|string',
         ];

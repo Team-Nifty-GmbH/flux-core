@@ -3,7 +3,7 @@
         <x-card :title="__('New Product')">
             <section class="flex flex-col gap-4">
                 <x-input wire:model="product.product_number" :label="__('Product Number')" :placeholder="__('Leave empty to generate a new :attribute.', ['attribute' => __('Product Number')])" />
-                <div x-show="$wire.productTypes.length">
+                <div x-show="$wire.productTypes.length" x-cloak>
                     <x-select
                         wire:model="product.product_type"
                         :label="__('Product Type')"

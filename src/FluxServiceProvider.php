@@ -152,7 +152,9 @@ class FluxServiceProvider extends ServiceProvider
         // Register repeatable artisan commands, jobs and invokable classes (in "Repeatable" directory) from app
         Repeatable::autoDiscover();
 
-        ProductType::register('product', 'flux::livewire.product.product', true);
+        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
+            ProductType::register('product', 'flux::livewire.product.product', true);
+        }
     }
 
     protected function registerMarcos(): void

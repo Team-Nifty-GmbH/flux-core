@@ -95,7 +95,7 @@ class PriceLists extends PriceListList
 
         if ($this->priceList->id) {
             $this->discountedCategories = $priceList->discountedCategories()
-                ->where('model_type', app(Product::class)->getMorphClass())
+                ->where('model_type', morph_alias(Product::class))
                 ->orderBy('sort_number', 'DESC')
                 ->with([
                     'discounts' => fn ($query) => $query->where('category_price_list.price_list_id', $priceList->id)
@@ -140,7 +140,7 @@ class PriceLists extends PriceListList
 
         // Create product category discounts
         $categories = $priceList->discountedCategories()
-            ->where('model_type', app(Product::class)->getMorphClass())
+            ->where('model_type', morph_alias(Product::class))
             ->orderBy('sort_number', 'DESC')
             ->with([
                 'discounts' => fn ($query) => $query->where('category_price_list.price_list_id', $priceList->id)
@@ -176,7 +176,7 @@ class PriceLists extends PriceListList
                         array_merge(
                             $discountedCategory['discounts'][0],
                             [
-                                'model_type' => app(Category::class)->getMorphClass(),
+                                'model_type' => morph_alias(Category::class),
                                 'model_id' => $discountedCategory['id'],
                             ]
                         )

@@ -19,13 +19,13 @@ class UpdateUserClientsRuleset extends FluxRuleset
             'user_id' => [
                 'required',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'clients' => 'present|array',
             'clients.*' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
         ];
     }

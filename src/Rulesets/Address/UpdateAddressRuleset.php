@@ -19,25 +19,25 @@ class UpdateAddressRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Address::class),
+                app(ModelExists::class, ['model' => Address::class]),
             ],
             'contact_id' => [
                 'integer',
-                new ExistsWithForeign(
-                    foreignAttribute: 'client_id',
-                    table: 'contacts',
-                    baseTable: 'addresses'
-                ),
+                app(ExistsWithForeign::class, [
+                    'foreignAttribute' => 'client_id',
+                    'table' => 'contacts',
+                    'baseTable' => 'addresses',
+                ]),
             ],
             'country_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Country::class),
+                app(ModelExists::class, ['model' => Country::class]),
             ],
             'language_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Language::class),
+                app(ModelExists::class, ['model' => Language::class]),
             ],
             'date_of_birth' => 'date|nullable',
             'department' => 'string|nullable',

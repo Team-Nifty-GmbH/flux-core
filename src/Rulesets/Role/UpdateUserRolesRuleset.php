@@ -15,7 +15,7 @@ class UpdateUserRolesRuleset extends FluxRuleset
             'user_id' => [
                 'required',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'assign' => 'required_without:sync|boolean',
             'sync' => 'boolean',
@@ -23,7 +23,7 @@ class UpdateUserRolesRuleset extends FluxRuleset
             'roles.*' => [
                 'required',
                 'integer',
-                (new ModelExists(Role::class))
+                app(ModelExists::class, ['model' => Role::class])
                     ->whereIn('guard_name', resolve_static(User::class, 'guardNames')),
             ],
         ];

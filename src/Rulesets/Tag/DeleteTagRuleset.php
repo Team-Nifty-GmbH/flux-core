@@ -18,7 +18,7 @@ class DeleteTagRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Tag::class),
+                app(ModelExists::class, ['model' => Tag::class]),
             ],
         ];
     }

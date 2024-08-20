@@ -40,15 +40,15 @@ class CreateScheduleRuleset extends FluxRuleset
             'cron.parameters' => 'required|array',
             'cron.parameters.basic' => [
                 'array',
-                new Frequency('cron.methods.basic'),
+                app(Frequency::class, ['frequencyKey' => 'cron.methods.basic']),
             ],
             'cron.parameters.dayConstraint' => [
                 'array',
-                new Frequency('cron.methods.dayConstraint'),
+                app(Frequency::class, ['frequencyKey' => 'cron.methods.dayConstraint']),
             ],
             'cron.parameters.timeConstraint' => [
                 'array',
-                new Frequency('cron.methods.timeConstraint'),
+                app(Frequency::class, ['frequencyKey' => 'cron.methods.timeConstraint']),
             ],
             'parameters' => 'array',
             'due_at' => 'date|nullable',

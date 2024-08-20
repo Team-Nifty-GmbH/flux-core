@@ -14,7 +14,7 @@ class ProductPropertyRuleset extends FluxRuleset
             'product_properties' => 'array',
             'product_properties.*.name' => 'required|string',
             'product_properties.*.property_type_enum' => [
-                'exclude_with:product_properties.*.id',
+                'sometimes',
                 'required',
                 'string',
                 Rule::enum(PropertyTypeEnum::class),

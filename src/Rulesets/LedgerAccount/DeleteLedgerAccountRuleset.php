@@ -18,7 +18,7 @@ class DeleteLedgerAccountRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(LedgerAccount::class),
+                app(ModelExists::class, ['model' => LedgerAccount::class]),
             ],
         ];
     }

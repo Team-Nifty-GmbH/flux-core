@@ -20,17 +20,17 @@ class UpdateTaskRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Task::class),
+                app(ModelExists::class, ['model' => Task::class]),
             ],
             'project_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Project::class),
+                app(ModelExists::class, ['model' => Project::class]),
             ],
             'responsible_user_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'name' => 'sometimes|required|string',
             'description' => 'string|nullable',

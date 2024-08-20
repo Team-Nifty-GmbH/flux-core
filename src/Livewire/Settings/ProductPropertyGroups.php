@@ -91,6 +91,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         JS);
     }
 
+    #[Renderless]
     public function save(): bool
     {
         try {
@@ -106,6 +107,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         return true;
     }
 
+    #[Renderless]
     public function delete(ProductPropertyGroup $productPropertyGroup): void
     {
         $this->productPropertyGroup->fill($productPropertyGroup);

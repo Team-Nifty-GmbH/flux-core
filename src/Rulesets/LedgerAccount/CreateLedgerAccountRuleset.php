@@ -5,7 +5,7 @@ namespace FluxErp\Rulesets\LedgerAccount;
 use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Rulesets\FluxRuleset;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rule;
 
 class CreateLedgerAccountRuleset extends FluxRuleset
 {
@@ -21,7 +21,7 @@ class CreateLedgerAccountRuleset extends FluxRuleset
             'ledger_account_type_enum' => [
                 'required',
                 'string',
-                new Enum(LedgerAccountTypeEnum::class),
+                Rule::enum(LedgerAccountTypeEnum::class),
             ],
             'is_automatic' => 'boolean',
         ];

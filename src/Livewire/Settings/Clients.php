@@ -125,7 +125,7 @@ class Clients extends ClientList
             return false;
         }
 
-        $this->logo->model_type = app(Client::class)->getMorphClass();
+        $this->logo->model_type = morph_alias(Client::class);
         $this->logo->model_id = $this->client->id;
         $this->logo->collection_name = 'logo';
 

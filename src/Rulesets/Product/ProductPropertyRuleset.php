@@ -15,7 +15,7 @@ class ProductPropertyRuleset extends FluxRuleset
             'product_properties.*.id' => [
                 'required',
                 'integer',
-                new ModelExists(ProductProperty::class),
+                app(ModelExists::class, ['model' => ProductProperty::class]),
             ],
             'product_properties.*.value' => 'string|nullable',
         ];

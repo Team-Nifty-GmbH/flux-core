@@ -18,7 +18,7 @@ class DeleteFormBuilderResponseRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(FormBuilderResponse::class),
+                app(ModelExists::class, ['model' => FormBuilderResponse::class]),
             ],
         ];
     }

@@ -48,7 +48,7 @@
                         <div class="flex-grow">
                             <livewire:product.product-property-group-list />
                         </div>
-                        <div x-collapse x-show="Object.values($wire.productProperties).length > 0" class="w-1/2">
+                        <div x-collapse x-show="Object.values($wire.productProperties).length > 0" x-cloak class="w-1/2">
                             <x-card>
                                 <x-slot:title>
                                     <span x-text="productPropertyGroup?.name"></span>
@@ -143,7 +143,7 @@
                         [
                             'model_type',
                             '=',
-                            app(\FluxErp\Models\Product::class)->getMorphClass(),
+                            morph_alias(\FluxErp\Models\Product::class),
                         ],
                     ],
                 ],
@@ -179,7 +179,7 @@
                         [
                             'type',
                             '=',
-                            app(\FluxErp\Models\Product::class)->getMorphClass(),
+                            morph_alias(\FluxErp\Models\Product::class),
                         ],
                     ],
                 ],

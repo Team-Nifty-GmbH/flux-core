@@ -42,7 +42,7 @@ class SettingTest extends BaseSetup
 
         $this->userSettings = Setting::factory()->create([
             'model_id' => $this->user->id,
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'settings' => [
                 'profile' => 'bla',
                 'value' => 12,

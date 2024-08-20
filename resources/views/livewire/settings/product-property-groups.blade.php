@@ -6,7 +6,7 @@
                 <div class="col-span-3">
                     <x-label>{{ __('Product Properties') }}</x-label>
                 </div>
-                <div class="col-span-2" x-show="$wire.productPropertyGroup.product_properties.length > 0">
+                <div class="col-span-2" x-show="$wire.productPropertyGroup.product_properties.length > 0" x-cloak>
                     <x-label>{{ __('Property Type') }}</x-label>
                 </div>
             </div>

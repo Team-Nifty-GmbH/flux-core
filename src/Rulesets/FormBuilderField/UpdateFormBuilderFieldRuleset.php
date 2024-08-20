@@ -18,7 +18,7 @@ class UpdateFormBuilderFieldRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(FormBuilderField::class),
+                app(ModelExists::class, ['model' => FormBuilderField::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',

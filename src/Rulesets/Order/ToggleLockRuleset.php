@@ -18,7 +18,7 @@ class ToggleLockRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'is_locked' => 'boolean',
         ];

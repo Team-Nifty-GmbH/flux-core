@@ -77,7 +77,7 @@ class WorkTime extends Component
     public function start(?array $data): void
     {
         if ($trackableType = data_get($data, 'trackable_type')) {
-            $data['trackable_type'] = app(morphed_model($trackableType) ?? $trackableType)->getMorphClass();
+            $data['trackable_type'] = morph_alias(morphed_model($trackableType) ?? $trackableType);
         }
 
         $this->workTime->fill($data ?? []);

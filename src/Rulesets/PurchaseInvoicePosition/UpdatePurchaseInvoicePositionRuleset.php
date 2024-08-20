@@ -20,27 +20,27 @@ class UpdatePurchaseInvoicePositionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(PurchaseInvoicePosition::class),
+                app(ModelExists::class, ['model' => PurchaseInvoicePosition::class]),
             ],
             'ledger_account_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(LedgerAccount::class),
+                app(ModelExists::class, ['model' => LedgerAccount::class]),
             ],
             'product_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'vat_rate_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(VatRate::class),
+                app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'name' => 'nullable|string|max:255',
-            'amount' => new Numeric(min: 0),
-            'unit_price' => new Numeric(min: 0),
-            'total_price' => new Numeric(min: 0),
+            'amount' => app(Numeric::class, ['min' => 0]),
+            'unit_price' => app(Numeric::class, ['min' => 0]),
+            'total_price' => app(Numeric::class, ['min' => 0]),
         ];
     }
 }

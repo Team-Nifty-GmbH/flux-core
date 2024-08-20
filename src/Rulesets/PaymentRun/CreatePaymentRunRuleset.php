@@ -23,7 +23,7 @@ class CreatePaymentRunRuleset extends FluxRuleset
             'bank_connection_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(BankConnection::class),
+                app(ModelExists::class, ['model' => BankConnection::class]),
             ],
             'state' => [
                 'string',
