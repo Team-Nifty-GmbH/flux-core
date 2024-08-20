@@ -216,13 +216,14 @@
                                         :label="__('Amount')"
                                     />
                                     <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'" class="w-full">
-                                        <x-native-select
+                                        <x-select
                                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                             :options="$vatRates"
                                             option-key-value
                                             :label="__('Vat Rate')"
                                             x-model.number="position.vat_rate_id"
                                             x-on:selected="position.vat_rate_id = $event.detail?.value"
+                                            x-init="$el.value = position.vat_rate_id; fillSelectedFromInputValue();"
                                         />
                                     </div>
                                     <x-inputs.number

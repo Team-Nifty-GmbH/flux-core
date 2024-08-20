@@ -116,38 +116,4 @@ class CreateMailExecutedSubscriber
             }
         }
     }
-
-    protected function findAddress(Communication $message): ?Address
-    {
-
-        $address = null;
-        if ($email) {
-            $address = resolve_static(Address::class, 'query')
-                ->with('contact')
-                ->where('email', $email)
-                ->orWhere('email_primary', $email)
-                ->first();
-
-            if (! $address) {
-                $address = resolve_static(ContactOption::class, 'query')
-                    ->with(['contact', 'address'])
-                    ->where('value', $email)
-                    ->first()
-                    ?->address;
-            }
-
-            if (! $address) {
-                $address = resolve_static(Address::class, 'query')
-                    ->with('contact')
-                    ->where('url', 'like', '%' . Str::after($email, '@'))
-                    ->first();
-            }
-        }
-
-        if ($address) {
-            CauserResolver::setCauser($address);
-        }
-
-        return $address;
-    }
 }
