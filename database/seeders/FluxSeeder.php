@@ -29,10 +29,8 @@ class FluxSeeder extends Seeder
 
         $this->call(ClientTableSeeder::class);
         $this->call(PaymentTypeTableSeeder::class);
-        $this->call(DocumentTypeTableSeeder::class);
         $this->call(OrderTypeTableSeeder::class);
         $this->call(PaymentNoticeTableSeeder::class);
-        $this->call(DocumentGenerationSettingTableSeeder::class);
 
         $this->call(ContactTableSeeder::class);
         $this->call(AddressTypeTableSeeder::class);
@@ -69,9 +67,5 @@ class FluxSeeder extends Seeder
         $this->call(TicketTypeTableSeeder::class);
         $this->call(TicketTableSeeder::class);
         $this->call(CommentTableSeeder::class);
-
-        $this->call(FormBuilderFormTableSeeder::class);
-        $this->call(FormBuilderSectionTableSeeder::class);
-        $this->call(FormBuilderFieldTableSeeder::class);
     }
 }

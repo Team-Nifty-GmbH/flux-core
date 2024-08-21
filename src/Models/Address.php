@@ -37,6 +37,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\UnauthorizedException;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
@@ -45,7 +46,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendars,
+    use BroadcastsEvents, CausesActivity,Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendars,
         HasCart, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification,
         HasUuid, Lockable, LogsActivity, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 
@@ -60,6 +61,35 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     protected ?string $detailRouteName = 'contacts.id?';
 
     public static string $iconName = 'user';
+
+    public static function findAddressByEmail(string $email): ?Address
+    {
+        $address = null;
+        if ($email) {
+            $address = resolve_static(Address::class, 'query')
+                ->with('contact')
+                ->where('email', $email)
+                ->orWhere('email_primary', $email)
+                ->first();
+
+            if (! $address) {
+                $address = resolve_static(ContactOption::class, 'query')
+                    ->with(['contact', 'address'])
+                    ->where('value', $email)
+                    ->first()
+                    ?->address;
+            }
+
+            if (! $address) {
+                $address = resolve_static(Address::class, 'query')
+                    ->with('contact')
+                    ->where('url', 'like', '%' . Str::after($email, '@'))
+                    ->first();
+            }
+        }
+
+        return $address;
+    }
 
     protected static function booted(): void
     {
