@@ -102,8 +102,8 @@ class CalendarTest extends BaseSetup
         $this->assertEquals($calendar['name'], $dbCalendar['name']);
         $this->assertEquals($calendar['color'], $dbCalendar['color']);
         $this->assertEquals($calendar['is_public'], $dbCalendar['is_public']);
-        $this->assertEquals($this->user->id, $dbCalendar->created_by->id);
-        $this->assertEquals($this->user->id, $dbCalendar->updated_by->id);
+        $this->assertTrue($this->user->is($dbCalendar->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbCalendar->getUpdatedBy()));
     }
 
     public function test_create_calendar_validation_fails()
@@ -146,7 +146,7 @@ class CalendarTest extends BaseSetup
         $this->assertEquals($calendar['name'], $dbCalendar['name']);
         $this->assertEquals($calendar['color'], $dbCalendar['color']);
         $this->assertEquals($calendar['is_public'], $dbCalendar['is_public']);
-        $this->assertEquals($this->user->id, $dbCalendar->updated_by->id);
+        $this->assertTrue($this->user->is($dbCalendar->getUpdatedBy()));
     }
 
     public function test_update_calendar_calendar_not_found()

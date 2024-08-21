@@ -6,6 +6,7 @@ use FluxErp\Casts\Money;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
@@ -18,8 +19,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Transaction extends Model implements InteractsWithDataTables
 {
-    use BroadcastsEvents, HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, Searchable,
-        SoftDeletes;
+    use BroadcastsEvents, HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
+        Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',

@@ -9,6 +9,7 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasCart;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\HasWidgets;
 use FluxErp\Traits\InteractsWithMedia;
@@ -43,7 +44,8 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
 {
     use BroadcastsEvents, CacheModelQueries, CausesActivity, Commentable, Filterable, HasApiTokens, HasCalendars,
         HasCart, HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles,
-        HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
+        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable,
+        SoftDeletes;
 
     protected $hidden = [
         'password',
@@ -65,6 +67,10 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
             if ($user->isDirty('iban')) {
                 $user->iban = str_replace(' ', '', strtoupper($user->iban));
             }
+        });
+
+        static::saved(function (User $user) {
+            Cache::forget('morph_to:' . $user->getMorphClass() . ':' . $user->id);
         });
     }
 
