@@ -18,8 +18,6 @@ trait SoftDeletes
         BaseSoftDeletes::restore as restoreBase;
     }
 
-    const DELETED_BY = 'deleted_by';
-
     public function initializeSoftDeletes(): void
     {
         $this->initializeSoftDeletesBase();
@@ -50,7 +48,7 @@ trait SoftDeletes
 
     public function getDeletedByColumn(): string
     {
-        return static::DELETED_BY;
+        return defined(static::class.'::DELETED_BY') ? static::DELETED_BY : 'deleted_by';
     }
 
     public function getDeletedBy(): ?Model
