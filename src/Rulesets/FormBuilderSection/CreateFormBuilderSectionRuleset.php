@@ -17,7 +17,7 @@ class CreateFormBuilderSectionRuleset extends FluxRuleset
             'form_id' => [
                 'required',
                 'integer',
-                new ModelExists(FormBuilderForm::class),
+                app(ModelExists::class, ['model' => FormBuilderForm::class]),
             ],
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',

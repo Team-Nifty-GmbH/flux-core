@@ -25,15 +25,15 @@ class ValueListTest extends BaseSetup
     {
         parent::setUp();
         $this->valueLists[] = AdditionalColumn::factory()->create([
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'values' => [1, 2, 3, 4, 5],
         ]);
         $this->valueLists[] = AdditionalColumn::factory()->create([
-            'model_type' => app(Category::class)->getMorphClass(),
+            'model_type' => morph_alias(Category::class),
             'values' => [1, 3, 5, 7],
         ]);
         $this->valueLists[] = AdditionalColumn::factory()->create([
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'values' => [1, 1, 2, 3, 5, 8],
         ]);
 
@@ -65,7 +65,7 @@ class ValueListTest extends BaseSetup
     public function test_get_value_list_value_list_not_found()
     {
         $valueList = AdditionalColumn::factory()->create([
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => mb_ord(User::class),
         ]);
 
         $this->user->givePermissionTo($this->permissions['show']);
@@ -111,7 +111,7 @@ class ValueListTest extends BaseSetup
 
         $this->assertNotEmpty($jsonValueLists);
         $this->assertTrue($jsonValueLists->every(function ($value, $key) {
-            return $value->model_type === app(User::class)->getMorphClass();
+            return $value->model_type === morph_alias(User::class);
         }));
 
         $valueList = $this->valueLists[0];
@@ -154,7 +154,7 @@ class ValueListTest extends BaseSetup
     {
         $valueList = [
             'name' => 'hopefullyNeverExistingName' . Str::random(),
-            'model_type' => app(Category::class)->getMorphClass(),
+            'model_type' => morph_alias(Category::class),
             'values' => ['test', 1, 3, 'c', 'g'],
         ];
 
@@ -335,7 +335,7 @@ class ValueListTest extends BaseSetup
     public function test_delete_value_list_value_list_not_found()
     {
         $valueList = AdditionalColumn::factory()->create([
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
         ]);
 
         $this->user->givePermissionTo($this->permissions['delete']);

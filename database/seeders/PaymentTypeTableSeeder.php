@@ -8,14 +8,9 @@ use Illuminate\Database\Seeder;
 
 class PaymentTypeTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        $clients = Client::all();
+        $clients = Client::all(['id']);
 
         foreach ($clients as $client) {
             PaymentType::factory()->count(2)->create([

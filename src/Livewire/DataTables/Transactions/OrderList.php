@@ -20,12 +20,12 @@ class OrderList extends BaseOrderList
 
     public bool $hasNoRedirect = true;
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

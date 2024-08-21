@@ -5,7 +5,6 @@ namespace FluxErp\Actions\ProductProperty;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Rulesets\ProductProperty\CreateProductPropertyRuleset;
-use Illuminate\Support\Facades\Validator;
 
 class CreateProductProperty extends FluxAction
 {
@@ -26,13 +25,5 @@ class CreateProductProperty extends FluxAction
         $productProperty->save();
 
         return $productProperty->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(ProductProperty::class));
-
-        $this->data = $validator->validate();
     }
 }

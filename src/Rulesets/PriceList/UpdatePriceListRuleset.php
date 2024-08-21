@@ -16,12 +16,12 @@ class UpdatePriceListRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'name' => 'sometimes|required|string',
             'price_list_code' => 'sometimes|required|string',

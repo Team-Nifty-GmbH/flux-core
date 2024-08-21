@@ -21,7 +21,7 @@ class Orders extends OrderList
         return $builder->where('contact_id', $this->contact->id);
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()

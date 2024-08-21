@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateRecordHistoriesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('record_histories', function (Blueprint $table) {
             $table->id();
@@ -22,12 +17,7 @@ class CreateRecordHistoriesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('record_histories');
     }

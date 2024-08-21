@@ -17,12 +17,12 @@ class UpdateCartRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Cart::class),
+                app(ModelExists::class, ['model' => Cart::class]),
             ],
             'payment_type_id' => [
                 'nullable',
                 'integer',
-                (new ModelExists(PaymentType::class))
+                app(ModelExists::class, ['model' => PaymentType::class])
                     ->where('is_active', true)
                     ->where('is_sales', true),
             ],

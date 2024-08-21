@@ -18,7 +18,7 @@ class DeleteUnitRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Unit::class),
+                app(ModelExists::class, ['model' => Unit::class]),
             ],
         ];
     }

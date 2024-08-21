@@ -16,7 +16,7 @@ class UpdateSerialNumberRangeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(SerialNumberRange::class),
+                app(ModelExists::class, ['model' => SerialNumberRange::class]),
             ],
             'type' => 'sometimes|required|string',
             'current_number' => 'integer|min:1',

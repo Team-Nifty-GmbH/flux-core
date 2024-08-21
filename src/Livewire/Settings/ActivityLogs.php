@@ -12,7 +12,7 @@ class ActivityLogs extends ActivityLogList
 
     public array $activity = [];
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

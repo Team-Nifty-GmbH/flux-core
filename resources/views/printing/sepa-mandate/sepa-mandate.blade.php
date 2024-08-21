@@ -1,4 +1,4 @@
-<x-print.first-page-header :address="$model->contact->mainAddress" />
+<x-flux::print.first-page-header :address="$model->contact->mainAddress" />
 <main class="pt-6">
     <div>
         {{ __('Creditor Identifier') }} <span class="font-semibold">{{ $model->client->creditor_identifier }}</span>

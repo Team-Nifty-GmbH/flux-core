@@ -8,14 +8,9 @@ use Illuminate\Database\Seeder;
 
 class WarehouseTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        $addresses = Address::all();
+        $addresses = Address::all(['id']);
         foreach ($addresses as $address) {
             Warehouse::factory()->create([
                 'address_id' => $address->id,

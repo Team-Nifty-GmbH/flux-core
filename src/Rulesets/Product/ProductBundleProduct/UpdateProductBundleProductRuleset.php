@@ -17,13 +17,13 @@ class UpdateProductBundleProductRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(ProductBundleProduct::class),
+                app(ModelExists::class, ['model' => ProductBundleProduct::class]),
             ],
             'bundle_product_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'count' => 'sometimes|required|numeric|gt:0',
         ];

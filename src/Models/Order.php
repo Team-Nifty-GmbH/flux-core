@@ -27,6 +27,7 @@ use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Printable;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
@@ -34,6 +35,7 @@ use FluxErp\Traits\Trackable;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
+use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Builder;
@@ -52,7 +54,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 {
     use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasCustomEvents, HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates,
-        HasUserModification, HasUuid, InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable {
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes, Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;
         }
 
@@ -64,12 +66,6 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
     protected $guarded = [
         'id',
-    ];
-
-    public array $translatable = [
-        'header',
-        'footer',
-        'logistic_note',
     ];
 
     public static string $iconName = 'shopping-bag';
@@ -389,7 +385,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('invoice')
-            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png'])
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml'])
             ->singleFile();
 
         $this->addMediaCollection('payment-reminders')
@@ -456,13 +452,14 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             ->where('is_alternative', false)
             ->whereNotNull('vat_rate_percentage')
             ->groupBy('vat_rate_percentage')
-            ->selectRaw('sum(vat_price) as total_vat_price, vat_rate_percentage')
+            ->selectRaw('sum(vat_price) as total_vat_price, sum(total_net_price) as total_net_price, vat_rate_percentage')
             ->get()
             ->map(function (OrderPosition $item) {
                 return $item->only(
                     [
                         'vat_rate_percentage',
                         'total_vat_price',
+                        'total_net_price',
                     ]
                 );
             })
@@ -475,6 +472,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                     'total_vat_price' => bcadd(
                         $this->shipping_costs_vat_price,
                         $totalVats->get($this->shipping_costs_vat_rate_percentage)['total_vat_price'] ?? 0,
+                        9
+                    ),
+                    'total_net_price' => bcadd(
+                        $this->shipping_costs_net_price,
+                        $totalVats->get($this->shipping_costs_vat_rate_percentage)['total_net_price'] ?? 0,
                         9
                     ),
                     'vat_rate_percentage' => $this->shipping_costs_vat_rate_percentage,
@@ -559,6 +561,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                 'offer' => Offer::class,
                 'order-confirmation' => OrderConfirmation::class,
                 'retoure' => Retoure::class,
+                'refund' => Refund::class,
             ];
     }
 

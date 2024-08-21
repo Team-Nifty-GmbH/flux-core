@@ -18,7 +18,7 @@ class DeleteProductCrossSellingRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(ProductCrossSelling::class),
+                app(ModelExists::class, ['model' => ProductCrossSelling::class]),
             ],
         ];
     }

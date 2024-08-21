@@ -16,7 +16,7 @@ class UpdateCommissionRateRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(CommissionRate::class),
+                app(ModelExists::class, ['model' => CommissionRate::class]),
             ],
             'commission_rate' => 'required|numeric|lt:1|min:0',
         ];

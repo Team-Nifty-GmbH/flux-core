@@ -9,7 +9,6 @@ use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Communication;
-use FluxErp\Models\ContactOption;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Media;
 use Illuminate\Support\Str;
@@ -22,7 +21,16 @@ class CreateMailExecutedSubscriber
     public function handle(CreateMailMessage $event): void
     {
         $message = $event->getResult();
-        $this->address = $this->findAddress($message);
+
+        $this->address = resolve_static(
+            Address::class,
+            'findAddressByEmail',
+            ['email' => Str::between($message->from, '<', '>')]
+        );
+
+        if ($this->address) {
+            CauserResolver::setCauser($this->address);
+        }
 
         if ($message->mailFolder->can_create_purchase_invoice && $message->media()->count() !== 0) {
             $this->createPurchaseInvoice($message);
@@ -106,40 +114,5 @@ class CreateMailExecutedSubscriber
             } catch (\Throwable) {
             }
         }
-    }
-
-    protected function findAddress(Communication $message): ?Address
-    {
-        $email = Str::between($message->from, '<', '>');
-
-        $address = null;
-        if ($email) {
-            $address = resolve_static(Address::class, 'query')
-                ->with('contact')
-                ->where('email', $email)
-                ->orWhere('email_primary', $email)
-                ->first();
-
-            if (! $address) {
-                $address = resolve_static(ContactOption::class, 'query')
-                    ->with(['contact', 'address'])
-                    ->where('value', $email)
-                    ->first()
-                    ?->address;
-            }
-
-            if (! $address) {
-                $address = resolve_static(Address::class, 'query')
-                    ->with('contact')
-                    ->where('url', 'like', '%' . Str::after($email, '@'))
-                    ->first();
-            }
-        }
-
-        if ($address) {
-            CauserResolver::setCauser($address);
-        }
-
-        return $address;
     }
 }

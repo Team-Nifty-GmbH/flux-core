@@ -18,7 +18,7 @@ class DeleteLanguageRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Language::class),
+                app(ModelExists::class, ['model' => Language::class]),
             ],
         ];
     }

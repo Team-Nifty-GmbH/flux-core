@@ -43,7 +43,7 @@ class CreateTicketRuleset extends FluxRuleset
             'ticket_type_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(TicketType::class),
+                app(ModelExists::class, ['model' => TicketType::class]),
             ],
             'title' => 'required|string',
             'description' => 'required|string|min:12',

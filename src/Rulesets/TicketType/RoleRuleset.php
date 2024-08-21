@@ -15,7 +15,7 @@ class RoleRuleset extends FluxRuleset
             'roles.*' => [
                 'required',
                 'integer',
-                new ModelExists(Role::class),
+                app(ModelExists::class, ['model' => Role::class]),
             ],
         ];
     }

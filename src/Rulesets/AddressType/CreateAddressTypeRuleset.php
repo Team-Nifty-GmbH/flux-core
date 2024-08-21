@@ -19,7 +19,7 @@ class CreateAddressTypeRuleset extends FluxRuleset
             'client_id' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'address_type_code' => [
                 'string',

@@ -11,6 +11,8 @@ class PaymentTypeFactory extends Factory
 
     public function definition(): array
     {
+        $default = $this->faker->boolean();
+
         return [
             'name' => $this->faker->firstName(),
             'description' => $this->faker->sentence(),
@@ -20,11 +22,11 @@ class PaymentTypeFactory extends Factory
             'payment_target' => $paymentTarget = $this->faker->numberBetween(13, 42),
             'payment_discount_target' => $this->faker->numberBetween(0, $paymentTarget),
             'payment_discount_percentage' => $this->faker->numberBetween(10, 50) / 100,
-            'is_active' => $this->faker->boolean(90),
+            'is_active' => $default ?: $this->faker->boolean(90),
             'is_direct_debit' => $this->faker->boolean(),
-            'is_default' => $this->faker->boolean(),
+            'is_default' => $default,
             'is_purchase' => $this->faker->boolean(),
-            'is_sales' => $this->faker->boolean(),
+            'is_sales' => $default ?: $this->faker->boolean(),
             'requires_manual_transfer' => $this->faker->boolean(),
         ];
     }

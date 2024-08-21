@@ -18,7 +18,7 @@ class DeleteCommunicationRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Communication::class),
+                app(ModelExists::class, ['model' => Communication::class]),
             ],
         ];
     }

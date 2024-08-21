@@ -61,7 +61,7 @@ class Printable
             throw new InvalidArgumentException('No view found for ' . $name);
         }
 
-        return $view;
+        return resolve_static($view, 'class');
     }
 
     public function printView(string $view, ...$arguments): PrintableView

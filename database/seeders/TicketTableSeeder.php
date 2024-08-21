@@ -10,12 +10,9 @@ use Illuminate\Database\Seeder;
 
 class TicketTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $ticketTypes = TicketType::all();
+        $ticketTypes = TicketType::all(['id']);
         $addressUsers = Address::query()
             ->whereNotNull('email')
             ->whereNotNull('password')
@@ -30,15 +27,17 @@ class TicketTableSeeder extends Seeder
         );
 
         for ($i = 0; $i < 20; $i++) {
-            $user = $users->random();
+            Ticket::factory()->create(function () use ($users, $ticketTypes) {
+                $user = $users->random();
 
-            Ticket::factory()->create([
-                'authenticatable_type' => get_class($user),
-                'authenticatable_id' => $user->id,
-                'ticket_type_id' => rand(0, 1) ?
-                    ($ticketTypes->isNotEmpty() ? $ticketTypes->random()->id : null) :
-                    null,
-            ]);
+                return [
+                    'authenticatable_type' => $user->getMorphClass(),
+                    'authenticatable_id' => $user->id,
+                    'ticket_type_id' => rand(0, 1) ?
+                        ($ticketTypes->isNotEmpty() ? $ticketTypes->random()->id : null) :
+                        null,
+                ];
+            });
         }
     }
 }

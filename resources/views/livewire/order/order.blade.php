@@ -223,8 +223,10 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex gap-1.5">
-                        <x-heroicons x-cloak x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
-                        <x-heroicons x-cloak x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
+                        <div @canAction(\FluxErp\Actions\Order\ToggleLock::class) wire:click="toggleLock()" class="cursor-pointer" wire:flux-confirm.icon.warning="{{  __('Unlock Order') }}|{{ __('Unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}" @endCanAction>
+                            <x-heroicons x-cloak x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
+                            <x-heroicons x-cloak x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
+                        </div>
                         <div>
                             <div>
                                 <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.order_type.name">
@@ -738,12 +740,12 @@
                             <div class="flex gap-0.5">
                                 <div class="">{{ __('Created At') }}:</div>
                                 <div x-text="window.formatters.datetime($wire.order.created_at)"></div>
-                                <div x-text="$wire.order.created_by?.name || '{{ __('Unknown') }}'"></div>
+                                <div x-text="$wire.order.created_by || '{{ __('Unknown') }}'"></div>
                             </div>
                             <div class="flex gap-0.5">
                                 <div class="">{{ __('Updated At') }}:</div>
                                 <div x-text="window.formatters.datetime($wire.order.updated_at)"></div>
-                                <div x-text="$wire.order.updated_by?.name || '{{ __('Unknown') }}'"></div>
+                                <div x-text="$wire.order.updated_by || '{{ __('Unknown') }}'"></div>
                             </div>
                         </div>
                     </x-card>

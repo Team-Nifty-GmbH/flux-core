@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class AddCountryIdOnClientsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('clients', function (Blueprint $table) {
             $table->unsignedBigInteger('country_id');
@@ -20,12 +15,7 @@ class AddCountryIdOnClientsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('clients', function (Blueprint $table) {
             $table->dropForeign('clients_country_id_foreign');

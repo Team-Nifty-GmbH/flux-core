@@ -18,7 +18,7 @@ class DeleteSepaMandateRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(SepaMandate::class),
+                app(ModelExists::class, ['model' => SepaMandate::class]),
             ],
         ];
     }

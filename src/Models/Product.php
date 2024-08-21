@@ -18,6 +18,7 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Lockable;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,15 +36,10 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
         HasPackageFactory, HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable,
-        Searchable, SoftDeletes;
+        LogsActivity, Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',
-    ];
-
-    public array $translatable = [
-        'name',
-        'description',
     ];
 
     protected ?string $detailRouteName = 'products.id';

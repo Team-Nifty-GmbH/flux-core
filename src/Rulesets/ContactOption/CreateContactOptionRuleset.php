@@ -18,7 +18,7 @@ class CreateContactOptionRuleset extends FluxRuleset
             'address_id' => [
                 'required',
                 'integer',
-                new ModelExists(Address::class),
+                app(ModelExists::class, ['model' => Address::class]),
             ],
             'type' => [
                 'required',

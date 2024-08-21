@@ -21,6 +21,9 @@ class CreateTranslation extends FluxAction
 
     public function performAction(): LanguageLine
     {
-        return resolve_static(LanguageLine::class, 'create', [$this->data]);
+        $languageLine = app(LanguageLine::class, ['attributes' => $this->data]);
+        $languageLine->save();
+
+        return $languageLine->fresh();
     }
 }

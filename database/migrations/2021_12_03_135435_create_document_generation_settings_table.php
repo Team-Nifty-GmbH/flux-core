@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateDocumentGenerationSettingsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('document_generation_settings', function (Blueprint $table) {
             $table->id();
@@ -48,12 +43,7 @@ class CreateDocumentGenerationSettingsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('document_generation_settings');
     }

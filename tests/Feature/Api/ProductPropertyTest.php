@@ -2,6 +2,7 @@
 
 namespace FluxErp\Tests\Feature\Api;
 
+use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
@@ -89,6 +90,7 @@ class ProductPropertyTest extends BaseSetup
     {
         $productProperty = [
             'name' => Str::random(),
+            'property_type_enum' => PropertyTypeEnum::Text->value,
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -104,6 +106,7 @@ class ProductPropertyTest extends BaseSetup
             ->first();
 
         $this->assertEquals($productProperty['name'], $dbProductProperty->name);
+        $this->assertEquals($productProperty['property_type_enum'], $dbProductProperty->property_type_enum->value);
     }
 
     public function test_create_product_property_validation_fails()
@@ -146,6 +149,7 @@ class ProductPropertyTest extends BaseSetup
     {
         $productProperty = [
             'id' => $this->productProperties[0]->id,
+            'name' => null,
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);

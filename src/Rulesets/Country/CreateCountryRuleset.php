@@ -19,12 +19,12 @@ class CreateCountryRuleset extends FluxRuleset
             'language_id' => [
                 'required',
                 'integer',
-                new ModelExists(Language::class),
+                app(ModelExists::class, ['model' => Language::class]),
             ],
             'currency_id' => [
                 'required',
                 'integer',
-                new ModelExists(Currency::class),
+                app(ModelExists::class, ['model' => Currency::class]),
             ],
             'name' => 'required|string',
             'iso_alpha2' => 'required|string|unique:countries,iso_alpha2',

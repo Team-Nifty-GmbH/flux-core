@@ -18,7 +18,7 @@ class DeleteSerialNumberRangeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(SerialNumberRange::class),
+                app(ModelExists::class, ['model' => SerialNumberRange::class]),
             ],
         ];
     }

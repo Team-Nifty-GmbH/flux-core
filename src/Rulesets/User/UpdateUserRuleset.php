@@ -20,16 +20,16 @@ class UpdateUserRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'language_id' => [
                 'integer',
-                new ModelExists(Language::class),
+                app(ModelExists::class, ['model' => Language::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'email' => 'sometimes|required|email|unique:users,email',
             'firstname' => 'sometimes|required|string',
@@ -38,7 +38,7 @@ class UpdateUserRuleset extends FluxRuleset
             'user_code' => 'sometimes|required|string|unique:users,user_code',
             'cost_per_hour' => [
                 'nullable',
-                new Numeric(),
+                app(Numeric::class),
             ],
             'is_active' => 'sometimes|required|boolean',
         ];

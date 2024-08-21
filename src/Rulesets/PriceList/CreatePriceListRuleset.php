@@ -17,7 +17,7 @@ class CreatePriceListRuleset extends FluxRuleset
             'parent_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'name' => 'required|string',
             'price_list_code' => 'required|string|unique:price_lists,price_list_code',

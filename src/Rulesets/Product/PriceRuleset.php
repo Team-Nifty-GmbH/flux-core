@@ -15,7 +15,7 @@ class PriceRuleset extends FluxRuleset
             'prices.*.price_list_id' => [
                 'required',
                 'integer',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'prices.*.price' => 'required|numeric',
         ];

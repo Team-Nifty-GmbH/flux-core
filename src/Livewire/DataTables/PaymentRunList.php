@@ -34,7 +34,7 @@ class PaymentRunList extends BaseDataTable
             ->toArray();
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

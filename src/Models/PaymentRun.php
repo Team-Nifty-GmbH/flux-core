@@ -7,13 +7,14 @@ use FluxErp\States\PaymentRun\PaymentRunState;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class PaymentRun extends Model
 {
-    use HasFrontendAttributes, HasUserModification, HasUuid;
+    use HasFrontendAttributes, HasUserModification, HasUuid, LogsActivity;
 
     protected $guarded = [
         'id',

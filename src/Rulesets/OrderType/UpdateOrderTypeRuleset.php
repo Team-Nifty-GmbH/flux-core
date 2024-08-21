@@ -17,11 +17,11 @@ class UpdateOrderTypeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(OrderType::class),
+                app(ModelExists::class, ['model' => OrderType::class]),
             ],
             'client_id' => [
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'name' => 'string',
             'description' => 'string|nullable',

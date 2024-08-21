@@ -2,10 +2,10 @@
 
 namespace FluxErp\Rulesets\WorkTime;
 
-use FluxErp\Livewire\WorkTime;
 use FluxErp\Models\Contact;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\User;
+use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
@@ -25,36 +25,36 @@ class UpdateLockedWorkTimeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(\FluxErp\Models\WorkTime::class),
+                app(ModelExists::class, ['model' => WorkTime::class]),
             ],
             'user_id' => [
                 'integer',
-                (new ModelExists(User::class))->where('is_active', true),
+                (app(ModelExists::class, ['model' => User::class]))->where('is_active', true),
             ],
             'contact_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'order_position_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(OrderPosition::class),
+                app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
             'work_time_type_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(WorkTimeType::class),
+                app(ModelExists::class, ['model' => WorkTimeType::class]),
             ],
             'trackable_type' => [
                 'required_with:trackable_id',
                 'string',
-                new MorphClassExists(uses: Trackable::class),
+                app(MorphClassExists::class, ['uses' => Trackable::class]),
             ],
             'trackable_id' => [
                 'required_with:trackable_type',
                 'integer',
-                new MorphExists('trackable_type'),
+                app(MorphExists::class, ['modelAttribute' => 'trackable_type']),
             ],
             'started_at' => 'required_with:ended_at|date|before:ended_at',
             'ended_at' => 'nullable|date|after:started_at',

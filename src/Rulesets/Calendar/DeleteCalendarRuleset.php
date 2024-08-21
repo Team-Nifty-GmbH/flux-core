@@ -18,7 +18,7 @@ class DeleteCalendarRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Calendar::class),
+                app(ModelExists::class, ['model' => Calendar::class]),
             ],
         ];
     }

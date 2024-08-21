@@ -45,7 +45,7 @@ class ReplicateOrderPositionList extends OrderPositionList
         ]);
     }
 
-    public function getRowAttributes(): DataTableRowAttributes
+    protected function getRowAttributes(): DataTableRowAttributes
     {
         return DataTableRowAttributes::make()
             ->bind(
@@ -142,21 +142,21 @@ class ReplicateOrderPositionList extends OrderPositionList
         return $tree;
     }
 
-    public function getLeftAppends(): array
+    protected function getLeftAppends(): array
     {
         return [
             'name' => 'indentation',
         ];
     }
 
-    public function getRightAppends(): array
+    protected function getRightAppends(): array
     {
         return [
             'name' => 'alternative_tag',
         ];
     }
 
-    public function getTopAppends(): array
+    protected function getTopAppends(): array
     {
         return [
             'name' => 'product_number',

@@ -16,7 +16,7 @@ class UpdateWorkTimeTypeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(WorkTimeType::class),
+                app(ModelExists::class, ['model' => WorkTimeType::class]),
             ],
             'name' => 'sometimes|required|string',
             'is_billable' => 'boolean',

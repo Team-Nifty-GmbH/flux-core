@@ -20,7 +20,7 @@ class TransactionList extends BaseTransactionList
 
     public ?string $includeBefore = 'flux::livewire.accounting.transaction-list.include-before';
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return array_merge(
             parent::getTableActions(),
@@ -35,7 +35,7 @@ class TransactionList extends BaseTransactionList
         );
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return array_merge(
             parent::getRowActions(),

@@ -52,16 +52,22 @@ class CreateVariants extends FluxAction
             }
 
             $product['product_options'] = $variantCreate;
-            $product['name'] = data_get($product, 'name') . ' - '
-                . implode(
-                    ' ',
-                    resolve_static(ProductOption::class, 'query')
-                        ->whereIntegerInRaw('id', $variantCreate)
-                        ->pluck('name')
-                        ->toArray()
-                );
 
-            CreateProduct::make($product)
+            CreateProduct::make(
+                array_merge(
+                    $product,
+                    [
+                        'name' => data_get($product, 'name') . ' - '
+                            . implode(
+                                ' ',
+                                resolve_static(ProductOption::class, 'query')
+                                    ->whereIntegerInRaw('id', $variantCreate)
+                                    ->pluck('name')
+                                    ->toArray()
+                            ),
+                    ]
+                )
+            )
                 ->checkPermission()
                 ->validate()
                 ->execute();

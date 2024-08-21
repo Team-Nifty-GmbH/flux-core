@@ -40,7 +40,7 @@ class MediaGrid extends BaseMediaGrid
         $this->collection = 'images';
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         $rowActions = parent::getRowActions();
         array_splice($rowActions, -1, 0, [
@@ -56,7 +56,7 @@ class MediaGrid extends BaseMediaGrid
         return $rowActions;
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make(icon: 'upload')
@@ -69,7 +69,7 @@ class MediaGrid extends BaseMediaGrid
         ];
     }
 
-    public function getRowAttributes(): ComponentAttributeBag
+    protected function getRowAttributes(): ComponentAttributeBag
     {
         return new ComponentAttributeBag(
             [
@@ -102,7 +102,7 @@ class MediaGrid extends BaseMediaGrid
                 $media = UploadMedia::make([
                     'name' => $file->getClientOriginalName(),
                     'file_name' => $file->getClientOriginalName(),
-                    'model_type' => app(Product::class)->getMorphClass(),
+                    'model_type' => morph_alias(Product::class),
                     'model_id' => $this->product->id,
                     'media' => $file,
                     'collection_name' => $this->collection,

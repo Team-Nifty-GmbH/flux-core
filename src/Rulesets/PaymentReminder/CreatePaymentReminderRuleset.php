@@ -19,12 +19,12 @@ class CreatePaymentReminderRuleset extends FluxRuleset
             'order_id' => [
                 'required',
                 'integer',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'media_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Media::class),
+                app(ModelExists::class, ['model' => Media::class]),
             ],
             'reminder_level' => 'nullable|integer|min:1',
         ];

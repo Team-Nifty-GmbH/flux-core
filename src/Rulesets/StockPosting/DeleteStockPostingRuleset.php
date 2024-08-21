@@ -18,7 +18,7 @@ class DeleteStockPostingRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(StockPosting::class),
+                app(ModelExists::class, ['model' => StockPosting::class]),
             ],
         ];
     }

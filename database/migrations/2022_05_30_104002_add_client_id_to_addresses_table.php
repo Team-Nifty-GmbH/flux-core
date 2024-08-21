@@ -8,12 +8,7 @@ use Ramsey\Uuid\Uuid;
 
 return new class() extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
             $table->unsignedBigInteger('client_id')->after('uuid')
@@ -27,12 +22,7 @@ return new class() extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
             $table->dropForeign('addresses_client_id_foreign');

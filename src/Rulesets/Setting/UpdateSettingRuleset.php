@@ -16,7 +16,7 @@ class UpdateSettingRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Setting::class),
+                app(ModelExists::class, ['model' => Setting::class]),
             ],
             'settings' => 'required|array',
         ];

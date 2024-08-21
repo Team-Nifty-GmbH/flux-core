@@ -31,6 +31,8 @@ class ProductForm extends FluxForm
 
     public ?string $product_number = null;
 
+    public ?string $product_type = null;
+
     public ?string $description = null;
 
     public ?float $weight_gram = null;
@@ -87,6 +89,8 @@ class ProductForm extends FluxForm
 
     public array $product_cross_sellings = [];
 
+    public array $product_properties = [];
+
     public array $suppliers = [];
 
     public array $categories = [];
@@ -122,8 +126,11 @@ class ProductForm extends FluxForm
             $values->loadMissing([
                 'bundleProducts:id',
                 'categories:id',
+                'clients:id',
                 'coverMedia',
                 'parent',
+                'productProperties:id,product_property_group_id,name,property_type_enum,product_product_property.value',
+                'productProperties.productPropertyGroup:id,name',
                 'suppliers:id,main_address_id,customer_number,' .
                     'product_supplier.contact_id,' .
                     'product_supplier.manufacturer_product_number,' .
@@ -131,7 +138,6 @@ class ProductForm extends FluxForm
                 'suppliers.mainAddress:id,name',
                 'tags:id',
                 'vatRate:id,rate_percentage',
-                'clients:id',
             ]);
 
             $values->append('avatar_url');

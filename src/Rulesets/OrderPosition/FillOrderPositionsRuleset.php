@@ -19,7 +19,7 @@ class FillOrderPositionsRuleset extends FluxRuleset
             'order_id' => [
                 'required',
                 'integer',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'order_positions' => 'array',
             'simulate' => 'boolean',

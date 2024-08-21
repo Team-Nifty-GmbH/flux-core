@@ -18,7 +18,7 @@ class DeleteContactRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
         ];
     }

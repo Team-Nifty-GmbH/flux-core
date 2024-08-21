@@ -16,7 +16,7 @@ class UpdateTagRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Tag::class),
+                app(ModelExists::class, ['model' => Tag::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'slug' => [

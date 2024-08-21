@@ -36,7 +36,7 @@ class Countries extends CountryList
         return Arr::prependKeysWith($countryAction->getRules(), 'selectedCountry.');
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -49,7 +49,7 @@ class Countries extends CountryList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()
