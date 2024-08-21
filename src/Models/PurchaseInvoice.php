@@ -16,7 +16,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class PurchaseInvoice extends Model implements HasMedia
 {
-    use Commentable, HasUserModification, HasPackageFactory, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes;
+    use Commentable, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes;
 
     protected $guarded = ['id'];
 

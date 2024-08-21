@@ -6,6 +6,10 @@ use FluxErp\Casts\MorphTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes as BaseSoftDeletes;
 
+/**
+ * When using this trait you have to ensure that a column for the user who deleted the model exists in the database.
+ * If you dont want to track the deleted by user, use the base SoftDeletes trait.
+ */
 trait SoftDeletes
 {
     use BaseSoftDeletes {

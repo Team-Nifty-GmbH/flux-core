@@ -11,7 +11,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Calendar extends BaseCalendar
 {
-    use HasUserModification, BroadcastsEvents, LogsActivity;
+    use BroadcastsEvents, HasUserModification, LogsActivity;
 
     protected $guarded = [
         'id',

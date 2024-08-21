@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\CalendarEventInvite;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class CalendarEvent extends BaseCalendarEvent implements HasMedia
 {
-    use BroadcastsEvents, InteractsWithMedia, LogsActivity;
+    use BroadcastsEvents, HasUserModification, InteractsWithMedia, LogsActivity;
 
     public function calendar(): BelongsTo
     {

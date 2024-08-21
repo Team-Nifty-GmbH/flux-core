@@ -42,14 +42,14 @@ trait HasUserModification
         return parent::setUpdatedAt($value);
     }
 
-    public function getUpdatedByColumn(): string
-    {
-        return static::UPDATED_BY;
-    }
-
     public function getCreatedByColumn(): string
     {
         return static::CREATED_BY;
+    }
+
+    public function getUpdatedByColumn(): string
+    {
+        return static::UPDATED_BY;
     }
 
     public function getCreatedBy(): ?Model

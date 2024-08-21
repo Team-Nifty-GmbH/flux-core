@@ -17,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderType extends Model
 {
-    use CacheModelQueries, Filterable, HasClientAssignment, HasEnums, HasPackageFactory,
-        HasUserModification, HasUuid, LogsActivity, SoftDeletes;
+    use CacheModelQueries, Filterable, HasClientAssignment, HasEnums, HasPackageFactory, HasUserModification, HasUuid,
+        LogsActivity, SoftDeletes;
 
     protected $guarded = [
         'id',

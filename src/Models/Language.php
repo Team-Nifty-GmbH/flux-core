@@ -16,8 +16,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Language extends Model
 {
-    use CacheModelQueries, Commentable, Filterable, HasDefault, HasPackageFactory,  HasUserModification,
-        HasUuid, LogsActivity, SoftDeletes;
+    use CacheModelQueries, Commentable, Filterable, HasDefault, HasPackageFactory, HasUserModification, HasUuid,
+        LogsActivity, SoftDeletes;
 
     protected $guarded = [
         'id',

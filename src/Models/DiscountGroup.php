@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class DiscountGroup extends Model
 {
-    use HasUuid, LogsActivity;
+    use HasUserModification, HasUuid, LogsActivity;
 
     protected $guarded = [
         'id',

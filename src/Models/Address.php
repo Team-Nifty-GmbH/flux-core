@@ -46,7 +46,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, CausesActivity,Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens,
+    use BroadcastsEvents, CausesActivity, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens,
         HasCalendars, HasCart, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags,
         HasUserModification, HasUuid, Lockable, LogsActivity, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 
@@ -108,7 +108,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         });
 
         static::saved(function (Address $address) {
-            Cache::forget('morph_to:' . $address->getMorphClass() . ':' . $address->id . ':name');
+            Cache::forget('morph_to:' . $address->getMorphClass() . ':' . $address->id);
 
             $contactUpdates = [];
             $addressesUpdates = [];

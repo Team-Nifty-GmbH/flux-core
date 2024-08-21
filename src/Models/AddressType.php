@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AddressType extends Model
 {
-    use CacheModelQueries, HasClientAssignment, HasPackageFactory,  HasUserModification, HasUuid,
-        LogsActivity, SoftDeletes;
+    use CacheModelQueries, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
+        SoftDeletes;
 
     protected $guarded = [
         'id',

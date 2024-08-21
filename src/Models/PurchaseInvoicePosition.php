@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PurchaseInvoicePosition extends Model
 {
-    use HasPackageFactory, HasUuid, LogsActivity;
+    use HasPackageFactory, HasUserModification, HasUuid, LogsActivity;
 
     protected $guarded = ['id'];
 

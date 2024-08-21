@@ -17,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PaymentType extends Model
 {
-    use CacheModelQueries, Filterable, HasClientAssignment, HasDefault, HasPackageFactory,
-        HasUserModification, HasUuid, LogsActivity, SoftDeletes;
+    use CacheModelQueries, Filterable, HasClientAssignment, HasDefault, HasPackageFactory, HasUserModification, HasUuid,
+        LogsActivity, SoftDeletes;
 
     protected $guarded = [
         'id',

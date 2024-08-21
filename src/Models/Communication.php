@@ -6,6 +6,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
@@ -25,8 +26,8 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Communication extends Model implements HasMedia, OffersPrinting
 {
-    use BroadcastsEvents, HasPackageFactory, HasTags, HasUuid, InteractsWithMedia, LogsActivity, Printable,
-        Searchable, SoftDeletes;
+    use BroadcastsEvents, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+        Printable, Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',
