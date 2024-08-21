@@ -214,7 +214,7 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->purchaseInvoiceForm->lastLedgerAccountId = resolve_static(OrderPosition::class, 'query')
             ->whereHas(
                 'ledgerAccount',
-                fn($query) => $query->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense)
+                fn ($query) => $query->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense)
             )
             ->whereHas('order', fn ($query) => $query->where('contact_id', $contact->id))
             ->orderByDesc('id')
