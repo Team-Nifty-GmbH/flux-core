@@ -55,6 +55,9 @@ class PurchaseInvoiceForm extends FluxForm
 
     public ?string $mediaUrl = null;
 
+    #[Locked]
+    public ?int $lastLedgerAccountId = null;
+
     protected function getActions(): array
     {
         return [

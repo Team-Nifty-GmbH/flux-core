@@ -2,12 +2,15 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Livewire\Forms\PurchaseInvoiceForm;
 use FluxErp\Models\Client;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Media;
+use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
@@ -201,5 +204,20 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->loadData();
 
         return true;
+    }
+
+    #[Renderless]
+    public function fillFromSelectedContact(Contact $contact): void
+    {
+        $this->purchaseInvoiceForm->payment_type_id ??= $contact->purchase_payment_type_id ?? $contact->payment_type_id;
+        $this->purchaseInvoiceForm->currency_id = $contact->currency_id ?? Currency::default()?->id;
+        $this->purchaseInvoiceForm->lastLedgerAccountId = resolve_static(OrderPosition::class, 'query')
+            ->whereHas(
+                'ledgerAccount',
+                fn ($query) => $query->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense)
+            )
+            ->whereHas('order', fn ($query) => $query->where('contact_id', $contact->id))
+            ->orderByDesc('id')
+            ->value('ledger_account_id');
     }
 }
