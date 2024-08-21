@@ -160,7 +160,10 @@ return new class() extends Migration
     private function migrateDown(string $tableName): void
     {
         if (Schema::hasColumn($tableName, 'created_by')) {
-            // Update created_by with numeric user IDs, set to null if invalid
+            DB::table($tableName)
+                ->whereNotLike('created_by', 'user:%')
+                ->update(['created_by' => null]);
+
             DB::table($tableName)
                 ->where(DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
                 ->whereNotExists(function ($query) {
@@ -188,7 +191,10 @@ return new class() extends Migration
         }
 
         if (Schema::hasColumn($tableName, 'updated_by')) {
-            // Update updated_by with numeric user IDs, set to null if invalid
+            DB::table($tableName)
+                ->whereNotLike('updated_by', 'user:%')
+                ->update(['updated_by' => null]);
+
             DB::table($tableName)
                 ->where(DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
                 ->whereNotExists(function ($query) {
@@ -216,7 +222,10 @@ return new class() extends Migration
         }
 
         if (Schema::hasColumn($tableName, 'deleted_by')) {
-            // Update deleted_by with numeric user IDs, set to null if invalid
+            DB::table($tableName)
+                ->whereNotLike('deleted_by', 'user:%')
+                ->update(['deleted_by' => null]);
+
             DB::table($tableName)
                 ->where(DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
                 ->whereNotExists(function ($query) {
