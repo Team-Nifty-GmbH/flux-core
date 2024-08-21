@@ -27,7 +27,7 @@ class MorphTo implements CastsAttributes
 
     public function set(Model $model, string $key, mixed $value, array $attributes): ?string
     {
-        if (! is_string($value) && ! $value instanceof Model) {
+        if ((! is_string($value) && ! $value instanceof Model) || ! $value) {
             return null;
         }
 

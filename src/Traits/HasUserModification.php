@@ -40,12 +40,12 @@ trait HasUserModification
 
     public function getCreatedByColumn(): string
     {
-        return defined(static::class.'::CREATED_BY') ? static::CREATED_BY : 'created_by';
+        return defined(static::class . '::CREATED_BY') ? static::CREATED_BY : 'created_by';
     }
 
     public function getUpdatedByColumn(): string
     {
-        return defined(static::class.'::UPDATED_BY') ? static::UPDATED_BY : 'updated_by';
+        return defined(static::class . '::UPDATED_BY') ? static::UPDATED_BY : 'updated_by';
     }
 
     public function getCreatedBy(): ?Model

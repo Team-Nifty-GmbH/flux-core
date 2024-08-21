@@ -48,7 +48,7 @@ trait SoftDeletes
 
     public function getDeletedByColumn(): string
     {
-        return defined(static::class.'::DELETED_BY') ? static::DELETED_BY : 'deleted_by';
+        return defined(static::class . '::DELETED_BY') ? static::DELETED_BY : 'deleted_by';
     }
 
     public function getDeletedBy(): ?Model
