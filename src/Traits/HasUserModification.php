@@ -12,10 +12,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait HasUserModification
 {
-    const UPDATED_BY = 'updated_by';
-
-    const CREATED_BY = 'created_by';
-
     public function initializeHasUserModification(): void
     {
         $this->mergeCasts([
@@ -44,12 +40,12 @@ trait HasUserModification
 
     public function getCreatedByColumn(): string
     {
-        return static::CREATED_BY;
+        return defined(static::class.'::CREATED_BY') ? static::CREATED_BY : 'created_by';
     }
 
     public function getUpdatedByColumn(): string
     {
-        return static::UPDATED_BY;
+        return defined(static::class.'::UPDATED_BY') ? static::UPDATED_BY : 'updated_by';
     }
 
     public function getCreatedBy(): ?Model
