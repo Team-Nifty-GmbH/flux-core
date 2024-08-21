@@ -120,8 +120,8 @@ class LanguageTest extends BaseSetup
         $this->assertEquals($language['name'], $dbLanguage->name);
         $this->assertEquals($language['iso_name'], $dbLanguage->iso_name);
         $this->assertEquals($language['language_code'], $dbLanguage->language_code);
-        $this->assertEquals($this->user->id, $dbLanguage->created_by->id);
-        $this->assertEquals($this->user->id, $dbLanguage->updated_by->id);
+        $this->assertTrue($this->user->is($dbLanguage->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbLanguage->getUpdatedBy()));
     }
 
     public function test_create_language_validation_fails()
@@ -175,7 +175,7 @@ class LanguageTest extends BaseSetup
         $this->assertNotEmpty($dbLanguage);
         $this->assertEquals($language['id'], $dbLanguage->id);
         $this->assertEquals($language['name'], $dbLanguage->name);
-        $this->assertEquals($this->user->id, $dbLanguage->updated_by->id);
+        $this->assertTrue($this->user->is($dbLanguage->getUpdatedBy()));
     }
 
     public function test_update_language_maximum()
@@ -203,7 +203,7 @@ class LanguageTest extends BaseSetup
         $this->assertEquals($language['name'], $dbLanguage->name);
         $this->assertEquals($language['iso_name'], $dbLanguage->iso_name);
         $this->assertEquals($language['language_code'], $dbLanguage->language_code);
-        $this->assertEquals($this->user->id, $dbLanguage->updated_by->id);
+        $this->assertTrue($this->user->is($dbLanguage->getUpdatedBy()));
     }
 
     public function test_update_language_validation_fails()
@@ -248,7 +248,7 @@ class LanguageTest extends BaseSetup
 
         $language = $this->languages[1]->fresh();
         $this->assertNotNull($language->deleted_at);
-        $this->assertEquals($this->user->id, $language->deleted_by->id);
+        $this->assertTrue($this->user->is($language->getDeletedBy()));
     }
 
     public function test_delete_language_language_not_found()

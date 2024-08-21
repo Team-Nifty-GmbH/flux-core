@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
@@ -15,7 +16,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class PurchaseInvoice extends Model implements HasMedia
 {
-    use Commentable, HasPackageFactory, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes;
+    use Commentable, HasUserModification, HasPackageFactory, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes;
 
     protected $guarded = ['id'];
 

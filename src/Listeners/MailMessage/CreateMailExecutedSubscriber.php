@@ -9,7 +9,6 @@ use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Communication;
-use FluxErp\Models\ContactOption;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Media;
 use Illuminate\Support\Str;

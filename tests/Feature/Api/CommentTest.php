@@ -9,6 +9,7 @@ use FluxErp\Models\Unit;
 use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 
 class CommentTest extends BaseSetup
@@ -101,8 +102,8 @@ class CommentTest extends BaseSetup
         $this->assertEquals($comment['model_id'], $dbComment->model_id);
         $this->assertEquals(app(User::class)->getMorphClass(), $dbComment->model_type);
         $this->assertEquals($comment['comment'], $dbComment->comment);
-        $this->assertEquals($this->user->id, $dbComment->created_by->id);
-        $this->assertEquals($this->user->id, $dbComment->updated_by->id);
+        $this->assertTrue($this->user->is($dbComment->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbComment->getUpdatedBy()));
     }
 
     public function test_create_comment_validation_fails()
@@ -229,9 +230,11 @@ class CommentTest extends BaseSetup
 
     public function test_delete_comment()
     {
-        $activity = $this->comment->activities()->where('event', 'created')->first();
-        $activity->causer()->associate($this->user);
-        $activity->save();
+        DB::table($this->comment->getTable())
+            ->where($this->comment->getKeyName(), $this->comment->getKey())
+            ->update([
+                'created_by' => $this->user->getMorphClass() . ':' . $this->user->getKey(),
+            ]);
 
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
@@ -241,7 +244,7 @@ class CommentTest extends BaseSetup
 
         $dbComment = $this->comment->fresh();
         $this->assertNotNull($dbComment->deleted_at);
-        $this->assertEquals($this->user->id, $dbComment->deleted_by->id);
+        $this->assertTrue($this->user->is($dbComment->getDeletedBy()));
     }
 
     public function test_delete_comment_different_user()
@@ -282,8 +285,8 @@ class CommentTest extends BaseSetup
         $response->assertStatus(204);
 
         $dbComment = $this->comment->fresh();
-        $this->assertNotEquals($dbComment->created_by->id, $this->user->id);
+        $this->assertFalse($this->user->is($dbComment->getCreatedBy()));
         $this->assertNotNull($dbComment->deleted_at);
-        $this->assertEquals($this->user->id, $dbComment->deleted_by->id);
+        $this->assertTrue($this->user->is($dbComment->getDeletedBy()));
     }
 }

@@ -42,8 +42,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
 class User extends Authenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
-    use BroadcastsEvents, CacheModelQueries, CausesActivity, Commentable, Filterable, HasApiTokens, HasCalendars, HasCart,
-        HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles,
+    use BroadcastsEvents, CacheModelQueries, CausesActivity, Commentable, Filterable, HasApiTokens, HasCalendars,
+        HasCart, HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles,
         HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable,
         SoftDeletes;
 
@@ -67,6 +67,10 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
             if ($user->isDirty('iban')) {
                 $user->iban = str_replace(' ', '', strtoupper($user->iban));
             }
+        });
+
+        static::saved(function (User $user) {
+            Cache::forget('morph_to:' . $user->getMorphClass() . ':' . $user->id . ':name');
         });
     }
 
