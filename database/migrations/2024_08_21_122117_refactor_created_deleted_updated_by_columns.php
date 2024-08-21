@@ -11,40 +11,51 @@ return new class() extends Migration
     private string $activitiesTableName;
 
     private array $tableNames = [
-        'addresses' => 'address',
         'address_types' => 'address_type',
+        'addresses' => 'address',
+        'bank_connections' => 'bank_connection',
+        'calendar_events' => 'calendar_event',
+        'calendars' => 'calendar',
         'categories' => 'category',
         'clients' => 'client',
         'comments' => 'comment',
-        'contacts' => 'contact',
+        'communications' => 'communication',
         'contact_bank_connections' => 'contact_bank_connection',
         'contact_options' => 'contact_option',
+        'contacts' => 'contact',
         'countries' => 'country',
         'country_regions' => 'country_region',
         'currencies' => 'currency',
+        'discount_groups' => 'discount_group',
         'discounts' => 'discount',
         'interface_users' => 'interface_user',
         'languages' => 'language',
         'locks' => 'lock',
-        'orders' => 'order',
+        'mail_accounts' => 'mail_account',
         'order_positions' => 'order_position',
         'order_types' => 'order_type',
+        'orders' => 'order',
+        'payment_reminders' => 'payment_reminder',
+        'payment_runs' => 'payment_run',
         'payment_types' => 'payment_type',
-        'prices' => 'price',
         'price_lists' => 'price_list',
-        'products' => 'product',
-        'product_options' => 'product_option',
+        'prices' => 'price',
         'product_option_groups' => 'product_option_group',
+        'product_options' => 'product_option',
         'product_properties' => 'product_property',
+        'products' => 'product',
         'projects' => 'project',
+        'purchase_invoice_positions' => 'purchase_invoice_position',
+        'purchase_invoices' => 'purchase_invoice',
         'sepa_mandates' => 'sepa_mandate',
-        'serial_numbers' => 'serial_number',
         'serial_number_ranges' => 'serial_number_range',
+        'serial_numbers' => 'serial_number',
         'snapshots' => 'snapshot',
         'stock_postings' => 'stock_posting',
         'tasks' => 'task',
-        'tickets' => 'ticket',
         'ticket_types' => 'ticket_type',
+        'tickets' => 'ticket',
+        'transactions' => 'transaction',
         'units' => 'unit',
         'users' => 'user',
         'vat_rates' => 'vat_rate',
@@ -149,16 +160,25 @@ return new class() extends Migration
     private function migrateDown(string $tableName): void
     {
         if (Schema::hasColumn($tableName, 'created_by')) {
+            // Update created_by with numeric user IDs, set to null if invalid
             DB::table($tableName)
                 ->where(DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
-                ->update([
-                    'created_by' => DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"),
-                ]);
+                ->whereNotExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('users')
+                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"));
+                })
+                ->update(['created_by' => null]);
 
             DB::table($tableName)
-                ->where(DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"), 'NOT REGEXP', '^[0-9]+$')
+                ->where(DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
+                ->whereExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('users')
+                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"));
+                })
                 ->update([
-                    'created_by' => null,
+                    'created_by' => DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"),
                 ]);
 
             Schema::table($tableName, function (Blueprint $table) {
@@ -168,16 +188,25 @@ return new class() extends Migration
         }
 
         if (Schema::hasColumn($tableName, 'updated_by')) {
+            // Update updated_by with numeric user IDs, set to null if invalid
             DB::table($tableName)
                 ->where(DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
-                ->update([
-                    'updated_by' => DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"),
-                ]);
+                ->whereNotExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('users')
+                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"));
+                })
+                ->update(['updated_by' => null]);
 
             DB::table($tableName)
-                ->where(DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"), 'NOT REGEXP', '^[0-9]+$')
+                ->where(DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
+                ->whereExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('users')
+                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"));
+                })
                 ->update([
-                    'updated_by' => null,
+                    'updated_by' => DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"),
                 ]);
 
             Schema::table($tableName, function (Blueprint $table) {
@@ -187,16 +216,25 @@ return new class() extends Migration
         }
 
         if (Schema::hasColumn($tableName, 'deleted_by')) {
+            // Update deleted_by with numeric user IDs, set to null if invalid
             DB::table($tableName)
                 ->where(DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
-                ->update([
-                    'deleted_by' => DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"),
-                ]);
+                ->whereNotExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('users')
+                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"));
+                })
+                ->update(['deleted_by' => null]);
 
             DB::table($tableName)
-                ->where(DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"), 'NOT REGEXP', '^[0-9]+$')
+                ->where(DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
+                ->whereExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('users')
+                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"));
+                })
                 ->update([
-                    'deleted_by' => null,
+                    'deleted_by' => DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"),
                 ]);
 
             Schema::table($tableName, function (Blueprint $table) {
