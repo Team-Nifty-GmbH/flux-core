@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class AddMissingForeignKeysOnProjectCategoriesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('project_categories', function (Blueprint $table) {
             $table->foreign('created_by')->references('id')->on('users');
@@ -19,12 +14,7 @@ class AddMissingForeignKeysOnProjectCategoriesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('project_categories', function (Blueprint $table) {
             $table->dropForeign('project_categories_created_by_foreign');

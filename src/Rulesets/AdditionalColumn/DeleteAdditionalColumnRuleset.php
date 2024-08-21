@@ -18,7 +18,7 @@ class DeleteAdditionalColumnRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(AdditionalColumn::class),
+                app(ModelExists::class, ['model' => AdditionalColumn::class]),
             ],
         ];
     }

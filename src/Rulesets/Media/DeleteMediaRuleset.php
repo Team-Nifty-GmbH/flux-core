@@ -18,7 +18,7 @@ class DeleteMediaRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Media::class),
+                app(ModelExists::class, ['model' => Media::class]),
             ],
         ];
     }

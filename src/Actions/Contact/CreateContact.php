@@ -6,6 +6,7 @@ use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Currency;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Rulesets\Contact\CreateContactRuleset;
@@ -30,8 +31,9 @@ class CreateContact extends FluxAction
         $discountGroups = Arr::pull($this->data, 'discount_groups');
         $mainAddress = Arr::pull($this->data, 'main_address');
 
-        $this->data['price_list_id'] = $this->data['price_list_id'] ?? PriceList::default()?->id;
-        $this->data['payment_type_id'] = $this->data['payment_type_id'] ?? PaymentType::default()?->id;
+        $this->data['price_list_id'] ??= PriceList::default()?->id;
+        $this->data['payment_type_id'] ??= PaymentType::default()?->id;
+        $this->data['currency_id'] ??= Currency::default()?->id;
 
         $contact = app(Contact::class, ['attributes' => $this->data]);
         $contact->save();
@@ -64,7 +66,7 @@ class CreateContact extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['client_id'] ??= resolve_static(Client::class, 'default')?->id;
+        $this->data['client_id'] ??= Client::default()?->id;
     }
 
     protected function validateData(): void

@@ -6,24 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 class AddUniqueIsoOnCurrenciesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('currencies', function (Blueprint $table) {
             $table->string('iso')->unique()->change();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('currencies', function (Blueprint $table) {
             $table->dropUnique('currencies_iso_unique');

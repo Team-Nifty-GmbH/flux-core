@@ -16,7 +16,7 @@ class UpdateTicketTypeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(TicketType::class),
+                app(ModelExists::class, ['model' => TicketType::class]),
             ],
             'name' => 'required|string',
         ];

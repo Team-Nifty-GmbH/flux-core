@@ -3,11 +3,13 @@
 namespace FluxErp\Livewire\Product;
 
 use FluxErp\Actions\CartItem\CreateCartItem;
+use FluxErp\Facades\ProductType;
 use FluxErp\Livewire\DataTables\ProductList as BaseProductList;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\VatRate;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -25,6 +27,8 @@ class ProductList extends BaseProductList
 
     public array $priceLists = [];
 
+    public array $productTypes = [];
+
     public bool $isSelectable = true;
 
     public function mount(): void
@@ -32,10 +36,18 @@ class ProductList extends BaseProductList
         parent::mount();
 
         $this->vatRates = app(VatRate::class)->all(['id', 'name', 'rate_percentage'])->toArray();
-        $priceList = resolve_static(PriceList::class, 'default')?->toArray() ?? [];
+        $priceList = PriceList::default()?->toArray() ?? [];
         $priceList['is_editable'] = true;
 
         $this->priceLists = [$priceList];
+
+        $this->productTypes = ProductType::all()
+            ->keys()
+            ->map(fn ($key) => [
+                'value' => $key,
+                'label' => __(Str::headline($key)),
+            ])
+            ->toArray();
     }
 
     protected function getSelectedActions(): array
@@ -61,10 +73,11 @@ class ProductList extends BaseProductList
     {
         $this->product->reset();
 
-        $this->product->client_id = resolve_static(Client::class, 'default')?->id;
+        $this->product->client_id = Client::default()?->id;
+        $this->product->product_type = data_get(ProductType::getDefault(), 'type');
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -77,7 +90,7 @@ class ProductList extends BaseProductList
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         return array_merge(
             parent::getViewData(),

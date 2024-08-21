@@ -19,17 +19,17 @@ class CreateCommissionRuleset extends FluxRuleset
             'user_id' => [
                 'required',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'commission_rate_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(CommissionRate::class),
+                app(ModelExists::class, ['model' => CommissionRate::class]),
             ],
             'order_position_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(OrderPosition::class),
+                app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
             'commission_rate' => 'required_without:commission_rate_id|numeric|gt:0|lt:1',
             'total_net_price' => 'required_without:order_position_id|numeric',

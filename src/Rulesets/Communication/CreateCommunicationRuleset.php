@@ -20,28 +20,28 @@ class CreateCommunicationRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:communications,uuid',
+            'uuid' => 'nullable|string|uuid|unique:communications,uuid',
             'communicatable_type' => [
                 'required',
                 'string',
-                new MorphClassExists(uses: Communicatable::class),
+                app(MorphClassExists::class, ['uses' => Communicatable::class]),
             ],
             'communicatable_id' => [
                 'required',
                 'integer',
-                new MorphExists('communicatable_type'),
+                app(MorphExists::class, ['modelAttribute' => 'communicatable_type']),
             ],
             'mail_account_id' => [
                 'exclude_unless:communication_type_enum,mail',
                 'integer',
                 'nullable',
-                new ModelExists(MailAccount::class),
+                app(ModelExists::class, ['model' => MailAccount::class]),
             ],
             'mail_folder_id' => [
                 'exclude_unless:communication_type_enum,mail',
                 'integer',
                 'nullable',
-                new ModelExists(MailFolder::class),
+                app(ModelExists::class, ['model' => MailFolder::class]),
             ],
             'message_id' => 'nullable|string|max:255',
             'message_uid' => 'integer',

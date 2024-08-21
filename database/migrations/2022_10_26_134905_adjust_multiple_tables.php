@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         return;
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
@@ -610,7 +605,7 @@ return new class() extends Migration
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
             $table->unsignedBigInteger('created_by')->nullable()

@@ -14,7 +14,7 @@ class CreateCategoryRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:categories,uuid',
+            'uuid' => 'nullable|string|uuid|unique:categories,uuid',
             'model_type' => [
                 'required',
                 'string',

@@ -9,15 +9,10 @@ use Illuminate\Database\Seeder;
 
 class StockPostingTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        $warehouses = Warehouse::all();
-        $products = Product::all();
+        $warehouses = Warehouse::all(['id']);
+        $products = Product::all(['id']);
 
         for ($i = 0; $i < 20; $i++) {
             StockPosting::factory()->create([

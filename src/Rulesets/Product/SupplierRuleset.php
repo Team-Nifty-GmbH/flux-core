@@ -15,7 +15,7 @@ class SupplierRuleset extends FluxRuleset
             'suppliers.*.contact_id' => [
                 'required',
                 'integer',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'suppliers.*.manufacturer_product_number' => 'string|nullable',
             'suppliers.*.purchase_price' => 'numeric|nullable|min:0',

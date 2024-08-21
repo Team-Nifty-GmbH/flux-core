@@ -17,11 +17,11 @@ class UpdateCountryRegionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(CountryRegion::class),
+                app(ModelExists::class, ['model' => CountryRegion::class]),
             ],
             'country_id' => [
                 'integer',
-                new ModelExists(Country::class),
+                app(ModelExists::class, ['model' => Country::class]),
             ],
             'name' => 'string',
         ];

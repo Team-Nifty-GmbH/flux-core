@@ -68,7 +68,7 @@ class VariantList extends ProductList
         parent::mount();
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()

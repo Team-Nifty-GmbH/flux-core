@@ -18,7 +18,7 @@ class DeletePermissionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Permission::class),
+                app(ModelExists::class, ['model' => Permission::class]),
             ],
         ];
     }

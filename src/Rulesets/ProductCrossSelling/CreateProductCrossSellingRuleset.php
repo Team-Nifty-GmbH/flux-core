@@ -17,12 +17,12 @@ class CreateProductCrossSellingRuleset extends FluxRuleset
         return [
             'uuid' => [
                 'string',
-                new Sole(ProductCrossSelling::class),
+                app(Sole::class, ['model' => ProductCrossSelling::class]),
             ],
             'product_id' => [
                 'required',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'name' => 'required|string|max:255',
             'order_column' => 'integer',

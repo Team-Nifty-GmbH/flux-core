@@ -17,7 +17,7 @@ class UpdateContactOptionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(ContactOption::class),
+                app(ModelExists::class, ['model' => ContactOption::class]),
             ],
             'type' => [
                 'sometimes',

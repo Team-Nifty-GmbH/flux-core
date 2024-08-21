@@ -18,7 +18,7 @@ class DeleteProductOptionGroupRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(ProductOptionGroup::class),
+                app(ModelExists::class, ['model' => ProductOptionGroup::class]),
             ],
         ];
     }

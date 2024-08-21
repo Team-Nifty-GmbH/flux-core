@@ -54,7 +54,7 @@ class CustomerPortal extends Component
         $this->setting = $setting?->toArray() ??
             [
                 'key' => 'customerPortal',
-                'model_type' => app(Client::class)->getMorphClass(),
+                'model_type' => morph_alias(Client::class),
                 'model_id' => $client->id,
                 'settings' => [
                     'nav' => [

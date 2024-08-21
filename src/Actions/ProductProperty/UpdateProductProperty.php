@@ -6,7 +6,6 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Rulesets\ProductProperty\UpdateProductPropertyRuleset;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 
 class UpdateProductProperty extends FluxAction
 {
@@ -31,13 +30,5 @@ class UpdateProductProperty extends FluxAction
         $productProperty->save();
 
         return $productProperty->withoutRelations()->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(ProductProperty::class));
-
-        $this->data = $validator->validate();
     }
 }

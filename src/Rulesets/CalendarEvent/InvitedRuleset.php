@@ -15,7 +15,7 @@ class InvitedRuleset extends FluxRuleset
             'invited.*.id' => [
                 'required',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'invited.*.status' => 'string|nullable|in:accepted,declined,maybe',
         ];

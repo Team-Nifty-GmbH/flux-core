@@ -15,16 +15,16 @@ class CreateStockPostingRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:stock_postings,uuid',
+            'uuid' => 'nullable|string|uuid|unique:stock_postings,uuid',
             'warehouse_id' => [
                 'required',
                 'integer',
-                new ModelExists(Warehouse::class),
+                app(ModelExists::class, ['model' => Warehouse::class]),
             ],
             'product_id' => [
                 'required',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'purchase_price' => 'required|numeric',
             'posting' => 'required|numeric',

@@ -33,11 +33,14 @@ class CreateComment extends FluxAction
             ->filter(fn (Model $notifiable) => in_array(Notifiable::class, class_uses_recursive($notifiable)));
 
         foreach ($mentions as $mention) {
-            if ($mention->eventSubscriptions()->where([
-                'event' => eloquent_model_event('created', Comment::class),
-                'model_type' => $this->data['model_type'],
-                'model_id' => $this->data['model_id'],
-            ])->doesntExist()) {
+            if ($mention->eventSubscriptions()
+                ->where([
+                    'event' => eloquent_model_event('created', Comment::class),
+                    'model_type' => $this->data['model_type'],
+                    'model_id' => $this->data['model_id'],
+                ])
+                ->doesntExist()
+            ) {
                 CreateEventSubscription::make([
                     'event' => eloquent_model_event(
                         'created',
@@ -49,7 +52,9 @@ class CreateComment extends FluxAction
                     'model_id' => $this->data['model_id'],
                     'is_broadcast' => false,
                     'is_notifiable' => true,
-                ])->execute();
+                ])
+                    ->validate()
+                    ->execute();
             }
         }
 

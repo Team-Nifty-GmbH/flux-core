@@ -18,7 +18,7 @@ class DeleteClientRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
         ];
     }

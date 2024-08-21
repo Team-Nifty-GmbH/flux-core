@@ -15,14 +15,14 @@ class UpdateRolePermissionsRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Role::class),
+                app(ModelExists::class, ['model' => Role::class]),
             ],
             'give' => 'required|boolean',
             'permissions' => 'required|array',
             'permissions.*' => [
                 'required',
                 'integer',
-                new ModelExists(Permission::class),
+                app(ModelExists::class, ['model' => Permission::class]),
             ],
         ];
     }

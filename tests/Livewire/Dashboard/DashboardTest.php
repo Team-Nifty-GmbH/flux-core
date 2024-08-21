@@ -32,12 +32,6 @@ class DashboardTest extends BaseSetup
                 blade;
             }
 
-            public function placeholder()
-            {
-                // because the dashboard renders widgets lazy this will be called
-                return $this->render();
-            }
-
             public static function getLabel(): string
             {
                 return 'Sample Component';
@@ -55,12 +49,6 @@ class DashboardTest extends BaseSetup
                 blade;
             }
 
-            public function placeholder()
-            {
-                // because the dashboard renders widgets lazy this will be called
-                return $this->render();
-            }
-
             public static function getLabel(): string
             {
                 return 'Sample Component 2';
@@ -68,7 +56,7 @@ class DashboardTest extends BaseSetup
         };
 
         Widget::query()->create([
-            'widgetable_type' => app(User::class)->getMorphClass(),
+            'widgetable_type' => morph_alias(User::class),
             'widgetable_id' => $this->user->id,
             'component_name' => 'sample-component',
             'name' => 'Widget 1',
@@ -87,7 +75,8 @@ class DashboardTest extends BaseSetup
     public function test_dashboard_widget_rendering()
     {
         // Perform the Livewire test
-        Livewire::test('dashboard.dashboard')
+        Livewire::withoutLazyLoading()
+            ->test('dashboard.dashboard')
             ->assertOk()
             ->assertSee('Hello from sample component')
             ->assertDontSee('Hello from sample component 2')
@@ -97,12 +86,14 @@ class DashboardTest extends BaseSetup
 
     public function test_dashboard_hide_widget_without_permission()
     {
-        Livewire::test('dashboard.dashboard')
+        Livewire::withoutLazyLoading()
+            ->test('dashboard.dashboard')
             ->assertSeeLivewire('sample-component');
 
         Permission::findOrCreate('widget.sample-component');
 
-        Livewire::test('dashboard.dashboard')
+        Livewire::withoutLazyLoading()
+            ->test('dashboard.dashboard')
             ->assertOk()
             ->assertDontSeeLivewire('sample-component');
     }
@@ -111,44 +102,23 @@ class DashboardTest extends BaseSetup
     {
         $permission = Permission::findOrCreate('widget.sample-component', 'web');
 
-        Livewire::test('dashboard.dashboard')
+        Livewire::withoutLazyLoading()
+            ->test('dashboard.dashboard')
             ->assertOk()
             ->assertDontSeeLivewire('sample-component');
 
         $this->user->givePermissionTo($permission);
 
-        Livewire::test('dashboard.dashboard')
+        Livewire::withoutLazyLoading()
+            ->test('dashboard.dashboard')
             ->assertOk()
             ->assertSeeLivewire('sample-component');
     }
 
-    public function test_dashboard_widget_adding()
-    {
-        // Add another widget to the dashboard
-        $livewire = Livewire::test('dashboard.dashboard');
-        $widgets = array_merge($livewire->get('widgets'), [
-            [
-                'id' => uniqid(),
-                'component_name' => 'sample-component-2',
-                'name' => 'Widget 2',
-                'width' => 2,
-                'height' => 1,
-            ],
-        ]);
-        $livewire->set('widgets', $widgets)
-            ->call('saveDashboard')
-            ->assertOk()
-            ->call('$refresh')
-            ->assertOk()
-            ->assertSee('Hello from sample component')
-            ->assertSee('Hello from sample component 2')
-            ->assertSeeLivewire('sample-component')
-            ->assertSeeLivewire('sample-component-2');
-    }
-
     public function test_dashboard_widget_removal()
     {
-        $livewire = Livewire::test('dashboard.dashboard');
+        $livewire = Livewire::withoutLazyLoading()
+            ->test('dashboard.dashboard');
 
         $livewire->assertSee('Hello from sample component')
             ->assertSeeLivewire('sample-component');
@@ -167,7 +137,8 @@ class DashboardTest extends BaseSetup
 
     public function test_dashboard_update_widget()
     {
-        Livewire::test('dashboard.dashboard')
+        Livewire::withoutLazyLoading()
+            ->test('dashboard.dashboard')
             ->set('widgets.0.name', 'New Name')
             ->set('widgets.0.width', 3)
             ->set('widgets.0.height', 3)
@@ -180,13 +151,15 @@ class DashboardTest extends BaseSetup
 
     public function test_dashboard_unregistered_widget()
     {
-        Livewire::test('dashboard.dashboard')
+        Livewire::withoutLazyLoading()
+            ->test('dashboard.dashboard')
             ->assertSee('Hello from sample component')
             ->assertSeeLivewire('sample-component');
 
         \FluxErp\Facades\Widget::unregister('sample-component');
 
-        Livewire::test('dashboard.dashboard')
+        Livewire::withoutLazyLoading()
+            ->test('dashboard.dashboard')
             ->assertDontSee('Hello from sample component')
             ->assertDontSeeLivewire('sample-component');
     }

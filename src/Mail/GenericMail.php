@@ -7,6 +7,7 @@ use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\Media;
+use FluxErp\Traits\Makeable;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Attachment;
@@ -21,7 +22,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class GenericMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Makeable, Queueable, SerializesModels;
 
     public function __construct(
         public CommunicationForm $mailMessageForm,

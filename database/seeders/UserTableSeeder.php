@@ -2,24 +2,33 @@
 
 namespace FluxErp\Database\Seeders;
 
+use FluxErp\Facades\Widget;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserTableSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        $languages = Language::all();
+        $languages = Language::all('id');
+        $password = Hash::make('password');
 
-        if ($languages) {
-            for ($i = 0; $i < 10; $i++) {
-                User::factory()->create([
-                    'language_id' => $languages->random()->id,
-                ])->each(function ($user) {
-                    $user->assignRole('Super Admin');
-                });
-            }
-        }
+        User::factory(10)
+            ->create([
+                'password' => $password,
+                'language_id' => fn () => $languages->random()->id,
+            ])
+            ->each(function (User $user) {
+                $user->assignRole('Super Admin');
+                foreach (Widget::all() as $widget) {
+                    $user->widgets()->create([
+                        'name' => $widget['label'],
+                        'component_name' => $widget['component_name'],
+                        'width' => rand(3, 6),
+                    ]);
+                }
+            });
     }
 }

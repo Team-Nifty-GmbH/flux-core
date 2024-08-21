@@ -41,12 +41,7 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         'id',
     ];
 
-    public array $translatable = [
-        'name',
-        'description',
-    ];
-
-    protected string $detailRouteName = 'products.id';
+    protected ?string $detailRouteName = 'products.id';
 
     public static string $iconName = 'square-3-stack-3d';
 
@@ -151,10 +146,13 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
         );
     }
 
-    public function purchasePrice(float|int $amount): float
+    public function purchasePrice(float|int $amount = 1): ?Price
     {
-        // TODO: add calculation for purchase price
-        return 0;
+        return PriceHelper::make($this)
+            ->setPriceList(resolve_static(PriceList::class, 'query')
+                ->where('is_purchase', true)
+                ->first()
+            )->price();
     }
 
     public function stockPostings(): HasMany

@@ -18,15 +18,15 @@ class UpdateCountryRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Country::class),
+                app(ModelExists::class, ['model' => Country::class]),
             ],
             'language_id' => [
                 'integer',
-                new ModelExists(Language::class),
+                app(ModelExists::class, ['model' => Language::class]),
             ],
             'currency_id' => [
                 'integer',
-                new ModelExists(Currency::class),
+                app(ModelExists::class, ['model' => Currency::class]),
             ],
             'name' => 'string',
             'iso_alpha2' => 'sometimes|required|string|unique:countries,iso_alpha2',

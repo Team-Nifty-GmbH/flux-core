@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateModelHasExternalRecord extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('model_has_external_record', function (Blueprint $table) {
             $table->id();
@@ -25,12 +20,7 @@ class CreateModelHasExternalRecord extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('model_has_external_record');
     }

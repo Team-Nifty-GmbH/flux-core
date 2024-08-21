@@ -28,7 +28,7 @@ class WorkTimeTypes extends WorkTimeTypeList
         $this->headline = __('Work Time Types');
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -42,7 +42,7 @@ class WorkTimeTypes extends WorkTimeTypeList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

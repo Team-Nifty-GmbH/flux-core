@@ -7,16 +7,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class WidgetFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Widget::class;
 
-    /**
-     * Define the model's default state.
-     */
     public function definition(): array
     {
         return [

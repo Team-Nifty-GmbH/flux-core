@@ -27,7 +27,7 @@ class Warehouses extends WarehouseList
         $this->headline = __('Warehouses');
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -41,7 +41,7 @@ class Warehouses extends WarehouseList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

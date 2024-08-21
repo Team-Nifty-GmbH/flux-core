@@ -18,7 +18,7 @@ class DeleteCurrencyRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Currency::class),
+                app(ModelExists::class, ['model' => Currency::class]),
             ],
         ];
     }

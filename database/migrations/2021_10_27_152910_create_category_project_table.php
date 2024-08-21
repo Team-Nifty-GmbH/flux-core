@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateCategoryProjectTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('category_project', function (Blueprint $table) {
             $table->unsignedBigInteger('category_id');
@@ -23,12 +18,7 @@ class CreateCategoryProjectTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('category_project');
     }

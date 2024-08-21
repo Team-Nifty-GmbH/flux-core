@@ -12,7 +12,7 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rulesets\ProductCrossSelling\CreateProductCrossSellingRuleset;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rule;
 
 class UpdateProductRuleset extends FluxRuleset
 {
@@ -24,37 +24,37 @@ class UpdateProductRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'cover_media_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Media::class),
+                app(ModelExists::class, ['model' => Media::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'vat_rate_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(VatRate::class),
+                app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'unit_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Unit::class),
+                app(ModelExists::class, ['model' => Unit::class]),
             ],
             'purchase_unit_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Unit::class),
+                app(ModelExists::class, ['model' => Unit::class]),
             ],
             'reference_unit_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Unit::class),
+                app(ModelExists::class, ['model' => Unit::class]),
             ],
 
             'product_number' => 'string|nullable',
@@ -69,7 +69,7 @@ class UpdateProductRuleset extends FluxRuleset
             'time_unit_enum' => [
                 'nullable',
                 'required_if:is_service,true',
-                new Enum(TimeUnitEnum::class),
+                Rule::enum(TimeUnitEnum::class),
             ],
             'ean' => 'string|nullable',
             'stock' => 'integer|nullable',
@@ -121,7 +121,7 @@ class UpdateProductRuleset extends FluxRuleset
                             'sometimes',
                             'required',
                             'integer',
-                            new ModelExists(ProductCrossSelling::class),
+                            app(ModelExists::class, ['model' => ProductCrossSelling::class]),
                         ],
                     ]
                 ),

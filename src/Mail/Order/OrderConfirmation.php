@@ -3,6 +3,7 @@
 namespace FluxErp\Mail\Order;
 
 use FluxErp\Models\Order;
+use FluxErp\Traits\Makeable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -11,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 
 class OrderConfirmation extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Makeable, Queueable, SerializesModels;
 
     public function __construct(public Order $order)
     {

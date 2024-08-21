@@ -19,13 +19,13 @@ class UpdateCommunicationRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Communication::class),
+                app(ModelExists::class, ['model' => Communication::class]),
             ],
             'mail_folder_id' => [
                 'exclude_unless:communication_type_enum,mail',
                 'integer',
                 'nullable',
-                new ModelExists(MailFolder::class),
+                app(ModelExists::class, ['model' => MailFolder::class]),
             ],
             'message_uid' => 'nullable|integer',
             'from' => 'nullable|string|max:255',

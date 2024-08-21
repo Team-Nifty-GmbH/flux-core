@@ -2,8 +2,12 @@
 
 namespace FluxErp\Rulesets\ProductProperty;
 
+use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Models\ProductProperty;
+use FluxErp\Models\ProductPropertyGroup;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class CreateProductPropertyRuleset extends FluxRuleset
 {
@@ -12,8 +16,18 @@ class CreateProductPropertyRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:product_properties,uuid',
+            'uuid' => 'nullable|string|uuid|unique:product_properties,uuid',
+            'product_property_group_id' => [
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => ProductPropertyGroup::class]),
+            ],
             'name' => 'required|string',
+            'property_type_enum' => [
+                'required',
+                'string',
+                Rule::enum(PropertyTypeEnum::class),
+            ],
         ];
     }
 }

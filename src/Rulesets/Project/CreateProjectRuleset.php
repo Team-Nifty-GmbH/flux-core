@@ -19,31 +19,31 @@ class CreateProjectRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:projects,uuid',
+            'uuid' => 'nullable|string|uuid|unique:projects,uuid',
             'client_id' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'contact_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'order_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'responsible_user_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Project::class),
+                app(ModelExists::class, ['model' => Project::class]),
             ],
             'project_number' => 'nullable|string',
             'name' => 'required|string',

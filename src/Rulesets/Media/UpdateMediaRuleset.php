@@ -16,12 +16,12 @@ class UpdateMediaRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Media::class),
+                app(ModelExists::class, ['model' => Media::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Media::class),
+                app(ModelExists::class, ['model' => Media::class]),
             ],
             'name' => 'sometimes|required|string',
             'collection' => 'sometimes|required|string',

@@ -8,14 +8,9 @@ use Illuminate\Database\Seeder;
 
 class DocumentTypeTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        $clients = Client::all();
+        $clients = Client::all(['id']);
 
         for ($i = 0; $i < 10; $i++) {
             DocumentType::factory()->create([

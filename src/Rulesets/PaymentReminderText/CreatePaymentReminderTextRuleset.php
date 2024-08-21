@@ -12,7 +12,7 @@ class CreatePaymentReminderTextRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:payment_reminders,uuid',
+            'uuid' => 'nullable|string|uuid|unique:payment_reminders,uuid',
             'mail_to' => 'nullable|array',
             'mail_to.*' => 'email',
             'mail_cc' => 'nullable|array',

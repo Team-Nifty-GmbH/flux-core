@@ -55,7 +55,7 @@ class AssetController extends Controller
                 ->log($communication->subject . ' opened');
         }
 
-        $logo = resolve_static(Client::class, 'default')->getFirstMedia('logo_small');
+        $logo = Client::default()->getFirstMedia('logo_small');
 
         return Utils::pretendResponseIsFile(
             $logo->getPath(),

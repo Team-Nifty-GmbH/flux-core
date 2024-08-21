@@ -2,22 +2,24 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\Money;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\Scout\Searchable;
+use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
-use TeamNiftyGmbH\DataTable\Casts\Money;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Transaction extends Model implements InteractsWithDataTables
 {
-    use BroadcastsEvents, HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, Searchable;
+    use BroadcastsEvents, HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, Searchable,
+        SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -28,7 +30,7 @@ class Transaction extends Model implements InteractsWithDataTables
         static::saving(function (Transaction $transaction) {
             $transaction->currency_id = $transaction->currency_id
                 ?? Auth::user()?->currency_id
-                ?? resolve_static(Currency::class, 'default')?->id;
+                ?? Currency::default()?->id;
         });
 
         static::saved(function (Transaction $transaction) {

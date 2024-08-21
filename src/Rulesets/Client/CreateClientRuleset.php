@@ -14,11 +14,11 @@ class CreateClientRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:clients,uuid',
+            'uuid' => 'nullable|string|uuid|unique:clients,uuid',
             'country_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Country::class),
+                app(ModelExists::class, ['model' => Country::class]),
             ],
             'name' => 'required|string',
             'client_code' => 'required|string|unique:clients,client_code',
@@ -31,6 +31,7 @@ class CreateClientRuleset extends FluxRuleset
             'email' => 'email|nullable',
             'website' => 'string|nullable',
             'creditor_identifier' => 'string|nullable',
+            'vat_id' => 'string|nullable',
             'sepa_text' => 'string|nullable',
             'opening_hours' => 'array|nullable',
             'terms_and_conditions' => 'string|nullable',

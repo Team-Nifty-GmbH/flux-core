@@ -9,23 +9,17 @@ use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Collection;
 
 class ProductTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        $units = Unit::all();
-        $vatRates = VatRate::all();
-        $clients = Client::all();
-        $products = Product::all();
+        $units = Unit::all(['id']);
+        $vatRates = VatRate::all(['id']);
+        $clients = Client::all(['id']);
+        $products = Product::all(['id']);
 
-        $createdProducts = Collection::make([]);
+        $createdProducts = collect();
         for ($i = 0; $i < 20; $i++) {
             $createdProducts->push(Product::factory()->create([
                 'unit_id' => $units->random()?->id,
@@ -37,8 +31,8 @@ class ProductTableSeeder extends Seeder
             ]));
         }
 
-        $productOptions = ProductOption::all();
-        $productProperties = ProductProperty::all();
+        $productOptions = ProductOption::all(['id']);
+        $productProperties = ProductProperty::all(['id']);
         $products = Product::query()
             ->where('is_bundle', false)
             ->get();

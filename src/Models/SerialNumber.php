@@ -26,7 +26,7 @@ class SerialNumber extends Model implements HasMedia, InteractsWithDataTables
         'id',
     ];
 
-    public string $detailRouteName = 'products.serial-numbers.id?';
+    protected ?string $detailRouteName = 'products.serial-numbers.id?';
 
     public static string $iconName = 'tag';
 

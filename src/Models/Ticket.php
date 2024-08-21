@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\Money;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -37,7 +38,7 @@ class Ticket extends Model implements HasMedia, InteractsWithDataTables
         'id',
     ];
 
-    protected string $detailRouteName = 'tickets.id';
+    protected ?string $detailRouteName = 'tickets.id';
 
     protected array $relatedCustomEvents = [
         'ticketType',
@@ -49,6 +50,7 @@ class Ticket extends Model implements HasMedia, InteractsWithDataTables
     {
         return [
             'state' => TicketState::class,
+            'total_cost' => Money::class,
         ];
     }
 
@@ -100,5 +102,15 @@ class Ticket extends Model implements HasMedia, InteractsWithDataTables
     public function getAvatarUrl(): ?string
     {
         return $this->getFirstMediaUrl('images') ?: self::icon()->getUrl();
+    }
+
+    public function getPortalDetailRoute(): string
+    {
+        return route('portal.tickets.id', ['id' => $this->id]);
+    }
+
+    public function costColumn(): string
+    {
+        return 'total_cost';
     }
 }

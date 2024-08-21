@@ -55,7 +55,7 @@
                                     [
                                         'model_type',
                                         '=',
-                                        app(\FluxErp\Models\Contact::class)->getMorphClass(),
+                                        morph_alias(\FluxErp\Models\Contact::class),
                                     ],
                                 ],
                             ],

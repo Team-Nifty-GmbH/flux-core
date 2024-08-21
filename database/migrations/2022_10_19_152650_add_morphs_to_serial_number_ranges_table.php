@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('serial_number_ranges', function (Blueprint $table) {
             $table->string('model_type')->after('uuid');
@@ -42,12 +37,7 @@ return new class() extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('serial_number_ranges', function (Blueprint $table) {
             $table->dropForeign(['client_id']);

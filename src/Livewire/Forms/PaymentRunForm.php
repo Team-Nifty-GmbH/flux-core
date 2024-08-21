@@ -19,6 +19,8 @@ class PaymentRunForm extends FluxForm
 
     public ?string $instructed_execution_date = null;
 
+    public ?bool $is_collective = true;
+
     public ?bool $is_single_booking = true;
 
     public ?bool $is_instant_payment = false;

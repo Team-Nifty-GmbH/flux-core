@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class RenameProjectIdToParentIdOnProjectsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('projects', function (Blueprint $table) {
             $table->dropForeign('projects_project_id_foreign');
@@ -23,12 +18,7 @@ class RenameProjectIdToParentIdOnProjectsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('projects', function (Blueprint $table) {
             $table->dropForeign('projects_parent_id_foreign');

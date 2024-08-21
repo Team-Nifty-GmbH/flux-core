@@ -22,7 +22,7 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:purchase_invoices,uuid',
+            'uuid' => 'nullable|string|uuid|unique:purchase_invoices,uuid',
             'client_id' => [
                 'nullable',
                 'integer',

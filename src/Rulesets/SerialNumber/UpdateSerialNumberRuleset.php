@@ -19,22 +19,22 @@ class UpdateSerialNumberRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(SerialNumber::class),
+                app(ModelExists::class, ['model' => SerialNumber::class]),
             ],
             'product_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'address_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Address::class),
+                app(ModelExists::class, ['model' => Address::class]),
             ],
             'order_position_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(OrderPosition::class),
+                app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
             'serial_number' => 'sometimes|required|string',
         ];

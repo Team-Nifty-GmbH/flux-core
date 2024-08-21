@@ -16,7 +16,7 @@ class UpdateLanguageRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Language::class),
+                app(ModelExists::class, ['model' => Language::class]),
             ],
             'name' => 'string',
             'iso_name' => 'string|unique:languages,iso_name',

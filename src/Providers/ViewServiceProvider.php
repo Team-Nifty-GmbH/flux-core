@@ -54,10 +54,6 @@ class ViewServiceProvider extends ServiceProvider
                         'team-nifty-gmbh/tall-calendar'
                     ),
                     static::getRealPackageAssetPath(
-                        'resources/css/calendar.css',
-                        'team-nifty-gmbh/tall-calendar'
-                    ),
-                    static::getRealPackageAssetPath(
                         'ts/index.ts',
                         'wireui/wireui'
                     ),
@@ -111,7 +107,7 @@ class ViewServiceProvider extends ServiceProvider
                 if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
                     View::share(
                         'defaultCurrency',
-                        resolve_static(Currency::class, 'default') ?? app(Currency::class)
+                        Currency::default() ?? app(Currency::class)
                     );
                 } else {
                     View::share('defaultCurrency', app(Currency::class));

@@ -36,6 +36,8 @@ class ClientForm extends FluxForm
 
     public ?string $creditor_identifier = null;
 
+    public ?string $vat_id = null;
+
     public ?string $sepa_text = null;
 
     public ?array $opening_hours = [];

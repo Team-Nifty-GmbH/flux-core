@@ -19,7 +19,7 @@ class CreateTicketRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:tickets,uuid',
+            'uuid' => 'nullable|string|uuid|unique:tickets,uuid',
             'authenticatable_type' => [
                 'required',
                 'string',
@@ -43,7 +43,7 @@ class CreateTicketRuleset extends FluxRuleset
             'ticket_type_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(TicketType::class),
+                app(ModelExists::class, ['model' => TicketType::class]),
             ],
             'title' => 'required|string',
             'description' => 'required|string|min:12',

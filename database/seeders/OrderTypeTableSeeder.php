@@ -6,48 +6,31 @@ use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\OrderType;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class OrderTypeTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        $clients = Client::all();
+        $clients = Client::all(['id']);
 
         foreach ($clients as $client) {
-            foreach (OrderTypeEnum::values() as $orderType) {
-                $printLayouts = $this->findPrintLayouts($orderType);
+            foreach (OrderTypeEnum::cases() as $orderType) {
                 OrderType::factory()->create([
-                    'name' => $orderType,
+                    'name' => Str::headline($orderType->name),
                     'client_id' => $client->id,
-                    'print_layouts' => $printLayouts,
+                    'print_layouts' => match ($orderType) {
+                        OrderTypeEnum::Order, OrderTypeEnum::SplitOrder, OrderTypeEnum::Subscription => [
+                            'offer',
+                            'invoice',
+                            'order-confirmation',
+                        ],
+                        OrderTypeEnum::Retoure => ['retoure'],
+                        default => [],
+                    },
                     'order_type_enum' => $orderType,
                 ]);
             }
         }
-    }
-
-    protected function findPrintLayouts($orderType): array
-    {
-        $printLayouts = get_subclasses_of(
-            extendingClass: 'FluxErp\View\Printing\Order\OrderView',
-            namespace: 'FluxErp\View\Printing\Order'
-        );
-        $orderType = OrderTypeEnum::from($orderType);
-
-        $filteredLayouts = match ($orderType) {
-            OrderTypeEnum::Order, OrderTypeEnum::SplitOrder, OrderTypeEnum::Subscription => ['Offer'],
-            OrderTypeEnum::Retoure => ['Retoure'],
-            OrderTypeEnum::Purchase, OrderTypeEnum::PurchaseRefund => ['Invoice'],
-            default => [],
-        };
-
-        return array_filter($printLayouts, function ($layout) use ($filteredLayouts) {
-            return in_array(class_basename($layout), $filteredLayouts);
-        });
     }
 }

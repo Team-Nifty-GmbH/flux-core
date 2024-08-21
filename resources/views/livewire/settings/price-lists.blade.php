@@ -28,6 +28,7 @@
                                 <x-input wire:model="priceList.price_list_code" :label="__('Code')"/>
                                 <x-toggle wire:model.boolean="priceList.is_net" lg :label="__('Is Net')"/>
                                 <x-toggle wire:model.boolean="priceList.is_default" lg :label="__('Is Default')"/>
+                                <x-toggle wire:model.boolean="priceList.is_purchase" lg :label="__('Is Purchase')"/>
                             </div>
                         </div>
                     </div>
@@ -116,7 +117,7 @@
                                                     [
                                                         'model_type',
                                                         '=',
-                                                        app(\FluxErp\Models\Product::class)->getMorphClass(),
+                                                        morph_alias(\FluxErp\Models\Product::class),
                                                     ]
                                                 ],
                                             ],

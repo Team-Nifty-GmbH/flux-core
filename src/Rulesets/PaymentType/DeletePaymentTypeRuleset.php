@@ -18,7 +18,7 @@ class DeletePaymentTypeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(PaymentType::class),
+                app(ModelExists::class, ['model' => PaymentType::class]),
             ],
         ];
     }

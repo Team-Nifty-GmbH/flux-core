@@ -15,16 +15,16 @@ class CreatePriceRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:prices,uuid',
+            'uuid' => 'nullable|string|uuid|unique:prices,uuid',
             'product_id' => [
                 'required',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'price_list_id' => [
                 'required',
                 'integer',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'price' => 'required|numeric',
         ];

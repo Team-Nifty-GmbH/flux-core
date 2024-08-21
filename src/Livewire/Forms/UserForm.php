@@ -36,6 +36,8 @@ class UserForm extends FluxForm
 
     public ?string $bic = null;
 
+    public ?float $cost_per_hour = null;
+
     protected function getActions(): array
     {
         return [

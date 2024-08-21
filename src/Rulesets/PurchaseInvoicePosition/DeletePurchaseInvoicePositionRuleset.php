@@ -18,7 +18,7 @@ class DeletePurchaseInvoicePositionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(PurchaseInvoicePosition::class),
+                app(ModelExists::class, ['model' => PurchaseInvoicePosition::class]),
             ],
         ];
     }

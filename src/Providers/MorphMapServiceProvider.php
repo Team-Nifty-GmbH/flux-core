@@ -77,6 +77,7 @@ use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Models\ProductProperty;
+use FluxErp\Models\ProductPropertyGroup;
 use FluxErp\Models\Project;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
@@ -173,6 +174,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'product_option' => ProductOption::class,
             'product_option_group' => ProductOptionGroup::class,
             'product_property' => ProductProperty::class,
+            'product_property_group' => ProductPropertyGroup::class,
             'project' => Project::class,
             'purchase_invoice' => PurchaseInvoice::class,
             'purchase_invoice_position' => PurchaseInvoicePosition::class,

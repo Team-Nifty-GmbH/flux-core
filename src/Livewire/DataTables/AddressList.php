@@ -39,7 +39,7 @@ class AddressList extends BaseDataTable
 
     public ContactForm $contact;
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()

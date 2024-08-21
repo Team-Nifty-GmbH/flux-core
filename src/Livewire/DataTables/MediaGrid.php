@@ -19,7 +19,7 @@ class MediaGrid extends MediaList
         'url' => 'image',
     ];
 
-    public function getLayout(): string
+    protected function getLayout(): string
     {
         return 'tall-datatables::layouts.grid';
     }

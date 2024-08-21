@@ -14,33 +14,30 @@ use Illuminate\Database\Seeder;
 
 class OrderTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $clients = Client::all();
-        $languages = Language::all();
-        $currencies = Currency::all();
-        $priceLists = PriceList::all();
+        $clients = Client::all(['id']);
+        $languages = Language::all(['id']);
+        $currencies = Currency::all(['id']);
+        $priceLists = PriceList::all(['id']);
 
         foreach ($clients as $client) {
             $contacts = Contact::query()
                 ->with('addresses')
                 ->where('client_id', $client->id)
-                ->get();
+                ->get(['id']);
 
             $orderTypes = OrderType::query()
                 ->where('client_id', $client->id)
-                ->get();
+                ->get(['id']);
 
             $paymentTypes = PaymentType::query()
                 ->where('client_id', $client->id)
-                ->get();
+                ->get(['id']);
 
             $orders = Order::query()
                 ->where('client_id', $client->id)
-                ->get();
+                ->get(['id']);
 
             for ($i = 0; $i < 10; $i++) {
                 $parentId = ! $orders ? $orders->random()->id : null;
@@ -70,7 +67,10 @@ class OrderTableSeeder extends Seeder
                 ]);
 
                 if ($order->is_locked) {
-                    $order->setAttribute('invoice_date', faker()->date())
+                    $order->setAttribute(
+                        'invoice_date',
+                        faker()->dateTimeBetween(now()->startOfYear(), now()->endOfYear())
+                    )
                         ->getSerialNumber('invoice_number', $order->client_id)
                         ->save();
                 }

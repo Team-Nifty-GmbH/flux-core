@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class AddFieldsToAddresses extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
             $table->date('date_of_birth')->nullable()->after('url');
@@ -30,12 +25,7 @@ class AddFieldsToAddresses extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
             $table->dropForeign('addresses_country_id_foreign');

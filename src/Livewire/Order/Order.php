@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Order;
 
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\ReplicateOrder;
+use FluxErp\Actions\Order\ToggleLock;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Contracts\OffersPrinting;
@@ -141,7 +142,7 @@ class Order extends OrderPositionList
         ]);
     }
 
-    public function getRowAttributes(): DataTableRowAttributes
+    protected function getRowAttributes(): DataTableRowAttributes
     {
         return DataTableRowAttributes::make()
             ->bind(
@@ -155,7 +156,7 @@ class Order extends OrderPositionList
             );
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()
@@ -239,28 +240,28 @@ class Order extends OrderPositionList
         );
     }
 
-    public function getLeftAppends(): array
+    protected function getLeftAppends(): array
     {
         return [
             'name' => 'indentation',
         ];
     }
 
-    public function getRightAppends(): array
+    protected function getRightAppends(): array
     {
         return [
             'name' => 'alternative_tag',
         ];
     }
 
-    public function getTopAppends(): array
+    protected function getTopAppends(): array
     {
         return [
             'name' => 'product_number',
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         return array_merge(
             parent::getViewData(),
@@ -344,7 +345,7 @@ class Order extends OrderPositionList
             TabButton::make('order.activities')
                 ->label(__('Activities'))
                 ->isLivewireComponent()
-                ->wireModel('order'),
+                ->wireModel('order.id'),
         ];
     }
 
@@ -381,6 +382,23 @@ class Order extends OrderPositionList
             ->whereKey($this->order->address_delivery_id)
             ->first()
             ->toArray();
+    }
+
+    public function toggleLock(): void
+    {
+        try {
+            ToggleLock::make(['id' => $this->order->id])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->fetchOrder($this->order->id);
+        $this->forceRender();
     }
 
     #[Renderless]
@@ -906,6 +924,7 @@ class Order extends OrderPositionList
                 'amount',
                 'amount_bundle',
                 'discount_percentage',
+                'purchase_price',
                 'total_base_gross_price',
                 'total_base_net_price',
                 'total_gross_price',

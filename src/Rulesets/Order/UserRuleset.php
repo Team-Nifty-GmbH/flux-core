@@ -15,7 +15,7 @@ class UserRuleset extends FluxRuleset
             'users.*' => [
                 'required',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
         ];
     }

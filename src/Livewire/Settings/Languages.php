@@ -20,7 +20,7 @@ class Languages extends LanguageList
 
     public bool $editModal = false;
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -33,7 +33,7 @@ class Languages extends LanguageList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

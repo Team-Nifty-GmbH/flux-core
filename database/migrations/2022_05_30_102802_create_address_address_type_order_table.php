@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateAddressAddressTypeOrderTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('address_address_type_order', function (Blueprint $table) {
             $table->unsignedBigInteger('order_id')
@@ -28,12 +23,7 @@ class CreateAddressAddressTypeOrderTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('address_address_type_order');
     }

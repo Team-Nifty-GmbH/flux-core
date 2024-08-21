@@ -181,7 +181,7 @@
                                 [
                                     'type',
                                     '=',
-                                    app(\FluxErp\Models\Address::class)->getMorphClass(),
+                                    morph_alias(\FluxErp\Models\Address::class),
                                 ],
                             ],
                         ],

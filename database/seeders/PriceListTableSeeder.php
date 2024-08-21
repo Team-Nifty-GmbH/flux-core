@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 
 class PriceListTableSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         PriceList::factory()->count(10)->create();
     }

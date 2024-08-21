@@ -13,6 +13,5 @@ trait SoftDeletes
     public function initializeSoftDeletes(): void
     {
         $this->initializeSoftDeletesBase();
-        $this->hidden = array_merge($this->hidden, ['deleted_at']);
     }
 }

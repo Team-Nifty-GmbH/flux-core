@@ -29,7 +29,7 @@ class ProductOptionGroupList extends BaseProductOptionGroupList
         parent::startSearch();
     }
 
-    public function getRowAttributes(): ComponentAttributeBag
+    protected function getRowAttributes(): ComponentAttributeBag
     {
         return new ComponentAttributeBag([
             'x-bind:class' => <<<'JS'
@@ -38,7 +38,7 @@ class ProductOptionGroupList extends BaseProductOptionGroupList
         ]);
     }
 
-    public function getCellAttributes(): ComponentAttributeBag
+    protected function getCellAttributes(): ComponentAttributeBag
     {
         $selectedText = __('Selected');
 
@@ -61,5 +61,10 @@ class ProductOptionGroupList extends BaseProductOptionGroupList
         $this->dispatch('data-table-row-clicked', record: $this->productOptionGroupForm);
 
         return true;
+    }
+
+    protected function allowSoftDeletes(): bool
+    {
+        return false;
     }
 }

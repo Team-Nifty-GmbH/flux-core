@@ -24,7 +24,7 @@ class CommentTest extends BaseSetup
         parent::setUp();
 
         $this->comment = Comment::factory()->create([
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'model_id' => $this->user->id,
             'comment' => 'User Comment from a Test!',
         ]);
@@ -41,7 +41,7 @@ class CommentTest extends BaseSetup
     public function test_get_user_comments()
     {
         $dbComment = new Comment();
-        $dbComment->model_type = app(User::class)->getMorphClass();
+        $dbComment->model_type = morph_alias(User::class);
         $dbComment->model_id = $this->user->id;
         $dbComment->comment = 'User Comment from a Test!';
         $dbComment->save();
@@ -83,7 +83,7 @@ class CommentTest extends BaseSetup
     {
         $comment = [
             'model_id' => $this->user->id,
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'comment' => 'test comment',
         ];
 
@@ -99,7 +99,7 @@ class CommentTest extends BaseSetup
             ->first();
         $this->assertNotEmpty($dbComment);
         $this->assertEquals($comment['model_id'], $dbComment->model_id);
-        $this->assertEquals(app(User::class)->getMorphClass(), $dbComment->model_type);
+        $this->assertEquals(morph_alias(User::class), $dbComment->model_type);
         $this->assertEquals($comment['comment'], $dbComment->comment);
         $this->assertEquals($this->user->id, $dbComment->created_by->id);
         $this->assertEquals($this->user->id, $dbComment->updated_by->id);
@@ -138,7 +138,7 @@ class CommentTest extends BaseSetup
     {
         $comment = [
             'model_id' => 1,
-            'model_type' => app(Unit::class)->getMorphClass(),
+            'model_type' => morph_alias(Unit::class),
             'comment' => 'test comment',
         ];
 
@@ -153,7 +153,7 @@ class CommentTest extends BaseSetup
     {
         $comment = [
             'model_id' => ++$this->user->id,
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'comment' => 'test comment',
         ];
 
@@ -168,7 +168,7 @@ class CommentTest extends BaseSetup
     {
         $comment = [
             'model_id' => $this->user->id,
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'parent_id' => $this->comment->id,
             'comment' => 'child comment',
         ];
@@ -193,7 +193,7 @@ class CommentTest extends BaseSetup
     {
         $comment = [
             'model_id' => $this->user->id,
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'parent_id' => ++$this->comment->id,
             'comment' => 'child comment',
         ];

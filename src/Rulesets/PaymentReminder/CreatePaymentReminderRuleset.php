@@ -15,16 +15,16 @@ class CreatePaymentReminderRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:payment_reminders,uuid',
+            'uuid' => 'nullable|string|uuid|unique:payment_reminders,uuid',
             'order_id' => [
                 'required',
                 'integer',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'media_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Media::class),
+                app(ModelExists::class, ['model' => Media::class]),
             ],
             'reminder_level' => 'nullable|integer|min:1',
         ];

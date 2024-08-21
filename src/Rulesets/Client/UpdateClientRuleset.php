@@ -17,12 +17,12 @@ class UpdateClientRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'country_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Country::class),
+                app(ModelExists::class, ['model' => Country::class]),
             ],
             'name' => 'sometimes|required|string',
             'client_code' => 'sometimes|required|string|unique:clients,client_code',
@@ -35,6 +35,7 @@ class UpdateClientRuleset extends FluxRuleset
             'email' => 'email|nullable',
             'website' => 'string|nullable',
             'creditor_identifier' => 'string|nullable',
+            'vat_id' => 'string|nullable',
             'sepa_text' => 'string|nullable',
             'opening_hours' => 'array|nullable',
             'terms_and_conditions' => 'string|nullable',

@@ -10,7 +10,8 @@
                 />
             </div>
             <div x-cloak x-show="$wire.purchaseInvoiceForm.id">
-                <embed width="100%" height="100%" lazy class="w-full h-full" x-bind:src="$wire.purchaseInvoiceForm.mediaUrl" type="application/pdf">
+                <iframe width="100%" height="100%" lazy class="w-full h-full" x-bind:src="$wire.purchaseInvoiceForm.mediaUrl" type="application/pdf">
+                </iframe>
             </div>
             <div class="flex flex-col gap-1.5 overflow-auto">
                 @if(count($clients ?? []) > 1)
@@ -26,7 +27,7 @@
                 @endif
                 <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
                     <x-select
-                        x-on:selected="$wire.purchaseInvoiceForm.payment_type_id = $event.detail?.contact?.purchase_payment_type_id"
+                        x-on:selected="$wire.fillFromSelectedContact($event.detail?.contact?.id)"
                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                         :label="__('Supplier')"
                         wire:model="purchaseInvoiceForm.contact_id"
@@ -56,7 +57,6 @@
                                 ],
                                 'with' => [
                                     'contact.media',
-                                    'contact:id,purchase_payment_type_id',
                                 ],
                             ]
                         ]"
@@ -177,7 +177,7 @@
                         }
                     }
                 }">
-                    <template x-for="(position, index) in $wire.purchaseInvoiceForm.purchase_invoice_positions">
+                    <template x-for="(position, index) in $wire.purchaseInvoiceForm.purchase_invoice_positions" :key="position.id">
                         <x-card>
                             <div class="flex flex-col gap-4">
                                 <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
@@ -221,7 +221,9 @@
                                             :options="$vatRates"
                                             option-key-value
                                             :label="__('Vat Rate')"
+                                            x-model.number="position.vat_rate_id"
                                             x-on:selected="position.vat_rate_id = $event.detail?.value"
+                                            x-init="$el.value = position.vat_rate_id; fillSelectedFromInputValue();"
                                         />
                                     </div>
                                     <x-inputs.number
@@ -246,6 +248,7 @@
                                             option-value="id"
                                             option-label="name"
                                             option-description="number"
+                                            x-init="$el.value = position.ledger_account_id; init();"
                                             x-model.number="position.ledger_account_id"
                                             :async-data="[
                                                 'api' => route('search', \FluxErp\Models\LedgerAccount::class),
@@ -282,7 +285,7 @@
                             x-show="! $wire.purchaseInvoiceForm.order_id"
                             positive
                             :label="__('Add Position')"
-                            x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.push({ vat_rate_id: null, product_id: null, name: null, amount: 1, unit_price: 0, total_price: 0 })"
+                            x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.push({ ledger_account_id: $wire.purchaseInvoiceForm.lastLedgerAccountId, vat_rate_id: null, product_id: null, name: null, amount: 1, unit_price: 0, total_price: 0 })"
                         />
                     </div>
                 </div>
