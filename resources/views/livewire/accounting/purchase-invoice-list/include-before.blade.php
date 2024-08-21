@@ -10,7 +10,8 @@
                 />
             </div>
             <div x-cloak x-show="$wire.purchaseInvoiceForm.id">
-                <embed width="100%" height="100%" lazy class="w-full h-full" x-bind:src="$wire.purchaseInvoiceForm.mediaUrl" type="application/pdf">
+                <iframe width="100%" height="100%" lazy class="w-full h-full" x-bind:src="$wire.purchaseInvoiceForm.mediaUrl" type="application/pdf">
+                </iframe>
             </div>
             <div class="flex flex-col gap-1.5 overflow-auto">
                 @if(count($clients ?? []) > 1)
@@ -26,7 +27,7 @@
                 @endif
                 <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
                     <x-select
-                        x-on:selected="$wire.purchaseInvoiceForm.payment_type_id = $event.detail?.contact?.purchase_payment_type_id"
+                        x-on:selected="$wire.fillFromSelectedContact($event.detail?.contact?.id)"
                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                         :label="__('Supplier')"
                         wire:model="purchaseInvoiceForm.contact_id"
@@ -56,7 +57,6 @@
                                 ],
                                 'with' => [
                                     'contact.media',
-                                    'contact:id,purchase_payment_type_id',
                                 ],
                             ]
                         ]"
@@ -285,7 +285,7 @@
                             x-show="! $wire.purchaseInvoiceForm.order_id"
                             positive
                             :label="__('Add Position')"
-                            x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.push({ vat_rate_id: null, product_id: null, name: null, amount: 1, unit_price: 0, total_price: 0 })"
+                            x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.push({ ledger_account_id: $wire.purchaseInvoiceForm.lastLedgerAccountId, vat_rate_id: null, product_id: null, name: null, amount: 1, unit_price: 0, total_price: 0 })"
                         />
                     </div>
                 </div>

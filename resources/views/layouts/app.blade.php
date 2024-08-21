@@ -28,13 +28,13 @@
             <x-modal
                 name="detail-modal"
                 max-width="7xl"
-                x-on:close="$el.querySelector('embed').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
+                x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
             >
                 <div
                     class="w-full"
                     x-data="{
                         openUrl() {
-                            let urlObj = new URL($el.querySelector('embed').src);
+                            let urlObj = new URL($el.querySelector('iframe').src);
                             urlObj.searchParams.delete('no-navigation');
 
                             window.open(urlObj);
@@ -43,7 +43,8 @@
                     }"
                 >
                     <x-card class="grid h-screen">
-                        <embed class="object-contain" height="100%" width="100%" id="detail-modal-embed" src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E" />
+                        <iframe class="object-contain" height="100%" width="100%" id="detail-modal-iframe" src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E">
+                        </iframe>
                         <x-slot:footer>
                             <div class="w-full flex justify-end gap-1.5">
                                 <x-button :label="__('Cancel')" x-on:click="close"/>
