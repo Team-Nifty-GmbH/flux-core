@@ -1,28 +1,47 @@
 const defaultTheme = require('tailwindcss/defaultTheme')
-const fluxConfig = require('./tailwind.config.js')
-const wireuiConfig = require('./vendor/wireui/wireui/tailwind.config.js')
-const tallCalendar = require('./vendor/team-nifty-gmbh/tall-calendar/tailwind.config.js')
-const dataTablesConfig = require('./vendor/team-nifty-gmbh/tall-datatables/tailwind.config.js')
 
 module.exports = {
-    presets: [
-        wireuiConfig,
-        dataTablesConfig,
-        tallCalendar,
-        fluxConfig,
-    ],
+    darkMode: 'selector',
     content: [
-        './resources/**/*.blade.php',
-        './resources/**/*.js',
-        './resources/**/*.vue',
-        './app/Livewire/**/*.php',
-        './app/Components/**/*.php',
-        './vendor/wireui/wireui/resources/**/*.blade.php',
-        './vendor/wireui/wireui/ts/**/*.ts',
-        './vendor/wireui/wireui/src/View/**/*.php',
-    ].concat(
-        tallCalendar.content,
-        dataTablesConfig.content,
-        fluxConfig.content
-    ),
+        __dirname + '/resources/**/*.blade.php',
+        __dirname + '/resources/**/*.js',
+        __dirname + '/resources/**/*.vue',
+        __dirname + '/src/Htmlables/**/*.php',
+        __dirname + '/src/Livewire/**/*.php',
+    ],
+    theme: {
+        extend: {
+            transitionProperty: {
+                width: 'width',
+            },
+            fontFamily: {
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+            },
+        },
+    },
+    plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
+    safelist: [
+        'mention',
+        'tippy-box',
+        'ring-offset-2',
+        'indent-icon',
+        'md:col-span-1',
+        'md:col-span-2',
+        'md:col-span-3',
+        'md:col-span-4',
+        'md:col-span-5',
+        'md:col-span-6',
+        'md:col-span-7',
+        'md:col-span-8',
+        'md:col-span-9',
+        'md:col-span-10',
+        'md:col-span-11',
+        'md:col-span-12',
+        {
+            pattern: /row-span-\d+/
+        },
+        {
+            pattern: /grid-cols-\d+/
+        }
+    ]
 }
