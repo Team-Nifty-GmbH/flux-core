@@ -11,11 +11,11 @@
                 <x-slot:sub-value>
                     @if($task->due_date)
                         <x-badge
-                            :color="$task->due_date?->diffInDays(now(), false) > 0
+                            :color="$task->due_date->diffInDays(now(), false) > 0
                                 ? 'negative'
-                                : ($task->due_date?->diffInDays(now(), false) === 0 ? 'warning' : 'positive')
+                                : ($task->due_date->diffInDays(now(), false) === 0 ? 'warning' : 'positive')
                             "
-                            :label="__('Due At') . ' ' .$task->due_date?->locale(app()->getLocale())->isoFormat('L')"
+                            :label="__('Due At') . ' ' . $task->due_date->locale(app()->getLocale())->isoFormat('L')"
                         />
                     @endif
                     @foreach($task->users as $user)

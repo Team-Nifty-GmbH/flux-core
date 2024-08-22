@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
@@ -11,12 +12,12 @@ class WidgetList extends Component
 {
     public string|int $id;
 
-    public function mount($id): void
+    public function mount(string|int $id): void
     {
         $this->id = $id;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('flux::livewire.widgets.widget-list', [
             'availableWidgets' => $this->filterWidgets(Widget::all()),

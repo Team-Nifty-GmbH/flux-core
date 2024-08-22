@@ -1,7 +1,7 @@
-import { GridStack } from 'gridstack';
-import { v4 as uuidv4 } from 'uuid';
+import {GridStack} from 'gridstack';
+import {v4 as uuidv4} from 'uuid';
 
-export default function($wire) {
+export default function ($wire) {
     return {
         editGrid: false,
         emptyLayout: false,
@@ -186,8 +186,8 @@ export default function($wire) {
                 columnOpts: {
                     breakpointForWindow: true,
                     breakpoints: [
-                        { w: 1100, c: 1 },
-                        { w: 2000000, c: 6 }
+                        {w: 1100, c: 1},
+                        {w: 2000000, c: 6}
                     ]
                 }
             });
