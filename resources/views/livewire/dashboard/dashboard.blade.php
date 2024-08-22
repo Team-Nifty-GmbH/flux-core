@@ -47,8 +47,8 @@
                  gs-x="{{$widget['order_column']}}"
                  gs-y="{{$widget['order_row']}}"
             >
-                <div class="grid-stack-item-content flex border-white place-content-center col-span-full border border-4"
-                     x-bind:class="editGrid ? 'dark:border-primary-500' : 'dark:border-secondary-800'"
+                <div class="grid-stack-item-content"
+                     x-bind:class="editGrid ? 'border border-4 border-primary-500' : ''"
                 >
                     <div class="absolute top-2 right-2 z-10">
                         <x-button.circle

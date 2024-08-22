@@ -27,7 +27,7 @@
 @if($showTotals)
     @section('chart')
         @parent
-        <div class="flex gap-1.5 justify-between w-full border p-1.5 rounded">
+        <div class="md:flex gap-1.5 justify-between w-full border p-1.5 rounded h-20">
             <template x-for="seriesData in livewireOptions.series">
                 <div class="flex flex-col gap-2 items-center font-semibold">
                     <div x-text="seriesData.name"></div>

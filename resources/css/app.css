@@ -147,7 +147,7 @@
 }
 
 .grid-stack-item-content {
-    @apply dark:text-gray-50 m-0 rounded shadow-md bg-white dark:bg-secondary-800;
+    @apply flex place-content-center col-span-full dark:text-gray-50 m-0 rounded-lg shadow-md bg-white dark:bg-secondary-800;
 }
 
 .grid-stack > .grid-stack-item > .grid-stack-item-content {
