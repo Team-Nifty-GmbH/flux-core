@@ -18,6 +18,7 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Lockable;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Printable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\View\Printing\Contact\BalanceStatement;
@@ -37,7 +38,7 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
 {
     use BroadcastsEvents, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
-        HasUuid, InteractsWithMedia, Lockable, Printable, SoftDeletes;
+        HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable, SoftDeletes;
 
     protected $guarded = [
         'id',

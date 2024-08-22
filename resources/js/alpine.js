@@ -84,6 +84,7 @@ Livewire.directive('flux-confirm', ({ el, directive }) => {
             icon: icon,
             accept: {
                 label: confirmLabel,
+                method: null,
                 execute: () => {
                     action();
                 }

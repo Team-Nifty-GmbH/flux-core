@@ -235,8 +235,8 @@ class PurchaseInvoiceTest extends BaseSetup
         );
         $this->assertNull($dbPurchaseInvoice->invoice_number);
         $this->assertTrue($dbPurchaseInvoice->is_net);
-        $this->assertEquals($this->user->id, $dbPurchaseInvoice->created_by->id);
-        $this->assertEquals($this->user->id, $dbPurchaseInvoice->updated_by->id);
+        $this->assertTrue($this->user->is($dbPurchaseInvoice->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbPurchaseInvoice->getUpdatedBy()));
         $this->assertEmpty($dbPurchaseInvoice->purchaseInvoicePositions);
     }
 
@@ -298,8 +298,8 @@ class PurchaseInvoiceTest extends BaseSetup
         );
         $this->assertEquals($purchaseInvoice['invoice_number'], $dbPurchaseInvoice->invoice_number);
         $this->assertEquals($purchaseInvoice['is_net'], $dbPurchaseInvoice->is_net);
-        $this->assertEquals($this->user->id, $dbPurchaseInvoice->created_by->id);
-        $this->assertEquals($this->user->id, $dbPurchaseInvoice->updated_by->id);
+        $this->assertTrue($this->user->is($dbPurchaseInvoice->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbPurchaseInvoice->getUpdatedBy()));
 
         $dbPurchaseInvoicePositions = $dbPurchaseInvoice->purchaseInvoicePositions;
         $this->assertCount(count($purchaseInvoice['purchase_invoice_positions']), $dbPurchaseInvoicePositions);
@@ -434,7 +434,7 @@ class PurchaseInvoiceTest extends BaseSetup
         $this->assertEquals($purchaseInvoice['invoice_number'], $dbPurchaseInvoice->invoice_number);
         $this->assertEquals($this->purchaseInvoices[0]->hash, $dbPurchaseInvoice->hash);
         $this->assertEquals($this->purchaseInvoices[0]->is_net, $dbPurchaseInvoice->is_net);
-        $this->assertEquals($this->user->id, $dbPurchaseInvoice->updated_by->id);
+        $this->assertTrue($this->user->is($dbPurchaseInvoice->getUpdatedBy()));
         $this->assertCount(
             count($purchaseInvoice['purchase_invoice_positions']),
             $dbPurchaseInvoice->purchaseInvoicePositions
@@ -472,7 +472,7 @@ class PurchaseInvoiceTest extends BaseSetup
 
         $purchaseInvoice = $this->purchaseInvoices[1]->fresh();
         $this->assertNotNull($purchaseInvoice->deleted_at);
-        $this->assertEquals($this->user->id, $purchaseInvoice->deleted_by->id);
+        $this->assertTrue($this->user->is($purchaseInvoice->getDeletedBy()));
     }
 
     public function test_delete_purchase_invoice_purchase_invoice_not_found()
