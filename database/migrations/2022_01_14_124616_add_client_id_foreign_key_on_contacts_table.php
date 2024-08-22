@@ -6,24 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 class AddClientIdForeignKeyOnContactsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('contacts', function (Blueprint $table) {
             $table->foreign('client_id')->references('id')->on('clients');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('contacts', function (Blueprint $table) {
             $table->dropForeign('contacts_client_id_foreign');

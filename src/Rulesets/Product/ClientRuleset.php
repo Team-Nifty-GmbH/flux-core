@@ -15,7 +15,7 @@ class ClientRuleset extends FluxRuleset
             'clients.*' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
         ];
     }

@@ -4,6 +4,7 @@ namespace FluxErp\Rulesets\Contact;
 
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
@@ -19,45 +20,50 @@ class CreateContactRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:contacts,uuid',
+            'uuid' => 'nullable|string|uuid|unique:contacts,uuid',
             'client_id' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'agent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
+            ],
+            'currency_id' => [
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => Currency::class]),
             ],
             'payment_type_id' => [
                 'integer',
                 'nullable',
-                (new ModelExists(PaymentType::class))
+                app(ModelExists::class, ['model' => PaymentType::class])
                     ->where('is_active', true)
                     ->where('is_sales', true),
             ],
             'purchase_payment_type_id' => [
                 'integer',
                 'nullable',
-                (new ModelExists(PaymentType::class))
+                app(ModelExists::class, ['model' => PaymentType::class])
                     ->where('is_active', true)
                     ->where('is_purchase', true),
             ],
             'price_list_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'expense_ledger_account_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(LedgerAccount::class),
+                app(ModelExists::class, ['model' => LedgerAccount::class]),
             ],
             'vat_rate_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(VatRate::class),
+                app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'customer_number' => 'string|nullable|unique:contacts,customer_number',
             'creditor_number' => 'string|nullable|unique:contacts,creditor_number',

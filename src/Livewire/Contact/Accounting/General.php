@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Contact\Accounting;
 
 use FluxErp\Livewire\Forms\ContactForm;
+use FluxErp\Models\Currency;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use Illuminate\Contracts\View\Factory;
@@ -34,6 +35,10 @@ class General extends Component
                     ->get(['id', 'name'])
                     ->toArray(),
                 'priceLists' => resolve_static(PriceList::class, 'query')
+                    ->orderByDesc('is_default')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'currencies' => resolve_static(Currency::class, 'query')
                     ->orderByDesc('is_default')
                     ->get(['id', 'name'])
                     ->toArray(),

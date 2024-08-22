@@ -9,6 +9,7 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasCart;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\HasWidgets;
 use FluxErp\Traits\InteractsWithMedia;
@@ -30,6 +31,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use NotificationChannels\WebPush\HasPushSubscriptions;
+use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use Spatie\Permission\Traits\HasRoles;
@@ -40,9 +42,10 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
 class User extends Authenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
-    use BroadcastsEvents, CacheModelQueries, Commentable, Filterable, HasApiTokens, HasCalendars, HasCart,
-        HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles, HasUuid,
-        HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
+    use BroadcastsEvents, CacheModelQueries, CausesActivity, Commentable, Filterable, HasApiTokens, HasCalendars,
+        HasCart, HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles,
+        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable,
+        SoftDeletes;
 
     protected $hidden = [
         'password',
@@ -64,6 +67,10 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
             if ($user->isDirty('iban')) {
                 $user->iban = str_replace(' ', '', strtoupper($user->iban));
             }
+        });
+
+        static::saved(function (User $user) {
+            Cache::forget('morph_to:' . $user->getMorphClass() . ':' . $user->id);
         });
     }
 
@@ -216,7 +223,7 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
             $expires
         );
 
-        Mail::to($this->email)->queue(new MagicLoginLink($plaintext, $expires));
+        Mail::to($this->email)->queue(MagicLoginLink::make($plaintext, $expires));
     }
 
     public static function guardNames(): array

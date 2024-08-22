@@ -15,7 +15,7 @@ class CreateContactBankConnectionRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:bank_connections,uuid',
+            'uuid' => 'nullable|string|uuid|unique:bank_connections,uuid',
             'contact_id' => [
                 'integer',
                 'nullable',

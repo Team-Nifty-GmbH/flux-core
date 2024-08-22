@@ -2,6 +2,9 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\BcFloat;
+use FluxErp\Casts\Money;
+use FluxErp\Casts\Percentage;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
@@ -10,6 +13,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -23,15 +27,12 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\EloquentSortable\SortableTrait;
 use Spatie\Tags\HasTags;
-use TeamNiftyGmbH\DataTable\Casts\BcFloat;
-use TeamNiftyGmbH\DataTable\Casts\Money;
-use TeamNiftyGmbH\DataTable\Casts\Percentage;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class OrderPosition extends Model implements InteractsWithDataTables, Sortable
 {
     use Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
-        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, SoftDeletes, SortableTrait;
+        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, LogsActivity, SoftDeletes, SortableTrait;
 
     protected $appends = [
         'unit_price',
@@ -124,6 +125,11 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function commission(): HasOne
+    {
+        return $this->hasOne(Commission::class);
     }
 
     public function currency(): HasOneThrough

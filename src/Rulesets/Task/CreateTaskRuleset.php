@@ -19,7 +19,7 @@ class CreateTaskRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:tasks,uuid',
+            'uuid' => 'nullable|string|uuid|unique:tasks,uuid',
             'project_id' => [
                 'integer',
                 'nullable',

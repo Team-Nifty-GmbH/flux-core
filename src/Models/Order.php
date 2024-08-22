@@ -2,6 +2,8 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\Money;
+use FluxErp\Casts\Percentage;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
@@ -10,6 +12,7 @@ use FluxErp\States\Order\PaymentState\Open;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
+use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
@@ -24,6 +27,7 @@ use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Printable;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
@@ -31,6 +35,7 @@ use FluxErp\Traits\Trackable;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
+use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Builder;
@@ -43,15 +48,13 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
-use TeamNiftyGmbH\DataTable\Casts\Money;
-use TeamNiftyGmbH\DataTable\Casts\Percentage;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasCustomEvents, HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates,
-        HasUserModification, HasUuid, InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable {
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes, Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;
         }
 
@@ -59,16 +62,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         'currency',
     ];
 
-    public string $detailRouteName = 'orders.id';
+    protected ?string $detailRouteName = 'orders.id';
 
     protected $guarded = [
         'id',
-    ];
-
-    public array $translatable = [
-        'header',
-        'footer',
-        'logistic_note',
     ];
 
     public static string $iconName = 'shopping-bag';
@@ -170,6 +167,8 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             'shipping_costs_vat_rate_percentage' => Percentage::class,
             'total_base_gross_price' => Money::class,
             'total_base_net_price' => Money::class,
+            'total_purchase_price' => Money::class,
+            'total_cost' => Money::class,
             'margin' => Money::class,
             'total_gross_price' => Money::class,
             'total_net_price' => Money::class,
@@ -233,6 +232,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->belongsTo(Client::class);
     }
 
+    public function commissions(): HasMany
+    {
+        return $this->hasMany(Commission::class);
+    }
+
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
@@ -288,6 +292,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->belongsTo(PriceList::class);
     }
 
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
     public function purchaseInvoice(): HasOne
     {
         return $this->hasOne(PurchaseInvoice::class);
@@ -296,6 +305,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function responsibleUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
+    public function tasks(): HasManyThrough
+    {
+        return $this->hasManyThrough(Task::class, Project::class);
     }
 
     public function transactions(): HasMany
@@ -371,7 +385,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('invoice')
-            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png'])
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml'])
             ->singleFile();
 
         $this->addMediaCollection('payment-reminders')
@@ -386,6 +400,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     {
         return $this->calculateTotalGrossPrice()
             ->calculateTotalNetPrice()
+            ->calculateMargin()
             ->calculateTotalVats();
     }
 
@@ -437,13 +452,14 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             ->where('is_alternative', false)
             ->whereNotNull('vat_rate_percentage')
             ->groupBy('vat_rate_percentage')
-            ->selectRaw('sum(vat_price) as total_vat_price, vat_rate_percentage')
+            ->selectRaw('sum(vat_price) as total_vat_price, sum(total_net_price) as total_net_price, vat_rate_percentage')
             ->get()
             ->map(function (OrderPosition $item) {
                 return $item->only(
                     [
                         'vat_rate_percentage',
                         'total_vat_price',
+                        'total_net_price',
                     ]
                 );
             })
@@ -456,6 +472,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                     'total_vat_price' => bcadd(
                         $this->shipping_costs_vat_price,
                         $totalVats->get($this->shipping_costs_vat_rate_percentage)['total_vat_price'] ?? 0,
+                        9
+                    ),
+                    'total_net_price' => bcadd(
+                        $this->shipping_costs_net_price,
+                        $totalVats->get($this->shipping_costs_vat_rate_percentage)['total_net_price'] ?? 0,
                         9
                     ),
                     'vat_rate_percentage' => $this->shipping_costs_vat_rate_percentage,
@@ -472,6 +493,31 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     {
         $this->balance = bcround(
             bcsub($this->total_gross_price, $this->transactions()->sum('amount'), 9),
+            2
+        );
+
+        return $this;
+    }
+
+    public function calculateMargin(): static
+    {
+        $this->total_purchase_price = $this->orderPositions()
+            ->where('is_alternative', false)
+            ->sum('purchase_price');
+
+        $this->margin = Rounding::round(
+            bcsub($this->total_net_price, $this->total_purchase_price, 9),
+            2
+        );
+
+        $variableCosts = 0;
+        $variableCosts = bcadd($variableCosts, $this->commissions()->sum('commission'));
+        $variableCosts = bcadd($variableCosts, $this->workTimes()->sum('total_cost'));
+        $variableCosts = bcadd($variableCosts, $this->projects()->sum('total_cost'));
+        $this->total_cost = $variableCosts;
+
+        $this->gross_profit = Rounding::round(
+            bcsub($this->margin, $this->total_cost, 9),
             2
         );
 
@@ -501,6 +547,11 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         return $this->contact?->getAvatarUrl() ?: self::icon()->getUrl();
     }
 
+    public function getPortalDetailRoute(): string
+    {
+        return route('portal.orders.id', ['id' => $this->id]);
+    }
+
     public function getPrintViews(): array
     {
         return $this->orderType?->order_type_enum->isPurchase()
@@ -510,6 +561,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
                 'offer' => Offer::class,
                 'order-confirmation' => OrderConfirmation::class,
                 'retoure' => Retoure::class,
+                'refund' => Refund::class,
             ];
     }
 
@@ -518,5 +570,10 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         $printViews = $this->printableResolvePrintViews();
 
         return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
+    }
+
+    public function costColumn(): ?string
+    {
+        return 'total_cost';
     }
 }

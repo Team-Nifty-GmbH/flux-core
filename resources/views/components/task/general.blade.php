@@ -93,7 +93,7 @@
                             [
                                 'type',
                                 '=',
-                                app(\FluxErp\Models\Task::class)->getMorphClass(),
+                                morph_alias(\FluxErp\Models\Task::class),
                             ],
                         ],
                     ],

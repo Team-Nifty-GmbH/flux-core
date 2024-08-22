@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 class ChangeNameToJsonOnCategoriesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('categories', function (Blueprint $table) {
             $table->json('name')->change();
@@ -21,12 +16,7 @@ class ChangeNameToJsonOnCategoriesTable extends Migration
         $this->migrateName();
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         $this->rollbackName();
 
@@ -35,7 +25,7 @@ class ChangeNameToJsonOnCategoriesTable extends Migration
         });
     }
 
-    private function migrateName()
+    private function migrateName(): void
     {
         $categories = DB::table('categories')->get()->toArray();
 
@@ -47,7 +37,7 @@ class ChangeNameToJsonOnCategoriesTable extends Migration
         DB::table('categories')->upsert($categories, ['id']);
     }
 
-    private function rollbackName()
+    private function rollbackName(): void
     {
         $categories = DB::table('categories')->get()->toArray();
 

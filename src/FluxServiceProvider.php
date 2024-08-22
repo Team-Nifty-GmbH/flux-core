@@ -6,6 +6,7 @@ use FluxErp\Console\Commands\Init\InitEnv;
 use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Menu;
+use FluxErp\Facades\ProductType;
 use FluxErp\Facades\Repeatable;
 use FluxErp\Facades\Widget;
 use FluxErp\Helpers\Composer;
@@ -57,6 +58,7 @@ use Illuminate\Support\Str;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Scout\Builder;
+use Livewire\Component;
 use Livewire\Livewire;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -149,6 +151,10 @@ class FluxServiceProvider extends ServiceProvider
         Repeatable::autoDiscover(flux_path('src/Repeatable'), 'FluxErp\Repeatable');
         // Register repeatable artisan commands, jobs and invokable classes (in "Repeatable" directory) from app
         Repeatable::autoDiscover();
+
+        if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
+            ProductType::register('product', 'flux::livewire.product.product', true);
+        }
     }
 
     protected function registerMarcos(): void
@@ -380,7 +386,11 @@ class FluxServiceProvider extends ServiceProvider
         $livewireNamespace = 'FluxErp\\Livewire\\';
 
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
-            Livewire::component($alias, $class);
+            if (is_a($class, Component::class, true)
+                && ! (new \ReflectionClass($class))->isAbstract()
+            ) {
+                Livewire::component($alias, $class);
+            }
         }
     }
 
@@ -507,6 +517,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.address-types');
                 Menu::register(route: 'settings.categories');
                 Menu::register(route: 'settings.product-option-groups');
+                Menu::register(route: 'settings.product-properties');
                 Menu::register(route: 'settings.clients');
                 Menu::register(route: 'settings.bank-connections');
                 Menu::register(route: 'settings.countries');

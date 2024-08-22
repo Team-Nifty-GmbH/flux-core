@@ -6,7 +6,7 @@
         @section('head.meta')
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <meta name="currency-code" content="{{ resolve_static(\FluxErp\Models\Currency::class, 'default')?->iso }}">
+            <meta name="currency-code" content="{{ \FluxErp\Models\Currency::default()?->iso }}">
             <meta name="csrf-token" content="{{ csrf_token() }}">
             <title>{{ $title ?? $subject ?? '' }}</title>
         @show

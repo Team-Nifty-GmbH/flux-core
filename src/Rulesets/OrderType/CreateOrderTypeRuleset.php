@@ -7,7 +7,7 @@ use FluxErp\Models\Client;
 use FluxErp\Models\OrderType;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rule;
 
 class CreateOrderTypeRuleset extends FluxRuleset
 {
@@ -16,11 +16,11 @@ class CreateOrderTypeRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:order_types,uuid',
+            'uuid' => 'nullable|string|uuid|unique:order_types,uuid',
             'client_id' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'name' => 'required|string',
             'description' => 'string|nullable',
@@ -30,7 +30,7 @@ class CreateOrderTypeRuleset extends FluxRuleset
             'print_layouts.*' => 'required|string',
             'order_type_enum' => [
                 'required',
-                new Enum(OrderTypeEnum::class),
+                Rule::enum(OrderTypeEnum::class),
             ],
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',

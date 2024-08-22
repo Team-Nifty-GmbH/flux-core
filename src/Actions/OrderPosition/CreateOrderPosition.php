@@ -61,12 +61,12 @@ class CreateOrderPosition extends FluxAction
         $this->data['client_id'] ??= data_get(
             $order,
             'client_id',
-            resolve_static(Client::class, 'default')
+            Client::default()
         );
         $this->data['price_list_id'] ??= data_get(
             $order,
             'price_list_id',
-            resolve_static(PriceList::class, 'default')
+            PriceList::default()
         );
 
         if (is_int($this->data['sort_number'] ?? false)) {
@@ -103,7 +103,7 @@ class CreateOrderPosition extends FluxAction
             data_set($this->data, 'unit_gram_weight', $product->weight_gram, false);
 
             if (! ($this->data['warehouse_id'] ?? false)) {
-                $this->data['warehouse_id'] = resolve_static(Warehouse::class, 'default')?->id;
+                $this->data['warehouse_id'] = Warehouse::default()?->id;
             }
         }
 

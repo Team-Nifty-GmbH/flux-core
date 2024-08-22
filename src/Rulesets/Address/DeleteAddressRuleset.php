@@ -18,7 +18,7 @@ class DeleteAddressRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Address::class),
+                app(ModelExists::class, ['model' => Address::class]),
             ],
         ];
     }

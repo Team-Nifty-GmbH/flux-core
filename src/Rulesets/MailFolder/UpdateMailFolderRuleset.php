@@ -16,15 +16,17 @@ class UpdateMailFolderRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(MailFolder::class),
+                app(ModelExists::class, ['model' => MailFolder::class]),
             ],
             'parent_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(MailFolder::class),
+                app(ModelExists::class, ['model' => MailFolder::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'slug' => 'sometimes|required|string|max:255',
+            'can_create_ticket' => 'boolean',
+            'can_create_purchase_invoice' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

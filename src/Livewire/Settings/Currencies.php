@@ -20,7 +20,7 @@ class Currencies extends CurrencyList
 
     public bool $editModal = false;
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -33,7 +33,7 @@ class Currencies extends CurrencyList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

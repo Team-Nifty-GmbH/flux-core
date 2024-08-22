@@ -76,7 +76,7 @@ class NotificationEloquentEventSubscriber
                 continue;
             }
 
-            $notifiable->notify($notification, $event);
+            $notifiable->notify($notification);
         }
     }
 

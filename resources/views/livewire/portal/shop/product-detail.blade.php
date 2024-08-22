@@ -59,7 +59,7 @@
                     @section('price')
                         <div class="flex flex-col gap-1.5 text-center">
                             <div class="flex gap-4 content-center justify-center w-full">
-                                <div class="text-sm font-semibold">{{ Number::currency($productForm->buy_price, $defaultCurrency->iso, app()->getLocale()) }} *</div>
+                                <div class="text-sm font-semibold">{{ Number::currency($productForm->buy_price ?? 0, $defaultCurrency->iso, app()->getLocale()) }} *</div>
                                 @if(bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
                                     <x-badge negative xs :label="__('%')" />
                                 @endif
@@ -77,7 +77,7 @@
                         </div>
                     @show
                     <div class="text-2xs text-secondary-400">
-                        @if(auth()->user()->priceList->is_net)
+                        @if(auth()->user()?->priceList?->is_net)
                             * {{ __('All prices net plus VAT') }}
                         @else
                             * {{ __('All prices gross including VAT') }}

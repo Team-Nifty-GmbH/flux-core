@@ -18,7 +18,7 @@ class DeleteProductRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
         ];
     }

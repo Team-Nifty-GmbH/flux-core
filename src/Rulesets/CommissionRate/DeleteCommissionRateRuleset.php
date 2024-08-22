@@ -18,7 +18,7 @@ class DeleteCommissionRateRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(CommissionRate::class),
+                app(ModelExists::class, ['model' => CommissionRate::class]),
             ],
         ];
     }

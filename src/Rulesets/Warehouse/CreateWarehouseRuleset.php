@@ -14,11 +14,11 @@ class CreateWarehouseRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:warehouses,uuid',
+            'uuid' => 'nullable|string|uuid|unique:warehouses,uuid',
             'address_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Address::class),
+                app(ModelExists::class, ['model' => Address::class]),
             ],
             'name' => 'required|string',
             'is_default' => 'boolean',

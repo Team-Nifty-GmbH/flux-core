@@ -2,11 +2,14 @@
 
 namespace FluxErp\Actions\Ticket;
 
+use FluxErp\Actions\EventSubscription\CreateEventSubscription;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Client;
+use FluxErp\Models\Comment;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
+use FluxErp\Models\User;
 use FluxErp\Rulesets\Ticket\CreateTicketRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -64,8 +67,38 @@ class CreateTicket extends FluxAction
         $ticket->save();
 
         if (is_array($users)) {
-            $ticket->users()->sync($users);
+            if ($ticket->authenticatable->getMorphClass() === morph_alias(User::class)) {
+                $users = array_filter($users, fn (int $user) => $user !== $ticket->authenticatable_id);
+            }
+
+            foreach (data_get($ticket->users()->sync($users), 'attached', []) as $user) {
+                CreateEventSubscription::make([
+                    'event' => eloquent_model_event(
+                        'created',
+                        resolve_static(Comment::class, 'class')
+                    ),
+                    'subscribable_id' => $user,
+                    'subscribable_type' => morph_alias(User::class),
+                    'model_type' => $ticket->getMorphClass(),
+                    'model_id' => $ticket->id,
+                    'is_broadcast' => false,
+                    'is_notifiable' => true,
+                ])->validate()->execute();
+            }
         }
+
+        CreateEventSubscription::make([
+            'event' => eloquent_model_event(
+                'created',
+                resolve_static(Comment::class, 'class')
+            ),
+            'subscribable_id' => $ticket->authenticatable_id,
+            'subscribable_type' => $ticket->authenticatable->getMorphClass(),
+            'model_type' => $ticket->getMorphClass(),
+            'model_id' => $ticket->id,
+            'is_broadcast' => false,
+            'is_notifiable' => true,
+        ])->validate()->execute();
 
         return $ticket->refresh();
     }

@@ -43,7 +43,7 @@ class CategoryList extends BaseDataTable
         return $tree;
     }
 
-    public function getLeftAppends(): array
+    protected function getLeftAppends(): array
     {
         return [
             'name' => 'indentation',

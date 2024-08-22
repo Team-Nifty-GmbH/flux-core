@@ -18,7 +18,7 @@ class DeleteDiscountGroupRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(DiscountGroup::class),
+                app(ModelExists::class, ['model' => DiscountGroup::class]),
             ],
         ];
     }

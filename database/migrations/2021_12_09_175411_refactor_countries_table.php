@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 class RefactorCountriesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('countries', function (Blueprint $table) {
             $table->boolean('is_default')->default(false)->change();
@@ -21,12 +16,7 @@ class RefactorCountriesTable extends Migration
         $this->moveIsoNumeric('iso_alpha3');
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('countries', function (Blueprint $table) {
             $table->boolean('is_default')->default(true)->change();

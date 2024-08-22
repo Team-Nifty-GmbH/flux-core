@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class AddFieldsToAddressesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
             $table->string('salutation')->nullable()->after('company');
@@ -22,12 +17,7 @@ class AddFieldsToAddressesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
             $table->dropColumn(['salutation', 'zip', 'city', 'street', 'url']);

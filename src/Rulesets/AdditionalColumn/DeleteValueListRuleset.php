@@ -18,7 +18,7 @@ class DeleteValueListRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                (new ModelExists(AdditionalColumn::class))->whereNotNull('values'),
+                app(ModelExists::class, ['model' => AdditionalColumn::class])->whereNotNull('values'),
             ],
         ];
     }

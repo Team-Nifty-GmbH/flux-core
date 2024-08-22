@@ -52,7 +52,7 @@ class ProjectTaskList extends BaseTaskList
     }
 
     #[Renderless]
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()

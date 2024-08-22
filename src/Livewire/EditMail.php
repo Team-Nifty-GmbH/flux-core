@@ -182,7 +182,7 @@ class EditMail extends Component
                 ));
             }
 
-            $mail = new GenericMail($this->mailMessage, $bladeParameters);
+            $mail = GenericMail::make($this->mailMessage, $bladeParameters);
             try {
                 $message = Mail::to($this->mailMessage->to)
                     ->cc($cc)

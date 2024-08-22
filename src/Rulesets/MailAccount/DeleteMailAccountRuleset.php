@@ -18,7 +18,7 @@ class DeleteMailAccountRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(MailAccount::class),
+                app(ModelExists::class, ['model' => MailAccount::class]),
             ],
         ];
     }

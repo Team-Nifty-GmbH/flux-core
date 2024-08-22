@@ -196,15 +196,6 @@ if (! function_exists('event_subscribers')) {
         ?int $modelId = null,
         ?string $modelType = null
     ): Illuminate\Support\Collection {
-        if (
-            resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
-                ->where('event', $event)
-                ->whereNull('subscribable_id')
-                ->exists()
-        ) {
-            return resolve_static(\FluxErp\Models\User::class, 'query')->get();
-        }
-
         return resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
             ->when(
                 auth()->user(),
@@ -538,7 +529,7 @@ if (! function_exists('morphed_model')) {
 }
 
 if (! function_exists('morph_to')) {
-    function morph_to(string $type, ?int $id = null): ?Illuminate\Database\Eloquent\Model
+    function morph_to(string $type, ?int $id = null, bool $returnBuilder = false): Illuminate\Database\Eloquent\Model|Illuminate\Database\Eloquent\Builder|null
     {
         if (is_null($id) && str_contains($type, ':')) {
             [$type, $id] = explode(':', $type);
@@ -550,7 +541,8 @@ if (! function_exists('morph_to')) {
 
         /** @var \Illuminate\Database\Eloquent\Model $model */
         $model = morphed_model($type);
+        $query = $model::query()->whereKey($id);
 
-        return $model::query()->whereKey($id)->first();
+        return $returnBuilder ? $query : $query->first();
     }
 }

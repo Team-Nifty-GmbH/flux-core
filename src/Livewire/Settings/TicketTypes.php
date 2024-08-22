@@ -48,7 +48,7 @@ class TicketTypes extends Component
             ];
 
             $additionalColumns = resolve_static(AdditionalColumn::class, 'query')
-                ->where('model_type', app(TicketType::class)->getMorphClass())
+                ->where('model_type', morph_alias(TicketType::class))
                 ->where('model_id', $ticketType['id'])
                 ->orderBy('name', 'ASC')
                 ->get([
@@ -104,7 +104,7 @@ class TicketTypes extends Component
                             null
                         ),
                         [
-                            'model_type' => app(TicketType::class)->getMorphClass(),
+                            'model_type' => morph_alias(TicketType::class),
                             'model_id' => $this->ticketTypes[$index]['id'],
                         ]
                     )

@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 
 class LanguageTableSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         Language::factory()->count(5)->create();
     }

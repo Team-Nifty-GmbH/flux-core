@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateClientUserTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('client_user', function (Blueprint $table) {
             $table->unsignedBigInteger('client_id');
@@ -23,12 +18,7 @@ class CreateClientUserTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('client_user');
     }

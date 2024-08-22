@@ -6,12 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 class AddCommoncolumnsToPrintDataTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('print_data', function (Blueprint $table) {
             $table->unsignedBigInteger('created_by')->nullable();
@@ -22,12 +17,7 @@ class AddCommoncolumnsToPrintDataTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('print_data', function (Blueprint $table) {
             $table->dropForeign('print_data_created_by_foreign');

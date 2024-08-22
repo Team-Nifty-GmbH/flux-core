@@ -25,7 +25,7 @@ class CreateOrderPositionRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:order_positions,uuid',
+            'uuid' => 'nullable|string|uuid|unique:order_positions,uuid',
             'client_id' => [
                 'required_without:order_id',
                 'integer',
@@ -128,19 +128,19 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'exclude_if:is_free_text,true',
                 'exclude_if:is_bundle_position,true',
                 'required_without_all:product_id,price_list_id,price_id',
-                new Numeric(),
+                app(Numeric::class),
                 'nullable',
             ],
 
             'amount_packed_products' => [
-                new Numeric(),
+                app(Numeric::class),
                 'nullable',
             ],
             'customer_delivery_date' => 'date_format:Y-m-d|nullable',
             'ean_code' => 'string|nullable',
             'possible_delivery_date' => 'date_format:Y-m-d|nullable',
             'unit_gram_weight' => [
-                new Numeric(),
+                app(Numeric::class),
                 'nullable',
             ],
 

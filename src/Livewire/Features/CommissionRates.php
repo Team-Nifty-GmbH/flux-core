@@ -37,10 +37,10 @@ class CommissionRates extends BaseDataTable
     public bool $orderAsc = true;
 
     #[Locked]
-    public ?int $userId;
+    public ?int $userId = null;
 
     #[Locked]
-    public ?int $contactId;
+    public ?int $contactId = null;
 
     public array $commissionRate = [
         'user_id' => null,
@@ -88,14 +88,14 @@ class CommissionRates extends BaseDataTable
         );
     }
 
-    public function getBottomAppends(): array
+    protected function getBottomAppends(): array
     {
         return [
             'user.name' => 'user.email',
         ];
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()

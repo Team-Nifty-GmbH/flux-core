@@ -17,7 +17,7 @@ class UpdateProductOptionGroupRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(ProductOptionGroup::class),
+                app(ModelExists::class, ['model' => ProductOptionGroup::class]),
             ],
             'name' => 'required|string',
         ];
@@ -33,7 +33,7 @@ class UpdateProductOptionGroupRuleset extends FluxRuleset
                     'sometimes',
                     'required',
                     'integer',
-                    new ModelExists(ProductOption::class),
+                    app(ModelExists::class, ['model' => ProductOption::class]),
                 ],
             ]
         );

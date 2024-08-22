@@ -7,9 +7,9 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasTranslations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,15 +17,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Country extends Model
 {
-    use CacheModelQueries, Commentable, Filterable, HasDefault, HasPackageFactory, HasTranslations, HasUserModification,
-        HasUuid, SoftDeletes;
+    use CacheModelQueries, Commentable, Filterable, HasDefault, HasPackageFactory, HasUserModification,
+        HasUuid, LogsActivity, SoftDeletes;
 
     protected $guarded = [
         'id',
-    ];
-
-    public $translatable = [
-        'name',
     ];
 
     protected function casts(): array

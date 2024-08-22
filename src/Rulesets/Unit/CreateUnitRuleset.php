@@ -12,7 +12,7 @@ class CreateUnitRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:units,uuid',
+            'uuid' => 'nullable|string|uuid|unique:units,uuid',
             'name' => 'required|string',
             'abbreviation' => 'required|string',
         ];

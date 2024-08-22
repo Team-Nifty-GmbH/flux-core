@@ -18,7 +18,7 @@ class DeleteContactBankConnectionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(ContactBankConnection::class),
+                app(ModelExists::class, ['model' => ContactBankConnection::class]),
             ],
         ];
     }

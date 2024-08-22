@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Traits\Categorizable;
@@ -17,7 +18,10 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Lockable;
+use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Printable;
 use FluxErp\Traits\SoftDeletes;
+use FluxErp\View\Printing\Contact\BalanceStatement;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -30,11 +34,11 @@ use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Contact extends Model implements HasMedia, InteractsWithDataTables
+class Contact extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use BroadcastsEvents, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
-        HasUuid, InteractsWithMedia, Lockable, SoftDeletes;
+        HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -88,6 +92,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
     public function contactBankConnections(): HasMany
     {
         return $this->hasMany(ContactBankConnection::class);
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function deliveryAddress(): BelongsTo
@@ -240,5 +249,12 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables
     public function getAvatarUrl(): ?string
     {
         return $this->getFirstMediaUrl('avatar', 'thumb') ?: self::icon()->getUrl();
+    }
+
+    public function getPrintViews(): array
+    {
+        return [
+            'balance-statement' => BalanceStatement::class,
+        ];
     }
 }

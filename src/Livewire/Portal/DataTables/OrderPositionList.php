@@ -78,7 +78,7 @@ class OrderPositionList extends BaseDataTable
         ]);
     }
 
-    public function getRowAttributes(): DataTableRowAttributes
+    protected function getRowAttributes(): DataTableRowAttributes
     {
         return DataTableRowAttributes::make()
             ->bind(
@@ -160,21 +160,21 @@ class OrderPositionList extends BaseDataTable
         return $tree;
     }
 
-    public function getLeftAppends(): array
+    protected function getLeftAppends(): array
     {
         return [
             'name' => 'indentation',
         ];
     }
 
-    public function getTopAppends(): array
+    protected function getTopAppends(): array
     {
         return [
             'name' => 'product_number',
         ];
     }
 
-    public function getRightAppends(): array
+    protected function getRightAppends(): array
     {
         return [
             'name' => 'alternative_tag',

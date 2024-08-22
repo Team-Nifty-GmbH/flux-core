@@ -80,6 +80,66 @@
     .suggestion-item {
         @apply py-2 px-3 focus:outline-none ease-in-out duration-150 relative text-secondary-600 dark:text-secondary-400 flex items-center justify-between cursor-pointer focus:bg-primary-100 focus:text-primary-800 hover:text-white dark:focus:bg-secondary-700 hover:bg-primary-500 dark:hover:bg-secondary-700;
     }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    .fc .fc-toolbar.fc-header-toolbar {
+        @apply p-4 mb-0;
+    }
+
+    .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-top a {
+        @apply bg-indigo-600 text-white font-semibold rounded-full;
+    }
+
+    .fc-day {
+        @apply bg-white text-gray-800 dark:bg-secondary-800;
+    }
+
+    .fc-day.fc-day-other {
+        @apply bg-gray-50 text-gray-500 dark:bg-secondary-700;
+    }
+
+    .fc-daygrid-day-top {
+        @apply text-gray-700 text-sm;
+    }
+
+    .fc-h-event {
+        @apply opacity-75 hover:opacity-100;
+    }
+
+    .fc-button {
+        @apply !capitalize;
+    }
+
+    .fc-scrollgrid  {
+        @apply !border-l-0 !border-b-0 !border-r-0 !border-gray-200;
+    }
+
+    .fc-col-header-cell .fc-scrollgrid-sync-inner {
+        @apply py-2 font-semibold;
+    }
+
+    .fc-col-header-cell-cushion {
+        @apply dark:text-white
+    }
+
+    .fc-event-time {
+        @apply dark:text-white
+    }
+
+    .fc-event-title {
+        @apply dark:text-white
+    }
+
+    .fc-daygrid-day-number {
+        @apply dark:text-white
+    }
+
+    .fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid {
+        @apply border dark:border-slate-600;
+    }
 }
 
 .grid-stack {

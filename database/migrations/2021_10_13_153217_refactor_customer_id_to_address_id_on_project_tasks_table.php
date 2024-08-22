@@ -7,12 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 class RefactorCustomerIdToAddressIdOnProjectTasksTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('project_tasks', function (Blueprint $table) {
             $table->unsignedBigInteger('address_id')->after('category_id');
@@ -26,12 +21,7 @@ class RefactorCustomerIdToAddressIdOnProjectTasksTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::table('project_tasks', function (Blueprint $table) {
             $table->unsignedBigInteger('customer_id')->after('category_id');

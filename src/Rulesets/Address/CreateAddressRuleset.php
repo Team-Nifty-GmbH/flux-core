@@ -18,26 +18,26 @@ class CreateAddressRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:addresses,uuid',
+            'uuid' => 'nullable|string|uuid|unique:addresses,uuid',
             'client_id' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'contact_id' => [
                 'required',
                 'integer',
-                new ExistsWithForeign(foreignAttribute: 'client_id', table: 'contacts'),
+                app(ExistsWithForeign::class, ['foreignAttribute' => 'client_id', 'table' => 'contacts']),
             ],
             'country_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Country::class),
+                app(ModelExists::class, ['model' => Country::class]),
             ],
             'language_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Language::class),
+                app(ModelExists::class, ['model' => Language::class]),
             ],
             'date_of_birth' => 'date|nullable',
             'department' => 'string|nullable',

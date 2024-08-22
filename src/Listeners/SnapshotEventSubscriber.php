@@ -12,7 +12,7 @@ class SnapshotEventSubscriber
     public function createSnapshot($event): void
     {
         $snapshot = resolve_static(Snapshot::class, 'query')
-            ->where('model_type', app($event->model)->getMorphClass())
+            ->where('model_type', morph_alias($event->model))
             ->where('model_id', $event->model->id)
             ->exists();
 

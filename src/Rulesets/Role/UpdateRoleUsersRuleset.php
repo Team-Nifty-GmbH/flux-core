@@ -15,14 +15,14 @@ class UpdateRoleUsersRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Role::class),
+                app(ModelExists::class, ['model' => Role::class]),
             ],
             'assign' => 'required|boolean',
             'users' => 'required|array',
             'users.*' => [
                 'required',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
         ];
     }

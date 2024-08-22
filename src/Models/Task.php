@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\Money;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\States\Task\TaskState;
@@ -14,6 +15,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
@@ -32,14 +34,14 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Searchable,
-        SoftDeletes, Trackable;
+        HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+        Searchable, SoftDeletes, Trackable;
 
     protected $guarded = [
         'id',
     ];
 
-    public string $detailRouteName = 'tasks.id';
+    protected ?string $detailRouteName = 'tasks.id';
 
     protected static function booted(): void
     {
@@ -61,6 +63,7 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
             'due_date' => 'date',
             'state' => TaskState::class,
             'time_budget' => TimeDuration::class,
+            'total_cost' => Money::class,
         ];
     }
 
@@ -184,5 +187,10 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
         ]);
 
         return $task;
+    }
+
+    public function costColumn(): string
+    {
+        return 'total_cost';
     }
 }

@@ -28,83 +28,83 @@ class UpdateOrderRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'agent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'approval_user_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'contact_bank_connection_id' => [
                 'integer',
                 'nullable',
-                new ExistsWithForeign(
-                    foreignAttribute: 'contact_id',
-                    table: 'contact_bank_connections',
-                    baseTable: 'orders'
-                ),
+                app(ExistsWithForeign::class, [
+                    'foreignAttribute' => 'contact_id',
+                    'table' => 'contact_bank_connections',
+                    'baseTable' => 'orders',
+                ]),
             ],
             'address_invoice_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                new ExistsWithForeign(
-                    foreignAttribute: 'client_id',
-                    table: 'addresses',
-                    baseTable: 'orders'
-                ),
+                app(ExistsWithForeign::class, [
+                    'foreignAttribute' => 'client_id',
+                    'table' => 'addresses',
+                    'baseTable' => 'orders',
+                ]),
             ],
             'address_delivery_id' => [
                 'integer',
                 'nullable',
-                new ExistsWithForeign(
-                    foreignAttribute: 'client_id',
-                    table: 'addresses',
-                    baseTable: 'orders'
-                ),
+                app(ExistsWithForeign::class, [
+                    'foreignAttribute' => 'client_id',
+                    'table' => 'addresses',
+                    'baseTable' => 'orders',
+                ]),
             ],
             'language_id' => [
                 'integer',
-                new ModelExists(Language::class),
+                app(ModelExists::class, ['model' => Language::class]),
             ],
             'order_type_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                new ExistsWithForeign(
-                    foreignAttribute: 'client_id',
-                    table: 'order_types',
-                    baseTable: 'orders'
-                ),
+                app(ExistsWithForeign::class, [
+                    'foreignAttribute' => 'client_id',
+                    'table' => 'order_types',
+                    'baseTable' => 'orders',
+                ]),
             ],
             'price_list_id' => [
                 'integer',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'unit_price_price_list_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'payment_type_id' => [
                 'sometimes',
                 'required',
                 'integer',
-                new ExistsWithForeign(
-                    foreignAttribute: 'client_id',
-                    table: 'payment_types',
-                    baseTable: 'orders'
-                ),
+                app(ExistsWithForeign::class, [
+                    'foreignAttribute' => 'client_id',
+                    'table' => 'payment_types',
+                    'baseTable' => 'orders',
+                ]),
             ],
             'responsible_user_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
 
             'address_delivery' => [
@@ -113,11 +113,11 @@ class UpdateOrderRuleset extends FluxRuleset
             ],
             'address_delivery.id' => [
                 'integer',
-                new ExistsWithForeign(
-                    foreignAttribute: 'client_id',
-                    table: 'addresses',
-                    baseTable: 'orders'
-                ),
+                app(ExistsWithForeign::class, [
+                    'foreignAttribute' => 'client_id',
+                    'table' => 'addresses',
+                    'baseTable' => 'orders',
+                ]),
             ],
 
             'state' => [
@@ -149,7 +149,7 @@ class UpdateOrderRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 'string',
-                new UniqueInFieldDependence(Order::class, 'client_id'),
+                app(UniqueInFieldDependence::class, ['model' => Order::class, 'dependingField' => 'client_id']),
             ],
             'commission' => 'string|nullable',
             'header' => 'string|nullable',

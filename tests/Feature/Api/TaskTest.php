@@ -42,7 +42,7 @@ class TaskTest extends BaseSetup
         ]);
 
         $this->additionalColumns = AdditionalColumn::query()
-            ->where('model_type', app(Task::class)->getMorphClass())
+            ->where('model_type', morph_alias(Task::class))
             ->get();
 
         $this->permissions = [
@@ -180,8 +180,8 @@ class TaskTest extends BaseSetup
         $this->assertEquals(0, $dbTask->progress);
         $this->assertEquals($task['time_budget'], $dbTask->time_budget);
         $this->assertEquals($task['budget'], $dbTask->budget);
-        $this->assertEquals($this->user->id, $dbTask->created_by->id);
-        $this->assertEquals($this->user->id, $dbTask->updated_by->id);
+        $this->assertTrue($this->user->is($dbTask->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbTask->getUpdatedBy()));
         $this->assertEquals($task['users'], $dbTask->users()->pluck('users.id')->toArray());
 
         foreach ($this->additionalColumns as $additionalColumn) {
@@ -291,7 +291,7 @@ class TaskTest extends BaseSetup
         $this->assertEquals(1, $dbTask->progress);
         $this->assertEquals($task['time_budget'], $dbTask->time_budget);
         $this->assertEquals($task['budget'], $dbTask->budget);
-        $this->assertEquals($this->user->id, $dbTask->updated_by->id);
+        $this->assertTrue($this->user->is($dbTask->getUpdatedBy()));
         $this->assertEquals($task['users'], $dbTask->users()->pluck('users.id')->toArray());
 
         foreach ($this->additionalColumns as $additionalColumn) {
@@ -303,10 +303,10 @@ class TaskTest extends BaseSetup
     public function test_bulk_update_tasks_with_additional_columns()
     {
         $additionalColumns[] = AdditionalColumn::factory()->create([
-            'model_type' => app(Task::class)->getMorphClass(),
+            'model_type' => morph_alias(Task::class),
         ]);
         $additionalColumns[] = AdditionalColumn::factory()->create([
-            'model_type' => app(Task::class)->getMorphClass(),
+            'model_type' => morph_alias(Task::class),
             'values' => ['a', 'b', 'c'],
         ]);
 
@@ -330,7 +330,7 @@ class TaskTest extends BaseSetup
         ];
 
         $this->additionalColumns = AdditionalColumn::query()
-            ->where('model_type', app(Task::class)->getMorphClass())
+            ->where('model_type', morph_alias(Task::class))
             ->get();
 
         foreach ($tasks as $key => $task) {
@@ -358,13 +358,13 @@ class TaskTest extends BaseSetup
         $this->assertEquals($tasks[0]['project_id'], $dbTasks[0]->project_id);
         $this->assertEquals($tasks[0]['name'], $dbTasks[0]->name);
         $this->assertEquals($tasks[0]['description'], $dbTasks[0]->description);
-        $this->assertEquals($this->user->id, $dbTasks[0]->updated_by->id);
+        $this->assertTrue($this->user->is($dbTasks[0]->getUpdatedBy()));
 
         $this->assertEquals($tasks[1]['id'], $dbTasks[1]->id);
         $this->assertEquals($tasks[1]['project_id'], $dbTasks[1]->project_id);
         $this->assertEquals($tasks[1]['name'], $dbTasks[1]->name);
         $this->assertEquals($tasks[1]['description'], $dbTasks[1]->description);
-        $this->assertEquals($this->user->id, $dbTasks[1]->updated_by->id);
+        $this->assertTrue($this->user->is($dbTasks[1]->getUpdatedBy()));
 
         $this->assertEquals($tasks[0][$additionalColumns[0]->name], $dbTasks[0]->{$additionalColumns[0]->name});
         $this->assertEquals($tasks[0][$additionalColumns[1]->name], $dbTasks[0]->{$additionalColumns[1]->name});
@@ -479,7 +479,7 @@ class TaskTest extends BaseSetup
         $this->assertEquals($this->tasks[2]->progress, $dbTask->progress);
         $this->assertEquals($this->tasks[2]->time_budget, $dbTask->time_budget);
         $this->assertEquals($this->tasks[2]->budget, $dbTask->budget);
-        $this->assertEquals($this->user->id, $dbTask->updated_by->id);
+        $this->assertTrue($this->user->is($dbTask->getUpdatedBy()));
         $this->assertEquals([], $dbTask->users()->pluck('users.id')->toArray());
 
         foreach ($this->additionalColumns as $additionalColumn) {
@@ -491,7 +491,7 @@ class TaskTest extends BaseSetup
     public function test_delete_task()
     {
         AdditionalColumn::factory()->create([
-            'model_type' => app(Task::class)->getMorphClass(),
+            'model_type' => morph_alias(Task::class),
         ]);
 
         $this->user->givePermissionTo($this->permissions['delete']);
@@ -502,7 +502,7 @@ class TaskTest extends BaseSetup
 
         $task = $this->tasks[1]->fresh();
         $this->assertNotNull($task->deleted_at);
-        $this->assertEquals($this->user->id, $task->deleted_by->id);
+        $this->assertTrue($this->user->is($task->getDeletedBy()));
     }
 
     public function test_delete_task_task_not_found()

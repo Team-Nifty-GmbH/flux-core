@@ -22,32 +22,32 @@ class UpdateWorkTimeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                (new ModelExists(WorkTime::class))->where('is_locked', false),
+                (app(ModelExists::class, ['model' => WorkTime::class]))->where('is_locked', false),
             ],
             'contact_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'order_position_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(OrderPosition::class),
+                app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
             'work_time_type_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(WorkTimeType::class),
+                app(ModelExists::class, ['model' => WorkTimeType::class]),
             ],
             'trackable_type' => [
                 'required_with:trackable_id',
                 'string',
-                new MorphClassExists(uses: Trackable::class),
+                app(MorphClassExists::class, ['uses' => Trackable::class]),
             ],
             'trackable_id' => [
                 'required_with:trackable_type',
                 'integer',
-                new MorphExists('trackable_type'),
+                app(MorphExists::class, ['modelAttribute' => 'trackable_type']),
             ],
             'ended_at' => 'nullable|date',
             'name' => 'exclude_if:is_daily_work_time,true|string|nullable',

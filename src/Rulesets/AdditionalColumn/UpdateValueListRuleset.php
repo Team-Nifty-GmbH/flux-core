@@ -16,7 +16,7 @@ class UpdateValueListRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                (new ModelExists(AdditionalColumn::class))->whereNotNull('values'),
+                app(ModelExists::class, ['model' => AdditionalColumn::class])->whereNotNull('values'),
             ],
             'name' => 'sometimes|required|string',
             'values' => 'sometimes|required|array',

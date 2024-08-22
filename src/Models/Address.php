@@ -15,6 +15,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\Lockable;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\MonitorsQueue;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\Scout\Searchable;
@@ -36,6 +37,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\UnauthorizedException;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
@@ -44,9 +46,9 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendars, HasCart,
-        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid,
-        Lockable, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
+    use BroadcastsEvents, CausesActivity, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens,
+        HasCalendars, HasCart, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags,
+        HasUserModification, HasUuid, Lockable, LogsActivity, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'password',
@@ -56,9 +58,38 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         'id',
     ];
 
-    protected string $detailRouteName = 'contacts.id?';
+    protected ?string $detailRouteName = 'contacts.id?';
 
     public static string $iconName = 'user';
+
+    public static function findAddressByEmail(string $email): ?Address
+    {
+        $address = null;
+        if ($email) {
+            $address = resolve_static(Address::class, 'query')
+                ->with('contact')
+                ->where('email', $email)
+                ->orWhere('email_primary', $email)
+                ->first();
+
+            if (! $address) {
+                $address = resolve_static(ContactOption::class, 'query')
+                    ->with(['contact', 'address'])
+                    ->where('value', $email)
+                    ->first()
+                    ?->address;
+            }
+
+            if (! $address) {
+                $address = resolve_static(Address::class, 'query')
+                    ->with('contact')
+                    ->where('url', 'like', '%' . Str::after($email, '@'))
+                    ->first();
+            }
+        }
+
+        return $address;
+    }
 
     protected static function booted(): void
     {
@@ -77,6 +108,8 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         });
 
         static::saved(function (Address $address) {
+            Cache::forget('morph_to:' . $address->getMorphClass() . ':' . $address->id);
+
             $contactUpdates = [];
             $addressesUpdates = [];
 
@@ -172,6 +205,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             'is_active' => 'boolean',
             'can_login' => 'boolean',
         ];
+    }
+
+    public function routeNotificationForMail(): ?string
+    {
+        return $this->email ?? $this->email_primary;
     }
 
     protected function password(): Attribute
@@ -360,6 +398,6 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         }
 
         // dont queue mail as the address isnt used as auth in the regular app url
-        Mail::to($this->email)->send(new MagicLoginLink($login['token'], $login['expires']));
+        Mail::to($this->email)->send(MagicLoginLink::make($login['token'], $login['expires']));
     }
 }

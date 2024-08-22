@@ -17,12 +17,12 @@ class CreateProductBundleProductRuleset extends FluxRuleset
             'product_id' => [
                 'required',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'bundle_product_id' => [
                 'required',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'count' => 'required|numeric|gt:0',
         ];

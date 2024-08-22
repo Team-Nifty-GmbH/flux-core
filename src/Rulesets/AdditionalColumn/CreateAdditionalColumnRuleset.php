@@ -22,7 +22,14 @@ class CreateAdditionalColumnRuleset extends FluxRuleset
             'name' => [
                 'required',
                 'string',
-                new UniqueInFieldDependence(AdditionalColumn::class, ['model_type', 'model_id'], false),
+                app(
+                    UniqueInFieldDependence::class,
+                    [
+                        'model' => AdditionalColumn::class,
+                        'dependingField' => ['model_type', 'model_id'],
+                        'ignoreSelf' => false,
+                    ]
+                ),
             ],
             'model_type' => [
                 'required',

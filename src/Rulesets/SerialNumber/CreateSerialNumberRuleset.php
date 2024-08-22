@@ -17,22 +17,22 @@ class CreateSerialNumberRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'string|uuid|unique:serial_numbers,uuid',
+            'uuid' => 'nullable|string|uuid|unique:serial_numbers,uuid',
             'serial_number_range_id' => [
                 'integer',
-                new ModelExists(SerialNumberRange::class),
+                app(ModelExists::class, ['model' => SerialNumberRange::class]),
             ],
             'product_id' => [
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'address_id' => [
                 'integer',
-                new ModelExists(Address::class),
+                app(ModelExists::class, ['model' => Address::class]),
             ],
             'order_position_id' => [
                 'integer',
-                new ModelExists(OrderPosition::class),
+                app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
             'serial_number' => 'required|string',
         ];
