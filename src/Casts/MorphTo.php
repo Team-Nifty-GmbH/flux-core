@@ -4,6 +4,7 @@ namespace FluxErp\Casts;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Cache;
 
 class MorphTo implements CastsAttributes
@@ -21,7 +22,17 @@ class MorphTo implements CastsAttributes
         return Cache::remember(
             'morph_to:' . $value,
             86400,
-            fn () => $this->value && $model ? $model->value($this->value) : $model?->first()
+            function () use ($model, $value) {
+                if ($this->value && $model) {
+                    try {
+                        return $model->value($this->value);
+                    } catch (QueryException) {
+                        return $value;
+                    }
+                } else {
+                    return $model?->first() ?? $value;
+                }
+            }
         );
     }
 
