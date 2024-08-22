@@ -305,6 +305,7 @@
     "validation.uploaded": "The :attribute failed to upload.",
     "validation.url": "The :attribute must be a valid URL.",
     "validation.uuid": "The :attribute must be a valid UUID.",
+    "wire:confirm.cancel.dashboard-edit": "Discard Changes|Do you really want to discard the changes?|Cancel|Discard",
     "wire:confirm.delete": "Delete :model|Do you really want to delete this :model?|Cancel|Delete",
     "wire:confirm.install-uploaded-plugin": "Install uploaded Plugins|The code of uploaded Plugins cant be verified.\nBe sure that the source is trusted.|Cancel|Install",
     "wire:confirm.uninstall-plugin": "Uninstall Plugin|Do you really want to uninstall this plugin?|Cancel|Uninstall"

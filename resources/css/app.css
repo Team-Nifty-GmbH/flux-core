@@ -146,9 +146,8 @@
     @apply w-full
 }
 
-
 .grid-stack-item-content {
-    @apply text-white m-0 rounded shadow-md bg-white dark:bg-secondary-800;
+    @apply dark:text-gray-50 m-0 rounded shadow-md bg-white dark:bg-secondary-800;
 }
 
 .grid-stack > .grid-stack-item > .grid-stack-item-content {

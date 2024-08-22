@@ -1,7 +1,6 @@
 import { GridStack } from 'gridstack';
 import { v4 as uuidv4 } from 'uuid';
 
-
 export default function($wire) {
     return {
         editGrid: false,
@@ -35,16 +34,6 @@ export default function($wire) {
         isWidgetList(id) {
             const w = $wire.widgets.find((w) => w.id.toString() === id.toString());
             return w?.component_name === 'widgets.widget-list';
-        },
-        async cancelDashboard() {
-            this.isLoading = true;
-            this.editGridMode(false);
-            // load data from db - to $wire.widgets
-            await $wire.cancelDashboard();
-            // refresh previous state
-            await $wire.$refresh();
-            // stop grid
-            this.reInit().disable();
         },
         async syncGridOnNewItem() {
             const snapshot = $wire.widgets;
@@ -84,10 +73,6 @@ export default function($wire) {
             });
             // sync property
             await $wire.syncWidgets(newSnapshot);
-        },
-        async pendingMessage() {
-            // on fetching data enable changes to the grid
-            await $wire.showFlashMessage();
         },
         async syncGridOnDelete() {
             const snapshot = $wire.widgets;
@@ -195,7 +180,7 @@ export default function($wire) {
             }
             // init grid
             this.grid = GridStack.init({
-                margin: 4,
+                margin: 10,
                 cellHeight: 250,
                 alwaysShowResizeHandle: true,
                 columnOpts: {
