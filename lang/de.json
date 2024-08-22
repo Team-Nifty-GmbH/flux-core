@@ -12,7 +12,7 @@
     ":time remaining": ":time verbleibend",
     ":username commented on :model": ":username hat :model kommentiert",
     ":view PDF created": ":view PDF erstellt",
-    ":view signature has been added": ":view Unterschrift wurde hinzugefügt",
+    ":view signature has been added by :name": ":view Unterschrift wurde von :name hinzugefügt",
     "<": "kleiner",
     "<=": "kleiner oder gleich",
     ">": "größer",

@@ -13,6 +13,8 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Tests\TestCase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 class SignaturePublicLinkTest extends TestCase
@@ -75,6 +77,41 @@ class SignaturePublicLinkTest extends TestCase
                 'printView' => array_keys($this->order->resolvePrintViews())[0],
             ]
         )
-            ->assertStatus(200);
+            ->assertStatus(200)
+            ->assertSet('uuid', $this->order->uuid)
+            ->assertSet('model', $this->order->getMorphClass())
+            ->assertSet('printView', array_keys($this->order->resolvePrintViews())[0])
+            ->assertSet('signature.stagedFiles', [])
+            ->assertSet('signature.id', null);
+    }
+
+    public function test_upload_signature()
+    {
+        $this->withoutVite();
+
+        Storage::fake('local');
+        $file = UploadedFile::fake()->image('signature.png');
+
+        Livewire::test(
+            SignaturePublicLink::class,
+            [
+                'uuid' => $this->order->uuid,
+                'model' => $this->order->getMorphClass(),
+                'printView' => array_keys($this->order->resolvePrintViews())[0],
+            ]
+        )
+            ->set('signature.file', $file)
+            ->set('signature.custom_properties.name', 'John Doe')
+            ->assertCount('signature.stagedFiles', 1)
+            ->call('save')
+            ->assertReturned(true);
+
+        $this->assertDatabaseHas('media', [
+            'model_id' => $this->order->id,
+            'model_type' => $this->order->getMorphClass(),
+            'collection_name' => 'signature',
+            'name' => 'signature-' . array_keys($this->order->resolvePrintViews())[0],
+            'custom_properties->name' => 'John Doe',
+        ]);
     }
 }

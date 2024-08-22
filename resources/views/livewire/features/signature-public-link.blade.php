@@ -4,8 +4,8 @@
         ViewServiceProvider::getRealPackageAssetPath('/resources/js/alpine.js', 'team-nifty-gmbh/flux-erp'),
         ViewServiceProvider::getRealPackageAssetPath('/resources/css/app.css', 'team-nifty-gmbh/flux-erp'),
     ])
-    <div x-cloak x-show="id === null" x-data="signature($wire, $refs)" class="bg-gray-100 mt-12 lg:pt-10 lg:pr-10 ">
-        <div class="flex flex-col items-center lg:items-end">
+    <div x-cloak x-show="id === null" x-data="signature($wire, $refs)" class="bg-gray-100 mt-12 lg:pt-10 lg:px-10 ">
+        <div class="flex flex-col items-center lg:items-end px-10">
             <div class="flex flex-col lg:flex-row w-full items-center justify-between">
                 <div class="flex-1 justify-center">
                     <div x-cloak class="pt-10 lg:pt-0 flex flex-col items-center justify-center" x-show="error || id">
@@ -25,8 +25,11 @@
                         </template>
                     </div>
                 </div>
-                <div class="flex flex-col items-end pt-10 lg:pt-0">
-                    <h1 class="text-xl mb-2">{{ __('Sign here') }}</h1>
+                <div class="flex flex-col gap-6 items-end pt-10 lg:pt-0 w-full">
+                    <div class="w-full max-w-96">
+                        <h1 class="text-xl mb-2">{{ __('Sign here') }}</h1>
+                        <x-input errorless :placeholder="__('Name')" wire:model="signature.custom_properties.name" class="w-full mt-4" />
+                    </div>
                     <canvas x-ref="canvas" height="200" width="500" class="rounded-md h-auto" />
                 </div>
             </div>
