@@ -26,13 +26,6 @@ return new class() extends Migration
             $table->string('updated_by')->nullable()->after('updated_at');
         });
 
-        // ProductPropertyGroup | created_by, updated_by, deleted_by
-        Schema::table('product_property_groups', function (Blueprint $table) {
-            $table->string('created_by')->nullable()->after('created_at');
-            $table->string('updated_by')->nullable()->after('updated_at');
-            $table->string('deleted_by')->nullable()->after('deleted_at');
-        });
-
         // Schedule | created_by, updated_by, deleted_by
         Schema::table('schedules', function (Blueprint $table) {
             $table->string('created_by')->nullable()->after('created_at');
@@ -65,10 +58,6 @@ return new class() extends Migration
 
         Schema::table('commissions', function (Blueprint $table) {
             $table->dropColumn(['created_by', 'updated_by']);
-        });
-
-        Schema::table('product_property_groups', function (Blueprint $table) {
-            $table->dropColumn(['created_by', 'updated_by', 'deleted_by']);
         });
 
         Schema::table('schedules', function (Blueprint $table) {
