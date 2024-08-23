@@ -39,7 +39,7 @@ export default function ($wire, propertyName, autoload = true, userIcon = null, 
         },
         addMarkers(addresses = null) {
             let address = addresses ?? $wire[propertyName];
-            if (propertyName.includes('.') && ! addresses) {
+            if (propertyName.includes('.') && !addresses) {
                 const props = propertyName.split('.');
                 address = $wire;
                 props.forEach(prop => {
@@ -59,18 +59,17 @@ export default function ($wire, propertyName, autoload = true, userIcon = null, 
                 return;
             }
 
-
-            if (! address) {
+            if (!address) {
                 return;
             }
 
-            if (! Array.isArray(address)) {
+            if (!Array.isArray(address)) {
                 address = [address];
             }
 
             this.markers.clearLayers();
             address.forEach((address) => {
-                if (! address.latitude || ! address.longitude) {
+                if (!address.latitude || !address.longitude) {
                     return;
                 }
 
@@ -122,7 +121,7 @@ export default function ($wire, propertyName, autoload = true, userIcon = null, 
 
             // Check if we have valid bounds to fit the map view
             if (allMarkersBounds && allMarkersBounds.isValid()) {
-                this.map.fitBounds(allMarkersBounds, { padding: [50, 50] });
+                this.map.fitBounds(allMarkersBounds, {padding: [50, 50]});
                 let boundZoom = this.map.getBoundsZoom(allMarkersBounds);
 
                 // Adjust the zoom level if necessary

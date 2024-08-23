@@ -102,6 +102,7 @@ class AddressList extends BaseDataTable
         return redirect(route('contacts.id?', ['id' => $this->contact->id]));
     }
 
+    #[Renderless]
     public function loadData(): void
     {
         parent::loadData();
