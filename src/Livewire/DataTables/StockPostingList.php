@@ -13,7 +13,7 @@ class StockPostingList extends BaseDataTable
         'posting',
         'stock',
         'created_at',
-        'created_by.name',
+        'created_by',
     ];
 
     public array $formatters = [

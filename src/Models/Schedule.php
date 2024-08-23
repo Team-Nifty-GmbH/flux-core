@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\RepeatableTypeEnum;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Schedule extends Model
 {
-    use BroadcastsEvents, HasUuid, SoftDeletes;
+    use BroadcastsEvents, HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
