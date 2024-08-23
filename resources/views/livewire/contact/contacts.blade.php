@@ -124,7 +124,7 @@
         <div
             x-on:load-map.window="$nextTick(() => onChange())"
             class="py-4 z-0"
-            x-data="addressMap($wire, 'loadMap', false, '{{ auth()->user()->getAvatarUrl() }}')"
+            x-data="addressMap($wire, 'loadMap', false, '{{ auth()->user()?->getAvatarUrl() }}')"
             x-cloak
             x-show="$wire.showMap"
             x-collapse
