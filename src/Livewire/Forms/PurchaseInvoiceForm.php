@@ -7,8 +7,10 @@ use FluxErp\Actions\PurchaseInvoice\CreateOrderFromPurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoice\DeletePurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoice\UpdatePurchaseInvoice;
+use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\Currency;
+use FluxErp\Models\OrderPosition;
 use Livewire\Attributes\Locked;
 
 class PurchaseInvoiceForm extends FluxForm
@@ -85,5 +87,17 @@ class PurchaseInvoiceForm extends FluxForm
 
         $this->client_id = Client::default()?->id;
         $this->currency_id = Currency::default()?->id;
+    }
+
+    public function findLastLedgerAccountId(): void
+    {
+        $this->lastLedgerAccountId = resolve_static(OrderPosition::class, 'query')
+            ->whereHas(
+                'ledgerAccount',
+                fn ($query) => $query->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense)
+            )
+            ->whereHas('order', fn ($query) => $query->where('contact_id', $this->contact_id))
+            ->orderByDesc('id')
+            ->value('ledger_account_id');
     }
 }
