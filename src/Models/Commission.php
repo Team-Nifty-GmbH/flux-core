@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Commission extends Model implements InteractsWithDataTables
 {
-    use HasPackageFactory, HasUuid;
+    use HasPackageFactory, HasUserModification, HasUuid;
 
     protected $guarded = [
         'id',
