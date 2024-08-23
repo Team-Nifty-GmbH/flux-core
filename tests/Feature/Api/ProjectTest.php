@@ -210,8 +210,8 @@ class ProjectTest extends BaseSetup
         $this->assertEquals($project['description'], $dbProject->description);
         $this->assertEquals($project['time_budget'], $dbProject->time_budget);
         $this->assertEquals($project['budget'], $dbProject->budget);
-        $this->assertEquals($this->user->id, $dbProject->created_by->id);
-        $this->assertEquals($this->user->id, $dbProject->updated_by->id);
+        $this->assertTrue($this->user->is($dbProject->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbProject->getUpdatedBy()));
     }
 
     public function test_create_project_validation_fails()
@@ -370,11 +370,9 @@ class ProjectTest extends BaseSetup
         $response->assertStatus(200);
 
         $responseProject = json_decode($response->getContent())->data;
-        $dbProject = (object) Project::query()
+        $dbProject = Project::query()
             ->whereKey($responseProject->id)
-            ->first()
-            ->append(['created_by', 'updated_by'])
-            ->toArray();
+            ->first();
 
         $this->assertNotEmpty($dbProject);
         $this->assertEquals($project['id'], $dbProject->id);
@@ -388,7 +386,7 @@ class ProjectTest extends BaseSetup
         $this->assertEquals($project['start_date'], Carbon::parse($dbProject->start_date)->toDateString());
         $this->assertNull($dbProject->end_date);
         $this->assertEquals($project['description'], $dbProject->description);
-        $this->assertEquals($this->user->id, $dbProject->updated_by['id']);
+        $this->assertTrue($this->user->is($dbProject->getUpdatedBy()));
         $this->assertEquals($project[$additionalColumns[0]->name], $responseProject->{$additionalColumns[0]->name});
         $this->assertEquals($project[$additionalColumns[0]->name], $dbProject->{$additionalColumns[0]->name});
         $this->assertNull($responseProject->{$additionalColumns[1]->name});
@@ -482,7 +480,7 @@ class ProjectTest extends BaseSetup
 
         $project = $this->projects[1]->fresh();
         $this->assertNotNull($project->deleted_at);
-        $this->assertEquals($this->user->id, $project->deleted_by->id);
+        $this->assertTrue($this->user->is($project->getDeletedBy()));
     }
 
     public function test_delete_project_project_not_found()

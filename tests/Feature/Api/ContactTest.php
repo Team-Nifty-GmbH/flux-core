@@ -178,8 +178,8 @@ class ContactTest extends BaseSetup
         $this->assertNull($dbContact->credit_line);
         $this->assertFalse($dbContact->has_sensitive_reminder);
         $this->assertFalse($dbContact->has_delivery_lock);
-        $this->assertEquals($this->user->id, $dbContact->created_by->id);
-        $this->assertEquals($this->user->id, $dbContact->updated_by->id);
+        $this->assertTrue($this->user->is($dbContact->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbContact->getUpdatedBy()));
     }
 
     public function test_create_contact_maximum()
@@ -229,8 +229,8 @@ class ContactTest extends BaseSetup
         $this->assertEquals($contact['credit_line'], $dbContact->credit_line);
         $this->assertEquals($contact['has_sensitive_reminder'], $dbContact->has_sensitive_reminder);
         $this->assertEquals($contact['has_delivery_lock'], $dbContact->has_delivery_lock);
-        $this->assertEquals($this->user->id, $dbContact->created_by->id);
-        $this->assertEquals($this->user->id, $dbContact->updated_by->id);
+        $this->assertTrue($this->user->is($dbContact->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbContact->getUpdatedBy()));
     }
 
     public function test_create_contact_validation_fails()
@@ -268,7 +268,7 @@ class ContactTest extends BaseSetup
         $this->assertNotEmpty($dbContact);
         $this->assertEquals($contact['id'], $dbContact->id);
         $this->assertEquals($contact['customer_number'], $dbContact->customer_number);
-        $this->assertEquals($this->user->id, $dbContact->updated_by->id);
+        $this->assertTrue($this->user->is($dbContact->getUpdatedBy()));
     }
 
     public function test_update_contact_maximum()
@@ -318,7 +318,7 @@ class ContactTest extends BaseSetup
         $this->assertEquals($contact['credit_line'], $dbContact->credit_line);
         $this->assertEquals($contact['has_sensitive_reminder'], $dbContact->has_sensitive_reminder);
         $this->assertEquals($contact['has_delivery_lock'], $dbContact->has_delivery_lock);
-        $this->assertEquals($this->user->id, $dbContact->updated_by->id);
+        $this->assertTrue($this->user->is($dbContact->getUpdatedBy()));
     }
 
     public function test_update_contact_multi_status_validation_fails()
@@ -407,7 +407,7 @@ class ContactTest extends BaseSetup
 
         $contact = $this->contacts[2]->fresh();
         $this->assertNotNull($contact->deleted_at);
-        $this->assertEquals($this->user->id, $contact->deleted_by->id);
+        $this->assertTrue($this->user->is($contact->getDeletedBy()));
     }
 
     public function test_delete_contact_contact_not_found()

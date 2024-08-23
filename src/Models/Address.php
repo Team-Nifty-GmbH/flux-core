@@ -16,6 +16,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\Lockable;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\MonitorsQueue;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\Scout\Searchable;
@@ -49,7 +50,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
 {
     use BroadcastsEvents, CausesActivity, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens,
         HasCalendars, HasCart, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags,
-        HasUserModification, HasUuid, Lockable, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
+        HasUserModification, HasUuid, Lockable, LogsActivity, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'password',
@@ -109,6 +110,8 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         });
 
         static::saved(function (Address $address) {
+            Cache::forget('morph_to:' . $address->getMorphClass() . ':' . $address->id);
+
             $contactUpdates = [];
             $addressesUpdates = [];
 

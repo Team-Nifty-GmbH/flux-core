@@ -7,6 +7,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +16,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class PurchaseInvoice extends Model implements HasMedia
 {
-    use Commentable, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, SoftDeletes;
+    use Commentable, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes;
 
     protected $guarded = ['id'];
 
