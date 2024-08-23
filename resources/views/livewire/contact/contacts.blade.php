@@ -1,3 +1,4 @@
+@use('\FluxErp\Enums\SalutationEnum')
 <div>
     @can('action.contact.create')
         <x-modal :name="'new-contact'">
@@ -20,11 +21,14 @@
                     </div>
                     <div
                         class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                        <label for="{{ md5('address.salutation') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
-                            {{ __('Salutation') }}
-                        </label>
-                        <div class="col-span-2">
-                            <x-input wire:model="contact.main_address.salutation"/>
+                        <x-label :label="__('Salutation')" for="{{ md5('contact.main_address.salutation') }}" />
+                        <div class="col-span-2 w-full">
+                            <x-select
+                                :options="SalutationEnum::valuesLocalized()"
+                                option-key-value
+                                x-bind:readonly="!$wire.edit"
+                                wire:model="contact.main_address.salutation"
+                            />
                         </div>
                     </div>
                     <div
@@ -116,5 +120,23 @@
             </x-card>
         </x-modal>
     @endcan
-    @include('tall-datatables::livewire.data-table')
+    <div>
+        <div
+            x-on:load-map.window="$nextTick(() => onChange())"
+            class="py-4 z-0"
+            x-data="addressMap($wire, 'loadMap', false, '{{ auth()->user()?->getAvatarUrl() }}')"
+            x-cloak
+            x-show="$wire.showMap"
+            x-collapse
+        >
+            <x-card class="w-full">
+                <x-slot:action>
+                    <x-button.circle wire:click="$set('showMap', false, true)" icon="x" />
+                </x-slot:action>
+                <div x-intersect.once="onChange()">
+                    <div id="map" class="h-96 min-w-96"></div>
+                </div>
+            </x-card>
+        </div>
+    </div>
 </div>

@@ -54,6 +54,7 @@ class ContactForm extends FluxForm
         'client_id' => null,
         'country_id' => null,
         'language_id' => null,
+        'salutation' => null,
     ];
 
     public array $categories = [];

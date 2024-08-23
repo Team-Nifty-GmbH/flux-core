@@ -3,6 +3,8 @@
 @import "/node_modules/@fontsource/inter/latin-600.css";
 @import "/node_modules/@fontsource/inter/latin-900.css";
 @import "/node_modules/leaflet/dist/leaflet.css";
+@import "/node_modules/leaflet.markercluster/dist/MarkerCluster.css";
+@import "/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 @import '/node_modules/gridstack/dist/gridstack.min.css';
 @import '/node_modules/gridstack/dist/gridstack-extra.min.css';
@@ -66,7 +68,7 @@
     }
 
     #map {
-        @apply h-96
+        @apply h-96 z-0;
     }
 
     .mention {

@@ -16,8 +16,8 @@
         "@tailwindcss/forms": "^0.5.7",
         "@tailwindcss/typography": "^0.5.10",
         "@tiptap/core": "^2.3.1",
-        "@tiptap/pm": "^2.3.1",
         "@tiptap/extension-mention": "^2.5.7",
+        "@tiptap/pm": "^2.3.1",
         "@tiptap/starter-kit": "^2.3.1",
         "@types/lodash.debounce": "^4.0.8",
         "@wireui/alpinejs-hold-directive": "^1.0.1",
@@ -30,6 +30,7 @@
         "laravel-echo": "^1.16.1",
         "laravel-vite-plugin": "^1.0.0",
         "leaflet": "^1.9.4",
+        "leaflet.markercluster": "^1.5.3",
         "lodash": "^4.17.21",
         "lodash.debounce": "^4.0.8",
         "lodash.kebabcase": "^4.1.1",
@@ -37,11 +38,11 @@
         "postcss-import": "^15.1.0",
         "pusher-js": "^8.4.0-rc2",
         "qs": "^6.11.2",
+        "signature_pad": "^5.0.1",
         "sortablejs": "^1.15.2",
         "tailwindcss": "^3.4.0",
+        "tippy.js": "^6.3.7",
         "uuid": "^10.0.0",
-        "signature_pad": "^5.0.1",
-        "vite": "^5.2.11",
-        "tippy.js": "^6.3.7"
+        "vite": "^5.2.11"
     }
 }
