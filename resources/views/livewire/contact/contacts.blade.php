@@ -122,9 +122,9 @@
     @endcan
     <div>
         <div
-            x-on:load-map.window="onChange()"
+            x-on:load-map.window="$nextTick(() => onChange())"
             class="py-4 z-0"
-            x-data="addressMap($wire, 'loadMap', false)"
+            x-data="addressMap($wire, 'loadMap', false, '{{ auth()->user()->getAvatarUrl() }}')"
             x-cloak
             x-show="$wire.showMap"
             x-collapse
@@ -134,7 +134,7 @@
                     <x-button.circle wire:click="$set('showMap', false, true)" icon="x" />
                 </x-slot:action>
                 <div x-intersect.once="onChange()">
-                    <div x-show="showMap" id="map" class="h-96 min-w-96"></div>
+                    <div id="map" class="h-96 min-w-96"></div>
                 </div>
             </x-card>
         </div>

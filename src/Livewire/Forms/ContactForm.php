@@ -51,10 +51,10 @@ class ContactForm extends FluxForm
     public ?string $vat_id = null;
 
     public array $main_address = [
-        'salutation' => null,
         'client_id' => null,
         'country_id' => null,
         'language_id' => null,
+        'salutation' => null,
     ];
 
     public array $categories = [];

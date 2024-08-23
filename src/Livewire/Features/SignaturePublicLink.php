@@ -101,7 +101,7 @@ class SignaturePublicLink extends Component
                 [
                     'view' => $this->printView,
                     'name' => auth()->user()?->name
-                        ?? data_get($this->signature->custom_properties, 'name')
+                        ?? data_get($this->signature->custom_properties, 'name'),
                 ]
             ));
 

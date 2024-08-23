@@ -13,7 +13,7 @@ L.Icon.Default.mergeOptions({
     shadowUrl: markerShadow
 });
 
-export default function ($wire, propertyName, autoload = true, zoom = 13) {
+export default function ($wire, propertyName, autoload = true, userIcon = null, zoom = 13) {
     return {
         zoom: zoom,
         init() {
@@ -93,20 +93,47 @@ export default function ($wire, propertyName, autoload = true, zoom = 13) {
 
             if (this.markers.getLayers().length > 0) {
                 this.markers.addTo(this.map);
-                this.$nextTick(() => {
-                    this.resizeMap();
-                });
             }
+
+            if (navigator.geolocation) {
+                this.addUserMarker();
+            }
+
+            this.$nextTick(() => {
+                this.resizeMap();
+            });
         },
         resizeMap() {
             this.map.invalidateSize();
-            // check if bounds are given#
-            let boundZoom = 0;
-            if (this.markers.getBounds().isValid()) {
-                this.map.fitBounds(this.markers.getBounds(), {padding: [50, 50]});
-                boundZoom = this.map.getBoundsZoom(this.markers.getBounds());
+
+            let allMarkersBounds = null;
+            let hasMarkerBounds = this.markers.getBounds().isValid();
+            let userMarkerBounds = this.userMarker ? L.latLngBounds(this.userMarker.getLatLng(), this.userMarker.getLatLng()) : null;
+
+            if (hasMarkerBounds) {
+                allMarkersBounds = this.markers.getBounds();
+
+                if (userMarkerBounds) {
+                    allMarkersBounds.extend(userMarkerBounds);
+                }
+            } else if (userMarkerBounds) {
+                allMarkersBounds = userMarkerBounds;
             }
-            this.map.setZoom(boundZoom > this.zoom ? this.zoom : boundZoom);
+
+            // Check if we have valid bounds to fit the map view
+            if (allMarkersBounds && allMarkersBounds.isValid()) {
+                this.map.fitBounds(allMarkersBounds, { padding: [50, 50] });
+                let boundZoom = this.map.getBoundsZoom(allMarkersBounds);
+
+                // Adjust the zoom level if necessary
+                let finalZoom = boundZoom > this.zoom ? this.zoom : boundZoom;
+                if (this.map.getZoom() !== finalZoom) {
+                    this.map.setZoom(finalZoom);
+                }
+            } else {
+                let defaultZoom = 2;
+                this.map.setView([0, 0], defaultZoom);
+            }
         },
         onChange() {
             this.$nextTick(() => {
@@ -117,6 +144,28 @@ export default function ($wire, propertyName, autoload = true, zoom = 13) {
         get showMap() {
             return this.markers.getLayers().length > 0;
         },
+        addUserMarker() {
+            navigator.geolocation.getCurrentPosition((position) => {
+                let icon = null;
+                let options = {};
+                console.log(userIcon);
+                if (userIcon) {
+                    icon = L.divIcon({
+                        className: 'custom-icon',
+                        html: userIcon,
+                    });
+                    options.icon = icon;
+                }
+
+                this.userMarker = L.marker([position.coords.latitude, position.coords.longitude], options)
+                    .addTo(this.map);
+
+                this.$nextTick(() => {
+                    this.resizeMap();
+                });
+            });
+        },
+        userMarker: null,
         map: null,
         markers: null,
         lat: null,

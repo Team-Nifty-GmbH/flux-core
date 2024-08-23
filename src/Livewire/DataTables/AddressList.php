@@ -111,6 +111,7 @@ class AddressList extends BaseDataTable
         }
     }
 
+    #[Renderless]
     public function updatedShowMap(): void
     {
         $this->dispatch('load-map');
