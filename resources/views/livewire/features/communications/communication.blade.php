@@ -1,4 +1,19 @@
 <div x-data="{
+    init() {
+        this.$watch('modelType', (value) => {
+            this.modelId = null;
+            this.relatedSelected(value);
+        });
+        this.$watch('modelId', () => {
+            if (this.modelType && this.modelId) {
+                $wire.addCommunicatable(this.modelType, this.modelId);
+                this.modelType = null;
+                this.modelId = null;
+                Alpine.$data(document.getElementById('communicatable-id').querySelector('[x-data]')).clear();
+                Alpine.$data(document.getElementById('communicatable-type').querySelector('[x-data]')).clear();
+            }
+        });
+    },
     addReceiver($event, type) {
         let value = $event.target.value;
         if ($event instanceof KeyboardEvent) {
@@ -8,12 +23,24 @@
         value = value.trim();
 
         if (value && ($event instanceof FocusEvent || ($event.code === 'Comma' || $event.code === 'Enter' || $event.code === 'Space'))) {
+            const email = value.match(/<([^>]*)>/);
+            if (email && email[1]) {
+                value = email[1];
+            }
+
             $wire.communication[type].push(value);
             $event.target.value = null;
         }
-    }
+    },
+    relatedSelected(type) {
+        let searchRoute = '{{  route('search', '') }}';
+        searchRoute = searchRoute + '/' + type;
+        Alpine.$data(document.getElementById('communicatable-id').querySelector('[x-data]')).asyncData.api = searchRoute;
+    },
+    modelType: null,
+    modelId: null
 }">
-    {{ $this->renderCreateDocumentsModal() }}
+    {!! $this->renderCreateDocumentsModal() !!}
     <x-modal name="edit-communication" max-width="5xl">
         <x-card :title="__('Edit Communication')" class="flex flex-col gap-4">
             <div>
@@ -27,6 +54,67 @@
                     option-label="label"
                 />
             </div>
+            <div class="flex gap-1.5">
+                <template x-for="(model, index) in $wire.communication.communicatables">
+                    <x-badge flat primary cl>
+                        <x-slot name="prepend" class="p-0.5">
+                            <x-button.circle
+                                x-cloak
+                                x-show="model.href"
+                                xs
+                                secondary
+                                href="#"
+                                x-bind:href="model.href"
+                                icon="eye"
+                                class="size-4"
+                            />
+                        </x-slot>
+                        <x-slot:label>
+                            <span x-text="model.label"></span>
+                        </x-slot:label>
+                        <x-slot
+                            name="append"
+                            class="relative flex items-center size-2"
+                        >
+                            <button
+                                type="button"
+                                x-on:click="$wire.communication.communicatables.splice(index, 1)"
+                            >
+                                <x-icon
+                                    name="x"
+                                    class="size-4"
+                                />
+                            </button>
+                        </x-slot>
+                    </x-badge>
+                </template>
+            </div>
+            <div id="communicatable-type">
+                <x-select
+                    :label="__('Model')"
+                    :option-key-value="true"
+                    x-on:selected="modelType = $event.detail?.value"
+                    :options="$this->communicatables"
+                />
+            </div>
+            <div id="communicatable-id" x-show="modelType" x-cloak>
+                <x-select :label="__('Record')"
+                    option-value="id"
+                    option-label="label"
+                    x-on:selected="modelId = $event.detail?.value;"
+                    :async-data="[
+                        'api' => route('search', ''),
+                        'method' => 'POST',
+                        'params' => [
+                            'appends' => [
+                                'contact_id',
+                            ],
+                        ]
+                    ]"
+                  x-model="modelId"
+                />
+            </div>
+            <hr>
             <div class="flex flex-col gap-4" x-show="$wire.communication.communication_type_enum === 'phone-call' || $wire.communication.communication_type_enum === 'letter'">
                 <x-select
                     :label="__('Address')"
@@ -195,13 +283,11 @@
                         x-on:click="close()"
                         :label="__('Cancel')"
                     />
-                    <div x-show="$wire.communication.communication_type_enum !== 'mail'">
-                        <x-button
-                            wire:click="save().then((success) => { if(success) close(); })"
-                            primary
-                            :label="__('Save')"
-                        />
-                    </div>
+                    <x-button
+                        wire:click="save().then((success) => { if(success) close(); })"
+                        primary
+                        :label="__('Save')"
+                    />
                     <div x-show="$wire.communication.communication_type_enum === 'mail' && !$wire.communication.id">
                         <x-button
                             wire:click="send().then((success) => { if(success) close(); })"

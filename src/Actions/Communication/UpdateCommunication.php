@@ -3,7 +3,9 @@
 namespace FluxErp\Actions\Communication;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\Address;
 use FluxErp\Models\Communication;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Communication\UpdateCommunicationRuleset;
 use Illuminate\Database\Eloquent\Model;
@@ -26,7 +28,9 @@ class UpdateCommunication extends FluxAction
     public function performAction(): Model
     {
         $tags = Arr::pull($this->data, 'tags');
+        $communicatables = Arr::pull($this->data, 'communicatables');
 
+        /** @var Communication $communication */
         $communication = resolve_static(Communication::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
@@ -41,8 +45,38 @@ class UpdateCommunication extends FluxAction
         $communication->fill($this->data);
         $communication->save();
 
+        if (! is_null($communicatables)) {
+            $existing = array_filter($communicatables, fn (array $item) => ! is_null(data_get($item, 'id')));
+            $new = array_filter($communicatables, fn (array $item) => is_null(data_get($item, 'id')));
+
+            $communication->communicatables()
+                ->whereIntegerNotInRaw('id', array_column($existing, 'id'))
+                ->delete();
+
+            if ($new) {
+                $communication->communicatables()->createMany($new);
+            }
+
+            if ($existing) {
+                foreach ($existing as $item) {
+                    $communication->communicatables()->whereKey($item['id'])->update($item);
+                }
+            }
+
+            // ensure that all communications that are attached to an address are also attached to the contact
+            $communication->communicatables()
+                ->where('communicatable_type', morph_alias(Address::class))
+                ->with('communicatable.contact')
+                ->get(['communicatable_id', 'communicatable_type'])
+                ->pluck('communicatable.contact')
+                ->unique()
+                ->each(fn (Contact $contact) => $contact->communications()->syncWithoutDetaching($communication->id));
+        }
+
         if (! is_null($tags)) {
-            $communication->syncTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
+            $communication->syncTags(resolve_static(Tag::class, 'query')
+                ->whereIntegerInRaw('id', $tags)
+                ->get());
         }
 
         return $communication->withoutRelations()->fresh();

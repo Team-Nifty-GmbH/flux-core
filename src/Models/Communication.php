@@ -39,6 +39,14 @@ class Communication extends Model implements HasMedia, OffersPrinting
             if ($message->isDirty('text_body')) {
                 $message->text_body = strip_tags($message->text_body ?? '');
             }
+
+            if ($message->isDirty('html_body') && $message->isClean('text_body') && ! trim($message->text_body)) {
+                $message->text_body = strip_tags($message->html_body ?? '');
+            }
+
+            if (! $message->date) {
+                $message->date = now();
+            }
         });
     }
 

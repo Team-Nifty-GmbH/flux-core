@@ -15,6 +15,11 @@
                         $wire.paymentReminderTextForm[type] = [];
                     }
 
+                    const email = value.match(/<([^>]*)>/);
+                    if (email && email[1]) {
+                        value = email[1];
+                    }
+
                     $wire.paymentReminderTextForm[type].push(value);
                     $event.target.value = null;
                 }

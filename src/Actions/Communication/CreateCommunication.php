@@ -6,7 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Address;
 use FluxErp\Models\Communication;
-use FluxErp\Models\Pivots\Communicatable;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Communication\CreateCommunicationRuleset;
 use Illuminate\Support\Arr;
@@ -30,6 +30,7 @@ class CreateCommunication extends FluxAction
     {
         $attachments = Arr::pull($this->data, 'attachments', []);
         $tags = Arr::pull($this->data, 'tags');
+        $communicatables = Arr::pull($this->data, 'communicatables');
 
         $startedAt = data_get($this->data, 'started_at');
         $endedAt = data_get($this->data, 'ended_at');
@@ -41,22 +42,27 @@ class CreateCommunication extends FluxAction
         $communication = app(Communication::class, ['attributes' => $this->data]);
         $communication->save();
 
-        $communicatable = app(Communicatable::class, [
-            'attributes' => [
-                'communicatable_type' => $this->data['communicatable_type'],
-                'communicatable_id' => $this->data['communicatable_id'],
-                'communication_id' => $communication->id,
-            ],
-        ]);
-        $communicatable->save();
+        if ($communicatables) {
+            $communication->communicatables()->createMany($communicatables);
+
+            $communication->communicatables()
+                ->where('communicatable_type', morph_alias(Address::class))
+                ->with('communicatable.contact')
+                ->get(['communicatable_id', 'communicatable_type'])
+                ->pluck('communicatable.contact')
+                ->unique()
+                ->each(fn (Contact $contact) => $contact->communications()->syncWithoutDetaching($communication->id));
+        }
 
         if ($tags) {
-            $communication->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
+            $communication->attachTags(resolve_static(Tag::class, 'query')
+                ->whereIntegerInRaw('id', $tags)
+                ->get());
         }
 
         foreach ($attachments as $attachment) {
             $attachment['model_id'] = $communication->id;
-            $attachment['model_type'] = app(Communication::class)->getMorphClass();
+            $attachment['model_type'] = morph_alias(Communication::class);
             $attachment['collection_name'] = 'attachments';
             $attachment['media_type'] = 'string';
 
@@ -66,9 +72,9 @@ class CreateCommunication extends FluxAction
             }
         }
 
-        if ($this->data['communicatable_type'] === morph_alias(Address::class)) {
-            $communication->loadMissing('addresses');
-            $communication->addresses->first()->contact->communications()->attach($communication->id);
+        if (data_get($this->data, 'communicatable_type') === morph_alias(Address::class)) {
+            /** @var Address $communicatable */
+            $communicatable->contact->communications()->attach($communication->id);
         }
 
         return $communication->fresh();
