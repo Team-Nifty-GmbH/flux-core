@@ -125,14 +125,14 @@ abstract class PrintableView extends Component
         if (! config('dompdf.options.allowed_remote_hosts')) {
             $this->pdf->setOption(
                 'allowedRemoteHosts',
-                [
+                array_filter([
                     'localhost',
                     '127.0.0.1',
                     'fonts.googleapis.com',
-                    config('app.url'),
-                    config('app.asset_url'),
-                    config('app.frontend_url'),
-                ]
+                    Str::after(config('app.url'), '://'),
+                    Str::after(config('app.asset_url'), '://'),
+                    Str::after(config('app.frontend_url'), '://'),
+                ])
             );
         }
 
