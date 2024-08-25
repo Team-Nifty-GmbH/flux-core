@@ -407,6 +407,8 @@ class Order extends OrderPositionList
         $this->order->address_delivery = $this->order->address_delivery ?: [];
         try {
             $action = UpdateOrder::make($this->order->toArray())->checkPermission()->validate();
+
+            $this->getAvailableStates('state');
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -526,9 +528,23 @@ class Order extends OrderPositionList
     }
 
     #[Renderless]
-    public function updatedOrderState(): void
+    public function saveStates(): void
     {
-        $this->getAvailableStates('state');
+        try {
+            UpdateOrder::make([
+                'id' => $this->order->id,
+                'state' => $this->order->state,
+                'payment_state' => $this->order->payment_state,
+                'delivery_state' => $this->order->delivery_state,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            $this->getAvailableStates('state');
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     #[Renderless]

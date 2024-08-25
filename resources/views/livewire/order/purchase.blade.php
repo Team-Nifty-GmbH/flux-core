@@ -26,6 +26,8 @@
 @endsection
 @section('content.right')
     @parent
+    @section('content.right.summary.profit')
+    @endsection
     @section('content.right.order_dates')
         <x-input wire:model="order.invoice_number" :label="__('Invoice number')" :disabled="$order->is_locked" class="w-full"/>
         <x-datetime-picker wire:model="order.invoice_date" :clearable="false" :without-time="true" :disabled="$order->is_locked" :label="__('Invoice Date')" />
