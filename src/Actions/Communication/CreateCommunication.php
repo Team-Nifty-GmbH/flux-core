@@ -72,11 +72,6 @@ class CreateCommunication extends FluxAction
             }
         }
 
-        if (data_get($this->data, 'communicatable_type') === morph_alias(Address::class)) {
-            /** @var Address $communicatable */
-            $communicatable->contact->communications()->attach($communication->id);
-        }
-
         return $communication->fresh();
     }
 }

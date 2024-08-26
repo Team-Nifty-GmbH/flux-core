@@ -146,8 +146,9 @@ class Communication extends CommunicationList
         $this->communication->communicatables[] = [
             'communicatable_type' => $modelType,
             'communicatable_id' => $modelId,
-            'href' => $model->getUrl(),
-            'label' => __(Str::headline($modelType)) . ': ' . $model->getLabel(),
+            'href' => method_exists($model, 'getUrl') ? $model->getUrl() : null,
+            'label' => __(Str::headline($modelType)) . ': '
+                . (method_exists($model, 'getLabel') ? $model->getLabel() : $model->getKey()),
         ];
     }
 

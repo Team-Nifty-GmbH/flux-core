@@ -105,11 +105,6 @@
                     :async-data="[
                         'api' => route('search', ''),
                         'method' => 'POST',
-                        'params' => [
-                            'appends' => [
-                                'contact_id',
-                            ],
-                        ]
                     ]"
                   x-model="modelId"
                 />

@@ -57,12 +57,6 @@ class UpdateCommunication extends FluxAction
                 $communication->communicatables()->createMany($new);
             }
 
-            if ($existing) {
-                foreach ($existing as $item) {
-                    $communication->communicatables()->whereKey($item['id'])->update($item);
-                }
-            }
-
             // ensure that all communications that are attached to an address are also attached to the contact
             $communication->communicatables()
                 ->where('communicatable_type', morph_alias(Address::class))
