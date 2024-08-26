@@ -408,7 +408,7 @@ class Order extends OrderPositionList
         try {
             $action = UpdateOrder::make($this->order->toArray())->checkPermission()->validate();
 
-            $this->getAvailableStates('state');
+            $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -541,7 +541,7 @@ class Order extends OrderPositionList
                 ->validate()
                 ->execute();
 
-            $this->getAvailableStates('state');
+            $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
         }
