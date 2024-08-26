@@ -98,7 +98,8 @@
                 />
             </div>
             <div id="communicatable-id" x-show="modelType" x-cloak>
-                <x-select :label="__('Record')"
+                <x-select
+                    :label="__('Record')"
                     option-value="id"
                     option-label="label"
                     x-on:selected="modelId = $event.detail?.value;"
@@ -106,7 +107,7 @@
                         'api' => route('search', ''),
                         'method' => 'POST',
                     ]"
-                  x-model="modelId"
+                    x-model="modelId"
                 />
             </div>
             <hr>
