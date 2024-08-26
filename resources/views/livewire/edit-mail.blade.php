@@ -8,6 +8,10 @@
         value = value.trim();
 
         if (value && ($event instanceof FocusEvent || ($event.code === 'Comma' || $event.code === 'Enter' || $event.code === 'Space'))) {
+            const email = value.match(/<([^>]*)>/);
+            if (email && email[1]) {
+                value = email[1];
+            }
             $wire.mailMessage[type].push(value);
             $event.target.value = null;
         }

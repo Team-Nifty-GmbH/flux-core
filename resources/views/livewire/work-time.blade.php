@@ -45,7 +45,7 @@
                 option-label="label"
                 option-value="value"
             />
-            <div id="trackable-id" x-show="$wire.workTime.trackable_type">
+            <div id="trackable-id" x-cloak x-show="$wire.workTime.trackable_type">
                 <x-select :label="__('Record')"
                     x-on:selected="recordSelected($event.detail)"
                     option-value="id"

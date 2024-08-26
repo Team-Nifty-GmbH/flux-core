@@ -15,6 +15,7 @@ class CommunicationList extends BaseDataTable
     public array $enabledCols = [
         'date',
         'from',
+        'to',
         'subject',
         'text_body',
         'communication_type_enum',

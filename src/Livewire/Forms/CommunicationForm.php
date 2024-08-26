@@ -6,7 +6,9 @@ use FluxErp\Actions\Communication\CreateCommunication;
 use FluxErp\Actions\Communication\DeleteCommunication;
 use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Models\Communication;
+use FluxErp\Models\Pivots\Communicatable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 
 class CommunicationForm extends FluxForm
@@ -42,11 +44,7 @@ class CommunicationForm extends FluxForm
 
     public array $tags = [];
 
-    #[Locked]
-    public ?string $communicatable_type = null;
-
-    #[Locked]
-    public ?int $communicatable_id = null;
+    public array $communicatables = [];
 
     protected function getActions(): array
     {
@@ -60,7 +58,21 @@ class CommunicationForm extends FluxForm
     public function fill($values): void
     {
         if ($values instanceof Communication) {
-            $values->loadMissing(['tags:id']);
+            $values->loadMissing(['tags:id', 'communicatables']);
+            $values->communicatables->map(function (Communicatable $communicatable) {
+                $communicatable->href = method_exists($communicatable->communicatable, 'getUrl')
+                    ? $communicatable->communicatable->getUrl()
+                    : null;
+
+                $typeLabel = __(Str::headline($communicatable->communicatable_type));
+                $modelLabel = method_exists($communicatable->communicatable, 'getLabel')
+                    ? $communicatable->communicatable->getLabel()
+                    : null;
+
+                $communicatable->label =  $modelLabel ? $typeLabel . ': ' . $modelLabel : $typeLabel;
+
+                $communicatable->unsetRelation('communicatable');
+            });
 
             $values = $values->toArray();
             $values['tags'] = array_column($values['tags'] ?? [], 'id');
@@ -68,9 +80,9 @@ class CommunicationForm extends FluxForm
 
         parent::fill($values);
 
-        $this->to = is_null($this->to) ? [] : $this->to;
-        $this->cc = is_null($this->cc) ? [] : $this->cc;
-        $this->bcc = is_null($this->bcc) ? [] : $this->bcc;
+        $this->to ??= [];
+        $this->cc ??= [];
+        $this->bcc ??= [];
 
         if ($this->id) {
             $message = $values instanceof Communication

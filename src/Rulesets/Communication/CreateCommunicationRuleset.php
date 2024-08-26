@@ -7,10 +7,7 @@ use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Rules\ModelExists;
-use FluxErp\Rules\MorphClassExists;
-use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
-use FluxErp\Traits\Communicatable;
 use Illuminate\Validation\Rule;
 
 class CreateCommunicationRuleset extends FluxRuleset
@@ -21,16 +18,6 @@ class CreateCommunicationRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:communications,uuid',
-            'communicatable_type' => [
-                'required',
-                'string',
-                app(MorphClassExists::class, ['uses' => Communicatable::class]),
-            ],
-            'communicatable_id' => [
-                'required',
-                'integer',
-                app(MorphExists::class, ['modelAttribute' => 'communicatable_type']),
-            ],
             'mail_account_id' => [
                 'exclude_unless:communication_type_enum,mail',
                 'integer',
@@ -67,6 +54,7 @@ class CreateCommunicationRuleset extends FluxRuleset
             parent::getRules(),
             resolve_static(AttachmentRuleset::class, 'getRules'),
             resolve_static(TagRuleset::class, 'getRules'),
+            resolve_static(CommunicatablesRuleset::class, 'getRules'),
         );
     }
 }
