@@ -653,8 +653,8 @@
                                                 {{ __('Margin') }}
                                             </div>
                                             <div>
-                                            <span x-html="formatters.coloredMoney($wire.order.margin ?? 0)">
-                                            </span>
+                                                <span x-html="formatters.coloredMoney($wire.order.margin ?? 0)">
+                                                </span>
                                             </div>
                                         </div>
                                         <div class="flex justify-between p-2.5">
@@ -662,8 +662,8 @@
                                                 {{ __('Gross Profit') }}
                                             </div>
                                             <div>
-                                            <span x-html="formatters.coloredMoney($wire.order.gross_profit ?? 0)">
-                                            </span>
+                                                <span x-html="formatters.coloredMoney($wire.order.gross_profit ?? 0)">
+                                                </span>
                                             </div>
                                         </div>
                                     @show
@@ -673,8 +673,8 @@
                                                 {{ __('Sum net without discount') }}
                                             </div>
                                             <div>
-                                            <span x-html="formatters.coloredMoney($wire.order.total_base_net_price ?? 0)">
-                                            </span>
+                                                <span x-html="formatters.coloredMoney($wire.order.total_base_net_price ?? 0)">
+                                                </span>
                                             </div>
                                         </div>
                                         <div class="flex justify-between p-2.5">
@@ -682,8 +682,8 @@
                                                 {{ __('Discount') }}
                                             </div>
                                             <div>
-                                            <span x-html="formatters.coloredMoney(($wire.order.total_net_price - $wire.order.total_base_net_price) ?? 0)">
-                                            </span>
+                                                <span x-html="formatters.coloredMoney(($wire.order.total_net_price - $wire.order.total_base_net_price) ?? 0)">
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -692,8 +692,8 @@
                                             {{ __('Sum net') }}
                                         </div>
                                         <div>
-                                        <span x-html="formatters.coloredMoney($wire.order.total_net_price ?? 0)">
-                                        </span>
+                                            <span x-html="formatters.coloredMoney($wire.order.total_net_price ?? 0)">
+                                            </span>
                                         </div>
                                     </div>
                                     <hr />
@@ -702,11 +702,11 @@
                                             <div>
                                                 <span>{{ __('Plus ') }}</span>
                                                 <span x-html="formatters.percentage(vat.vat_rate_percentage ?? 0)">
-                                            </span>
+                                                </span>
                                             </div>
                                             <div>
-                                            <span x-html="formatters.coloredMoney(vat.total_vat_price ?? 0)">
-                                            </span>
+                                                <span x-html="formatters.coloredMoney(vat.total_vat_price ?? 0)">
+                                                </span>
                                             </div>
                                         </div>
                                     </template>
@@ -715,8 +715,8 @@
                                             {{ __('Total Gross') }}
                                         </div>
                                         <div>
-                                        <span x-html="formatters.coloredMoney($wire.order.total_gross_price ?? 0)">
-                                        </span>
+                                            <span x-html="formatters.coloredMoney($wire.order.total_gross_price ?? 0)">
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5">
@@ -724,8 +724,8 @@
                                             {{ __('Balance') }}
                                         </div>
                                         <div>
-                                        <span x-html="formatters.coloredMoney($wire.order.balance ?? 0)">
-                                        </span>
+                                            <span x-html="formatters.coloredMoney($wire.order.balance ?? 0)">
+                                            </span>
                                         </div>
                                     </div>
                                 @show

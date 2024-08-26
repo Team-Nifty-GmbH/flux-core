@@ -62,7 +62,7 @@
                 @show
                 </thead>
                 @section('positions.body')
-                    @foreach ($model->orders()->whereNotState('payment_state', Paid::class)->whereNot('balance', 0)->get(['id', 'order_number', 'invoice_date', 'invoice_number', 'total_gross_price', 'balance']) as $order)
+                    @foreach ($model->orders()->whereNotState('payment_state', \FluxErp\States\Order\PaymentState\Paid::class)->whereNot('balance', 0)->get(['id', 'order_number', 'invoice_date', 'invoice_number', 'total_gross_price', 'balance']) as $order)
                         <x-flux::print.order.order :order="$order" :currency="$currency" :formatter="$formatter" />
                     @endforeach
                 @show
