@@ -12,7 +12,7 @@ use Livewire\Attributes\On;
 trait Widgetable
 {
     #[Modelable]
-    public TimeFrameEnum $timeFrame;
+    public TimeFrameEnum $timeFrame = TimeFrameEnum::LastMonth;
 
     public ?Carbon $start = null;
 
