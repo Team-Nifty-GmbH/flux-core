@@ -2,11 +2,34 @@
 
 namespace FluxErp\Traits;
 
+use FluxErp\Enums\TimeFrameEnum;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Modelable;
+use Livewire\Attributes\On;
 
 trait Widgetable
 {
+    #[Modelable]
+    public TimeFrameEnum $timeFrame;
+
+    public ?Carbon $start = null;
+
+    public ?Carbon $end = null;
+
+    #[On('time-frame-changed')]
+    public function timeFrameChanged(TimeFrameEnum $timeFrameEnum, ?string $start = null, ?string $end = null): void
+    {
+        $this->timeFrame = $timeFrameEnum;
+        $this->start = Carbon::parse($start);
+        $this->end = Carbon::parse($end);
+
+        if (method_exists($this, 'updatedTimeFrame')) {
+            $this->updatedTimeFrame();
+        }
+    }
+
     public static function getLabel(): string
     {
         if (app()->runningInConsole()) {

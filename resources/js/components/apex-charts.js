@@ -139,6 +139,7 @@ export default function($wire) {
                     redrawOnParentResize: true,
                     type: null,
                     height: this.height,
+                    fontFamily: 'inherit',
                 },
                 dataLabels: {
                     formatter: function(val) {

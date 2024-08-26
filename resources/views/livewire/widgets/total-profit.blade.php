@@ -6,13 +6,4 @@
             <p class="text-lg font-normal text-gray-500" x-text="formatters.money(total, @js($currency))"></p>
         </div>
     </div>
-    <x-select
-        :label="__('Select Time Frame')"
-        :options="$timeFrames"
-        option-value="value"
-        option-label="label"
-        class="pb-4 px-1.5"
-        wire:model.live="timeFrame"
-        :clearable="false"
-    />
 </div>

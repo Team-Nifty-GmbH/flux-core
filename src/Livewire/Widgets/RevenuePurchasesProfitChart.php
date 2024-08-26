@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Charts\BarChart;
 use FluxErp\Models\Order;
 use FluxErp\Traits\Widgetable;
@@ -17,7 +16,7 @@ class RevenuePurchasesProfitChart extends BarChart
             ->whereNotNull('invoice_date')
             ->whereNotNull('invoice_number');
 
-        $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
+        $timeFrame = $this->timeFrame;
         $parameters = $timeFrame->dateQueryParameters('invoice_date');
         if ($parameters && count($parameters) > 0) {
             if ($parameters['operator'] === 'between') {

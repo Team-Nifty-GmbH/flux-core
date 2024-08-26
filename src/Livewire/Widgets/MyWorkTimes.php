@@ -110,7 +110,7 @@ class MyWorkTimes extends BarChart
     public function calculateChart(): void
     {
         $this->xaxis = null;
-        $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
+        $timeFrame = $this->timeFrame;
 
         $baseQuery = resolve_static(WorkTime::class, 'query')
             ->where('user_id', $this->userId)

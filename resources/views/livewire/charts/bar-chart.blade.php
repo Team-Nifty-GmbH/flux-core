@@ -26,15 +26,18 @@
 @endsection
 @if($showTotals)
     @section('chart')
-        @parent
-        <div class="md:flex gap-1.5 justify-between w-full border p-1.5 rounded h-20">
-            <template x-for="seriesData in livewireOptions.series">
-                <div class="flex flex-col gap-2 items-center font-semibold">
-                    <div x-text="seriesData.name"></div>
-                    <div x-html="window.formatters.badge(window.formatters.money(seriesData.sum), seriesData.colorName)">
+        <div class="px-6">
+            <div class="md:flex gap-1.5 justify-between w-full rounded h-20">
+                <template x-for="seriesData in livewireOptions.series">
+                    <div class="flex flex-col gap-2 items-center font-semibold">
+                        <div x-text="seriesData.name"></div>
+                        <div x-html="window.formatters.badge(window.formatters.money(seriesData.sum), seriesData.colorName)">
+                        </div>
                     </div>
-                </div>
-            </template>
+                </template>
+            </div>
+            <hr>
         </div>
+        @parent
     @endsection
 @endif

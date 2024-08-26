@@ -2,12 +2,14 @@
 
 namespace FluxErp\Livewire\Dashboard;
 
+use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -22,6 +24,12 @@ class Dashboard extends Component
 
     public array $availableWidgets = [];
 
+    public TimeFrameEnum $timeFrame = TimeFrameEnum::LastMonth;
+
+    public ?Carbon $start = null;
+
+    public ?Carbon $end = null;
+
     public function mount(): void
     {
         $this->availableWidgets = $this->filterWidgets(Widget::all());
@@ -30,7 +38,50 @@ class Dashboard extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.dashboard.dashboard');
+        return view('flux::livewire.dashboard.dashboard', [
+            'timeFrames' => array_map(function (TimeFrameEnum $timeFrame) {
+                return [
+                    'value' => $timeFrame->value,
+                    'label' => __($timeFrame->value),
+                ];
+            }, TimeFrameEnum::cases()),
+        ]);
+    }
+
+    public function updatedTimeFrame(): void
+    {
+        $this->skipRender();
+    }
+
+    public function updatedStart(): void
+    {
+        $this->start = $this->start->startOfDay();
+        if ($this->start->greaterThan($this->end)) {
+            $this->end = $this->start->copy()->addDays(30);
+        }
+
+        $this->dispatchStartEnd();
+
+        $this->skipRender();
+    }
+
+    public function updatedEnd(): void
+    {
+        $this->end = $this->end->endOfDay();
+        if ($this->start->greaterThan($this->end)) {
+            $this->start = $this->end->copy()->subDays(30);
+        }
+
+        $this->dispatchStartEnd();
+
+        $this->skipRender();
+    }
+
+    protected function dispatchStartEnd(): void
+    {
+        if ($this->timeFrame === TimeFrameEnum::Custom && $this->start && $this->end) {
+            $this->dispatch('time-frame-changed', $this->timeFrame, $this->start->toDateString(), $this->end->toDateString());
+        }
     }
 
     public function widgets(): void

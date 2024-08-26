@@ -9,6 +9,7 @@ use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
 class TotalProfit extends Component
@@ -17,7 +18,8 @@ class TotalProfit extends Component
 
     public float $sum = 0;
 
-    public string $timeFrame = TimeFrameEnum::LastMonth->name;
+    #[Modelable]
+    public TimeFrameEnum $timeFrame;
 
     public function mount(): void
     {
@@ -29,13 +31,6 @@ class TotalProfit extends Component
         return view('flux::livewire.widgets.total-profit',
             [
                 'currency' => Currency::default()?->toArray(),
-                'timeFrames' => array_map(function (TimeFrameEnum $timeFrame) {
-                    return [
-                        'value' => $timeFrame->name,
-                        'label' => __($timeFrame->value),
-                    ];
-                }, TimeFrameEnum::cases()),
-                'selectedTimeFrame' => $this->timeFrame,
             ]
         );
     }
@@ -53,7 +48,7 @@ class TotalProfit extends Component
     {
         $query = resolve_static(Order::class, 'query');
 
-        $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
+        $timeFrame = $this->timeFrame;
         $parameters = $timeFrame->dateQueryParameters('invoice_date');
 
         if ($parameters && count($parameters) > 0) {

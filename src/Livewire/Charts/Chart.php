@@ -55,27 +55,12 @@ abstract class Chart extends Component
 
     public ?array $yaxis = null;
 
-    public string $timeFrame = TimeFrameEnum::LastMonth->name;
-
-    public array $timeFrames;
-
-    public ?string $start = null;
-
-    public ?string $end = null;
-
     public array $chartTypes = [];
 
     abstract public function calculateChart(): void;
 
     public function mount(): void
     {
-        $this->timeFrames = array_map(function (TimeFrameEnum $timeFrame) {
-            return [
-                'value' => $timeFrame->name,
-                'label' => __($timeFrame->value),
-            ];
-        }, TimeFrameEnum::cases());
-
         $this->calculateChart();
     }
 
@@ -106,6 +91,10 @@ abstract class Chart extends Component
 
     public function updatedTimeFrame(): void
     {
+        if ($this->timeFrame === TimeFrameEnum::Custom && ! $this->start && ! $this->end) {
+            return;
+        }
+
         $this->calculateChart();
         $this->updateData();
         $this->skipRender();
@@ -144,7 +133,7 @@ abstract class Chart extends Component
     {
         $this->js(
             <<<'JS'
-                Alpine.$data($el.querySelector('[apex_chart]')).updateData();
+                Alpine.$data($el).updateData();
             JS
         );
     }

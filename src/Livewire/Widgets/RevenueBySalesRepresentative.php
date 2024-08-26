@@ -2,11 +2,11 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use Carbon\Carbon;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Charts\CircleChart;
 use FluxErp\Models\Order;
 use FluxErp\Traits\Widgetable;
+use Illuminate\Database\Eloquent\Builder;
 
 class RevenueBySalesRepresentative extends CircleChart
 {
@@ -37,17 +37,17 @@ class RevenueBySalesRepresentative extends CircleChart
 
     public function calculateChart(): void
     {
-        $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
+        $timeFrame = $this->timeFrame;
 
         $baseQuery = resolve_static(Order::class, 'query')
             ->whereNotNull('invoice_date')
             ->whereNotNull('invoice_number')
             ->whereNotNull('agent_id')
-            ->when($timeFrame === TimeFrameEnum::Custom && $this->start, function ($query) {
-                $query->where('invoice_date', '>=', Carbon::parse($this->start));
+            ->when($timeFrame === TimeFrameEnum::Custom && $this->start, function (Builder $query) {
+                $query->where('invoice_date', '>=', $this->start);
             })
-            ->when($timeFrame === TimeFrameEnum::Custom && $this->end, function ($query) {
-                $query->where('invoice_date', '<=', Carbon::parse($this->end));
+            ->when($timeFrame === TimeFrameEnum::Custom && $this->end, function (Builder $query) {
+                $query->where('invoice_date', '<=', $this->end);
             });
 
         if ($timeFrame !== TimeFrameEnum::Custom) {
@@ -64,7 +64,7 @@ class RevenueBySalesRepresentative extends CircleChart
 
         $revenueBySalesRepresentative = $baseQuery
             ->join('users', 'users.id', '=', 'agent_id')
-            ->whereHas('orderType', function ($query) {
+            ->whereHas('orderType', function (Builder $query) {
                 $query->whereNotIn('order_type_enum', ['purchase', 'purchase-refund']);
             })
             ->selectRaw('ROUND(SUM(total_net_price), 2) as total, agent_id, users.firstname, users.lastname')
