@@ -110,20 +110,19 @@ class MyWorkTimes extends BarChart
     public function calculateChart(): void
     {
         $this->xaxis = null;
-        $timeFrame = $this->timeFrame;
 
         $baseQuery = resolve_static(WorkTime::class, 'query')
             ->where('user_id', $this->userId)
             ->where('is_locked', true)
-            ->when($timeFrame === TimeFrameEnum::Custom && $this->start, function ($query) {
+            ->when($this->timeFrame === TimeFrameEnum::Custom && $this->start, function ($query) {
                 $query->where('started_at', '>=', Carbon::parse($this->start));
             })
-            ->when($timeFrame === TimeFrameEnum::Custom && $this->end, function ($query) {
+            ->when($this->timeFrame === TimeFrameEnum::Custom && $this->end, function ($query) {
                 $query->where('started_at', '<=', Carbon::parse($this->end)->endOfDay());
             });
 
-        if ($timeFrame !== TimeFrameEnum::Custom) {
-            $parameters = $timeFrame->dateQueryParameters('started_at');
+        if ($this->timeFrame !== TimeFrameEnum::Custom) {
+            $parameters = $this->timeFrame->dateQueryParameters('started_at');
 
             if ($parameters && count($parameters) > 0) {
                 if ($parameters['operator'] === 'between') {

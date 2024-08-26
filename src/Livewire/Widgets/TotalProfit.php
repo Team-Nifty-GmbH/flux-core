@@ -2,14 +2,12 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
-use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
 class TotalProfit extends Component
@@ -17,9 +15,6 @@ class TotalProfit extends Component
     use Widgetable;
 
     public float $sum = 0;
-
-    #[Modelable]
-    public TimeFrameEnum $timeFrame;
 
     public function mount(): void
     {
@@ -48,8 +43,7 @@ class TotalProfit extends Component
     {
         $query = resolve_static(Order::class, 'query');
 
-        $timeFrame = $this->timeFrame;
-        $parameters = $timeFrame->dateQueryParameters('invoice_date');
+        $parameters = $this->timeFrame->dateQueryParameters('invoice_date');
 
         if ($parameters && count($parameters) > 0) {
             if ($parameters['operator'] === 'between') {

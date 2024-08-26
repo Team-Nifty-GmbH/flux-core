@@ -37,21 +37,19 @@ class RevenueBySalesRepresentative extends CircleChart
 
     public function calculateChart(): void
     {
-        $timeFrame = $this->timeFrame;
-
         $baseQuery = resolve_static(Order::class, 'query')
             ->whereNotNull('invoice_date')
             ->whereNotNull('invoice_number')
             ->whereNotNull('agent_id')
-            ->when($timeFrame === TimeFrameEnum::Custom && $this->start, function (Builder $query) {
+            ->when($this->timeFrame === TimeFrameEnum::Custom && $this->start, function (Builder $query) {
                 $query->where('invoice_date', '>=', $this->start);
             })
-            ->when($timeFrame === TimeFrameEnum::Custom && $this->end, function (Builder $query) {
+            ->when($this->timeFrame === TimeFrameEnum::Custom && $this->end, function (Builder $query) {
                 $query->where('invoice_date', '<=', $this->end);
             });
 
-        if ($timeFrame !== TimeFrameEnum::Custom) {
-            $parameters = $timeFrame->dateQueryParameters('invoice_date');
+        if ($this->timeFrame !== TimeFrameEnum::Custom) {
+            $parameters = $this->timeFrame->dateQueryParameters('invoice_date');
 
             if ($parameters && count($parameters) > 0) {
                 if ($parameters['operator'] === 'between') {

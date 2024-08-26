@@ -16,8 +16,7 @@ class RevenuePurchasesProfitChart extends BarChart
             ->whereNotNull('invoice_date')
             ->whereNotNull('invoice_number');
 
-        $timeFrame = $this->timeFrame;
-        $parameters = $timeFrame->dateQueryParameters('invoice_date');
+        $parameters = $this->timeFrame->dateQueryParameters('invoice_date');
         if ($parameters && count($parameters) > 0) {
             if ($parameters['operator'] === 'between') {
                 $baseQuery->whereBetween($parameters['column'], $parameters['value']);
@@ -31,7 +30,7 @@ class RevenuePurchasesProfitChart extends BarChart
                 ->whereHas('orderType', function ($query) {
                     $query->whereNotIn('order_type_enum', ['purchase', 'purchase-refund']);
                 }),
-            $timeFrame,
+            $this->timeFrame,
             'invoice_date',
             'total_net_price'
         );
@@ -40,7 +39,7 @@ class RevenuePurchasesProfitChart extends BarChart
                 ->whereHas('orderType', function ($query) {
                     $query->whereIn('order_type_enum', ['purchase', 'purchase-refund']);
                 }),
-            $timeFrame,
+            $this->timeFrame,
             'invoice_date',
             'total_net_price'
         );
