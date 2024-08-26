@@ -14,6 +14,10 @@ class Role extends SpatieRole implements InteractsWithDataTables
 {
     use Filterable, HasPackageFactory, Notifiable, Searchable;
 
+    protected $guarded = [
+        'id',
+    ];
+
     protected $hidden = ['pivot'];
 
     public function users(): BelongsToMany
