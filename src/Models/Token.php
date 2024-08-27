@@ -14,10 +14,6 @@ class Token extends Authenticatable
 
     protected $guarded = [
         'id',
-        'created_at',
-        'created_by',
-        'updated_at',
-        'updated_by',
     ];
 
     public ?string $token = null;

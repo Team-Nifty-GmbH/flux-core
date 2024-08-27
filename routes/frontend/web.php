@@ -14,6 +14,7 @@ use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Auth\Logout;
 use FluxErp\Livewire\Auth\ResetPassword;
 use FluxErp\Livewire\Calendars\Calendar;
+use FluxErp\Livewire\Contact\CommunicationList;
 use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
@@ -110,8 +111,13 @@ Route::middleware('web')
             Route::middleware(TrackVisits::class)->group(function () {
                 Route::get('/mail', Mail::class)->name('mail');
                 Route::get('/calendars', Calendar::class)->name('calendars');
-                Route::get('/contacts', AddressList::class)->name('contacts');
-                Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
+
+                Route::name('contacts.')->prefix('contacts')
+                    ->group(function () {
+                        Route::get('/', AddressList::class)->name('contacts');
+                        Route::get('/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
+                        Route::get('/communications', CommunicationList::class)->name('communications');
+                    });
 
                 Route::name('orders.')->prefix('orders')
                     ->group(function () {

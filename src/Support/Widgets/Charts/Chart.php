@@ -3,6 +3,7 @@
 namespace FluxErp\Support\Widgets\Charts;
 
 use FluxErp\Enums\TimeFrameEnum;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
 abstract class Chart extends Component
@@ -69,6 +70,7 @@ abstract class Chart extends Component
         }
     }
 
+    #[Renderless]
     public function getOptions(): array
     {
         $public = [];
@@ -112,6 +114,7 @@ abstract class Chart extends Component
         $this->skipRender();
     }
 
+    #[Renderless]
     public function updateData(): void
     {
         $this->js(

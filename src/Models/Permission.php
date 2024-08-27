@@ -11,6 +11,10 @@ class Permission extends SpatiePermission
 {
     use Filterable, Searchable;
 
+    protected $guarded = [
+        'id',
+    ];
+
     protected $hidden = ['pivot'];
 
     public function users(): BelongsToMany

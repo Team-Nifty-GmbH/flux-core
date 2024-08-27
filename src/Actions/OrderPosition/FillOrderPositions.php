@@ -10,6 +10,7 @@ use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
 use FluxErp\Rulesets\OrderPosition\FillOrderPositionsRuleset;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
@@ -365,8 +366,7 @@ class FillOrderPositions extends FluxAction
 
     private function fillOrderPosition(array $data, bool $simulate, ?int $parentId = null): array
     {
-        $originalChildren = $data['children'] ?? [];
-        unset($data['children']);
+        $originalChildren = Arr::pull($data, 'children', []);
 
         if (is_int($data['id'] ?? false)) {
             $orderPosition = resolve_static(OrderPosition::class, 'query')
@@ -399,7 +399,18 @@ class FillOrderPositions extends FluxAction
 
         // If simulate = false, save order position, keep track of saved ids
         if (! $simulate) {
+            $discounts = $orderPosition->discounts;
+            unset($orderPosition->discounts);
             $orderPosition->save();
+
+            $existingDiscounts = $discounts->filter(fn ($discount) => $discount['id'] ?? false)->toArray();
+            $newDiscounts = $discounts->filter(fn ($discount) => ! ($discount['id'] ?? false))->toArray();
+
+            $orderPosition->discounts()->whereIntegerNotInRaw('id', array_column($existingDiscounts, 'id'))->delete();
+            $orderPosition->discounts()->createMany($newDiscounts);
+            foreach ($existingDiscounts as $discount) {
+                $orderPosition->discounts()->whereKey($discount['id'])->update($discount);
+            }
 
             $ids = [$orderPosition->id];
         }

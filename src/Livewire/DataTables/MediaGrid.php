@@ -36,7 +36,7 @@ class MediaGrid extends MediaList
         return $itemArray;
     }
 
-    public function deleteMedia(Media $media): void
+    public function deleteMedia(Media $media): bool
     {
         try {
             DeleteMedia::make($media->toArray())
@@ -46,9 +46,11 @@ class MediaGrid extends MediaList
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return;
+            return false;
         }
 
         $this->loadData();
+
+        return true;
     }
 }

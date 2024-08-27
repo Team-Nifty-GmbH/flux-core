@@ -48,7 +48,8 @@ class UpdateCommunicationRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
-            resolve_static(TagRuleset::class, 'getRules')
+            resolve_static(TagRuleset::class, 'getRules'),
+            resolve_static(CommunicatablesRuleset::class, 'getRules'),
         );
     }
 }

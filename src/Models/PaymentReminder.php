@@ -19,6 +19,10 @@ class PaymentReminder extends Model implements OffersPrinting
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity, Printable, SoftDeletes;
 
+    protected $guarded = [
+        'id',
+    ];
+
     protected static function booted(): void
     {
         static::creating(function (PaymentReminder $model) {

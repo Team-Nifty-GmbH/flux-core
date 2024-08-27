@@ -16,6 +16,10 @@ class CalendarEvent extends BaseCalendarEvent implements HasMedia
 {
     use BroadcastsEvents, HasUserModification, InteractsWithMedia, LogsActivity;
 
+    protected $guarded = [
+        'id',
+    ];
+
     public function calendar(): BelongsTo
     {
         return $this->belongsTo(Calendar::class);

@@ -44,6 +44,8 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
         'id',
     ];
 
+    protected string $detailRouteName = 'contacts.id?';
+
     public static string $iconName = 'users';
 
     protected static function booted(): void

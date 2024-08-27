@@ -6,6 +6,7 @@ use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Livewire\DataTables\MediaGrid as BaseMediaGrid;
 use FluxErp\Livewire\Forms\ProductForm;
+use FluxErp\Models\Media;
 use FluxErp\Models\Product;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Validation\ValidationException;
@@ -125,5 +126,33 @@ class MediaGrid extends BaseMediaGrid
         }
 
         $this->loadData();
+    }
+
+    public function deleteMedia(Media $media): bool
+    {
+        $delete = parent::deleteMedia($media);
+
+        if ($delete) {
+            if ($this->product->cover_media_id === $media->id) {
+                $this->product->cover_media_id = resolve_static(Media::class, 'query')
+                    ->where('model_id', $this->product->id)
+                    ->where('model_type', morph_alias(Product::class))
+                    ->where('collection_name', 'images')
+                    ->value('id');
+            }
+
+            try {
+                UpdateProduct::make([
+                    'id' => $this->product->id,
+                    'cover_media_id' => $this->product->cover_media_id,
+                ])
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+
+        return $delete;
     }
 }

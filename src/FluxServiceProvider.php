@@ -474,7 +474,17 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'orders.order-positions');
             }
         );
-        Menu::register(route: 'contacts', icon: 'identification');
+
+        Menu::group(
+            path: 'contacts',
+            icon: 'identification',
+            label: 'Contacts',
+            closure: function () {
+                Menu::register(route: 'contacts.contacts');
+                Menu::register(route: 'contacts.communications');
+            }
+        );
+
         Menu::register(route: 'tasks', icon: 'clipboard-document');
         Menu::register(route: 'tickets', icon: 'wrench-screwdriver');
         Menu::register(route: 'projects', icon: 'briefcase');

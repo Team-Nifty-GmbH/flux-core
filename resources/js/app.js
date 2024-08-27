@@ -54,6 +54,6 @@ window.$openDetailModal = (url, hideNavigation = true) => {
     let urlObj = new URL(url);
     urlObj.searchParams.set('no-navigation', hideNavigation === true ? 'true' : 'false');
 
-    document.getElementById('detail-modal-embed').src = urlObj.href;
+    document.getElementById('detail-modal-iframe').src = urlObj.href;
     $openModal('detail-modal');
 }
