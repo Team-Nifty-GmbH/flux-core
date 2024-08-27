@@ -12,7 +12,7 @@ use Livewire\Attributes\On;
 trait Widgetable
 {
     #[Modelable]
-    public TimeFrameEnum $timeFrame = TimeFrameEnum::LastMonth;
+    public TimeFrameEnum $timeFrame = TimeFrameEnum::ThisMonth;
 
     public ?Carbon $start = null;
 
@@ -25,8 +25,12 @@ trait Widgetable
         $this->start = Carbon::parse($start);
         $this->end = Carbon::parse($end);
 
-        if (method_exists($this, 'updatedTimeFrame')) {
-            $this->updatedTimeFrame();
+        if ($this->timeFrame === TimeFrameEnum::Custom && ($this->start === null || $this->end === null)) {
+            return;
+        }
+
+        if (method_exists($this, 'calculateSum')) {
+            $this->calculateSum();
         }
     }
 

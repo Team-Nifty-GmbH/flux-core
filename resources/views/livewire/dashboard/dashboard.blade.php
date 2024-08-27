@@ -29,8 +29,8 @@
                 </div>
             </div>
         </div>
-        <div class="flex gap-1.5">
-            <div x-cloak x-show="!editGrid" class="flex gap-1.5 items-center text-sm">
+        <div class="flex flex-col md:flex-row gap-1.5">
+            <div x-cloak x-show="!editGrid" class="flex flex-col md:flex-row gap-1.5 items-center text-sm">
                 <x-select
                     class="p-2"
                     :options="$timeFrames"
@@ -39,7 +39,7 @@
                     wire:model.live="timeFrame"
                     :clearable="false"
                 />
-                <div class="flex flex-col md:flex-row gap-1.5 items-center" x-cloak x-show="$wire.timeFrame === 'Custom'">
+                <div class="flex flex-col md:flex-row gap-1.5 items-center min-w-96" x-cloak x-show="$wire.timeFrame === 'Custom'">
                     <x-datetime-picker wire:model.live="start" :without-time="true"/>
                     <div>
                         <span class="px-1.5">{{ __('Till') }}</span>
@@ -63,8 +63,6 @@
                     />
                     <x-button
                         primary
-                        x-cloak
-                        x-show="openGridItems"
                         x-on:click="isLoading ? pendingMessage : save"
                         :label="__('Save')"
                         class="flex-shrink-0"

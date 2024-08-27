@@ -4,9 +4,10 @@ namespace FluxErp\Livewire\Widgets;
 
 use Carbon\Carbon;
 use FluxErp\Enums\TimeFrameEnum;
-use FluxErp\Livewire\Charts\BarChart;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
+use FluxErp\Support\Metrics\Charts\Bar;
+use FluxErp\Support\Widgets\Charts\BarChart;
 use FluxErp\Traits\Widgetable;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Locked;
@@ -15,7 +16,7 @@ class MyWorkTimes extends BarChart
 {
     use Widgetable;
 
-    public bool $showTotals = false;
+    public bool $showTotals = true;
 
     public ?array $plotOptions = [
         'bar' => [
@@ -48,7 +49,7 @@ class MyWorkTimes extends BarChart
     public function toolTipFormatter(): string
     {
         return <<<'JS'
-            let hours = val / 60000;
+            let hours = val / 3600000;
             return hours.toFixed(2) + 'h';
         JS;
     }
@@ -57,11 +58,11 @@ class MyWorkTimes extends BarChart
     public function dataLabelsFormatter(): string
     {
         return <<<'JS'
-            if (val > 60000) {
-                let hours = val / 60000;
+            if (val > 3600000) {
+                let hours = val / 3600000;
                 return hours.toFixed(2) + 'h';
             } else {
-                let minutes = val / 1000;
+                let minutes = val / 60000;
                 return minutes.toFixed(0) + 'm';
             }
         JS;
@@ -121,37 +122,44 @@ class MyWorkTimes extends BarChart
                 $query->where('started_at', '<=', Carbon::parse($this->end)->endOfDay());
             });
 
-        if ($this->timeFrame !== TimeFrameEnum::Custom) {
-            $parameters = $this->timeFrame->dateQueryParameters('started_at');
+        $workDays = Bar::make(
+            $baseQuery
+                ->clone()
+                ->where('is_daily_work_time', true)
+                ->where('is_pause', false)
+        )
+            ->dateColumn('started_at')
+            ->range($this->timeFrame)
+            ->setEndingDate($this->end)
+            ->setStartingDate($this->start)
+            ->sumByRange('total_time_ms');
 
-            if ($parameters && count($parameters) > 0) {
-                if ($parameters['operator'] === 'between') {
-                    $baseQuery->whereBetween($parameters['column'], $parameters['value']);
-                } else {
-                    $baseQuery->where(...array_values($parameters));
-                }
-            }
-        }
-
-        $workDays = $baseQuery
-            ->clone()
-            ->where('is_daily_work_time', true)
-            ->where('is_pause', false)
-            ->orderBy('started_at', 'desc')
-            ->get();
+        $pause = Bar::make(
+            $baseQuery
+                ->clone()
+                ->where('is_daily_work_time', true)
+                ->where('is_pause', true)
+        )
+            ->dateColumn('started_at')
+            ->range($this->timeFrame)
+            ->setEndingDate($this->end)
+            ->setStartingDate($this->start)
+            ->sumByRange('total_time_ms');
 
         $data = [
             'work_time' => [
                 'name' => __('Work Time'),
                 'group' => 'worktime',
-                'color' => 'emerald-600',
-                'data' => [],
+                'color' => 'indigo',
+                'data' => $workDays->getData(),
+                'growthRate' => $workDays->getGrowthRate(),
             ],
             'pause_time' => [
                 'name' => __('Paused Time'),
                 'group' => 'worktime',
-                'color' => 'amber-400',
-                'data' => [],
+                'color' => 'amber',
+                'data' => $pause->getData(),
+                'growthRate' => $pause->getGrowthRate(),
             ],
         ];
 
@@ -170,80 +178,33 @@ class MyWorkTimes extends BarChart
             'teal-400',
         ];
 
-        $activeWorkTimeTypeIds = [];
-        foreach ($workDays as $day) {
-            $pause = $baseQuery->clone()
-                ->where('is_daily_work_time', true)
-                ->where('is_pause', true)
-                ->where('parent_id', $day->id)
-                ->sum('total_time_ms');
-
-            $workTime = resolve_static(WorkTime::class, 'query')
-                ->whereKey($day->id)
-                ->first();
-
-            $data['work_time']['data'][] = ceil(($workTime->total_time_ms - $pause) / 60);
-            $data['pause_time']['data'][] = ceil($pause / 60);
-
-            $activeWorkTimeTypeIds = array_merge(
-                $activeWorkTimeTypeIds,
-                $baseQuery->clone()
+        foreach (WorkTimeType::query()->pluck('name', 'id') as $workTimeTypeID => $name) {
+            $typeData = Bar::make(
+                $baseQuery
+                    ->clone()
                     ->where('is_daily_work_time', false)
-                    ->where('parent_id', $day->id)
-                    ->distinct()
-                    ->pluck('work_time_type_id')
-                    ->toArray()
-            );
+                    ->where('work_time_type_id', $workTimeTypeID)
+            )
+                ->dateColumn('started_at')
+                ->range($this->timeFrame)
+                ->setEndingDate($this->end)
+                ->setStartingDate($this->start)
+                ->sumByRange('total_time_ms');
 
-            $this->xaxis['categories'][] = $day->started_at->format('Y-m-d')
-                . (auth()->id() === $day->user_id ? '' : '->' . $day->user->name);
-
-        }
-
-        $activeWorkTimeTypes = resolve_static(WorkTimeType::class, 'query')
-            ->whereIntegerInRaw('id', $activeWorkTimeTypeIds)
-            ->get();
-
-        foreach ($workDays as $day) {
-            foreach ($activeWorkTimeTypes as $activeWorkTimeType) {
-                $current = data_get($data, 'task_time_' . $activeWorkTimeType->id . '.data', []);
-                $taskTime = $baseQuery->clone()
-                    ->where('is_daily_work_time', false)
-                    ->where('work_time_type_id', $activeWorkTimeType->id)
-                    ->where('parent_id', $day->id)
-                    ->sum('total_time_ms');
-                $current[$day->id] = ceil($taskTime / 60);
-
-                $data['task_time_' . $activeWorkTimeType->id] = [
-                    'name' => $activeWorkTimeType->name ?? __('Unknown'),
+            if (array_sum($typeData->getData()) > 0) {
+                $data['task_time_' . $workTimeTypeID] = [
+                    'name' => $name ?? __('Unknown'),
                     'group' => 'tasktime',
-                    'color' => $colors[$activeWorkTimeType->id ?? 0],
-                    'data' => $current,
+                    'color' => array_shift($colors),
+                    'data' => $typeData->getData(),
+                    'growthRate' => $typeData->getGrowthRate(),
                 ];
             }
-
-            // add unknown task time
-            $current = data_get($data, 'task_time_0.data', []);
-            $taskTime = $baseQuery->clone()
-                ->where('is_daily_work_time', false)
-                ->whereNull('work_time_type_id')
-                ->where('parent_id', $day->id)
-                ->sum('total_time_ms');
-
-            $current[$day->id] = ceil($taskTime / 60);
-            $data['task_time_0'] = [
-                'name' => __('Unknown'),
-                'group' => 'tasktime',
-                'color' => $colors[0],
-                'data' => $current,
-            ];
         }
 
-        $data = array_map(function ($item) {
-            $item['data'] = array_values($item['data']);
-
-            return $item;
-        }, $data);
+        $this->xaxis = [
+            'categories' => array_unique(array_merge($workDays->getLabels(), $pause->getLabels())),
+        ];
 
         $this->series = array_values($data);
     }

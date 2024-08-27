@@ -24,7 +24,7 @@ class Dashboard extends Component
 
     public array $availableWidgets = [];
 
-    public TimeFrameEnum $timeFrame = TimeFrameEnum::LastMonth;
+    public TimeFrameEnum $timeFrame = TimeFrameEnum::ThisMonth;
 
     public ?Carbon $start = null;
 
@@ -134,7 +134,7 @@ class Dashboard extends Component
 
     protected function filterWidgets(array $widgets): array
     {
-        return array_filter(
+        $widgets = array_filter(
             $widgets,
             function (array $widget) {
                 $name = $widget['component_name'];
@@ -155,5 +155,9 @@ class Dashboard extends Component
                     && array_key_exists($name, Widget::all());
             }
         );
+
+        ksort($widgets);
+
+        return $widgets;
     }
 }

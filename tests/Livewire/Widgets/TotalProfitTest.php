@@ -2,7 +2,7 @@
 
 namespace FluxErp\Tests\Livewire\Widgets;
 
-use FluxErp\Livewire\Widgets\TotalProfit;
+use FluxErp\Livewire\Widgets\Revenue;
 use FluxErp\Models\Currency;
 use FluxErp\Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -23,7 +23,7 @@ class TotalProfitTest extends TestCase
 
     public function test_renders_successfully()
     {
-        Livewire::test(TotalProfit::class)
+        Livewire::test(Revenue::class)
             ->assertStatus(200);
     }
 }

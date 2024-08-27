@@ -38,22 +38,32 @@ export default function($wire) {
                     this.chart.updateOptions(this.options);
                 });
             });
-
-            if ($wire.__instance.originalEffects.js?.hasOwnProperty('toolTipFormatter')) {
-                this.defaultOptions.tooltip.y.formatter = new Function('val', $wire.__instance.originalEffects.js.toolTipFormatter);
-            }
-
-            if ($wire.__instance.originalEffects.js?.hasOwnProperty('yAxisFormatter')) {
-                this.defaultOptions.yaxis.labels.formatter = new Function('val', $wire.__instance.originalEffects.js.yAxisFormatter);
-            }
-
-            if ($wire.__instance.originalEffects.js?.hasOwnProperty('xAxisFormatter')) {
-                this.defaultOptions.xaxis.labels.formatter = new Function('val', $wire.__instance.originalEffects.js.xAxisFormatter);
-            }
-
+        },
+        get dataLabelsFormatter() {
             if ($wire.__instance.originalEffects.js?.hasOwnProperty('dataLabelsFormatter')) {
-                this.defaultOptions.dataLabels.formatter = new Function('val', 'opts', $wire.__instance.originalEffects.js.dataLabelsFormatter);
+                return new Function('val', 'opts', $wire.__instance.originalEffects.js.dataLabelsFormatter);
             }
+
+            return null;
+        },
+        get xAxisFormatter() {
+            if ($wire.__instance.originalEffects.js?.hasOwnProperty('xAxisFormatter')) {
+                return new Function('val', $wire.__instance.originalEffects.js.xAxisFormatter);
+            }
+        },
+        get yAxisFormatter() {
+            if ($wire.__instance.originalEffects.js?.hasOwnProperty('yAxisFormatter')) {
+                return new Function('val', $wire.__instance.originalEffects.js.yAxisFormatter);
+            }
+
+            return null;
+        },
+        get toolTipFormatter() {
+            if ($wire.__instance.originalEffects.js?.hasOwnProperty('toolTipFormatter')) {
+                return new Function('val', $wire.__instance.originalEffects.js.toolTipFormatter);
+            }
+
+            return null;
         },
         updateData() {
             $wire.getOptions().then((options) => {
@@ -142,28 +152,28 @@ export default function($wire) {
                     fontFamily: 'inherit',
                 },
                 dataLabels: {
-                    formatter: function(val) {
+                    formatter: this.dataLabelsFormatter ?? function(val) {
                         return val;
                     }
                 },
                 xaxis: {
                     labels: {
-                        formatter: function(val) {
+                        formatter: this.xAxisFormatter ?? function(val) {
                             return val;
                         }
                     }
                 },
                 yaxis: {
                     labels: {
-                        formatter: function(val) {
-                            return window.formatters.money(val);
+                        formatter: this.yAxisFormatter ?? function(val) {
+                            return val;
                         }
                     }
                 },
                 tooltip: {
                     y: {
-                        formatter: function(val) {
-                            return window.formatters.money(val);
+                        formatter: this.toolTipFormatter ?? function(val) {
+                            return val;
                         }
                     }
                 }

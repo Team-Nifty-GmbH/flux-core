@@ -1,10 +1,8 @@
 <?php
 
-namespace FluxErp\Livewire\Charts;
+namespace FluxErp\Support\Widgets\Charts;
 
 use FluxErp\Enums\TimeFrameEnum;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 abstract class Chart extends Component
@@ -112,21 +110,6 @@ abstract class Chart extends Component
         $this->calculateChart();
         $this->updateData();
         $this->skipRender();
-    }
-
-    public function getSum(
-        Builder $builder,
-        TimeFrameEnum $timeFrameEnum,
-        string $dateField,
-        string $aggregateField,
-        ?string $aggregateFunction = 'SUM'
-    ): array {
-        return $timeFrameEnum
-            ->groupQuery($builder, $dateField)
-            ->addSelect(DB::raw('ROUND(' . $aggregateFunction . '(' . $aggregateField . '), 2) as total'))
-            ->get()
-            ->pluck('total', 'group_key')
-            ->toArray();
     }
 
     public function updateData(): void
