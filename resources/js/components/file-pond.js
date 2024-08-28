@@ -47,7 +47,8 @@ export default function($wire, $ref, label) {
                 server:{
                     process: async (fieldName, file, metadata, load, error, progress, abort, transfer, options) => {
                         const onSuccess = async (tempFileId) => {
-                            if(await $wire.validateOnDemand(tempFileId)) {
+                            console.log(this.selectedCollection)
+                            if(await $wire.validateOnDemand(tempFileId,this.selectedCollection)) {
                                 this.tempFilesId.push(tempFileId);
                                 load(tempFileId);
                             } else {
@@ -67,13 +68,17 @@ export default function($wire, $ref, label) {
                 }
             });
         },
+        clearFilesOnLeave(){
+          if(this.pond !== null && this.tempFilesId.length > 0){
+              this.tempFilesId = [];
+              this.pond.removeFiles()
+          }
+        },
         async submitFiles(collectionName,successCallback){
             const response = await $wire.submitFiles(collectionName,this.tempFilesId);
             if(response && this.pond !== null){
                 this.tempFilesId = [];
                 this.pond.removeFiles()
-                // TODO: make it like side effect - this belongs to x-data - cannot pass as argument
-                // it loses referance to this keyword
                 await (successCallback.bind(this))();
             } else {
 

@@ -58,10 +58,22 @@ class FolderTree extends Component
         ];
     }
 
-    public function getRulesSingleFile($index): array
+    public function getRulesSingleFile(int $index,string $collectionName): array
     {
+
+        $baseCollection =  str_contains($collectionName,'.') ?  explode('.',$collectionName)[0] : $collectionName;
+
+        $modelTypeValidationRules = app($this->modelType)
+            ->query()
+            ->whereKey($this->modelId)
+            ->first()
+            ?->getMediaCollection($baseCollection)
+            ?->acceptsMimeTypes;
+
+
         return [
-            'files.'.$index => 'required|file|max:1024',
+            'files.'.$index => is_null($modelTypeValidationRules) ? 'required|file|max:1024' : 'required|file|max:1024|mimetypes:'
+                . implode(',',$modelTypeValidationRules),
         ];
     }
 
@@ -80,7 +92,7 @@ class FolderTree extends Component
     }
 
     #[Renderless]
-    public function validateOnDemand(string $fileId):bool
+    public function validateOnDemand(string $fileId,string $collectionName):bool
     {
 
         $index = array_search($fileId, array_map(function ($item) {
@@ -92,7 +104,7 @@ class FolderTree extends Component
         }
 
         try {
-            $this->validate($this->getRulesSingleFile($index));
+            $this->validate($this->getRulesSingleFile($index,$collectionName));
         } catch (ValidationException $e) {
             // Handle the validation exception
             exception_to_notifications($e, $this);
