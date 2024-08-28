@@ -19,9 +19,7 @@ class MessageSendingEventSubscriber
             return;
         }
 
-        if (! $communicationForm instanceof CommunicationForm
-            || ! $communicationForm->communicatable_type
-            || ! $communicationForm->communicatable_id
+        if (! $communicationForm instanceof CommunicationForm || ! $communicationForm->communicatables
         ) {
             return;
         }
@@ -54,13 +52,15 @@ class MessageSendingEventSubscriber
             ->whereKey($communicationForm->id)
             ->first();
 
-        $communicatable = morphed_model($communicationForm->communicatable_type)::query()
-            ->whereKey($communicationForm->communicatable_id)
-            ->first();
+        foreach ($communicationForm->communicatables as $communicatable) {
+            $communicatableModel = resolve_static(data_get($communicatable, 'communicatable_type'), 'query')
+                ->whereKey(data_get($communicatable, 'communicatable_type'))
+                ->first();
 
-        // if the given morph has a contact id always attach to the contact
-        if ($communicatable->contact_id) {
-            $communication->contacts()->syncWithoutDetaching($communicatable->contact_id);
+            // if the given morph has a contact id always attach to the contact
+            if ($communicatableModel->contact_id) {
+                $communication->contacts()->syncWithoutDetaching($communicatable->contact_id);
+            }
         }
 
         // add a tracking pixel
