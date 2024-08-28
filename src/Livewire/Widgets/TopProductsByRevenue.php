@@ -64,12 +64,12 @@ class TopProductsByRevenue extends ValueList
             ->keyBy('product_id');
 
         $this->items = $query->map(fn ($item) => [
-            'label' => $item->product->name,
-            'value' => Number::abbreviate(Rounding::round($item->total_net_price, 0))
+            'label' => $item->product?->name,
+            'value' => Number::abbreviate(Rounding::round($item->total_net_price ?? 0, 0))
                 . ' ' . Currency::default()->symbol,
             'growthRate' => GrowthRateTypeEnum::Percentage->getValue(
                 $previous->get($item->product_id)?->total_net_price ?? 0,
-                $item->total_net_price
+                $item->total_net_price ?? 0
             ),
         ])->toArray();
     }

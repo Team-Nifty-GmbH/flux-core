@@ -58,6 +58,16 @@ abstract class Chart extends Component
 
     abstract public function calculateChart(): void;
 
+    public static function getDefaultWidth(): int
+    {
+        return 2;
+    }
+
+    public static function getDefaultHeight(): int
+    {
+        return 2;
+    }
+
     public function mount(): void
     {
         $this->calculateChart();

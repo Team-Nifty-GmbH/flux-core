@@ -5,6 +5,7 @@ namespace FluxErp\Support\Metrics;
 use Carbon\CarbonImmutable;
 use FluxErp\Enums\GrowthRateTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Support\Calculation\Rounding;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
@@ -197,8 +198,8 @@ abstract class Metric
         ];
     }
 
-    protected function transformResult(int|float $data): float
+    protected function transformResult(int|float|null $data): float
     {
-        return round($data, 2);
+        return Rounding::round($data ?? 0);
     }
 }

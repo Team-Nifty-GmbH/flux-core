@@ -120,13 +120,14 @@ export default function ($wire) {
                 this.availableWidgets = await $wire.availableWidgets;
             }
             const id = uuidv4();
+            const selectedWidget = this.availableWidgets[key];
+
             const placeholder = this.grid.addWidget({
                 id,
-                h: 1,
-                w: 2
+                h: selectedWidget.defaultHeight,
+                w: selectedWidget.defaultWidth,
             });
-            placeholder.gridstackNode.order_column =
-                placeholder.gridstackNode.x;
+            placeholder.gridstackNode.order_column = placeholder.gridstackNode.x;
             placeholder.gridstackNode.order_row = placeholder.gridstackNode.y;
             placeholder.gridstackNode.component_name = key;
 
