@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Mail\MagicLoginLink;
+use FluxErp\Support\Collection\AddressCollection;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
@@ -15,6 +16,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\Lockable;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\MonitorsQueue;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\Scout\Searchable;
@@ -22,6 +24,7 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -36,6 +39,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\UnauthorizedException;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
@@ -44,9 +48,9 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens, HasCalendars, HasCart,
-        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid,
-        Lockable, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
+    use BroadcastsEvents, CausesActivity, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens,
+        HasCalendars, HasCart, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags,
+        HasUserModification, HasUuid, Lockable, LogsActivity, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'password',
@@ -59,6 +63,35 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     protected ?string $detailRouteName = 'contacts.id?';
 
     public static string $iconName = 'user';
+
+    public static function findAddressByEmail(string $email): ?Address
+    {
+        $address = null;
+        if ($email) {
+            $address = resolve_static(Address::class, 'query')
+                ->with('contact')
+                ->where('email', $email)
+                ->orWhere('email_primary', $email)
+                ->first();
+
+            if (! $address) {
+                $address = resolve_static(ContactOption::class, 'query')
+                    ->with(['contact', 'address'])
+                    ->where('value', $email)
+                    ->first()
+                    ?->address;
+            }
+
+            if (! $address) {
+                $address = resolve_static(Address::class, 'query')
+                    ->with('contact')
+                    ->where('url', 'like', '%' . Str::after($email, '@'))
+                    ->first();
+            }
+        }
+
+        return $address;
+    }
 
     protected static function booted(): void
     {
@@ -77,6 +110,8 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         });
 
         static::saved(function (Address $address) {
+            Cache::forget('morph_to:' . $address->getMorphClass() . ':' . $address->id);
+
             $contactUpdates = [];
             $addressesUpdates = [];
 
@@ -271,6 +306,11 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
     public function settings(): MorphMany
     {
         return $this->morphMany(Setting::class, 'model');
+    }
+
+    public function newCollection(array $models = []): Collection
+    {
+        return app(AddressCollection::class, ['items' => $models]);
     }
 
     /**

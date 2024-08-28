@@ -6,6 +6,7 @@ use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Livewire\Forms\PurchaseInvoiceForm;
 use FluxErp\Models\Client;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Media;
 use FluxErp\Models\OrderType;
@@ -75,12 +76,12 @@ class PurchaseInvoiceList extends BaseDataTable
         return response()->download($media->getPath(), $media->file_name);
     }
 
-    public function getLayout(): string
+    protected function getLayout(): string
     {
         return 'tall-datatables::layouts.grid';
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -90,7 +91,7 @@ class PurchaseInvoiceList extends BaseDataTable
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         $purchaseOrderTypes = array_filter(
             OrderTypeEnum::cases(),
@@ -111,7 +112,7 @@ class PurchaseInvoiceList extends BaseDataTable
         );
     }
 
-    public function getRowAttributes(): ComponentAttributeBag
+    protected function getRowAttributes(): ComponentAttributeBag
     {
         return new ComponentAttributeBag(
             [
@@ -150,6 +151,7 @@ class PurchaseInvoiceList extends BaseDataTable
             $this->purchaseInvoiceForm->fill($purchaseInvoice);
             $this->purchaseInvoiceForm->mediaUrl = $purchaseInvoice->getFirstMediaUrl('purchase_invoice')
                 ?: $purchaseInvoice->invoice->getUrl();
+            $this->purchaseInvoiceForm->findLastLedgerAccountId();
         }
 
         $this->js(<<<'JS'
@@ -201,5 +203,13 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->loadData();
 
         return true;
+    }
+
+    #[Renderless]
+    public function fillFromSelectedContact(Contact $contact): void
+    {
+        $this->purchaseInvoiceForm->payment_type_id ??= $contact->purchase_payment_type_id ?? $contact->payment_type_id;
+        $this->purchaseInvoiceForm->currency_id = $contact->currency_id ?? Currency::default()?->id;
+        $this->purchaseInvoiceForm->findLastLedgerAccountId();
     }
 }

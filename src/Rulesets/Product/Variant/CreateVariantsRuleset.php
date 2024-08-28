@@ -20,14 +20,14 @@ class CreateVariantsRuleset extends FluxRuleset
             'parent_id' => [
                 'required',
                 'integer',
-                new ModelExists(Product::class),
+                app(ModelExists::class, ['model' => Product::class]),
             ],
             'name' => 'string',
             'clients' => 'array',
             'clients.*' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'product_options' => 'required|array',
         ];

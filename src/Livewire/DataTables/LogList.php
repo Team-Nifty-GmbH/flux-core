@@ -70,7 +70,7 @@ class LogList extends BaseDataTable
         }
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make(label: __('Done'))
@@ -82,7 +82,7 @@ class LogList extends BaseDataTable
         ];
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make(label: __('Mark found as done'))

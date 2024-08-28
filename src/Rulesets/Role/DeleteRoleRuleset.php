@@ -18,7 +18,7 @@ class DeleteRoleRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Role::class),
+                app(ModelExists::class, ['model' => Role::class]),
             ],
         ];
     }

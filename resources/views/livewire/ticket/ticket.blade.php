@@ -186,7 +186,7 @@
                                         ),
                                         'method' => 'POST',
                                         'params' => [
-                                            'with' => $ticket['authenticatable_type'] === app(\FluxErp\Models\Address::class)->getMorphClass() ? 'contact.media' : 'media',
+                                            'with' => $ticket['authenticatable_type'] === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',
                                         ]
                                     ]"
                                 />

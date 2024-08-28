@@ -18,7 +18,7 @@ class DeleteTransactionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Transaction::class),
+                app(ModelExists::class, ['model' => Transaction::class]),
             ],
         ];
     }

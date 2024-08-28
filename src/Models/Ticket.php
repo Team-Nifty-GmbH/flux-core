@@ -15,6 +15,7 @@ use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
@@ -32,7 +33,7 @@ class Ticket extends Model implements HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
         HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
-        InteractsWithMedia, Searchable, SoftDeletes, Trackable;
+        InteractsWithMedia, LogsActivity, Searchable, SoftDeletes, Trackable;
 
     protected $guarded = [
         'id',

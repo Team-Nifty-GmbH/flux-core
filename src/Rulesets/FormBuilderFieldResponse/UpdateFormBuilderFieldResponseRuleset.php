@@ -16,7 +16,7 @@ class UpdateFormBuilderFieldResponseRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(FormBuilderFieldResponse::class),
+                app(ModelExists::class, ['model' => FormBuilderFieldResponse::class]),
             ],
             'response' => 'required|string',
         ];

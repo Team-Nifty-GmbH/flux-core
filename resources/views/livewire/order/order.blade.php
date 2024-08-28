@@ -1,10 +1,7 @@
 <div
     x-data="{
         init() {
-            var meta = document.createElement('meta');
-            meta.name = 'currency-code';
-            meta.content = $wire.order.currency.iso;
-            document.getElementsByTagName('head')[0].appendChild(meta);
+            document.body.dataset.currencyCode = $wire.order.currency.iso;
         },
         orderPositions: [],
         formatter: @js(resolve_static(\FluxErp\Models\Order::class, 'typeScriptAttributes')),
@@ -223,8 +220,10 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex gap-1.5">
-                        <x-heroicons x-cloak x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
-                        <x-heroicons x-cloak x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
+                        <div @canAction(\FluxErp\Actions\Order\ToggleLock::class) wire:click="toggleLock()" class="cursor-pointer" wire:flux-confirm.icon.warning="{{  __('Unlock Order') }}|{{ __('Unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}" @endCanAction>
+                            <x-heroicons x-cloak x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
+                            <x-heroicons x-cloak x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
+                        </div>
                         <div>
                             <div>
                                 <span class="opacity-40 transition-opacity hover:opacity-100" x-text="$wire.order.order_type.name">
@@ -528,6 +527,7 @@
                                     autocomplete="off"
                                     wire:model.live="order.price_list_id"
                                     x-bind:disabled="$wire.order.is_locked"
+                                    :disabled="$order->is_locked"
                                 />
                                 <x-select
                                     :label="__('Payment method')"
@@ -538,6 +538,7 @@
                                     autocomplete="off"
                                     wire:model.live="order.payment_type_id"
                                     x-bind:disabled="$wire.order.is_locked"
+                                    :disabled="$order->is_locked"
                                 />
                                 @if($contactBankConnections)
                                     <x-select
@@ -558,6 +559,7 @@
                                         autocomplete="off"
                                         wire:model="order.language_id"
                                         x-bind:disabled="$wire.order.is_locked"
+                                        :disabled="$order->is_locked"
                                     />
                                 @endif
                             </div>
@@ -565,29 +567,38 @@
                     @show
                     @section('state-card')
                         <x-card>
-                            <div class="space-y-3">
+                            <div class="flex flex-col gap-3">
                                 <x-state
                                     class="w-full"
                                     align="left"
                                     :label="__('Order state')"
-                                    wire:model.live="order.state"
+                                    wire:model="order.state"
                                     formatters="formatter.state"
                                     available="availableStates.state"
                                 />
                                 <x-state
                                     align="left"
                                     :label="__('Payment state')"
-                                    wire:model.live="order.payment_state"
+                                    wire:model="order.payment_state"
                                     formatters="formatter.payment_state"
                                     available="availableStates.payment_state"
                                 />
                                 <x-state
                                     align="left"
                                     :label="__('Delivery state')"
-                                    wire:model.live="order.delivery_state"
+                                    wire:model="order.delivery_state"
                                     formatters="formatter.delivery_state"
                                     available="availableStates.delivery_state"
                                 />
+                                @if($order->is_locked)
+                                    <x-button
+                                        primary
+                                        class="w-full"
+                                        icon="document-text"
+                                        wire:click="saveStates()"
+                                        :label="__('Save')"
+                                    />
+                                @endif
                             </div>
                         </x-card>
                     @show
@@ -635,85 +646,89 @@
                         </x-card>
                         <x-card>
                             <div class="text-sm">
-                                <div class="flex justify-between p-2.5">
-                                    <div>
-                                        {{ __('Margin') }}
+                                @section('content.right.summary')
+                                    @section('content.right.summary.profit')
+                                        <div class="flex justify-between p-2.5">
+                                            <div>
+                                                {{ __('Margin') }}
+                                            </div>
+                                            <div>
+                                                <span x-html="formatters.coloredMoney($wire.order.margin ?? 0)">
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between p-2.5">
+                                            <div>
+                                                {{ __('Gross Profit') }}
+                                            </div>
+                                            <div>
+                                                <span x-html="formatters.coloredMoney($wire.order.gross_profit ?? 0)">
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @show
+                                    <div x-cloak x-show="$wire.order.total_net_price !== ($wire.order.total_base_net_price ?? '0.0000000000')">
+                                        <div class="flex justify-between p-2.5">
+                                            <div>
+                                                {{ __('Sum net without discount') }}
+                                            </div>
+                                            <div>
+                                                <span x-html="formatters.coloredMoney($wire.order.total_base_net_price ?? 0)">
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between p-2.5">
+                                            <div>
+                                                {{ __('Discount') }}
+                                            </div>
+                                            <div>
+                                                <span x-html="formatters.coloredMoney(($wire.order.total_net_price - $wire.order.total_base_net_price) ?? 0)">
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span x-html="formatters.coloredMoney($wire.order.margin ?? 0)">
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between p-2.5">
-                                    <div>
-                                        {{ __('Gross Profit') }}
-                                    </div>
-                                    <div>
-                                        <span x-html="formatters.coloredMoney($wire.order.gross_profit ?? 0)">
-                                        </span>
-                                    </div>
-                                </div>
-                                <div x-cloak x-show="$wire.order.total_net_price !== ($wire.order.total_base_net_price ?? '0.0000000000')">
                                     <div class="flex justify-between p-2.5">
                                         <div>
-                                            {{ __('Sum net without discount') }}
+                                            {{ __('Sum net') }}
                                         </div>
                                         <div>
-                                            <span x-html="formatters.coloredMoney($wire.order.total_base_net_price ?? 0)">
+                                            <span x-html="formatters.coloredMoney($wire.order.total_net_price ?? 0)">
                                             </span>
                                         </div>
                                     </div>
-                                    <div class="flex justify-between p-2.5">
+                                    <hr />
+                                    <template x-for="vat in $wire.order.total_vats">
+                                        <div class="flex justify-between p-2.5">
+                                            <div>
+                                                <span>{{ __('Plus ') }}</span>
+                                                <span x-html="formatters.percentage(vat.vat_rate_percentage ?? 0)">
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span x-html="formatters.coloredMoney(vat.total_vat_price ?? 0)">
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5">
                                         <div>
-                                            {{ __('Discount') }}
+                                            {{ __('Total Gross') }}
                                         </div>
                                         <div>
-                                            <span x-html="formatters.coloredMoney(($wire.order.total_net_price - $wire.order.total_base_net_price) ?? 0)">
+                                            <span x-html="formatters.coloredMoney($wire.order.total_gross_price ?? 0)">
                                             </span>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="flex justify-between p-2.5">
-                                    <div>
-                                        {{ __('Sum net') }}
-                                    </div>
-                                    <div>
-                                        <span x-html="formatters.coloredMoney($wire.order.total_net_price ?? 0)">
-                                        </span>
-                                    </div>
-                                </div>
-                                <hr />
-                                <template x-for="vat in $wire.order.total_vats">
-                                    <div class="flex justify-between p-2.5">
+                                    <div class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5">
                                         <div>
-                                            <span>{{ __('Plus ') }}</span>
-                                            <span x-html="formatters.percentage(vat.vat_rate_percentage ?? 0)">
-                                            </span>
+                                            {{ __('Balance') }}
                                         </div>
                                         <div>
-                                            <span x-html="formatters.coloredMoney(vat.total_vat_price ?? 0)">
+                                            <span x-html="formatters.coloredMoney($wire.order.balance ?? 0)">
                                             </span>
                                         </div>
                                     </div>
-                                </template>
-                                <div class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5">
-                                    <div>
-                                        {{ __('Total Gross') }}
-                                    </div>
-                                    <div>
-                                        <span x-html="formatters.coloredMoney($wire.order.total_gross_price ?? 0)">
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5">
-                                    <div>
-                                        {{ __('Balance') }}
-                                    </div>
-                                    <div>
-                                        <span x-html="formatters.coloredMoney($wire.order.balance ?? 0)">
-                                        </span>
-                                    </div>
-                                </div>
+                                @show
                             </div>
                         </x-card>
                         <x-card>
@@ -738,12 +753,12 @@
                             <div class="flex gap-0.5">
                                 <div class="">{{ __('Created At') }}:</div>
                                 <div x-text="window.formatters.datetime($wire.order.created_at)"></div>
-                                <div x-text="$wire.order.created_by?.name || '{{ __('Unknown') }}'"></div>
+                                <div x-text="$wire.order.created_by || '{{ __('Unknown') }}'"></div>
                             </div>
                             <div class="flex gap-0.5">
                                 <div class="">{{ __('Updated At') }}:</div>
                                 <div x-text="window.formatters.datetime($wire.order.updated_at)"></div>
-                                <div x-text="$wire.order.updated_by?.name || '{{ __('Unknown') }}'"></div>
+                                <div x-text="$wire.order.updated_by || '{{ __('Unknown') }}'"></div>
                             </div>
                         </div>
                     </x-card>

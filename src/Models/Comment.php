@@ -6,6 +6,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -18,7 +19,8 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Comment extends Model implements HasMedia
 {
-    use BroadcastsEvents, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, SoftDeletes;
+    use BroadcastsEvents, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+        SoftDeletes;
 
     protected $appends = [
         'user',
@@ -49,10 +51,17 @@ class Comment extends Model implements HasMedia
 
     public function user(): Attribute
     {
-        $user = $this->created_by?->only('id', 'name', 'email', 'user_code');
-        $user['avatar_url'] = $this->created_by?->getAvatarUrl();
+        $user = $this->getCreatedBy();
 
-        return Attribute::get(fn () => $user);
+        $userData = null;
+        if ($user) {
+            $userData = $user->only('id', 'name', 'email', 'user_code');
+            $userData['avatar_url'] = method_exists($user, 'getAvatarUrl')
+                ? $user->getAvatarUrl()
+                : null;
+        }
+
+        return Attribute::get(fn () => $userData);
     }
 
     public static function restoring($callback): void

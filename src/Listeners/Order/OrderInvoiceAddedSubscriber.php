@@ -13,7 +13,7 @@ class OrderInvoiceAddedSubscriber
     public function handle(MediaHasBeenAddedEvent $event): void
     {
         if ($event->media->collection_name !== 'invoice'
-            || $event->media->model_type !== app(Order::class)->getMorphClass()
+            || $event->media->model_type !== morph_alias(Order::class)
         ) {
             return;
         }

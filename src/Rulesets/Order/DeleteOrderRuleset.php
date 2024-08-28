@@ -18,7 +18,7 @@ class DeleteOrderRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
         ];
     }

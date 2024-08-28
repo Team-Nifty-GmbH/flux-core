@@ -26,6 +26,8 @@
 @endsection
 @section('content.right')
     @parent
+    @section('content.right.summary.profit')
+    @endsection
     @section('content.right.order_dates')
         <x-input wire:model="order.invoice_number" :label="__('Invoice number')" :disabled="$order->is_locked" class="w-full"/>
         <x-datetime-picker wire:model="order.invoice_date" :clearable="false" :without-time="true" :disabled="$order->is_locked" :label="__('Invoice Date')" />
@@ -35,13 +37,12 @@
         <x-input wire:model="order.commission" :disabled="$order->is_locked" :label="__('Commission')" />
     @endsection
     @section('content.right.invoice_preview')
-        @if($order->invoice)
-            <x-card class="space-y-3">
-                <div>
-                    <embed class="object-contain" width="100%" height="400px" type="{{  $order->invoice['mime_type'] ?? null }}" src="{{ $order->invoice['url'] ?? null }}">
-                </div>
-                <x-button primary :label="__('View')" x-on:click="$openDetailModal($wire.order.invoice.url)" />
-            </x-card>
-        @endif
+        <x-card class="space-y-3">
+            <div>
+                <iframe class="object-contain" width="100%" height="400px" type="{{  $order->invoice['mime_type'] ?? null }}" src="{{ $order->invoice['url'] ?? null }}">
+                </iframe>
+            </div>
+            <x-button primary :label="__('View')" x-on:click="$openDetailModal($wire.order.invoice.url)" />
+        </x-card>
     @show
 @endsection

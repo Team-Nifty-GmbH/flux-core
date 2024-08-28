@@ -90,7 +90,7 @@ class WorkTimeList extends BaseDataTable
         ];
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -258,7 +258,7 @@ class WorkTimeList extends BaseDataTable
         $this->loadData();
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()
@@ -279,7 +279,7 @@ class WorkTimeList extends BaseDataTable
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         return array_merge(
             parent::getViewData(),

@@ -2,9 +2,11 @@
 
 namespace FluxErp\Rulesets\ProductProperty;
 
+use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class UpdateProductPropertyRuleset extends FluxRuleset
 {
@@ -16,9 +18,15 @@ class UpdateProductPropertyRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(ProductProperty::class),
+                app(ModelExists::class, ['model' => ProductProperty::class]),
             ],
-            'name' => 'required|string',
+            'name' => 'sometimes|required|string',
+            'property_type_enum' => [
+                'sometimes',
+                'required',
+                'string',
+                Rule::enum(PropertyTypeEnum::class),
+            ],
         ];
     }
 }

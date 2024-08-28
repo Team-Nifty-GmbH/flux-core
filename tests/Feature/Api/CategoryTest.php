@@ -30,14 +30,14 @@ class CategoryTest extends BaseSetup
     {
         parent::setUp();
 
-        $this->categories[] = Category::factory()->create(['model_type' => app(Task::class)->getMorphClass()]);
+        $this->categories[] = Category::factory()->create(['model_type' => morph_alias(Task::class)]);
         $this->categories[] = Category::factory()->create([
             'parent_id' => $this->categories[0]->id,
-            'model_type' => app(Task::class)->getMorphClass(),
+            'model_type' => morph_alias(Task::class),
         ]);
 
         $this->additionalColumns = AdditionalColumn::query()
-            ->where('model_type', app(Category::class)->getMorphClass())
+            ->where('model_type', morph_alias(Category::class))
             ->get();
 
         $this->permissions = [
@@ -106,7 +106,7 @@ class CategoryTest extends BaseSetup
     {
         $category = [
             'name' => 'Random Category Name',
-            'model_type' => app(Task::class)->getMorphClass(),
+            'model_type' => morph_alias(Task::class),
         ];
 
         foreach ($this->additionalColumns as $additionalColumn) {
@@ -136,7 +136,7 @@ class CategoryTest extends BaseSetup
         $category = [
             'parent_id' => $this->categories[0]->id,
             'name' => 'Random Category Name',
-            'model_type' => app(Task::class)->getMorphClass(),
+            'model_type' => morph_alias(Task::class),
         ];
 
         foreach ($this->additionalColumns as $additionalColumn) {
@@ -164,13 +164,13 @@ class CategoryTest extends BaseSetup
     public function test_create_category_with_additional_column()
     {
         $additionalColumn = AdditionalColumn::factory()->create([
-            'model_type' => app(Category::class)->getMorphClass(),
+            'model_type' => morph_alias(Category::class),
         ]);
 
         $category = [
             'name' => 'Random Category Name',
             $additionalColumn->name => 'Testvalue for this column',
-            'model_type' => app(Task::class)->getMorphClass(),
+            'model_type' => morph_alias(Task::class),
         ];
 
         foreach ($this->additionalColumns as $column) {
@@ -202,14 +202,14 @@ class CategoryTest extends BaseSetup
     public function test_create_category_with_additional_column_predefined_values()
     {
         $additionalColumn = AdditionalColumn::factory()->create([
-            'model_type' => app(Category::class)->getMorphClass(),
+            'model_type' => morph_alias(Category::class),
             'values' => [0, 1, 2, 3, 4, 5],
         ]);
 
         $category = [
             'name' => 'Random Category Name',
             $additionalColumn->name => $additionalColumn->values[3],
-            'model_type' => app(Task::class)->getMorphClass(),
+            'model_type' => morph_alias(Task::class),
         ];
 
         foreach ($this->additionalColumns as $column) {
@@ -259,7 +259,7 @@ class CategoryTest extends BaseSetup
     public function test_create_category_additional_column_validation_fails()
     {
         $additionalColumn = AdditionalColumn::factory()->create([
-            'model_type' => app(Category::class)->getMorphClass(),
+            'model_type' => morph_alias(Category::class),
             'values' => [0, 1, 2, 3, 4, 5],
         ]);
 
@@ -314,7 +314,7 @@ class CategoryTest extends BaseSetup
         $category = [
             'parent_id' => ++$this->categories[1]->id,
             'name' => 'Random Category Name',
-            'model_type' => app(Task::class)->getMorphClass(),
+            'model_type' => morph_alias(Task::class),
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -359,7 +359,7 @@ class CategoryTest extends BaseSetup
     public function test_update_category_with_additional_column()
     {
         $additionalColumn = AdditionalColumn::factory()->create([
-            'model_type' => app(Category::class)->getMorphClass(),
+            'model_type' => morph_alias(Category::class),
         ]);
 
         $this->categories[1]->saveMeta($additionalColumn->name, 'Original Value');

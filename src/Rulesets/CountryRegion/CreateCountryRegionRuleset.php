@@ -18,7 +18,7 @@ class CreateCountryRegionRuleset extends FluxRuleset
             'country_id' => [
                 'required',
                 'integer',
-                new ModelExists(Country::class),
+                app(ModelExists::class, ['model' => Country::class]),
             ],
             'name' => 'required|string',
         ];

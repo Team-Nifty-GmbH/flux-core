@@ -312,7 +312,7 @@ class Addresses extends Component
         try {
             $tag = CreateTag::make([
                 'name' => $name,
-                'type' => app(Address::class)->getMorphClass(),
+                'type' => morph_alias(Address::class),
             ])
                 ->checkPermission()
                 ->validate()

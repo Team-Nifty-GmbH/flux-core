@@ -26,7 +26,7 @@ class EventSubscriptionTest extends BaseSetup
         parent::setUp();
 
         $this->comments = Comment::factory()->count(3)->create([
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'model_id' => $this->user->id,
             'comment' => 'User Comment from a Test!',
         ]);
@@ -35,7 +35,7 @@ class EventSubscriptionTest extends BaseSetup
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => app(Comment::class)->getMorphClass(),
+            'model_type' => morph_alias(Comment::class),
             'model_id' => $this->comments[0]->id,
         ]);
 
@@ -90,7 +90,7 @@ class EventSubscriptionTest extends BaseSetup
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => app(Comment::class)->getMorphClass(),
+            'model_type' => morph_alias(Comment::class),
             'model_id' => $this->comments[2]->id,
             'is_broadcast' => true,
             'is_notifiable' => false,
@@ -122,7 +122,7 @@ class EventSubscriptionTest extends BaseSetup
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => app(Comment::class)->getMorphClass(),
+            'model_type' => morph_alias(Comment::class),
             'model_id' => $this->comments[0]->id,
         ];
 
@@ -139,7 +139,7 @@ class EventSubscriptionTest extends BaseSetup
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
             'event' => 'InvalidEvent',
-            'model_type' => app(Comment::class)->getMorphClass(),
+            'model_type' => morph_alias(Comment::class),
             'model_id' => null,
             'is_broadcast' => true,
             'is_notifiable' => false,
@@ -177,7 +177,7 @@ class EventSubscriptionTest extends BaseSetup
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => app(Comment::class)->getMorphClass(),
+            'model_type' => morph_alias(Comment::class),
             'model_id' => ++$this->comments[2]->id,
             'is_broadcast' => true,
             'is_notifiable' => false,
@@ -196,7 +196,7 @@ class EventSubscriptionTest extends BaseSetup
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
             'event' => 'eloquent.created: FluxErp\Models\Comment',
-            'model_type' => app(Comment::class)->getMorphClass(),
+            'model_type' => morph_alias(Comment::class),
             'model_id' => $this->comments[0]->id,
             'is_broadcast' => true,
             'is_notifiable' => false,
@@ -219,7 +219,7 @@ class EventSubscriptionTest extends BaseSetup
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
             'event' => 'eloquent.deleted: FluxErp\Models\Comment',
-            'model_type' => app(Comment::class)->getMorphClass(),
+            'model_type' => morph_alias(Comment::class),
             'model_id' => $this->comments[1]->id,
             'is_broadcast' => true,
             'is_notifiable' => false,
@@ -252,7 +252,7 @@ class EventSubscriptionTest extends BaseSetup
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
             'event' => class_basename('eloquent.created: FluxErp\Models\Comment'),
-            'model_type' => app(Comment::class)->getMorphClass(),
+            'model_type' => morph_alias(Comment::class),
             'model_id' => $this->comments[1]->id,
             'is_broadcast' => true,
             'is_notifiable' => false,
@@ -272,7 +272,7 @@ class EventSubscriptionTest extends BaseSetup
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
             'event' => class_basename('eloquent.created: FluxErp\Models\Comment'),
-            'model_type' => app(Comment::class)->getMorphClass(),
+            'model_type' => morph_alias(Comment::class),
             'model_id' => $this->comments[1]->id,
             'is_broadcast' => true,
             'is_notifiable' => false,

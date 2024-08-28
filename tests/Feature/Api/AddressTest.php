@@ -229,8 +229,8 @@ class AddressTest extends BaseSetup
         $this->assertNull($dbAddress->department);
         $this->assertFalse($dbAddress->is_main_address);
         $this->assertTrue($dbAddress->is_active);
-        $this->assertEquals($this->user->id, $dbAddress->created_by->id);
-        $this->assertEquals($this->user->id, $dbAddress->updated_by->id);
+        $this->assertTrue($this->user->is($dbAddress->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbAddress->getUpdatedBy()));
     }
 
     public function test_create_address_maximum()
@@ -292,8 +292,8 @@ class AddressTest extends BaseSetup
         $this->assertEquals($address['department'], $dbAddress->department);
         $this->assertEquals($address['is_main_address'], $dbAddress->is_main_address);
         $this->assertEquals($address['is_active'], $dbAddress->is_active);
-        $this->assertEquals($this->user->id, $dbAddress->created_by->id);
-        $this->assertEquals($this->user->id, $dbAddress->updated_by->id);
+        $this->assertTrue($this->user->is($dbAddress->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbAddress->getUpdatedBy()));
     }
 
     public function test_create_address_validation_fails()
@@ -332,7 +332,7 @@ class AddressTest extends BaseSetup
         $this->assertNotEmpty($dbAddress);
         $this->assertEquals($address['id'], $dbAddress->id);
         $this->assertEquals($address['firstname'], $dbAddress->firstname);
-        $this->assertEquals($this->user->id, $dbAddress->updated_by->id);
+        $this->assertTrue($this->user->is($dbAddress->getUpdatedBy()));
     }
 
     public function test_update_address_maximum()
@@ -394,7 +394,7 @@ class AddressTest extends BaseSetup
         $this->assertEquals($address['department'], $dbAddress->department);
         $this->assertEquals($address['is_main_address'], $dbAddress->is_main_address);
         $this->assertEquals($address['is_active'], $dbAddress->is_active);
-        $this->assertEquals($this->user->id, $dbAddress->updated_by->id);
+        $this->assertTrue($this->user->is($dbAddress->getUpdatedBy()));
     }
 
     public function test_update_address_multi_status_validation_fails()
@@ -473,7 +473,7 @@ class AddressTest extends BaseSetup
 
         $address = $this->addresses[2]->fresh();
         $this->assertNotNull($address->deleted_at);
-        $this->assertEquals($this->user->id, $address->deleted_by->id);
+        $this->assertTrue($this->user->is($address->getDeletedBy()));
     }
 
     public function test_delete_address_address_not_found()

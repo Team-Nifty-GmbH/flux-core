@@ -20,17 +20,17 @@ class UpdateBankConnectionRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(BankConnection::class),
+                app(ModelExists::class, ['model' => BankConnection::class]),
             ],
             'currency_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Currency::class),
+                app(ModelExists::class, ['model' => Currency::class]),
             ],
             'ledger_account_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(LedgerAccount::class),
+                app(ModelExists::class, ['model' => LedgerAccount::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'credit_limit' => 'nullable|numeric|min:0',

@@ -1,8 +1,8 @@
-<x-card class="!py-0 !px-0">
-    <x-slot:title>
-        <div>{{ __('My Tasks') }}</div>
-    </x-slot:title>
-    <div class="w-full max-h-96 overflow-auto" x-data="{formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes'))}">
+<div class="!py-0 !px-0 max-h-full flex flex-col">
+    <div class="border-b pb-2 pt-2 pl-2 border-gray-200">
+        <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">{{ __('My Tasks') }}</h2>
+    </div>
+    <div class="flex-1 overflow-auto" x-data="{formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes'))}">
         @foreach($tasks as $task)
             <x-list-item :item="$task">
                 <x-slot:avatar>
@@ -54,4 +54,4 @@
             </x-list-item>
         @endforeach
     </div>
-</x-card>
+</div>

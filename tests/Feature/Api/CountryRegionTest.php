@@ -126,8 +126,8 @@ class CountryRegionTest extends BaseSetup
         $this->assertNotEmpty($dbCountryRegion);
         $this->assertEquals($countryRegion['country_id'], $dbCountryRegion->country_id);
         $this->assertEquals($countryRegion['name'], $dbCountryRegion->name);
-        $this->assertEquals($this->user->id, $dbCountryRegion->created_by->id);
-        $this->assertEquals($this->user->id, $dbCountryRegion->updated_by->id);
+        $this->assertTrue($this->user->is($dbCountryRegion->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbCountryRegion->getUpdatedBy()));
     }
 
     public function test_create_country_region_validation_fails()
@@ -165,7 +165,7 @@ class CountryRegionTest extends BaseSetup
         $this->assertNotEmpty($dbCountryRegion);
         $this->assertEquals($countryRegion['id'], $dbCountryRegion->id);
         $this->assertEquals($countryRegion['name'], $dbCountryRegion->name);
-        $this->assertEquals($this->user->id, $dbCountryRegion->updated_by->id);
+        $this->assertTrue($this->user->is($dbCountryRegion->getUpdatedBy()));
     }
 
     public function test_update_country_region_maximum()
@@ -191,7 +191,7 @@ class CountryRegionTest extends BaseSetup
         $this->assertEquals($countryRegion['id'], $dbCountryRegion->id);
         $this->assertEquals($countryRegion['country_id'], $dbCountryRegion->country_id);
         $this->assertEquals($countryRegion['name'], $dbCountryRegion->name);
-        $this->assertEquals($this->user->id, $dbCountryRegion->updated_by->id);
+        $this->assertTrue($this->user->is($dbCountryRegion->getUpdatedBy()));
     }
 
     public function test_update_country_region_validation_fails()
@@ -218,7 +218,7 @@ class CountryRegionTest extends BaseSetup
 
         $countryRegion = $this->countryRegions[1]->fresh();
         $this->assertNotNull($countryRegion->deleted_at);
-        $this->assertEquals($this->user->id, $countryRegion->deleted_by->id);
+        $this->assertTrue($this->user->is($countryRegion->getDeletedBy()));
     }
 
     public function test_delete_country_region_country_region_not_found()

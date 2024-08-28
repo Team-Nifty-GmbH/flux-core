@@ -9,6 +9,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Printable;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
@@ -25,8 +26,8 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Communication extends Model implements HasMedia, OffersPrinting
 {
-    use BroadcastsEvents, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Printable,
-        Searchable, SoftDeletes;
+    use BroadcastsEvents, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+        Printable, Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -37,6 +38,14 @@ class Communication extends Model implements HasMedia, OffersPrinting
         static::saving(function (Communication $message) {
             if ($message->isDirty('text_body')) {
                 $message->text_body = strip_tags($message->text_body ?? '');
+            }
+
+            if ($message->isDirty('html_body') && $message->isClean('text_body') && ! trim($message->text_body)) {
+                $message->text_body = strip_tags($message->html_body ?? '');
+            }
+
+            if (! $message->date) {
+                $message->date = now();
             }
         });
     }

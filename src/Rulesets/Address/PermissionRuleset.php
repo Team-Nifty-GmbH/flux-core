@@ -15,7 +15,7 @@ class PermissionRuleset extends FluxRuleset
             'permissions.*' => [
                 'required',
                 'integer',
-                (new ModelExists(Permission::class))->where('guard_name', 'address'),
+                app(ModelExists::class, ['model' => Permission::class])->where('guard_name', 'address'),
             ],
         ];
     }

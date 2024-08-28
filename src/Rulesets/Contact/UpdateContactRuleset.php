@@ -23,50 +23,50 @@ class UpdateContactRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'client_id' => [
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'agent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'currency_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Currency::class),
+                app(ModelExists::class, ['model' => Currency::class]),
             ],
             'payment_type_id' => [
                 'integer',
                 'nullable',
-                (new ModelExists(PaymentType::class))
+                app(ModelExists::class, ['model' => PaymentType::class])
                     ->where('is_active', true)
                     ->where('is_sales', true),
             ],
             'purchase_payment_type_id' => [
                 'integer',
                 'nullable',
-                (new ModelExists(PaymentType::class))
+                app(ModelExists::class, ['model' => PaymentType::class])
                     ->where('is_active', true)
                     ->where('is_purchase', true),
             ],
             'price_list_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(PriceList::class),
+                app(ModelExists::class, ['model' => PriceList::class]),
             ],
             'expense_ledger_account_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(LedgerAccount::class),
+                app(ModelExists::class, ['model' => LedgerAccount::class]),
             ],
             'vat_rate_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(VatRate::class),
+                app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'customer_number' => 'sometimes|string',
             'creditor_number' => 'string|nullable',

@@ -15,7 +15,7 @@ class OrderRuleset extends FluxRuleset
             'orders.*.order_id' => [
                 'required',
                 'integer',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'orders.*.amount' => 'required|numeric|not_in:0',
         ];

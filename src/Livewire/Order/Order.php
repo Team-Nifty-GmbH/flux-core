@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Order;
 
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\ReplicateOrder;
+use FluxErp\Actions\Order\ToggleLock;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Contracts\OffersPrinting;
@@ -141,7 +142,7 @@ class Order extends OrderPositionList
         ]);
     }
 
-    public function getRowAttributes(): DataTableRowAttributes
+    protected function getRowAttributes(): DataTableRowAttributes
     {
         return DataTableRowAttributes::make()
             ->bind(
@@ -155,7 +156,7 @@ class Order extends OrderPositionList
             );
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()
@@ -239,28 +240,28 @@ class Order extends OrderPositionList
         );
     }
 
-    public function getLeftAppends(): array
+    protected function getLeftAppends(): array
     {
         return [
             'name' => 'indentation',
         ];
     }
 
-    public function getRightAppends(): array
+    protected function getRightAppends(): array
     {
         return [
             'name' => 'alternative_tag',
         ];
     }
 
-    public function getTopAppends(): array
+    protected function getTopAppends(): array
     {
         return [
             'name' => 'product_number',
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         return array_merge(
             parent::getViewData(),
@@ -383,12 +384,31 @@ class Order extends OrderPositionList
             ->toArray();
     }
 
+    public function toggleLock(): void
+    {
+        try {
+            ToggleLock::make(['id' => $this->order->id])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->fetchOrder($this->order->id);
+        $this->forceRender();
+    }
+
     #[Renderless]
     public function save(): bool
     {
         $this->order->address_delivery = $this->order->address_delivery ?: [];
         try {
             $action = UpdateOrder::make($this->order->toArray())->checkPermission()->validate();
+
+            $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -508,9 +528,23 @@ class Order extends OrderPositionList
     }
 
     #[Renderless]
-    public function updatedOrderState(): void
+    public function saveStates(): void
     {
-        $this->getAvailableStates('state');
+        try {
+            UpdateOrder::make([
+                'id' => $this->order->id,
+                'state' => $this->order->state,
+                'payment_state' => $this->order->payment_state,
+                'delivery_state' => $this->order->delivery_state,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     #[Renderless]

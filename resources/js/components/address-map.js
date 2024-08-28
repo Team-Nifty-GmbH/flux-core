@@ -2,6 +2,7 @@ import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import 'leaflet.markercluster';
 
 // remove default icon - take what vite generated
 delete L.Icon.Default.prototype._getIconUrl;
@@ -12,56 +13,160 @@ L.Icon.Default.mergeOptions({
     shadowUrl: markerShadow
 });
 
-export default function ($wire) {
+export default function ($wire, propertyName, autoload = true, userIcon = null, zoom = 13) {
     return {
+        zoom: zoom,
         init() {
             // init map
             this.map = L.map('map');
+            this.markers = L.markerClusterGroup();
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }).addTo(this.map);
 
-            this.lat = $wire.address.latitude !== null ? parseFloat($wire.address.latitude) : null;
-            this.long = $wire.address.longitude !== null ? parseFloat($wire.address.longitude) : null;
-
-            if (this.lat !== null && this.long !== null) {
-                // x-show - racing condition with leaflet
-                // Dom is not ready yet - hence next event loop run
+            // ensure that the property is wrapped in an object
+            if (autoload) {
                 this.$nextTick(() => {
-                    // create view
-                    this.map.setView([this.lat, this.long], 13);
-                    // set marker
-                    this.marker = L.marker([this.lat, this.long]).addTo(this.map);
+                    this.addMarkers();
                 });
             }
-            // side-effect -> update map on address change
-            this.$watch('$wire.address', this.onChange.bind(this));
-        },
-        onChange(value) {
-            // remove old marker if exists
-            if (this.marker) {
-                this.marker.remove();
-            }
-            // update new lat and long
-            this.lat = $wire.address.latitude !== null ? parseFloat($wire.address.latitude) : null;
-            this.long = $wire.address.longitude !== null ? parseFloat($wire.address.longitude) : null;
 
-            if (this.lat === null || this.long === null) {
+            if (typeof $wire[propertyName] !== 'function') {
+                // side-effect -> update map on address change
+                this.$watch('$wire.' + propertyName, this.onChange.bind(this));
+            }
+        },
+        addMarkers(addresses = null) {
+            let address = addresses ?? $wire[propertyName];
+            if (propertyName.includes('.') && !addresses) {
+                const props = propertyName.split('.');
+                address = $wire;
+                props.forEach(prop => {
+                    address = address[prop];
+                });
+            }
+
+            if (typeof address === 'function') {
+                address = address();
+            }
+
+            // check if async function
+            if (address instanceof Promise) {
+                address.then((address) => {
+                    this.addMarkers(address);
+                });
                 return;
             }
+
+            if (!address) {
+                return;
+            }
+
+            if (!Array.isArray(address)) {
+                address = [address];
+            }
+
+            this.markers.clearLayers();
+            address.forEach((address) => {
+                if (!address.latitude || !address.longitude) {
+                    return;
+                }
+
+                let icon = null;
+                let options = {};
+                if (address.hasOwnProperty('icon')) {
+                    icon = L.divIcon({
+                        className: 'custom-icon',
+                        html: address.icon,
+                    });
+                    options.icon = icon;
+                }
+
+                let marker = L.marker([address.latitude, address.longitude], options);
+                if (address.popup) marker.bindPopup(address.popup);
+                if (address.tooltip) marker.bindTooltip(address.tooltip);
+
+                this.markers.addLayer(marker);
+            });
+
+            if (this.markers.getLayers().length > 0) {
+                this.markers.addTo(this.map);
+            }
+
+            if (navigator.geolocation) {
+                this.addUserMarker();
+            }
+
+            this.$nextTick(() => {
+                this.resizeMap();
+            });
+        },
+        resizeMap() {
+            this.map.invalidateSize();
+
+            let allMarkersBounds = null;
+            let hasMarkerBounds = this.markers.getBounds().isValid();
+            let userMarkerBounds = this.userMarker ? L.latLngBounds(this.userMarker.getLatLng(), this.userMarker.getLatLng()) : null;
+
+            if (hasMarkerBounds) {
+                allMarkersBounds = this.markers.getBounds();
+
+                if (userMarkerBounds) {
+                    allMarkersBounds.extend(userMarkerBounds);
+                }
+            } else if (userMarkerBounds) {
+                allMarkersBounds = userMarkerBounds;
+            }
+
+            // Check if we have valid bounds to fit the map view
+            if (allMarkersBounds && allMarkersBounds.isValid()) {
+                this.map.fitBounds(allMarkersBounds, {padding: [50, 50]});
+                let boundZoom = this.map.getBoundsZoom(allMarkersBounds);
+
+                // Adjust the zoom level if necessary
+                let finalZoom = boundZoom > this.zoom ? this.zoom : boundZoom;
+                if (this.map.getZoom() !== finalZoom) {
+                    this.map.setZoom(finalZoom);
+                }
+            } else {
+                let defaultZoom = 2;
+                this.map.setView([0, 0], defaultZoom);
+            }
+        },
+        onChange() {
             this.$nextTick(() => {
                 // create view
-                this.map.setView([this.lat, this.long], 13);
-                // set marker
-                this.marker = L.marker([this.lat, this.long]).addTo(this.map);
+                this.addMarkers();
             });
         },
         get showMap() {
-            return this.lat && this.long;
+            return this.markers.getLayers().length > 0;
         },
+        addUserMarker() {
+            navigator.geolocation.getCurrentPosition((position) => {
+                let icon = null;
+                let options = {};
+                console.log(userIcon);
+                if (userIcon) {
+                    icon = L.divIcon({
+                        className: 'custom-icon',
+                        html: userIcon,
+                    });
+                    options.icon = icon;
+                }
+
+                this.userMarker = L.marker([position.coords.latitude, position.coords.longitude], options)
+                    .addTo(this.map);
+
+                this.$nextTick(() => {
+                    this.resizeMap();
+                });
+            });
+        },
+        userMarker: null,
         map: null,
-        marker: null,
+        markers: null,
         lat: null,
         long: null
     }

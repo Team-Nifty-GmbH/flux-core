@@ -123,7 +123,7 @@ class MediaTest extends BaseSetup
     public function test_upload_media_not_allowed_model_type()
     {
         $media = [
-            'model_type' => app(Media::class)->getMorphClass(),
+            'model_type' => morph_alias(Media::class),
             'model_id' => $this->task->id,
             'media' => $this->file,
         ];

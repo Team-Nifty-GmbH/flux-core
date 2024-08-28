@@ -18,7 +18,7 @@ class DeleteTaskRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Task::class),
+                app(ModelExists::class, ['model' => Task::class]),
             ],
         ];
     }

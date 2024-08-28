@@ -18,7 +18,7 @@ class SyncCalendarEventInvitesRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(CalendarEvent::class),
+                app(ModelExists::class, ['model' => CalendarEvent::class]),
             ],
         ];
     }

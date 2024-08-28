@@ -16,8 +16,8 @@ class CategoryRuleset extends FluxRuleset
             'categories.*' => [
                 'required',
                 'integer',
-                (new ModelExists(Category::class))
-                    ->where('model_type', app(Contact::class)->getMorphClass()),
+                app(ModelExists::class, ['model' => Category::class])
+                    ->where('model_type', morph_alias(Contact::class)),
             ],
         ];
     }

@@ -116,21 +116,19 @@ class OrderTypeTest extends BaseSetup
         $response->assertStatus(201);
 
         $responseOrderType = json_decode($response->getContent())->data;
-        $dbOrderType = (object) OrderType::query()
+        $dbOrderType = OrderType::query()
             ->whereKey($responseOrderType->id)
-            ->first()
-            ->append(['created_by', 'updated_by'])
-            ->toArray();
+            ->first();
 
         $this->assertNotEmpty($dbOrderType);
         $this->assertEquals($orderType['client_id'], $dbOrderType->client_id);
         $this->assertEquals($orderType['name'], $dbOrderType->name);
         $this->assertNull($dbOrderType->description);
-        $this->assertEquals($orderType['order_type_enum'], $dbOrderType->order_type_enum);
+        $this->assertEquals($orderType['order_type_enum'], $dbOrderType->order_type_enum->value);
         $this->assertTrue($dbOrderType->is_active);
         $this->assertFalse($dbOrderType->is_hidden);
-        $this->assertEquals($this->user->id, $dbOrderType->created_by['id']);
-        $this->assertEquals($this->user->id, $dbOrderType->updated_by['id']);
+        $this->assertTrue($this->user->is($dbOrderType->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbOrderType->getUpdatedBy()));
     }
 
     public function test_create_order_type_maximum()
@@ -162,8 +160,8 @@ class OrderTypeTest extends BaseSetup
         $this->assertEquals($orderType['order_type_enum'], $dbOrderType->order_type_enum->value);
         $this->assertEquals($orderType['is_active'], $dbOrderType->is_active);
         $this->assertEquals($orderType['is_hidden'], $dbOrderType->is_hidden);
-        $this->assertEquals($this->user->id, $dbOrderType->created_by->id);
-        $this->assertEquals($this->user->id, $dbOrderType->updated_by->id);
+        $this->assertTrue($this->user->is($dbOrderType->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbOrderType->getUpdatedBy()));
     }
 
     public function test_create_order_type_validation_fails()
@@ -206,7 +204,7 @@ class OrderTypeTest extends BaseSetup
         $this->assertEquals($this->orderTypes[0]->order_type_enum, $dbOrderType->order_type_enum);
         $this->assertEquals($this->orderTypes[0]->is_active, $dbOrderType->is_active);
         $this->assertEquals($this->orderTypes[0]->is_hidden, $dbOrderType->is_hidden);
-        $this->assertEquals($this->user->id, $dbOrderType->updated_by->id);
+        $this->assertTrue($this->user->is($dbOrderType->getUpdatedBy()));
     }
 
     public function test_update_order_type_maximum()
@@ -237,7 +235,7 @@ class OrderTypeTest extends BaseSetup
         $this->assertEquals($this->orderTypes[0]->order_type_enum, $dbOrderType->order_type_enum);
         $this->assertEquals($orderType['is_active'], $dbOrderType->is_active);
         $this->assertEquals($orderType['is_hidden'], $dbOrderType->is_hidden);
-        $this->assertEquals($this->user->id, $dbOrderType->updated_by->id);
+        $this->assertTrue($this->user->is($dbOrderType->getUpdatedBy()));
     }
 
     public function test_update_order_type_validation_fails()
@@ -265,7 +263,7 @@ class OrderTypeTest extends BaseSetup
 
         $orderType = $this->orderTypes[1]->fresh();
         $this->assertNotNull($orderType->deleted_at);
-        $this->assertEquals($this->user->id, $orderType->deleted_by->id);
+        $this->assertTrue($this->user->is($orderType->getDeletedBy()));
     }
 
     public function test_delete_order_type_order_type_not_found()

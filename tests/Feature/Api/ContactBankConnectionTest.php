@@ -131,8 +131,8 @@ class ContactBankConnectionTest extends BaseSetup
         $this->assertNull($dbBankConnection->account_holder);
         $this->assertNull($dbBankConnection->bank_name);
         $this->assertNull($dbBankConnection->bic);
-        $this->assertEquals($this->user->id, $dbBankConnection->created_by->id);
-        $this->assertEquals($this->user->id, $dbBankConnection->updated_by->id);
+        $this->assertTrue($this->user->is($dbBankConnection->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbBankConnection->getUpdatedBy()));
     }
 
     public function test_create_contact_bank_connection_maximum()
@@ -162,8 +162,8 @@ class ContactBankConnectionTest extends BaseSetup
         $this->assertEquals($bankConnection['account_holder'], $dbBankConnection->account_holder);
         $this->assertEquals($bankConnection['bank_name'], $dbBankConnection->bank_name);
         $this->assertEquals($bankConnection['bic'], $dbBankConnection->bic);
-        $this->assertEquals($this->user->id, $dbBankConnection->created_by->id);
-        $this->assertEquals($this->user->id, $dbBankConnection->updated_by->id);
+        $this->assertTrue($this->user->is($dbBankConnection->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbBankConnection->getUpdatedBy()));
     }
 
     public function test_create_contact_bank_connection_validation_fails()
@@ -201,7 +201,7 @@ class ContactBankConnectionTest extends BaseSetup
         $this->assertNotEmpty($dbBankConnection);
         $this->assertEquals($bankConnection['id'], $dbBankConnection->id);
         $this->assertEquals($bankConnection['bank_name'], $dbBankConnection->bank_name);
-        $this->assertEquals($this->user->id, $dbBankConnection->updated_by->id);
+        $this->assertTrue($this->user->is($dbBankConnection->getUpdatedBy()));
     }
 
     public function test_update_contact_bank_connection_maximum()
@@ -233,7 +233,7 @@ class ContactBankConnectionTest extends BaseSetup
         $this->assertEquals($bankConnection['account_holder'], $dbBankConnection->account_holder);
         $this->assertEquals($bankConnection['bank_name'], $dbBankConnection->bank_name);
         $this->assertEquals($bankConnection['bic'], $dbBankConnection->bic);
-        $this->assertEquals($this->user->id, $dbBankConnection->updated_by->id);
+        $this->assertTrue($this->user->is($dbBankConnection->getUpdatedBy()));
     }
 
     public function test_update_contact_bank_connection_multi_status_validation_fails()
@@ -264,7 +264,7 @@ class ContactBankConnectionTest extends BaseSetup
 
         $bankConnection = $this->contactBankConnections[1]->fresh();
         $this->assertNotNull($bankConnection->deleted_at);
-        $this->assertEquals($this->user->id, $bankConnection->deleted_by->id);
+        $this->assertTrue($this->user->is($bankConnection->getDeletedBy()));
     }
 
     public function test_delete_contact_bank_connection_bankConnection_not_found()

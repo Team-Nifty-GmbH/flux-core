@@ -9,6 +9,7 @@ use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -49,12 +50,18 @@ class SignaturePublicLink extends Component
                 ->where('name', 'signature-'.$this->printView)
                 ->firstOr(fn () => [])
         );
+        $this->signature->custom_properties['name'] ??= auth()->user()?->name;
     }
 
     public function save(): bool
     {
         // add to which type it belongs
         if ($this->signature->stagedFiles || $this->signature->id) {
+            Validator::make(
+                ['name' => data_get($this->signature->custom_properties, 'name')],
+                ['name' => 'required|string|max:255']
+            )->validate();
+
             $this->signature->fill([
                 'name' => 'signature-'.$this->printView,
                 'model_type' => $this->model,
@@ -89,7 +96,14 @@ class SignaturePublicLink extends Component
         activity()
             ->performedOn($this->getModel())
             ->event('signature_added')
-            ->log(__(':view signature has been added', ['view' => $this->printView]));
+            ->log(__(
+                ':view signature has been added by :name',
+                [
+                    'view' => $this->printView,
+                    'name' => auth()->user()?->name
+                        ?? data_get($this->signature->custom_properties, 'name'),
+                ]
+            ));
 
         return true;
     }

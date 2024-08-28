@@ -18,7 +18,7 @@ class DeletePaymentReminderTextRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(PaymentReminderText::class),
+                app(ModelExists::class, ['model' => PaymentReminderText::class]),
             ],
         ];
     }

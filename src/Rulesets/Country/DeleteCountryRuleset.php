@@ -18,7 +18,7 @@ class DeleteCountryRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Country::class),
+                app(ModelExists::class, ['model' => Country::class]),
             ],
         ];
     }

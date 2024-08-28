@@ -16,13 +16,17 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Communication as CommunicationModel;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\Media;
+use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Laravel\Scout\Searchable;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 use Spatie\MediaLibrary\Support\MediaStream;
@@ -36,7 +40,7 @@ class Communication extends CommunicationList
     protected ?string $includeBefore = 'flux::livewire.features.communications.communication';
 
     #[Modelable]
-    public int $modelId;
+    public ?int $modelId = null;
 
     protected ?string $modelType = null;
 
@@ -100,11 +104,15 @@ class Communication extends CommunicationList
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->whereHas(
-            'communicatables',
-            fn ($query) => $query->where('communicatable_id', $this->modelId)
-                ->where('communicatable_type', morph_alias($this->modelType))
-        );
+        return $builder
+            ->when(
+                $this->modelId && $this->modelType,
+                fn (Builder $query) => $query->whereHas(
+                    'communicatables',
+                    fn ($query) => $query->where('communicatable_id', $this->modelId)
+                        ->where('communicatable_type', morph_alias($this->modelType))
+                )
+            );
     }
 
     protected function getReturnKeys(): array
@@ -112,11 +120,47 @@ class Communication extends CommunicationList
         return array_merge(parent::getReturnKeys(), ['communication_type_enum']);
     }
 
+    #[Computed(cache: true)]
+    public function communicatables(): array
+    {
+        return collect(
+            array_filter(
+                Relation::morphMap(),
+                function (string $class, string $alias) {
+                    $uses = class_uses_recursive($class);
+
+                    return in_array(Communicatable::class, $uses)
+                        && in_array(Searchable::class, $uses);
+                },
+                ARRAY_FILTER_USE_BOTH
+            )
+        )
+            ->mapWithKeys(fn ($value, $key) => [$key => __(Str::headline($key))])
+            ->toArray();
+    }
+
+    #[Renderless]
+    public function addCommunicatable(string $modelType, string|int $modelId): void
+    {
+        $model = morph_to($modelType, $modelId);
+        $this->communication->communicatables[] = [
+            'communicatable_type' => $modelType,
+            'communicatable_id' => $modelId,
+            'href' => method_exists($model, 'getUrl') ? $model->getUrl() : null,
+            'label' => __(Str::headline($modelType)) . ': '
+                . (method_exists($model, 'getLabel') ? $model->getLabel() : $model->getKey()),
+        ];
+    }
+
     #[Renderless]
     public function save(): bool
     {
-        $this->communication->communicatable_type ??= morph_alias($this->modelType);
-        $this->communication->communicatable_id ??= $this->modelId;
+        if (! $this->communication->communicatables && $this->modelType && $this->modelId) {
+            $this->communication->communicatables[] = [
+                'communicatable_type' => morph_alias($this->modelType),
+                'communicatable_id' => $this->modelId,
+            ];
+        }
 
         try {
             $this->communication->save();
@@ -222,19 +266,17 @@ class Communication extends CommunicationList
     #[Renderless]
     public function setTo(Address $address): void
     {
-        $this->communication->communicatable_type = morph_alias(Address::class);
-        $this->communication->communicatable_id = $address->id;
+        $this->communication->communicatables = [
+            [
+                'communicatable_type' => $address->getMorphClass(),
+                'communicatable_id' => $address->id,
+                'href' => $address->getUrl(),
+                'label' => __(Str::headline($address->getMorphClass())) . ': ' . $address->getLabel(),
+            ],
+        ];
 
         $this->communication->to = [
-            implode(
-                "\n",
-                array_filter([
-                    $address->company,
-                    trim($address->firstname.' '.$address->lastname),
-                    $address->street,
-                    trim($address->zip.' '.$address->city),
-                ])
-            ),
+            implode("\n", $address->postal_address),
         ];
     }
 

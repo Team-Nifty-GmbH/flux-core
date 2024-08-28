@@ -141,11 +141,9 @@ class PaymentTypeTest extends BaseSetup
         $response->assertStatus(201);
 
         $responsePaymentType = json_decode($response->getContent())->data;
-        $dbPaymentType = (object) PaymentType::query()
+        $dbPaymentType = PaymentType::query()
             ->whereKey($responsePaymentType->id)
-            ->first()
-            ->append(['created_by', 'updated_by'])
-            ->toArray();
+            ->first();
 
         $this->assertNotEmpty($dbPaymentType);
         $this->assertEquals($paymentType['client_id'], $dbPaymentType->client_id);
@@ -158,8 +156,8 @@ class PaymentTypeTest extends BaseSetup
         $this->assertNull($dbPaymentType->payment_discount_target);
         $this->assertNull($dbPaymentType->payment_discount_percentage);
         $this->assertTrue($dbPaymentType->is_active);
-        $this->assertEquals($this->user->id, $dbPaymentType->created_by['id']);
-        $this->assertEquals($this->user->id, $dbPaymentType->updated_by['id']);
+        $this->assertTrue($this->user->is($dbPaymentType->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbPaymentType->getUpdatedBy()));
     }
 
     public function test_create_payment_type_maximum()
@@ -199,8 +197,8 @@ class PaymentTypeTest extends BaseSetup
         $this->assertEquals($paymentType['payment_discount_target'], $dbPaymentType->payment_discount_target);
         $this->assertEquals($paymentType['payment_discount_percentage'], $dbPaymentType->payment_discount_percentage);
         $this->assertEquals($paymentType['is_active'], $dbPaymentType->is_active);
-        $this->assertEquals($this->user->id, $dbPaymentType->created_by->id);
-        $this->assertEquals($this->user->id, $dbPaymentType->updated_by->id);
+        $this->assertTrue($this->user->is($dbPaymentType->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbPaymentType->getUpdatedBy()));
     }
 
     public function test_create_payment_type_validation_fails()
@@ -246,7 +244,7 @@ class PaymentTypeTest extends BaseSetup
         $this->assertEquals($this->paymentTypes[0]->payment_discount_target, $dbPaymentType->payment_discount_target);
         $this->assertEquals($this->paymentTypes[0]->payment_discount_percentage, $dbPaymentType->payment_discount_percentage);
         $this->assertEquals($this->paymentTypes[0]->is_active, $dbPaymentType->is_active);
-        $this->assertEquals($this->user->id, $dbPaymentType->updated_by->id);
+        $this->assertTrue($this->user->is($dbPaymentType->getUpdatedBy()));
     }
 
     public function test_update_payment_type_maximum()
@@ -286,7 +284,7 @@ class PaymentTypeTest extends BaseSetup
         $this->assertEquals($paymentType['payment_discount_target'], $dbPaymentType->payment_discount_target);
         $this->assertEquals($paymentType['payment_discount_percentage'], $dbPaymentType->payment_discount_percentage);
         $this->assertEquals($paymentType['is_active'], $dbPaymentType->is_active);
-        $this->assertEquals($this->user->id, $dbPaymentType->updated_by->id);
+        $this->assertTrue($this->user->is($dbPaymentType->getUpdatedBy()));
     }
 
     public function test_update_payment_type_validation_fails()
@@ -314,7 +312,7 @@ class PaymentTypeTest extends BaseSetup
 
         $paymentType = $this->paymentTypes[1]->fresh();
         $this->assertNotNull($paymentType->deleted_at);
-        $this->assertEquals($this->user->id, $paymentType->deleted_by->id);
+        $this->assertTrue($this->user->is($paymentType->getDeletedBy()));
     }
 
     public function test_delete_payment_type_payment_type_not_found()

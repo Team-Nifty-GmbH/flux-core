@@ -19,17 +19,17 @@ class CreateFormBuilderFieldResponseRuleset extends FluxRuleset
             'form_id' => [
                 'required',
                 'integer',
-                new ModelExists(FormBuilderForm::class),
+                app(ModelExists::class, ['model' => FormBuilderForm::class]),
             ],
             'field_id' => [
                 'required',
                 'integer',
-                new ModelExists(FormBuilderField::class),
+                app(ModelExists::class, ['model' => FormBuilderField::class]),
             ],
             'response_id' => [
                 'required',
                 'integer',
-                new ModelExists(FormBuilderResponse::class),
+                app(ModelExists::class, ['model' => FormBuilderResponse::class]),
             ],
             'response' => 'required|string',
         ];

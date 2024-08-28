@@ -7,6 +7,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Printable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\View\Printing\PaymentReminder\PaymentReminderView;
@@ -16,7 +17,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PaymentReminder extends Model implements OffersPrinting
 {
-    use HasPackageFactory, HasUserModification, HasUuid, Printable, SoftDeletes;
+    use HasPackageFactory, HasUserModification, HasUuid, LogsActivity, Printable, SoftDeletes;
+
+    protected $guarded = [
+        'id',
+    ];
 
     protected static function booted(): void
     {

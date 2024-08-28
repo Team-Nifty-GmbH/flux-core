@@ -30,7 +30,7 @@ class TicketsTest extends BaseSetup
         ]);
 
         $this->ticket = Ticket::factory()->create([
-            'authenticatable_type' => app(Address::class)->getMorphClass(),
+            'authenticatable_type' => morph_alias(Address::class),
             'authenticatable_id' => $address->id,
         ]);
     }

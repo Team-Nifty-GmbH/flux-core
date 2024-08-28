@@ -24,37 +24,37 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(PurchaseInvoice::class),
+                app(ModelExists::class, ['model' => PurchaseInvoice::class]),
             ],
             'client_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
             'contact_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'lay_out_user_id' => [
                 'nullable',
                 'integer',
-                (new ModelExists(User::class))->where('is_active', true),
+                app(ModelExists::class, ['model' => User::class])->where('is_active', true),
             ],
             'currency_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Currency::class),
+                app(ModelExists::class, ['model' => Currency::class]),
             ],
             'order_type_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(OrderType::class),
+                app(ModelExists::class, ['model' => OrderType::class]),
             ],
             'payment_type_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(PaymentType::class),
+                app(ModelExists::class, ['model' => PaymentType::class]),
             ],
             'invoice_date' => 'date',
             'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
@@ -75,7 +75,7 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
             [
                 'purchase_invoice_positions.*.id' => [
                     'integer',
-                    new ModelExists(PurchaseInvoicePosition::class),
+                    app(ModelExists::class, ['model' => PurchaseInvoicePosition::class]),
                 ],
             ]
         );

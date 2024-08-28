@@ -121,8 +121,8 @@ class CurrencyTest extends BaseSetup
         $this->assertEquals($currency['iso'], $dbCurrency->iso);
         $this->assertEquals($currency['symbol'], $dbCurrency->symbol);
         $this->assertEquals($currency['is_default'], $dbCurrency->is_default);
-        $this->assertEquals($this->user->id, $dbCurrency->created_by->id);
-        $this->assertEquals($this->user->id, $dbCurrency->updated_by->id);
+        $this->assertTrue($this->user->is($dbCurrency->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbCurrency->getUpdatedBy()));
     }
 
     public function test_create_currency_validation_fails()
@@ -176,7 +176,7 @@ class CurrencyTest extends BaseSetup
         $this->assertNotEmpty($dbCurrency);
         $this->assertEquals($currency['id'], $dbCurrency->id);
         $this->assertEquals($currency['name'], $dbCurrency->name);
-        $this->assertEquals($this->user->id, $dbCurrency->updated_by->id);
+        $this->assertTrue($this->user->is($dbCurrency->getUpdatedBy()));
     }
 
     public function test_update_currency_maximum()
@@ -206,7 +206,7 @@ class CurrencyTest extends BaseSetup
         $this->assertEquals($currency['iso'], $dbCurrency->iso);
         $this->assertEquals($currency['symbol'], $dbCurrency->symbol);
         $this->assertEquals($currency['is_default'], $dbCurrency->is_default);
-        $this->assertEquals($this->user->id, $dbCurrency->updated_by->id);
+        $this->assertTrue($this->user->is($dbCurrency->getUpdatedBy()));
     }
 
     public function test_update_currency_validation_fails()
@@ -251,7 +251,7 @@ class CurrencyTest extends BaseSetup
 
         $currency = $this->currencies[1]->fresh();
         $this->assertNotNull($currency->deleted_at);
-        $this->assertEquals($this->user->id, $currency->deleted_by->id);
+        $this->assertTrue($this->user->is($currency->getDeletedBy()));
     }
 
     public function test_delete_currency_currency_not_found()

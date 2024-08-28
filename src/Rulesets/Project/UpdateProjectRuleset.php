@@ -21,22 +21,22 @@ class UpdateProjectRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Project::class),
+                app(ModelExists::class, ['model' => Project::class]),
             ],
             'contact_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Contact::class),
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'order_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(Order::class),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'responsible_user_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'project_number' => 'sometimes|required|string',
             'name' => 'sometimes|required|string',

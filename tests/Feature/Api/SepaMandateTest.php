@@ -167,8 +167,8 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
         $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
         $this->assertNull($dbSepaMandate->signed_date);
-        $this->assertEquals($this->user->id, $dbSepaMandate->created_by->id);
-        $this->assertEquals($this->user->id, $dbSepaMandate->updated_by->id);
+        $this->assertTrue($this->user->is($dbSepaMandate->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbSepaMandate->getUpdatedBy()));
     }
 
     public function test_create_sepa_mandate_maximum()
@@ -196,8 +196,8 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
         $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
         $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date->toDateString());
-        $this->assertEquals($this->user->id, $dbSepaMandate->created_by->id);
-        $this->assertEquals($this->user->id, $dbSepaMandate->updated_by->id);
+        $this->assertTrue($this->user->is($dbSepaMandate->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbSepaMandate->getUpdatedBy()));
     }
 
     public function test_create_sepa_mandate_validation_fails()
@@ -268,7 +268,7 @@ class SepaMandateTest extends BaseSetup
         $this->assertNotEmpty($dbSepaMandate);
         $this->assertEquals($sepaMandate['id'], $dbSepaMandate->id);
         $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date->toDateString());
-        $this->assertEquals($this->user->id, $dbSepaMandate->updated_by->id);
+        $this->assertTrue($this->user->is($dbSepaMandate->getUpdatedBy()));
     }
 
     public function test_update_sepa_mandate_maximum()
@@ -296,7 +296,7 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($this->sepaMandates[0]->contact_id, $dbSepaMandate->contact_id);
         $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
         $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date->toDateString());
-        $this->assertEquals($this->user->id, $dbSepaMandate->updated_by->id);
+        $this->assertTrue($this->user->is($dbSepaMandate->getUpdatedBy()));
     }
 
     public function test_update_sepa_mandate_multi_status_validation_fails()
@@ -355,7 +355,7 @@ class SepaMandateTest extends BaseSetup
 
         $sepaMandate = $this->sepaMandates[2]->fresh();
         $this->assertNotNull($sepaMandate->deleted_at);
-        $this->assertEquals($this->user->id, $sepaMandate->deleted_by->id);
+        $this->assertTrue($this->user->is($sepaMandate->getDeletedBy()));
     }
 
     public function test_delete_sepa_mandate_sepa_mandate_not_found()

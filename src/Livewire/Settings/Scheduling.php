@@ -47,7 +47,7 @@ class Scheduling extends ScheduleList
         );
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -61,7 +61,7 @@ class Scheduling extends ScheduleList
         ];
     }
 
-    public function getViewData(): array
+    protected function getViewData(): array
     {
         return array_merge(
             parent::getViewData(),
@@ -82,7 +82,7 @@ class Scheduling extends ScheduleList
         );
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

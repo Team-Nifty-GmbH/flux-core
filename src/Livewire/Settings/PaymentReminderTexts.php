@@ -18,7 +18,7 @@ class PaymentReminderTexts extends PaymentReminderTextList
 
     public PaymentReminderTextForm $paymentReminderTextForm;
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
@@ -32,7 +32,7 @@ class PaymentReminderTexts extends PaymentReminderTextList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

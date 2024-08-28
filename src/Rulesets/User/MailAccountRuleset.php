@@ -15,7 +15,7 @@ class MailAccountRuleset extends FluxRuleset
             'mail_accounts.*' => [
                 'required',
                 'integer',
-                new ModelExists(MailAccount::class),
+                app(ModelExists::class, ['model' => MailAccount::class]),
             ],
         ];
     }

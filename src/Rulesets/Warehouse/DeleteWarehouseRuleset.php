@@ -18,7 +18,7 @@ class DeleteWarehouseRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Warehouse::class),
+                app(ModelExists::class, ['model' => Warehouse::class]),
             ],
         ];
     }

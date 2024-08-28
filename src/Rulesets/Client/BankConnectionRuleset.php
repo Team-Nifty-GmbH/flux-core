@@ -14,7 +14,7 @@ class BankConnectionRuleset extends FluxRuleset
             'bank_connections' => 'array|nullable',
             'bank_connections.*' => [
                 'integer',
-                new ModelExists(BankConnection::class),
+                app(ModelExists::class, ['model' => BankConnection::class]),
             ],
         ];
     }

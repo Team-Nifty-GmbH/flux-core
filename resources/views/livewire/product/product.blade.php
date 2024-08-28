@@ -68,7 +68,7 @@
                     primary
                     x-show="edit"
                     class="w-full"
-                    x-on:click="edit = false"
+                    x-on:click="edit = false; $wire.resetProduct()"
                     :label="__('Cancel')"
                 />
             @endCanAction

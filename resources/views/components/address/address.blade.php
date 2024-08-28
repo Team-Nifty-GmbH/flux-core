@@ -181,7 +181,7 @@
                                 [
                                     'type',
                                     '=',
-                                    app(\FluxErp\Models\Address::class)->getMorphClass(),
+                                    morph_alias(\FluxErp\Models\Address::class),
                                 ],
                             ],
                         ],
@@ -241,7 +241,7 @@
             <x-button icon="plus" :label="__('Add')" primary x-on:click.prevent="$wire.address.contact_options.push({})" x-bind:disabled="!edit"/>
         </div>
     </div>
-    <div x-data="addressMap($wire)">
+    <div x-data="addressMap($wire, 'address', true, '{{ auth()->user()?->getAvatarUrl() }}')" class="pt-6">
         <div id="map" x-show="showMap"></div>
     </div>
 @endif

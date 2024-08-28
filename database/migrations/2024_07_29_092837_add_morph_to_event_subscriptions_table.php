@@ -30,7 +30,11 @@ return new class extends Migration
             $table->dropIndex(['subscribable_id', 'subscribable_type']);
             $table->renameColumn('subscribable_id', 'user_id');
             $table->dropColumn('subscribable_type');
-            $table->foreign('user_id', 'event_notifications_user_id_foreign')->references('id')->on('users')->onDelete('cascade');
+
+            $table->foreign('user_id', 'event_notifications_user_id_foreign')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
         });
     }
 };

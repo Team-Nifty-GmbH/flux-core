@@ -18,7 +18,7 @@ class DeleteTicketRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Ticket::class),
+                app(ModelExists::class, ['model' => Ticket::class]),
             ],
         ];
     }

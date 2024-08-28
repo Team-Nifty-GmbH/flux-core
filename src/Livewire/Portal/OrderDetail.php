@@ -54,6 +54,7 @@ class OrderDetail extends Component
                     'addressDelivery',
                     'orderPositions',
                     'currency:id,iso',
+                    'agent:id,name',
                 ]
             )
             ->first();
@@ -224,7 +225,7 @@ class OrderDetail extends Component
             ->event('downloaded')
             ->log($mediaItem->collection_name.' '.$mediaItem->name);
 
-        return response()->download($mediaItem->getPath(), $mediaItem->name);
+        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
 
     public function downloadMedia(int $id): BinaryFileResponse

@@ -18,7 +18,7 @@ class DeleteCategoryRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Category::class),
+                app(ModelExists::class, ['model' => Category::class]),
             ],
         ];
     }

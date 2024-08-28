@@ -25,15 +25,15 @@ class ValueListTest extends BaseSetup
     {
         parent::setUp();
         $this->valueLists[] = AdditionalColumn::factory()->create([
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'values' => [1, 2, 3, 4, 5],
         ]);
         $this->valueLists[] = AdditionalColumn::factory()->create([
-            'model_type' => app(Category::class)->getMorphClass(),
+            'model_type' => morph_alias(Category::class),
             'values' => [1, 3, 5, 7],
         ]);
         $this->valueLists[] = AdditionalColumn::factory()->create([
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'values' => [1, 1, 2, 3, 5, 8],
         ]);
 
@@ -51,7 +51,7 @@ class ValueListTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/value-lists/'.$this->valueLists[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/value-lists/' . $this->valueLists[0]->id);
         $response->assertStatus(200);
 
         $jsonValueList = json_decode($response->getContent())->data;
@@ -65,13 +65,13 @@ class ValueListTest extends BaseSetup
     public function test_get_value_list_value_list_not_found()
     {
         $valueList = AdditionalColumn::factory()->create([
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => mb_ord(User::class),
         ]);
 
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/value-lists/'.$valueList->id + 1);
+        $response = $this->actingAs($this->user)->get('/api/value-lists/' . $valueList->id + 1);
         $response->assertStatus(404);
     }
 
@@ -104,14 +104,14 @@ class ValueListTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $queryParams = '?filter[model_type]=user';
-        $response = $this->actingAs($this->user)->get('/api/value-lists'.$queryParams);
+        $response = $this->actingAs($this->user)->get('/api/value-lists' . $queryParams);
         $response->assertStatus(200);
 
         $jsonValueLists = collect(json_decode($response->getContent())->data->data);
 
         $this->assertNotEmpty($jsonValueLists);
         $this->assertTrue($jsonValueLists->every(function ($value, $key) {
-            return $value->model_type === app(User::class)->getMorphClass();
+            return $value->model_type === morph_alias(User::class);
         }));
 
         $valueList = $this->valueLists[0];
@@ -144,8 +144,8 @@ class ValueListTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['index']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $queryParams = '?filter[model_type]=zywx'.Str::random();
-        $response = $this->actingAs($this->user)->get('/api/value-lists'.$queryParams);
+        $queryParams = '?filter[model_type]=zywx' . Str::random();
+        $response = $this->actingAs($this->user)->get('/api/value-lists' . $queryParams);
         $response->assertStatus(200);
         $this->assertEmpty(json_decode($response->getContent())->data->data);
     }
@@ -153,8 +153,8 @@ class ValueListTest extends BaseSetup
     public function test_create_value_list()
     {
         $valueList = [
-            'name' => 'hopefullyNeverExistingName'.Str::random(),
-            'model_type' => app(Category::class)->getMorphClass(),
+            'name' => 'hopefullyNeverExistingName' . Str::random(),
+            'model_type' => morph_alias(Category::class),
             'values' => ['test', 1, 3, 'c', 'g'],
         ];
 
@@ -178,7 +178,7 @@ class ValueListTest extends BaseSetup
     public function test_create_value_list_validation_fails()
     {
         $valueList = [
-            'name' => 'hopefullyNeverExistingName'.Str::random(),
+            'name' => 'hopefullyNeverExistingName' . Str::random(),
             'model_type' => 'user',
             'values' => [],
         ];
@@ -193,7 +193,7 @@ class ValueListTest extends BaseSetup
     public function test_create_value_list_values_no_list()
     {
         $valueList = [
-            'name' => 'hopefullyNeverExistingName'.Str::random(),
+            'name' => 'hopefullyNeverExistingName' . Str::random(),
             'model_type' => 'user',
             'values' => ['test' => 1, 3 => 'c', 'g'],
         ];
@@ -208,8 +208,8 @@ class ValueListTest extends BaseSetup
     public function test_create_value_list_model_not_found()
     {
         $valueList = [
-            'name' => 'hopefullyNeverExistingName'.Str::random(),
-            'model_type' => 'user'.Str::random(),
+            'name' => 'hopefullyNeverExistingName' . Str::random(),
+            'model_type' => 'user' . Str::random(),
             'values' => ['test', 1, 3, 'c', 'g'],
         ];
 
@@ -239,7 +239,7 @@ class ValueListTest extends BaseSetup
     {
         $valueList = [
             'id' => $this->valueLists[0]->id,
-            'name' => 'hopefullyNeverExistingName'.Str::random(),
+            'name' => 'hopefullyNeverExistingName' . Str::random(),
             'values' => ['test', 1, 3, 'c', 'g'],
         ];
 
@@ -306,7 +306,7 @@ class ValueListTest extends BaseSetup
     {
         $valueList = [
             'id' => $this->valueLists[1]->id,
-            'name' => 'hopefullyNeverExistingName'.Str::random(),
+            'name' => 'hopefullyNeverExistingName' . Str::random(),
             'values' => ['test', 1, 3, 'c', 'g'],
         ];
 
@@ -326,7 +326,7 @@ class ValueListTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/value-lists/'.$this->valueLists[2]->id);
+        $response = $this->actingAs($this->user)->delete('/api/value-lists/' . $this->valueLists[2]->id);
         $response->assertStatus(204);
 
         $this->assertEmpty($this->valueLists[2]->fresh());
@@ -335,13 +335,13 @@ class ValueListTest extends BaseSetup
     public function test_delete_value_list_value_list_not_found()
     {
         $valueList = AdditionalColumn::factory()->create([
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
         ]);
 
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/value-lists/'.$valueList->id);
+        $response = $this->actingAs($this->user)->delete('/api/value-lists/' . $valueList->id);
         $response->assertStatus(404);
     }
 
@@ -353,7 +353,7 @@ class ValueListTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/value-lists/'.$this->valueLists[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/value-lists/' . $this->valueLists[1]->id);
         $response->assertStatus(423);
     }
 }

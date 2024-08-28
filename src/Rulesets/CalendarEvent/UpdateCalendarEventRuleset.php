@@ -17,12 +17,12 @@ class UpdateCalendarEventRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(CalendarEvent::class),
+                app(ModelExists::class, ['model' => CalendarEvent::class]),
             ],
             'calendar_id' => [
                 'required',
                 'integer',
-                new ModelExists(Calendar::class),
+                app(ModelExists::class, ['model' => Calendar::class]),
             ],
             'title' => 'sometimes|required|string',
             'description' => 'string|nullable',

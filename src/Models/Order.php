@@ -27,6 +27,7 @@ use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Printable;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
@@ -53,7 +54,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 {
     use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasCustomEvents, HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates,
-        HasUserModification, HasUuid, InteractsWithMedia, Printable, Searchable, SoftDeletes, Trackable {
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes, Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;
         }
 
@@ -384,7 +385,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('invoice')
-            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png'])
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml'])
             ->singleFile();
 
         $this->addMediaCollection('payment-reminders')

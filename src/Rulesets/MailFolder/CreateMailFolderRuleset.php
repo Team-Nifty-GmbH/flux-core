@@ -18,12 +18,12 @@ class CreateMailFolderRuleset extends FluxRuleset
             'mail_account_id' => [
                 'required',
                 'integer',
-                new ModelExists(MailAccount::class),
+                app(ModelExists::class, ['model' => MailAccount::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(MailFolder::class),
+                app(ModelExists::class, ['model' => MailFolder::class]),
             ],
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255',

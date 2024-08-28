@@ -119,7 +119,23 @@ abstract class PrintableView extends Component
         $this->pdf = PdfFacade::loadHTML($this->renderWithLayout())
             ->setOption('isFontSubsettingEnabled', true)
             ->setOption('isPhpEnabled', true)
+            ->setOption('isRemoteEnabled', true)
             ->setOption('defaultMediaType', 'print');
+
+        if (! config('dompdf.options.allowed_remote_hosts')) {
+            $this->pdf->setOption(
+                'allowedRemoteHosts',
+                array_filter([
+                    'localhost',
+                    '127.0.0.1',
+                    'fonts.googleapis.com',
+                    Str::after(config('app.url'), '://'),
+                    Str::after(config('app.asset_url'), '://'),
+                    Str::after(config('app.frontend_url'), '://'),
+                ])
+            );
+        }
+
         $this->pdf->render();
 
         Printable::injectPageCount($this->pdf);

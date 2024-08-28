@@ -7,6 +7,7 @@ use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,7 +18,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class DocumentType extends Model
 {
-    use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
+        SoftDeletes;
 
     protected $guarded = [
         'id',

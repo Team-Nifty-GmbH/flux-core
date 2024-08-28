@@ -18,7 +18,7 @@ class CreateValueListRuleset extends FluxRuleset
             'model_type' => [
                 'required',
                 'string',
-                new MorphClassExists(uses: HasAdditionalColumns::class),
+                app(MorphClassExists::class, ['uses' => HasAdditionalColumns::class]),
             ],
             'values' => 'required|array',
         ];

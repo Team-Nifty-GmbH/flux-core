@@ -28,7 +28,7 @@ class TaskList extends BaseDataTable
         'progress' => 'percentage',
     ];
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()

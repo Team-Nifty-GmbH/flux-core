@@ -6,6 +6,7 @@ use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Livewire\DataTables\MediaGrid as BaseMediaGrid;
 use FluxErp\Livewire\Forms\ProductForm;
+use FluxErp\Models\Media;
 use FluxErp\Models\Product;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Validation\ValidationException;
@@ -40,7 +41,7 @@ class MediaGrid extends BaseMediaGrid
         $this->collection = 'images';
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         $rowActions = parent::getRowActions();
         array_splice($rowActions, -1, 0, [
@@ -56,7 +57,7 @@ class MediaGrid extends BaseMediaGrid
         return $rowActions;
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [
             DataTableButton::make(icon: 'upload')
@@ -69,7 +70,7 @@ class MediaGrid extends BaseMediaGrid
         ];
     }
 
-    public function getRowAttributes(): ComponentAttributeBag
+    protected function getRowAttributes(): ComponentAttributeBag
     {
         return new ComponentAttributeBag(
             [
@@ -102,7 +103,7 @@ class MediaGrid extends BaseMediaGrid
                 $media = UploadMedia::make([
                     'name' => $file->getClientOriginalName(),
                     'file_name' => $file->getClientOriginalName(),
-                    'model_type' => app(Product::class)->getMorphClass(),
+                    'model_type' => morph_alias(Product::class),
                     'model_id' => $this->product->id,
                     'media' => $file,
                     'collection_name' => $this->collection,
@@ -125,5 +126,33 @@ class MediaGrid extends BaseMediaGrid
         }
 
         $this->loadData();
+    }
+
+    public function deleteMedia(Media $media): bool
+    {
+        $delete = parent::deleteMedia($media);
+
+        if ($delete) {
+            if ($this->product->cover_media_id === $media->id) {
+                $this->product->cover_media_id = resolve_static(Media::class, 'query')
+                    ->where('model_id', $this->product->id)
+                    ->where('model_type', morph_alias(Product::class))
+                    ->where('collection_name', 'images')
+                    ->value('id');
+            }
+
+            try {
+                UpdateProduct::make([
+                    'id' => $this->product->id,
+                    'cover_media_id' => $this->product->cover_media_id,
+                ])
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+
+        return $delete;
     }
 }

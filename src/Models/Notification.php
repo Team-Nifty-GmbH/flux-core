@@ -9,6 +9,10 @@ class Notification extends DatabaseNotification
 {
     use MassPrunable;
 
+    protected $guarded = [
+        'id',
+    ];
+
     public function prunable(): mixed
     {
         return static::where('created_at', '<', now()->subDays(30))->whereNotNull('read_at');

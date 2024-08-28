@@ -36,7 +36,7 @@ class SerialNumberRangeTest extends BaseSetup
         $this->serialNumberRanges = collect();
         foreach ($this->products as $product) {
             $this->serialNumberRanges->push(SerialNumberRange::factory()->create([
-                'model_type' => app(Product::class)->getMorphClass(),
+                'model_type' => morph_alias(Product::class),
                 'model_id' => $product->id,
                 'type' => 'product',
                 'client_id' => $product->client_id,
@@ -106,7 +106,7 @@ class SerialNumberRangeTest extends BaseSetup
     {
         $serialNumberRange = [
             'product_id' => $this->products[0]->id,
-            'model_type' => app(Product::class)->getMorphClass(),
+            'model_type' => morph_alias(Product::class),
             'type' => 'product',
             'client_id' => $this->dbClient->id,
             'start_number' => rand(1, 100),

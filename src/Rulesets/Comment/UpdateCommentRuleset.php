@@ -16,7 +16,7 @@ class UpdateCommentRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Comment::class),
+                app(ModelExists::class, ['model' => Comment::class]),
             ],
             'is_internal' => 'required_without:is_sticky|boolean',
             'is_sticky' => 'required_without:is_internal|boolean',

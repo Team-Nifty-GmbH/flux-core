@@ -4,11 +4,11 @@ namespace FluxErp\Livewire\Dashboard;
 
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
-use FluxErp\Models\Widget as WidgetModel;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
+use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
@@ -20,16 +20,17 @@ class Dashboard extends Component
 
     public array $widgets = [];
 
+    public array $availableWidgets = [];
+
     public function mount(): void
     {
+        $this->availableWidgets = $this->filterWidgets(Widget::all());
         $this->widgets();
     }
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.dashboard.dashboard', [
-            'availableWidgets' => $this->filterWidgets(Widget::all()),
-        ]);
+        return view('flux::livewire.dashboard.dashboard');
     }
 
     public function widgets(): void
@@ -38,30 +39,49 @@ class Dashboard extends Component
     }
 
     #[Renderless]
-    public function saveDashboard(array $sortedIds = []): void
+    public function syncWidgets(array $widgets): void
     {
+        $this->widgets = $widgets;
+    }
+
+    #[Renderless]
+    public function saveDashboard(array $widgets): void
+    {
+        $this->widgets = $widgets;
+
         $existingItemIds = array_filter(Arr::pluck($this->widgets, 'id'), 'is_numeric');
         auth()->user()->widgets()->whereNotIn('id', $existingItemIds)->delete();
 
         // create new widgets, update existing widgets
         foreach ($this->widgets as &$widget) {
             $savedWidget = auth()->user()->widgets()->updateOrCreate(['id' => $widget['id']], $widget);
-            $position = array_search($widget['id'], $sortedIds);
-
-            if ($position !== false) {
-                $sortedIds[$position] = $savedWidget->id;
-            }
-
             $widget['id'] = $savedWidget->id;
         }
-
-        $sortedIds = array_filter($sortedIds, 'is_numeric');
-        app(WidgetModel::class)->setNewOrder($sortedIds);
 
         $this->widgets();
     }
 
-    private function filterWidgets(array $widgets): array
+    public function cancelDashboard(): void
+    {
+        $this->widgets();
+    }
+
+    #[Js]
+    public function disableEditMode(): void
+    {
+        $this->js(<<<'JS'
+            isLoading = true;
+            editGridMode(false);
+        JS);
+    }
+
+    #[Renderless]
+    public function showFlashMessage(): void
+    {
+        $this->notification()->success(__('Dashboard syncing'));
+    }
+
+    protected function filterWidgets(array $widgets): array
     {
         return array_filter(
             $widgets,

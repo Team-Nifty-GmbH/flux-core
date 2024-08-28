@@ -14,13 +14,13 @@ use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Auth\Logout;
 use FluxErp\Livewire\Auth\ResetPassword;
 use FluxErp\Livewire\Calendars\Calendar;
+use FluxErp\Livewire\Contact\CommunicationList;
 use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Livewire\DataTables\CommissionList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\PaymentRunList;
-use FluxErp\Livewire\DataTables\ProductOptionGroupList;
 use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
 use FluxErp\Livewire\DataTables\SerialNumberList;
 use FluxErp\Livewire\DataTables\TicketList;
@@ -56,6 +56,8 @@ use FluxErp\Livewire\Settings\PaymentTypes;
 use FluxErp\Livewire\Settings\Permissions;
 use FluxErp\Livewire\Settings\Plugins;
 use FluxErp\Livewire\Settings\PriceLists;
+use FluxErp\Livewire\Settings\ProductOptionGroups;
+use FluxErp\Livewire\Settings\ProductPropertyGroups;
 use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\Scheduling;
@@ -109,8 +111,13 @@ Route::middleware('web')
             Route::middleware(TrackVisits::class)->group(function () {
                 Route::get('/mail', Mail::class)->name('mail');
                 Route::get('/calendars', Calendar::class)->name('calendars');
-                Route::get('/contacts', AddressList::class)->name('contacts');
-                Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
+
+                Route::name('contacts.')->prefix('contacts')
+                    ->group(function () {
+                        Route::get('/', AddressList::class)->name('contacts');
+                        Route::get('/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
+                        Route::get('/communications', CommunicationList::class)->name('communications');
+                    });
 
                 Route::name('orders.')->prefix('orders')
                     ->group(function () {
@@ -153,7 +160,8 @@ Route::middleware('web')
                         Route::get('/additional-columns', AdditionalColumns::class)->name('additional-columns');
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
                         Route::get('/categories', Categories::class)->name('categories');
-                        Route::get('/product-option-groups', ProductOptionGroupList::class)->name('product-option-groups');
+                        Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
+                        Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');
                         Route::get('/clients', Clients::class)->name('clients');
                         Route::get('/bank-connections', BankConnections::class)->name('bank-connections');
                         Route::get('/clients/{client}/customer-portal', CustomerPortal::class)->name('customer-portal');

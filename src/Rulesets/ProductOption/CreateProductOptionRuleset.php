@@ -18,7 +18,7 @@ class CreateProductOptionRuleset extends FluxRuleset
             'product_option_group_id' => [
                 'required',
                 'integer',
-                new ModelExists(ProductOptionGroup::class),
+                app(ModelExists::class, ['model' => ProductOptionGroup::class]),
             ],
             'name' => 'required|string',
         ];

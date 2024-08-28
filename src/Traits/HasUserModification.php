@@ -2,102 +2,63 @@
 
 namespace FluxErp\Traits;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
+use FluxErp\Casts\MorphTo;
+use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
+use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin \Illuminate\Database\Eloquent\Model
+ * @mixin HasTimestamps
+ */
 trait HasUserModification
 {
-    use LogsActivity;
-
-    public function getActivityLogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->useLogName('model_events')
-            ->logAll()
-            ->dontLogIfAttributesChangedOnly(['created_at', 'updated_at'])
-            ->dontSubmitEmptyLogs()
-            ->logExcept(['created_at', 'updated_at', 'deleted_at'])
-            ->logOnlyDirty();
-    }
-
     public function initializeHasUserModification(): void
     {
-        $this->mergeGuarded([
-            'created_at',
-            'updated_at',
-            'deleted_at',
+        $this->mergeCasts([
+            $this->getCreatedByColumn() => MorphTo::class . ':name',
+            $this->getUpdatedByColumn() => MorphTo::class . ':name',
         ]);
     }
 
-    public function createdBy(): Attribute
+    public function setCreatedAt($value): static
     {
-        return Attribute::get(
-            fn () => $this->activityAttributeQuery('created')
-                ->select(['id', 'causer_type', 'causer_id'])
-                ->with([
-                    'causer' => fn (MorphTo $query) => $query->withoutGlobalScopes()
-                        ->withTrashed()
-                        ->select(['id', 'name']),
-                ])
-                ->first()
-                ?->causer,
-        );
+        $this->{$this->getCreatedByColumn()} = auth()->user()
+            ? auth()->user()->getMorphClass() . ':' . auth()->user()->getKey()
+            : null;
+
+        return parent::setCreatedAt($value);
     }
 
-    public function updatedBy(): Attribute
+    public function setUpdatedAt($value): static
     {
-        return Attribute::get(function () {
-            $activity = $this->activityAttributeQuery('updated')
-                ->select(['id', 'causer_type', 'causer_id'])
-                ->with([
-                    'causer' => fn (MorphTo $query) => $query->withoutGlobalScopes()
-                        ->withTrashed()
-                        ->select(['id', 'name']),
-                ])
-                ->orderBy('id', 'desc')
-                ->first();
+        $this->{$this->getUpdatedByColumn()} = auth()->user()
+            ? auth()->user()->getMorphClass() . ':' . auth()->user()->getKey()
+            : null;
 
-            if ($activity?->causer_id === $this->id
-                && $activity?->causer_type === $this->getMorphClass()
-            ) {
-                return [
-                    'causer_type' => $activity->causer_type,
-                    'causer_id' => $activity->causer_id,
-                ];
-            }
-
-            return $activity?->causer ?? $this->created_by;
-        });
+        return parent::setUpdatedAt($value);
     }
 
-    public function deletedBy(): Attribute
+    public function getCreatedByColumn(): string
     {
-        return Attribute::get(
-            fn () => $this->activityAttributeQuery('deleted')
-                ->select(['id', 'causer_type', 'causer_id'])
-                ->with([
-                    'causer' => fn (MorphTo $query) => $query->withoutGlobalScopes()
-                        ->withTrashed()
-                        ->select(['id', 'name']),
-                ])
-                ->orderBy('id', 'desc')
-                ->first()
-                ?->causer
-        );
+        return defined(static::class . '::CREATED_BY') ? static::CREATED_BY : 'created_by';
     }
 
-    private function activityAttributeQuery(?string $event = null): MorphMany
+    public function getUpdatedByColumn(): string
     {
-        $query = $this->activities()
-            ->where('log_name', 'model_events');
+        return defined(static::class . '::UPDATED_BY') ? static::UPDATED_BY : 'updated_by';
+    }
 
-        if ($event) {
-            $query->where('event', $event);
-        }
+    public function getCreatedBy(): ?Model
+    {
+        $user = $this->getRawOriginal($this->getCreatedByColumn());
 
-        return $query;
+        return $user ? morph_to($user) : null;
+    }
+
+    public function getUpdatedBy(): ?Model
+    {
+        $user = $this->getRawOriginal($this->getUpdatedByColumn());
+
+        return $user ? morph_to($user) : null;
     }
 }

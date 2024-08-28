@@ -21,7 +21,7 @@ class Tickets extends TicketList
         );
     }
 
-    public function getTableActions(): array
+    protected function getTableActions(): array
     {
         return [];
     }

@@ -21,12 +21,12 @@ class CreateUserRuleset extends FluxRuleset
             'language_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Language::class),
+                app(ModelExists::class, ['model' => Language::class]),
             ],
             'parent_id' => [
                 'integer',
                 'nullable',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => User::class]),
             ],
             'email' => 'required|email|unique:users,email',
             'firstname' => 'required|string',
@@ -35,7 +35,7 @@ class CreateUserRuleset extends FluxRuleset
             'user_code' => 'required|string|unique:users,user_code',
             'cost_per_hour' => [
                 'nullable',
-                new Numeric,
+                app(Numeric::class),
             ],
             'is_active' => 'sometimes|boolean',
         ];

@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webklex\IMAP\Facades\Client as ImapClient;
@@ -18,7 +19,7 @@ use Webklex\PHPIMAP\Exceptions\RuntimeException;
 
 class MailAccount extends Model
 {
-    use HasPackageFactory, HasUserModification, HasUuid;
+    use HasPackageFactory, HasUserModification, HasUuid, LogsActivity;
 
     protected $guarded = [
         'id',

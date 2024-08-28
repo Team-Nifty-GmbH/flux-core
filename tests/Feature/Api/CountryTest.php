@@ -144,8 +144,8 @@ class CountryTest extends BaseSetup
         $this->assertEquals($country['currency_id'], $dbCountry->currency_id);
         $this->assertEquals($country['name'], $dbCountry->name);
         $this->assertEquals($country['iso_alpha2'], $dbCountry->iso_alpha2);
-        $this->assertEquals($this->user->id, $dbCountry->created_by->id);
-        $this->assertEquals($this->user->id, $dbCountry->updated_by->id);
+        $this->assertTrue($this->user->is($dbCountry->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbCountry->getUpdatedBy()));
     }
 
     public function test_create_country_maximum()
@@ -183,8 +183,8 @@ class CountryTest extends BaseSetup
         $this->assertEquals($country['is_active'], $dbCountry->is_active);
         $this->assertEquals($country['is_default'], $dbCountry->is_default);
         $this->assertEquals($country['is_eu_country'], $dbCountry->is_eu_country);
-        $this->assertEquals($this->user->id, $dbCountry->created_by->id);
-        $this->assertEquals($this->user->id, $dbCountry->updated_by->id);
+        $this->assertTrue($this->user->is($dbCountry->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbCountry->getUpdatedBy()));
     }
 
     public function test_create_country_validation_fails()
@@ -239,7 +239,7 @@ class CountryTest extends BaseSetup
 
         $this->assertNotEmpty($dbCountry);
         $this->assertEquals($country['id'], $dbCountry->id);
-        $this->assertEquals($this->user->id, $dbCountry->updated_by->id);
+        $this->assertTrue($this->user->is($dbCountry->getUpdatedBy()));
     }
 
     public function test_update_country_maximum()
@@ -279,7 +279,7 @@ class CountryTest extends BaseSetup
         $this->assertEquals($country['is_active'], $dbCountry->is_active);
         $this->assertEquals($country['is_default'], $dbCountry->is_default);
         $this->assertEquals($country['is_eu_country'], $dbCountry->is_eu_country);
-        $this->assertEquals($this->user->id, $dbCountry->updated_by->id);
+        $this->assertTrue($this->user->is($dbCountry->getUpdatedBy()));
     }
 
     public function test_update_country_validation_fails()
@@ -324,7 +324,7 @@ class CountryTest extends BaseSetup
 
         $country = $this->countries[1]->fresh();
         $this->assertNotNull($country->deleted_at);
-        $this->assertEquals($this->user->id, $country->deleted_by->id);
+        $this->assertTrue($this->user->is($country->getDeletedBy()));
     }
 
     public function test_delete_country_country_not_found()

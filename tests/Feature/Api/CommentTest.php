@@ -9,6 +9,7 @@ use FluxErp\Models\Unit;
 use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 
 class CommentTest extends BaseSetup
@@ -24,7 +25,7 @@ class CommentTest extends BaseSetup
         parent::setUp();
 
         $this->comment = Comment::factory()->create([
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'model_id' => $this->user->id,
             'comment' => 'User Comment from a Test!',
         ]);
@@ -40,8 +41,8 @@ class CommentTest extends BaseSetup
 
     public function test_get_user_comments()
     {
-        $dbComment = new Comment;
-        $dbComment->model_type = app(User::class)->getMorphClass();
+        $dbComment = new Comment();
+        $dbComment->model_type = morph_alias(User::class);
         $dbComment->model_id = $this->user->id;
         $dbComment->comment = 'User Comment from a Test!';
         $dbComment->save();
@@ -49,7 +50,7 @@ class CommentTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/user/comments/'.$this->user->id);
+        $response = $this->actingAs($this->user)->get('/api/user/comments/' . $this->user->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -66,7 +67,7 @@ class CommentTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/notExistingTestModel/comments/'.$this->user->id);
+        $response = $this->actingAs($this->user)->get('/api/notExistingTestModel/comments/' . $this->user->id);
         $response->assertStatus(404);
     }
 
@@ -75,7 +76,7 @@ class CommentTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/user/comments/'.++$this->user->id);
+        $response = $this->actingAs($this->user)->get('/api/user/comments/' . ++$this->user->id);
         $response->assertStatus(404);
     }
 
@@ -83,7 +84,7 @@ class CommentTest extends BaseSetup
     {
         $comment = [
             'model_id' => $this->user->id,
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'comment' => 'test comment',
         ];
 
@@ -99,10 +100,10 @@ class CommentTest extends BaseSetup
             ->first();
         $this->assertNotEmpty($dbComment);
         $this->assertEquals($comment['model_id'], $dbComment->model_id);
-        $this->assertEquals(app(User::class)->getMorphClass(), $dbComment->model_type);
+        $this->assertEquals(morph_alias(User::class), $dbComment->model_type);
         $this->assertEquals($comment['comment'], $dbComment->comment);
-        $this->assertEquals($this->user->id, $dbComment->created_by->id);
-        $this->assertEquals($this->user->id, $dbComment->updated_by->id);
+        $this->assertTrue($this->user->is($dbComment->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbComment->getUpdatedBy()));
     }
 
     public function test_create_comment_validation_fails()
@@ -138,7 +139,7 @@ class CommentTest extends BaseSetup
     {
         $comment = [
             'model_id' => 1,
-            'model_type' => app(Unit::class)->getMorphClass(),
+            'model_type' => morph_alias(Unit::class),
             'comment' => 'test comment',
         ];
 
@@ -153,7 +154,7 @@ class CommentTest extends BaseSetup
     {
         $comment = [
             'model_id' => ++$this->user->id,
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'comment' => 'test comment',
         ];
 
@@ -168,7 +169,7 @@ class CommentTest extends BaseSetup
     {
         $comment = [
             'model_id' => $this->user->id,
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'parent_id' => $this->comment->id,
             'comment' => 'child comment',
         ];
@@ -193,7 +194,7 @@ class CommentTest extends BaseSetup
     {
         $comment = [
             'model_id' => $this->user->id,
-            'model_type' => app(User::class)->getMorphClass(),
+            'model_type' => morph_alias(User::class),
             'parent_id' => ++$this->comment->id,
             'comment' => 'child comment',
         ];
@@ -229,19 +230,21 @@ class CommentTest extends BaseSetup
 
     public function test_delete_comment()
     {
-        $activity = $this->comment->activities()->where('event', 'created')->first();
-        $activity->causer()->associate($this->user);
-        $activity->save();
+        DB::table($this->comment->getTable())
+            ->where($this->comment->getKeyName(), $this->comment->getKey())
+            ->update([
+                'created_by' => $this->user->getMorphClass() . ':' . $this->user->getKey(),
+            ]);
 
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/comments/'.$this->comment->id);
+        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
         $response->assertStatus(204);
 
         $dbComment = $this->comment->fresh();
         $this->assertNotNull($dbComment->deleted_at);
-        $this->assertEquals($this->user->id, $dbComment->deleted_by->id);
+        $this->assertTrue($this->user->is($dbComment->getDeletedBy()));
     }
 
     public function test_delete_comment_different_user()
@@ -249,7 +252,7 @@ class CommentTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/comments/'.$this->comment->id);
+        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
         $response->assertStatus(403);
 
         $dbComment = Comment::query()->whereKey($this->comment->id)->first();
@@ -261,7 +264,7 @@ class CommentTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/comments/'.$this->comment->id + 1);
+        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id + 1);
         $response->assertStatus(404);
     }
 
@@ -278,12 +281,12 @@ class CommentTest extends BaseSetup
         $this->user->assignRole('Super Admin');
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/comments/'.$this->comment->id);
+        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
         $response->assertStatus(204);
 
         $dbComment = $this->comment->fresh();
-        $this->assertNotEquals($dbComment->created_by->id, $this->user->id);
+        $this->assertFalse($this->user->is($dbComment->getCreatedBy()));
         $this->assertNotNull($dbComment->deleted_at);
-        $this->assertEquals($this->user->id, $dbComment->deleted_by->id);
+        $this->assertTrue($this->user->is($dbComment->getDeletedBy()));
     }
 }

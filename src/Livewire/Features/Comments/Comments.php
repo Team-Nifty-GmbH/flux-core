@@ -84,7 +84,7 @@ class Comments extends Component
             ->comments()
             ->get()
             ->each(function (Comment $comment) {
-                $comment->is_current_user = $comment->createdBy?->is(Auth::user());
+                $comment->is_current_user = $comment->getCreatedBy()?->is(Auth::user());
             })
             ->toArray();
 
@@ -202,7 +202,7 @@ class Comments extends Component
             ->paginate($this->commentsPerPage * $this->commentPage);
 
         $data = $comments->getCollection()->each(function ($comment) {
-            $comment->is_current_user = $comment->createdBy?->is(Auth::user());
+            $comment->is_current_user = $comment->getCreatedBy()?->is(Auth::user());
         });
 
         $comments->setCollection($data);

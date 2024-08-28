@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Charts;
 use FluxErp\Enums\TimeFrameEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
 abstract class Chart extends Component
@@ -86,6 +87,7 @@ abstract class Chart extends Component
         }
     }
 
+    #[Renderless]
     public function getOptions(): array
     {
         $public = [];
@@ -125,6 +127,7 @@ abstract class Chart extends Component
         $this->skipRender();
     }
 
+    #[Renderless]
     public function getSum(
         Builder $builder,
         TimeFrameEnum $timeFrameEnum,
@@ -140,11 +143,12 @@ abstract class Chart extends Component
             ->toArray();
     }
 
+    #[Renderless]
     public function updateData(): void
     {
         $this->js(
             <<<'JS'
-                Alpine.$data($el.querySelector('[apex_chart]')).updateData();
+                Alpine.$data($el).updateData();
             JS
         );
     }

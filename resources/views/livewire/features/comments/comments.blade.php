@@ -62,7 +62,7 @@
                 <template x-ref="textarea">
                     <x-features.comments.input />
                 </template>
-                @if(user_can('action.comment.create') || $this->isPublic === false)
+                @if(resolve_static(\FluxErp\Actions\Comment\CreateComment::class, 'canPerformAction', [false]) || $this->isPublic === false)
                     <x-features.comments.input />
                 @endcan
                 <div class="relative">

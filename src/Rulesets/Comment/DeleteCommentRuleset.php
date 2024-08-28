@@ -18,7 +18,7 @@ class DeleteCommentRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Comment::class),
+                app(ModelExists::class, ['model' => Comment::class]),
             ],
         ];
     }

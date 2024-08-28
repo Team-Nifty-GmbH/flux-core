@@ -16,7 +16,7 @@ class UpdateUnitRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Unit::class),
+                app(ModelExists::class, ['model' => Unit::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'abbreviation' => 'sometimes|required|string|max:10',

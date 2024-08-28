@@ -12,6 +12,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
@@ -25,9 +26,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Project extends Model implements InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment,
-        HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification,
-        HasUuid, Searchable, SoftDeletes;
+    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
+        HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, LogsActivity,
+        Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',

@@ -3,6 +3,11 @@
 @import "/node_modules/@fontsource/inter/latin-600.css";
 @import "/node_modules/@fontsource/inter/latin-900.css";
 @import "/node_modules/leaflet/dist/leaflet.css";
+@import "/node_modules/leaflet.markercluster/dist/MarkerCluster.css";
+@import "/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css";
+
+@import '/node_modules/gridstack/dist/gridstack.min.css';
+@import '/node_modules/gridstack/dist/gridstack-extra.min.css';
 
 @import "/node_modules/filepond/dist/filepond.css";
 @import "/node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
@@ -66,7 +71,7 @@
     }
 
     #map {
-        @apply h-96
+        @apply h-96 z-0;
     }
 
     .mention {
@@ -141,3 +146,32 @@
         @apply border dark:border-slate-600;
     }
 }
+
+.grid-stack {
+    @apply w-full
+}
+
+.grid-stack-item-content {
+    @apply flex place-content-center col-span-full dark:text-gray-50 m-0 rounded-lg shadow-md bg-white dark:bg-secondary-800;
+}
+
+.grid-stack > .grid-stack-item > .grid-stack-item-content {
+    @apply overflow-hidden;
+}
+
+::-webkit-scrollbar {
+    width: .5rem;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-gray-200 dark:bg-gray-700 rounded;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+}
+
