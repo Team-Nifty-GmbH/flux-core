@@ -32,12 +32,12 @@ class WidgetList extends Component
                 $name = $widget['component_name'];
 
                 try {
-                    $permissionExists = app(Permission::class)->findByName('widget.' . $name)->exists;
+                    $permissionExists = app(Permission::class)->findByName('widget.'.$name)->exists;
                 } catch (PermissionDoesNotExist) {
                     $permissionExists = false;
                 }
 
-                return (! $permissionExists || auth()->user()->can('widget.' . $name))
+                return (! $permissionExists || auth()->user()->can('widget.'.$name))
                     && array_key_exists($name, Widget::all());
             }
         );

@@ -69,7 +69,7 @@ class CommunicationForm extends FluxForm
                     ? $communicatable->communicatable->getLabel()
                     : null;
 
-                $communicatable->label =  $modelLabel ? $typeLabel . ': ' . $modelLabel : $typeLabel;
+                $communicatable->label = $modelLabel ? $typeLabel.': '.$modelLabel : $typeLabel;
 
                 $communicatable->unsetRelation('communicatable');
             });

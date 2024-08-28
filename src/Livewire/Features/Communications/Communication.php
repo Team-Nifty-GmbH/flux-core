@@ -147,8 +147,8 @@ class Communication extends CommunicationList
             'communicatable_type' => $modelType,
             'communicatable_id' => $modelId,
             'href' => method_exists($model, 'getUrl') ? $model->getUrl() : null,
-            'label' => __(Str::headline($modelType)) . ': '
-                . (method_exists($model, 'getLabel') ? $model->getLabel() : $model->getKey()),
+            'label' => __(Str::headline($modelType)).': '
+                .(method_exists($model, 'getLabel') ? $model->getLabel() : $model->getKey()),
         ];
     }
 
@@ -271,7 +271,7 @@ class Communication extends CommunicationList
                 'communicatable_type' => $address->getMorphClass(),
                 'communicatable_id' => $address->id,
                 'href' => $address->getUrl(),
-                'label' => __(Str::headline($address->getMorphClass())) . ': ' . $address->getLabel(),
+                'label' => __(Str::headline($address->getMorphClass())).': '.$address->getLabel(),
             ],
         ];
 

@@ -110,7 +110,7 @@ class SignaturePublicLinkTest extends TestCase
             'model_id' => $this->order->id,
             'model_type' => $this->order->getMorphClass(),
             'collection_name' => 'signature',
-            'name' => 'signature-' . array_keys($this->order->resolvePrintViews())[0],
+            'name' => 'signature-'.array_keys($this->order->resolvePrintViews())[0],
             'custom_properties->name' => 'John Doe',
         ]);
     }

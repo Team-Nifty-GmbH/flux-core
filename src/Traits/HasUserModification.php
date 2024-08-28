@@ -15,15 +15,15 @@ trait HasUserModification
     public function initializeHasUserModification(): void
     {
         $this->mergeCasts([
-            $this->getCreatedByColumn() => MorphTo::class . ':name',
-            $this->getUpdatedByColumn() => MorphTo::class . ':name',
+            $this->getCreatedByColumn() => MorphTo::class.':name',
+            $this->getUpdatedByColumn() => MorphTo::class.':name',
         ]);
     }
 
     public function setCreatedAt($value): static
     {
         $this->{$this->getCreatedByColumn()} = auth()->user()
-            ? auth()->user()->getMorphClass() . ':' . auth()->user()->getKey()
+            ? auth()->user()->getMorphClass().':'.auth()->user()->getKey()
             : null;
 
         return parent::setCreatedAt($value);
@@ -32,7 +32,7 @@ trait HasUserModification
     public function setUpdatedAt($value): static
     {
         $this->{$this->getUpdatedByColumn()} = auth()->user()
-            ? auth()->user()->getMorphClass() . ':' . auth()->user()->getKey()
+            ? auth()->user()->getMorphClass().':'.auth()->user()->getKey()
             : null;
 
         return parent::setUpdatedAt($value);
@@ -40,12 +40,12 @@ trait HasUserModification
 
     public function getCreatedByColumn(): string
     {
-        return defined(static::class . '::CREATED_BY') ? static::CREATED_BY : 'created_by';
+        return defined(static::class.'::CREATED_BY') ? static::CREATED_BY : 'created_by';
     }
 
     public function getUpdatedByColumn(): string
     {
-        return defined(static::class . '::UPDATED_BY') ? static::UPDATED_BY : 'updated_by';
+        return defined(static::class.'::UPDATED_BY') ? static::UPDATED_BY : 'updated_by';
     }
 
     public function getCreatedBy(): ?Model

@@ -41,7 +41,7 @@ class CommentTest extends BaseSetup
 
     public function test_get_user_comments()
     {
-        $dbComment = new Comment();
+        $dbComment = new Comment;
         $dbComment->model_type = morph_alias(User::class);
         $dbComment->model_id = $this->user->id;
         $dbComment->comment = 'User Comment from a Test!';
@@ -50,7 +50,7 @@ class CommentTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/user/comments/' . $this->user->id);
+        $response = $this->actingAs($this->user)->get('/api/user/comments/'.$this->user->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -67,7 +67,7 @@ class CommentTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/notExistingTestModel/comments/' . $this->user->id);
+        $response = $this->actingAs($this->user)->get('/api/notExistingTestModel/comments/'.$this->user->id);
         $response->assertStatus(404);
     }
 
@@ -76,7 +76,7 @@ class CommentTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/user/comments/' . ++$this->user->id);
+        $response = $this->actingAs($this->user)->get('/api/user/comments/'.++$this->user->id);
         $response->assertStatus(404);
     }
 
@@ -233,13 +233,13 @@ class CommentTest extends BaseSetup
         DB::table($this->comment->getTable())
             ->where($this->comment->getKeyName(), $this->comment->getKey())
             ->update([
-                'created_by' => $this->user->getMorphClass() . ':' . $this->user->getKey(),
+                'created_by' => $this->user->getMorphClass().':'.$this->user->getKey(),
             ]);
 
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
+        $response = $this->actingAs($this->user)->delete('/api/comments/'.$this->comment->id);
         $response->assertStatus(204);
 
         $dbComment = $this->comment->fresh();
@@ -252,7 +252,7 @@ class CommentTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
+        $response = $this->actingAs($this->user)->delete('/api/comments/'.$this->comment->id);
         $response->assertStatus(403);
 
         $dbComment = Comment::query()->whereKey($this->comment->id)->first();
@@ -264,7 +264,7 @@ class CommentTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id + 1);
+        $response = $this->actingAs($this->user)->delete('/api/comments/'.$this->comment->id + 1);
         $response->assertStatus(404);
     }
 
@@ -281,7 +281,7 @@ class CommentTest extends BaseSetup
         $this->user->assignRole('Super Admin');
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
+        $response = $this->actingAs($this->user)->delete('/api/comments/'.$this->comment->id);
         $response->assertStatus(204);
 
         $dbComment = $this->comment->fresh();

@@ -18,7 +18,7 @@ class ProductPropertyGroupList extends BaseProductPropertyGroupList
         $this->filters = [[
             'name',
             'like',
-            '%' . $this->search . '%',
+            '%'.$this->search.'%',
         ]];
 
         parent::startSearch();

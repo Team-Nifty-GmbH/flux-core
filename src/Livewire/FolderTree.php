@@ -5,14 +5,12 @@ namespace FluxErp\Livewire;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\DeleteMediaCollection;
 use FluxErp\Actions\Media\UpdateMedia;
-use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Models\Media as MediaModel;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -54,15 +52,16 @@ class FolderTree extends Component
     public function getRules(): array
     {
         return [
-            'files.*'=> 'required|file|max:1024',
+            'files.*' => 'required|file|max:1024',
         ];
     }
 
-    public function getRulesSingleFile(int $index,string $collectionName): array
+    public function getRulesSingleFile(int $index, string $collectionName): array
     {
+        // get the base collection name - ignore subfolders
+        $baseCollection = str_contains($collectionName, '.') ? explode('.', $collectionName)[0] : $collectionName;
 
-        $baseCollection =  str_contains($collectionName,'.') ?  explode('.',$collectionName)[0] : $collectionName;
-
+        // get the validation rules for the model type
         $modelTypeValidationRules = app($this->modelType)
             ->query()
             ->whereKey($this->modelId)
@@ -70,15 +69,12 @@ class FolderTree extends Component
             ?->getMediaCollection($baseCollection)
             ?->acceptsMimeTypes;
 
-
+        // merge the validation rules
         return [
             'files.'.$index => is_null($modelTypeValidationRules) ? 'required|file|max:1024' : 'required|file|max:1024|mimetypes:'
-                . implode(',',$modelTypeValidationRules),
+                .implode(',', $modelTypeValidationRules),
         ];
     }
-
-
-
 
     #[Renderless]
     public function updatedFiles(): void
@@ -87,27 +83,29 @@ class FolderTree extends Component
             resolve_static(UpdateMedia::class, 'canPerformAction', [false]);
         } catch (UnauthorizedException $e) {
             exception_to_notifications($e, $this);
+
             return;
         }
     }
 
     #[Renderless]
-    public function validateOnDemand(string $fileId,string $collectionName):bool
+    public function validateOnDemand(string $fileId, string $collectionName): bool
     {
-
+        // find the index of the file in the files array - which invokes the validation
         $index = array_search($fileId, array_map(function ($item) {
             return $item->getFilename();
-        } ,$this->files));
+        }, $this->files));
 
-        if($index === false) {
+        if ($index === false) {
             return false;
         }
 
         try {
-            $this->validate($this->getRulesSingleFile($index,$collectionName));
+            $this->validate($this->getRulesSingleFile($index, $collectionName));
         } catch (ValidationException $e) {
             // Handle the validation exception
             exception_to_notifications($e, $this);
+
             return false;
         }
 
@@ -136,6 +134,7 @@ class FolderTree extends Component
             $this->files = [];
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
+
             return false;
         }
 

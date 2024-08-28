@@ -70,7 +70,7 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
         });
 
         static::saved(function (User $user) {
-            Cache::forget('morph_to:' . $user->getMorphClass() . ':' . $user->id);
+            Cache::forget('morph_to:'.$user->getMorphClass().':'.$user->id);
         });
     }
 

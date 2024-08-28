@@ -85,7 +85,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
             if (! $address) {
                 $address = resolve_static(Address::class, 'query')
                     ->with('contact')
-                    ->where('url', 'like', '%' . Str::after($email, '@'))
+                    ->where('url', 'like', '%'.Str::after($email, '@'))
                     ->first();
             }
         }
@@ -110,7 +110,7 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         });
 
         static::saved(function (Address $address) {
-            Cache::forget('morph_to:' . $address->getMorphClass() . ':' . $address->id);
+            Cache::forget('morph_to:'.$address->getMorphClass().':'.$address->id);
 
             $contactUpdates = [];
             $addressesUpdates = [];
