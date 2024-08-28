@@ -1,6 +1,6 @@
-<div x-data="{
+<div
+    x-data="{
         ...folderTree(),
-        ...filePond($wire,$refs.upload, '{{__('Upload with drag and drop…')}}'),
         async loadLevels() {
             this.levels = await $wire.getTree();
         },
@@ -70,12 +70,8 @@
         isFolder(level) {
             return level.hasOwnProperty('children') && ! level.hasOwnProperty('file_name');
         },
-        isUploading: false,
-        progress: 0,
         filesArray: $wire.entangle('filesArray', true),
         uploadError(message) {
-            this.isUploading = false;
-            this.progress = 0;
             window.$wireui.notify({
                 title: '{{  __('File upload failed') }}',
                 description: message ? message : '{{ __('Your file upload failed. Please try again.') }}',
@@ -83,14 +79,11 @@
             });
         },
         async uploadSuccess() {
-            console.log('upload success',this.selectionProxy);
-            this.isUploading = false
-            this.progress = 0
             this.showLevel(null, this.selectionProxy);
-             console.log(this.selectionProxy)
             (await $wire.get('latestUploads')).forEach((file) => {
-                this.folderTree.selectionProxy.children.push(file);
-                this.folderTree.selection = JSON.parse(JSON.stringify(this.folderTree.selectionProxy));
+                console.log(this);
+                this.selectionProxy.children.push(file);
+                this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
             },this);
         },
         save() {
@@ -203,12 +196,14 @@
                 </div>
             @endcan
             @can('action.media.upload')
-                <div class="flex flex-col items-end">
+                <div class="flex flex-col items-end"
+                x-data="filePond($wire,$refs.upload, '{{__('Upload with drag and drop…')}}')"
+                >
                     <div class="w-full mb-4">
                         <input x-init="loadFilePond()" id="filepond-drop" type="file" />
                     </div>
                     <x-button x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0" x-cloak
-                              x-on:click="submitFiles(selectionProxy.collection_name, uploadSuccess)"
+                              x-on:click="submitFiles(selectionProxy.collection_name,uploadSuccess)"
                               primary
                               :label="__('Upload')" />
                 </div>

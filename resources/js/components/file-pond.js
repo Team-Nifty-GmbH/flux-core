@@ -5,7 +5,11 @@ export default function($wire, $ref, label) {
     return {
         tempFilesId: [],
         isLoadingFiles: [],
+        selectedCollection: null,
         pond:null,
+        setCollection(collectionName){
+            this.selectedCollection = collectionName;
+        },
         loadFilePond() {
             registerPlugin(FilePondPluginImagePreview);
 
@@ -63,19 +67,17 @@ export default function($wire, $ref, label) {
                 }
             });
         },
-        async submitFiles(collectionName,sideEffect){
+        async submitFiles(collectionName,successCallback){
             const response = await $wire.submitFiles(collectionName,this.tempFilesId);
-            console.log('RESPONSE',response);
             if(response && this.pond !== null){
                 this.tempFilesId = [];
                 this.pond.removeFiles()
+                // TODO: make it like side effect - this belongs to x-data - cannot pass as argument
+                // it loses referance to this keyword
+                await (successCallback.bind(this))();
+            } else {
+
             }
-            // TODO: make it like side effect - this belongs to folder-tree.js
-            this.showLevel(null, this.selectionProxy);
-            (await $wire.get('latestUploads')).forEach((file) => {
-                this.selectionProxy.children.push(file);
-                this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
-            });
         }
     };
 }
