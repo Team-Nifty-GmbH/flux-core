@@ -60,7 +60,7 @@ class LockController extends BaseController
 
         $validator = Validator::make(
             $request->all(),
-            array_merge(array_combine($columns, $validationStrings), (new LockRequest)->rules())
+            array_merge(array_combine($columns, $validationStrings), (new LockRequest())->rules())
         );
 
         if ($validator->fails()) {

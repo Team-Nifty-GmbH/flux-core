@@ -35,6 +35,6 @@ class SepaMandateView extends PrintableView
 
     public function getSubject(): string
     {
-        return __('Sepa Mandate').' '.$this->model->contact->mainAddress->name;
+        return __('Sepa Mandate') . ' ' . $this->model->contact->mainAddress->name;
     }
 }

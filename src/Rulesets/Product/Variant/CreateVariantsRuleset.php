@@ -53,7 +53,7 @@ class CreateVariantsRuleset extends FluxRuleset
             ),
             Arr::mapWithKeys(
                 resolve_static(ProductOptionRuleset::class, 'getRules'),
-                fn ($item, $key) => [$key.'.*' => $item]
+                fn ($item, $key) => [$key . '.*' => $item]
             ),
             parent::getRules(),
         );

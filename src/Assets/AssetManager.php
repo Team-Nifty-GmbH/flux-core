@@ -90,7 +90,7 @@ class AssetManager implements Htmlable
 
     public function vite(string $path, string|array $files, string $manifestFilename = 'manifest.json'): void
     {
-        $buildDirectory = is_dir($path) ? $path : Str::finish($path, '/').$manifestFilename;
+        $buildDirectory = is_dir($path) ? $path : Str::finish($path, '/') . $manifestFilename;
         $vite = invade(app(Vite::class));
         $files = Arr::wrap($files);
 
@@ -113,7 +113,7 @@ class AssetManager implements Htmlable
 
             $this->register(
                 $chunk['src'],
-                Str::finish($buildDirectory, '/').$chunk['file'],
+                Str::finish($buildDirectory, '/') . $chunk['file'],
                 [
                     'is_vite' => true,
                     'alias' => $chunk['file'],
@@ -124,7 +124,7 @@ class AssetManager implements Htmlable
             foreach (data_get($chunk, 'imports', []) as $import) {
                 $this->register(
                     $manifest[$import]['file'],
-                    Str::finish($buildDirectory, '/').$manifest[$import]['file'],
+                    Str::finish($buildDirectory, '/') . $manifest[$import]['file'],
                     [
                         'is_vite' => true,
                         'alias' => $manifest[$import]['file'],
@@ -140,7 +140,7 @@ class AssetManager implements Htmlable
 
             $this->register(
                 $file,
-                Str::finish($buildDirectory, '/').$data['file'],
+                Str::finish($buildDirectory, '/') . $data['file'],
                 [
                     'is_vite' => true,
                     'alias' => $data['file'],

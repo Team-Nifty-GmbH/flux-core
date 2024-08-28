@@ -288,7 +288,7 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/event-subscriptions/'.$this->eventSubscriptions[0]->id);
+            ->delete('/api/event-subscriptions/' . $this->eventSubscriptions[0]->id);
 
         $response->assertStatus(204);
 
@@ -301,7 +301,7 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/event-subscriptions/'.++$this->eventSubscriptions[2]->id);
+            ->delete('/api/event-subscriptions/' . ++$this->eventSubscriptions[2]->id);
 
         $response->assertStatus(404);
     }

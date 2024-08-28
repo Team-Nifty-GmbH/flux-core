@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
@@ -12,13 +12,13 @@ return new class extends Migration
             $table->unsignedBigInteger('currency_id')->after('client_id');
 
             $table->boolean('is_locked')->default(false)->after('has_logistic_notify_number')
-                ->comment('If set to true this order cant be edited anymore, '.
+                ->comment('If set to true this order cant be edited anymore, ' .
                     'this happens usually when the invoice was printed.');
 
             $table->string('invoice_number')->after('invoice_date')->unique()->nullable();
 
             $table->unsignedBigInteger('unit_price_price_list_id')->after('price_list_id')->comment(
-                'Just for customer frontend purposes, the unit price is replaced with the value from '.
+                'Just for customer frontend purposes, the unit price is replaced with the value from ' .
                 'this price_list_id price. This also triggers recalculation of the discount.'
             );
         });

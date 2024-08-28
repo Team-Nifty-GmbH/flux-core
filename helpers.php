@@ -80,7 +80,7 @@ if (! function_exists('get_subclasses_of')) {
     function get_subclasses_of(string $extendingClass, array|string $namespace): array
     {
         if (! class_exists($extendingClass) && ! interface_exists($extendingClass)) {
-            throw new InvalidArgumentException($extendingClass.' is not an existing class.');
+            throw new InvalidArgumentException($extendingClass . ' is not an existing class.');
         }
 
         $autoload = array_keys(include base_path('/vendor/composer/autoload_classmap.php'));
@@ -125,7 +125,7 @@ if (! function_exists('channel_to_permission')) {
 
         $table = (new (implode('\\', $exploded)))->getTable();
 
-        return 'api.'.str_replace('_', '-', $table).$id.'.get';
+        return 'api.' . str_replace('_', '-', $table) . $id . '.get';
     }
 }
 
@@ -145,7 +145,7 @@ if (! function_exists('qualify_model')) {
         $model = str_replace('/', '\\', $model);
         $models = all_models();
 
-        return $models->filter(fn ($item) => str_ends_with(strtolower($item), '\\'.strtolower($model)))->first()
+        return $models->filter(fn ($item) => str_ends_with(strtolower($item), '\\' . strtolower($model)))->first()
             ?: $model;
     }
 }
@@ -240,7 +240,7 @@ if (! function_exists('eloquent_model_event')) {
             ->first();
 
         if (! $modelClass) {
-            throw new InvalidArgumentException('Invalid model: '.$model);
+            throw new InvalidArgumentException('Invalid model: ' . $model);
         }
 
         if (! in_array(
@@ -262,10 +262,10 @@ if (! function_exists('eloquent_model_event')) {
             ]
         )
         ) {
-            throw new InvalidArgumentException('Invalid event: '.$event);
+            throw new InvalidArgumentException('Invalid event: ' . $event);
         }
 
-        return 'eloquent.'.$event.': '.$modelClass;
+        return 'eloquent.' . $event . ': ' . $modelClass;
     }
 }
 
@@ -281,7 +281,7 @@ if (! function_exists('to_flat_tree')) {
             $suffix = \Illuminate\Support\Str::padLeft($loop, $padding, '0');
 
             $node['slug_position'] = ($parent['slug_position'] ?? false)
-                ? $parent['slug_position'].'.'.$suffix
+                ? $parent['slug_position'] . '.' . $suffix
                 : $suffix;
             $node['depth'] = substr_count($node['slug_position'], '.');
 
@@ -343,7 +343,7 @@ if (! function_exists('meilisearch_import_sync')) {
             || ! in_array(\Laravel\Scout\Searchable::class, class_uses($model))
             || ! is_subclass_of($model, \Illuminate\Database\Eloquent\Model::class)
         ) {
-            throw new InvalidArgumentException('Invalid model: '.$model);
+            throw new InvalidArgumentException('Invalid model: ' . $model);
         }
 
         \Illuminate\Support\Facades\Artisan::call(\FluxErp\Console\Commands\Scout\ImportCommand::class, [
@@ -351,7 +351,7 @@ if (! function_exists('meilisearch_import_sync')) {
         ]);
 
         $client = new \MeiliSearch\Client(config('scout.meilisearch.host'), config('scout.meilisearch.key'));
-        $from = $client->getTasks((new \MeiliSearch\Contracts\TasksQuery)
+        $from = $client->getTasks((new \MeiliSearch\Contracts\TasksQuery())
             ->setIndexUids([app($model)->searchableAs()])
             ->setLimit(1))
             ->getFrom();
@@ -363,7 +363,7 @@ if (! function_exists('meilisearch_import_sync')) {
             \FluxErp\Console\Commands\Scout\SyncIndexSettingsCommand::class,
             ['model' => $model]
         );
-        $from = $client->getTasks((new \MeiliSearch\Contracts\TasksQuery)
+        $from = $client->getTasks((new \MeiliSearch\Contracts\TasksQuery())
             ->setIndexUids([app($model)->searchableAs()])
             ->setLimit(1))
             ->getFrom();
@@ -405,8 +405,8 @@ if (! function_exists('bcround')) {
     {
         if (str_contains($number, '.')) {
             return $number[0] !== '-' ?
-                bcadd($number, '0.'.str_repeat('0', $precision).'5', $precision) :
-                bcsub($number, '0.'.str_repeat('0', $precision).'5', $precision);
+                bcadd($number, '0.' . str_repeat('0', $precision) . '5', $precision) :
+                bcsub($number, '0.' . str_repeat('0', $precision) . '5', $precision);
         }
 
         return $number;
@@ -438,7 +438,7 @@ if (! function_exists('bcfloor')) {
 if (! function_exists('flux_path')) {
     function flux_path(string $path = ''): string
     {
-        return __DIR__.($path ? DIRECTORY_SEPARATOR.$path : $path);
+        return __DIR__ . ($path ? DIRECTORY_SEPARATOR . $path : $path);
     }
 }
 
@@ -463,7 +463,7 @@ if (! function_exists('resolve_static')) {
         }
 
         if (! $concrete) {
-            throw new InvalidArgumentException('Invalid class: '.$class);
+            throw new InvalidArgumentException('Invalid class: ' . $class);
         }
 
         if ($method === 'class') {
@@ -475,7 +475,7 @@ if (! function_exists('resolve_static')) {
             $reflectionMethod = $reflectionClass->getMethod($method);
 
             if (! $reflectionMethod->isStatic()) {
-                throw new InvalidArgumentException('Method is not static: '.$method);
+                throw new InvalidArgumentException('Method is not static: ' . $method);
             }
 
             if ($reflectionMethod->getParameters() && is_array($parameters)) {
@@ -484,7 +484,7 @@ if (! function_exists('resolve_static')) {
                 return $concrete::$method();
             }
         } catch (ReflectionException) {
-            throw new InvalidArgumentException('Invalid method: '.$method);
+            throw new InvalidArgumentException('Invalid method: ' . $method);
         }
     }
 }
@@ -493,11 +493,11 @@ if (! function_exists('class_to_broadcast_channel')) {
     function class_to_broadcast_channel(string $class, bool $withParam = true): string
     {
         if (! class_exists($class)) {
-            throw new InvalidArgumentException('Invalid class: '.$class);
+            throw new InvalidArgumentException('Invalid class: ' . $class);
         }
 
         return str_replace('\\', '.', $class)
-            .($withParam ? '.{'.\Illuminate\Support\Str::camel(class_basename($class)).'}' : '');
+            . ($withParam ? '.{' . \Illuminate\Support\Str::camel(class_basename($class)) . '}' : '');
     }
 }
 

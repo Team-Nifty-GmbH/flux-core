@@ -31,7 +31,7 @@ trait InteractsWithMedia
         $mediaCollections = Arr::undot(array_flip($mediaCollections));
 
         foreach ($registeredMediaCollections as $collection) {
-            data_set($mediaCollections, $collection.'.is_static', true);
+            data_set($mediaCollections, $collection . '.is_static', true);
         }
 
         return $this->calculateTree($mediaCollections);
@@ -50,19 +50,19 @@ trait InteractsWithMedia
                 'name' => __($key),
                 'id' => Str::uuid()->toString(),
                 'is_static' => $isStatic,
-                'collection_name' => $prefix.$key,
+                'collection_name' => $prefix . $key,
                 'children' => is_array($item) ?
                     array_merge(
-                        $this->calculateTree($item, $prefix.$key.'.'),
+                        $this->calculateTree($item, $prefix . $key . '.'),
                         $this->media()
-                            ->where('collection_name', $prefix.$key)
+                            ->where('collection_name', $prefix . $key)
                             ->orderBy('name', 'ASC')
                             ->get()
                             ->makeVisible(['id', 'name', 'file_name', 'collection_name', 'disk', 'size', 'mime_type', 'created_at'])
                             ->toArray(),
                     ) :
                     $this->media()
-                        ->where('collection_name', $prefix.$key)
+                        ->where('collection_name', $prefix . $key)
                         ->orderBy('name', 'ASC')
                         ->get(['id', 'name', 'file_name', 'collection_name', 'disk', 'size', 'mime_type', 'created_at'])
                         ->makeVisible(['name', 'collection_name'])

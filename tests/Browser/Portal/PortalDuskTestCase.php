@@ -26,7 +26,7 @@ class PortalDuskTestCase extends DuskTestCase
 
     protected function baseUrl(): string
     {
-        return config('flux.portal_domain').':'.static::getBaseServePort();
+        return config('flux.portal_domain') . ':' . static::getBaseServePort();
     }
 
     public function createLoginUser(): void

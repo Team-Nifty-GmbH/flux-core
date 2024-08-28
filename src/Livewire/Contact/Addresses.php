@@ -64,14 +64,14 @@ class Addresses extends Component
         $listeners = [];
         foreach ($this->addresses as $address) {
             $model->id = $address['id'];
-            $channel = 'echo-private:'.$model->broadcastChannel();
-            $listeners[$channel.',.AddressUpdated'] = 'addressUpdated';
-            $listeners[$channel.',.AddressDeleted'] = 'addressDeleted';
+            $channel = 'echo-private:' . $model->broadcastChannel();
+            $listeners[$channel . ',.AddressUpdated'] = 'addressUpdated';
+            $listeners[$channel . ',.AddressDeleted'] = 'addressDeleted';
         }
 
         $contactModel = app(Contact::class);
         $contactModel->id = $this->contact->id;
-        $listeners['echo-private:'.$contactModel->broadcastChannel().',.AddressCreated'] = 'loadAddresses';
+        $listeners['echo-private:' . $contactModel->broadcastChannel() . ',.AddressCreated'] = 'loadAddresses';
 
         return $listeners;
     }
@@ -296,10 +296,10 @@ class Addresses extends Component
 
         foreach ($addresses as $address) {
             $this->listeners[
-                'echo-private:'.$address->broadcastChannel(false).',.AddressUpdated'
+                'echo-private:' . $address->broadcastChannel(false) . ',.AddressUpdated'
             ] = 'addressUpdated';
             $this->listeners[
-                'echo-private:'.$address->broadcastChannel(false).',.AddressDeleted'
+                'echo-private:' . $address->broadcastChannel(false) . ',.AddressDeleted'
             ] = 'addressDeleted';
         }
 

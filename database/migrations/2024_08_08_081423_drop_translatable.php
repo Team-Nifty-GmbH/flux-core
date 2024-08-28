@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
@@ -632,7 +632,7 @@ return new class extends Migration
     {
         // Work Time Types table
         DB::table('work_time_types')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
         Schema::table('work_time_types', function (Blueprint $table) {
             $table->json('name')->change();
@@ -640,7 +640,7 @@ return new class extends Migration
 
         // Ticket Types table
         DB::table('ticket_types')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
         Schema::table('ticket_types', function (Blueprint $table) {
             $table->json('name')->change();
@@ -648,8 +648,8 @@ return new class extends Migration
 
         // Products table
         DB::table('products')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
-            'description' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', description)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
+            'description' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', description)"),
         ]);
         Schema::table('products', function (Blueprint $table) {
             $table->json('name')->nullable()->change();
@@ -658,7 +658,7 @@ return new class extends Migration
 
         // Product Properties table
         DB::table('product_properties')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
         Schema::table('product_properties', function (Blueprint $table) {
             $table->json('name')->change();
@@ -666,7 +666,7 @@ return new class extends Migration
 
         // Product Options table
         DB::table('product_options')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
         Schema::table('product_options', function (Blueprint $table) {
             $table->json('name')->change();
@@ -674,7 +674,7 @@ return new class extends Migration
 
         // Product Option Groups table
         DB::table('product_option_groups')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
         Schema::table('product_option_groups', function (Blueprint $table) {
             $table->json('name')->change();
@@ -682,8 +682,8 @@ return new class extends Migration
 
         // Payment Types table
         DB::table('payment_types')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
-            'description' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', description)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
+            'description' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', description)"),
         ]);
         Schema::table('payment_types', function (Blueprint $table) {
             $table->json('name')->change();
@@ -692,9 +692,9 @@ return new class extends Migration
 
         // Orders table
         DB::table('orders')->update([
-            'header' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', header)"),
-            'footer' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', footer)"),
-            'logistic_note' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', logistic_note)"),
+            'header' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', header)"),
+            'footer' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', footer)"),
+            'logistic_note' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', logistic_note)"),
         ]);
         Schema::table('orders', function (Blueprint $table) {
             $table->json('header')->nullable()->change();
@@ -704,8 +704,8 @@ return new class extends Migration
 
         // Order Types table
         DB::table('order_types')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
-            'description' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', description)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
+            'description' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', description)"),
         ]);
         Schema::table('order_types', function (Blueprint $table) {
             $table->json('name')->change();
@@ -714,7 +714,7 @@ return new class extends Migration
 
         // Languages table
         DB::table('languages')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
         Schema::table('languages', function (Blueprint $table) {
             $table->json('name')->change();
@@ -722,7 +722,7 @@ return new class extends Migration
 
         // Countries table
         DB::table('countries')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
         Schema::table('countries', function (Blueprint $table) {
             $table->json('name')->change();
@@ -730,7 +730,7 @@ return new class extends Migration
 
         // Country Regions table
         DB::table('country_regions')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
         Schema::table('country_regions', function (Blueprint $table) {
             $table->json('name')->change();
@@ -738,7 +738,7 @@ return new class extends Migration
 
         // Categories table
         DB::table('categories')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
         Schema::table('categories', function (Blueprint $table) {
             $table->json('name')->change();
@@ -746,7 +746,7 @@ return new class extends Migration
 
         // Address Types table
         DB::table('address_types')->update([
-            'name' => DB::raw("JSON_SET('{}', '$.".app()->getLocale()."', name)"),
+            'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
         Schema::table('address_types', function (Blueprint $table) {
             $table->json('name')->change();

@@ -20,7 +20,7 @@ abstract class State extends BaseState implements Arrayable
 
         if (! is_a($stateClass, static::class, true)) {
             throw new \InvalidArgumentException(
-                "The state class `{$stateClass}` must be a subclass of `".static::class.'`'
+                "The state class `{$stateClass}` must be a subclass of `" . static::class . '`'
             );
         }
 

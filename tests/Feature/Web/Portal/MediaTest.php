@@ -23,7 +23,7 @@ class MediaTest extends PortalSetup
         $file = UploadedFile::fake()->image('TestFile.png');
 
         $this->media = $this->user->contact->addMedia($file)
-            ->usingFileName($this->filename = Str::random().'.png')
+            ->usingFileName($this->filename = Str::random() . '.png')
             ->toMediaCollection();
     }
 
@@ -34,14 +34,14 @@ class MediaTest extends PortalSetup
         );
 
         $this->actingAs($this->user, 'address')
-            ->get($this->portalDomain.'/media/'.$this->media->id.'/'.$this->filename)
+            ->get($this->portalDomain . '/media/' . $this->media->id . '/' . $this->filename)
             ->assertStatus(200)
             ->assertDownload();
     }
 
     public function test_download_media_no_user()
     {
-        $this->get($this->portalDomain.'/media/'.$this->media->id.'/'.$this->filename)
+        $this->get($this->portalDomain . '/media/' . $this->media->id . '/' . $this->filename)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -51,7 +51,7 @@ class MediaTest extends PortalSetup
         Permission::findOrCreate('media.{media}.{filename}.get', 'address');
 
         $this->actingAs($this->user, 'address')
-            ->get($this->portalDomain.'/media/'.$this->media->id.'/'.$this->filename)
+            ->get($this->portalDomain . '/media/' . $this->media->id . '/' . $this->filename)
             ->assertStatus(403);
     }
 
@@ -64,7 +64,7 @@ class MediaTest extends PortalSetup
         );
 
         $this->actingAs($this->user, 'address')
-            ->get($this->portalDomain.'/media/'.$this->media->id.'/'.$this->filename)
+            ->get($this->portalDomain . '/media/' . $this->media->id . '/' . $this->filename)
             ->assertStatus(404);
     }
 }

@@ -54,7 +54,7 @@ abstract class FluxAction
         $booted = [];
 
         foreach (class_uses_recursive($class) as $trait) {
-            $method = 'boot'.class_basename($trait);
+            $method = 'boot' . class_basename($trait);
 
             if (method_exists($class, $method) && ! in_array($method, $booted)) {
                 forward_static_call([$class, $method]);
@@ -76,16 +76,16 @@ abstract class FluxAction
                 Permission::class,
                 'findByName',
                 [
-                    'name' => 'action.'.static::name(),
+                    'name' => 'action.' . static::name(),
                 ]
             );
         } catch (PermissionDoesNotExist) {
             return true;
         }
 
-        if (! auth()->user()->can('action.'.static::name())) {
+        if (! auth()->user()->can('action.' . static::name())) {
             if ($throwException) {
-                throw UnauthorizedException::forPermissions(['action.'.static::name()]);
+                throw UnauthorizedException::forPermissions(['action.' . static::name()]);
             } else {
                 return false;
             }
@@ -111,7 +111,7 @@ abstract class FluxAction
         $exploded = explode('_', Str::snake(class_basename(static::class)));
         $function = array_shift($exploded);
 
-        return implode('_', $exploded).'.'.$function;
+        return implode('_', $exploded) . '.' . $function;
     }
 
     public static function description(): ?string
@@ -124,7 +124,7 @@ abstract class FluxAction
 
     public static function executed($callback): void
     {
-        static::$dispatcher->listen('action.executed: '.static::class, $callback);
+        static::$dispatcher->listen('action.executed: ' . static::class, $callback);
     }
 
     public function setData(array|Arrayable $data, bool $keepEmptyStrings = false): static
@@ -255,7 +255,7 @@ abstract class FluxAction
     {
         $function = $halt ? 'until' : 'dispatch';
 
-        return static::$dispatcher->{$function}('action.'.$event.': '.static::class, $this);
+        return static::$dispatcher->{$function}('action.' . $event . ': ' . static::class, $this);
     }
 
     private function setEventDispatcher(bool $nullDispatcher = false): void
@@ -264,7 +264,7 @@ abstract class FluxAction
             try {
                 static::$dispatcher = app()->make(Dispatcher::class);
             } catch (BindingResolutionException) {
-                static::$dispatcher = new NullDispatcher(new \Illuminate\Events\Dispatcher);
+                static::$dispatcher = new NullDispatcher(new \Illuminate\Events\Dispatcher());
             }
         } else {
             static::$dispatcher = new NullDispatcher(static::$dispatcher);

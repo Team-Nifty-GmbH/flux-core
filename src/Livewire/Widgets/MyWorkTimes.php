@@ -197,7 +197,7 @@ class MyWorkTimes extends BarChart
             );
 
             $this->xaxis['categories'][] = $day->started_at->format('Y-m-d')
-                .(auth()->id() === $day->user_id ? '' : '->'.$day->user->name);
+                . (auth()->id() === $day->user_id ? '' : '->' . $day->user->name);
 
         }
 
@@ -207,7 +207,7 @@ class MyWorkTimes extends BarChart
 
         foreach ($workDays as $day) {
             foreach ($activeWorkTimeTypes as $activeWorkTimeType) {
-                $current = data_get($data, 'task_time_'.$activeWorkTimeType->id.'.data', []);
+                $current = data_get($data, 'task_time_' . $activeWorkTimeType->id . '.data', []);
                 $taskTime = $baseQuery->clone()
                     ->where('is_daily_work_time', false)
                     ->where('work_time_type_id', $activeWorkTimeType->id)
@@ -215,7 +215,7 @@ class MyWorkTimes extends BarChart
                     ->sum('total_time_ms');
                 $current[$day->id] = ceil($taskTime / 60);
 
-                $data['task_time_'.$activeWorkTimeType->id] = [
+                $data['task_time_' . $activeWorkTimeType->id] = [
                     'name' => $activeWorkTimeType->name ?? __('Unknown'),
                     'group' => 'tasktime',
                     'color' => $colors[$activeWorkTimeType->id ?? 0],

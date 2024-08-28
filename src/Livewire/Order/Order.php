@@ -124,7 +124,7 @@ class Order extends OrderPositionList
             ->whereKey($this->order->order_type_id)
             ->first();
 
-        $this->view = 'flux::livewire.order.'.(($value = $orderType?->order_type_enum->value) ? $value : 'order');
+        $this->view = 'flux::livewire.order.' . (($value = $orderType?->order_type_enum->value) ? $value : 'order');
 
         $this->getAvailableStates(['payment_state', 'delivery_state', 'state']);
 
@@ -203,7 +203,7 @@ class Order extends OrderPositionList
                 })
                 ->attributes([
                     'class' => 'w-full',
-                    'x-on:click' => '$wire.replicate(\''.OrderTypeEnum::Retoure->value.'\')',
+                    'x-on:click' => '$wire.replicate(\'' . OrderTypeEnum::Retoure->value . '\')',
                 ]),
             DataTableButton::make()
                 ->label(__('Create Split-Order'))
@@ -224,7 +224,7 @@ class Order extends OrderPositionList
                 })
                 ->attributes([
                     'class' => 'w-full',
-                    'x-on:click' => '$wire.replicate(\''.OrderTypeEnum::SplitOrder->value.'\')',
+                    'x-on:click' => '$wire.replicate(\'' . OrderTypeEnum::SplitOrder->value . '\')',
                 ]),
         ];
     }
@@ -562,11 +562,11 @@ class Order extends OrderPositionList
             ->where('order_positions.order_id', $this->order->id)
             ->leftJoin('order_positions AS descendants', 'order_positions.id', '=', 'descendants.origin_position_id')
             ->selectRaw(
-                'order_positions.id'.
-                ', order_positions.amount'.
-                ', order_positions.name'.
-                ', order_positions.description'.
-                ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount'.
+                'order_positions.id' .
+                ', order_positions.amount' .
+                ', order_positions.name' .
+                ', order_positions.description' .
+                ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount' .
                 ', order_positions.amount - SUM(COALESCE(descendants.amount, 0)) AS totalAmount'
             )
             ->groupBy([
@@ -733,7 +733,7 @@ class Order extends OrderPositionList
         // remove all children
         if ($slugPositions) {
             foreach ($this->data as $index => $item) {
-                if (Str::startsWith($item['slug_position'].'.', $slugPositions)) {
+                if (Str::startsWith($item['slug_position'] . '.', $slugPositions)) {
                     unset($this->data[$index]);
                 }
             }
@@ -870,7 +870,7 @@ class Order extends OrderPositionList
             $this->orderPosition->amount = bcmul($bundleProduct->pivot->count, $this->orderPosition->amount);
             $this->orderPosition->amount_bundle = $bundleProduct->pivot->count;
             $this->orderPosition->is_bundle_position = true;
-            $this->orderPosition->slug_position = $slugPrefix.'.'.Str::padLeft($index + 1, $padLength, '0');
+            $this->orderPosition->slug_position = $slugPrefix . '.' . Str::padLeft($index + 1, $padLength, '0');
             $this->orderPosition->indentation = <<<HTML
                     <div class="text-right indent-icon" style="width:{$indent}px;">
                     </div>

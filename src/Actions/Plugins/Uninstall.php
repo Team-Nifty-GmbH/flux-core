@@ -50,11 +50,11 @@ class Uninstall extends BasePluginAction
         foreach ($this->data['packages'] as $key => $package) {
             if (in_array($package, ['laravel/framework', 'team-nifty-gmbh/flux-erp'])) {
                 $errors += [
-                    'packages.'.$key => ['Unable to uninstall \''.$package.'\'.'],
+                    'packages.' . $key => ['Unable to uninstall \'' . $package . '\'.'],
                 ];
             } elseif (! in_array($package, $installedPackages)) {
                 $errors += [
-                    'packages.'.$key => ['Plugin \''.$package.'\' not installed.'],
+                    'packages.' . $key => ['Plugin \'' . $package . '\' not installed.'],
                 ];
             }
         }

@@ -21,7 +21,7 @@ class SerialNumbersTest extends PortalSetup
     {
         $this->get(route('portal.serial-numbers'))
             ->assertStatus(302)
-            ->assertRedirect($this->portalDomain.'/login');
+            ->assertRedirect($this->portalDomain . '/login');
     }
 
     public function test_portal_serial_numbers_without_permission()

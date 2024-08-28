@@ -53,7 +53,7 @@ class ProductPropertyTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/product-properties/'.$this->productProperties[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/product-properties/' . $this->productProperties[0]->id);
         $response->assertStatus(200);
 
         $productProperty = json_decode($response->getContent())->data;
@@ -68,7 +68,7 @@ class ProductPropertyTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->get('/api/product-properties/'.$this->productProperties[2]->id + 10000);
+            ->get('/api/product-properties/' . $this->productProperties[2]->id + 10000);
         $response->assertStatus(404);
     }
 
@@ -165,7 +165,7 @@ class ProductPropertyTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/product-properties/'.$this->productProperties[0]->id);
+            ->delete('/api/product-properties/' . $this->productProperties[0]->id);
         $response->assertStatus(204);
 
         $this->assertFalse(ProductProperty::query()->whereKey($this->productProperties[0]->id)->exists());
@@ -177,7 +177,7 @@ class ProductPropertyTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/product-properties/'.++$this->productProperties[2]->id);
+            ->delete('/api/product-properties/' . ++$this->productProperties[2]->id);
         $response->assertStatus(404);
     }
 
@@ -187,7 +187,7 @@ class ProductPropertyTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->delete('/api/product-properties/'.$this->productProperties[1]->id);
+            ->delete('/api/product-properties/' . $this->productProperties[1]->id);
         $response->assertStatus(423);
     }
 }

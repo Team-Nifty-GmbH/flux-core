@@ -53,8 +53,8 @@ class Contact extends Component
         $channel = $model->broadcastChannel(false);
 
         return [
-            'echo-private:'.$channel.',.ContactUpdated' => 'contactUpdated',
-            'echo-private:'.$channel.',.ContactDeleted' => 'contactDeleted',
+            'echo-private:' . $channel . ',.ContactUpdated' => 'contactUpdated',
+            'echo-private:' . $channel . ',.ContactDeleted' => 'contactDeleted',
         ];
     }
 

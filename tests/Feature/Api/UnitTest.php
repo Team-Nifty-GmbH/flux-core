@@ -36,7 +36,7 @@ class UnitTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/units/'.$this->unit->id);
+        $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id);
         $response->assertStatus(200);
 
         $unit = json_decode($response->getContent())->data;
@@ -51,7 +51,7 @@ class UnitTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/units/'.$this->unit->id + 10000);
+        $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id + 10000);
         $response->assertStatus(404);
     }
 
@@ -112,7 +112,7 @@ class UnitTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/units/'.$this->unit->id);
+        $response = $this->actingAs($this->user)->delete('/api/units/' . $this->unit->id);
         $response->assertStatus(204);
 
         $this->assertFalse(Unit::query()->whereKey($this->unit->id)->exists());
@@ -123,7 +123,7 @@ class UnitTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/units/'.++$this->unit->id);
+        $response = $this->actingAs($this->user)->delete('/api/units/' . ++$this->unit->id);
         $response->assertStatus(404);
     }
 }

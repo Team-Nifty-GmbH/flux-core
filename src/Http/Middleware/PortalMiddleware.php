@@ -20,7 +20,7 @@ class PortalMiddleware
     public function handle(Request $request, Closure $next): mixed
     {
         if (request()->isPortal()) {
-            config(['filesystems.disks.public.url' => config('flux.portal_domain').'/storage']);
+            config(['filesystems.disks.public.url' => config('flux.portal_domain') . '/storage']);
             resolve_static(SerialNumber::class, 'addGlobalScope', [
                 'scope' => 'portal',
                 'implementation' => function (Builder $query) {

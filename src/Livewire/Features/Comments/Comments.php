@@ -58,12 +58,12 @@ class Comments extends Component
      */
     public function getListeners(): array
     {
-        $channel = app($this->modelType)->broadcastChannel().$this->modelId;
+        $channel = app($this->modelType)->broadcastChannel() . $this->modelId;
 
         return [
-            'echo-private:'.$channel.',.CommentCreated' => 'commentCreatedEvent',
-            'echo-private:'.$channel.',.CommentUpdated' => 'commentUpdatedEvent',
-            'echo-private:'.$channel.',.CommentDeleted' => 'commentDeletedEvent',
+            'echo-private:' . $channel . ',.CommentCreated' => 'commentCreatedEvent',
+            'echo-private:' . $channel . ',.CommentUpdated' => 'commentUpdatedEvent',
+            'echo-private:' . $channel . ',.CommentDeleted' => 'commentDeletedEvent',
         ];
     }
 
@@ -237,7 +237,7 @@ class Comments extends Component
     {
         if ($parentId) {
             $index = array_search($parentId, array_column($this->comments['data'], 'id'));
-            $comment['slug_position'] = $this->comments['data'][$index]['slug_position'].'.'.$comment['id'];
+            $comment['slug_position'] = $this->comments['data'][$index]['slug_position'] . '.' . $comment['id'];
             array_splice($this->comments['data'], $index + 1, 0, [$comment]);
         } else {
             $comment['slug_position'] = (string) $comment['id'];

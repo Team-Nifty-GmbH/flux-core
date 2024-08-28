@@ -53,9 +53,9 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
             )
             ->line(new HtmlString(
                 '<span>[flux:comment:'
-                .$this->model->model->getMorphClass().':'
-                .$this->model->model->getKey()
-                .']</span>'
+                . $this->model->model->getMorphClass() . ':'
+                . $this->model->model->getKey()
+                . ']</span>'
             )
             );
     }
@@ -82,7 +82,7 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
                 ':username commented on :model',
                 [
                     'username' => $this->model->createdBy?->getLabel() ?? __('Unknown'),
-                    'model' => __('your '.$this->model->model->getMorphClass()),
+                    'model' => __('your ' . $this->model->model->getMorphClass()),
                 ],
             ))
             ->icon('chat')

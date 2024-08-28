@@ -20,7 +20,7 @@ class SettingFactory extends Factory
         }
 
         if ($i === 100) {
-            $key .= '_'.Str::uuid();
+            $key .= '_' . Str::uuid();
         }
 
         return [

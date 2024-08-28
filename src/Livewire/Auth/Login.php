@@ -100,7 +100,7 @@ class Login extends Component
 
     protected function getPasswordBroker(): PasswordBroker
     {
-        $provider = config('auth.guards.'.Auth::guard($this->guard)->name.'.provider');
+        $provider = config('auth.guards.' . Auth::guard($this->guard)->name . '.provider');
         $broker = collect(config('auth.passwords'))
             ->filter(function ($item) use ($provider) {
                 return $item['provider'] === $provider;

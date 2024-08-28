@@ -27,6 +27,6 @@ class LoginListener
                 'guard' => $event->guard,
             ])
             ->event('logged_in')
-            ->log(trim(($event->user->name ?? '').' logged in'));
+            ->log(trim(($event->user->name ?? '') . ' logged in'));
     }
 }

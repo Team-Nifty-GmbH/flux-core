@@ -44,7 +44,7 @@ class ReplaceMedia extends FluxAction
         DeleteMedia::make(['id' => $this->data['id']])->execute();
 
         if ($this->data['media_type'] ?? false) {
-            $fileAdder = $mediaItem->model->{'addMediaFrom'.$this->data['media_type']}($file);
+            $fileAdder = $mediaItem->model->{'addMediaFrom' . $this->data['media_type']}($file);
         } else {
             $fileAdder = $mediaItem->model->addMedia($file instanceof UploadedFile ? $file->path() : $file);
         }
@@ -111,7 +111,7 @@ class ReplaceMedia extends FluxAction
         $this->data['file_name'] = $this->data['file_name'] ?? (
             $this->data['media'] instanceof UploadedFile ?
                 $this->data['media']->getClientOriginalName() :
-                hash('sha512', microtime().Str::uuid())
+                hash('sha512', microtime() . Str::uuid())
         );
         $this->data['name'] = $this->data['name'] ?? $this->data['file_name'];
         $this->data['collection_name'] ??= 'default';

@@ -20,7 +20,7 @@ class Invoice extends OrderView
 
     public function getSubject(): string
     {
-        return __('Invoice').' '.($this->model->invoice_number ?: __('Preview'));
+        return __('Invoice') . ' ' . ($this->model->invoice_number ?: __('Preview'));
     }
 
     public function beforePrinting(): void

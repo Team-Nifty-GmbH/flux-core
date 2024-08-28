@@ -18,6 +18,6 @@ class DashboardTest extends PortalSetup
     {
         $this->get(route('portal.dashboard'))
             ->assertStatus(302)
-            ->assertRedirect($this->portalDomain.'/login');
+            ->assertRedirect($this->portalDomain . '/login');
     }
 }

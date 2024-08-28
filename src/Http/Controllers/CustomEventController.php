@@ -58,7 +58,7 @@ class CustomEventController extends BaseController
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
             data: $response,
-            statusMessage: 'Event \''.$customEvent->name.'\' dispatched.'
+            statusMessage: 'Event \'' . $customEvent->name . '\' dispatched.'
         );
     }
 }

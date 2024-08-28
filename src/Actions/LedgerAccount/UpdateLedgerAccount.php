@@ -34,6 +34,6 @@ class UpdateLedgerAccount extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->rules['number'] .= ','.($this->data['id'] ?? 0);
+        $this->rules['number'] .= ',' . ($this->data['id'] ?? 0);
     }
 }

@@ -245,7 +245,7 @@ class Product extends Model implements HasMedia, InteractsWithDataTables
             ->where('is_active_export_to_web_shop', true)
             ->where('is_active', true)
             ->select(array_map(
-                fn (string $column) => $this->getTable().'.'.$column,
+                fn (string $column) => $this->getTable() . '.' . $column,
                 [
                     'id',
                     'cover_media_id',

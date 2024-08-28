@@ -99,7 +99,7 @@ class ViewServiceProvider extends ServiceProvider
         ]);
 
         // Register Printing views as blade components
-        $views[] = __DIR__.'/../../resources/views/printing';
+        $views[] = __DIR__ . '/../../resources/views/printing';
         $this->loadViewsFrom($views, 'print');
 
         View::composer('*', function () {
@@ -123,11 +123,11 @@ class ViewServiceProvider extends ServiceProvider
         $relativePath = ltrim(
             substr(
                 realpath(InstalledVersions::getInstallPath($packageName)),
-                strlen(realpath(array_keys(ClassLoader::getRegisteredLoaders())[0].'/../'))
-            ).'/',
+                strlen(realpath(array_keys(ClassLoader::getRegisteredLoaders())[0] . '/../'))
+            ) . '/',
             '/'
         );
 
-        return $relativePath.$path;
+        return $relativePath . $path;
     }
 }

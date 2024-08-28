@@ -15,7 +15,7 @@ class CreateDocumentType extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new CreateDocumentTypeRequest)->rules();
+        $this->rules = (new CreateDocumentTypeRequest())->rules();
     }
 
     public static function models(): array

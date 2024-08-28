@@ -18,7 +18,7 @@ class FrontendHelper
     public static function relative(string|Carbon $timestamp): string
     {
         // Create the current timestamp
-        $now = new DateTime;
+        $now = new DateTime();
         $timestamp = $timestamp instanceof Carbon ? $timestamp->toDateTime() : strtotime($timestamp);
 
         // Calculate the difference against the current time
@@ -88,7 +88,7 @@ class FrontendHelper
         $code = dechex(crc32($str));
         $code = substr($code, 0, 6);
 
-        return '#'.$code;
+        return '#' . $code;
     }
 
     public static function getContrastColor($hexColor): string

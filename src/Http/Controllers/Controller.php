@@ -14,7 +14,7 @@ class Controller extends BaseController
     public function __construct(?string $permission = null)
     {
         if (! $permission && $permission = route_to_permission()) {
-            $this->middleware(['permission:'.$permission]);
+            $this->middleware(['permission:' . $permission]);
         }
     }
 }

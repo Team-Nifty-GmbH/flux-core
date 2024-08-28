@@ -16,14 +16,14 @@ class SettingsClientsCustomerPortalTest extends BaseSetup
         );
 
         $this->actingAs($this->user, 'web')->get(
-            '/settings/clients/'.$this->dbClient->id.'/customer-portal'
+            '/settings/clients/' . $this->dbClient->id . '/customer-portal'
         )
             ->assertStatus(200);
     }
 
     public function test_settings_clients_customer_portal_no_user()
     {
-        $this->get('/settings/clients/'.$this->dbClient->id.'/customer-portal')
+        $this->get('/settings/clients/' . $this->dbClient->id . '/customer-portal')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -33,7 +33,7 @@ class SettingsClientsCustomerPortalTest extends BaseSetup
         Permission::findOrCreate('settings.clients.{client}.customer-portal.get', 'web');
 
         $this->actingAs($this->user, 'web')->get(
-            '/settings/clients/'.$this->dbClient->id.'/customer-portal'
+            '/settings/clients/' . $this->dbClient->id . '/customer-portal'
         )
             ->assertStatus(403);
     }
@@ -47,7 +47,7 @@ class SettingsClientsCustomerPortalTest extends BaseSetup
         );
 
         $this->actingAs($this->user, 'web')->get(
-            '/settings/clients/'.$this->dbClient->id.'/customer-portal'
+            '/settings/clients/' . $this->dbClient->id . '/customer-portal'
         )
             ->assertStatus(404);
     }

@@ -71,8 +71,8 @@ enum TimeFrameEnum: string
     {
         return $builder->select(
             DB::raw(
-                'DATE_FORMAT('.$dateField.', \''.$this->groupKeyFormatter($dateField).'\') as '
-                .$groupByKey
+                'DATE_FORMAT(' . $dateField . ', \'' . $this->groupKeyFormatter($dateField) . '\') as '
+                . $groupByKey
             )
         )
             ->groupBy(...$this->groupBy($dateField, $groupByKey))
@@ -84,10 +84,10 @@ enum TimeFrameEnum: string
         return array_merge(match ($this) {
             self::LastWeek, self::ThisWeek, self::ThisMonth, self::LastMonth => [$dateField],
             self::LastYear, self::ThisYear => [
-                DB::raw('YEAR('.$dateField.')'),
-                DB::raw('MONTH('.$dateField.')'),
+                DB::raw('YEAR(' . $dateField . ')'),
+                DB::raw('MONTH(' . $dateField . ')'),
             ],
-            self::AllTime => [DB::raw('YEAR('.$dateField.')')],
+            self::AllTime => [DB::raw('YEAR(' . $dateField . ')')],
             default => throw new \InvalidArgumentException('Invalid time frame'),
         }, [$groupByKey]);
     }

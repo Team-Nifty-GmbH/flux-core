@@ -28,7 +28,7 @@ class RelatedColumnSort implements Sort
         $relatedTable = $related->getTable();
 
         $subQuery = DB::table($relatedTable)
-            ->select($relatedTable.'.'.$select);
+            ->select($relatedTable . '.' . $select);
 
         if ($relation instanceof BelongsTo) {
             $subQuery->whereColumn($relation->getQualifiedForeignKeyName(), $relation->getQualifiedOwnerKeyName());
@@ -52,8 +52,8 @@ class RelatedColumnSort implements Sort
                     $relation->getTable(),
                     $relation->getQualifiedRelatedKeyName(), '=', $relation->getQualifiedRelatedPivotKeyName())
                 ->whereColumn($relation->getQualifiedParentKeyName(), $relation->getQualifiedForeignPivotKeyName())
-                ->where($relation->getTable().'.'.$relation->getMorphType(), $relation->getMorphClass())
-                ->orderBy($relatedTable.'.'.$select, $direction)
+                ->where($relation->getTable() . '.' . $relation->getMorphType(), $relation->getMorphClass())
+                ->orderBy($relatedTable . '.' . $select, $direction)
                 ->limit(1);
         } else {
             return;

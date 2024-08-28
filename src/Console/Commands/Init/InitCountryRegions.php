@@ -14,7 +14,7 @@ class InitCountryRegions extends Command
 
     public function handle(): void
     {
-        $path = resource_path().'/init-files/country-regions.json';
+        $path = resource_path() . '/init-files/country-regions.json';
         if (! file_exists($path)) {
             return;
         }

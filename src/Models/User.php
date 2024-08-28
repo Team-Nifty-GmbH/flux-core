@@ -61,7 +61,7 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
     {
         static::saving(function (User $user) {
             if ($user->isDirty('lastname') || $user->isDirty('firstname')) {
-                $user->name = trim($user->firstname.' '.$user->lastname);
+                $user->name = trim($user->firstname . ' ' . $user->lastname);
             }
 
             if ($user->isDirty('iban')) {
@@ -70,7 +70,7 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
         });
 
         static::saved(function (User $user) {
-            Cache::forget('morph_to:'.$user->getMorphClass().':'.$user->id);
+            Cache::forget('morph_to:' . $user->getMorphClass() . ':' . $user->id);
         });
     }
 
@@ -214,7 +214,7 @@ class User extends Authenticatable implements HasLocalePreference, HasMedia, Int
     {
         $plaintext = Str::uuid()->toString();
         $expires = now()->addMinutes(15);
-        Cache::put('login_token_'.$plaintext,
+        Cache::put('login_token_' . $plaintext,
             [
                 'user' => $this,
                 'guard' => 'web',

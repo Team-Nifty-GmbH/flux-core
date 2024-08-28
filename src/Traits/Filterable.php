@@ -59,7 +59,7 @@ trait Filterable
 
     public static function getColumns(bool $showHidden = false): Collection
     {
-        $collection = collect(DB::select('DESCRIBE `'.(app(static::class))->getTable().'`;'));
+        $collection = collect(DB::select('DESCRIBE `' . (app(static::class))->getTable() . '`;'));
 
         return $showHidden ? $collection : $collection->whereNotIn('Field', (app(static::class))->getHidden());
     }

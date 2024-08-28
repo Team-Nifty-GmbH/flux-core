@@ -40,7 +40,7 @@ class PaymentTypeTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/payment-types/'.$this->paymentTypes[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/payment-types/' . $this->paymentTypes[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -71,7 +71,7 @@ class PaymentTypeTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/payment-types/'.++$this->paymentTypes[1]->id);
+        $response = $this->actingAs($this->user)->get('/api/payment-types/' . ++$this->paymentTypes[1]->id);
         $response->assertStatus(404);
     }
 
@@ -80,7 +80,7 @@ class PaymentTypeTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/payment-types/'.$this->paymentTypes[1]->id.'?include= ');
+        $response = $this->actingAs($this->user)->get('/api/payment-types/' . $this->paymentTypes[1]->id . '?include= ');
         $response->assertStatus(404);
     }
 
@@ -89,7 +89,7 @@ class PaymentTypeTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/payment-types/'.$this->paymentTypes[1]->id.'?include=test');
+        $response = $this->actingAs($this->user)->get('/api/payment-types/' . $this->paymentTypes[1]->id . '?include=test');
         $response->assertStatus(422);
     }
 
@@ -307,7 +307,7 @@ class PaymentTypeTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/payment-types/'.$this->paymentTypes[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/payment-types/' . $this->paymentTypes[1]->id);
         $response->assertStatus(204);
 
         $paymentType = $this->paymentTypes[1]->fresh();
@@ -320,7 +320,7 @@ class PaymentTypeTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/payment-types/'.++$this->paymentTypes[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/payment-types/' . ++$this->paymentTypes[1]->id);
         $response->assertStatus(404);
     }
 }

@@ -37,7 +37,7 @@ class ClientTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/clients/'.$this->clients[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/clients/' . $this->clients[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -64,7 +64,7 @@ class ClientTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/clients/'.++$this->clients->last()->id);
+        $response = $this->actingAs($this->user)->get('/api/clients/' . ++$this->clients->last()->id);
         $response->assertStatus(404);
     }
 

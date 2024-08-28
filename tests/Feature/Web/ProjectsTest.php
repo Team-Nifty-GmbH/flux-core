@@ -48,13 +48,13 @@ class ProjectsTest extends BaseSetup
     {
         $this->user->givePermissionTo(Permission::findOrCreate('projects.{id}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/projects/'.$this->project->id)
+        $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
             ->assertStatus(200);
     }
 
     public function test_projects_id_no_user()
     {
-        $this->get('/projects/'.$this->project->id)
+        $this->get('/projects/' . $this->project->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -63,7 +63,7 @@ class ProjectsTest extends BaseSetup
     {
         Permission::findOrCreate('projects.{id}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/projects/'.$this->project->id)
+        $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
             ->assertStatus(403);
     }
 
@@ -73,7 +73,7 @@ class ProjectsTest extends BaseSetup
 
         $this->user->givePermissionTo(Permission::findOrCreate('projects.{id}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/projects/'.$this->project->id)
+        $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
             ->assertStatus(404);
     }
 }

@@ -20,7 +20,7 @@ class MorphTo implements CastsAttributes
         $model = morph_to(type: $value, returnBuilder: true);
 
         return Cache::remember(
-            'morph_to:'.$value,
+            'morph_to:' . $value,
             86400,
             function () use ($model, $value) {
                 if ($this->value && $model) {
@@ -44,6 +44,6 @@ class MorphTo implements CastsAttributes
             return null;
         }
 
-        return is_string($value) ? $value : $value->getMorphClass().':'.$value->getKey();
+        return is_string($value) ? $value : $value->getMorphClass() . ':' . $value->getKey();
     }
 }

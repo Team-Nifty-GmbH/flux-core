@@ -26,13 +26,13 @@ class SyncIndexSettingsCommand extends BaseSyncIndexSettingsCommand
         $driver = config('scout.driver');
 
         if (! method_exists($engine, 'updateIndexSettings')) {
-            $this->error('The "'.$driver.'" engine does not support updating index settings.');
+            $this->error('The "' . $driver . '" engine does not support updating index settings.');
 
             return;
         }
 
         try {
-            $indexes = (array) config('scout.'.$driver.'.index-settings', []);
+            $indexes = (array) config('scout.' . $driver . '.index-settings', []);
 
             if ($this->argument('model')) {
                 $indexes = [$this->argument('model') => $indexes[$this->argument('model')] ?? []];
@@ -80,10 +80,10 @@ class SyncIndexSettingsCommand extends BaseSyncIndexSettingsCommand
 
                     $engine->updateIndexSettings($indexName = $this->indexName($name), $settings);
 
-                    $this->info('Settings for the ['.$indexName.'] index synced successfully.');
+                    $this->info('Settings for the [' . $indexName . '] index synced successfully.');
                 }
             } else {
-                $this->info('No index settings found for the "'.$driver.'" engine.');
+                $this->info('No index settings found for the "' . $driver . '" engine.');
             }
         } catch (\Exception $exception) {
             $this->error($exception->getMessage());

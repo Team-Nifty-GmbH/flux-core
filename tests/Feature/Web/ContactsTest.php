@@ -62,7 +62,7 @@ class ContactsTest extends BaseSetup
     {
         $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/contacts/'.$this->contact->id)
+        $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
             ->assertStatus(200);
     }
 
@@ -76,7 +76,7 @@ class ContactsTest extends BaseSetup
 
     public function test_contacts_id_no_user()
     {
-        $this->get('/contacts/'.$this->contact->id)
+        $this->get('/contacts/' . $this->contact->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -85,7 +85,7 @@ class ContactsTest extends BaseSetup
     {
         Permission::findOrCreate('contacts.{id?}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/contacts/'.$this->contact->id)
+        $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
             ->assertStatus(403);
     }
 
@@ -95,7 +95,7 @@ class ContactsTest extends BaseSetup
 
         $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/contacts/'.$this->contact->id)
+        $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
             ->assertStatus(404);
     }
 }

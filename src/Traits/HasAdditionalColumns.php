@@ -150,7 +150,7 @@ trait HasAdditionalColumns
 
         $this->translatableMeta =
             Cache::store('array')->rememberForever(
-                'meta_translatable_'.get_class($this),
+                'meta_translatable_' . get_class($this),
                 fn () => $this->getAdditionalColumns()
                     ->where('is_translatable', '=', true)
                     ->whereNull('values')
@@ -262,7 +262,7 @@ trait HasAdditionalColumns
 
         foreach ($this->getAdditionalColumns(false) as $column) {
             if ($column->values) {
-                $rules[$column->name] = 'in:'.implode(',', $column->values);
+                $rules[$column->name] = 'in:' . implode(',', $column->values);
             }
 
             $rules[$column->name] = ($rules[$column->name] ?? false)
@@ -450,7 +450,7 @@ trait HasAdditionalColumns
         if (! (static::$metaSchemaColumnsCache[$class] ?? false)) {
             static::$metaSchemaColumnsCache[$class] = collect(
                 Cache::remember(
-                    'column-listing:'.$this->getTable(),
+                    'column-listing:' . $this->getTable(),
                     86400,
                     fn () => Schema::getColumnListing($this->getTable()),
                 ) ?? []
@@ -516,7 +516,7 @@ trait HasAdditionalColumns
          * means there is an equal named database column which we pulled the value from earlier.
          */
         $value = with($this->getMeta($key), function ($value) use ($key) {
-            $accessor = Str::camel('get_'.$key.'_meta');
+            $accessor = Str::camel('get_' . $key . '_meta');
 
             if (! method_exists($this, $accessor)) {
                 return $value;
@@ -639,7 +639,7 @@ trait HasAdditionalColumns
          * Let’s check if there is a mutator for the given meta key and pipe
          * the given value through it if so.
          */
-        $value = with(Str::camel('set_'.$key.'_meta'), function ($mutator) use ($value) {
+        $value = with(Str::camel('set_' . $key . '_meta'), function ($mutator) use ($value) {
             if (! method_exists($this, $mutator)) {
                 return $value;
             }
@@ -951,7 +951,7 @@ trait HasAdditionalColumns
         $oldValue = $translations[$locale] ?? '';
 
         if ($this->hasSetMutator($key)) {
-            $method = 'set'.Str::studly($key).'Attribute';
+            $method = 'set' . Str::studly($key) . 'Attribute';
 
             $this->{$method}($value, $locale);
 

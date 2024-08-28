@@ -193,7 +193,7 @@ class AdditionalColumnEdit extends Component
             return;
         }
 
-        (new AdditionalColumnService)->delete($this->additionalColumn['id']);
+        (new AdditionalColumnService())->delete($this->additionalColumn['id']);
 
         $this->skipRender();
         $this->dispatch('closeModal', $this->additionalColumn, true);

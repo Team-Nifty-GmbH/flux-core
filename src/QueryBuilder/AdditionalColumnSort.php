@@ -21,7 +21,7 @@ class AdditionalColumnSort implements Sort
             ->join('meta', 'additional_columns.id', '=', 'meta.additional_column_id')
             ->where('additional_columns.model_type', $className)
             ->where('additional_columns.name', $exploded[1])
-            ->whereColumn($table.'.id', 'meta.model_id');
+            ->whereColumn($table . '.id', 'meta.model_id');
 
         $query->orderBy($subQuery, $direction);
     }

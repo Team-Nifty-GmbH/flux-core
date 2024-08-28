@@ -13,7 +13,7 @@ class LoginLinkController extends Controller
 {
     public function __invoke(Request $request): RedirectResponse|View|Factory
     {
-        $login = Cache::pull('login_token_'.$request->token);
+        $login = Cache::pull('login_token_' . $request->token);
 
         if (! $login) {
             return view('flux::login-link-failed');

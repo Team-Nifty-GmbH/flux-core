@@ -21,7 +21,7 @@ trait WithTabs
     {
         $this->mergeTabsToRender($this->getTabs());
 
-        event('tabs.rendering: '.get_class($this), $this);
+        event('tabs.rendering: ' . get_class($this), $this);
 
         if ($view === null && ! app()->runningInConsole()) {
             throw new ViewException('View is null');
@@ -37,7 +37,7 @@ trait WithTabs
         $this->setTabsToRender($this->getTabs());
 
         // fire event to get tab buttons that are registered
-        event('tabs.rendering: '.get_class($this), $this);
+        event('tabs.rendering: ' . get_class($this), $this);
 
         return collect($this->getTabsToRender())->keyBy('component')->toArray()[$component];
     }

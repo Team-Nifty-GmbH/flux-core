@@ -52,8 +52,8 @@ class UpdateUser extends FluxAction
         $this->rules = array_merge(
             $this->rules,
             [
-                'user_code' => $this->rules['user_code'].','.($this->data['id'] ?? 0),
-                'email' => $this->rules['email'].','.($this->data['id'] ?? 0),
+                'user_code' => $this->rules['user_code'] . ',' . ($this->data['id'] ?? 0),
+                'email' => $this->rules['email'] . ',' . ($this->data['id'] ?? 0),
             ]
         );
     }

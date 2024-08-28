@@ -17,7 +17,7 @@ class ProjectFactory extends Factory
             'start_date' => $this->faker->date(),
             'description' => $this->faker->realText(),
             'state' => ProjectState::all()->random()::$name,
-            'time_budget' => rand(0, 1000).':'.rand(0, 59),
+            'time_budget' => rand(0, 1000) . ':' . rand(0, 59),
             'budget' => $this->faker->randomFloat(),
         ];
     }

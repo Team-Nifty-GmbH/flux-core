@@ -84,14 +84,14 @@ class FluxServiceProvider extends ServiceProvider
             $this->offerPublishing();
         }
 
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->app->bind(
             'path.lang',
-            fn () => [__DIR__.'/../lang', base_path('lang')]
+            fn () => [__DIR__ . '/../lang', base_path('lang')]
         );
 
-        $this->loadJsonTranslationsFrom(__DIR__.'/../lang');
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'flux');
+        $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerConfig();
         $this->registerMarcos();
         $this->registerExtensions();
@@ -130,7 +130,7 @@ class FluxServiceProvider extends ServiceProvider
             Response::macro('attachment', function ($content, $filename = 'download.pdf') {
                 $headers = [
                     'Content-type' => 'application/pdf',
-                    'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
                 ];
 
                 return Response::make($content, 200, $headers);
@@ -194,7 +194,7 @@ class FluxServiceProvider extends ServiceProvider
 
                     return (new LengthAwarePaginator(
                         $this->forPage($page, $perPage), $this->count(), $perPage, $page, $options))
-                        ->withPath($urlParams ? dirname(url()->full()).$urlParams : url()->full());
+                        ->withPath($urlParams ? dirname(url()->full()) . $urlParams : url()->full());
                 });
         }
 
@@ -232,38 +232,38 @@ class FluxServiceProvider extends ServiceProvider
     protected function offerPublishing(): void
     {
         $this->publishes([
-            __DIR__.'/../database/migrations' => database_path('migrations'),
+            __DIR__ . '/../database/migrations' => database_path('migrations'),
         ], 'flux-migrations');
         $this->publishes([
-            __DIR__.'/../database/seeders' => database_path('seeders'),
+            __DIR__ . '/../database/seeders' => database_path('seeders'),
         ], 'flux-seeders');
         $this->publishes([
-            __DIR__.'/../config/flux.php' => config_path('flux.php'),
+            __DIR__ . '/../config/flux.php' => config_path('flux.php'),
         ], 'flux-config');
         $this->publishes([
-            __DIR__.'/../resources/views' => resource_path('views/vendor/flux'),
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/flux'),
         ], 'flux-views');
         $this->publishes([
-            __DIR__.'/../lang' => base_path('lang/vendor/team-nifty-gmbh/flux'),
+            __DIR__ . '/../lang' => base_path('lang/vendor/team-nifty-gmbh/flux'),
         ], 'flux-translations');
         $this->publishes([
-            __DIR__.'/../public/build' => public_path('vendor/team-nifty-gmbh/flux'),
+            __DIR__ . '/../public/build' => public_path('vendor/team-nifty-gmbh/flux'),
         ], 'flux-assets');
         $this->publishes([
-            __DIR__.'/../docker' => base_path('docker'),
+            __DIR__ . '/../docker' => base_path('docker'),
         ], 'flux-docker');
     }
 
     protected function registerConfig(): void
     {
-        $this->loadViewsFrom(__DIR__.'/../resources/views/vendor/wireui', 'wireui');
-        $this->mergeConfigFrom(__DIR__.'/../config/flux.php', 'flux');
-        $this->mergeConfigFrom(__DIR__.'/../config/notifications.php', 'notifications');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views/vendor/wireui', 'wireui');
+        $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
+        $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
         config(['permission.models.role' => resolve_static(Role::class, 'class')]);
         config(['permission.models.permission' => resolve_static(Permission::class, 'class')]);
-        config(['auth' => require __DIR__.'/../config/auth.php']);
+        config(['auth' => require __DIR__ . '/../config/auth.php']);
         config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
-        config(['logging' => array_merge_recursive(config('logging'), require __DIR__.'/../config/logging.php')]);
+        config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
         config(['wireui.heroicons.alias' => 'heroicons']);
         config(['wireui.modal' => [
             'zIndex' => env('WIREUI_MODAL_Z_INDEX', 'z-20'),
@@ -365,15 +365,15 @@ class FluxServiceProvider extends ServiceProvider
     protected function registerBladeComponents(): void
     {
         $directoryIterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(__DIR__.'/../resources/views/components')
+            new RecursiveDirectoryIterator(__DIR__ . '/../resources/views/components')
         );
         $phpFiles = new RegexIterator($directoryIterator, '/\.blade\.php$/');
 
         foreach ($phpFiles as $phpFile) {
-            $relativePath = Str::replace(__DIR__.'/../resources/views/components/', '', $phpFile->getRealPath());
+            $relativePath = Str::replace(__DIR__ . '/../resources/views/components/', '', $phpFile->getRealPath());
             $relativePath = Str::replace(DIRECTORY_SEPARATOR, '.', Str::remove('.blade.php', $relativePath));
             $relativePath = Str::afterLast($relativePath, 'views.components.');
-            Blade::component('flux::components.'.$relativePath, Str::remove('.index', $relativePath));
+            Blade::component('flux::components.' . $relativePath, Str::remove('.index', $relativePath));
         }
 
         foreach ($this->getViewClassAliasFromNamespace('FluxErp\\View\\Components') as $alias => $class) {
@@ -396,8 +396,8 @@ class FluxServiceProvider extends ServiceProvider
 
     private function getViewClassAliasFromNamespace(string $namespace, ?string $directoryPath = null): array
     {
-        if (Cache::has('flux.view-classes.'.Str::slug($namespace))) {
-            return Cache::get('flux.view-classes.'.Str::slug($namespace));
+        if (Cache::has('flux.view-classes.' . Str::slug($namespace))) {
+            return Cache::get('flux.view-classes.' . Str::slug($namespace));
         }
 
         $directoryPath = $directoryPath ?: Str::replace(['\\', 'FluxErp'], ['/', __DIR__], $namespace);
@@ -408,7 +408,7 @@ class FluxServiceProvider extends ServiceProvider
         foreach ($phpFiles as $phpFile) {
             $relativePath = Str::replace($directoryPath, '', $phpFile->getRealPath());
             $relativePath = Str::replace(DIRECTORY_SEPARATOR, '\\', $relativePath);
-            $class = $namespace.str_replace(
+            $class = $namespace . str_replace(
                 '/',
                 '\\',
                 pathinfo($relativePath, PATHINFO_FILENAME)
@@ -425,7 +425,7 @@ class FluxServiceProvider extends ServiceProvider
             }
         }
 
-        return Cache::rememberForever('flux.view-classes.'.Str::slug($namespace), fn () => $components);
+        return Cache::rememberForever('flux.view-classes.' . Str::slug($namespace), fn () => $components);
     }
 
     protected function bootRoutes(): void
@@ -434,18 +434,18 @@ class FluxServiceProvider extends ServiceProvider
             Authenticate::redirectUsing(fn (HttpRequest $request) => route('login', absolute: false));
         }
 
-        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
         if (static::$registerApiRoutes) {
-            $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
+            $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
         }
 
         if (static::$registerPortalRoutes) {
-            $this->loadRoutesFrom(__DIR__.'/../routes/frontend/portal.php');
+            $this->loadRoutesFrom(__DIR__ . '/../routes/frontend/portal.php');
         }
 
         if (static::$registerFluxRoutes) {
-            $this->loadRoutesFrom(__DIR__.'/../routes/frontend/web.php');
+            $this->loadRoutesFrom(__DIR__ . '/../routes/frontend/web.php');
         }
 
         if (static::$registerApiRoutes) {
@@ -581,15 +581,15 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(__DIR__.'/Console/Commands')
+            new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands')
         );
         $commandClasses = [];
 
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === 'php') {
-                $classPath = str_replace([__DIR__.'/', '/'], ['', '\\'], $file->getPathname());
+                $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
                 $classNamespace = '\\FluxErp\\';
-                $class = $classNamespace.str_replace('.php', '', $classPath);
+                $class = $classNamespace . str_replace('.php', '', $classPath);
                 $commandClasses[] = $class;
             }
         }

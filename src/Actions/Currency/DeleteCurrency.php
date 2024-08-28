@@ -28,7 +28,7 @@ class DeleteCurrency extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
-        $currency->iso = $currency->iso.'___'.Hash::make(Str::uuid());
+        $currency->iso = $currency->iso . '___' . Hash::make(Str::uuid());
         $currency->save();
 
         return $currency->delete();

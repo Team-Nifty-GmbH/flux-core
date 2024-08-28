@@ -34,7 +34,7 @@ class UpdateCurrency extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->rules['iso'] .= ','.($this->data['id'] ?? 0);
+        $this->rules['iso'] .= ',' . ($this->data['id'] ?? 0);
 
         if (($this->data['is_default'] ?? false)
             && ! resolve_static(Currency::class, 'query')

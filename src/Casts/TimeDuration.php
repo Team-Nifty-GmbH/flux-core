@@ -16,7 +16,7 @@ class TimeDuration implements CastsAttributes
         $minutes = $value % 60;
         $hours = ($value - $minutes) / 60;
 
-        return $hours.':'.sprintf('%02d', $minutes);
+        return $hours . ':' . sprintf('%02d', $minutes);
     }
 
     public function set(Model $model, string $key, mixed $value, array $attributes): ?string

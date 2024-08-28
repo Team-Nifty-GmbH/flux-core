@@ -52,7 +52,7 @@ class AssetController extends Controller
                     'user_agent' => request()->userAgent(),
                 ])
                 ->event('communication_opened')
-                ->log($communication->subject.' opened');
+                ->log($communication->subject . ' opened');
         }
 
         $logo = Client::default()->getFirstMedia('logo_small');

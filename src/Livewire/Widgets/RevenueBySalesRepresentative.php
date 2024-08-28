@@ -71,7 +71,7 @@ class RevenueBySalesRepresentative extends CircleChart
             ->groupBy('agent_id', 'users.firstname', 'users.lastname')
             ->get()
             ->mapWithKeys(function ($item) {
-                return [$item->firstname.' '.$item->lastname => (float) $item->total];
+                return [$item->firstname . ' ' . $item->lastname => (float) $item->total];
             })
             ->toArray();
 

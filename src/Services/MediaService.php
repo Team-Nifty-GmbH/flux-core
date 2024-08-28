@@ -40,7 +40,7 @@ class MediaService
             );
         }
 
-        if ((config('filesystems.disks.'.$mediaItem->disk)['visibility'] ?? null) !== 'public') {
+        if ((config('filesystems.disks.' . $mediaItem->disk)['visibility'] ?? null) !== 'public') {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
                 data: ['public' => __('File not found (not public)')]
@@ -77,7 +77,7 @@ class MediaService
         $calculatedPath = $pathGenerator->getPath($mediaItem);
         $storage = Storage::disk($mediaItem->disk);
 
-        if (! $storage->exists($calculatedPath.$mediaItem->file_name)) {
+        if (! $storage->exists($calculatedPath . $mediaItem->file_name)) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
                 data: ['file' => __('Path not found')]
@@ -87,7 +87,7 @@ class MediaService
         return ResponseHelper::createArrayResponse(
             statusCode: 200,
             data: $mediaItem->withoutRelations(),
-            additions: ['file_contents' => base64_encode($storage->read($calculatedPath.$mediaItem->file_name))]
+            additions: ['file_contents' => base64_encode($storage->read($calculatedPath . $mediaItem->file_name))]
         );
     }
 

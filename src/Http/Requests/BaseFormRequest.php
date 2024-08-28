@@ -74,9 +74,9 @@ class BaseFormRequest extends FormRequest
                     str_starts_with($ruleItem, 'unique:') &&
                     substr_count($ruleItem, ',') < 2
                 ) {
-                    $rules[$key][$ruleKey] .= ','.(
+                    $rules[$key][$ruleKey] .= ',' . (
                         substr_count($ruleItem, ',') === 0 ?
-                            $key.','.$model['id'] :
+                            $key . ',' . $model['id'] :
                             $model['id']
                     );
                 } elseif ($ruleItem instanceof Unique) {

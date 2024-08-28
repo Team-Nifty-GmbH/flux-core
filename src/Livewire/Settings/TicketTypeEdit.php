@@ -127,7 +127,7 @@ class TicketTypeEdit extends Component
             return;
         }
 
-        (new TicketTypeService)->delete($this->ticketType['id']);
+        (new TicketTypeService())->delete($this->ticketType['id']);
 
         $this->skipRender();
         $this->dispatch('closeModal', $this->ticketType, true)->to('settings.ticket-types');

@@ -23,7 +23,7 @@ class MediaTest extends BaseSetup
         $file = UploadedFile::fake()->image('TestFile.png');
 
         $this->media = $this->user->addMedia($file)
-            ->usingFileName($this->filename = Str::random().'.png')
+            ->usingFileName($this->filename = Str::random() . '.png')
             ->toMediaCollection();
     }
 
@@ -31,14 +31,14 @@ class MediaTest extends BaseSetup
     {
         $this->user->givePermissionTo(Permission::findOrCreate('media.{media}.{filename}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/media/'.$this->media->id.'/'.$this->filename)
+        $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
             ->assertStatus(200)
             ->assertDownload();
     }
 
     public function test_download_media_no_user()
     {
-        $this->get('/media/'.$this->media->id.'/'.$this->filename)
+        $this->get('/media/' . $this->media->id . '/' . $this->filename)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -47,7 +47,7 @@ class MediaTest extends BaseSetup
     {
         Permission::findOrCreate('media.{media}.{filename}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/media/'.$this->media->id.'/'.$this->filename)
+        $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
             ->assertStatus(403);
     }
 
@@ -57,7 +57,7 @@ class MediaTest extends BaseSetup
 
         $this->user->givePermissionTo(Permission::findOrCreate('media.{media}.{filename}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/media/'.$this->media->id.'/'.$this->filename)
+        $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
             ->assertStatus(404);
     }
 }

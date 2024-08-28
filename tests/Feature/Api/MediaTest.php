@@ -217,8 +217,8 @@ class MediaTest extends BaseSetup
 
         $uploadedMedia = $this->task->getFirstMedia();
 
-        $queryParams = '?model_type='.$modelType.'&model_id='.$this->task->id;
-        $download = $this->get('/api/media/'.$uploadedMedia->file_name.$queryParams);
+        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->id;
+        $download = $this->get('/api/media/' . $uploadedMedia->file_name . $queryParams);
         $download->assertStatus(200);
     }
 
@@ -236,8 +236,8 @@ class MediaTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['download']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $queryParams = '?model_type=notExistingModelType'.Str::random().'&model_id='.$this->task->id;
-        $response = $this->actingAs($this->user)->get('/api/media/filename'.$queryParams);
+        $queryParams = '?model_type=notExistingModelType' . Str::random() . '&model_id=' . $this->task->id;
+        $response = $this->actingAs($this->user)->get('/api/media/filename' . $queryParams);
         $response->assertStatus(422);
     }
 
@@ -264,8 +264,8 @@ class MediaTest extends BaseSetup
                 'generated_conversions' => [],
             ]);
 
-        $queryParams = '?model_type='.$modelType.'&model_id='.$this->task->id.'&conversion=thumb';
-        $download = $this->get('/api/media/'.$uploadedMedia->file_name.$queryParams);
+        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->id . '&conversion=thumb';
+        $download = $this->get('/api/media/' . $uploadedMedia->file_name . $queryParams);
         $download->assertStatus(404);
     }
 
@@ -286,7 +286,7 @@ class MediaTest extends BaseSetup
 
         $uploadedMedia = $this->task->getFirstMedia();
 
-        $download = $this->actingAs($this->user)->get('/api/media/private/'.$uploadedMedia->id);
+        $download = $this->actingAs($this->user)->get('/api/media/private/' . $uploadedMedia->id);
         $download->assertStatus(200);
     }
 
@@ -307,9 +307,9 @@ class MediaTest extends BaseSetup
         $response->assertStatus(201);
 
         $uploadedMedia = $this->task->getFirstMedia();
-        $queryParams = '?model_type='.$modelType.'&model_id='.$this->task->id;
+        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->id;
 
-        $download = $this->get('/api/media/'.Str::random().$uploadedMedia->file_name.$queryParams);
+        $download = $this->get('/api/media/' . Str::random() . $uploadedMedia->file_name . $queryParams);
         $download->assertStatus(404);
     }
 
@@ -331,9 +331,9 @@ class MediaTest extends BaseSetup
         $response->assertStatus(201);
 
         $uploadedMedia = $this->task->getFirstMedia();
-        $queryParams = '?model_type='.$modelType.'&model_id='.$this->task->id;
+        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->id;
 
-        $download = $this->get('/api/media/'.$uploadedMedia->file_name.$queryParams);
+        $download = $this->get('/api/media/' . $uploadedMedia->file_name . $queryParams);
         $download->assertStatus(404);
     }
 
@@ -354,7 +354,7 @@ class MediaTest extends BaseSetup
 
         $uploadedMedia = $this->task->getFirstMedia();
 
-        $download = $this->get('/api/media/private/'.++$uploadedMedia->id);
+        $download = $this->get('/api/media/private/' . ++$uploadedMedia->id);
         $download->assertStatus(404);
     }
 
@@ -381,7 +381,7 @@ class MediaTest extends BaseSetup
             ]);
 
         $queryParams = '?conversion=thumb';
-        $download = $this->get('/api/media/private/'.$uploadedMedia->id.$queryParams);
+        $download = $this->get('/api/media/private/' . $uploadedMedia->id . $queryParams);
         $download->assertStatus(404);
     }
 
@@ -405,8 +405,8 @@ class MediaTest extends BaseSetup
 
         $uploadedMedia = $this->task->getMedia()[0];
 
-        $queryParams = '?model_type='.$modelType.'&model_id='.$this->task->id;
-        $download = $this->get('/api/media/'.$uploadedMedia->file_name.$queryParams);
+        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->id;
+        $download = $this->get('/api/media/' . $uploadedMedia->file_name . $queryParams);
         $download->assertStatus(200);
     }
 
@@ -429,7 +429,7 @@ class MediaTest extends BaseSetup
         $uploadedMedia = $this->task->getFirstMedia();
         $file = UploadedFile::fake()->image('NewNotExistingTestFile.png');
 
-        $replace = $this->actingAs($this->user)->post('/api/media/'.$uploadedMedia->id, [
+        $replace = $this->actingAs($this->user)->post('/api/media/' . $uploadedMedia->id, [
             'media' => $file,
         ]);
         $replace->assertStatus(200);
@@ -453,7 +453,7 @@ class MediaTest extends BaseSetup
 
         $uploadedMedia = $this->task->getFirstMedia();
 
-        $replace = $this->actingAs($this->user)->post('/api/media/'.$uploadedMedia->id, [
+        $replace = $this->actingAs($this->user)->post('/api/media/' . $uploadedMedia->id, [
             'media' => true,
         ]);
         $replace->assertStatus(422);
@@ -477,7 +477,7 @@ class MediaTest extends BaseSetup
 
         $uploadedMedia = $this->task->getMedia()[0];
 
-        $replace = $this->actingAs($this->user)->post('/api/media/'.$uploadedMedia->id, [
+        $replace = $this->actingAs($this->user)->post('/api/media/' . $uploadedMedia->id, [
             'media' => false,
         ]);
         $replace->assertStatus(422);
@@ -501,7 +501,7 @@ class MediaTest extends BaseSetup
 
         $uploadedMedia = $this->task->getFirstMedia();
 
-        $replace = $this->actingAs($this->user)->post('/api/media/'.++$uploadedMedia->id, [
+        $replace = $this->actingAs($this->user)->post('/api/media/' . ++$uploadedMedia->id, [
             'media' => $this->file,
         ]);
         $replace->assertStatus(422);
@@ -529,7 +529,7 @@ class MediaTest extends BaseSetup
         $replicate->name = 'Replicate.png';
         $replicate->save();
 
-        $replace = $this->actingAs($this->user)->post('/api/media/'.$uploadedMedia->id, [
+        $replace = $this->actingAs($this->user)->post('/api/media/' . $uploadedMedia->id, [
             'media' => $file,
         ]);
         $replace->assertStatus(422);
@@ -607,7 +607,7 @@ class MediaTest extends BaseSetup
 
         $uploadedMedia = $this->task->getFirstMedia();
 
-        $delete = $this->actingAs($this->user)->delete('/api/media/'.$uploadedMedia->id);
+        $delete = $this->actingAs($this->user)->delete('/api/media/' . $uploadedMedia->id);
         $delete->assertStatus(204);
 
         $this->assertFalse(DB::table('media')->where('id', $uploadedMedia->id)->exists());
@@ -637,7 +637,7 @@ class MediaTest extends BaseSetup
 
         $uploadedMedia = $this->task->getFirstMedia();
 
-        $delete = $this->actingAs($this->user)->delete('/api/media/'.++$uploadedMedia->id);
+        $delete = $this->actingAs($this->user)->delete('/api/media/' . ++$uploadedMedia->id);
         $delete->assertStatus(404);
     }
 }

@@ -26,7 +26,7 @@ class TaskFactory extends Factory
                 ? Carbon::instance($startDate)->addDays(rand(1, 3))->format('Y-m-d H:i:s')
                 : null,
             'priority' => rand(0, 5),
-            'time_budget' => rand(0, 1000).':'.rand(0, 59),
+            'time_budget' => rand(0, 1000) . ':' . rand(0, 59),
             'budget' => $this->faker->randomFloat(),
         ];
     }

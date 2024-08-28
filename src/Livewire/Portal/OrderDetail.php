@@ -223,7 +223,7 @@ class OrderDetail extends Component
 
         activity()->performedOn($order)
             ->event('downloaded')
-            ->log($mediaItem->collection_name.' '.$mediaItem->name);
+            ->log($mediaItem->collection_name . ' ' . $mediaItem->name);
 
         return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
@@ -242,7 +242,7 @@ class OrderDetail extends Component
 
         activity()->performedOn($order)
             ->event('downloaded')
-            ->log($mediaItem->collection_name.' '.$mediaItem->name);
+            ->log($mediaItem->collection_name . ' ' . $mediaItem->name);
 
         return response()->download($mediaItem->getPath(), $mediaItem->name);
     }
@@ -262,24 +262,24 @@ class OrderDetail extends Component
             $treeItem->level = $level;
             $treeItem->is_alternative = $parent?->is_alternative ?: $treeItem->is_alternative;
             $treeItem->name = '<div><div>'
-                .$treeItem->product?->product_number.
+                . $treeItem->product?->product_number .
                 '</div><div class="font-semibold">'
-                .$treeItem->name.
+                . $treeItem->name .
                 '</div></div>';
 
             if ($treeItem->is_alternative && ! ($treeItem->tags->isEmpty() ?? false)) {
                 $tagItems = '';
                 foreach ($treeItem->tags as $tag) {
-                    $tagItems .= '<div>'.$tag->name.'</div>';
+                    $tagItems .= '<div>' . $tag->name . '</div>';
                 }
 
-                $treeItem->name = '<div><div class="flex">'.$tagItems.'</div>'.$treeItem->name.'</div>';
+                $treeItem->name = '<div><div class="flex">' . $tagItems . '</div>' . $treeItem->name . '</div>';
             }
 
             $treeItem->name = $level > 0
                 ? '<i class="fa-regular fa-arrow-turn-down-right pr-2"  style="padding-left: '
-                    .$level * 30 .'px;"></i>'
-                    .$treeItem['name']
+                    . $level * 30 . 'px;"></i>'
+                    . $treeItem['name']
                 : $treeItem['name'];
 
             // show line number if
@@ -287,7 +287,7 @@ class OrderDetail extends Component
             // 2. the parent is not a product
             // 3. the item has children
             if (! $parent || $parent->is_no_product && ! $treeItem->is_no_product || $treeItem->children->count()) {
-                $treeItem->pos = $loopPrefix.Str::padLeft($loop, 2, '0');
+                $treeItem->pos = $loopPrefix . Str::padLeft($loop, 2, '0');
             }
 
             if ($level === 0 && $treeItem->is_no_product && $treeItem->children->count()) {
@@ -304,7 +304,7 @@ class OrderDetail extends Component
                 $this->renderTree(
                     $treeItem->children,
                     $level + 1,
-                    Str::padLeft($loop, 2, '0').'.',
+                    Str::padLeft($loop, 2, '0') . '.',
                     $treeItem
                 );
             }

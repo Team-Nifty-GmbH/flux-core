@@ -53,7 +53,7 @@ class Init extends Command
                 $this->call(KeyGenerateCommand::class);
             }
             $envFilePath = App::environmentFilePath();
-            $this->info('The following environment file is used: »'.$envFilePath.'«');
+            $this->info('The following environment file is used: »' . $envFilePath . '«');
 
             $content = file_get_contents($envFilePath);
 
@@ -99,8 +99,8 @@ class Init extends Command
 
                 // check database connection with new credentials
                 try {
-                    new PDO('mysql:host='.$dbCredentials['DB_HOST'].':'.$dbCredentials['DB_PORT'].
-                        ';dbname='.$dbCredentials['DB_DATABASE'],
+                    new PDO('mysql:host=' . $dbCredentials['DB_HOST'] . ':' . $dbCredentials['DB_PORT'] .
+                        ';dbname=' . $dbCredentials['DB_DATABASE'],
                         $dbCredentials['DB_USERNAME'],
                         $dbCredentials['DB_PASSWORD']);
 
@@ -124,7 +124,7 @@ class Init extends Command
             }
 
             $envFilePath = App::environmentFilePath();
-            $this->info('The following environment file is used: »'.$envFilePath.'«');
+            $this->info('The following environment file is used: »' . $envFilePath . '«');
 
             $content = file_get_contents($envFilePath);
         }
@@ -132,9 +132,9 @@ class Init extends Command
         $filter = $this->option('filter');
         if (! empty($filter)) {
             try {
-                $this->call($filter.':init', []);
+                $this->call($filter . ':init', []);
             } catch (\Exception $e) {
-                $this->error($filter.' not found');
+                $this->error($filter . ' not found');
             }
         } else {
             // Most crucial tables for all purposes.
@@ -166,20 +166,20 @@ class Init extends Command
 
         // Wrap values that have a space or equals in quotes to escape them
         if (preg_match('/\s/', $value) || str_contains($value, '=')) {
-            $value = '"'.$value.'"';
+            $value = '"' . $value . '"';
         }
 
-        $newPair = $key.'='.$value;
+        $newPair = $key . '=' . $value;
 
         // For existed key.
         if ($oldPair !== null) {
-            $replaced = preg_replace('/^'.preg_quote($oldPair, '/').'$/uimU', $newPair, $envFileContent);
+            $replaced = preg_replace('/^' . preg_quote($oldPair, '/') . '$/uimU', $newPair, $envFileContent);
 
             return [$replaced, false];
         }
 
         // For a new key.
-        return [$envFileContent."\n".$newPair."\n", true];
+        return [$envFileContent . "\n" . $newPair . "\n", true];
     }
 
     /**

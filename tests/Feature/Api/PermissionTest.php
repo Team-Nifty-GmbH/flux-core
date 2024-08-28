@@ -34,7 +34,7 @@ class PermissionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/permissions/user/'.$this->user->id);
+        $response = $this->actingAs($this->user)->get('/api/permissions/user/' . $this->user->id);
         $response->assertStatus(200);
 
         $permissions = json_decode($response->getContent())->data;
@@ -49,7 +49,7 @@ class PermissionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/permissions/user/'.++$this->user->id);
+        $response = $this->actingAs($this->user)->get('/api/permissions/user/' . ++$this->user->id);
         $response->assertStatus(404);
     }
 
@@ -177,7 +177,7 @@ class PermissionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/permissions/'.$permission->id);
+        $response = $this->actingAs($this->user)->delete('/api/permissions/' . $permission->id);
         $response->assertStatus(204);
 
         $this->assertFalse(Permission::query()->whereKey($permission->id)->exists());
@@ -190,7 +190,7 @@ class PermissionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/permissions/'.++$permission->id);
+        $response = $this->actingAs($this->user)->delete('/api/permissions/' . ++$permission->id);
         $response->assertStatus(404);
     }
 
@@ -204,7 +204,7 @@ class PermissionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/permissions/'.$permission->id);
+        $response = $this->actingAs($this->user)->delete('/api/permissions/' . $permission->id);
         $response->assertStatus(423);
     }
 }

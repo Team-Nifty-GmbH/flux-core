@@ -20,7 +20,7 @@ class CountryFactory extends Factory
         }
 
         if ($i === 100) {
-            $isoAlpha2 .= '_'.Str::uuid();
+            $isoAlpha2 .= '_' . Str::uuid();
         }
 
         return [

@@ -43,7 +43,7 @@ class OrderTypeTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/order-types/'.$this->orderTypes[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/order-types/' . $this->orderTypes[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -68,7 +68,7 @@ class OrderTypeTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/order-types/'.++$this->orderTypes[1]->id);
+        $response = $this->actingAs($this->user)->get('/api/order-types/' . ++$this->orderTypes[1]->id);
         $response->assertStatus(404);
     }
 
@@ -258,7 +258,7 @@ class OrderTypeTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/order-types/'.$this->orderTypes[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/order-types/' . $this->orderTypes[1]->id);
         $response->assertStatus(204);
 
         $orderType = $this->orderTypes[1]->fresh();
@@ -271,7 +271,7 @@ class OrderTypeTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/order-types/'.++$this->orderTypes[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/order-types/' . ++$this->orderTypes[1]->id);
         $response->assertStatus(404);
     }
 }

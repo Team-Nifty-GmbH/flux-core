@@ -48,7 +48,7 @@ class ProductsSerialNumbersTest extends BaseSetup
             Permission::findOrCreate('products.serial-numbers.{id?}.get', 'web')
         );
 
-        $this->actingAs($this->user, 'web')->get('/products/serial-numbers/'.$this->serialNumber->id)
+        $this->actingAs($this->user, 'web')->get('/products/serial-numbers/' . $this->serialNumber->id)
             ->assertStatus(200);
     }
 
@@ -64,7 +64,7 @@ class ProductsSerialNumbersTest extends BaseSetup
 
     public function test_products_id_serial_numbers_no_user()
     {
-        $this->get('/products/serial-numbers/'.$this->serialNumber->id)
+        $this->get('/products/serial-numbers/' . $this->serialNumber->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -73,7 +73,7 @@ class ProductsSerialNumbersTest extends BaseSetup
     {
         Permission::findOrCreate('products.serial-numbers.{id?}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/products/serial-numbers/'.$this->serialNumber->id)
+        $this->actingAs($this->user, 'web')->get('/products/serial-numbers/' . $this->serialNumber->id)
             ->assertStatus(403);
     }
 
@@ -85,7 +85,7 @@ class ProductsSerialNumbersTest extends BaseSetup
             Permission::findOrCreate('products.serial-numbers.{id?}.get', 'web')
         );
 
-        $this->actingAs($this->user, 'web')->get('/products/serial-numbers/'.$this->serialNumber->id)
+        $this->actingAs($this->user, 'web')->get('/products/serial-numbers/' . $this->serialNumber->id)
             ->assertStatus(404);
     }
 }

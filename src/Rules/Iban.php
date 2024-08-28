@@ -134,7 +134,7 @@ class Iban implements Rule
      */
     private function getChecksum(string $iban): int
     {
-        $iban = substr($iban, 4).substr($iban, 0, 4);
+        $iban = substr($iban, 4) . substr($iban, 0, 4);
         $iban = str_replace(
             $this->getReplacementsChars(),
             $this->getReplacementsValues(),

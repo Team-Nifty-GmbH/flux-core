@@ -93,22 +93,22 @@ class ExistsWithForeign implements DataAwareRule, InvokableRule
         if (! $this->throughTable) {
             $query->where($this->attributeColumn, $foreignAttributeValue)->where($this->column, $value);
         } else {
-            $query->where($this->table.'.'.$this->column, $value);
+            $query->where($this->table . '.' . $this->column, $value);
             $query->join(
                 $this->throughTable,
                 function ($join) use ($foreignAttributeValue) {
                     $join->on(
-                        $this->table.'.'.$this->throughLocal,
+                        $this->table . '.' . $this->throughLocal,
                         '=',
-                        $this->throughTable.'.'.$this->throughForeign
+                        $this->throughTable . '.' . $this->throughForeign
                     );
                     $join->where(
-                        $this->throughTable.'.'.$this->attributeColumn,
+                        $this->throughTable . '.' . $this->attributeColumn,
                         $foreignAttributeValue
                     );
                 }
             );
-            $query->select($this->throughTable.'.*');
+            $query->select($this->throughTable . '.*');
         }
 
         if (! $query->count()) {

@@ -53,7 +53,7 @@ class CountryTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/countries/'.$this->countries[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/countries/' . $this->countries[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -82,7 +82,7 @@ class CountryTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/countries/'.++$this->countries[1]->id);
+        $response = $this->actingAs($this->user)->get('/api/countries/' . ++$this->countries[1]->id);
         $response->assertStatus(404);
     }
 
@@ -319,7 +319,7 @@ class CountryTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/countries/'.$this->countries[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/countries/' . $this->countries[1]->id);
         $response->assertStatus(204);
 
         $country = $this->countries[1]->fresh();
@@ -332,7 +332,7 @@ class CountryTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/countries/'.++$this->countries[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/countries/' . ++$this->countries[1]->id);
         $response->assertStatus(404);
     }
 
@@ -351,7 +351,7 @@ class CountryTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/countries/'.$this->countries[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/countries/' . $this->countries[1]->id);
         $response->assertStatus(423);
     }
 
@@ -366,7 +366,7 @@ class CountryTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/countries/'.$this->countries[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/countries/' . $this->countries[1]->id);
         $response->assertStatus(423);
     }
 }

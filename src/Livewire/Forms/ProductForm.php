@@ -131,9 +131,9 @@ class ProductForm extends FluxForm
                 'parent',
                 'productProperties:id,product_property_group_id,name,property_type_enum,product_product_property.value',
                 'productProperties.productPropertyGroup:id,name',
-                'suppliers:id,main_address_id,customer_number,'.
-                    'product_supplier.contact_id,'.
-                    'product_supplier.manufacturer_product_number,'.
+                'suppliers:id,main_address_id,customer_number,' .
+                    'product_supplier.contact_id,' .
+                    'product_supplier.manufacturer_product_number,' .
                     'product_supplier.purchase_price',
                 'suppliers.mainAddress:id,name',
                 'tags:id',

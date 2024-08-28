@@ -76,7 +76,7 @@ class QueryBuilder
                     ->where('hidden', false)
                     ->where('virtual', false)
                     ->pluck('name')
-                    ->map(fn ($value) => $includedItem.'.'.$value)
+                    ->map(fn ($value) => $includedItem . '.' . $value)
                     ->flip()
                     ->toArray()
             );
@@ -85,7 +85,7 @@ class QueryBuilder
         $allowed = $model::getColumns();
         $allowedFields = array_flip(
             array_map(
-                fn ($item) => $model->getTable().'.'.$item,
+                fn ($item) => $model->getTable() . '.' . $item,
                 $allowed->pluck('Field')->toArray()
             )
         );
@@ -106,7 +106,7 @@ class QueryBuilder
         $additionalColumnsFilters = [];
         $additionalColumnsSorts = [];
         foreach ($additionalColumns as $additionalColumn) {
-            $alias = $modelName.'.'.$additionalColumn;
+            $alias = $modelName . '.' . $additionalColumn;
             $additionalColumnsFilters[] = AllowedFilter::custom(
                 $additionalColumn, app(AdditionalColumnFilter::class), $alias
             );
@@ -167,7 +167,7 @@ class QueryBuilder
         $scope = [];
         foreach ($allowed as $column) {
             if (str_contains($column->Type, 'tinyint')) {
-                $exact[] = $related ? $related.'.'.$column->Field : $column->Field;
+                $exact[] = $related ? $related . '.' . $column->Field : $column->Field;
 
                 continue;
             }
@@ -175,8 +175,8 @@ class QueryBuilder
             if (count(array_filter($exactAndScopeColumnTypes, function ($item) use ($column) {
                 return str_contains($column->Type, $item);
             })) > 0) {
-                $exact[] = $related ? $related.'.'.$column->Field : $column->Field;
-                $scope[] = $related ? $related.'.'.$column->Field : $column->Field;
+                $exact[] = $related ? $related . '.' . $column->Field : $column->Field;
+                $scope[] = $related ? $related . '.' . $column->Field : $column->Field;
 
                 continue;
             }
@@ -184,7 +184,7 @@ class QueryBuilder
             if (count(array_filter($partialColumnTypes, function ($item) use ($column) {
                 return str_contains($column->Type, $item);
             })) > 0) {
-                $partial[] = $related ? $related.'.'.$column->Field : $column->Field;
+                $partial[] = $related ? $related . '.' . $column->Field : $column->Field;
             }
         }
 
@@ -194,7 +194,7 @@ class QueryBuilder
 
         if (count($scope) > 0) {
             $scopeFilters = self::allowedFilters($related ?
-                [$related.'.scope', $related.'.between'] : ['scope', 'between'], 'scope'
+                [$related . '.scope', $related . '.between'] : ['scope', 'between'], 'scope'
             );
         }
 
@@ -207,8 +207,8 @@ class QueryBuilder
 
         array_walk($allowed, function (&$item) use ($baseModelClass, $relation) {
             $item = AllowedSort::custom(
-                $relation.'.'.$item,
-                new RelatedColumnSort,
+                $relation . '.' . $item,
+                new RelatedColumnSort(),
                 implode('.', [$baseModelClass, $relation, $item])
             );
         });

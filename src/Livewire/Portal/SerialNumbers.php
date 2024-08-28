@@ -29,9 +29,9 @@ class SerialNumbers extends Component
         foreach ($addresses as $address) {
             $channel = $address->broadcastChannel(false);
             $listeners = array_merge($listeners, [
-                'echo-private:'.$channel.',.SerialNumberCreated' => 'serialNumberCreatedEvent',
-                'echo-private:'.$channel.',.SerialNumberUpdated' => 'serialNumberUpdatedEvent',
-                'echo-private:'.$channel.',.SerialNumberDeleted' => 'serialNumberDeletedEvent',
+                'echo-private:' . $channel . ',.SerialNumberCreated' => 'serialNumberCreatedEvent',
+                'echo-private:' . $channel . ',.SerialNumberUpdated' => 'serialNumberUpdatedEvent',
+                'echo-private:' . $channel . ',.SerialNumberDeleted' => 'serialNumberDeletedEvent',
             ]);
         }
 

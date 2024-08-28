@@ -15,7 +15,7 @@ class Authenticate extends BaseAuthenticate
     {
         // if a token is set in get parameters, set it as the bearer token
         if ($request->get('token')) {
-            request()->headers->add(['Authorization' => 'Bearer '.$request->token]);
+            request()->headers->add(['Authorization' => 'Bearer ' . $request->token]);
             $guards = ['token'];
         }
 

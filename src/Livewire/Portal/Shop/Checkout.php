@@ -98,7 +98,7 @@ class Checkout extends Cart
             array_filter(
                 [
                     $this->comment,
-                    $this->delivery_date ? __('Desired delivery date').': '.$this->delivery_date : null,
+                    $this->delivery_date ? __('Desired delivery date') . ': ' . $this->delivery_date : null,
                 ]
             )
         );

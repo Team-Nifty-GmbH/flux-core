@@ -27,6 +27,6 @@ class RefactorCountriesTable extends Migration
 
     private function moveIsoNumeric($after)
     {
-        DB::statement('ALTER TABLE countries MODIFY COLUMN iso_numeric VARCHAR(255) AFTER '.$after);
+        DB::statement('ALTER TABLE countries MODIFY COLUMN iso_numeric VARCHAR(255) AFTER ' . $after);
     }
 }

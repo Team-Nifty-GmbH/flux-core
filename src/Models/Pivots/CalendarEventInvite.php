@@ -33,7 +33,7 @@ class CalendarEventInvite extends MorphPivot
     public function broadcastOn($event): PrivateChannel
     {
         return new PrivateChannel(
-            str_replace('\\', '.', $this->model_type).'.'.$this->model_id
+            str_replace('\\', '.', $this->model_type) . '.' . $this->model_id
         );
     }
 

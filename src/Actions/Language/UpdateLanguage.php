@@ -35,8 +35,8 @@ class UpdateLanguage extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->rules['language_code'] .= ','.($this->data['id'] ?? 0);
-        $this->rules['iso_name'] .= ','.($this->data['id'] ?? 0);
+        $this->rules['language_code'] .= ',' . ($this->data['id'] ?? 0);
+        $this->rules['iso_name'] .= ',' . ($this->data['id'] ?? 0);
 
         if (($this->data['is_default'] ?? false)
             && ! resolve_static(Language::class, 'query')

@@ -71,8 +71,8 @@ class FolderTree extends Component
 
         // merge the validation rules
         return [
-            'files.'.$index => is_null($modelTypeValidationRules) ? 'required|file|max:1024' : 'required|file|max:1024|mimetypes:'
-                .implode(',', $modelTypeValidationRules),
+            'files.' . $index => is_null($modelTypeValidationRules) ? 'required|file|max:1024' : 'required|file|max:1024|mimetypes:'
+                . implode(',', $modelTypeValidationRules),
         ];
     }
 
@@ -188,7 +188,7 @@ class FolderTree extends Component
         resolve_static(MediaModel::class, 'query')
             ->where('model_type', app($this->modelType)->getMorphClass())
             ->where('model_id', $this->modelId)
-            ->where('collection_name', 'LIKE', $collection['collection_name'].'%')
+            ->where('collection_name', 'LIKE', $collection['collection_name'] . '%')
             ->get()
             ->each(function (MediaModel $media) use ($newCollectionName, $model, $collection) {
                 $collectionName = $media->collection_name;

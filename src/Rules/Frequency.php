@@ -86,7 +86,7 @@ class Frequency implements DataAwareRule, ValidationRule
         switch ($validation) {
             case 'minute':
                 if (count($value) !== 1 || ! is_int($value[0]) || $value[0] > 59 || $value[0] < 0) {
-                    $fail('The :attribute must be an array with one entry '.
+                    $fail('The :attribute must be an array with one entry ' .
                         'which must be a minute between 0 and 59.'
                     )
                         ->translate();
@@ -97,7 +97,7 @@ class Frequency implements DataAwareRule, ValidationRule
                     || count($value) === 1
                     && ! (is_null($value[0]) || (is_int($value[0]) && $value[0] < 60 && $value[0] > -1))
                 ) {
-                    $fail('The :attribute must be an array with max one entry, '.
+                    $fail('The :attribute must be an array with max one entry, ' .
                         'this entry must be null or a minute between 0 and 59.'
                     )->translate();
                 }
@@ -107,7 +107,7 @@ class Frequency implements DataAwareRule, ValidationRule
                     || ! is_string($value[0])
                     || ! preg_match('/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/', $value[0])
                 ) {
-                    $fail('The :attribute must be an array with one entry, '.
+                    $fail('The :attribute must be an array with one entry, ' .
                         'this entry must be a valid time string.'
                     )->translate();
                 }
@@ -133,8 +133,8 @@ class Frequency implements DataAwareRule, ValidationRule
                     || $value[2] > 59 || $value[2] < 0
                 ) {
                     $fail('The :attribute must be an array with three entries '
-                        .'the first two entries must be valid hour integers, '
-                        .'the third entry must be a valid minute integer.'
+                        . 'the first two entries must be valid hour integers, '
+                        . 'the third entry must be a valid minute integer.'
                     )
                         ->translate();
                 }
@@ -147,8 +147,8 @@ class Frequency implements DataAwareRule, ValidationRule
                     || ! preg_match('/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/', $value[1])
                 ) {
                     $fail('The :attribute must be an array with two entries, '
-                        .'the first entry must be a weekday integer between 0 and 6 starting on sunday, '
-                        .'the second entry must be a valid time string.'
+                        . 'the first entry must be a weekday integer between 0 and 6 starting on sunday, '
+                        . 'the second entry must be a valid time string.'
                     )
                         ->translate();
                 }
@@ -161,8 +161,8 @@ class Frequency implements DataAwareRule, ValidationRule
                     || ! preg_match('/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/', $value[1])
                 ) {
                     $fail('The :attribute must be an array with two entries, '
-                        .'the first entry must be a day of month integer, '
-                        .'the second entry must be a valid time string.'
+                        . 'the first entry must be a day of month integer, '
+                        . 'the second entry must be a valid time string.'
                     )
                         ->translate();
                 }
@@ -177,9 +177,9 @@ class Frequency implements DataAwareRule, ValidationRule
                     || ! preg_match('/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/', $value[2])
                 ) {
                     $fail('The :attribute must be an array with three entries, '
-                        .'the first entry must be a day of month integer, '
-                        .'the second entry must be a day of month integer, '
-                        .'the third entry must be a valid time string.'
+                        . 'the first entry must be a day of month integer, '
+                        . 'the second entry must be a day of month integer, '
+                        . 'the third entry must be a valid time string.'
                     )
                         ->translate();
                 }
@@ -194,9 +194,9 @@ class Frequency implements DataAwareRule, ValidationRule
                     || ! preg_match('/^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/', $value[2])
                 ) {
                     $fail('The :attribute must be an array with three entries, '
-                        .'the first entry must be a month integer, '
-                        .'the second entry must be a day of month integer, '
-                        .'the third entry must be a valid time string.'
+                        . 'the first entry must be a month integer, '
+                        . 'the second entry must be a day of month integer, '
+                        . 'the third entry must be a valid time string.'
                     )
                         ->translate();
                 }
@@ -208,8 +208,8 @@ class Frequency implements DataAwareRule, ValidationRule
                     || max($value) > 6 || min($value) < 0
                 ) {
                     $fail('The :attribute must be an array with min 1 entry and max 7 entries, '
-                        .'all entries must be a weekday integer between 0 and 6 starting on sunday '
-                        .'and no duplicates are allowed.'
+                        . 'all entries must be a weekday integer between 0 and 6 starting on sunday '
+                        . 'and no duplicates are allowed.'
                     )
                         ->translate();
                 }
@@ -222,7 +222,7 @@ class Frequency implements DataAwareRule, ValidationRule
                     || ! preg_match('/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/', $value[1])
                     || $value[1] > $value[0]
                 ) {
-                    $fail('The :attribute must be an array with two entries, '.
+                    $fail('The :attribute must be an array with two entries, ' .
                         'both entries must be a valid time string.'
                     )->translate();
                 }

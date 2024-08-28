@@ -72,7 +72,7 @@ class ProcessWebhook implements ShouldQueue
             'signature' => [
                 'timestamp' => $timestamp,
                 'token' => $token,
-                'signature' => hash_hmac('sha256', $timestamp.$token, $this->signingKey),
+                'signature' => hash_hmac('sha256', $timestamp . $token, $this->signingKey),
             ],
             'model' => [
                 $this->model->toArray(),

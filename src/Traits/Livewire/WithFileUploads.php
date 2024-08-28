@@ -35,7 +35,7 @@ trait WithFileUploads
     public function downloadCollection(string $collection): ?BinaryFileResponse
     {
         $media = resolve_static(Media::class, 'query')
-            ->where('collection_name', 'like', $collection.'%')
+            ->where('collection_name', 'like', $collection . '%')
             ->when($this->modelType ?? false,
                 fn ($query) => $query->where('model_type', $this->modelType)
                     ->when(
@@ -46,10 +46,10 @@ trait WithFileUploads
             ->get();
 
         // add files to a zip file
-        $zip = new \ZipArchive;
+        $zip = new \ZipArchive();
         $zipFileName = explode('.', $collection);
         $zipFileName = array_pop($zipFileName);
-        $zipFileName = $zipFileName.'.zip';
+        $zipFileName = $zipFileName . '.zip';
 
         $zip->open($zipFileName, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         foreach ($media as $file) {
@@ -61,7 +61,7 @@ trait WithFileUploads
             if ($collection === $file->collection_name) {
                 $relativePath = $file->name;
             } else {
-                $collectionName = Str::remove($collection.'.', $file->collection_name);
+                $collectionName = Str::remove($collection . '.', $file->collection_name);
                 $relativePath = explode('.', $collectionName);
                 $relativePath[] = $file->name;
                 $relativePath = implode(DIRECTORY_SEPARATOR, $relativePath);

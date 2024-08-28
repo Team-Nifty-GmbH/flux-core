@@ -164,14 +164,14 @@ class InstallWizard extends Component
         $this->dbForm->validate();
 
         CommandJob::dispatchSync('flux:init-env', [
-            'keyValues' => 'app_url:'.request()->getSchemeAndHttpHost().','.
-                'log_channel:single'.','.
-                'app_debug:true'.','.
-                'db_host:'.$this->dbForm->host.','.
-                'db_port:'.$this->dbForm->port.','.
-                'db_database:'.$this->dbForm->database.','.
-                'db_username:'.$this->dbForm->username.','.
-                'db_password:'.($this->dbForm->password ?? null),
+            'keyValues' => 'app_url:' . request()->getSchemeAndHttpHost() . ',' .
+                'log_channel:single' . ',' .
+                'app_debug:true' . ',' .
+                'db_host:' . $this->dbForm->host . ',' .
+                'db_port:' . $this->dbForm->port . ',' .
+                'db_database:' . $this->dbForm->database . ',' .
+                'db_username:' . $this->dbForm->username . ',' .
+                'db_password:' . ($this->dbForm->password ?? null),
             '--use-default' => true,
         ]);
 
@@ -289,8 +289,8 @@ class InstallWizard extends Component
     private function finish(): void
     {
         CommandJob::dispatchSync('flux:init-env', [
-            'keyValues' => 'app_locale:'.$this->languageForm->language_code.','.
-                'app_name:'.$this->clientForm->name.','.
+            'keyValues' => 'app_locale:' . $this->languageForm->language_code . ',' .
+                'app_name:' . $this->clientForm->name . ',' .
                 'flux_install_done:true',
         ]);
 

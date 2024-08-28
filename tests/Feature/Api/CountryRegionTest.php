@@ -53,7 +53,7 @@ class CountryRegionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/country-regions/'.$this->countryRegions[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/country-regions/' . $this->countryRegions[0]->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -75,7 +75,7 @@ class CountryRegionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/country-regions/'.++$this->countryRegions[1]->id);
+        $response = $this->actingAs($this->user)->get('/api/country-regions/' . ++$this->countryRegions[1]->id);
         $response->assertStatus(404);
     }
 
@@ -213,7 +213,7 @@ class CountryRegionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/country-regions/'.$this->countryRegions[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/country-regions/' . $this->countryRegions[1]->id);
         $response->assertStatus(204);
 
         $countryRegion = $this->countryRegions[1]->fresh();
@@ -226,7 +226,7 @@ class CountryRegionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/country-regions/'.++$this->countryRegions[1]->id);
+        $response = $this->actingAs($this->user)->delete('/api/country-regions/' . ++$this->countryRegions[1]->id);
         $response->assertStatus(404);
     }
 }

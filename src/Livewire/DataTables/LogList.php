@@ -107,7 +107,7 @@ class LogList extends BaseDataTable
         $this->filters = [[
             'message',
             'like',
-            '%'.$this->search.'%',
+            '%' . $this->search . '%',
         ]];
 
         parent::startSearch();

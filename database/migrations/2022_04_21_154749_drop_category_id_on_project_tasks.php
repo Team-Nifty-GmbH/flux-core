@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
@@ -33,9 +33,9 @@ return new class extends Migration
     private function migrateCategorizablesTable()
     {
         DB::statement('INSERT INTO categorizables(category_id, categorizable_type, categorizable_id)
-            SELECT category_id, \''.trim(
+            SELECT category_id, \'' . trim(
             json_encode('FluxErp\\Models\\ProjectTask', JSON_UNESCAPED_SLASHES), '"'
-        ).'\', id
+        ) . '\', id
             FROM project_tasks'
         );
     }
@@ -45,9 +45,9 @@ return new class extends Migration
         DB::statement('UPDATE project_tasks
             INNER JOIN categorizables
             ON project_tasks.id = categorizables.categorizable_id
-            AND categorizables.categorizable_type = \''.trim(
+            AND categorizables.categorizable_type = \'' . trim(
             json_encode('FluxErp\\Models\\ProjectTask', JSON_UNESCAPED_SLASHES), '"'
-        ).'\'
+        ) . '\'
             SET project_tasks.category_id = categorizables.category_id'
         );
     }

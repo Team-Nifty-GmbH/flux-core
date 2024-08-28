@@ -184,14 +184,14 @@ class Product extends Component
 
         if ($this->displayedProductProperties) {
             $productProperties = Arr::flatten(
-                array_filter(data_get($this->displayedProductProperties, '*.'.PropertyTypeEnum::Text->value)),
+                array_filter(data_get($this->displayedProductProperties, '*.' . PropertyTypeEnum::Text->value)),
                 1
             );
 
             foreach ($productProperties as $productProperty) {
                 data_set(
                     $this->product->product_properties,
-                    $productProperty['id'].'.value',
+                    $productProperty['id'] . '.value',
                     $productProperty['value']
                 );
             }

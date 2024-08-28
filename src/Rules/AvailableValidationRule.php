@@ -109,7 +109,7 @@ class AvailableValidationRule implements Rule
             return false;
         }
 
-        $validationRule = $exploded[0].':';
+        $validationRule = $exploded[0] . ':';
 
         return in_array($validationRule, $this->availableValidationRules);
     }

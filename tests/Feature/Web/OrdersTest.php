@@ -91,13 +91,13 @@ class OrdersTest extends BaseSetup
     {
         $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/orders/'.$this->order->id)
+        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
             ->assertStatus(200);
     }
 
     public function test_orders_id_no_user()
     {
-        $this->get('/orders/'.$this->order->id)
+        $this->get('/orders/' . $this->order->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -106,7 +106,7 @@ class OrdersTest extends BaseSetup
     {
         Permission::findOrCreate('orders.{id}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/orders/'.$this->order->id)
+        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
             ->assertStatus(403);
     }
 
@@ -116,7 +116,7 @@ class OrdersTest extends BaseSetup
 
         $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/orders/'.$this->order->id)
+        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
             ->assertStatus(404);
     }
 }

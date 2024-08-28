@@ -22,7 +22,7 @@ class ModelHandler implements HandlerInterface
     public function serializeValue(mixed $value): string
     {
         if ($value->exists) {
-            return get_class($value).'#'.$value->getKey();
+            return get_class($value) . '#' . $value->getKey();
         }
 
         return get_class($value);

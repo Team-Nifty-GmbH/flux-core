@@ -76,7 +76,7 @@ class FillOrderPositions extends FluxAction
         // Validate Data
         $rules = [
             'children' => 'array',
-            'order_id' => 'required|integer|size:'.$this->data['order_id'],
+            'order_id' => 'required|integer|size:' . $this->data['order_id'],
         ];
 
         $createRules = array_merge(resolve_static(CreateOrderPositionRuleset::class, 'getRules'), $rules);
@@ -193,27 +193,27 @@ class FillOrderPositions extends FluxAction
 
             $priceValidator = Validator::make($orderPosition, [
                 'unit_gross_price' => [
-                    'required_with:'.implode(',', array_diff($priceFields, ['unit_gross_price'])),
+                    'required_with:' . implode(',', array_diff($priceFields, ['unit_gross_price'])),
                     app(Numeric::class),
                 ],
                 'unit_net_price' => [
-                    'required_with:'.implode(',', array_diff($priceFields, ['unit_net_price'])),
+                    'required_with:' . implode(',', array_diff($priceFields, ['unit_net_price'])),
                     app(Numeric::class),
                 ],
                 'total_gross_price' => [
-                    'required_with:'.implode(',', array_diff($priceFields, ['total_gross_price'])),
+                    'required_with:' . implode(',', array_diff($priceFields, ['total_gross_price'])),
                     app(Numeric::class),
                 ],
                 'total_net_price' => [
-                    'required_with:'.implode(',', array_diff($priceFields, ['total_net_price'])),
+                    'required_with:' . implode(',', array_diff($priceFields, ['total_net_price'])),
                     app(Numeric::class),
                 ],
                 'total_base_gross_price' => [
-                    'required_with:'.implode(',', array_diff($priceFields, ['total_base_gross_price'])),
+                    'required_with:' . implode(',', array_diff($priceFields, ['total_base_gross_price'])),
                     app(Numeric::class),
                 ],
                 'total_base_net_price' => [
-                    'required_with:'.implode(',', array_diff($priceFields, ['total_base_net_price'])),
+                    'required_with:' . implode(',', array_diff($priceFields, ['total_base_net_price'])),
                     app(Numeric::class),
                 ],
                 'discount_percentage' => [
@@ -229,12 +229,12 @@ class FillOrderPositions extends FluxAction
                     'nullable',
                 ],
                 'vat_price' => [
-                    'required_with:'.implode(',', array_diff($priceFields, ['vat_price'])),
+                    'required_with:' . implode(',', array_diff($priceFields, ['vat_price'])),
                     'nullable',
                     app(Numeric::class),
                 ],
                 'vat_rate_percentage' => [
-                    'required_with:'.implode(',', array_diff($priceFields, ['vat_rate_percentage'])),
+                    'required_with:' . implode(',', array_diff($priceFields, ['vat_rate_percentage'])),
                     app(Numeric::class, ['min' => 0, 'max' => 1]),
                 ],
             ]);
@@ -262,7 +262,7 @@ class FillOrderPositions extends FluxAction
                         'exists:price_lists,id,deleted_at,NULL',
                     ],
                     'unit_price' => [
-                        new Numeric,
+                        new Numeric(),
                         'nullable',
                     ],
                 ]);
@@ -336,7 +336,7 @@ class FillOrderPositions extends FluxAction
                 'product_id' => 'required|integer|exists:products,id,deleted_at,NULL',
                 'amount' => [
                     'required',
-                    new Numeric,
+                    new Numeric(),
                 ],
 
                 'unit_gross_price' => ['sometimes', Rule::in([null])],

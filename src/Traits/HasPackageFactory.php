@@ -10,6 +10,6 @@ trait HasPackageFactory
 
     protected static function newFactory()
     {
-        return app('FluxErp\Database\Factories\\'.class_basename(static::class).'Factory');
+        return app('FluxErp\Database\Factories\\' . class_basename(static::class) . 'Factory');
     }
 }

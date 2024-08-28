@@ -15,7 +15,7 @@ trait Searchable
     {
         return Arr::sortByPattern(
             $this->toSearchableArrayBase(),
-            config('scout.sorted_searchable_keys.'.morph_alias(static::class), []),
+            config('scout.sorted_searchable_keys.' . morph_alias(static::class), []),
         );
     }
 }

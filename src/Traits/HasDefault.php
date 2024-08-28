@@ -16,7 +16,7 @@ trait HasDefault
         static::saving(
             function (Model $model) {
                 if ($model->isDirty(static::$defaultColumn)) {
-                    Cache::forget('default_'.morph_alias(static::class));
+                    Cache::forget('default_' . morph_alias(static::class));
 
                     if ($model->{static::$defaultColumn}) {
                         $model->setUpdatedDefault();
@@ -56,7 +56,7 @@ trait HasDefault
     public static function default(): ?static
     {
         return Cache::rememberForever(
-            'default_'.morph_alias(static::class),
+            'default_' . morph_alias(static::class),
             fn () => resolve_static(static::class, 'query')->where(static::$defaultColumn, true)->first()
         );
     }

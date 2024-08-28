@@ -37,7 +37,7 @@ class PaymentReminder extends Model implements OffersPrinting
                 'payment_reminder_current_level' => $model->reminder_level,
                 'payment_reminder_next_date' => $model->created_at
                     ->addDays(
-                        $model->order->{'payment_reminder_days_'.$model->reminder_level + 1}
+                        $model->order->{'payment_reminder_days_' . $model->reminder_level + 1}
                             ?? $model->order->payment_reminder_days_3
                     )
                     ->toDateString(),

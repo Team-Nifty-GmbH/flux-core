@@ -16,7 +16,7 @@ class UpdateDocumentType extends FluxAction
     protected function boot(array $data): void
     {
         parent::boot($data);
-        $this->rules = (new UpdateDocumentTypeRequest)->rules();
+        $this->rules = (new UpdateDocumentTypeRequest())->rules();
     }
 
     public static function models(): array
@@ -39,7 +39,7 @@ class UpdateDocumentType extends FluxAction
     protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(new DocumentType);
+        $validator->addModel(new DocumentType());
 
         $this->data = $validator->validate();
     }

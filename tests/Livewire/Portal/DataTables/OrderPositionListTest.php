@@ -68,7 +68,7 @@ class OrderPositionListTest extends BaseSetup
             ->hasAttached(factory: $this->dbClient, relationship: 'clients')
             ->create();
 
-        (new OrderPositionTableSeeder)->run();
+        (new OrderPositionTableSeeder())->run();
     }
 
     public function test_renders_successfully()

@@ -91,7 +91,7 @@ class Mail extends CommunicationList
         if (is_null($this->folderId)) {
             $this->selectedFolderIds = [];
         } elseif (! is_numeric($this->folderId)) {
-            $folderTree = data_get(Arr::keyBy($this->folders, 'id'), $this->folderId.'.children', []);
+            $folderTree = data_get(Arr::keyBy($this->folders, 'id'), $this->folderId . '.children', []);
             $this->selectedFolderIds = array_column(to_flat_tree($folderTree), 'id');
         } else {
             $folderTree = $this->findFolderIdById($this->folders, $this->folderId)['children'] ?? [];

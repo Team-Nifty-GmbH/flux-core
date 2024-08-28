@@ -86,7 +86,7 @@ class Rounding
         }
 
         if (! in_array($mode, ['ceil', 'floor'])) {
-            $modifier = 5 .str_repeat(0, $length - 1);
+            $modifier = 5 . str_repeat(0, $length - 1);
 
             if (bccomp($number, $modifier) < 1) {
                 $min = bcadd($number, 1, 0);
@@ -103,14 +103,14 @@ class Rounding
         if ($mode == 'ceil') {
             if (bccomp($end, $number) === 1) {
                 $powValue = $powValue[0] !== '-' ?
-                    bcadd($powValue, 1 .str_repeat(0, $length), 1) :
-                    bcsub($powValue, 1 .str_repeat(0, $length), 1);
+                    bcadd($powValue, 1 . str_repeat(0, $length), 1) :
+                    bcsub($powValue, 1 . str_repeat(0, $length), 1);
             }
         } else {
             if (bccomp($end, $number) === -1) {
                 $powValue = $powValue[0] !== '-' ?
-                    bcsub($powValue, 1 .str_repeat(0, $length), 1) :
-                    bcadd($powValue, 1 .str_repeat(0, $length), 1);
+                    bcsub($powValue, 1 . str_repeat(0, $length), 1) :
+                    bcadd($powValue, 1 . str_repeat(0, $length), 1);
             }
         }
 

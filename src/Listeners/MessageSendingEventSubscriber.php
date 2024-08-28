@@ -77,15 +77,15 @@ class MessageSendingEventSubscriber
     protected function injectTrackingPixel($html, Communication $communication): array|string
     {
         $tracking_pixel =
-            '<img border=0 width=1 alt="" height=1 src="'.route('mail-pixel', [$communication->uuid]).'" />';
+            '<img border=0 width=1 alt="" height=1 src="' . route('mail-pixel', [$communication->uuid]) . '" />';
 
         $linebreak = app(Str::class)->random(32);
         $html = str_replace("\n", $linebreak, $html);
 
         if (preg_match('/^(.*<body[^>]*>)(.*)$/', $html, $matches)) {
-            $html = $matches[1].$matches[2].$tracking_pixel;
+            $html = $matches[1] . $matches[2] . $tracking_pixel;
         } else {
-            $html = $html.$tracking_pixel;
+            $html = $html . $tracking_pixel;
         }
 
         return str_replace($linebreak, "\n", $html);
@@ -100,6 +100,6 @@ class MessageSendingEventSubscriber
             $email->html($this->injectTrackingPixel($html, $communication));
         }
 
-        $email->text($text."\n\n".'['.$communication->uuid.']');
+        $email->text($text . "\n\n" . '[' . $communication->uuid . ']');
     }
 }

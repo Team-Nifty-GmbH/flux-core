@@ -86,7 +86,7 @@ class Plugins extends Component
     {
         $packageInfo = app('composer')->show($package);
         try {
-            $readme = file_get_contents($packageInfo['path'].DIRECTORY_SEPARATOR.'README.md');
+            $readme = file_get_contents($packageInfo['path'] . DIRECTORY_SEPARATOR . 'README.md');
             $this->readme = Str::markdown($readme);
         } catch (\Exception) {
             $this->readme = null;
@@ -183,10 +183,10 @@ class Plugins extends Component
 
         if (str_starts_with($packageInfo['source'], 'https://github.com')) {
             $changeLog = Http::withHeader('Accept', 'application/vnd.github.v3+json')
-                ->get('https://api.github.com/repos/'.$package.'/releases/tags/'.$version)
+                ->get('https://api.github.com/repos/' . $package . '/releases/tags/' . $version)
                 ->json('body');
 
-            $this->update['readme'] = Str::markdown($changeLog ?? '### '.__('No changelog found'));
+            $this->update['readme'] = Str::markdown($changeLog ?? '### ' . __('No changelog found'));
             $this->update['readme'] = str_replace('<a', '<a target="_blank"', $this->update['readme']);
         }
 

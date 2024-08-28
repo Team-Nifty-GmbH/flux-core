@@ -20,7 +20,7 @@ class CurrencyFactory extends Factory
         }
 
         if ($i === 100) {
-            $iso .= '_'.Str::uuid();
+            $iso .= '_' . Str::uuid();
         }
 
         return [

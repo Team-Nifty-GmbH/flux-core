@@ -21,7 +21,7 @@ class CalendarTest extends PortalSetup
     {
         $this->get(route('portal.calendar'))
             ->assertStatus(302)
-            ->assertRedirect($this->portalDomain.'/login');
+            ->assertRedirect($this->portalDomain . '/login');
     }
 
     public function test_portal_calendar_without_permission()

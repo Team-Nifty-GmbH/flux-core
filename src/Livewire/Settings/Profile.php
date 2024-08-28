@@ -64,7 +64,7 @@ class Profile extends Component
 
                 $userSetting = data_get(
                     $userNotificationSettings,
-                    $notificationSetting.'.'.$channelDriver);
+                    $notificationSetting . '.' . $channelDriver);
 
                 $this->notificationSettings[$notificationSetting][$key] =
                     [

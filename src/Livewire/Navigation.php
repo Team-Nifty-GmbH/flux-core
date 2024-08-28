@@ -29,9 +29,9 @@ class Navigation extends Component
             $this->setting = $setting;
 
             $this->background = ($setting['nav']['background'] ?? false)
-                ? 'background: linear-gradient('.($setting['nav']['background']['angle'] ?? 0).'deg, '
-                .($setting['nav']['background']['start'] ?? 0).', '
-                .($setting['nav']['background']['end'] ?? 0).');'
+                ? 'background: linear-gradient(' . ($setting['nav']['background']['angle'] ?? 0) . 'deg, '
+                . ($setting['nav']['background']['start'] ?? 0) . ', '
+                . ($setting['nav']['background']['end'] ?? 0) . ');'
                 : null;
         }
     }
@@ -75,8 +75,8 @@ class Navigation extends Component
     {
         $menuHash = md5(serialize(Menu::all()));
 
-        if (Session::has('navigations.'.$menuHash)) {
-            return Session::get('navigations.'.$menuHash);
+        if (Session::has('navigations.' . $menuHash)) {
+            return Session::get('navigations.' . $menuHash);
         }
 
         $guard = explode('_', Auth::guard()->getName());
@@ -92,11 +92,11 @@ class Navigation extends Component
         if ($this->setting['nav']['append_links'] ?? false) {
             foreach ($this->setting['nav']['append_links'] as $index => $appendLink) {
                 $appendLink['uri'] = __($appendLink['uri']);
-                $navigations['append'.$index] = $appendLink;
+                $navigations['append' . $index] = $appendLink;
             }
         }
 
-        Session::put('navigations.'.$menuHash, collect($navigations));
+        Session::put('navigations.' . $menuHash, collect($navigations));
 
         return collect($navigations);
     }

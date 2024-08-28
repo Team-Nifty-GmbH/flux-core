@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new class() extends Migration
 {
     /**
      * Run the migrations.
@@ -63,7 +63,7 @@ return new class extends Migration
             ?->id;
 
         if ($clientId) {
-            DB::statement('UPDATE products SET client_id = '.$clientId);
+            DB::statement('UPDATE products SET client_id = ' . $clientId);
         }
     }
 };

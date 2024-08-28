@@ -14,7 +14,7 @@ abstract class FluxRuleset
 
     public static function getRules(): array
     {
-        $rules = (new static)->rules();
+        $rules = (new static())->rules();
 
         if (static::$addAdditionalColumnRules && static::$model) {
             $model = app(static::$model);

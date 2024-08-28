@@ -34,7 +34,7 @@ class MagicLoginLink extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: config('app.name').' '.__('Login Link')
+            subject: config('app.name') . ' ' . __('Login Link')
         );
     }
 

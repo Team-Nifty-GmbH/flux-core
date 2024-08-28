@@ -47,7 +47,7 @@ class OrderTableSeeder extends Seeder
 
                 $contact = $contacts->random();
 
-                $orderModel = new Order;
+                $orderModel = new Order();
 
                 $order = Order::factory()->create([
                     'address_invoice_id' => $contact->addresses->random()->id,

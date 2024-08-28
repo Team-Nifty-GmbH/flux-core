@@ -45,8 +45,8 @@ class CalendarEventInviteCreated extends Notification implements HasToastNotific
                 return $toast->img($this->model->userCreated->avatar_url);
             })
             ->description(
-                '<div class="font-semibold">'.$this->model->calendarEvent->title.'</div>'.
-                '<div class="text-sm">'.$this->model->calendarEvent->starts_at.'</div>'
+                '<div class="font-semibold">' . $this->model->calendarEvent->title . '</div>' .
+                '<div class="text-sm">' . $this->model->calendarEvent->starts_at . '</div>'
             )
             ->when(
                 method_exists($this->model->calendarEvent, 'detailRoute'),

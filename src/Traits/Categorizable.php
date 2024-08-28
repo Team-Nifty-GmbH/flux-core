@@ -44,7 +44,7 @@ trait Categorizable
     {
         $unguarded = array_diff(
             static::$columnListing ??= Cache::remember(
-                'column-listing:'.$this->getTable(),
+                'column-listing:' . $this->getTable(),
                 86400,
                 fn () => Schema::getColumnListing($this->getTable()),
             ),

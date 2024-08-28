@@ -36,7 +36,7 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
     {
         $notification = $this->toArray($notifiable);
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject($notification['title'])
             ->line($notification['description'])
             ->action($notification['accept']['label'] ?? '', $notification['accept']['url'] ?? '');
@@ -48,13 +48,13 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
 
         return ToastNotification::make()
             ->title(__(':username created ticket :id', ['username' => $user->name, 'id' => $this->model->id]))
-            ->description($this->model->title.'<br>'.$this->model->description)
+            ->description($this->model->title . '<br>' . $this->model->description)
             ->icon('info')
             ->img(method_exists($user, 'getAvatarUrl') ? $user->getAvatarUrl() : null)
             ->accept(
                 NotificationAction::make()
                     ->label(__('View'))
-                    ->url(config('app.url').$this->model->detailRoute(false))
+                    ->url(config('app.url') . $this->model->detailRoute(false))
             )
             ->toArray();
     }
@@ -67,7 +67,7 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
 
         $notification = $this->toArray($notifiable);
 
-        return (new WebPushMessage)
+        return (new WebPushMessage())
             ->icon($notification['img'])
             ->title($notification['title'])
             ->body($notification['description'])

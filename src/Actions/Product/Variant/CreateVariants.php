@@ -57,8 +57,8 @@ class CreateVariants extends FluxAction
                 array_merge(
                     $product,
                     [
-                        'name' => data_get($product, 'name').' - '
-                            .implode(
+                        'name' => data_get($product, 'name') . ' - '
+                            . implode(
                                 ' ',
                                 resolve_static(ProductOption::class, 'query')
                                     ->whereIntegerInRaw('id', $variantCreate)

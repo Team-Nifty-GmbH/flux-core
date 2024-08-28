@@ -38,7 +38,7 @@ class RoleTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/roles/user/'.$this->user->id);
+        $response = $this->actingAs($this->user)->get('/api/roles/user/' . $this->user->id);
         $response->assertStatus(200);
 
         $roles = json_decode($response->getContent())->data;
@@ -53,7 +53,7 @@ class RoleTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/roles/user/'.++$this->user->id);
+        $response = $this->actingAs($this->user)->get('/api/roles/user/' . ++$this->user->id);
         $response->assertStatus(404);
     }
 
@@ -230,7 +230,7 @@ class RoleTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/roles/'.$role->id);
+        $response = $this->actingAs($this->user)->delete('/api/roles/' . $role->id);
         $response->assertStatus(204);
     }
 
@@ -239,7 +239,7 @@ class RoleTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/roles/'.Role::query()->max('id') + 100);
+        $response = $this->actingAs($this->user)->delete('/api/roles/' . Role::query()->max('id') + 100);
         $response->assertStatus(404);
     }
 
@@ -250,7 +250,7 @@ class RoleTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/roles/'.$role->id);
+        $response = $this->actingAs($this->user)->delete('/api/roles/' . $role->id);
         $response->assertStatus(423);
     }
 }

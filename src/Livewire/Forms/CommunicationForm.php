@@ -69,7 +69,7 @@ class CommunicationForm extends FluxForm
                     ? $communicatable->communicatable->getLabel()
                     : null;
 
-                $communicatable->label = $modelLabel ? $typeLabel.': '.$modelLabel : $typeLabel;
+                $communicatable->label = $modelLabel ? $typeLabel . ': ' . $modelLabel : $typeLabel;
 
                 $communicatable->unsetRelation('communicatable');
             });
@@ -101,7 +101,7 @@ class CommunicationForm extends FluxForm
                 ->toArray();
 
             $this->slug = $message->mailAccount ?
-                $message->mailAccount->email.' -> '.$message->mailFolder?->slug : null;
+                $message->mailAccount->email . ' -> ' . $message->mailFolder?->slug : null;
         }
     }
 
