@@ -51,8 +51,8 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 RepeatableTypeEnum::Job => $schedule->job($repeatable->parameters ?
                         new $repeatable->class(...$repeatable->parameters) : new $repeatable->class()
                 ),
-                RepeatableTypeEnum::Invokable => $schedule->call($repeatable->parameters ?
-                    new $repeatable->class(...$repeatable->parameters) : new $repeatable->class()
+                RepeatableTypeEnum::Invokable => $schedule->call(
+                    new $repeatable->class(), $repeatable->parameters ?? []
                 ),
                 RepeatableTypeEnum::Shell => $schedule->exec($repeatable->class, $repeatable->parameters ?? []),
                 default => null
@@ -105,7 +105,6 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 $repeatable->due_at = $nextRunDate;
                 $repeatable->save();
             });
-
         }
 
         $dispatcher->dispatch(new ScheduleTasksRegistered($schedule));
