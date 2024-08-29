@@ -77,7 +77,7 @@ class RepeatableManager
             $directories = [
                 app_path('Console/Commands'),
                 app_path('Jobs'),
-                app_path('Repeatable'),
+                app_path('Invokable'),
             ];
         }
 
@@ -87,7 +87,7 @@ class RepeatableManager
             $namespaces = [
                 'App\\Console\\Commands',
                 'App\\Jobs',
-                'App\\Repeatable',
+                'App\\Invokable',
             ];
         }
 

@@ -147,8 +147,8 @@ class FluxServiceProvider extends ServiceProvider
         Repeatable::autoDiscover(flux_path('src/Console/Commands'), 'FluxErp\Console\Commands');
         // Register repeatable jobs
         Repeatable::autoDiscover(flux_path('src/Jobs'), 'FluxErp\Jobs');
-        // Register repeatable invokable classes in "Repeatable" directory
-        Repeatable::autoDiscover(flux_path('src/Repeatable'), 'FluxErp\Repeatable');
+        // Register repeatable invokable classes from "Invokable" directory
+        Repeatable::autoDiscover(flux_path('src/Invokable'), 'FluxErp\Invokable');
         // Register repeatable artisan commands, jobs and invokable classes (in "Repeatable" directory) from app
         Repeatable::autoDiscover();
 
