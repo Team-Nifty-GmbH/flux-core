@@ -8,6 +8,7 @@ use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Permission;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
@@ -105,7 +106,14 @@ class Addresses extends Component
 
     public function render(): Application|Factory|View
     {
-        return view('flux::livewire.contact.addresses');
+        return view(
+            'flux::livewire.contact.addresses',
+            [
+                'contactOrigins' => resolve_static(ContactOrigin::class, 'query')
+                    ->get(['id', 'name'])
+                    ->pluck('name', 'id'),
+            ]
+        );
     }
 
     public function select(Address $address): void

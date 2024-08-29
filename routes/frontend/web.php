@@ -41,6 +41,7 @@ use FluxErp\Livewire\Settings\AddressTypes;
 use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\Clients;
+use FluxErp\Livewire\Settings\ContactOrigins;
 use FluxErp\Livewire\Settings\Countries;
 use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\CustomerPortal;
@@ -159,6 +160,7 @@ Route::middleware('web')
                     ->group(function () {
                         Route::get('/additional-columns', AdditionalColumns::class)->name('additional-columns');
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
+                        Route::get('/contact-origins', ContactOrigins::class)->name('contact-origins');
                         Route::get('/categories', Categories::class)->name('categories');
                         Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
                         Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');

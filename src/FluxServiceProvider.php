@@ -40,6 +40,7 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -159,6 +160,21 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function registerMarcos(): void
     {
+        if (! Blueprint::hasMacro('userModifications')) {
+            Blueprint::macro('userModifications', function (?int $precision = 0, bool $withSoftDeletes = false) {
+                $this->timestamp('created_at', $precision)->nullable();
+                $this->string('created_by')->nullable();
+
+                $this->timestamp('updated_at', $precision)->nullable();
+                $this->string('updated_by')->nullable();
+
+                if ($withSoftDeletes) {
+                    $this->timestamp('deleted_at', $precision)->nullable();
+                    $this->string('deleted_by')->nullable();
+                }
+            });
+        }
+
         if (! Arr::hasMacro('sortByPattern')) {
             Arr::macro('sortByPattern', function (array $array, array $pattern) {
                 $sortedAttributes = [];
@@ -525,6 +541,7 @@ class FluxServiceProvider extends ServiceProvider
             closure: function () {
                 Menu::register(route: 'settings.additional-columns');
                 Menu::register(route: 'settings.address-types');
+                Menu::register(route: 'settings.contact-origins');
                 Menu::register(route: 'settings.categories');
                 Menu::register(route: 'settings.product-option-groups');
                 Menu::register(route: 'settings.product-properties');

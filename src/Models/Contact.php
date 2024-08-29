@@ -96,6 +96,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
         return $this->hasMany(ContactBankConnection::class);
     }
 
+    public function contactOrigin(): BelongsTo
+    {
+        return $this->belongsTo(ContactOrigin::class);
+    }
+
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
