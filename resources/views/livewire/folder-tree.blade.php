@@ -1,7 +1,7 @@
 <div
     x-data="{
         ...folderTree(),
-        ...filePond($wire,$refs.upload, '{{__('Upload with drag and drop…')}}'),
+        ...filePond($wire,$refs.upload,'{{Auth::user()->language?->language_code}}'),
         async loadLevels() {
             this.levels = await $wire.getTree();
         },
@@ -102,17 +102,9 @@
             return level.hasOwnProperty('children') && ! level.hasOwnProperty('file_name');
         },
         filesArray: $wire.entangle('filesArray', true),
-        uploadError(message) {
-            window.$wireui.notify({
-                title: '{{  __('File upload failed') }}',
-                description: message ? message : '{{ __('Your file upload failed. Please try again.') }}',
-                icon: 'error'
-            });
-        },
         async uploadSuccess() {
             this.showLevel(null, this.selectionProxy);
             (await $wire.get('latestUploads')).forEach((file) => {
-                console.log(this);
                 this.selectionProxy.children.push(file);
                 this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
             },this);
