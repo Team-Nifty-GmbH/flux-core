@@ -69,6 +69,7 @@ return new class() extends Migration
 
     public function up(): void
     {
+        return;
         foreach ($this->tableNames as $tableName => $morphAlias) {
             $this->migrateUp($tableName, $morphAlias);
         }
