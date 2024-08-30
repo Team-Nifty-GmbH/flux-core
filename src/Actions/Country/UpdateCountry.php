@@ -37,8 +37,8 @@ class UpdateCountry extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->rules['iso_alpha2'] = $this->rules['iso_alpha2'] . ',' . ($this->data['id'] ?? 0);
-        $this->data['iso_numeric'] = data_get($this->data, 'iso_numeric') ?
-            Str::of(data_get($this->data, 'iso_numeric'))->padLeft(3, '0')->toString()
+        $this->data['iso_numeric'] = data_get($this->data, 'iso_numeric')
+            ? Str::of(data_get($this->data, 'iso_numeric'))->padLeft(3, '0')->toString()
             : null;
     }
 
@@ -46,16 +46,10 @@ class UpdateCountry extends FluxAction
     {
         parent::validateData();
 
-        if ($isoNumeric = data_get($this->data, 'iso_numeric')) {
-            $numeric = bcadd($isoNumeric, 0, 9);
-
-            if (
-                bccomp($numeric, bcfloor($isoNumeric)) !== 0 || Str::contains($isoNumeric, '.')
-            ) {
-                throw ValidationException::withMessages([
-                    'iso_numeric' => [__('validation.no_decimals', ['attribute' => 'iso_numeric'])],
-                ]);
-            }
+        if (Str::contains(data_get($this->data, 'iso_numeric', ''), '.')) {
+            throw ValidationException::withMessages([
+                'iso_numeric' => [__('validation.no_decimals', ['attribute' => 'iso_numeric'])],
+            ]);
         }
     }
 }

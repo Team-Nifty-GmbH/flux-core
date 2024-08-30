@@ -29,20 +29,21 @@ class CreateCountry extends FluxAction
         return $country->fresh();
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->data['iso_numeric'] = data_get($this->data, 'iso_numeric')
+            ? Str::of(data_get($this->data, 'iso_numeric'))->padLeft(3, '0')->toString()
+            : null;
+    }
+
     protected function validateData(): void
     {
         parent::validateData();
 
-        if ($isoNumeric = data_get($this->data, 'iso_numeric')) {
-            $numeric = bcadd($isoNumeric, 0, 9);
-
-            if (
-                bccomp($numeric, bcfloor($isoNumeric)) !== 0 || Str::contains($isoNumeric, '.')
-            ) {
-                throw ValidationException::withMessages([
-                    'iso_numeric' => [__('validation.no_decimals', ['attribute' => 'iso_numeric'])],
-                ]);
-            }
+        if (Str::contains(data_get($this->data, 'iso_numeric', ''), '.')) {
+            throw ValidationException::withMessages([
+                'iso_numeric' => [__('validation.no_decimals', ['attribute' => 'iso_numeric'])],
+            ]);
         }
     }
 }
