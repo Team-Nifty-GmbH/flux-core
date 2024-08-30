@@ -14,7 +14,7 @@
         "laravel/reverb": "^1.0.0",
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^10.0",
-        "livewire/livewire": "^3.4.7",
+        "livewire/livewire": "3.4.7",
         "meilisearch/meilisearch-php": "^1.9",
         "php-http/discovery": "^1.15",
         "spatie/laravel-activitylog": "^4.6",
