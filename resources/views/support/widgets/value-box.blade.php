@@ -5,7 +5,7 @@
     </div>
     <div class="flex flex-col justify-between">
         <h2 class="truncate text-lg font-semibold text-gray-400">{{ __($this->title()) }}</h2>
-        <div class="flex gap-4 max-w-full">
+        <div class="flex flex-wrap gap-4 max-w-full">
             <div class="font-bold text-2xl whitespace-nowrap truncate flex-none">
                 {{ $sum }}
             </div>

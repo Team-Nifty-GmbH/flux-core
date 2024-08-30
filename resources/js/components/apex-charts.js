@@ -64,6 +64,13 @@ export default function($wire) {
 
             return null;
         },
+        get plotOptionsTotalFormatter() {
+            if ($wire.__instance.originalEffects.js?.hasOwnProperty('plotOptionsTotalFormatter')) {
+                return new Function('w', $wire.__instance.originalEffects.js.plotOptionsTotalFormatter);
+            }
+
+            return null;
+        },
         updateData() {
             if (this.chart === null) {
                 return;
@@ -151,6 +158,10 @@ export default function($wire) {
                         fontFamily: undefined
                     }
                 },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'left',
+                },
                 chart: {
                     redrawOnParentResize: true,
                     type: null,
@@ -180,6 +191,28 @@ export default function($wire) {
                     y: {
                         formatter: this.toolTipFormatter ?? function(val) {
                             return val;
+                        }
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            labels: {
+                                show: true,
+                                value: {
+                                    formatter: this.dataLabelsFormatter ?? function(val) {
+                                        return val;
+                                    }
+                                },
+                                total: {
+                                    show: true,
+                                    formatter: this.plotOptionsTotalFormatter ?? function (w) {
+                                        return w.globals.seriesTotals.reduce((a, b) => {
+                                            return a + b
+                                        }, 0);
+                                    }
+                                }
+                            }
                         }
                     }
                 }

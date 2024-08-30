@@ -24,6 +24,16 @@ trait MoneyChartFormattingTrait
         return $this->moneyFormatterJs();
     }
 
+    #[Js]
+    public function plotOptionsTotalFormatter(): string
+    {
+        return <<<'JS'
+            return window.formatters.money(w.globals.seriesTotals.reduce((a, b) => {
+              return a + b
+            }, 0))
+        JS;
+    }
+
     protected function moneyFormatterJs(): string
     {
         return <<<'JS'
