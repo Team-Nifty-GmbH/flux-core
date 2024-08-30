@@ -7,11 +7,12 @@ use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\Charts\LineChart;
+use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Widgetable;
 
 class TotalOrdersCount extends LineChart
 {
-    use Widgetable;
+    use IsTimeFrameAwareWidget, Widgetable;
 
     public function calculateByTimeFrame(): void
     {

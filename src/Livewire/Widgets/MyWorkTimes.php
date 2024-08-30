@@ -8,13 +8,14 @@ use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Support\Metrics\Charts\Bar;
 use FluxErp\Support\Widgets\Charts\BarChart;
+use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Widgetable;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Locked;
 
 class MyWorkTimes extends BarChart
 {
-    use Widgetable;
+    use IsTimeFrameAwareWidget, Widgetable;
 
     public bool $showTotals = true;
 

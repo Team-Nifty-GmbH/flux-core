@@ -39,11 +39,6 @@ class MyTasks extends Component
         return view('flux::livewire.placeholders.horizontal-bar');
     }
 
-    public function calculateByTimeFrame(): void
-    {
-        // this widget is not time frame dependent
-    }
-
     public static function getDefaultWidth(): int
     {
         return 2;

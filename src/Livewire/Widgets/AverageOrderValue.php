@@ -8,12 +8,13 @@ use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Trend;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\Charts\LineChart;
+use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use FluxErp\Traits\Widgetable;
 
 class AverageOrderValue extends LineChart
 {
-    use MoneyChartFormattingTrait, Widgetable;
+    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait, Widgetable;
 
     public function calculateByTimeFrame(): void
     {

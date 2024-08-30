@@ -6,10 +6,13 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\ValueBox;
+use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Illuminate\Support\Number;
 
 class Revenue extends ValueBox
 {
+    use IsTimeFrameAwareWidget;
+
     public function calculateSum(): void
     {
         $metric = Value::make(

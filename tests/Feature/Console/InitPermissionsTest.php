@@ -61,8 +61,6 @@ class InitPermissionsTest extends BaseSetup
             {
                 return 'Custom Widget';
             }
-
-            public function calculateByTimeFrame(): void {}
         });
 
         Widget::register('custom-widget-that-never-exists', 'custom-widget-that-never-exists');

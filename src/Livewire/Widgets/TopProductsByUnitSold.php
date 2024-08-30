@@ -7,10 +7,13 @@ use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Widgets\ValueList;
+use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Illuminate\Database\Eloquent\Builder;
 
 class TopProductsByUnitSold extends ValueList
 {
+    use IsTimeFrameAwareWidget;
+
     public function calculateList(): void
     {
         $query = resolve_static(OrderPosition::class, 'query')

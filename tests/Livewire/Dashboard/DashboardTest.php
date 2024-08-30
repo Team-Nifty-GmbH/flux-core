@@ -36,8 +36,6 @@ class DashboardTest extends BaseSetup
             {
                 return 'Sample Component';
             }
-
-            public function calculateByTimeFrame(): void {}
         };
 
         $this->components[] = new class() extends Component
@@ -55,8 +53,6 @@ class DashboardTest extends BaseSetup
             {
                 return 'Sample Component 2';
             }
-
-            public function calculateByTimeFrame(): void {}
         };
 
         Widget::query()->create([

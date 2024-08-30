@@ -7,10 +7,13 @@ use FluxErp\Models\Order;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\ValueBox;
+use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Illuminate\Support\Number;
 
 class Outstanding extends ValueBox
 {
+    use IsTimeFrameAwareWidget;
+
     public bool $shouldBePositive = false;
 
     public function calculateSum(): void

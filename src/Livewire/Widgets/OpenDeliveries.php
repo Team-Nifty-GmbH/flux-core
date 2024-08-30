@@ -6,9 +6,12 @@ use FluxErp\Models\Order;
 use FluxErp\States\Order\DeliveryState\Open;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\ValueBox;
+use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 
 class OpenDeliveries extends ValueBox
 {
+    use IsTimeFrameAwareWidget;
+
     public bool $shouldBePositive = false;
 
     public function calculateSum(): void

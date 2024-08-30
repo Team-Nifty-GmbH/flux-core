@@ -5,14 +5,13 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Donut;
 use FluxErp\Support\Widgets\Charts\CircleChart;
+use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use FluxErp\Traits\Widgetable;
-use Livewire\Attributes\Lazy;
 
-#[Lazy]
 class RevenueBySalesRepresentative extends CircleChart
 {
-    use MoneyChartFormattingTrait, Widgetable;
+    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait, Widgetable;
 
     public ?array $chart = [
         'type' => 'donut',
