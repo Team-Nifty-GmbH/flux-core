@@ -87,6 +87,17 @@ abstract class Chart extends Component
         $this->options ??= $this->getOptions();
     }
 
+    #[Renderless]
+    public function updateData(): void
+    {
+        $this->options = $this->getOptions();
+        $this->js(
+            <<<'JS'
+                Alpine.$data($el).updateData();
+            JS
+        );
+    }
+
     protected function getOptions(): array
     {
         $public = [];
@@ -103,16 +114,5 @@ abstract class Chart extends Component
         }
 
         return array_filter($public);
-    }
-
-    #[Renderless]
-    public function updateData(): void
-    {
-        $this->options = $this->getOptions();
-        $this->js(
-            <<<'JS'
-                Alpine.$data($el).updateData();
-            JS
-        );
     }
 }

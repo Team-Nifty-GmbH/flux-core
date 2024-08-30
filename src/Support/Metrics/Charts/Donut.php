@@ -71,30 +71,30 @@ class Donut extends Metric
 
     public function min(string $column, string $groupBy): Result
     {
-        return $this->setType('min', $groupBy, $column);
+        return $this->setType('min', $column, $groupBy);
     }
 
     public function max(string $column, string $groupBy): Result
     {
-        return $this->setType('max', $groupBy, $column);
+        return $this->setType('max', $column, $groupBy);
     }
 
     public function sum(string $column, string $groupBy): Result
     {
-        return $this->setType('sum', $groupBy, $column);
+        return $this->setType('sum', $column, $groupBy);
     }
 
     public function average(string $column, string $groupBy): Result
     {
-        return $this->setType('avg', $groupBy, $column);
+        return $this->setType('avg', $column, $groupBy);
     }
 
     public function count(string $groupBy, string $column = '*'): Result
     {
-        return $this->setType('count', $groupBy, $column);
+        return $this->setType('count', $column, $groupBy);
     }
 
-    public function resolveValue(?array $range): array
+    protected function resolveValue(?array $range): array
     {
         $column = $this->query->getQuery()->getGrammar()->wrap($this->column);
 
@@ -126,15 +126,15 @@ class Donut extends Metric
             (new ReflectionEnum($cast))->isBacked() &&
             method_exists($cast, 'getLabel')
         ) {
-            $data = Arr::mapWithKeys($data, fn (float $value, mixed $key) => [
-                $cast::from($key)->getLabel() => $value,
+            $data = Arr::mapWithKeys($data, fn (string $value, mixed $key) => [
+                $cast::tryFrom($key)?->getLabel() => $value,
             ]);
         }
 
         return $data;
     }
 
-    public function resolvePreviousValue(): array
+    protected function resolvePreviousValue(): array
     {
         $range = $this->previousRange();
 
@@ -145,14 +145,14 @@ class Donut extends Metric
         return $this->resolveValue($range);
     }
 
-    public function resolveCurrentValue(): array
+    protected function resolveCurrentValue(): array
     {
         return $this->resolveValue(
             $this->currentRange()
         );
     }
 
-    public function resolveGrowthRate(array $previousData, array $currentData): array
+    protected function resolveGrowthRate(array $previousData, array $currentData): array
     {
         $growthRate = [];
 
@@ -165,7 +165,7 @@ class Donut extends Metric
         return $growthRate;
     }
 
-    public function resolve(): Result
+    protected function resolve(): Result
     {
         if (! $this->withGrowthRate) {
             $data = $this->resolveCurrentValue();
@@ -187,7 +187,7 @@ class Donut extends Metric
         );
     }
 
-    protected function setType(string $type, string $groupBy, string $column): Result
+    protected function setType(string $type, string $column, string $groupBy): Result
     {
         $this->type = $type;
         $this->column = $column;

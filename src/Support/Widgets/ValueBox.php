@@ -20,6 +20,8 @@ abstract class ValueBox extends Component
 
     public bool $shouldBePositive = true;
 
+    abstract public function calculateSum(): void;
+
     public function mount(): void
     {
         $this->calculateSum();
@@ -34,8 +36,6 @@ abstract class ValueBox extends Component
     {
         $this->calculateSum();
     }
-
-    abstract public function calculateSum(): void;
 
     protected function icon(): string
     {

@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\States\Order\PaymentState\Paid;
-use FluxErp\Support\Metrics\Results\ValueResult;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\ValueBox;
 use Illuminate\Support\Number;
@@ -14,12 +13,8 @@ class Outstanding extends ValueBox
 {
     public bool $shouldBePositive = false;
 
-    /**
-     * @throws \Exception
-     */
     public function calculateSum(): void
     {
-        /** @var ValueResult $metric */
         $metric = Value::make(
             resolve_static(Order::class, 'query')
                 ->whereNotNull('invoice_date')

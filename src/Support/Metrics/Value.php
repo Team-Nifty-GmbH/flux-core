@@ -7,16 +7,32 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Value extends Metric
 {
-    public function __call($method, $parameters)
+    public function min(string $column): string|ValueResult
     {
-        if (in_array($method, ['min', 'max', 'sum', 'avg', 'count'], true)) {
-            return $this->setType($method, $parameters[0] ?? '*');
-        }
-
-        return parent::__call($method, $parameters);
+        return $this->setType('min', $column);
     }
 
-    protected function setType(string $type, string $column): float|ValueResult
+    public function max(string $column): string|ValueResult
+    {
+        return $this->setType('max', $column);
+    }
+
+    public function sum(string $column): string|ValueResult
+    {
+        return $this->setType('sum', $column);
+    }
+
+    public function avg(string $column): string|ValueResult
+    {
+        return $this->setType('avg', $column);
+    }
+
+    public function count(string $column = '*'): string|ValueResult
+    {
+        return $this->setType('count', $column);
+    }
+
+    protected function setType(string $type, string $column): string|ValueResult
     {
         $this->type = $type;
         $this->column = $column;
@@ -37,7 +53,7 @@ class Value extends Metric
         return $this->transformResult($value);
     }
 
-    public function resolvePreviousValue(): float
+    protected function resolvePreviousValue(): int|string
     {
         $range = $this->previousRange();
 
@@ -48,14 +64,14 @@ class Value extends Metric
         return $this->resolveValue($range);
     }
 
-    public function resolveCurrentValue(): float
+    protected function resolveCurrentValue(): string
     {
         return $this->resolveValue(
             $this->currentRange()
         );
     }
 
-    protected function resolve(): float|ValueResult
+    protected function resolve(): string|ValueResult
     {
         if (! $this->withGrowthRate) {
             return $this->resolveCurrentValue();

@@ -138,7 +138,7 @@ class MyWorkTimes extends BarChart
             ->setRange($this->timeFrame)
             ->setEndingDate($this->end)
             ->setStartingDate($this->start)
-            ->sumByRange('total_time_ms');
+            ->sum('total_time_ms');
 
         $pause = Bar::make(
             $baseQuery
@@ -150,7 +150,7 @@ class MyWorkTimes extends BarChart
             ->setRange($this->timeFrame)
             ->setEndingDate($this->end)
             ->setStartingDate($this->start)
-            ->sumByRange('total_time_ms');
+            ->sum('total_time_ms');
 
         $data = [
             'work_time' => [
@@ -195,7 +195,7 @@ class MyWorkTimes extends BarChart
                 ->setRange($this->timeFrame)
                 ->setEndingDate($this->end)
                 ->setStartingDate($this->start)
-                ->sumByRange('total_time_ms');
+                ->sum('total_time_ms');
 
             if (array_sum($typeData->getData()) > 0) {
                 $data['task_time_' . $workTimeTypeID] = [

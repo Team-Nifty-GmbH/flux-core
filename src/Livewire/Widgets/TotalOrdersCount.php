@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
-use FluxErp\Support\Metrics\Results\Result;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\Charts\LineChart;
 use FluxErp\Traits\Widgetable;
@@ -47,10 +46,8 @@ class TotalOrdersCount extends LineChart
             ->withGrowthRate()
             ->count('total_net_price');
 
-        /** @var Result $revenue */
-        $revenue = $metric->countByRange('total_net_price');
-        /** @var Result $previousRevenue */
-        $previousRevenue = $previousMetric->countByRange('total_net_price');
+        $revenue = $metric->count();
+        $previousRevenue = $previousMetric->count();
 
         $this->series = [
             [

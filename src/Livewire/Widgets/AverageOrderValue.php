@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
-use FluxErp\Support\Metrics\Results\Result;
 use FluxErp\Support\Metrics\Trend;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\Charts\LineChart;
@@ -49,10 +48,8 @@ class AverageOrderValue extends LineChart
             ->withGrowthRate()
             ->avg('total_net_price');
 
-        /** @var Result $revenue */
-        $revenue = $metric->avgByRange('total_net_price');
-        /** @var Result $previousRevenue */
-        $previousRevenue = $previousMetric->avgByRange('total_net_price');
+        $revenue = $metric->avg('total_net_price');
+        $previousRevenue = $previousMetric->avg('total_net_price');
 
         $this->series = [
             [

@@ -52,49 +52,7 @@ class Dashboard extends Component
         $this->skipRender();
     }
 
-    public function updatedStart(): void
-    {
-        $this->start = $this->start->startOfDay();
-        if ($this->start->greaterThan($this->end)) {
-            $this->end = $this->start->copy()->addDays(30);
-        }
-
-        $this->fillParams();
-
-        $this->skipRender();
-    }
-
-    public function updatedEnd(): void
-    {
-        $this->end = $this->end->endOfDay();
-        if ($this->start->greaterThan($this->end)) {
-            $this->start = $this->end->copy()->subDays(30);
-        }
-
-        $this->fillParams();
-
-        $this->skipRender();
-    }
-
-    protected function fillParams(): void
-    {
-        if ($this->timeFrame === TimeFrameEnum::Custom && $this->start && $this->end) {
-            $this->params = [
-                'timeFrame' => $this->timeFrame->value,
-                'start' => $this->start->toDateString(),
-                'end' => $this->end->toDateString(),
-            ];
-
-            return;
-        } elseif ($this->timeFrame === TimeFrameEnum::Custom) {
-            return;
-        }
-
-        $this->params = [
-            'timeFrame' => $this->timeFrame->value,
-        ];
-    }
-
+    #[Renderless]
     public function widgets(): void
     {
         $this->widgets = $this->filterWidgets(auth()->user()->widgets()->get()->toArray());
@@ -135,12 +93,6 @@ class Dashboard extends Component
             isLoading = true;
             editGridMode(false);
         JS);
-    }
-
-    #[Renderless]
-    public function showFlashMessage(): void
-    {
-        $this->notification()->success(__('Dashboard syncing'));
     }
 
     protected function filterWidgets(array $widgets): array

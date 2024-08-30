@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
-use FluxErp\Support\Metrics\Results\Result;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\Charts\LineChart;
 use FluxErp\Traits\MoneyChartFormattingTrait;
@@ -48,10 +47,8 @@ class TotalRevenue extends LineChart
             ->withGrowthRate()
             ->sum('total_net_price');
 
-        /** @var Result $revenue */
-        $revenue = $metric->sumByRange('total_net_price');
-        /** @var Result $previousRevenue */
-        $previousRevenue = $previousMetric->sumByRange('total_net_price');
+        $revenue = $metric->sum('total_net_price');
+        $previousRevenue = $previousMetric->sum('total_net_price');
 
         $this->series = [
             [

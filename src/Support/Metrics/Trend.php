@@ -7,29 +7,41 @@ use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Support\Metrics\Results\Result;
-use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 class Trend extends Metric
 {
     protected string $unit;
 
-    public function __call($method, $parameters)
+    public function min(string $column, ?string $unit = null): Result
     {
-        if (static::hasMacro($method)) {
-            parent::__call($method, $parameters);
-        }
+        return $this->setType('min', $column, $unit);
+    }
 
-        $call = explode('By', $method);
-        $rangeUnit = $this->range?->getUnit();
+    public function max(string $column, ?string $unit = null): Result
+    {
+        return $this->setType('max', $column, $unit);
+    }
 
-        $unit = strtolower($call[1] ?? '') === 'range' && $rangeUnit
-            ? $rangeUnit
-            : Str::of($call[1] ?? '')->singular()->lower()->toString();
+    public function sum(string $column, ?string $unit = null): Result
+    {
+        return $this->setType('sum', $column, $unit);
+    }
 
-        // if the range is custom we need to determinate the unit based on starting and ending date
-        if ($this->range === TimeFrameEnum::Custom && $this->startingDate && $this->endingDate) {
-            $diff = $this->startingDate->diffInDays($this->endingDate);
+    public function avg(string $column, ?string $unit = null): Result
+    {
+        return $this->setType('avg', $column, $unit);
+    }
+
+    public function count(string $column = '*', ?string $unit = null): Result
+    {
+        return $this->setType('count', $column, $unit);
+    }
+
+    protected function setType(string $type, string $column, ?string $unit = null): Result
+    {
+        if (is_null($unit) && ! ($unit = $this->getRange()->getUnit())) {
+            $diff = $this->startingDate?->diffInDays($this->endingDate ?? now()->addCenturies(2));
 
             $unit = match (true) {
                 $diff < 30 => 'day',
@@ -38,19 +50,6 @@ class Trend extends Metric
             };
         }
 
-        if (! in_array($unit, ['year', 'month', 'week', 'day', 'hour', 'minute'], true)) {
-            throw new InvalidArgumentException('Invalid unit: ' . $unit);
-        }
-
-        if (! in_array($call[0], ['min', 'max', 'sum', 'avg', 'count'], true)) {
-            throw new InvalidArgumentException('Invalid type: ' . $call[0]);
-        }
-
-        return $this->setType($call[0], $unit, $parameters[0] ?? '*');
-    }
-
-    protected function setType(string $type, string $unit, string $column): Result
-    {
         $this->type = $type;
         $this->unit = $unit;
         $this->column = $column;
@@ -61,12 +60,8 @@ class Trend extends Metric
     protected function getExpression(): string
     {
         $grammar = $this->query->getQuery()->getGrammar();
-        $driver = $this->query->getConnection()->getDriverName(); // @phpstan-ignore-line
+        $driver = $this->query->getConnection()->getDriverName();
         $dateColumn = $grammar->wrap($this->getDateColumn());
-
-        if (! in_array($this->unit, ['year', 'month', 'week', 'day', 'hour', 'minute'], true)) {
-            throw new InvalidArgumentException('Invalid unit: ' . $this->unit);
-        }
 
         if (static::hasMacro($driver)) {
             return static::$driver($dateColumn, $this->unit);
@@ -106,7 +101,7 @@ class Trend extends Metric
                 'hour' => "FORMAT($dateColumn, 'yyyy-MM-dd HH:00')",
                 'minute' => "FORMAT($dateColumn, 'yyyy-MM-dd HH:mm:00')",
             },
-            default => throw new InvalidArgumentException('Laravel Easy Metrics is not supported for this database.')
+            default => throw new InvalidArgumentException('Metrics is not supported for this database.')
         };
     }
 
@@ -134,35 +129,28 @@ class Trend extends Metric
         }
 
         $now = CarbonImmutable::now();
-        $range = $this->getRange() - 1;
 
         return match ($this->unit) {
-            'year' => $now
-                ->subYearsWithoutOverflow($range)
+            'year' => $now->subYearsWithoutOverflow()
                 ->firstOfYear()
                 ->setTime(0, 0),
-            'month' => $now
-                ->subMonthsWithoutOverflow($range)
+            'month' => $now->subMonthsWithoutOverflow()
                 ->firstOfMonth()
                 ->setTime(0, 0),
-            'week' => $now
-                ->subWeeks($range)
+            'week' => $now->subWeeks()
                 ->startOfWeek()
                 ->setTime(0, 0),
-            'day' => $now
-                ->subDays($range)
+            'day' => $now->subDays()
                 ->setTime(0, 0),
-            'hour' => $now
-                ->subHours($range),
-            'minute' => $now
-                ->subMinutes($range),
+            'hour' => $now->subHours(),
+            'minute' => $now->subMinutes(),
             default => throw new InvalidArgumentException('Invalid unit: ' . $this->unit),
         };
     }
 
     protected function getEndingDate(): CarbonImmutable
     {
-        if ($this->getRange() instanceof TimeFrameEnum && $timeFrameRange = $this->getRange()?->getRange()) {
+        if ($this->getRange() instanceof TimeFrameEnum && $timeFrameRange = $this->getRange()->getRange()) {
             return $timeFrameRange[1];
         }
 

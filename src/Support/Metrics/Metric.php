@@ -8,7 +8,6 @@ use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Support\Calculation\Rounding;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Support\Traits\Macroable;
 
@@ -34,8 +33,6 @@ abstract class Metric
 
     protected GrowthRateTypeEnum $growthRateType = GrowthRateTypeEnum::Percentage;
 
-    abstract protected function resolve(): mixed;
-
     protected array $ranges = [
         TimeFrameEnum::Today,
         TimeFrameEnum::Yesterday,
@@ -45,6 +42,8 @@ abstract class Metric
         TimeFrameEnum::ThisYear,
         TimeFrameEnum::Custom,
     ];
+
+    abstract protected function resolve(): mixed;
 
     public function __construct(Builder $query)
     {
@@ -118,7 +117,7 @@ abstract class Metric
         return $this;
     }
 
-    public function getRange(): int|TimeFrameEnum
+    public function getRange(): TimeFrameEnum
     {
         return $this->range ?? data_get($this->getRanges(), '0', TimeFrameEnum::ThisWeek);
     }
@@ -135,19 +134,6 @@ abstract class Metric
         return $this;
     }
 
-    protected function getDateColumn(): string
-    {
-        return $this->dateColumn ?? $this->query->getModel()->getCreatedAtColumn();
-    }
-
-    protected function resolveBetween(array $range): array
-    {
-        return [
-            $this->getDateColumn(),
-            $range,
-        ];
-    }
-
     public function previousRange(): ?array
     {
         $range = $this->getRange();
@@ -161,14 +147,7 @@ abstract class Metric
             ];
         }
 
-        if ($range instanceof TimeFrameEnum) {
-            return $range->getPreviousRange();
-        }
-
-        return [
-            Date::now()->subDays($range * 2),
-            Date::now()->subDays($range),
-        ];
+        return $range->getPreviousRange();
     }
 
     public function currentRange(): ?array
@@ -182,17 +161,23 @@ abstract class Metric
             ];
         }
 
-        if ($range instanceof TimeFrameEnum) {
-            return $range->getRange();
-        }
+        return $range->getRange();
+    }
 
+    protected function getDateColumn(): string
+    {
+        return $this->dateColumn ?? $this->query->getModel()->getCreatedAtColumn();
+    }
+
+    protected function resolveBetween(array $range): array
+    {
         return [
-            Date::now()->subDays($range),
-            Date::now(),
+            $this->getDateColumn(),
+            $range,
         ];
     }
 
-    protected function transformResult(int|float|null $data): string
+    protected function transformResult(int|float|string|null $data): string
     {
         return Rounding::round($data ?? 0);
     }

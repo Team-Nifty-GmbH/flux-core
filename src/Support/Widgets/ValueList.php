@@ -16,6 +16,8 @@ abstract class ValueList extends Component
 
     public array $items = [];
 
+    abstract public function calculateList(): void;
+
     public function mount(): void
     {
         $this->calculateList();
@@ -35,8 +37,6 @@ abstract class ValueList extends Component
     {
         $this->calculateList();
     }
-
-    abstract public function calculateList(): void;
 
     protected function title(): ?string
     {

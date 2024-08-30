@@ -10,8 +10,11 @@ enum GrowthRateTypeEnum: string
 
     case Value = 'value';
 
-    public function getValue(string|int|float $previousValue, string|int|float $currentValue): string
+    public function getValue(string|int|float|null $previousValue, string|int|float|null $currentValue): string
     {
+        $previousValue ??= 0;
+        $currentValue ??= 0;
+
         $value = match ($this) {
             GrowthRateTypeEnum::Percentage => bccomp($previousValue, 0) === 0 ?
                 (bccomp($currentValue, 0) === 0 ? 0 : bcmul(100, bccomp($currentValue, 0))) :
