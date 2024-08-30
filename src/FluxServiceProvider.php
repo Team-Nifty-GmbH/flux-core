@@ -528,6 +528,7 @@ class FluxServiceProvider extends ServiceProvider
             closure: function () {
                 Menu::register(route: 'settings.additional-columns');
                 Menu::register(route: 'settings.address-types');
+                Menu::register(route: 'settings.contact-origins');
                 Menu::register(route: 'settings.categories');
                 Menu::register(route: 'settings.product-option-groups');
                 Menu::register(route: 'settings.product-properties');

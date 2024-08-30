@@ -20,6 +20,7 @@ use FluxErp\Models\Communication;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\ContactOption;
+use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Country;
 use FluxErp\Models\CountryRegion;
 use FluxErp\Models\Currency;
@@ -129,6 +130,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'contact' => Contact::class,
             'contact_bank_connection' => ContactBankConnection::class,
             'contact_option' => ContactOption::class,
+            'contact_origin' => ContactOrigin::class,
             'country' => Country::class,
             'country_region' => CountryRegion::class,
             'currency' => Currency::class,

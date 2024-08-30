@@ -61,6 +61,14 @@
                             ],
                         ]"
                     />
+                    <x-select
+                        searchable
+                        x-bind:disabled="! $wire.$parent.edit"
+                        wire:model.number="contact.contact_origin_id"
+                        :label="__('Contact Origin')"
+                        option-key-value
+                        :options="$contactOrigins"
+                    />
                 </div>
             </x-card>
         @show

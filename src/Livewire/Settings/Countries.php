@@ -6,11 +6,12 @@ use FluxErp\Actions\Country\CreateCountry;
 use FluxErp\Actions\Country\DeleteCountry;
 use FluxErp\Actions\Country\UpdateCountry;
 use FluxErp\Livewire\DataTables\CountryList;
+use FluxErp\Livewire\Forms\CountryForm;
 use FluxErp\Models\Country;
-use FluxErp\Services\CountryService;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
+use FluxErp\Models\Currency;
+use FluxErp\Models\Language;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
 
@@ -18,23 +19,9 @@ class Countries extends CountryList
 {
     use Actions;
 
-    protected string $view = 'flux::livewire.settings.countries';
+    protected ?string $includeBefore = 'flux::livewire.settings.countries';
 
-    public ?array $selectedCountry = [
-        'language_id' => null,
-        'currency_id' => null,
-    ];
-
-    public bool $editModal = false;
-
-    public function getRules(): array
-    {
-        $countryAction = ($this->selectedCountry['id'] ?? false)
-            ? UpdateCountry::make([])
-            : CreateCountry::make([]);
-
-        return Arr::prependKeysWith($countryAction->getRules(), 'selectedCountry.');
-    }
+    public CountryForm $country;
 
     protected function getTableActions(): array
     {
@@ -43,9 +30,8 @@ class Countries extends CountryList
                 ->label(__('Create'))
                 ->color('primary')
                 ->icon('plus')
-                ->attributes([
-                    'x-on:click' => '$wire.showEditModal()',
-                ]),
+                ->when(resolve_static(CreateCountry::class, 'canPerformAction', [false]))
+                ->wireClick('edit'),
         ];
     }
 
@@ -54,66 +40,75 @@ class Countries extends CountryList
         return [
             DataTableButton::make()
                 ->label(__('Edit'))
-                ->color('primary')
                 ->icon('pencil')
+                ->color('primary')
+                ->when(resolve_static(UpdateCountry::class, 'canPerformAction', [false]))
+                ->wireClick('edit(record.id)'),
+            DataTableButton::make()
+                ->label(__('Delete'))
+                ->color('negative')
+                ->icon('trash')
+                ->when(resolve_static(DeleteCountry::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'x-on:click' => '$wire.showEditModal(record.id)',
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Country')]),
                 ]),
         ];
     }
 
-    public function showEditModal(?int $countryId = null): void
+    protected function getViewData(): array
     {
-        $this->selectedCountry = resolve_static(Country::class, 'query')
-            ->whereKey($countryId)
-            ->first()
-            ?->toArray()
-            ?: [
-                'language_id' => null,
-                'currency_id' => null,
-                'is_active' => true,
-            ];
-
-        $this->editModal = true;
-        $this->resetErrorBag();
+        return array_merge(
+            parent::getViewData(),
+            [
+                'languages' => resolve_static(Language::class, 'query')
+                    ->pluck('name', 'id'),
+                'currencies' => resolve_static(Currency::class, 'query')
+                    ->pluck('name', 'id'),
+            ]
+        );
     }
 
-    public function save(): void
+    public function edit(Country $country): void
     {
-        if (! resolve_static(CreateCountry::class, 'canPerformAction', [false])) {
-            return;
-        }
+        $this->country->reset();
+        $this->country->fill($country);
 
-        $function = ($this->selectedCountry['id'] ?? false) ? 'update' : 'create';
-
-        try {
-            $response = app(CountryService::class)->{$function}($this->selectedCountry);
-        } catch (ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        if (($response['status'] ?? false) === 200 || $response instanceof Model) {
-            $this->notification()->success(__('Successfully saved'));
-            $this->editModal = false;
-        }
-        $this->loadData();
+        $this->js(<<<'JS'
+            $openModal('edit-country');
+        JS);
     }
 
-    public function delete(): void
+    public function save(): bool
     {
         try {
-            DeleteCountry::make(['id' => $this->selectedCountry['id']])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
+            $this->country->save();
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return;
+            return false;
         }
 
         $this->loadData();
+
+        return true;
+    }
+
+    public function delete(Country $country): bool
+    {
+        $this->country->reset();
+        $this->country->fill($country);
+
+        try {
+            $this->country->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 }

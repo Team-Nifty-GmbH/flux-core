@@ -6,6 +6,7 @@ use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateCountryRuleset extends FluxRuleset
@@ -28,8 +29,11 @@ class CreateCountryRuleset extends FluxRuleset
             ],
             'name' => 'required|string',
             'iso_alpha2' => 'required|string|unique:countries,iso_alpha2',
-            'iso_alpha3' => 'string',
-            'iso_numeric' => 'string',
+            'iso_alpha3' => 'nullable|string',
+            'iso_numeric' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 999]),
+            ],
             'is_active' => 'boolean',
             'is_default' => 'boolean',
             'is_eu_country' => 'boolean',
