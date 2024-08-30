@@ -9,6 +9,7 @@ use FluxErp\Livewire\DataTables\ContactOriginList;
 use FluxErp\Livewire\Forms\ContactOriginForm;
 use FluxErp\Models\ContactOrigin;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -54,6 +55,7 @@ class ContactOrigins extends ContactOriginList
         ];
     }
 
+    #[Renderless]
     public function edit(ContactOrigin $contactOrigin): void
     {
         $this->contactOriginForm->reset();
@@ -64,6 +66,7 @@ class ContactOrigins extends ContactOriginList
         JS);
     }
 
+    #[Renderless]
     public function save(): bool
     {
         try {
@@ -79,6 +82,7 @@ class ContactOrigins extends ContactOriginList
         return true;
     }
 
+    #[Renderless]
     public function delete(ContactOrigin $contactOrigin): bool
     {
         $this->contactOriginForm->reset();

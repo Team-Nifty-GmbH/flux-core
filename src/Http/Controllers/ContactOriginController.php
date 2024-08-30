@@ -65,7 +65,7 @@ class ContactOriginController extends BaseController
         return ResponseHelper::createResponseFromArrayResponse([
             'status' => $statusCode,
             'responses' => $responses,
-            'statusMessage' => $statusCode === 422 ? null : 'contact origins(s) updated',
+            'statusMessage' => $statusCode === 422 ? null : 'contact origin(s) updated',
         ]);
     }
 
@@ -79,7 +79,7 @@ class ContactOriginController extends BaseController
             );
         } catch (ValidationException $e) {
             $response = ResponseHelper::createArrayResponse(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                statusCode: 404,
                 data: $e->errors()
             );
         }

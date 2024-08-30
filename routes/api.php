@@ -178,7 +178,7 @@ Route::prefix('api')
                 Route::get('/contact-origins', [ContactOriginController::class, 'index']);
                 Route::post('/contact-origins', [ContactOriginController::class, 'create']);
                 Route::put('/contact-origins', [ContactOriginController::class, 'update']);
-                Route::delete('/ledger-accounts/{id}', [ContactOriginController::class, 'delete']);
+                Route::delete('/contact-origins/{id}', [ContactOriginController::class, 'delete']);
 
                 //Contacts
                 Route::get('/contacts/{id}', [ContactController::class, 'show']);

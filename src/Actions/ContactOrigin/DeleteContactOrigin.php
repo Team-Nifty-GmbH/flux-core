@@ -19,7 +19,7 @@ class DeleteContactOrigin extends FluxAction
         return [ContactOrigin::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): ?bool
     {
         return resolve_static(ContactOrigin::class, 'query')
             ->whereKey($this->data['id'])

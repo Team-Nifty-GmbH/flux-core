@@ -19,7 +19,7 @@ class CreateContactOrigin extends FluxAction
         return [ContactOrigin::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): ContactOrigin
     {
         $contactOrigin = app(ContactOrigin::class, ['attributes' => $this->data]);
         $contactOrigin->save();

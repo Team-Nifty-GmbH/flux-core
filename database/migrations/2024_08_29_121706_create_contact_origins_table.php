@@ -12,7 +12,11 @@ return new class() extends Migration
             $table->id();
             $table->string('name');
             $table->boolean('is_active')->default(true);
-            $table->userModifications();
+
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
         });
     }
 

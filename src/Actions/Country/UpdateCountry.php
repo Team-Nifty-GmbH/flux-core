@@ -7,6 +7,8 @@ use FluxErp\Models\Country;
 use FluxErp\Rulesets\Country\UpdateCountryRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class UpdateCountry extends FluxAction
 {
@@ -40,9 +42,18 @@ class UpdateCountry extends FluxAction
 
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Country::class));
+        parent::validateData();
 
-        $this->data = $validator->validate();
+        if ($isoNumeric = data_get($this->data, 'iso_numeric')) {
+            $numeric = bcadd(data_get($this->data, 'iso_numeric'), 0, 9);
+
+            if (
+                bccomp($numeric, bcfloor(data_get($this->data, 'iso_numeric'))) !== 0 || Str::contains($isoNumeric, '.')
+            ) {
+                throw ValidationException::withMessages([
+                    'iso_numeric' => [__(':attribute cannot have decimal places', ['attribute' => 'iso_numeric'])],
+                ]);
+            }
+        }
     }
 }
