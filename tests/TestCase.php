@@ -8,7 +8,6 @@ use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Laravel\Scout\ScoutServiceProvider;
@@ -43,8 +42,6 @@ abstract class TestCase extends BaseTestCase
         }
 
         parent::setUp();
-
-        $this->artisan('migrate');
 
         if (! file_exists(public_path('flux'))) {
             symlink(package_path('public'), public_path('flux'));
