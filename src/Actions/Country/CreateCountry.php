@@ -5,7 +5,8 @@ namespace FluxErp\Actions\Country;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Country;
 use FluxErp\Rulesets\Country\CreateCountryRuleset;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class CreateCountry extends FluxAction
 {
@@ -28,11 +29,21 @@ class CreateCountry extends FluxAction
         return $country->fresh();
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->data['iso_numeric'] = data_get($this->data, 'iso_numeric')
+            ? Str::of(data_get($this->data, 'iso_numeric'))->padLeft(3, '0')->toString()
+            : null;
+    }
+
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Country::class));
+        parent::validateData();
 
-        $this->data = $validator->validate();
+        if (Str::contains(data_get($this->data, 'iso_numeric', ''), '.')) {
+            throw ValidationException::withMessages([
+                'iso_numeric' => [__('validation.no_decimals', ['attribute' => 'iso_numeric'])],
+            ]);
+        }
     }
 }
