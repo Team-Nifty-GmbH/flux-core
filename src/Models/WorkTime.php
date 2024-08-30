@@ -61,6 +61,11 @@ class WorkTime extends Model
         return $this->belongsTo(OrderPosition::class);
     }
 
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(WorkTime::class, 'parent_id');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

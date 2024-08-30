@@ -54,6 +54,12 @@ class WidgetManager
             'component_name' => $widget,
             'label' => $componentClass::getLabel(),
             'class' => $componentClass,
+            'defaultWidth' => method_exists($componentClass, 'getDefaultWidth')
+                ? $componentClass::getDefaultWidth()
+                : 1,
+            'defaultHeight' => method_exists($componentClass, 'getDefaultHeight')
+                ? $componentClass::getDefaultHeight()
+                : 1,
         ];
     }
 

@@ -386,10 +386,13 @@ class FluxServiceProvider extends ServiceProvider
         $livewireNamespace = 'FluxErp\\Livewire\\';
 
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
-            if (is_a($class, Component::class, true)
-                && ! (new \ReflectionClass($class))->isAbstract()
-            ) {
-                Livewire::component($alias, $class);
+            try {
+                if (is_a($class, Component::class, true)
+                    && ! (new \ReflectionClass($class))->isAbstract()
+                ) {
+                    Livewire::component($alias, $class);
+                }
+            } catch (\Throwable) {
             }
         }
     }

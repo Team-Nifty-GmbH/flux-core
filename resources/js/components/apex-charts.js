@@ -21,55 +21,76 @@ export default function($wire) {
             document.addEventListener('livewire:navigating', () => {
                 this.chart.destroy();
             });
-            $wire.getOptions().then((options) => {
-                this.mapLivewireData(options);
-                this.chartType = this.livewireOptions.chart.type;
-                this.chart = new ApexCharts(this.$el.querySelector('.chart'), this.options);
 
-                this.chart.render();
+            this.mapLivewireData($wire.options);
+            this.chartType = this.livewireOptions.chart.type;
+            this.chart = new ApexCharts(this.$el.querySelector('.chart'), this.options);
 
-                this.$watch('chartType', () => {
-                    this.options.chart.type = this.chartType;
-                    if (this.chartType === 'area') {
-                        this.options.fill.opacity = 0.9;
-                    } else {
-                        this.options.fill.opacity = 1;
-                    }
-                    this.chart.updateOptions(this.options);
-                });
-            });
+            this.chart.render();
 
-            if ($wire.__instance.originalEffects.js?.hasOwnProperty('toolTipFormatter')) {
-                this.defaultOptions.tooltip.y.formatter = new Function('val', $wire.__instance.originalEffects.js.toolTipFormatter);
-            }
-
-            if ($wire.__instance.originalEffects.js?.hasOwnProperty('yAxisFormatter')) {
-                this.defaultOptions.yaxis.labels.formatter = new Function('val', $wire.__instance.originalEffects.js.yAxisFormatter);
-            }
-
-            if ($wire.__instance.originalEffects.js?.hasOwnProperty('xAxisFormatter')) {
-                this.defaultOptions.xaxis.labels.formatter = new Function('val', $wire.__instance.originalEffects.js.xAxisFormatter);
-            }
-
-            if ($wire.__instance.originalEffects.js?.hasOwnProperty('dataLabelsFormatter')) {
-                this.defaultOptions.dataLabels.formatter = new Function('val', 'opts', $wire.__instance.originalEffects.js.dataLabelsFormatter);
-            }
-        },
-        updateData() {
-            $wire.getOptions().then((options) => {
-                this.mapLivewireData(options);
+            this.$watch('chartType', () => {
+                this.options.chart.type = this.chartType;
+                if (this.chartType === 'area') {
+                    this.options.fill.opacity = 0.9;
+                } else {
+                    this.options.fill.opacity = 1;
+                }
                 this.chart.updateOptions(this.options);
             });
         },
+        get dataLabelsFormatter() {
+            if ($wire.__instance.originalEffects.js?.hasOwnProperty('dataLabelsFormatter')) {
+                return new Function('val', 'opts', $wire.__instance.originalEffects.js.dataLabelsFormatter);
+            }
+
+            return null;
+        },
+        get xAxisFormatter() {
+            if ($wire.__instance.originalEffects.js?.hasOwnProperty('xAxisFormatter')) {
+                return new Function('val', $wire.__instance.originalEffects.js.xAxisFormatter);
+            }
+        },
+        get yAxisFormatter() {
+            if ($wire.__instance.originalEffects.js?.hasOwnProperty('yAxisFormatter')) {
+                return new Function('val', $wire.__instance.originalEffects.js.yAxisFormatter);
+            }
+
+            return null;
+        },
+        get toolTipFormatter() {
+            if ($wire.__instance.originalEffects.js?.hasOwnProperty('toolTipFormatter')) {
+                return new Function('val', $wire.__instance.originalEffects.js.toolTipFormatter);
+            }
+
+            return null;
+        },
+        get plotOptionsTotalFormatter() {
+            if ($wire.__instance.originalEffects.js?.hasOwnProperty('plotOptionsTotalFormatter')) {
+                return new Function('w', $wire.__instance.originalEffects.js.plotOptionsTotalFormatter);
+            }
+
+            return null;
+        },
+        updateData() {
+            if (this.chart === null) {
+                return;
+            }
+
+            this.mapLivewireData($wire.options);
+            this.chart.updateOptions(this.options);
+        },
         mapLivewireData(options) {
+            options = JSON.parse(JSON.stringify(options));
             options.series = options.series || [];
+
             options.chart.type = this.chartType || options.chart.type;
 
-            options.series?.map((series) => {
+            options.series = options.series?.map((series) => {
                 if (typeof series !== 'object') {
-                    return series;
+                    return typeof series === 'string' ? parseFloat(series) : series;
                 }
-                series.sum = series.data?.reduce((a, b) => a + b, 0);
+
+                series.sum = series.data?.reduce((a, b) => parseFloat(a) + parseFloat(b), 0);
 
                 if (! series.hasOwnProperty('color')) {
                     return series;
@@ -80,6 +101,8 @@ export default function($wire) {
                 const weight = colorString[1] || 500;
                 series.color = window.colors[color][weight];
                 series.colorName = color;
+
+                return series;
             });
 
             this.livewireOptions = options;
@@ -135,34 +158,61 @@ export default function($wire) {
                         fontFamily: undefined
                     }
                 },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'left',
+                },
                 chart: {
                     redrawOnParentResize: true,
                     type: null,
                     height: this.height,
+                    fontFamily: 'inherit',
                 },
                 dataLabels: {
-                    formatter: function(val) {
+                    formatter: this.dataLabelsFormatter ?? function(val) {
                         return val;
                     }
                 },
                 xaxis: {
                     labels: {
-                        formatter: function(val) {
+                        formatter: this.xAxisFormatter ?? function(val) {
                             return val;
                         }
                     }
                 },
                 yaxis: {
                     labels: {
-                        formatter: function(val) {
-                            return window.formatters.money(val);
+                        formatter: this.yAxisFormatter ?? function(val) {
+                            return val;
                         }
                     }
                 },
                 tooltip: {
                     y: {
-                        formatter: function(val) {
-                            return window.formatters.money(val);
+                        formatter: this.toolTipFormatter ?? function(val) {
+                            return val;
+                        }
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            labels: {
+                                show: true,
+                                value: {
+                                    formatter: this.dataLabelsFormatter ?? function(val) {
+                                        return val;
+                                    }
+                                },
+                                total: {
+                                    show: true,
+                                    formatter: this.plotOptionsTotalFormatter ?? function (w) {
+                                        return w.globals.seriesTotals.reduce((a, b) => {
+                                            return a + b
+                                        }, 0);
+                                    }
+                                }
+                            }
                         }
                     }
                 }

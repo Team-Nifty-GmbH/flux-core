@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Dashboard;
 
+use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
 use Illuminate\Contracts\Foundation\Application;
@@ -22,6 +23,12 @@ class Dashboard extends Component
 
     public array $availableWidgets = [];
 
+    public array $params = [
+        'timeFrame' => TimeFrameEnum::ThisMonth,
+        'start' => null,
+        'end' => null,
+    ];
+
     public function mount(): void
     {
         $this->availableWidgets = $this->filterWidgets(Widget::all());
@@ -30,9 +37,22 @@ class Dashboard extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.dashboard.dashboard');
+        return view('flux::livewire.dashboard.dashboard', [
+            'timeFrames' => array_map(function (TimeFrameEnum $timeFrame) {
+                return [
+                    'value' => $timeFrame->value,
+                    'label' => __($timeFrame->value),
+                ];
+            }, TimeFrameEnum::cases()),
+        ]);
     }
 
+    public function updatedParams(): void
+    {
+        $this->skipRender();
+    }
+
+    #[Renderless]
     public function widgets(): void
     {
         $this->widgets = $this->filterWidgets(auth()->user()->widgets()->get()->toArray());
@@ -75,15 +95,9 @@ class Dashboard extends Component
         JS);
     }
 
-    #[Renderless]
-    public function showFlashMessage(): void
-    {
-        $this->notification()->success(__('Dashboard syncing'));
-    }
-
     protected function filterWidgets(array $widgets): array
     {
-        return array_filter(
+        $widgets = array_filter(
             $widgets,
             function (array $widget) {
                 $name = $widget['component_name'];
@@ -104,5 +118,9 @@ class Dashboard extends Component
                     && array_key_exists($name, Widget::all());
             }
         );
+
+        ksort($widgets);
+
+        return $widgets;
     }
 }

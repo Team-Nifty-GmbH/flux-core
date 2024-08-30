@@ -11,7 +11,7 @@
     <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
     <x-flux::layouts.head.head/>
 </head>
-<body class="dark:bg-secondary-900 h-full bg-slate-50 transition duration-300">
+<body class="dark:bg-secondary-900 h-full bg-slate-50 transition duration-300 text-secondary-600 dark:text-secondary-50">
     @persist('notifications')
         <x-notifications z-index="z-50"></x-notifications>
         <x-dialog z-index="z-40" blur="md" align="center"/>
