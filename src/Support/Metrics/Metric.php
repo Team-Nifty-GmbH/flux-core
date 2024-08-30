@@ -91,9 +91,9 @@ abstract class Metric
         return $this;
     }
 
-    public function setRange(int|string|TimeFrameEnum|null $range): static
+    public function setRange(string|TimeFrameEnum $range): static
     {
-        if (! $range instanceof TimeFrameEnum && ! is_null($range)) {
+        if (! $range instanceof TimeFrameEnum) {
             $range = TimeFrameEnum::tryFrom($range);
         }
 

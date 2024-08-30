@@ -18,8 +18,8 @@ enum GrowthRateTypeEnum: string
         $value = match ($this) {
             GrowthRateTypeEnum::Percentage => bccomp($previousValue, 0) === 0 ?
                 (bccomp($currentValue, 0) === 0 ? 0 : bcmul(100, bccomp($currentValue, 0))) :
-                bcmul(bcdiv(bcsub($currentValue, $previousValue), $previousValue, 9), 100, 2),
-            GrowthRateTypeEnum::Value => bcsub($currentValue, $previousValue, 9),
+                bcmul(bcdiv(bcsub($currentValue, $previousValue), $previousValue), 100),
+            GrowthRateTypeEnum::Value => bcsub($currentValue, $previousValue),
         };
 
         return Rounding::round($value);

@@ -7,10 +7,10 @@ class Result
     public function __construct(
         protected array $data,
         protected array $labels,
-        protected null|float|string|array $growthRate
+        protected null|string|float|array $growthRate
     ) {}
 
-    public static function make(array $data, array $labels, null|float|string|array $growthRate): static
+    public static function make(array $data, array $labels, null|string|float|array $growthRate): static
     {
         return app(static::class, [
             'data' => $data,
@@ -69,7 +69,7 @@ class Result
         return $this->setData(array_values($data))->setLabels(array_keys($data));
     }
 
-    public function getGrowthRate(): null|float|array
+    public function getGrowthRate(): null|string|float|array
     {
         return $this->growthRate;
     }

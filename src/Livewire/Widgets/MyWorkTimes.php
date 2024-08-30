@@ -9,13 +9,12 @@ use FluxErp\Models\WorkTimeType;
 use FluxErp\Support\Metrics\Charts\Bar;
 use FluxErp\Support\Widgets\Charts\BarChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
-use FluxErp\Traits\Widgetable;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Locked;
 
 class MyWorkTimes extends BarChart
 {
-    use IsTimeFrameAwareWidget, Widgetable;
+    use IsTimeFrameAwareWidget;
 
     public bool $showTotals = true;
 
@@ -87,26 +86,6 @@ class MyWorkTimes extends BarChart
     public function xAxisFormatter(): string
     {
         return $this->toolTipFormatter();
-    }
-
-    public function updatedTimeFrame(): void
-    {
-        $this->xaxis = null;
-        $this->series = null;
-
-        parent::updatedTimeFrame();
-    }
-
-    public function updatedStart(): void
-    {
-        $this->calculateChart();
-        $this->updateData();
-    }
-
-    public function updatedEnd(): void
-    {
-        $this->calculateChart();
-        $this->updateData();
     }
 
     public function calculateByTimeFrame(): void

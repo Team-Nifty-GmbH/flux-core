@@ -19,8 +19,7 @@ class TopProductsByRevenue extends ValueList
     public function calculateList(): void
     {
         $query = resolve_static(OrderPosition::class, 'query')
-            ->select('product_id')
-            ->selectRaw('SUM(total_net_price) as total_net_price')
+            ->selectRaw('product_id, SUM(total_net_price) as total_net_price')
             ->groupBy('product_id')
             ->whereHas(
                 'order',
@@ -39,8 +38,7 @@ class TopProductsByRevenue extends ValueList
 
         $previous = resolve_static(OrderPosition::class, 'query')
             ->whereIntegerInRaw('product_id', $query->pluck('product_id'))
-            ->select('product_id')
-            ->selectRaw('SUM(total_net_price) as total_net_price')
+            ->selectRaw('product_id, SUM(total_net_price) as total_net_price')
             ->groupBy('product_id')
             ->whereHas(
                 'order',
