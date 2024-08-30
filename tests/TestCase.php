@@ -35,6 +35,8 @@ abstract class TestCase extends BaseTestCase
 
     protected $loadEnvironmentVariables = true;
 
+    public static bool $isMigrated = false;
+
     protected function setUp(): void
     {
         if (file_exists(__DIR__ . '/../../../.env')) {
@@ -43,6 +45,11 @@ abstract class TestCase extends BaseTestCase
         }
 
         parent::setUp();
+
+        if (! static::$isMigrated) {
+            $this->artisan('migrate', ['--database' => 'testing']);
+            static::$isMigrated = true;
+        }
 
         if (! file_exists(public_path('flux'))) {
             symlink(package_path('public'), public_path('flux'));
