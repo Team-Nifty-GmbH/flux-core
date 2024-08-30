@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class TopProductsByUnitSold extends ValueList
 {
-    public function calculateSum(): void
+    public function calculateList(): void
     {
         $query = resolve_static(OrderPosition::class, 'query')
             ->select('product_id')

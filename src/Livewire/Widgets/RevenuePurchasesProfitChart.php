@@ -13,6 +13,13 @@ class RevenuePurchasesProfitChart extends LineChart
 {
     use MoneyChartFormattingTrait, Widgetable;
 
+    public function calculateByTimeFrame(): void
+    {
+        $this->skipRender();
+        $this->calculateChart();
+        $this->updateData();
+    }
+
     public function calculateChart(): void
     {
         $baseQuery = resolve_static(Order::class, 'query')
@@ -20,15 +27,15 @@ class RevenuePurchasesProfitChart extends LineChart
             ->whereNotNull('invoice_number');
 
         $revenue = Line::make($baseQuery->clone()->revenue())
-            ->dateColumn('invoice_date')
-            ->range($this->timeFrame)
+            ->setDateColumn('invoice_date')
+            ->setRange($this->timeFrame)
             ->setEndingDate($this->end)
             ->setStartingDate($this->start)
             ->sumByRange('total_net_price');
 
         $purchases = Line::make($baseQuery->clone()->purchase())
-            ->dateColumn('invoice_date')
-            ->range($this->timeFrame)
+            ->setDateColumn('invoice_date')
+            ->setRange($this->timeFrame)
             ->setEndingDate($this->end)
             ->setStartingDate($this->start)
             ->sumByRange('total_net_price');

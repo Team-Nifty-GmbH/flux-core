@@ -3,11 +3,13 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Models\Order;
-use FluxErp\Support\Metrics\Charts\Doughnut;
+use FluxErp\Support\Metrics\Charts\Donut;
 use FluxErp\Support\Widgets\Charts\CircleChart;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use FluxErp\Traits\Widgetable;
+use Livewire\Attributes\Lazy;
 
+#[Lazy]
 class RevenueBySalesRepresentative extends CircleChart
 {
     use MoneyChartFormattingTrait, Widgetable;
@@ -35,9 +37,15 @@ class RevenueBySalesRepresentative extends CircleChart
         ];
     }
 
+    public function calculateByTimeFrame(): void
+    {
+        $this->calculateChart();
+        $this->updateData();
+    }
+
     public function calculateChart(): void
     {
-        $metrics = Doughnut::make(
+        $metrics = Donut::make(
             resolve_static(Order::class, 'query')
                 ->revenue()
                 ->whereNotNull('invoice_date')
@@ -45,8 +53,8 @@ class RevenueBySalesRepresentative extends CircleChart
                 ->whereNotNull('agent_id')
                 ->with('agent:id,name')
         )
-            ->dateColumn('invoice_date')
-            ->range($this->timeFrame)
+            ->setDateColumn('invoice_date')
+            ->setRange($this->timeFrame)
             ->setEndingDate($this->end)
             ->setStartingDate($this->start)
             ->setLabelKey('agent.name')

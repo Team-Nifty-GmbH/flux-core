@@ -27,10 +27,10 @@ class Outstanding extends ValueBox
                 ->whereNotState('payment_state', Paid::class)
                 ->revenue()
         )
-            ->range($this->timeFrame)
+            ->setRange($this->timeFrame)
             ->setEndingDate($this->end)
             ->setStartingDate($this->start)
-            ->dateColumn('invoice_date')
+            ->setDateColumn('invoice_date')
             ->withGrowthRate()
             ->sum('balance');
 

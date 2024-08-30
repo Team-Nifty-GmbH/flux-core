@@ -21,22 +21,21 @@ export default function($wire) {
             document.addEventListener('livewire:navigating', () => {
                 this.chart.destroy();
             });
-            $wire.getOptions().then((options) => {
-                this.mapLivewireData(options);
-                this.chartType = this.livewireOptions.chart.type;
-                this.chart = new ApexCharts(this.$el.querySelector('.chart'), this.options);
 
-                this.chart.render();
+            this.mapLivewireData($wire.options);
+            this.chartType = this.livewireOptions.chart.type;
+            this.chart = new ApexCharts(this.$el.querySelector('.chart'), this.options);
 
-                this.$watch('chartType', () => {
-                    this.options.chart.type = this.chartType;
-                    if (this.chartType === 'area') {
-                        this.options.fill.opacity = 0.9;
-                    } else {
-                        this.options.fill.opacity = 1;
-                    }
-                    this.chart.updateOptions(this.options);
-                });
+            this.chart.render();
+
+            this.$watch('chartType', () => {
+                this.options.chart.type = this.chartType;
+                if (this.chartType === 'area') {
+                    this.options.fill.opacity = 0.9;
+                } else {
+                    this.options.fill.opacity = 1;
+                }
+                this.chart.updateOptions(this.options);
             });
         },
         get dataLabelsFormatter() {
@@ -66,20 +65,25 @@ export default function($wire) {
             return null;
         },
         updateData() {
-            $wire.getOptions().then((options) => {
-                this.mapLivewireData(options);
-                this.chart.updateOptions(this.options);
-            });
+            if (this.chart === null) {
+                return;
+            }
+
+            this.mapLivewireData($wire.options);
+            this.chart.updateOptions(this.options);
         },
         mapLivewireData(options) {
+            options = JSON.parse(JSON.stringify(options));
             options.series = options.series || [];
+
             options.chart.type = this.chartType || options.chart.type;
 
-            options.series?.map((series) => {
+            options.series = options.series?.map((series) => {
                 if (typeof series !== 'object') {
-                    return series;
+                    return typeof series === 'string' ? parseFloat(series) : series;
                 }
-                series.sum = series.data?.reduce((a, b) => a + b, 0);
+
+                series.sum = series.data?.reduce((a, b) => parseFloat(a) + parseFloat(b), 0);
 
                 if (! series.hasOwnProperty('color')) {
                     return series;
@@ -90,6 +94,8 @@ export default function($wire) {
                 const weight = colorString[1] || 500;
                 series.color = window.colors[color][weight];
                 series.colorName = color;
+
+                return series;
             });
 
             this.livewireOptions = options;

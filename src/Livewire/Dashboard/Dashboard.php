@@ -9,7 +9,6 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -24,11 +23,11 @@ class Dashboard extends Component
 
     public array $availableWidgets = [];
 
-    public TimeFrameEnum $timeFrame = TimeFrameEnum::ThisMonth;
-
-    public ?Carbon $start = null;
-
-    public ?Carbon $end = null;
+    public array $params = [
+        'timeFrame' => TimeFrameEnum::ThisMonth,
+        'start' => null,
+        'end' => null,
+    ];
 
     public function mount(): void
     {
@@ -48,7 +47,7 @@ class Dashboard extends Component
         ]);
     }
 
-    public function updatedTimeFrame(): void
+    public function updatedParams(): void
     {
         $this->skipRender();
     }
@@ -60,7 +59,7 @@ class Dashboard extends Component
             $this->end = $this->start->copy()->addDays(30);
         }
 
-        $this->dispatchStartEnd();
+        $this->fillParams();
 
         $this->skipRender();
     }
@@ -72,16 +71,28 @@ class Dashboard extends Component
             $this->start = $this->end->copy()->subDays(30);
         }
 
-        $this->dispatchStartEnd();
+        $this->fillParams();
 
         $this->skipRender();
     }
 
-    protected function dispatchStartEnd(): void
+    protected function fillParams(): void
     {
         if ($this->timeFrame === TimeFrameEnum::Custom && $this->start && $this->end) {
-            $this->dispatch('time-frame-changed', $this->timeFrame, $this->start->toDateString(), $this->end->toDateString());
+            $this->params = [
+                'timeFrame' => $this->timeFrame->value,
+                'start' => $this->start->toDateString(),
+                'end' => $this->end->toDateString(),
+            ];
+
+            return;
+        } elseif ($this->timeFrame === TimeFrameEnum::Custom) {
+            return;
         }
+
+        $this->params = [
+            'timeFrame' => $this->timeFrame->value,
+        ];
     }
 
     public function widgets(): void

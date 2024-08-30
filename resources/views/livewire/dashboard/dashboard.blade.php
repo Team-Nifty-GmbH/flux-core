@@ -36,15 +36,15 @@
                     :options="$timeFrames"
                     option-value="value"
                     option-label="label"
-                    wire:model.live="timeFrame"
+                    wire:model.live="params.timeFrame"
                     :clearable="false"
                 />
-                <div class="flex flex-col md:flex-row gap-1.5 items-center min-w-96" x-cloak x-show="$wire.timeFrame === 'Custom'">
-                    <x-datetime-picker wire:model.live="start" :without-time="true"/>
+                <div class="flex flex-col md:flex-row gap-1.5 items-center min-w-96" x-cloak x-show="$wire.params.timeFrame === 'Custom'">
+                    <x-datetime-picker wire:model.live="params.start" :without-time="true"/>
                     <div>
                         <span class="px-1.5">{{ __('Till') }}</span>
                     </div>
-                    <x-datetime-picker wire:model.live="end" :without-time="true"/>
+                    <x-datetime-picker wire:model.live="params.end" :without-time="true"/>
                 </div>
             </div>
             <div class="flex flex-col md:flex-row gap-1.5 items-center">
@@ -88,7 +88,7 @@
                  gs-y="{{$widget['order_row']}}"
             >
                 <div class="grid-stack-item-content"
-                     x-bind:class="editGrid ? 'border border-4 border-primary-500' : ''"
+                     x-bind:class="editGrid ? 'border-4 border-primary-500' : ''"
                 >
                     <div class="absolute top-2 right-2 z-10">
                         <x-button.circle
@@ -104,7 +104,7 @@
                             lazy
                             :id="$widget['id']"
                             :component="$widget['component_name'] ?? $widget['class']"
-                            wire:model="timeFrame"
+                            wire:model="params"
                             wire:key="{{ uniqid() }}"
                         />
                     </div>

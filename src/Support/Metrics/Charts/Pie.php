@@ -2,4 +2,4 @@
 
 namespace FluxErp\Support\Metrics\Charts;
 
-class Pie extends Doughnut {}
+class Pie extends Donut {}

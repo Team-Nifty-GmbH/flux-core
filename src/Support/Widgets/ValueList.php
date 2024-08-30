@@ -18,7 +18,7 @@ abstract class ValueList extends Component
 
     public function mount(): void
     {
-        $this->calculateSum();
+        $this->calculateList();
     }
 
     public function render(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
@@ -28,10 +28,15 @@ abstract class ValueList extends Component
 
     public function updatedTimeFrame(): void
     {
-        $this->timeFrameChanged($this->timeFrame);
+        $this->calculateList();
     }
 
-    abstract public function calculateSum(): void;
+    public function calculateByTimeFrame(): void
+    {
+        $this->calculateList();
+    }
+
+    abstract public function calculateList(): void;
 
     protected function title(): ?string
     {

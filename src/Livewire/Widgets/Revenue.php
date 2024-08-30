@@ -23,10 +23,10 @@ class Revenue extends ValueBox
                 ->whereNotNull('invoice_number')
                 ->revenue()
         )
-            ->range($this->timeFrame)
+            ->setRange($this->timeFrame)
             ->setEndingDate($this->end)
             ->setStartingDate($this->start)
-            ->dateColumn('invoice_date')
+            ->setDateColumn('invoice_date')
             ->withGrowthRate()
             ->sum('total_net_price');
 

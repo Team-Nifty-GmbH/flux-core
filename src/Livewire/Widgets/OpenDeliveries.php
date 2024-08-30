@@ -25,10 +25,10 @@ class OpenDeliveries extends ValueBox
                 ->whereState('delivery_state', Open::class)
                 ->revenue()
         )
-            ->range($this->timeFrame)
+            ->setRange($this->timeFrame)
             ->setEndingDate($this->end)
             ->setStartingDate($this->start)
-            ->dateColumn('invoice_date')
+            ->setDateColumn('invoice_date')
             ->withGrowthRate()
             ->count('id');
 

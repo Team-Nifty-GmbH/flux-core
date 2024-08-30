@@ -24,7 +24,7 @@ class Value extends Metric
         return $this->resolve();
     }
 
-    protected function resolveValue(?array $range): float
+    protected function resolveValue(?array $range): string
     {
         $value = $this->query
             ->clone()

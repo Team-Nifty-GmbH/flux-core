@@ -13,7 +13,7 @@ use Illuminate\Support\Number;
 
 class TopProductsByRevenue extends ValueList
 {
-    public function calculateSum(): void
+    public function calculateList(): void
     {
         $query = resolve_static(OrderPosition::class, 'query')
             ->select('product_id')

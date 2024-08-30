@@ -28,7 +28,7 @@ class Trend extends Metric
             : Str::of($call[1] ?? '')->singular()->lower()->toString();
 
         // if the range is custom we need to determinate the unit based on starting and ending date
-        if ($this->range === TimeFrameEnum::Custom) {
+        if ($this->range === TimeFrameEnum::Custom && $this->startingDate && $this->endingDate) {
             $diff = $this->startingDate->diffInDays($this->endingDate);
 
             $unit = match (true) {

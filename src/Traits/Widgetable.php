@@ -12,26 +12,36 @@ use Livewire\Attributes\On;
 trait Widgetable
 {
     #[Modelable]
+    public array $timeParams = [];
+
     public TimeFrameEnum $timeFrame = TimeFrameEnum::ThisMonth;
 
     public ?Carbon $start = null;
 
     public ?Carbon $end = null;
 
+    abstract public function calculateByTimeFrame(): void;
+
     #[On('time-frame-changed')]
-    public function timeFrameChanged(TimeFrameEnum $timeFrameEnum, ?string $start = null, ?string $end = null): void
+    public function updatedTimeParams(): void
     {
-        $this->timeFrame = $timeFrameEnum;
-        $this->start = Carbon::parse($start);
-        $this->end = Carbon::parse($end);
+        $timeFrame = data_get($this->timeParams, 'timeFrame', TimeFrameEnum::ThisMonth);
+
+        $this->timeFrame = is_string($timeFrame)
+            ? TimeFrameEnum::tryFrom($timeFrame)
+            : $timeFrame;
+        $this->start = $this->timeFrame === TimeFrameEnum::Custom
+            ? Carbon::parse(data_get($this->timeParams, 'start'))
+            : null;
+        $this->end = $this->timeFrame === TimeFrameEnum::Custom
+            ? Carbon::parse(data_get($this->timeParams, 'end'))
+            : null;
 
         if ($this->timeFrame === TimeFrameEnum::Custom && ($this->start === null || $this->end === null)) {
             return;
         }
 
-        if (method_exists($this, 'calculateSum')) {
-            $this->calculateSum();
-        }
+        $this->calculateByTimeFrame();
     }
 
     public static function getLabel(): string

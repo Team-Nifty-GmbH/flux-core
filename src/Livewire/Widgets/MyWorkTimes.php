@@ -108,6 +108,12 @@ class MyWorkTimes extends BarChart
         $this->updateData();
     }
 
+    public function calculateByTimeFrame(): void
+    {
+        $this->calculateChart();
+        $this->updateData();
+    }
+
     public function calculateChart(): void
     {
         $this->xaxis = null;
@@ -128,8 +134,8 @@ class MyWorkTimes extends BarChart
                 ->where('is_daily_work_time', true)
                 ->where('is_pause', false)
         )
-            ->dateColumn('started_at')
-            ->range($this->timeFrame)
+            ->setDateColumn('started_at')
+            ->setRange($this->timeFrame)
             ->setEndingDate($this->end)
             ->setStartingDate($this->start)
             ->sumByRange('total_time_ms');
@@ -140,8 +146,8 @@ class MyWorkTimes extends BarChart
                 ->where('is_daily_work_time', true)
                 ->where('is_pause', true)
         )
-            ->dateColumn('started_at')
-            ->range($this->timeFrame)
+            ->setDateColumn('started_at')
+            ->setRange($this->timeFrame)
             ->setEndingDate($this->end)
             ->setStartingDate($this->start)
             ->sumByRange('total_time_ms');
@@ -185,8 +191,8 @@ class MyWorkTimes extends BarChart
                     ->where('is_daily_work_time', false)
                     ->where('work_time_type_id', $workTimeTypeID)
             )
-                ->dateColumn('started_at')
-                ->range($this->timeFrame)
+                ->setDateColumn('started_at')
+                ->setRange($this->timeFrame)
                 ->setEndingDate($this->end)
                 ->setStartingDate($this->start)
                 ->sumByRange('total_time_ms');

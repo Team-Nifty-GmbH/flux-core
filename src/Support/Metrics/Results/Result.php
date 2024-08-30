@@ -2,35 +2,21 @@
 
 namespace FluxErp\Support\Metrics\Results;
 
-use ArrayAccess;
-use Exception;
-use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Http\Response;
-
-class Result implements ArrayAccess, Responsable
+class Result
 {
-    public array $container;
-
     public function __construct(
         protected array $data,
         protected array $labels,
-        protected null|float|array $growthRate
-    ) {
-        $this->container = [$labels, $data, $growthRate];
-    }
+        protected null|float|string|array $growthRate
+    ) {}
 
-    public static function make(array $data, array $labels, null|float|array $growthRate): static
+    public static function make(array $data, array $labels, null|float|string|array $growthRate): static
     {
         return app(static::class, [
             'data' => $data,
             'labels' => $labels,
             'growthRate' => $growthRate,
         ]);
-    }
-
-    public function getOptions(): array
-    {
-        return array_combine($this->labels, $this->data);
     }
 
     public function getData(): array
@@ -62,12 +48,12 @@ class Result implements ArrayAccess, Responsable
         return $this;
     }
 
-    public function mergeLabels(array $labels, float|int $default = 0): static
+    public function mergeLabels(array $labels, float|int|string $default = 0): static
     {
         $data = $this->getCombinedData();
 
         foreach ($labels as $label) {
-            $data[$label] = $data[$label] ?? $default;
+            $data[$label] ??= $default;
         }
         ksort($data);
 
@@ -86,38 +72,5 @@ class Result implements ArrayAccess, Responsable
     public function getGrowthRate(): null|float|array
     {
         return $this->growthRate;
-    }
-
-    public function toResponse($request): Response
-    {
-        return new Response(
-            $this->getData()
-        );
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function offsetSet($offset, $value): void
-    {
-        throw new Exception('Result is immutable');
-    }
-
-    public function offsetExists($offset): bool
-    {
-        return isset($this->container[$offset]);
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function offsetUnset($offset): void
-    {
-        throw new Exception('Result is immutable');
-    }
-
-    public function offsetGet($offset): mixed
-    {
-        return $this->container[$offset] ?? null;
     }
 }

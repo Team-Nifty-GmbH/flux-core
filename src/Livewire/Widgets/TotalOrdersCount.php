@@ -14,6 +14,13 @@ class TotalOrdersCount extends LineChart
 {
     use Widgetable;
 
+    public function calculateByTimeFrame(): void
+    {
+        $this->skipRender();
+        $this->calculateChart();
+        $this->updateData();
+    }
+
     public function calculateChart(): void
     {
         $query = resolve_static(Order::class, 'query')
@@ -22,21 +29,21 @@ class TotalOrdersCount extends LineChart
             ->revenue();
 
         $metric = Line::make($query)
-            ->dateColumn('invoice_date')
-            ->range($this->timeFrame)
+            ->setDateColumn('invoice_date')
+            ->setRange($this->timeFrame)
             ->setEndingDate($this->end)
             ->setStartingDate($this->start);
         $previousMetric = Line::make($query)
-            ->dateColumn('invoice_date')
+            ->setDateColumn('invoice_date')
             ->setEndingDate($metric->previousRange()[1])
             ->setStartingDate($metric->previousRange()[0])
-            ->range(TimeFrameEnum::Custom);
+            ->setRange(TimeFrameEnum::Custom);
 
         $growth = Value::make($query)
-            ->range($this->timeFrame)
+            ->setRange($this->timeFrame)
             ->setEndingDate($this->end)
             ->setStartingDate($this->start)
-            ->dateColumn('invoice_date')
+            ->setDateColumn('invoice_date')
             ->withGrowthRate()
             ->count('total_net_price');
 

@@ -22,7 +22,7 @@ abstract class Metric
 
     protected string $column;
 
-    protected int|TimeFrameEnum|null $range = null;
+    protected ?TimeFrameEnum $range = null;
 
     protected ?CarbonImmutable $startingDate = null;
 
@@ -34,11 +34,9 @@ abstract class Metric
 
     protected GrowthRateTypeEnum $growthRateType = GrowthRateTypeEnum::Percentage;
 
+    abstract protected function resolve(): mixed;
+
     protected array $ranges = [
-        15,
-        30,
-        60,
-        365,
         TimeFrameEnum::Today,
         TimeFrameEnum::Yesterday,
         TimeFrameEnum::ThisWeek,
@@ -48,18 +46,15 @@ abstract class Metric
         TimeFrameEnum::Custom,
     ];
 
-    public function __construct(
-        string|Builder $query,
-    ) {
-        $this->query = is_string($query) ? $query::query() : $query->clone();
+    public function __construct(Builder $query)
+    {
+        $this->query = $query->clone();
     }
 
-    public static function make(string|Builder $query): static
+    public static function make(Builder $query): static
     {
         return app(static::class, ['query' => $query]);
     }
-
-    abstract protected function resolve(): mixed;
 
     public function setStartingDate(string|CarbonImmutable|null $startingDate): static
     {
@@ -90,14 +85,14 @@ abstract class Metric
         return $this;
     }
 
-    public function growthRateType(GrowthRateTypeEnum $growthRateType): static
+    public function setGrowthRateType(GrowthRateTypeEnum $growthRateType): static
     {
         $this->growthRateType = $growthRateType;
 
         return $this;
     }
 
-    public function range(int|string|TimeFrameEnum|null $range): static
+    public function setRange(int|string|TimeFrameEnum|null $range): static
     {
         if (! $range instanceof TimeFrameEnum && ! is_null($range)) {
             $range = TimeFrameEnum::tryFrom($range);
@@ -110,23 +105,22 @@ abstract class Metric
         return $this;
     }
 
-    public function ranges(array $ranges): static
+    public function setRanges(array $ranges): static
     {
-        $this->ranges = Arr::map($ranges,
-            fn ($range) => is_string($range) ? TimeFrameEnum::from($range) : $range
+        $this->ranges = array_filter(
+            Arr::map(
+                $ranges,
+                fn ($range) => is_string($range) ? TimeFrameEnum::tryFrom($range) : $range
+            ),
+            fn ($range) => $range instanceof TimeFrameEnum
         );
 
         return $this;
     }
 
-    public function rangesFromOptions(array $options): static
-    {
-        return $this->ranges(array_keys($options));
-    }
-
     public function getRange(): int|TimeFrameEnum
     {
-        return $this->range ?? $this->getRanges()[0] ?? TimeFrameEnum::ThisWeek;
+        return $this->range ?? data_get($this->getRanges(), '0', TimeFrameEnum::ThisWeek);
     }
 
     public function getRanges(): array
@@ -134,7 +128,7 @@ abstract class Metric
         return $this->ranges;
     }
 
-    public function dateColumn(string $dateColumn): static
+    public function setDateColumn(string $dateColumn): static
     {
         $this->dateColumn = $dateColumn;
 
@@ -198,7 +192,7 @@ abstract class Metric
         ];
     }
 
-    protected function transformResult(int|float|null $data): float
+    protected function transformResult(int|float|null $data): string
     {
         return Rounding::round($data ?? 0);
     }

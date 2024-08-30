@@ -30,7 +30,7 @@ abstract class ValueBox extends Component
         return view('flux::support.widgets.value-box');
     }
 
-    public function updatedTimeFrame(): void
+    public function calculateByTimeFrame(): void
     {
         $this->calculateSum();
     }

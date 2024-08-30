@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 use ReflectionEnum;
 use ReflectionException;
 
-class Doughnut extends Metric
+class Donut extends Metric
 {
     protected string $groupBy;
 
@@ -94,15 +94,6 @@ class Doughnut extends Metric
         return $this->setType('count', $groupBy, $column);
     }
 
-    protected function setType(string $type, string $groupBy, string $column): Result
-    {
-        $this->type = $type;
-        $this->column = $column;
-        $this->groupBy = $groupBy;
-
-        return $this->resolve();
-    }
-
     public function resolveValue(?array $range): array
     {
         $column = $this->query->getQuery()->getGrammar()->wrap($this->column);
@@ -136,7 +127,7 @@ class Doughnut extends Metric
             method_exists($cast, 'getLabel')
         ) {
             $data = Arr::mapWithKeys($data, fn (float $value, mixed $key) => [
-                $cast::from($key)->getLabel() => $value, // @phpstan-ignore-line
+                $cast::from($key)->getLabel() => $value,
             ]);
         }
 
@@ -194,5 +185,14 @@ class Doughnut extends Metric
             array_keys($currentData),
             $this->resolveGrowthRate($previousData, $currentData)
         );
+    }
+
+    protected function setType(string $type, string $groupBy, string $column): Result
+    {
+        $this->type = $type;
+        $this->column = $column;
+        $this->groupBy = $groupBy;
+
+        return $this->resolve();
     }
 }

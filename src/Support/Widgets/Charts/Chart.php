@@ -2,7 +2,6 @@
 
 namespace FluxErp\Support\Widgets\Charts;
 
-use FluxErp\Enums\TimeFrameEnum;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
@@ -56,6 +55,8 @@ abstract class Chart extends Component
 
     public array $chartTypes = [];
 
+    public ?array $options = null;
+
     abstract public function calculateChart(): void;
 
     public static function getDefaultWidth(): int
@@ -71,6 +72,7 @@ abstract class Chart extends Component
     public function mount(): void
     {
         $this->calculateChart();
+        $this->options = $this->getOptions();
     }
 
     public function boot(): void
@@ -80,14 +82,18 @@ abstract class Chart extends Component
         }
     }
 
-    #[Renderless]
-    public function getOptions(): array
+    public function rendering(): void
+    {
+        $this->options ??= $this->getOptions();
+    }
+
+    protected function getOptions(): array
     {
         $public = [];
         $reflection = new \ReflectionClass(Chart::class);
         $properties = array_filter(
             $reflection->getProperties(\ReflectionProperty::IS_PUBLIC),
-            fn ($property) => ! in_array($property->getName(), ['timeFrame'])
+            fn ($property) => ! in_array($property->getName(), ['timeFrame', 'options'])
         );
 
         foreach ($properties as $property) {
@@ -99,34 +105,10 @@ abstract class Chart extends Component
         return array_filter($public);
     }
 
-    public function updatedTimeFrame(): void
-    {
-        if ($this->timeFrame === TimeFrameEnum::Custom && ! $this->start && ! $this->end) {
-            return;
-        }
-
-        $this->calculateChart();
-        $this->updateData();
-        $this->skipRender();
-    }
-
-    public function updatedStart(): void
-    {
-        $this->calculateChart();
-        $this->updateData();
-        $this->skipRender();
-    }
-
-    public function updatedEnd(): void
-    {
-        $this->calculateChart();
-        $this->updateData();
-        $this->skipRender();
-    }
-
     #[Renderless]
     public function updateData(): void
     {
+        $this->options = $this->getOptions();
         $this->js(
             <<<'JS'
                 Alpine.$data($el).updateData();

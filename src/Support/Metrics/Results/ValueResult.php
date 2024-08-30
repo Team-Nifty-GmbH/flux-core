@@ -2,21 +2,13 @@
 
 namespace FluxErp\Support\Metrics\Results;
 
-use ArrayAccess;
-use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Http\Response;
-
-class ValueResult implements ArrayAccess, Responsable
+class ValueResult
 {
-    public array $container;
-
     public function __construct(
-        protected float $value,
-        protected ?float $previousValue,
-        protected ?float $growthRate = null
-    ) {
-        $this->container = [$value, $previousValue, $growthRate];
-    }
+        protected float|string|int $value,
+        protected float|string|int|null $previousValue,
+        protected float|string|int|null $growthRate = null
+    ) {}
 
     public static function make(float $value, ?float $previousValue, ?float $growthRate): static
     {
@@ -40,32 +32,5 @@ class ValueResult implements ArrayAccess, Responsable
     public function getGrowthRate(): ?float
     {
         return $this->growthRate;
-    }
-
-    public function toResponse($request): Response
-    {
-        return new Response(
-            $this->getValue()
-        );
-    }
-
-    public function offsetSet($offset, $value): void
-    {
-        throw new \Exception('ValueResult is immutable');
-    }
-
-    public function offsetExists($offset): bool
-    {
-        return isset($this->container[$offset]);
-    }
-
-    public function offsetUnset($offset): void
-    {
-        throw new \Exception('ValueResult is immutable');
-    }
-
-    public function offsetGet($offset): mixed
-    {
-        return $this->container[$offset] ?? null;
     }
 }

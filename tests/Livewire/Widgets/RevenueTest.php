@@ -8,7 +8,7 @@ use FluxErp\Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
-class TotalProfitTest extends TestCase
+class RevenueTest extends TestCase
 {
     use DatabaseTransactions;
 
