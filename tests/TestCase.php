@@ -47,6 +47,7 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         if (! static::$isMigrated) {
+            dd(config('database'));
             $this->artisan('migrate', ['--database' => 'testing']);
             static::$isMigrated = true;
         }
