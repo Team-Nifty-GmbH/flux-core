@@ -12,11 +12,11 @@ abstract class ValueBox extends Component
 {
     use Widgetable;
 
-    public float|string $sum = 0;
+    public string|float $sum = 0;
 
-    public float|string|null $previousSum = null;
+    public string|float|null $previousSum = null;
 
-    public ?float $growthRate = null;
+    public string|float|null $growthRate = null;
 
     public bool $shouldBePositive = true;
 

@@ -3,11 +3,14 @@
 namespace FluxErp\Traits\Livewire;
 
 use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Traits\Widgetable;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Modelable;
 
 trait IsTimeFrameAwareWidget
 {
+    use Widgetable;
+
     #[Modelable]
     public array $timeParams = [];
 

@@ -7,11 +7,10 @@ use FluxErp\Support\Metrics\Charts\Donut;
 use FluxErp\Support\Widgets\Charts\CircleChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
-use FluxErp\Traits\Widgetable;
 
 class RevenueBySalesRepresentative extends CircleChart
 {
-    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait, Widgetable;
+    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
     public ?array $chart = [
         'type' => 'donut',

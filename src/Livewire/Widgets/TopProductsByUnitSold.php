@@ -17,8 +17,7 @@ class TopProductsByUnitSold extends ValueList
     public function calculateList(): void
     {
         $query = resolve_static(OrderPosition::class, 'query')
-            ->select('product_id')
-            ->selectRaw('SUM(amount) as total_amount')
+            ->selectRaw('product_id, SUM(amount) as total_amount')
             ->groupBy('product_id')
             ->whereHas(
                 'order',
@@ -37,8 +36,7 @@ class TopProductsByUnitSold extends ValueList
 
         $previous = resolve_static(OrderPosition::class, 'query')
             ->whereIntegerInRaw('product_id', $query->pluck('product_id'))
-            ->select('product_id')
-            ->selectRaw('SUM(amount) as total_amount')
+            ->selectRaw('product_id, SUM(amount) as total_amount')
             ->groupBy('product_id')
             ->whereHas(
                 'order',

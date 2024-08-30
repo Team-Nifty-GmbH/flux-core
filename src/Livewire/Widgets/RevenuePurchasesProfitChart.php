@@ -8,11 +8,10 @@ use FluxErp\Support\Metrics\Results\Result;
 use FluxErp\Support\Widgets\Charts\LineChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
-use FluxErp\Traits\Widgetable;
 
 class RevenuePurchasesProfitChart extends LineChart
 {
-    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait, Widgetable;
+    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
     public function calculateByTimeFrame(): void
     {
