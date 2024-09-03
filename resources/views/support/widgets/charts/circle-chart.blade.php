@@ -1,4 +1,4 @@
-@extends('flux::livewire.charts.chart')
+@extends('flux::support.widgets.charts.chart')
 @section('options')
     @parent
     <x-native-select

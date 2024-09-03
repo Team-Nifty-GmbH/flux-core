@@ -26,6 +26,8 @@ class ContactForm extends FluxForm
 
     public ?int $agent_id = null;
 
+    public ?int $contact_origin_id = null;
+
     public ?int $currency_id = null;
 
     public ?string $customer_number = null;

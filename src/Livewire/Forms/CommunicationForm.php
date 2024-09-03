@@ -107,9 +107,9 @@ class CommunicationForm extends FluxForm
 
     public function communicatable(): ?Model
     {
-        return $this->communicatable_type && $this->communicatable_id
-            ? morphed_model($this->communicatable_type)::query()
-                ->whereKey($this->communicatable_id)
+        return count($this->communicatables) === 1
+            ? resolve_static(data_get($this->communicatables, '0.communicatable_type'), 'query')
+                ->whereKey(data_get($this->communicatables, '0.communicatable_id'))
                 ->first()
             : null;
     }

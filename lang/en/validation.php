@@ -102,6 +102,7 @@ return [
     'missing_with' => 'The :attribute field must be missing when :values is present.',
     'missing_with_all' => 'The :attribute field must be missing when :values are present.',
     'multiple_of' => 'The :attribute must be a multiple of :value.',
+    'no_decimals' => 'The :attribute field must not have any decimal places.',
     'not_in' => 'The :attribute field must not be in the list.',
     'not_regex' => 'The :attribute format is invalid.',
     'numeric' => 'The :attribute must be a number.',

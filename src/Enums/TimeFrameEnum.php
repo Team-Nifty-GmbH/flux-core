@@ -2,103 +2,100 @@
 
 namespace FluxErp\Enums;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use FluxErp\Enums\Traits\EnumTrait;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 
 enum TimeFrameEnum: string
 {
     use EnumTrait;
 
-    case LastWeek = 'Last Week';
-    case LastMonth = 'Last Month';
-    case LastYear = 'Last Year';
+    case Today = 'Today';
+
+    case Yesterday = 'Yesterday';
+
     case ThisWeek = 'This Week';
+
     case ThisMonth = 'This Month';
+
+    case ThisQuarter = 'This Quarter';
+
     case ThisYear = 'This Year';
-    case AllTime = 'All Time';
+
     case Custom = 'Custom';
 
-    public function dateQueryParameters(string $dateField): array
+    public function getRange(): ?array
     {
+        $now = CarbonImmutable::now();
+
         return match ($this) {
-            self::LastWeek => [
-                'column' => $dateField,
-                'operator' => '>=',
-                'value' => Carbon::now()->subWeek(),
+            TimeFrameEnum::Today => [
+                $now->startOfDay(),
+                $now,
             ],
-            self::LastMonth => [
-                'column' => $dateField,
-                'operator' => '>=',
-                'value' => Carbon::now()->subMonth(),
+            TimeFrameEnum::Yesterday => [
+                $now->subDay()->startOfDay(),
+                $now->subDay(),
             ],
-            self::LastYear => [
-                'column' => $dateField,
-                'operator' => '>=',
-                'value' => Carbon::now()->subYear(),
+            TimeFrameEnum::ThisWeek => [
+                $now->startOfWeek(),
+                $now,
             ],
-            self::ThisWeek => [
-                'column' => $dateField,
-                'operator' => 'between',
-                'value' => [
-                    Carbon::now()->startOfWeek(),
-                    Carbon::now()->endOfWeek(),
-                ],
+            TimeFrameEnum::ThisMonth => [
+                $now->startOfMonth(),
+                $now,
             ],
-            self::ThisMonth => [
-                'column' => $dateField,
-                'operator' => 'between',
-                'value' => [
-                    Carbon::now()->startOfMonth(),
-                    Carbon::now()->endOfMonth(),
-                ],
+            TimeFrameEnum::ThisQuarter => [
+                $now->startOfQuarter(),
+                $now,
             ],
-            self::ThisYear => [
-                'column' => $dateField,
-                'operator' => 'between',
-                'value' => [
-                    Carbon::now()->startOfYear(),
-                    Carbon::now()->endOfYear(),
-                ],
+            TimeFrameEnum::ThisYear => [
+                $now->startOfYear(),
+                $now,
             ],
-            self::AllTime, self::Custom => [],
-            default => throw new \InvalidArgumentException('Invalid time frame'),
+            TimeFrameEnum::Custom => null,
         };
     }
 
-    public function groupQuery(Builder $builder, string $dateField, string $groupByKey = 'group_key'): Builder
+    public function getPreviousRange(): ?array
     {
-        return $builder->select(
-            DB::raw(
-                'DATE_FORMAT(' . $dateField . ', \'' . $this->groupKeyFormatter($dateField) . '\') as '
-                . $groupByKey
-            )
-        )
-            ->groupBy(...$this->groupBy($dateField, $groupByKey))
-            ->orderBy($groupByKey);
-    }
+        $now = CarbonImmutable::now();
 
-    private function groupBy(string $dateField, string $groupByKey = 'group_key'): array
-    {
-        return array_merge(match ($this) {
-            self::LastWeek, self::ThisWeek, self::ThisMonth, self::LastMonth => [$dateField],
-            self::LastYear, self::ThisYear => [
-                DB::raw('YEAR(' . $dateField . ')'),
-                DB::raw('MONTH(' . $dateField . ')'),
+        return match ($this) {
+            TimeFrameEnum::Today => [
+                $now->subDay()->startOfDay(),
+                $now->subDay(),
             ],
-            self::AllTime => [DB::raw('YEAR(' . $dateField . ')')],
-            default => throw new \InvalidArgumentException('Invalid time frame'),
-        }, [$groupByKey]);
+            TimeFrameEnum::Yesterday => [
+                $now->subDays(2)->startOfDay(),
+                $now->subDays(2),
+            ],
+            TimeFrameEnum::ThisWeek => [
+                $now->subWeek()->startOfWeek(),
+                $now->subWeek(),
+            ],
+            TimeFrameEnum::ThisMonth => [
+                $now->subMonthWithoutOverflow()->startOfMonth(),
+                $now->subMonthWithoutOverflow(),
+            ],
+            TimeFrameEnum::ThisQuarter => [
+                $now->subQuarter()->startOfQuarter(),
+                $now->subQuarter(),
+            ],
+            TimeFrameEnum::ThisYear => [
+                $now->subYear()->startOfYear(),
+                $now->subYear(),
+            ],
+            TimeFrameEnum::Custom => null,
+        };
     }
 
-    private function groupKeyFormatter(string $dateField): string
+    public function getUnit(): ?string
     {
         return match ($this) {
-            self::LastWeek, self::ThisWeek, self::ThisMonth, self::LastMonth => '%Y-%m-%d',
-            self::LastYear, self::ThisYear => '%Y-%m',
-            self::AllTime => '%Y',
-            default => throw new \InvalidArgumentException('Invalid time frame'),
+            TimeFrameEnum::Today, TimeFrameEnum::Yesterday, TimeFrameEnum::ThisMonth, TimeFrameEnum::ThisWeek => 'day',
+            TimeFrameEnum::ThisQuarter => 'week',
+            TimeFrameEnum::ThisYear => 'month',
+            TimeFrameEnum::Custom => null,
         };
     }
 }

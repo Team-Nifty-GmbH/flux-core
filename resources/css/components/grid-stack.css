@@ -1,0 +1,27 @@
+.grid-stack {
+    @apply w-full
+}
+
+.grid-stack-item-content {
+    @apply flex place-content-center col-span-full dark:text-gray-50 m-0 rounded-lg shadow-md bg-white dark:bg-secondary-800;
+}
+
+.grid-stack > .grid-stack-item > .grid-stack-item-content {
+    @apply overflow-hidden;
+}
+
+::-webkit-scrollbar {
+    width: .5rem;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-gray-200 dark:bg-gray-700 rounded;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+}

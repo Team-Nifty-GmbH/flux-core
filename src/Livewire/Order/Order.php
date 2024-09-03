@@ -11,7 +11,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Htmlables\TabButton;
-use FluxErp\Jobs\ProcessSubscriptionOrderJob;
+use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Forms\OrderPositionForm;
@@ -748,8 +748,8 @@ class Order extends OrderPositionList
     public function fillSchedule(): void
     {
         $schedule = resolve_static(Schedule::class, 'query')
-            ->where('class', ProcessSubscriptionOrderJob::class)
-            ->whereJsonContains('parameters->order', $this->order->id)
+            ->where('class', ProcessSubscriptionOrder::class)
+            ->whereJsonContains('parameters->orderId', $this->order->id)
             ->first();
 
         if ($schedule) {
@@ -761,22 +761,21 @@ class Order extends OrderPositionList
                 ->order_type_enum === OrderTypeEnum::PurchaseSubscription ?
                 OrderTypeEnum::Purchase->value : OrderTypeEnum::Order->value;
 
-            $this->schedule->parameters['orderType'] = resolve_static(OrderType::class, 'query')
+            $this->schedule->parameters['orderTypeId'] = resolve_static(OrderType::class, 'query')
                 ->where('order_type_enum', $defaultOrderType)
                 ->where('is_active', true)
                 ->where('is_hidden', false)
-                ->first()
-                ?->id;
+                ->value('id');
         }
     }
 
     #[Renderless]
     public function saveSchedule(): bool
     {
-        $this->schedule->name = ProcessSubscriptionOrderJob::name();
+        $this->schedule->name = ProcessSubscriptionOrder::name();
         $this->schedule->parameters = [
-            'order' => $this->order->id,
-            'orderType' => $this->schedule->parameters['orderType'] ?? null,
+            'orderId' => $this->order->id,
+            'orderTypeId' => $this->schedule->parameters['orderTypeId'] ?? null,
         ];
 
         try {

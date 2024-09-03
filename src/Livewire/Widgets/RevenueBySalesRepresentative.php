@@ -2,15 +2,15 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use Carbon\Carbon;
-use FluxErp\Enums\TimeFrameEnum;
-use FluxErp\Livewire\Charts\CircleChart;
 use FluxErp\Models\Order;
-use FluxErp\Traits\Widgetable;
+use FluxErp\Support\Metrics\Charts\Donut;
+use FluxErp\Support\Widgets\Charts\CircleChart;
+use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
+use FluxErp\Traits\MoneyChartFormattingTrait;
 
 class RevenueBySalesRepresentative extends CircleChart
 {
-    use Widgetable;
+    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
     public ?array $chart = [
         'type' => 'donut',
@@ -35,47 +35,30 @@ class RevenueBySalesRepresentative extends CircleChart
         ];
     }
 
+    public function calculateByTimeFrame(): void
+    {
+        $this->calculateChart();
+        $this->updateData();
+    }
+
     public function calculateChart(): void
     {
-        $timeFrame = TimeFrameEnum::fromName($this->timeFrame);
+        $metrics = Donut::make(
+            resolve_static(Order::class, 'query')
+                ->revenue()
+                ->whereNotNull('invoice_date')
+                ->whereNotNull('invoice_number')
+                ->whereNotNull('agent_id')
+                ->with('agent:id,name')
+        )
+            ->setDateColumn('invoice_date')
+            ->setRange($this->timeFrame)
+            ->setEndingDate($this->end)
+            ->setStartingDate($this->start)
+            ->setLabelKey('agent.name')
+            ->sum('total_net_price', 'agent_id');
 
-        $baseQuery = resolve_static(Order::class, 'query')
-            ->whereNotNull('invoice_date')
-            ->whereNotNull('invoice_number')
-            ->whereNotNull('agent_id')
-            ->when($timeFrame === TimeFrameEnum::Custom && $this->start, function ($query) {
-                $query->where('invoice_date', '>=', Carbon::parse($this->start));
-            })
-            ->when($timeFrame === TimeFrameEnum::Custom && $this->end, function ($query) {
-                $query->where('invoice_date', '<=', Carbon::parse($this->end));
-            });
-
-        if ($timeFrame !== TimeFrameEnum::Custom) {
-            $parameters = $timeFrame->dateQueryParameters('invoice_date');
-
-            if ($parameters && count($parameters) > 0) {
-                if ($parameters['operator'] === 'between') {
-                    $baseQuery->whereBetween($parameters['column'], $parameters['value']);
-                } else {
-                    $baseQuery->where(...array_values($parameters));
-                }
-            }
-        }
-
-        $revenueBySalesRepresentative = $baseQuery
-            ->join('users', 'users.id', '=', 'agent_id')
-            ->whereHas('orderType', function ($query) {
-                $query->whereNotIn('order_type_enum', ['purchase', 'purchase-refund']);
-            })
-            ->selectRaw('ROUND(SUM(total_net_price), 2) as total, agent_id, users.firstname, users.lastname')
-            ->groupBy('agent_id', 'users.firstname', 'users.lastname')
-            ->get()
-            ->mapWithKeys(function ($item) {
-                return [$item->firstname . ' ' . $item->lastname => (float) $item->total];
-            })
-            ->toArray();
-
-        $this->series = array_values($revenueBySalesRepresentative);
-        $this->labels = array_keys($revenueBySalesRepresentative);
+        $this->series = $metrics->getData();
+        $this->labels = $metrics->getLabels();
     }
 }

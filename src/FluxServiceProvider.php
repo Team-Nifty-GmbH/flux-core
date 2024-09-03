@@ -147,8 +147,8 @@ class FluxServiceProvider extends ServiceProvider
         Repeatable::autoDiscover(flux_path('src/Console/Commands'), 'FluxErp\Console\Commands');
         // Register repeatable jobs
         Repeatable::autoDiscover(flux_path('src/Jobs'), 'FluxErp\Jobs');
-        // Register repeatable invokable classes in "Repeatable" directory
-        Repeatable::autoDiscover(flux_path('src/Repeatable'), 'FluxErp\Repeatable');
+        // Register repeatable invokable classes from "Invokable" directory
+        Repeatable::autoDiscover(flux_path('src/Invokable'), 'FluxErp\Invokable');
         // Register repeatable artisan commands, jobs and invokable classes (in "Repeatable" directory) from app
         Repeatable::autoDiscover();
 
@@ -386,10 +386,13 @@ class FluxServiceProvider extends ServiceProvider
         $livewireNamespace = 'FluxErp\\Livewire\\';
 
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
-            if (is_a($class, Component::class, true)
-                && ! (new \ReflectionClass($class))->isAbstract()
-            ) {
-                Livewire::component($alias, $class);
+            try {
+                if (is_a($class, Component::class, true)
+                    && ! (new \ReflectionClass($class))->isAbstract()
+                ) {
+                    Livewire::component($alias, $class);
+                }
+            } catch (\Throwable) {
             }
         }
     }
@@ -525,6 +528,7 @@ class FluxServiceProvider extends ServiceProvider
             closure: function () {
                 Menu::register(route: 'settings.additional-columns');
                 Menu::register(route: 'settings.address-types');
+                Menu::register(route: 'settings.contact-origins');
                 Menu::register(route: 'settings.categories');
                 Menu::register(route: 'settings.product-option-groups');
                 Menu::register(route: 'settings.product-properties');

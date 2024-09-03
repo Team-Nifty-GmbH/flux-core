@@ -5,7 +5,7 @@
             <x-card>
                 <x-select wire:model="contact.client_id"
                           label="{{ __('Client') }}"
-                          :options="app(\FluxErp\Models\Client::class)->all(['id', 'name'])"
+                          :options="resolve_static(\FluxErp\Models\Client::class, 'query')->get(['id', 'name'])"
                           option-label="name"
                           option-value="id"
                 />
@@ -89,7 +89,7 @@
                             <x-select
                                 wire:model="contact.main_address.country_id"
                                 searchable
-                                :options="app(\FluxErp\Models\Country::class)->all(['id', 'name'])"
+                                :options="resolve_static(\FluxErp\Models\Country::class, 'query')->get(['id', 'name'])"
                                 option-label="name"
                                 option-value="id"
                             />
@@ -104,7 +104,22 @@
                             <x-select
                                 wire:model="contact.main_address.language_id"
                                 searchable
-                                :options="app(\FluxErp\Models\Language::class)->all(['id', 'name'])"
+                                :options="resolve_static(\FluxErp\Models\Language::class, 'query')->get(['id', 'name'])"
+                                option-label="name"
+                                option-value="id"
+                            />
+                        </div>
+                    </div>
+                    <div
+                        class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                        <label for="{{ md5('contact.contact_origin_id') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
+                            {{ __('Contact Origin') }}
+                        </label>
+                        <div class="col-span-2">
+                            <x-select
+                                wire:model="contact.contact_origin_id"
+                                searchable
+                                :options="resolve_static(\FluxErp\Models\ContactOrigin::class, 'query')->where('is_active', true)->get(['id', 'name'])"
                                 option-label="name"
                                 option-value="id"
                             />
