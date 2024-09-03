@@ -39,8 +39,8 @@ class CreateTransactionRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Order::class]),
             ],
-            'value_date' => 'required|date_format:Y-m-d',
-            'booking_date' => 'required|date_format:Y-m-d',
+            'value_date' => 'required|date',
+            'booking_date' => 'required|date',
             'amount' => [
                 'required',
                 app(Numeric::class),

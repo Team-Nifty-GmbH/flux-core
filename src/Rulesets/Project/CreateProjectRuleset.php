@@ -47,8 +47,8 @@ class CreateProjectRuleset extends FluxRuleset
             ],
             'project_number' => 'nullable|string',
             'name' => 'required|string',
-            'start_date' => 'date_format:Y-m-d|nullable',
-            'end_date' => 'date_format:Y-m-d|nullable',
+            'start_date' => 'date|nullable',
+            'end_date' => 'date|nullable',
             'description' => 'string|nullable',
             'state' => [
                 'string',

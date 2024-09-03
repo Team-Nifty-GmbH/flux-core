@@ -136,9 +136,9 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 app(Numeric::class),
                 'nullable',
             ],
-            'customer_delivery_date' => 'date_format:Y-m-d|nullable',
+            'customer_delivery_date' => 'date|nullable',
             'ean_code' => 'string|nullable',
-            'possible_delivery_date' => 'date_format:Y-m-d|nullable',
+            'possible_delivery_date' => 'date|nullable',
             'unit_gram_weight' => [
                 app(Numeric::class),
                 'nullable',
