@@ -6,9 +6,9 @@ use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Task\TaskState;
-use Spatie\ModelStates\Validation\ValidStateRule;
 
 class UpdateTaskRuleset extends FluxRuleset
 {

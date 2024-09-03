@@ -7,10 +7,10 @@ use FluxErp\Models\BankConnection;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Rules\Iban;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\PaymentRun\PaymentRunState;
 use Illuminate\Validation\Rule;
-use Spatie\ModelStates\Validation\ValidStateRule;
 
 class CreatePaymentRunRuleset extends FluxRuleset
 {

@@ -8,9 +8,9 @@ use FluxErp\Models\Order;
 use FluxErp\Models\Project;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Project\ProjectState;
-use Spatie\ModelStates\Validation\ValidStateRule;
 
 class CreateProjectRuleset extends FluxRuleset
 {

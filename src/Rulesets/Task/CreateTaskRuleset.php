@@ -8,9 +8,9 @@ use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
+use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Task\TaskState;
-use Spatie\ModelStates\Validation\ValidStateRule;
 
 class CreateTaskRuleset extends FluxRuleset
 {
