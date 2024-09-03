@@ -1,7 +1,7 @@
 <div
     x-data="{
         ...folderTree(),
-        ...filePond($wire,$refs.upload,'{{Auth::user()->language?->language_code}}'),
+        ...filePond($wire,$refs.upload,'{{Auth::user()?->language?->language_code}}'),
         async loadLevels() {
             this.levels = await $wire.getTree();
         },
