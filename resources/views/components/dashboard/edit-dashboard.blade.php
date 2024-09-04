@@ -39,7 +39,7 @@
             <x-button
                 negative
                 wire:flux-confirm.icon.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
-                wire:click="cancelWidgets().then(() => {reInit().disable(); isLoading = false; editGridMode(false);})"
+                wire:click="resetWidgets().then(() => {reInit().disable(); isLoading = false; editGridMode(false);})"
                 class="flex-shrink-0"
                 :label="__('Cancel')"
             />

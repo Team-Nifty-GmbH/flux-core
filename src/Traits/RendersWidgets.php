@@ -72,7 +72,7 @@ trait RendersWidgets
         $this->widgets();
     }
 
-    public function cancelWidgets(): void
+    public function resetWidgets(): void
     {
         $this->widgets();
     }
