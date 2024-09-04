@@ -12,13 +12,13 @@ use FluxErp\Models\User;
 use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
+use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\Address\PostalAddressRuleset;
 use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\PaymentState\PaymentState;
 use Illuminate\Support\Arr;
-use Spatie\ModelStates\Validation\ValidStateRule;
 
 class CreateOrderRuleset extends FluxRuleset
 {

@@ -67,7 +67,7 @@ class Contact extends Component
     #[Renderless]
     public function contactDeleted(): void
     {
-        $this->redirectRoute('contacts', navigate: true);
+        $this->redirectRoute('contacts.contacts', navigate: true);
     }
 
     public function render(): View|Factory|Application
@@ -122,7 +122,7 @@ class Contact extends Component
             return;
         }
 
-        $this->redirectRoute('contacts', navigate: true);
+        $this->redirectRoute('contacts.contacts', navigate: true);
     }
 
     #[Renderless]

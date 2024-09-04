@@ -149,8 +149,9 @@ class MenuManager
                     return false;
                 }
 
+                $permission = data_get($value, 'permission');
                 // first check if a permission exists
-                if ($permission = data_get($value, 'permission') && ! $ignorePermissions) {
+                if ($permission && ! $ignorePermissions) {
                     try {
                         resolve_static(
                             Permission::class,
@@ -170,6 +171,12 @@ class MenuManager
 
                 return true;
             }
+        );
+
+        // filter out the group if it doesnt have children
+        $menuItems = array_filter(
+            $menuItems,
+            fn ($value) => count(data_get($value, 'children', [])) > 0 || data_get($value, 'uri'),
         );
 
         return $group ? data_get($menuItems, $group, []) : $menuItems;

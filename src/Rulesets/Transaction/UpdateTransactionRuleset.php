@@ -37,8 +37,8 @@ class UpdateTransactionRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Order::class]),
             ],
-            'value_date' => 'sometimes|required|date_format:Y-m-d',
-            'booking_date' => 'sometimes|required|date_format:Y-m-d',
+            'value_date' => 'sometimes|required|date',
+            'booking_date' => 'sometimes|required|date',
             'amount' => [
                 'sometimes',
                 'required',

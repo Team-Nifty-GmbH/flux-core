@@ -48,6 +48,8 @@ class Project extends Model implements InteractsWithDataTables
     protected function casts(): array
     {
         return [
+            'start_date' => 'date:Y-m-d',
+            'end_date' => 'date:Y-m-d',
             'state' => ProjectState::class,
             'time_budget' => TimeDuration::class,
         ];

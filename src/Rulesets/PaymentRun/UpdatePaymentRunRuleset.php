@@ -5,9 +5,9 @@ namespace FluxErp\Rulesets\PaymentRun;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\PaymentRun\PaymentRunState;
-use Spatie\ModelStates\Validation\ValidStateRule;
 
 class UpdatePaymentRunRuleset extends FluxRuleset
 {

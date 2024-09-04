@@ -8,9 +8,9 @@ use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
+use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Task\TaskState;
-use Spatie\ModelStates\Validation\ValidStateRule;
 
 class CreateTaskRuleset extends FluxRuleset
 {
@@ -44,8 +44,8 @@ class CreateTaskRuleset extends FluxRuleset
             ],
             'name' => 'required|string',
             'description' => 'string|nullable',
-            'start_date' => 'date_format:Y-m-d|nullable',
-            'due_date' => 'date_format:Y-m-d|nullable|after_or_equal:start_date',
+            'start_date' => 'date|nullable',
+            'due_date' => 'date|nullable|after_or_equal:start_date',
             'priority' => 'integer|nullable|min:0',
             'state' => [
                 'string',

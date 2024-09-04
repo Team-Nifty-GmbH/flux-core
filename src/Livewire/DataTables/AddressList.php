@@ -60,7 +60,8 @@ class AddressList extends BaseDataTable
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->with('contact.media');
+        // add contact_id to the select statement to ensure that the contact route is available
+        return $builder->addSelect('contact_id')->with('contact.media');
     }
 
     protected function getReturnKeys(): array

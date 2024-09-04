@@ -6,9 +6,9 @@ use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Task\TaskState;
-use Spatie\ModelStates\Validation\ValidStateRule;
 
 class UpdateTaskRuleset extends FluxRuleset
 {
@@ -34,8 +34,8 @@ class UpdateTaskRuleset extends FluxRuleset
             ],
             'name' => 'sometimes|required|string',
             'description' => 'string|nullable',
-            'start_date' => 'present|date_format:Y-m-d|nullable',
-            'due_date' => 'present|date_format:Y-m-d|nullable|after_or_equal:start_date',
+            'start_date' => 'present|date|nullable',
+            'due_date' => 'present|date|nullable|after_or_equal:start_date',
             'priority' => 'integer|nullable|min:0',
             'state' => [
                 'string',

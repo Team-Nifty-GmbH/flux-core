@@ -127,7 +127,7 @@ class DashboardTest extends BaseSetup
         unset($widgets[0]);
 
         $livewire->set('widgets', $widgets)
-            ->call('saveDashboard', $widgets)
+            ->call('saveWidgets', $widgets)
             ->assertOk()
             ->call('$refresh')
             ->assertOk()
@@ -145,7 +145,7 @@ class DashboardTest extends BaseSetup
         $widgets[0]['width'] = 3;
         $widgets[0]['height'] = 3;
 
-        $livewire->call('saveDashboard', $widgets)
+        $livewire->call('saveWidgets', $widgets)
             ->assertOk()
             ->assertSet('widgets.0.name', 'New Name')
             ->assertSet('widgets.0.width', 3)
