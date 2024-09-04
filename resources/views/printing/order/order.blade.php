@@ -66,9 +66,11 @@
                     </tr>
                 @show
                 </thead>
-                @foreach ($model->orderPositions as $position)
-                    <x-flux::print.order.order-position :position="$position" :is-net="$isNet" :currency="$currency" :formatter="$formatter" />
-                @endforeach
+                @section('positions.positions')
+                    @foreach ($model->orderPositions as $position)
+                        <x-flux::print.order.order-position :position="$position" :is-net="$isNet" :currency="$currency" :formatter="$formatter" />
+                    @endforeach
+                @show
             </table>
         @show
     </div>
@@ -108,39 +110,45 @@
                     {{ __('Total') }}
                 </td>
             </tr>
-            <tr>
-                <td class="text-right">
-                    {{ __('Sum net') }}
-                </td>
-                <td class="text-right w-0 whitespace-nowrap pl-12">
-                    {{ $formatter->formatCurrency($model->total_net_price, $currency) }}
-                </td>
-            </tr>
-            @foreach($model->total_vats ?? [] as $vat)
+            @section('total.net')
                 <tr>
                     <td class="text-right">
-                        {{ __(
-                                'Plus :percentage VAT from :total_net',
-                                [
-                                    'percentage' => format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT),
-                                    'total_net' => $formatter->formatCurrency($vat['total_net_price'], $currency)
-                                ]
-                            )
-                        }}
+                        {{ __('Sum net') }}
                     </td>
                     <td class="text-right w-0 whitespace-nowrap pl-12">
-                        {{ $formatter->formatCurrency($vat['total_vat_price'], $currency) }}
+                        {{ $formatter->formatCurrency($model->total_net_price, $currency) }}
                     </td>
                 </tr>
-            @endforeach
-            <tr class="font-bold">
-                <td class="text-right">
-                    {{ __('Total Gross') }}
-                </td>
-                <td class="text-right w-0 whitespace-nowrap pl-12">
-                    {{ $formatter->formatCurrency($model->total_gross_price, $currency) }}
-                </td>
-            </tr>
+            @show
+            @section('total.vats')
+                @foreach($model->total_vats ?? [] as $vat)
+                    <tr>
+                        <td class="text-right">
+                            {{ __(
+                                    'Plus :percentage VAT from :total_net',
+                                    [
+                                        'percentage' => format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT),
+                                        'total_net' => $formatter->formatCurrency($vat['total_net_price'], $currency)
+                                    ]
+                                )
+                            }}
+                        </td>
+                        <td class="text-right w-0 whitespace-nowrap pl-12">
+                            {{ $formatter->formatCurrency($vat['total_vat_price'], $currency) }}
+                        </td>
+                    </tr>
+                @endforeach
+            @show
+            @section('total.gross')
+                <tr class="font-bold">
+                    <td class="text-right">
+                        {{ __('Total Gross') }}
+                    </td>
+                    <td class="text-right w-0 whitespace-nowrap pl-12">
+                        {{ $formatter->formatCurrency($model->total_gross_price, $currency) }}
+                    </td>
+                </tr>
+            @show
             </tbody>
         </table>
     @show
