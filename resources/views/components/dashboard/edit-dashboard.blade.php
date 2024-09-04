@@ -3,14 +3,8 @@
     <div x-cloak x-show="!editGrid" class="flex flex-col md:flex-row gap-1.5 items-center text-sm">
         <x-select
             class="p-2"
-            :options="array_map(function (TimeFrameEnum $timeFrame) {
-                    return [
-                        'value' => $timeFrame->value,
-                        'label' => __($timeFrame->value),
-                    ];
-                }, TimeFrameEnum::cases())"
-            option-value="value"
-            option-label="label"
+            :options="TimeFrameEnum::valuesLocalized()"
+            option-key-value
             wire:model.live="params.timeFrame"
             :clearable="false"
         />
@@ -45,7 +39,7 @@
             <x-button
                 negative
                 wire:flux-confirm.icon.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
-                wire:click="cancelDashboard().then(() => {reInit().disable(); isLoading = false; editGridMode(false);})"
+                wire:click="cancelWidgets().then(() => {reInit().disable(); isLoading = false; editGridMode(false);})"
                 class="flex-shrink-0"
                 :label="__('Cancel')"
             />

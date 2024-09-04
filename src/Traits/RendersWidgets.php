@@ -56,7 +56,7 @@ trait RendersWidgets
     }
 
     #[Renderless]
-    public function saveDashboard(array $widgets): void
+    public function saveWidgets(array $widgets): void
     {
         $this->widgets = $widgets;
 
@@ -72,7 +72,7 @@ trait RendersWidgets
         $this->widgets();
     }
 
-    public function cancelDashboard(): void
+    public function cancelWidgets(): void
     {
         $this->widgets();
     }

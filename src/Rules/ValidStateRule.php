@@ -10,7 +10,6 @@ class ValidStateRule extends \Spatie\ModelStates\Validation\ValidStateRule
 
     public function __construct(string $abstractStateClass)
     {
-        $baseStateClass = resolve_static($abstractStateClass, 'class');
-        parent::__construct($baseStateClass);
+        parent::__construct(resolve_static($abstractStateClass, 'class'));
     }
 }
