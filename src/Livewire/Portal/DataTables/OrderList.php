@@ -39,6 +39,8 @@ class OrderList extends BaseDataTable
                 'delivery_state',
                 'state',
                 'currency.iso',
+                'header',
+                'footer',
             ]
         );
 

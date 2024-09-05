@@ -174,12 +174,12 @@ class MenuManager
         );
 
         // filter out the group if it doesnt have children
-        $menuItems = array_filter(
+        $menuItems = $group ? data_get($menuItems, $group, []) : $menuItems;
+
+        return array_filter(
             $menuItems,
             fn ($value) => count(data_get($value, 'children', [])) > 0 || data_get($value, 'uri'),
         );
-
-        return $group ? data_get($menuItems, $group, []) : $menuItems;
     }
 
     public function get(string $name): ?string
