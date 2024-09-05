@@ -99,7 +99,7 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'nullable',
             ],
             'discount_percentage' => [
-                app(Numeric::class, ['min' => 0, 'max' => 1]),
+                app(Numeric::class, ['min' => 0, 'max' => 100]),
                 'nullable',
             ],
             'margin' => 'exclude_if:is_free_text,true|sometimes|numeric|nullable',

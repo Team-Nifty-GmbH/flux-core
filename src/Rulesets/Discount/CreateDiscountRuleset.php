@@ -28,7 +28,7 @@ class CreateDiscountRuleset extends FluxRuleset
             'discount' => 'required|numeric',
             'from' => 'nullable|date_format:Y-m-d H:i:s',
             'till' => 'nullable|date_format:Y-m-d H:i:s',
-            'sort_number' => 'integer|min:0',
+            'sort_number' => 'nullable|integer|min:0',
             'is_percentage' => 'required|boolean',
         ];
     }

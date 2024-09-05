@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\PriceList\CreatePriceList;
 use FluxErp\Actions\PriceList\DeletePriceList;
 use FluxErp\Actions\PriceList\UpdatePriceList;
@@ -50,25 +49,10 @@ class PriceListForm extends FluxForm
         ];
     }
 
-    protected function makeAction(string $name, ?array $data = null): FluxAction
-    {
-        $data = $data ?? $this->toArray();
-
-        if (data_get($data, 'discount.is_percentage')) {
-            data_set($data, 'discount.discount', data_get($data, 'discount.discount') / 100);
-        }
-
-        return parent::makeAction($name, $data);
-    }
-
     public function fill($values): void
     {
         if ($values instanceof PriceList) {
             $values->loadMissing(['discount:id,model_type,model_id,discount,is_percentage']);
-        }
-
-        if (data_get($values, 'discount.is_percentage')) {
-            data_set($values, 'discount.discount', data_get($values, 'discount.discount') * 100);
         }
 
         parent::fill($values);

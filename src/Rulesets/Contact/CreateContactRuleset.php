@@ -12,6 +12,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateContactRuleset extends FluxRuleset
@@ -80,8 +81,16 @@ class CreateContactRuleset extends FluxRuleset
             'payment_reminder_days_2' => 'sometimes|integer|min:1|nullable',
             'payment_reminder_days_3' => 'sometimes|integer|min:1|nullable',
             'discount_days' => 'sometimes|integer|min:1|nullable',
-            'discount_percent' => 'sometimes|numeric|min:0|max:100|nullable',
-            'credit_line' => 'sometimes|numeric|min:0|nullable',
+            'discount_percent' => [
+                'sometimes',
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 100]),
+            ],
+            'credit_line' => [
+                'sometimes',
+                'nullable',
+                app(Numeric::class, ['min' => 0]),
+            ],
             'vat_id' => 'sometimes|string|nullable',
             'vendor_customer_number' => 'sometimes|string|nullable',
             'has_sensitive_reminder' => 'sometimes|boolean',

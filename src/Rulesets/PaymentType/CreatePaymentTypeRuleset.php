@@ -30,7 +30,7 @@ class CreatePaymentTypeRuleset extends FluxRuleset
             'payment_discount_target' => 'integer|nullable|lte:payment_target',
             'payment_discount_percentage' => [
                 'nullable',
-                app(Numeric::class, ['min' => 0, 'max' => 1]),
+                app(Numeric::class, ['min' => 0, 'max' => 100]),
             ],
             'payment_reminder_text' => 'string|nullable',
             'payment_reminder_email_text' => 'string|nullable',

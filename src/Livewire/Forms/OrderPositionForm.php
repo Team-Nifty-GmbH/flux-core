@@ -145,7 +145,9 @@ class OrderPositionForm extends Form
     {
         PriceCalculation::fill($this, [
             'vat_rate_percentage' => $this->vat_rate_percentage,
-            'discount_percentage' => $this->discount_percentage,
+            'discount_percentage' => ! is_null($this->discount_percentage)
+                ? bcdiv($this->discount_percentage, 100)
+                : null,
         ]);
     }
 }

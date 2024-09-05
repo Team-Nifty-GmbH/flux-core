@@ -217,7 +217,7 @@ class FillOrderPositions extends FluxAction
                     app(Numeric::class),
                 ],
                 'discount_percentage' => [
-                    app(Numeric::class, ['min' => 0, 'max' => 1]),
+                    app(Numeric::class, ['min' => 0, 'max' => 100]),
                     'nullable',
                 ],
                 'margin' => [
@@ -235,7 +235,7 @@ class FillOrderPositions extends FluxAction
                 ],
                 'vat_rate_percentage' => [
                     'required_with:' . implode(',', array_diff($priceFields, ['vat_rate_percentage'])),
-                    app(Numeric::class, ['min' => 0, 'max' => 1]),
+                    app(Numeric::class, ['min' => 0, 'max' => 100]),
                 ],
             ]);
 

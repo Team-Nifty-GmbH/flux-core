@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Contact\CreateContact;
 use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Actions\Contact\UpdateContact;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use Livewire\Attributes\Locked;
@@ -79,6 +80,17 @@ class ContactForm extends FluxForm
             : null;
     }
 
+    protected function makeAction(string $name, ?array $data = null): FluxAction
+    {
+        $data = $data ?? $this->toArray();
+
+        if (! is_null(data_get($data, 'discount_percent'))) {
+            data_set($data, 'discount_percent', bcdiv(data_get($data, 'discount_percent'), 100));
+        }
+
+        return parent::makeAction($name, $data);
+    }
+
     public function fill($values): void
     {
         if ($values instanceof Contact) {
@@ -86,6 +98,10 @@ class ContactForm extends FluxForm
 
             $values = $values->toArray();
             $values['categories'] = array_column($values['categories'] ?? [], 'id');
+        }
+
+        if (! is_null(data_get($values, 'discount_percent'))) {
+            data_set($values, 'discount_percent', bcmul(data_get($values, 'discount_percent'), 100));
         }
 
         parent::fill($values);

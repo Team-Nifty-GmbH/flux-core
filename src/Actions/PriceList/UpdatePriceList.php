@@ -46,7 +46,9 @@ class UpdatePriceList extends FluxAction
                         'model_id' => $priceList->id,
                     ]
                 )
-            )->execute();
+            )
+                ->validate()
+                ->execute();
         } elseif ($hasDiscount && $priceList->discount) {
             // Update existing discount
             UpdateDiscount::make(
@@ -54,10 +56,14 @@ class UpdatePriceList extends FluxAction
                     $priceList->discount->toArray(),
                     $this->data['discount']
                 )
-            );
+            )
+                ->validate()
+                ->execute();
         } elseif ($priceList->discount && ! $hasDiscount) {
             // Delete existing discount
-            DeleteDiscount::make(['id' => $priceList->discount->id])->execute();
+            DeleteDiscount::make(['id' => $priceList->discount->id])
+                ->validate()
+                ->execute();
         }
 
         return $priceList->withoutRelations()->fresh($hasDiscount ? ['discount'] : []);
@@ -95,13 +101,13 @@ class UpdatePriceList extends FluxAction
             ];
         }
 
-        // Check discount is max 1 if is_percentage = true
+        // Check discount is max 100 if is_percentage = true
         if (($this->data['discount'] ?? false)
             && $this->data['discount']['is_percentage']
-            && $this->data['discount']['discount'] > 1
+            && $this->data['discount']['discount'] > 100
         ) {
             $errors += [
-                'discount.discount' => [__('validation.max', ['attribute' => 'discount', 'max' => 1])],
+                'discount.discount' => [__('validation.max', ['attribute' => 'discount', 'max' => 100])],
             ];
         }
 

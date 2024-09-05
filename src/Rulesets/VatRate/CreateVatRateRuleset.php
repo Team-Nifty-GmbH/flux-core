@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\VatRate;
 
 use FluxErp\Models\VatRate;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
 class CreateVatRateRuleset extends FluxRuleset
@@ -14,7 +15,10 @@ class CreateVatRateRuleset extends FluxRuleset
         return [
             'uuid' => 'nullable|string|uuid|unique:vat_rates,uuid',
             'name' => 'required|string',
-            'rate_percentage' => 'required|numeric|lt:1|min:0',
+            'rate_percentage' => [
+                'required',
+                app(Numeric::class, ['min' => 0, 'max' => 100]),
+            ],
             'footer_text' => 'string|nullable',
         ];
     }

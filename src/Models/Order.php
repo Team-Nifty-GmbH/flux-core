@@ -162,6 +162,7 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             'state' => OrderState::class,
             'payment_state' => PaymentState::class,
             'delivery_state' => DeliveryState::class,
+            'payment_discount_percent' => Percentage::class,
             'shipping_costs_net_price' => Money::class,
             'shipping_costs_gross_price' => Money::class,
             'shipping_costs_vat_price' => Money::class,
