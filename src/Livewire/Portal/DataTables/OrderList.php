@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Portal\DataTables;
 
 use FluxErp\Livewire\DataTables\BaseDataTable;
 use FluxErp\Models\Order;
+use Laravel\Scout\Builder;
 
 class OrderList extends BaseDataTable
 {
@@ -39,6 +40,8 @@ class OrderList extends BaseDataTable
                 'delivery_state',
                 'state',
                 'currency.iso',
+                'header',
+                'footer',
             ]
         );
 
@@ -58,7 +61,7 @@ class OrderList extends BaseDataTable
         return $formatters;
     }
 
-    public function getScoutSearch(): \Laravel\Scout\Builder
+    public function getScoutSearch(): Builder
     {
         return app($this->model)->search($this->search)->where('contact_id', auth()->user()->contact_id);
     }
