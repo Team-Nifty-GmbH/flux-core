@@ -41,6 +41,8 @@ abstract class TestCase extends BaseTestCase
             $dotenv->load();
         }
 
+        parent::setUp();
+
         // copy a schema dump if it exists
         if (
             file_exists(__DIR__ . '/../database/schema/mysql-schema.sql')
@@ -48,8 +50,6 @@ abstract class TestCase extends BaseTestCase
         ) {
             copy(__DIR__ . '/../database/schema/mysql-schema.sql', database_path('schema/mysql-schema.sql'));
         }
-
-        parent::setUp();
 
         if (! file_exists(public_path('flux'))) {
             symlink(package_path('public'), public_path('flux'));
