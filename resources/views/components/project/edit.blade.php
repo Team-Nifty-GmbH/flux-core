@@ -58,7 +58,7 @@
                 wire:model="project.description"
                 :label="__('Description')"
             />
-            @section('connected')
+            @section('connections')
                 <div x-bind:class="! edit && 'pointer-events-none'">
                     <x-select
                         x-bind:readonly="!edit"
