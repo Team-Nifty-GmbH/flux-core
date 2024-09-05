@@ -43,14 +43,6 @@ abstract class TestCase extends BaseTestCase
 
         parent::setUp();
 
-        // copy a schema dump if it exists
-        if (
-            file_exists(__DIR__ . '/../database/schema/mysql-schema.sql')
-            && ! file_exists(database_path('schema/mysql-schema.sql'))
-        ) {
-            copy(__DIR__ . '/../database/schema/mysql-schema.sql', database_path('schema/mysql-schema.sql'));
-        }
-
         if (! file_exists(public_path('flux'))) {
             symlink(package_path('public'), public_path('flux'));
         }
