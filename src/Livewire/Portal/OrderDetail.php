@@ -8,6 +8,7 @@ use FluxErp\Models\TicketType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -211,6 +212,7 @@ class OrderDetail extends Component
         $this->detailModal = true;
     }
 
+    #[Renderless]
     public function downloadInvoice(): BinaryFileResponse
     {
         $order = resolve_static(Order::class, 'query')
@@ -229,6 +231,7 @@ class OrderDetail extends Component
         return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
 
+    #[Renderless]
     public function downloadMedia(int $id): BinaryFileResponse
     {
         $order = resolve_static(Order::class, 'query')
@@ -245,10 +248,10 @@ class OrderDetail extends Component
             ->event('downloaded')
             ->log($mediaItem->collection_name . ' ' . $mediaItem->name);
 
-        return response()->download($mediaItem->getPath(), $mediaItem->name);
+        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
 
-    private function renderTree(array|Collection $tree, int $level = 0, string $loopPrefix = '', $parent = null): void
+    protected function renderTree(array|Collection $tree, int $level = 0, string $loopPrefix = '', $parent = null): void
     {
         $loop = 1;
 

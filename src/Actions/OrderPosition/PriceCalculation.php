@@ -49,6 +49,12 @@ class PriceCalculation
                 ->whereKey($orderPosition->order_id)
                 ->first();
 
+        $orderPosition->vat_rate_percentage = data_get($data, 'vat_rate_percentage')
+            ?? resolve_static(VatRate::class, 'query')
+                ->whereKey($orderPosition->vat_rate_id)
+                ->value('rate_percentage')
+            ?? $product?->vatRate?->rate_percentage;
+
         if (is_null($price) && $product) {
             $priceHelper = PriceHelper::make($product);
 
@@ -67,8 +73,8 @@ class PriceCalculation
             $productPrice = $priceHelper->price();
 
             $price = $orderPosition->is_net
-                ? $productPrice?->getNet($product->vatRate->rate_percentage)
-                : $productPrice?->getGross($product->vatRate->rate_percentage);
+                ? $productPrice?->getNet($orderPosition->vat_rate_percentage)
+                : $productPrice?->getGross($orderPosition->vat_rate_percentage);
         }
 
         if (is_null($price)) {
@@ -78,12 +84,6 @@ class PriceCalculation
         $orderPosition->unit_price = $price;
 
         // Collect & set missing data
-        $orderPosition->vat_rate_percentage = ($data['vat_rate_percentage'] ?? false)
-            ?: resolve_static(VatRate::class, 'query')
-                ->whereKey($orderPosition->vat_rate_id)
-                ->first()
-                ?->rate_percentage;
-
         if ($product) {
             $orderPosition->product_prices = $product->prices()
                 ->get([
@@ -171,7 +171,7 @@ class PriceCalculation
         $orderPosition->total_net_price = bcmul($discountedNetPrice, $multiplier);
         $orderPosition->total_gross_price = bcmul($discountedGrossPrice, $multiplier);
 
-        if ($orderPosition->vat_rate_percentage) {
+        if (! is_null($orderPosition->vat_rate_percentage)) {
             $orderPosition->vat_price = bcsub($orderPosition->total_gross_price, $orderPosition->total_net_price);
         }
 
