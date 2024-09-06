@@ -86,14 +86,16 @@
         ]) }}
     </h1>
     <div class="flex justify-end pb-5 gap-1.5">
-        @if($order['invoice_number'])
-            <x-button primary :label="__('Download invoice')" wire:click="downloadInvoice()" spinner="downloadInvoice"/>
-        @endif
+        @section('actions')
+            @if($order['invoice_number'])
+                <x-button primary :label="__('Download invoice')" wire:click="downloadInvoice()" spinner="downloadInvoice"/>
+            @endif
 
-        @if($order['parent_id'])
-            <x-button primary :href="route('portal.orders.id', data_get($order, 'parent_id'))">{{ __('Show parent') }}</x-button>
-        @endif
-        <x-button primary :label="__('New Ticket')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal').querySelector('[wireui-modal]')).open();" spinner="downloadInvoice"/>
+            @if($order['parent_id'])
+                <x-button primary :href="route('portal.orders.id', data_get($order, 'parent_id'))">{{ __('Show parent') }}</x-button>
+            @endif
+            <x-button primary :label="__('New Ticket')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal').querySelector('[wireui-modal]')).open();" spinner="downloadInvoice"/>
+        @show
     </div>
     <div class="space-y-5">
         <div class="flex gap-8">
