@@ -51,8 +51,8 @@ class PriceCalculation
 
         $orderPosition->vat_rate_percentage = data_get($data, 'vat_rate_percentage')
             ?? resolve_static(VatRate::class, 'query')
-            ->whereKey($orderPosition->vat_rate_id)
-            ->value('rate_percentage')
+                ->whereKey($orderPosition->vat_rate_id)
+                ->value('rate_percentage')
             ?? $product->vatRate->rate_percentage;
 
         if (is_null($price) && $product) {
