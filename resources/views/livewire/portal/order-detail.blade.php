@@ -139,50 +139,56 @@
                 </x-card>
             @endif
         @show
-        <x-card>
-            <div class="grid grid-cols-1 lg:grid-cols-2">
-                <div class="grid grid-cols-2 gap-5">
-                    <div class="text-right">
-                        {{ __('Commission') }}:
+        @section('attributes')
+            <x-card>
+                <div class="grid grid-cols-1 lg:grid-cols-2">
+                    <div class="grid grid-cols-2 gap-5">
+                        @section('attributes.left')
+                            <div class="text-right">
+                                {{ __('Commission') }}:
+                            </div>
+                            <div>
+                                {{ data_get($order, 'commission') }}
+                            </div>
+                            <div class="text-right">
+                                {{ __('Customer no.') }}:
+                            </div>
+                            <div>
+                                {{ data_get($order, 'address_invoice.contact.customer_number') }}
+                            </div>
+                            <div class="text-right">
+                                {{ __('Logistics note') }}:
+                            </div>
+                            <div>
+                                {{ data_get($order, 'logistic_note') }}
+                            </div>
+                        @show
                     </div>
-                    <div>
-                        {{ data_get($order, 'commission') }}
-                    </div>
-                    <div class="text-right">
-                        {{ __('Customer no.') }}:
-                    </div>
-                    <div>
-                        {{ data_get($order, 'address_invoice.contact.customer_number') }}
-                    </div>
-                    <div class="text-right">
-                        {{ __('Logistics note') }}:
-                    </div>
-                    <div>
-                        {{ data_get($order, 'logistic_note') }}
+                    <div class="grid grid-cols-2 gap-5">
+                        @section('attributes.right')
+                            <div class="text-right">
+                                {{ __('Clerk') }}:
+                            </div>
+                            <div>
+                                {{ data_get($order, 'user_created.name') }}
+                            </div>
+                            <div class="text-right">
+                                {{ __('Responsible representative') }}:
+                            </div>
+                            <div>
+                                {{ data_get($order, 'agent.name') }}
+                            </div>
+                            <div class="text-right">
+                                {{ __('Performance/Delivery date') }}:
+                            </div>
+                            <div>
+                                {{ data_get($order, 'system_delivery_date') }}
+                            </div>
+                        @show
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-5">
-                    <div class="text-right">
-                        {{ __('Clerk') }}:
-                    </div>
-                    <div>
-                        {{ data_get($order, 'user_created.name') }}
-                    </div>
-                    <div class="text-right">
-                        {{ __('Responsible representative') }}:
-                    </div>
-                    <div>
-                        {{ data_get($order, 'agent.name') }}
-                    </div>
-                    <div class="text-right">
-                        {{ __('Performance/Delivery date') }}:
-                    </div>
-                    <div>
-                        {{ data_get($order, 'system_delivery_date') }}
-                    </div>
-                </div>
-            </div>
-        </x-card>
+            </x-card>
+        @show
         @if($order['header'])
             <x-card>
                 {!! $order['header'] !!}
