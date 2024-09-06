@@ -53,7 +53,8 @@ class PriceCalculation
             ?? resolve_static(VatRate::class, 'query')
                 ->whereKey($orderPosition->vat_rate_id)
                 ->value('rate_percentage')
-            ?? $product->vatRate->rate_percentage;
+            ?? $product->vatRate?->rate_percentage
+            ?? 0;
 
         if (is_null($price) && $product) {
             $priceHelper = PriceHelper::make($product);
