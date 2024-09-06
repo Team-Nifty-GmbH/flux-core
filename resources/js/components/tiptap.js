@@ -4,7 +4,7 @@ import Mention from '@tiptap/extension-mention';
 import axios from 'axios';
 import tippy from 'tippy.js';
 
-export default function (content, searchModel = ['user', 'role']) {
+export default function (content, debounceDelay = 0, searchModel = ['user', 'role']) {
     return (() => {
         let _editor;
         let suggestionPopup;
@@ -83,6 +83,7 @@ export default function (content, searchModel = ['user', 'role']) {
                             },
                         }),
                     ],
+                    timeout: null,
                     content: this.content,
                     editable: this.editable,
                     editorProps: {
@@ -91,7 +92,10 @@ export default function (content, searchModel = ['user', 'role']) {
                         },
                     },
                     onUpdate: ({ editor }) => {
-                        this.content = editor.getHTML();
+                        clearTimeout(this.timeout);
+                        this.timeout = setTimeout(() => {
+                            this.content = editor.getHTML();
+                        }, debounceDelay); // Delay Livewire updates by debounceDelay (300ms by default)
                     },
                 });
 
