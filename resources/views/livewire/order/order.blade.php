@@ -292,7 +292,7 @@
             @endif
         </div>
     </div>
-    <x-tabs wire:loading="tab" wire:model="tab" :$tabs class="w-full lg:col-start-1 xl:col-span-2 xl:flex gap-4">
+    <x-flux::tabs wire:loading="tab" wire:model="tab" :$tabs class="w-full lg:col-start-1 xl:col-span-2 xl:flex gap-4">
         <x-slot:prepend>
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 flex flex-col gap-4">
@@ -765,5 +765,5 @@
                 </div>
             </section>
         </x-slot:append>
-    </x-tabs>
+    </x-flux::tabs>
 </div>

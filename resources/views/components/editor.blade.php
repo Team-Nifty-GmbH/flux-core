@@ -14,8 +14,12 @@
         x-data="{
             ...setupEditor(
                 @if($attributes->wire('model')->value())
-                    $wire.entangle('{{ $attributes->wire('model')->value() }}')
-               @endif
+                    $wire.$entangle('{{ $attributes->wire('model')->value() }}', @js($attributes->wire('model')->hasModifier('live')))
+               @endif,
+                {{ $attributes->wire('model')->hasModifier('debounce')
+                    ? Str::before($attributes->wire('model')->modifiers()[$attributes->wire('model')->modifiers()->search('debounce') + 1], 'ms')
+                    : 0
+                }}
             ),
         }"
         x-init="() => init($refs.editor)"
