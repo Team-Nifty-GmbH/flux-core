@@ -6,6 +6,7 @@ use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Actions\OrderPosition\PriceCalculation;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Models\Product;
+use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
@@ -61,7 +62,7 @@ class OrderPositionForm extends Form
 
     public null|string|float $unit_gross_price = null;
 
-    public ?float $vat_rate_percentage = 0;
+    public ?float $vat_rate_percentage = null;
 
     public ?string $amount_packed_products = null;
 
@@ -143,6 +144,10 @@ class OrderPositionForm extends Form
 
     public function calculate(): void
     {
+        $this->vat_rate_percentage = resolve_static(VatRate::class, 'query')
+            ->whereKey($this->vat_rate_id)
+            ->value('rate_percentage');
+
         PriceCalculation::fill($this, [
             'vat_rate_percentage' => $this->vat_rate_percentage,
             'discount_percentage' => $this->discount_percentage,
