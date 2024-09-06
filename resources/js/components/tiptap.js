@@ -95,7 +95,7 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                         clearTimeout(this.timeout);
                         this.timeout = setTimeout(() => {
                             this.content = editor.getHTML();
-                        }, debounceDelay); // Delay Livewire updates by debounceDelay (300ms by default)
+                        }, debounceDelay);
                     },
                 });
 
