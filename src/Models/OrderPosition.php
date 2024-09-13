@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
@@ -76,7 +77,6 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
             'is_net' => 'boolean',
             'is_free_text' => 'boolean',
             'is_bundle_position' => 'boolean',
-            'is_positive_operator' => 'boolean',
         ];
     }
 
@@ -189,9 +189,9 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
         return $this->belongsTo(Product::class);
     }
 
-    public function serialNumbers(): HasMany
+    public function reservedStock(): BelongsToMany
     {
-        return $this->hasMany(SerialNumber::class);
+        return $this->belongsToMany(StockPosting::class, 'order_position_stock_posting')->withPivot('reserved_amount');
     }
 
     public function siblings(): HasMany
@@ -201,6 +201,11 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
             'origin_position_id',
             'origin_position_id'
         );
+    }
+
+    public function stockPostings(): HasMany
+    {
+        return $this->hasMany(StockPosting::class);
     }
 
     public function tasks(): HasMany

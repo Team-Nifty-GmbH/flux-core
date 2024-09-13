@@ -28,6 +28,8 @@ class OrderType extends Model
     {
         return [
             'print_layouts' => 'array',
+            'post_stock_print_layouts' => 'array',
+            'reserve_stock_print_layouts' => 'array',
             'order_type_enum' => OrderTypeEnum::class,
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',

@@ -24,4 +24,15 @@ class AddressCollection extends Collection
             ];
         });
     }
+
+    public function toSerialNumber(): Collection
+    {
+        return $this->transform(function (Address $address) {
+            return [
+                'id' => $address->id,
+                'name' => $address->name,
+                'quantity' => $address->pivot->quantity,
+            ];
+        });
+    }
 }

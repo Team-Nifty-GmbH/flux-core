@@ -1032,7 +1032,7 @@ class Order extends OrderPositionList
     {
         $to = [];
 
-        // add invoice address email if an invoice is being send
+        // add invoice address email if an invoice is being sent
         $to[] = in_array('invoice', $documents) && $item->contact->invoiceAddress
             ? $item->contact->invoiceAddress->email_primary
             : $item->contact->mainAddress->email_primary;

@@ -400,6 +400,13 @@ if (! function_exists('livewire_component_exists')) {
     }
 }
 
+if (! function_exists('bcabs')) {
+    function bcabs(string $number): string
+    {
+        return $number[0] === '-' ? substr($number, 1) : $number;
+    }
+}
+
 if (! function_exists('bcround')) {
     function bcround(string $number, int $precision = 0): string
     {

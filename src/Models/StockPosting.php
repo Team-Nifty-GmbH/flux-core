@@ -32,8 +32,17 @@ class StockPosting extends Model
                         ->first();
 
                     $stockPosting->stock = ($latestPosting->stock ?? 0) + $stockPosting->posting;
+
+                    if ($stockPosting->posting > 0) {
+                        $stockPosting->remaining_stock = $stockPosting->posting;
+                    }
                 });
         });
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(StockPosting::class, 'parent_id');
     }
 
     public function product(): BelongsTo

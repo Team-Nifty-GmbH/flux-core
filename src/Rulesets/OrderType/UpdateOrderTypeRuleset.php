@@ -29,6 +29,10 @@ class UpdateOrderTypeRuleset extends FluxRuleset
             'mail_body' => 'string|nullable',
             'print_layouts' => 'array|nullable',
             'print_layouts.*' => 'required|string',
+            'post_stock_print_layouts' => 'array|nullable',
+            'post_stock_print_layouts.*' => 'required|string',
+            'reserve_stock_print_layouts' => 'array|nullable',
+            'reserve_stock_print_layouts.*' => 'required|string',
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',
         ];

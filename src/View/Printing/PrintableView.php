@@ -212,7 +212,7 @@ abstract class PrintableView extends Component
 
     protected function getCollectionName(): string
     {
-        return strtolower(class_basename($this));
+        return Str::kebab(class_basename($this));
     }
 
     public function attachToModel(?Model $model = null): ?Media
