@@ -25,7 +25,6 @@ class PortalMiddleware
                 'scope' => 'portal',
                 'implementation' => function (Builder $query) {
                     $query
-                        ->whereNotNull('address_id')
                         ->where(function (Builder $query) {
                             $query->whereHas(
                                 'addresses',
