@@ -177,7 +177,7 @@
                         }
                     }
                 }">
-                    <template x-for="(position, index) in $wire.purchaseInvoiceForm.purchase_invoice_positions" :key="position.id">
+                    <template x-for="(position, index) in $wire.purchaseInvoiceForm.purchase_invoice_positions">
                         <x-card>
                             <div class="flex flex-col gap-4">
                                 <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
@@ -240,30 +240,30 @@
                                         x-model.number="position.total_price"
                                         :label="__('Total Price')"
                                     />
-                                    <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'" class="w-full">
-                                        <x-select
-                                            x-on:selected="position.ledger_account_id = $event.detail?.value"
-                                            x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                                            :label="__('Ledger Account')"
-                                            option-value="id"
-                                            option-label="name"
-                                            option-description="number"
-                                            x-init="$el.value = position.ledger_account_id; init();"
-                                            x-model.number="position.ledger_account_id"
-                                            :async-data="[
-                                                'api' => route('search', \FluxErp\Models\LedgerAccount::class),
-                                                'params' => [
-                                                    'where' => [
-                                                        [
-                                                            'ledger_account_type_enum',
-                                                            '=',
-                                                            \FluxErp\Enums\LedgerAccountTypeEnum::Expense,
-                                                        ],
-                                                    ]
+                                </div>
+                                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'" class="w-full">
+                                    <x-select
+                                        x-on:selected="position.ledger_account_id = $event.detail?.value"
+                                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                                        :label="__('Ledger Account')"
+                                        option-value="id"
+                                        option-label="name"
+                                        option-description="number"
+                                        x-init="$el.value = position.ledger_account_id; init();"
+                                        x-model.number="position.ledger_account_id"
+                                        :async-data="[
+                                            'api' => route('search', \FluxErp\Models\LedgerAccount::class),
+                                            'params' => [
+                                                'where' => [
+                                                    [
+                                                        'ledger_account_type_enum',
+                                                        '=',
+                                                        \FluxErp\Enums\LedgerAccountTypeEnum::Expense,
+                                                    ],
                                                 ]
-                                            ]"
-                                        />
-                                    </div>
+                                            ]
+                                        ]"
+                                    />
                                 </div>
                             </div>
                             <x-slot:footer>

@@ -151,7 +151,7 @@ class PurchaseInvoiceList extends BaseDataTable
             $this->purchaseInvoiceForm->fill($purchaseInvoice);
             $this->purchaseInvoiceForm->mediaUrl = $purchaseInvoice->getFirstMediaUrl('purchase_invoice')
                 ?: $purchaseInvoice->invoice->getUrl();
-            $this->purchaseInvoiceForm->findLastLedgerAccountId();
+            $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
         }
 
         $this->js(<<<'JS'
@@ -210,6 +210,7 @@ class PurchaseInvoiceList extends BaseDataTable
     {
         $this->purchaseInvoiceForm->payment_type_id ??= $contact->purchase_payment_type_id ?? $contact->payment_type_id;
         $this->purchaseInvoiceForm->currency_id = $contact->currency_id ?? Currency::default()?->id;
-        $this->purchaseInvoiceForm->findLastLedgerAccountId();
+        $this->purchaseInvoiceForm->client_id = $contact->client_id;
+        $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
     }
 }

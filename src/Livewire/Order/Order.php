@@ -361,6 +361,25 @@ class Order extends OrderPositionList
         $this->forceRender();
     }
 
+    public function updatedOrderIsConfirmed(): void
+    {
+        $this->skipRender();
+
+        try {
+            UpdateOrder::make([
+                'id' => $this->order->id,
+                'is_confirmed' => $this->order->is_confirmed,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        $this->notification()->success(__('Order saved successfully!'));
+    }
+
     public function updatedOrderAddressInvoiceId(): void
     {
         $this->order->address_invoice = resolve_static(Address::class, 'query')
