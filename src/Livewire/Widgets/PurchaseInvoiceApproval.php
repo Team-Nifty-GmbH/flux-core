@@ -14,8 +14,6 @@ class PurchaseInvoiceApproval extends Component
 
     public function render(): View|Factory
     {
-        $endStates = TaskState::all()->filter(fn ($state) => $state::$isEndState)->keys()->toArray();
-
         return view(
             'flux::livewire.widgets.purchase-invoice-approval',
             [
@@ -28,7 +26,7 @@ class PurchaseInvoiceApproval extends Component
                         'currency:id,symbol',
                     ])
                     ->orderBy('created_at', 'desc')
-                    ->get(),
+                    ->get(['id', 'contact_id', 'currency_id', 'total_gross_price', 'created_at']),
             ]
         );
     }

@@ -9,7 +9,7 @@
                     <x-avatar :src="$invoice->contact->getAvatarUrl()" />
                 </x-slot:avatar>
                 <x-slot:value>
-                    <span x-html="window.formatters.coloredMoney({{ $invoice->total_net_price }}, '{{ $invoice->currency->symbol }}')"></span>
+                    <span x-html="window.formatters.coloredMoney({{ $invoice->total_gross_price }}, '{{ $invoice->currency->symbol }}')"></span>
                 </x-slot:value>
                 <x-slot:sub-value>
                     <div class="flex gap-1.5">
