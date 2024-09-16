@@ -55,6 +55,24 @@
                     ]
                 ]"
             />
+            <x-select
+                x-bind:disabled="! $wire.$parent.$parent.edit"
+                :label="__('Approval User')"
+                wire:model="contact.approval_user_id"
+                option-value="id"
+                option-label="label"
+                :clearable="false"
+                :template="[
+                    'name'   => 'user-option',
+                ]"
+                :async-data="[
+                    'api' => route('search', \FluxErp\Models\User::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'with' => 'media',
+                    ]
+                ]"
+            />
         </div>
     </x-card>
     <x-card>

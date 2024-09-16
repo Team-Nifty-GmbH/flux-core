@@ -3,7 +3,7 @@
         <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">{{ __('My Responsible Tasks') }}</h2>
     </div>
     <div class="flex-1 overflow-auto" x-data="{formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes'))}">
-        @foreach($tasks as $task)
+        @forelse($tasks as $task)
             <x-list-item :item="$task">
                 <x-slot:avatar>
                     {!! $task->state->badge() !!}
@@ -46,6 +46,10 @@
                     </x-button>
                 </x-slot:actions>
             </x-list-item>
-        @endforeach
+        @empty
+            <div class="p-4 text-center text-gray-500 dark:text-gray-400">
+                {{ __('No tasks found') }}
+            </div>
+        @endforelse
     </div>
 </div>

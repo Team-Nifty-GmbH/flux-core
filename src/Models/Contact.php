@@ -86,6 +86,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
         return $this->belongsTo(User::class, 'agent_id');
     }
 
+    public function approvalUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approval_user_id');
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);

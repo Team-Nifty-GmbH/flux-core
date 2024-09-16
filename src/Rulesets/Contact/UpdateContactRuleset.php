@@ -26,6 +26,12 @@ class UpdateContactRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Contact::class]),
             ],
+            'approval_user_id' => [
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => User::class])
+                    ->where('is_active', true),
+            ],
             'client_id' => [
                 'integer',
                 app(ModelExists::class, ['model' => Client::class]),
@@ -33,7 +39,8 @@ class UpdateContactRuleset extends FluxRuleset
             'agent_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => User::class]),
+                app(ModelExists::class, ['model' => User::class])
+                    ->where('is_active', true),
             ],
             'contact_origin_id' => [
                 'integer',
