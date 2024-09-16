@@ -164,7 +164,7 @@ class SerialNumberTest extends BaseSetup
             ->whereKey($responseSerialNumber->id)
             ->first();
 
-        $this->assertEquals($serialNumber['serial_number_range_id'], $dbSerialNumber->serial_number_range_id);
+        $this->assertNull($dbSerialNumber->serial_number_range_id);
         $this->assertEquals($serialNumber['supplier_serial_number'], $dbSerialNumber->serial_number);
         $this->assertEquals($serialNumber['supplier_serial_number'], $dbSerialNumber->supplier_serial_number);
     }
