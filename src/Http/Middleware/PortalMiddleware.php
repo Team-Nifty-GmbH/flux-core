@@ -28,10 +28,7 @@ class PortalMiddleware
                         ->whereNotNull('address_id')
                         ->where(function (Builder $query) {
                             $query->whereHas(
-                                'address',
-                                fn (Builder $query) => $query->where('contact_id', auth()->user()?->contact_id)
-                            )->orWhereHas(
-                                'orderPosition.order',
+                                'addresses',
                                 fn (Builder $query) => $query->where('contact_id', auth()->user()?->contact_id)
                             );
                         });

@@ -155,11 +155,6 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
         return $this->hasMany(SepaMandate::class);
     }
 
-    public function serialNumbers(): HasManyThrough
-    {
-        return $this->hasManyThrough(SerialNumber::class, Address::class);
-    }
-
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);

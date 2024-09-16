@@ -18,9 +18,9 @@ class SerialNumberForm extends FluxForm
 
     public bool $use_supplier_serial_number = false;
 
-    public array $addresses = [];
+    public ?array $addresses = [];
 
-    public array $product = [];
+    public ?array $product = [];
 
     protected function getActions(): array
     {
