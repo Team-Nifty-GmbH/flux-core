@@ -84,7 +84,7 @@ class CreateProductRuleset extends FluxRuleset
             'is_bundle' => 'boolean',
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
-            'is_required_product_serial_number' => 'boolean',
+            'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',
         ];
