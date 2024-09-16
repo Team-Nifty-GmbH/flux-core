@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -26,7 +25,15 @@ class PurchaseInvoiceApproval extends Component
                         'currency:id,symbol',
                     ])
                     ->orderBy('created_at', 'desc')
-                    ->get(['id', 'contact_id', 'currency_id', 'total_gross_price', 'created_at']),
+                    ->get([
+                        'id',
+                        'contact_id',
+                        'currency_id',
+                        'invoice_date',
+                        'invoice_number',
+                        'total_gross_price',
+                        'created_at',
+                    ]),
             ]
         );
     }
