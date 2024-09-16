@@ -393,6 +393,7 @@ class FluxServiceProvider extends ServiceProvider
                     Livewire::component($alias, $class);
                 }
             } catch (\Throwable) {
+                Cache::forget('flux.view-classes.' . Str::slug($livewireNamespace));
             }
         }
     }

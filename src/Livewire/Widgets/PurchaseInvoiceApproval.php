@@ -30,9 +30,9 @@ class PurchaseInvoiceApproval extends Component
                         'id',
                         'contact_id',
                         'currency_id',
+                        'total_gross_price',
                         'invoice_date',
                         'invoice_number',
-                        'total_gross_price',
                         'created_at',
                     ]),
             ]
