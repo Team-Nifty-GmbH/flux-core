@@ -20,8 +20,9 @@ class PurchaseInvoiceApproval extends Component
                     ->where('approval_user_id', auth()->id())
                     ->where('is_confirmed', false)
                     ->with([
+                        'contact:id,invoice_address_id',
+                        'contact.invoiceAddress:id,contact_id,name',
                         'contact.media',
-                        'contact.invoiceAddress',
                         'currency:id,symbol',
                     ])
                     ->orderBy('created_at', 'desc')
