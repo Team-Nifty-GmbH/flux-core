@@ -5,6 +5,7 @@ namespace FluxErp\Support\Container;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
+use Livewire\Component;
 
 class ProductTypeManager
 {
@@ -20,9 +21,22 @@ class ProductTypeManager
     /**
      * @throws \Exception
      */
-    public function register(string $name, string $view, bool $default = false): void
+    public function register(string $name, ?string $class = null, ?string $view = null, bool $default = false): void
     {
-        if (! view()->exists($view)) {
+        if (! $class && ! $view) {
+            throw new InvalidArgumentException('Either a class or a view must be provided.');
+        }
+
+        if ($class
+            && (
+                ! is_a($class, Component::class, true)
+                || (new \ReflectionClass($class))->isAbstract()
+            )
+        ) {
+            throw new InvalidArgumentException('The provided class must be a non-abstract livewire component.');
+        }
+
+        if ($view && ! view()->exists($view)) {
             throw new InvalidArgumentException('The provided view does not exist.');
         }
 
@@ -34,7 +48,8 @@ class ProductTypeManager
 
         $this->productTypes[$name] = [
             'type' => $name,
-            'view' => $view,
+            'class' => $class ?: null,
+            'view' => $view ?: null,
             'is_default' => $default,
         ];
     }

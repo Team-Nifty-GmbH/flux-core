@@ -153,7 +153,7 @@ class FluxServiceProvider extends ServiceProvider
         Repeatable::autoDiscover();
 
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
-            ProductType::register('product', 'flux::livewire.product.product', true);
+            ProductType::register(name: 'product', class: \FluxErp\Livewire\Product\Product::class, default: true);
         }
     }
 
