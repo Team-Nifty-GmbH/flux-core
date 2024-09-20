@@ -218,6 +218,11 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
         return $this->belongsTo(VatRate::class);
     }
 
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
     public function workTime(): HasOne
     {
         return $this->hasOne(WorkTime::class);

@@ -92,7 +92,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                         __(
                             'Not enough stock available in warehouse :warehouse for product :product.',
                             [
-                                'warehouse' => $orderPosition->warehouse->name,
+                                'warehouse' => $orderPosition->warehouse?->name,
                                 'product' => $orderPosition->product->name,
                             ]
                         ),
