@@ -147,13 +147,13 @@ class FluxServiceProvider extends ServiceProvider
         Repeatable::autoDiscover(flux_path('src/Console/Commands'), 'FluxErp\Console\Commands');
         // Register repeatable jobs
         Repeatable::autoDiscover(flux_path('src/Jobs'), 'FluxErp\Jobs');
-        // Register repeatable invokable classes in "Repeatable" directory
-        Repeatable::autoDiscover(flux_path('src/Repeatable'), 'FluxErp\Repeatable');
+        // Register repeatable invokable classes from "Invokable" directory
+        Repeatable::autoDiscover(flux_path('src/Invokable'), 'FluxErp\Invokable');
         // Register repeatable artisan commands, jobs and invokable classes (in "Repeatable" directory) from app
         Repeatable::autoDiscover();
 
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
-            ProductType::register('product', 'flux::livewire.product.product', true);
+            ProductType::register(name: 'product', class: \FluxErp\Livewire\Product\Product::class, default: true);
         }
     }
 
@@ -386,10 +386,14 @@ class FluxServiceProvider extends ServiceProvider
         $livewireNamespace = 'FluxErp\\Livewire\\';
 
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
-            if (is_a($class, Component::class, true)
-                && ! (new \ReflectionClass($class))->isAbstract()
-            ) {
-                Livewire::component($alias, $class);
+            try {
+                if (is_a($class, Component::class, true)
+                    && ! (new \ReflectionClass($class))->isAbstract()
+                ) {
+                    Livewire::component($alias, $class);
+                }
+            } catch (\Throwable) {
+                Cache::forget('flux.view-classes.' . Str::slug($livewireNamespace));
             }
         }
     }
@@ -471,7 +475,17 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'orders.order-positions');
             }
         );
-        Menu::register(route: 'contacts', icon: 'identification');
+
+        Menu::group(
+            path: 'contacts',
+            icon: 'identification',
+            label: 'Contacts',
+            closure: function () {
+                Menu::register(route: 'contacts.contacts');
+                Menu::register(route: 'contacts.communications');
+            }
+        );
+
         Menu::register(route: 'tasks', icon: 'clipboard-document');
         Menu::register(route: 'tickets', icon: 'wrench-screwdriver');
         Menu::register(route: 'projects', icon: 'briefcase');
@@ -515,6 +529,7 @@ class FluxServiceProvider extends ServiceProvider
             closure: function () {
                 Menu::register(route: 'settings.additional-columns');
                 Menu::register(route: 'settings.address-types');
+                Menu::register(route: 'settings.contact-origins');
                 Menu::register(route: 'settings.categories');
                 Menu::register(route: 'settings.product-option-groups');
                 Menu::register(route: 'settings.product-properties');

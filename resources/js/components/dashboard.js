@@ -10,6 +10,7 @@ export default function ($wire) {
         isLoading: false,
         init() {
             this.reInit().disable();
+            this.availableWidgets = $wire.availableWidgets;
         },
         destroy() {
             // destroy grid - on page leave - since livewire caches the component
@@ -27,16 +28,8 @@ export default function ($wire) {
             }
             this.editGrid = mode;
         },
-        // cannot save if widgets-list is presented in the grid
-        get openGridItems() {
-            return $wire.widgets.filter((w) => w.component_name === 'widgets.widget-list').length === 0;
-        },
-        isWidgetList(id) {
-            const w = $wire.widgets.find((w) => w.id.toString() === id.toString());
-            return w?.component_name === 'widgets.widget-list';
-        },
         async syncGridOnNewItem() {
-            const snapshot = $wire.widgets;
+            const snapshot = Array.from($wire.widgets);
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             // update x,y coordinates and type of widget if selected
@@ -75,7 +68,7 @@ export default function ($wire) {
             await $wire.syncWidgets(newSnapshot);
         },
         async syncGridOnDelete() {
-            const snapshot = $wire.widgets;
+            const snapshot = Array.from($wire.widgets);
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             onScreen.forEach((item) => {
@@ -96,7 +89,7 @@ export default function ($wire) {
         },
         async save() {
             this.isLoading = true;
-            const snapshot = $wire.widgets;
+            const snapshot = Array.from($wire.widgets);
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             // update x,y coordinates on save
@@ -113,7 +106,7 @@ export default function ($wire) {
                 }
             });
             // sync and save to db
-            await $wire.saveDashboard(newSnapshot);
+            await $wire.saveWidgets(newSnapshot);
             // stop edit mode
             this.editGridMode(false);
             // refresh id
@@ -121,21 +114,22 @@ export default function ($wire) {
             // stop grid
             this.reInit().disable();
         },
-        async addPlaceHolder() {
+        async selectWidget(key) {
             this.isLoading = true;
             if (this.availableWidgets === null) {
                 this.availableWidgets = await $wire.availableWidgets;
             }
             const id = uuidv4();
+            const selectedWidget = this.availableWidgets[key];
+
             const placeholder = this.grid.addWidget({
                 id,
-                h: 1,
-                w: 2
+                h: selectedWidget.defaultHeight,
+                w: selectedWidget.defaultWidth,
             });
-            placeholder.gridstackNode.order_column =
-                placeholder.gridstackNode.x;
+            placeholder.gridstackNode.order_column = placeholder.gridstackNode.x;
             placeholder.gridstackNode.order_row = placeholder.gridstackNode.y;
-            placeholder.gridstackNode.component_name = 'widgets.widget-list';
+            placeholder.gridstackNode.component_name = key;
 
             // sync position of each grid element with the server
             await this.syncGridOnNewItem();
@@ -145,29 +139,6 @@ export default function ($wire) {
 
             // re-init grid-stack
             this.reInit();
-        },
-        async selectWidget(key, id) {
-            this.isLoading = true;
-            const el = this.grid
-                .getGridItems()
-                .find((item) =>
-                    item.gridstackNode.id.toString() === id.toString()
-                );
-            if (el !== undefined) {
-                const selectedWidget = this.availableWidgets[key];
-
-                el.gridstackNode.class = selectedWidget.class;
-                el.gridstackNode.component_name = selectedWidget.component_name;
-
-                // sync position of each grid element with the server
-                await this.syncGridOnNewItem();
-
-                // reload component
-                await $wire.$refresh();
-
-                // re-init grid-stack
-                this.reInit();
-            }
         },
         reInit() {
             // check if grid is loading

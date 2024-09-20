@@ -2,7 +2,11 @@
     {{-- Header --}}
     <x-slot:header>
         <x-mail::header :url="$client->website">
-            <img style="max-height: 100px; width: 100%;" alt="logo" src="{{ $client->getFirstMediaUrl('logo_small') }}" />
+            <img
+                style="max-height: 100px; max-width: 100px; width: auto; height: auto;"
+                alt="logo"
+                src="{{ $client->getFirstMediaUrl('logo_small') }}"
+            />
         </x-mail::header>
     </x-slot:header>
     {{-- Body --}}

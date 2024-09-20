@@ -14,6 +14,7 @@ use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Auth\Logout;
 use FluxErp\Livewire\Auth\ResetPassword;
 use FluxErp\Livewire\Calendars\Calendar;
+use FluxErp\Livewire\Contact\CommunicationList;
 use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
@@ -40,6 +41,7 @@ use FluxErp\Livewire\Settings\AddressTypes;
 use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\Clients;
+use FluxErp\Livewire\Settings\ContactOrigins;
 use FluxErp\Livewire\Settings\Countries;
 use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\CustomerPortal;
@@ -110,8 +112,13 @@ Route::middleware('web')
             Route::middleware(TrackVisits::class)->group(function () {
                 Route::get('/mail', Mail::class)->name('mail');
                 Route::get('/calendars', Calendar::class)->name('calendars');
-                Route::get('/contacts', AddressList::class)->name('contacts');
-                Route::get('/contacts/{id?}', Contact::class)->name('contacts.id?');
+
+                Route::name('contacts.')->prefix('contacts')
+                    ->group(function () {
+                        Route::get('/', AddressList::class)->name('contacts');
+                        Route::get('/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
+                        Route::get('/communications', CommunicationList::class)->name('communications');
+                    });
 
                 Route::name('orders.')->prefix('orders')
                     ->group(function () {
@@ -153,6 +160,7 @@ Route::middleware('web')
                     ->group(function () {
                         Route::get('/additional-columns', AdditionalColumns::class)->name('additional-columns');
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
+                        Route::get('/contact-origins', ContactOrigins::class)->name('contact-origins');
                         Route::get('/categories', Categories::class)->name('categories');
                         Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
                         Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');

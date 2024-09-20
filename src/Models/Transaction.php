@@ -59,10 +59,10 @@ class Transaction extends Model implements InteractsWithDataTables
     protected function casts(): array
     {
         return [
-            'value_date' => 'date',
-            'booking_date' => 'date',
+            'value_date' => 'date:Y-md',
+            'booking_date' => 'date:Y-md',
             'amount' => Money::class,
-            'created_at' => 'datetime',
+            'created_at' => 'datetime:Y-m-d H:i:s',
         ];
     }
 

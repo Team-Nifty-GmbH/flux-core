@@ -8,7 +8,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class AdditionalColumns extends AdditionalColumnList
 {
-    protected string $view = 'flux::livewire.settings.additional-columns';
+    protected ?string $includeBefore = 'flux::livewire.settings.additional-columns';
 
     public bool $showAdditionalColumnModal = false;
 

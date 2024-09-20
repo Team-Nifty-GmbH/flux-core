@@ -2,6 +2,7 @@
 
 namespace FluxErp\Database\Seeders;
 
+use FluxErp\Models\BankConnection;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
@@ -10,6 +11,8 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Transaction;
+use FluxErp\Models\User;
 use Illuminate\Database\Seeder;
 
 class OrderTableSeeder extends Seeder
@@ -20,6 +23,8 @@ class OrderTableSeeder extends Seeder
         $languages = Language::all(['id']);
         $currencies = Currency::all(['id']);
         $priceLists = PriceList::all(['id']);
+        $users = User::all(['id']);
+        $bankConnections = BankConnection::all(['id']);
 
         foreach ($clients as $client) {
             $contacts = Contact::query()
@@ -38,20 +43,19 @@ class OrderTableSeeder extends Seeder
             $orders = Order::query()
                 ->where('client_id', $client->id)
                 ->get(['id']);
+            $orderModel = new Order();
 
             for ($i = 0; $i < 10; $i++) {
                 $parentId = ! $orders ? $orders->random()->id : null;
                 $paymentType = $paymentTypes->random();
                 $orderType = $orderTypes->random();
                 $currency = $currencies->random();
-
                 $contact = $contacts->random();
-
-                $orderModel = new Order();
 
                 $order = Order::factory()->create([
                     'address_invoice_id' => $contact->addresses->random()->id,
                     'address_delivery_id' => $contact->addresses->random()->id,
+                    'agent_id' => faker()->boolean(40) ? $users->random()->id : null,
                     'parent_id' => rand(0, 1) ? null : $parentId,
                     'client_id' => $client->id,
                     'currency_id' => $currency->id,
@@ -67,11 +71,21 @@ class OrderTableSeeder extends Seeder
                 ]);
 
                 if ($order->is_locked) {
+                    Transaction::factory()->create([
+                        'bank_connection_id' => $bankConnections->random()->id,
+                        'currency_id' => $currency->id,
+                        'order_id' => $order->id,
+                        'amount' => faker()->boolean(80)
+                            ? $order->total_gross_price
+                            : $order->total_gross_price - rand(1, $order->total_gross_price),
+                    ]);
+
                     $order->setAttribute(
                         'invoice_date',
                         faker()->dateTimeBetween(now()->startOfYear(), now()->endOfYear())
                     )
                         ->getSerialNumber('invoice_number', $order->client_id)
+                        ->calculateBalance()
                         ->save();
                 }
             }

@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Product;
 use FluxErp\Actions\StockPosting\CreateStockPosting;
 use FluxErp\Livewire\DataTables\StockPostingList as BaseStockPostingList;
 use FluxErp\Livewire\Forms\StockPostingForm;
+use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Models\Warehouse;
@@ -13,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -84,6 +86,18 @@ class StockPostingList extends BaseStockPostingList
         return true;
     }
 
+    #[Renderless]
+    public function viewOrder(int $orderPositionId): void
+    {
+        $orderId = resolve_static(OrderPosition::class, 'query')
+            ->whereKey($orderPositionId)
+            ->value('order_id');
+
+        if ($orderId) {
+            $this->redirect(route('orders.id', $orderId));
+        }
+    }
+
     protected function getViewData(): array
     {
         $viewData = [
@@ -118,6 +132,20 @@ class StockPostingList extends BaseStockPostingList
         ];
     }
 
+    protected function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('View Order'))
+                ->color('primary')
+                ->icon('eye')
+                ->attributes([
+                    'x-show' => 'record.order_position_id',
+                    'x-on:click' => '$wire.viewOrder(record.order_position_id)',
+                ]),
+        ];
+    }
+
     protected function getComponentAttributes(): ComponentAttributeBag
     {
         return new ComponentAttributeBag([
@@ -133,5 +161,15 @@ class StockPostingList extends BaseStockPostingList
     {
         return $builder
             ->where('product_id', $this->productId);
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'order_position_id',
+            ]
+        );
     }
 }

@@ -8,6 +8,7 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
 use FluxErp\Rulesets\StockPosting\CreateStockPostingsFromOrderRuleset;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class CreateStockPostingsFromOrder extends FluxAction
@@ -38,8 +39,9 @@ class CreateStockPostingsFromOrder extends FluxAction
             ->first(['id', 'order_type_id', 'order_number']);
 
         $postStock = ! data_get($this->data, 'only_reserve_stock', false);
-
         $multiplier = $order->orderType->order_type_enum->multiplier();
+        $description = __(Str::headline($order->orderType->order_type_enum->value)) . ' ' . $order->order_number;
+
         foreach ($order->orderPositions as $orderPosition) {
             $posting = bcabs($orderPosition->stockPostings()->sum('posting'));
 
@@ -58,7 +60,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                     'order_position_id' => $orderPosition->id,
                     'purchase_price' => $orderPosition->unit_net_price,
                     'posting' => $open,
-                    'description' => $order->order_number,
+                    'description' => $description,
                 ])
                     ->checkPermission()
                     ->validate()
@@ -129,7 +131,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                         'serial_number_id' => $stockPosting->serial_number_id,
                         'posting' => bcmul($posting, -1),
                         'purchase_price' => $stockPosting->purchase_price,
-                        'description' => $order->order_number,
+                        'description' => $description,
                     ])
                         ->checkPermission()
                         ->validate()
@@ -152,7 +154,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                         'product_id' => $orderPosition->product_id,
                         'order_position_id' => $orderPosition->id,
                         'posting' => bcmul($open, -1),
-                        'description' => $order->order_number,
+                        'description' => $description,
                     ])
                         ->checkPermission()
                         ->validate()
@@ -192,7 +194,7 @@ class CreateStockPostingsFromOrder extends FluxAction
     protected function postReservedStock(
         OrderPosition $orderPosition,
         string|int|float $open,
-        ?string $orderNumber = null): void
+        ?string $description = null): void
     {
         // Used reserved stock for stock posting.
         foreach ($orderPosition->reservedStock as $stockPosting) {
@@ -232,7 +234,7 @@ class CreateStockPostingsFromOrder extends FluxAction
                 'serial_number_id' => $stockPosting->serial_number_id,
                 'posting' => bcmul($posting, -1),
                 'purchase_price' => $stockPosting->purchase_price,
-                'description' => $orderNumber,
+                'description' => $description,
             ])
                 ->checkPermission()
                 ->validate()

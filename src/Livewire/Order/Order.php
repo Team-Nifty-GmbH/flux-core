@@ -11,7 +11,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Htmlables\TabButton;
-use FluxErp\Jobs\ProcessSubscriptionOrderJob;
+use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Forms\OrderPositionForm;
@@ -361,6 +361,25 @@ class Order extends OrderPositionList
         $this->forceRender();
     }
 
+    public function updatedOrderIsConfirmed(): void
+    {
+        $this->skipRender();
+
+        try {
+            UpdateOrder::make([
+                'id' => $this->order->id,
+                'is_confirmed' => $this->order->is_confirmed,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        $this->notification()->success(__('Order saved successfully!'));
+    }
+
     public function updatedOrderAddressInvoiceId(): void
     {
         $this->order->address_invoice = resolve_static(Address::class, 'query')
@@ -407,6 +426,8 @@ class Order extends OrderPositionList
         $this->order->address_delivery = $this->order->address_delivery ?: [];
         try {
             $action = UpdateOrder::make($this->order->toArray())->checkPermission()->validate();
+
+            $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -526,9 +547,23 @@ class Order extends OrderPositionList
     }
 
     #[Renderless]
-    public function updatedOrderState(): void
+    public function saveStates(): void
     {
-        $this->getAvailableStates('state');
+        try {
+            UpdateOrder::make([
+                'id' => $this->order->id,
+                'state' => $this->order->state,
+                'payment_state' => $this->order->payment_state,
+                'delivery_state' => $this->order->delivery_state,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     #[Renderless]
@@ -732,8 +767,8 @@ class Order extends OrderPositionList
     public function fillSchedule(): void
     {
         $schedule = resolve_static(Schedule::class, 'query')
-            ->where('class', ProcessSubscriptionOrderJob::class)
-            ->whereJsonContains('parameters->order', $this->order->id)
+            ->where('class', ProcessSubscriptionOrder::class)
+            ->whereJsonContains('parameters->orderId', $this->order->id)
             ->first();
 
         if ($schedule) {
@@ -745,22 +780,21 @@ class Order extends OrderPositionList
                 ->order_type_enum === OrderTypeEnum::PurchaseSubscription ?
                 OrderTypeEnum::Purchase->value : OrderTypeEnum::Order->value;
 
-            $this->schedule->parameters['orderType'] = resolve_static(OrderType::class, 'query')
+            $this->schedule->parameters['orderTypeId'] = resolve_static(OrderType::class, 'query')
                 ->where('order_type_enum', $defaultOrderType)
                 ->where('is_active', true)
                 ->where('is_hidden', false)
-                ->first()
-                ?->id;
+                ->value('id');
         }
     }
 
     #[Renderless]
     public function saveSchedule(): bool
     {
-        $this->schedule->name = ProcessSubscriptionOrderJob::name();
+        $this->schedule->name = ProcessSubscriptionOrder::name();
         $this->schedule->parameters = [
-            'order' => $this->order->id,
-            'orderType' => $this->schedule->parameters['orderType'] ?? null,
+            'orderId' => $this->order->id,
+            'orderTypeId' => $this->schedule->parameters['orderTypeId'] ?? null,
         ];
 
         try {

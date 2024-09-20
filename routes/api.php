@@ -14,6 +14,7 @@ use FluxErp\Http\Controllers\CommentController;
 use FluxErp\Http\Controllers\ContactBankConnectionController;
 use FluxErp\Http\Controllers\ContactController;
 use FluxErp\Http\Controllers\ContactOptionController;
+use FluxErp\Http\Controllers\ContactOriginController;
 use FluxErp\Http\Controllers\CountryController;
 use FluxErp\Http\Controllers\CountryRegionController;
 use FluxErp\Http\Controllers\CurrencyController;
@@ -171,6 +172,13 @@ Route::prefix('api')
                 Route::post('/contact-options', [ContactOptionController::class, 'create']);
                 Route::put('/contact-options', [ContactOptionController::class, 'update']);
                 Route::delete('/contact-options', [ContactOptionController::class, 'delete']);
+
+                //ContactOrigins
+                Route::get('/contact-origins/{id}', [ContactOriginController::class, 'show']);
+                Route::get('/contact-origins', [ContactOriginController::class, 'index']);
+                Route::post('/contact-origins', [ContactOriginController::class, 'create']);
+                Route::put('/contact-origins', [ContactOriginController::class, 'update']);
+                Route::delete('/contact-origins/{id}', [ContactOriginController::class, 'delete']);
 
                 //Contacts
                 Route::get('/contacts/{id}', [ContactController::class, 'show']);

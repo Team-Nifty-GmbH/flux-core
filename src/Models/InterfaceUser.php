@@ -13,6 +13,10 @@ class InterfaceUser extends Authenticatable
 {
     use HasApiTokens, HasUserModification, SoftDeletes;
 
+    protected $guarded = [
+        'id',
+    ];
+
     protected $hidden = [
         'password',
     ];

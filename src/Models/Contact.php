@@ -44,6 +44,8 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
         'id',
     ];
 
+    protected string $detailRouteName = 'contacts.id?';
+
     public static string $iconName = 'users';
 
     protected static function booted(): void
@@ -84,6 +86,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
         return $this->belongsTo(User::class, 'agent_id');
     }
 
+    public function approvalUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approval_user_id');
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
@@ -92,6 +99,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
     public function contactBankConnections(): HasMany
     {
         return $this->hasMany(ContactBankConnection::class);
+    }
+
+    public function contactOrigin(): BelongsTo
+    {
+        return $this->belongsTo(ContactOrigin::class);
     }
 
     public function currency(): BelongsTo

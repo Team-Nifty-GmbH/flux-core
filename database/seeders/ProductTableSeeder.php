@@ -3,6 +3,8 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Models\Client;
+use FluxErp\Models\Price;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductProperty;
@@ -18,6 +20,9 @@ class ProductTableSeeder extends Seeder
         $vatRates = VatRate::all(['id']);
         $clients = Client::all(['id']);
         $products = Product::all(['id']);
+        $priceLists = PriceList::query()
+            ->whereNull('parent_id')
+            ->get(['id']);
 
         $createdProducts = collect();
         for ($i = 0; $i < 20; $i++) {
@@ -55,6 +60,13 @@ class ProductTableSeeder extends Seeder
                             ->mapWithKeys(fn ($item) => [$item['id'] => ['count' => rand(1, 100)]])
                             ->toArray()
                     );
+            }
+
+            foreach ($priceLists as $priceList) {
+                Price::factory()->create([
+                    'product_id' => $product->id,
+                    'price_list_id' => $priceList->id,
+                ]);
             }
         }
     }

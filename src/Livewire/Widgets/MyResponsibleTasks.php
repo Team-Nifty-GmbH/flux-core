@@ -35,4 +35,14 @@ class MyResponsibleTasks extends Component
     {
         return view('flux::livewire.placeholders.horizontal-bar');
     }
+
+    public static function getDefaultWidth(): int
+    {
+        return 2;
+    }
+
+    public static function getDefaultHeight(): int
+    {
+        return 2;
+    }
 }

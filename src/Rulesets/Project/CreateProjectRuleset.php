@@ -8,9 +8,9 @@ use FluxErp\Models\Order;
 use FluxErp\Models\Project;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Project\ProjectState;
-use Spatie\ModelStates\Validation\ValidStateRule;
 
 class CreateProjectRuleset extends FluxRuleset
 {
@@ -47,8 +47,8 @@ class CreateProjectRuleset extends FluxRuleset
             ],
             'project_number' => 'nullable|string',
             'name' => 'required|string',
-            'start_date' => 'date_format:Y-m-d|nullable',
-            'end_date' => 'date_format:Y-m-d|nullable',
+            'start_date' => 'date|nullable',
+            'end_date' => 'date|nullable',
             'description' => 'string|nullable',
             'state' => [
                 'string',

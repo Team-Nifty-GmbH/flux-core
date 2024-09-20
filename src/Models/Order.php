@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
@@ -331,6 +332,28 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
             'id',
             'id',
             'vat_rate_id'
+        );
+    }
+
+    public function scopeRevenue(Builder $query): Builder
+    {
+        return $query->whereHas(
+            'orderType',
+            fn (Builder $query) => $query->whereIn(
+                'order_type_enum',
+                array_filter(OrderTypeEnum::cases(), fn (OrderTypeEnum $enum) => ! $enum->isPurchase())
+            )
+        );
+    }
+
+    public function scopePurchase(Builder $query): Builder
+    {
+        return $query->whereHas(
+            'orderType',
+            fn (Builder $query) => $query->whereIn(
+                'order_type_enum',
+                array_filter(OrderTypeEnum::cases(), fn (OrderTypeEnum $enum) => $enum->isPurchase())
+            )
         );
     }
 

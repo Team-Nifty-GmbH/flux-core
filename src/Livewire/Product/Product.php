@@ -19,12 +19,15 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\Features\SupportPageComponents\PageComponentConfig;
+use Livewire\Features\SupportPageComponents\SupportPageComponents;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
 
@@ -52,6 +55,38 @@ class Product extends Component
     public string $tab = 'product.general';
 
     protected string $view = 'flux::livewire.product.product';
+
+    public function __invoke(): Response
+    {
+        $html = null;
+
+        $layoutConfig = SupportPageComponents::interceptTheRenderOfTheComponentAndRetreiveTheLayoutConfiguration(
+            function () use (&$html) {
+                $params = SupportPageComponents::gatherMountMethodParamsFromRouteParameters($this);
+
+                $productType = resolve_static(ProductModel::class, 'query')
+                    ->where($params)
+                    ->value('product_type');
+
+                $html = app('livewire')->mount(
+                    data_get(ProductType::get($productType) ?? ProductType::getDefault(), 'class') ?? static::class,
+                    $params
+                );
+            }
+        );
+
+        $layoutConfig = $layoutConfig ?: new PageComponentConfig();
+
+        $layoutConfig->normalizeViewNameAndParamsForBladeComponents();
+
+        $response = response(SupportPageComponents::renderContentsIntoLayout($html, $layoutConfig));
+
+        if (is_callable($layoutConfig->response)) {
+            call_user_func($layoutConfig->response, $response);
+        }
+
+        return $response;
+    }
 
     public function mount(int $id): void
     {
@@ -97,11 +132,7 @@ class Product extends Component
             ->whereKey($this->product->id)
             ->value('product_type');
 
-        return data_get(
-            ProductType::get($productType) ?? ProductType::getDefault(),
-            'view',
-            $this->view
-        );
+        return data_get(ProductType::get($productType) ?? ProductType::getDefault(), 'view') ?? $this->view;
     }
 
     #[Renderless]

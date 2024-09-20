@@ -10,7 +10,7 @@
                     option-label="name"
                     option-value="id"
                     :clearable="false"
-                    wire:model="schedule.parameters.orderType"
+                    wire:model="schedule.parameters.orderTypeId"
                 />
                 <x-select
                     :label="__('Repeat')"

@@ -7,6 +7,8 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\TicketType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -40,7 +42,7 @@ class OrderDetail extends Component
 
     public function mount(string $id): void
     {
-        $this->ticketTypes = app(TicketType::class)->all()
+        $this->ticketTypes = resolve_static(TicketType::class, 'query')
             ->pluck('name', 'id')
             ->toArray();
 
@@ -100,7 +102,7 @@ class OrderDetail extends Component
                 return $query->selectRaw('MAX(id)')
                     ->from('media')
                     ->where('model_id', $order->id)
-                    ->where('model_type', Order::class)
+                    ->where('model_type', morph_alias(Order::class))
                     ->where('disk', 'public')
                     ->groupBy('collection_name');
             })
@@ -176,7 +178,7 @@ class OrderDetail extends Component
         }
     }
 
-    public function render(): mixed
+    public function render(): View
     {
         return view('flux::livewire.portal.order-detail');
     }
@@ -210,6 +212,7 @@ class OrderDetail extends Component
         $this->detailModal = true;
     }
 
+    #[Renderless]
     public function downloadInvoice(): BinaryFileResponse
     {
         $order = resolve_static(Order::class, 'query')
@@ -228,6 +231,7 @@ class OrderDetail extends Component
         return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
 
+    #[Renderless]
     public function downloadMedia(int $id): BinaryFileResponse
     {
         $order = resolve_static(Order::class, 'query')
@@ -244,10 +248,10 @@ class OrderDetail extends Component
             ->event('downloaded')
             ->log($mediaItem->collection_name . ' ' . $mediaItem->name);
 
-        return response()->download($mediaItem->getPath(), $mediaItem->name);
+        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
 
-    private function renderTree(array|Collection $tree, int $level = 0, string $loopPrefix = '', $parent = null): void
+    protected function renderTree(array|Collection $tree, int $level = 0, string $loopPrefix = '', $parent = null): void
     {
         $loop = 1;
 

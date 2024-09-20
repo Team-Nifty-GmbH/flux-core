@@ -26,6 +26,6 @@
 @section('total')
     @parent
     <div>
-        {!! $model->paymentType->description !!}
+        {!! Blade::render(html_entity_decode($model->paymentType->description ?? ''), ['model' => $model]) !!}
     </div>
 @endsection
