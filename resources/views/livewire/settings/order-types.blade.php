@@ -6,26 +6,29 @@
                     <div class="space-y-3 sm:col-span-6">
                         <x-input wire:model="orderType.name" :label="__('Order Type Name')"/>
                         <x-textarea wire:model="orderType.description" :label="__('Description')"/>
-                        <x-select label="{{ __('Client') }}"
-                                  placeholder="{{ __('Select a Client') }}"
-                                  wire:model="orderType.client_id"
-                                  :options="$clients"
-                                  option-label="name"
-                                  option-value="id"
+                        <x-select
+                            label="{{ __('Client') }}"
+                            placeholder="{{ __('Select a Client') }}"
+                            wire:model="orderType.client_id"
+                            :options="$clients"
+                            option-label="name"
+                            option-value="id"
                         />
-                        <x-select label="{{ __('Order Type') }}"
-                                  :disabled="(bool) $orderType->id"
-                                  placeholder="{{ __('Select Order Type') }}"
-                                  wire:model="orderType.order_type_enum"
-                                  :options="$enum"
+                        <x-select
+                            label="{{ __('Order Type') }}"
+                            :disabled="(bool) $orderType->id"
+                            placeholder="{{ __('Select Order Type') }}"
+                            wire:model="orderType.order_type_enum"
+                            :options="$enum"
                         />
-                        <x-select label="{{ __('Print Layouts') }}"
-                                  placeholder="{{ __('Select a Print Layout') }}"
-                                  wire:model="orderType.print_layouts"
-                                  multiselect
-                                  option-label="label"
-                                  option-value="value"
-                                  :options="$printViews"
+                        <x-select
+                            label="{{ __('Print Layouts') }}"
+                            placeholder="{{ __('Select a Print Layout') }}"
+                            wire:model="orderType.print_layouts"
+                            multiselect
+                            option-label="label"
+                            option-value="value"
+                            :options="$printViews"
                         />
 
                         <x-checkbox wire:model="orderType.is_active" :label="__('Is Active')"/>
@@ -42,11 +45,9 @@
                     <x-button
                         flat
                         negative
-                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order Type')]) }}"
                         :label="__('Delete')"
-                        wire:click="delete().then((success) => {
-                                if (success) close();
-                            })"
+                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order Type')]) }}"
+                        wire:click="delete().then((success) => {if (success) close();})"
                     />
                 </div>
                 <div class="flex">
@@ -54,9 +55,7 @@
                     <x-button
                         primary
                         :label="__('Save')"
-                        wire:click="save().then((success) => {
-                                if (success) close();
-                            })"
+                        wire:click="save().then((success) => {if (success) close();})"
                     />
                 </div>
             </div>

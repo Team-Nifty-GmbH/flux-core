@@ -62,14 +62,14 @@
                 <x-select
                     :label="__('Weekday')"
                     :options="[
-                            ['id' => 1, 'name' => __('Mondays')],
-                            ['id' => 2, 'name' => __('Tuesdays')],
-                            ['id' => 3, 'name' => __('Wednesdays')],
-                            ['id' => 4, 'name' => __('Thursdays')],
-                            ['id' => 5, 'name' => __('Fridays')],
-                            ['id' => 6, 'name' => __('Saturdays')],
-                            ['id' => 0, 'name' => __('Sundays')],
-                        ]"
+                        ['id' => 1, 'name' => __('Mondays')],
+                        ['id' => 2, 'name' => __('Tuesdays')],
+                        ['id' => 3, 'name' => __('Wednesdays')],
+                        ['id' => 4, 'name' => __('Thursdays')],
+                        ['id' => 5, 'name' => __('Fridays')],
+                        ['id' => 6, 'name' => __('Saturdays')],
+                        ['id' => 0, 'name' => __('Sundays')],
+                    ]"
                     option-value="id"
                     option-label="name"
                     wire:model="schedule.cron.parameters.basic.0"
@@ -103,19 +103,19 @@
                 <x-select
                     :label="__('Month')"
                     :options="[
-                            ['id' => 1, 'name' => __('January'), 'days' => 31],
-                            ['id' => 2, 'name' => __('February'), 'days' => 28],
-                            ['id' => 3, 'name' => __('March'), 'days' => 31],
-                            ['id' => 4, 'name' => __('April'), 'days' => 30],
-                            ['id' => 5, 'name' => __('May'), 'days' => 31],
-                            ['id' => 6, 'name' => __('June'), 'days' => 30],
-                            ['id' => 7, 'name' => __('July'), 'days' => 31],
-                            ['id' => 8, 'name' => __('August'), 'days' => 31],
-                            ['id' => 9, 'name' => __('September'), 'days' => 30],
-                            ['id' => 10, 'name' => __('October'), 'days' => 31],
-                            ['id' => 11, 'name' => __('November'), 'days' => 30],
-                            ['id' => 12, 'name' => __('December'), 'days' => 31],
-                        ]"
+                        ['id' => 1, 'name' => __('January'), 'days' => 31],
+                        ['id' => 2, 'name' => __('February'), 'days' => 28],
+                        ['id' => 3, 'name' => __('March'), 'days' => 31],
+                        ['id' => 4, 'name' => __('April'), 'days' => 30],
+                        ['id' => 5, 'name' => __('May'), 'days' => 31],
+                        ['id' => 6, 'name' => __('June'), 'days' => 30],
+                        ['id' => 7, 'name' => __('July'), 'days' => 31],
+                        ['id' => 8, 'name' => __('August'), 'days' => 31],
+                        ['id' => 9, 'name' => __('September'), 'days' => 30],
+                        ['id' => 10, 'name' => __('October'), 'days' => 31],
+                        ['id' => 11, 'name' => __('November'), 'days' => 30],
+                        ['id' => 12, 'name' => __('December'), 'days' => 31],
+                    ]"
                     option-value="id"
                     option-label="name"
                     wire:model="schedule.cron.parameters.basic.0"
@@ -139,14 +139,14 @@
             <div x-cloak x-show="$wire.schedule.cron.methods.dayConstraint === 'days'">
                 <x-select
                     :options="[
-                            ['id' => 1, 'name' => __('Mondays')],
-                            ['id' => 2, 'name' => __('Tuesdays')],
-                            ['id' => 3, 'name' => __('Wednesdays')],
-                            ['id' => 4, 'name' => __('Thursdays')],
-                            ['id' => 5, 'name' => __('Fridays')],
-                            ['id' => 6, 'name' => __('Saturdays')],
-                            ['id' => 0, 'name' => __('Sundays')],
-                        ]"
+                        ['id' => 1, 'name' => __('Mondays')],
+                        ['id' => 2, 'name' => __('Tuesdays')],
+                        ['id' => 3, 'name' => __('Wednesdays')],
+                        ['id' => 4, 'name' => __('Thursdays')],
+                        ['id' => 5, 'name' => __('Fridays')],
+                        ['id' => 6, 'name' => __('Saturdays')],
+                        ['id' => 0, 'name' => __('Sundays')],
+                    ]"
                     option-value="id"
                     option-label="name"
                     :multiselect="true"
