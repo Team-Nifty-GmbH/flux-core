@@ -21,7 +21,7 @@ class SerialNumberRanges extends SerialNumberRangeList
 {
     use Actions;
 
-    public string $view = 'flux::livewire.settings.serial-number-ranges';
+    public ?string $includeBefore = 'flux::livewire.settings.serial-number-ranges';
 
     public SerialNumberRangeForm $serialNumberRange;
 

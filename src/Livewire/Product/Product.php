@@ -75,7 +75,7 @@ class Product extends Component
             }
         );
 
-        $layoutConfig = $layoutConfig ?: new PageComponentConfig;
+        $layoutConfig = $layoutConfig ?: new PageComponentConfig();
 
         $layoutConfig->normalizeViewNameAndParamsForBladeComponents();
 

@@ -17,7 +17,7 @@ class VatRates extends VatRateList
 {
     use Actions;
 
-    public string $view = 'flux::livewire.settings.vat-rates';
+    public ?string $includeBefore = 'flux::livewire.settings.vat-rates';
 
     public VatRateForm $vatRate;
 

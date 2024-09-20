@@ -18,7 +18,7 @@ class BankConnections extends BankConnectionList
 
     public BankConnectionForm $bankConnection;
 
-    protected string $view = 'flux::livewire.settings.bank-connections';
+    protected ?string $includeBefore = 'flux::livewire.settings.bank-connections';
 
     protected function getTableActions(): array
     {

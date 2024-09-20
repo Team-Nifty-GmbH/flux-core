@@ -25,7 +25,7 @@ class Clients extends ClientList
 {
     use Actions, WithFileUploads, WithTabs;
 
-    protected string $view = 'flux::livewire.settings.clients';
+    protected ?string $includeBefore = 'flux::livewire.settings.clients';
 
     public string $tab = 'general';
 

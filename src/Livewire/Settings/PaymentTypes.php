@@ -18,7 +18,7 @@ class PaymentTypes extends PaymentTypeList
 {
     use Actions;
 
-    public string $view = 'flux::livewire.settings.payment-types';
+    public ?string $includeBefore = 'flux::livewire.settings.payment-types';
 
     public PaymentTypeForm $paymentType;
 
