@@ -14,7 +14,7 @@ class Languages extends LanguageList
 {
     use Actions;
 
-    protected string $view = 'flux::livewire.settings.languages';
+    protected ?string $includeBefore = 'flux::livewire.settings.languages';
 
     public LanguageForm $selectedLanguage;
 

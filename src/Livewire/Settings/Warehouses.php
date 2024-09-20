@@ -16,7 +16,7 @@ class Warehouses extends WarehouseList
 {
     use Actions;
 
-    public string $view = 'flux::livewire.settings.warehouses';
+    public ?string $includeBefore = 'flux::livewire.settings.warehouses';
 
     public WareHouseForm $warehouse;
 

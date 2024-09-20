@@ -42,7 +42,7 @@
 <main>
     @section('header')
         <div class="pt-10 pb-4 prose prose-xs">
-            {!! $model->header !!}
+            {!! Blade::render(html_entity_decode($model->header ?? ''), ['model' => $model]) !!}
         </div>
     @show
     <div class="pb-6">
@@ -154,8 +154,14 @@
     @show
     @section('footer')
         <div class="break-inside-avoid prose prose-xs">
-            {!! $model->footer !!}
-            {!! $model->vatRates()->distinct()->pluck('footer_text')->implode('<br>') !!}
+            {!! Blade::render(html_entity_decode($model->footer ?? ''), ['model' => $model]) !!}
+            {!!
+                $model->vatRates()
+                    ->distinct()
+                    ->pluck('footer_text')
+                    ->filter()->map(fn (string $text) => Blade::render(html_entity_decode($text), ['model' => $model]))
+                    ->implode('<br>')
+            !!}
         </div>
     @show
 </main>

@@ -86,6 +86,7 @@ class Printable
         foreach ($canvas->get_cpdf()->objects as &$object) {
             if ($object['t'] === 'contents') {
                 $object['c'] = str_replace($search, $replace, $object['c']);
+                $object['c'] = str_replace('DOMPDF_PAGE_COUNT_PLACEHOLDER', $replace, $object['c']);
             }
         }
     }
