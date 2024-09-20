@@ -5,7 +5,7 @@ namespace FluxErp\Actions\SerialNumber;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Rulesets\SerialNumber\CreateSerialNumberRuleset;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Arr;
 
 class CreateSerialNumber extends FluxAction
 {
@@ -22,17 +22,19 @@ class CreateSerialNumber extends FluxAction
 
     public function performAction(): SerialNumber
     {
-        $serialNumber = app(SerialNumber::class, ['attributes' => $this->data]);
+        $data = $this->data;
+        Arr::forget($data, 'use_supplier_serial_number');
+
+        $serialNumber = app(SerialNumber::class, ['attributes' => $data]);
         $serialNumber->save();
 
         return $serialNumber->fresh();
     }
 
-    protected function validateData(): void
+    protected function prepareForValidation(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(SerialNumber::class));
-
-        $this->data = $validator->validate();
+        if (data_get($this->data, 'use_supplier_serial_number') === true) {
+            $this->data['serial_number'] = data_get($this->data, 'supplier_serial_number');
+        }
     }
 }

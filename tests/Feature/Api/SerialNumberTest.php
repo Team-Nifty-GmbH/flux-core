@@ -17,6 +17,8 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
+use FluxErp\Models\StockPosting;
+use FluxErp\Models\Warehouse;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
@@ -33,70 +35,38 @@ class SerialNumberTest extends BaseSetup
 
     private Collection $serialNumberRanges;
 
-    private Collection $addresses;
-
-    private Collection $orderPositions;
-
     private array $permissions;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
-        ]);
-
-        $language = Language::factory()->create();
-
-        $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
-            'order_type_enum' => OrderTypeEnum::Purchase,
-        ]);
-
-        $paymentType = PaymentType::factory()->create([
-            'client_id' => $this->dbClient->id,
-        ]);
-
+        $warehouse = Warehouse::factory()->create();
         $this->products = Product::factory()
             ->count(3)
             ->hasAttached(factory: $this->dbClient, relationship: 'clients')
-            ->create();
+            ->create([
+                'has_serial_numbers' => true,
+            ]);
+
+        $this->serialNumbers = SerialNumber::factory()->count(3)->create();
 
         $this->serialNumberRanges = collect();
-        foreach ($this->products as $product) {
+        foreach ($this->products as $key => $product) {
             $this->serialNumberRanges->push(SerialNumberRange::factory()->create([
                 'model_type' => Product::class,
                 'model_id' => $product->id,
                 'type' => 'product',
                 'client_id' => $product->client_id,
             ]));
+
+            StockPosting::factory()->create([
+                'warehouse_id' => $warehouse->id,
+                'product_id' => $product->id,
+                'serial_number_id' => $this->serialNumbers[$key]->id,
+                'posting' => 1,
+            ]);
         }
-
-        $this->serialNumbers = SerialNumber::factory()->count(3)->create();
-
-        $this->addresses = Address::factory()->count(3)->create([
-            'contact_id' => $contact->id,
-            'is_main_address' => false,
-            'client_id' => $this->dbClient->id,
-        ]);
-
-        $order = Order::factory()->create([
-            'address_invoice_id' => $this->addresses[0]->id,
-            'address_delivery_id' => $this->addresses[0]->id,
-            'client_id' => $this->dbClient->id,
-            'currency_id' => Currency::factory()->create()->id,
-            'language_id' => $language->id,
-            'order_type_id' => $orderType->id,
-            'payment_type_id' => $paymentType->id,
-            'price_list_id' => PriceList::factory()->create()->id,
-        ]);
-
-        $this->orderPositions = OrderPosition::factory()->count(3)->create([
-            'order_id' => $order->id,
-            'client_id' => $this->dbClient->id,
-            'sort_number' => 0,
-        ]);
 
         $this->permissions = [
             'show' => Permission::findOrCreate('api.serial-numbers.{id}.get'),
@@ -120,9 +90,7 @@ class SerialNumberTest extends BaseSetup
         $this->assertEquals($this->serialNumbers[0]->id, $serialNumber->id);
         $this->assertEquals($this->serialNumbers[0]->serial_number_range_id, $serialNumber->serial_number_range_id);
         $this->assertEquals($this->serialNumbers[0]->serial_number, $serialNumber->serial_number);
-        $this->assertEquals($this->serialNumbers[0]->order_position_id, $serialNumber->order_position_id);
-        $this->assertEquals($this->serialNumbers[0]->address_id, $serialNumber->address_id);
-        $this->assertEquals($this->serialNumbers[0]->product_id, $serialNumber->product_id);
+        $this->assertEquals($this->serialNumbers[0]->supplier_serial_number, $serialNumber->supplier_serial_number);
     }
 
     public function test_get_serial_number_serial_number_not_found()
@@ -147,19 +115,15 @@ class SerialNumberTest extends BaseSetup
         $this->assertEquals($this->serialNumbers[0]->id, $serialNumbers[0]->id);
         $this->assertEquals($this->serialNumbers[0]->serial_number_range_id, $serialNumbers[0]->serial_number_range_id);
         $this->assertEquals($this->serialNumbers[0]->serial_number, $serialNumbers[0]->serial_number);
-        $this->assertEquals($this->serialNumbers[0]->order_position_id, $serialNumbers[0]->order_position_id);
-        $this->assertEquals($this->serialNumbers[0]->address_id, $serialNumbers[0]->address_id);
-        $this->assertEquals($this->serialNumbers[0]->product_id, $serialNumbers[0]->product_id);
+        $this->assertEquals($this->serialNumbers[0]->supplier_serial_number, $serialNumbers[0]->supplier_serial_number);
     }
 
     public function test_create_serial_number()
     {
         $serialNumber = [
             'serial_number_range_id' => $this->serialNumberRanges[0]->id,
-            'product_id' => $this->products[0]->id,
-            'address_id' => $this->addresses[0]->id,
-            'order_position_id' => $this->orderPositions[0]->id,
             'serial_number' => Str::random(),
+            'supplier_serial_number' => null,
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -175,19 +139,43 @@ class SerialNumberTest extends BaseSetup
             ->first();
 
         $this->assertEquals($serialNumber['serial_number_range_id'], $dbSerialNumber->serial_number_range_id);
-        $this->assertEquals($serialNumber['product_id'], $dbSerialNumber->product_id);
-        $this->assertEquals($serialNumber['address_id'], $dbSerialNumber->address_id);
-        $this->assertEquals($serialNumber['order_position_id'], $dbSerialNumber->order_position_id);
         $this->assertEquals($serialNumber['serial_number'], $dbSerialNumber->serial_number);
+        $this->assertEquals($serialNumber['supplier_serial_number'], $dbSerialNumber->supplier_serial_number);
+    }
+
+    public function test_create_serial_number_from_supplier_serial_number()
+    {
+        $serialNumber = [
+            'serial_number_range_id' => $this->serialNumberRanges[0]->id,
+            'serial_number' => Str::random(),
+            'supplier_serial_number' => Str::random(),
+            'use_supplier_serial_number' => true,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/serial-numbers', $serialNumber);
+        $response->assertStatus(201);
+
+        $responseSerialNumber = json_decode($response->getContent())->data;
+
+        $dbSerialNumber = SerialNumber::query()
+            ->whereKey($responseSerialNumber->id)
+            ->first();
+
+        $this->assertNull($dbSerialNumber->serial_number_range_id);
+        $this->assertEquals($serialNumber['supplier_serial_number'], $dbSerialNumber->serial_number);
+        $this->assertEquals($serialNumber['supplier_serial_number'], $dbSerialNumber->supplier_serial_number);
     }
 
     public function test_create_serial_number_validation_fails()
     {
         $serialNumber = [
             'serial_number_range_id' => $this->serialNumberRanges[0]->id,
-            'product_id' => $this->products[0]->id,
-            'address_id' => $this->addresses[0]->id,
-            'order_position_id' => $this->orderPositions[0]->id,
+            'serial_number' => Str::random(),
+            'supplier_serial_number' => null,
+            'use_supplier_serial_number' => true,
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -201,9 +189,7 @@ class SerialNumberTest extends BaseSetup
     {
         $serialNumber = [
             'id' => $this->serialNumbers[0]->id,
-            'product_id' => $this->products[0]->id,
-            'address_id' => $this->addresses[0]->id,
-            'order_position_id' => $this->orderPositions[0]->id,
+            'supplier_serial_number' => Str::random(),
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
@@ -219,11 +205,10 @@ class SerialNumberTest extends BaseSetup
             ->first();
 
         $this->assertEquals($serialNumber['id'], $dbSerialNumber->id);
-        $this->assertEquals($serialNumber['product_id'], $dbSerialNumber->product_id);
-        $this->assertEquals($serialNumber['address_id'], $dbSerialNumber->address_id);
-        $this->assertEquals($serialNumber['order_position_id'], $dbSerialNumber->order_position_id);
+        $this->assertEquals($serialNumber['supplier_serial_number'], $dbSerialNumber->supplier_serial_number);
         $this->assertEquals($this->serialNumbers[0]->serial_number, $dbSerialNumber->serial_number);
         $this->assertEquals($this->serialNumbers[0]->serial_number_range_id, $dbSerialNumber->serial_number_range_id);
+        $this->assertEquals($this->serialNumbers[0]->supp, $dbSerialNumber->supp);
     }
 
     public function test_update_serial_number_with_additional_columns()
@@ -234,9 +219,6 @@ class SerialNumberTest extends BaseSetup
 
         $serialNumber = [
             'id' => $this->serialNumbers[0]->id,
-            'product_id' => $this->products[0]->id,
-            'address_id' => $this->addresses[0]->id,
-            'order_position_id' => $this->orderPositions[0]->id,
             $additionalColumn->name => 'New Value',
         ];
 
@@ -253,9 +235,6 @@ class SerialNumberTest extends BaseSetup
             ->first();
 
         $this->assertEquals($serialNumber['id'], $dbSerialNumber->id);
-        $this->assertEquals($serialNumber['product_id'], $dbSerialNumber->product_id);
-        $this->assertEquals($serialNumber['address_id'], $dbSerialNumber->address_id);
-        $this->assertEquals($serialNumber['order_position_id'], $dbSerialNumber->order_position_id);
         $this->assertEquals($serialNumber[$additionalColumn->name], $dbSerialNumber->{$additionalColumn->name});
         $this->assertEquals($this->serialNumbers[0]->serial_number, $dbSerialNumber->serial_number);
         $this->assertEquals($this->serialNumbers[0]->serial_number_range_id, $dbSerialNumber->serial_number_range_id);
@@ -264,47 +243,8 @@ class SerialNumberTest extends BaseSetup
     public function test_update_serial_number_validation_fails()
     {
         $serialNumber = [
-            'product_id' => $this->products[0]->id,
-            'address_id' => $this->addresses[0]->id,
-            'order_position_id' => $this->orderPositions[0]->id,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/serial-numbers', $serialNumber);
-        $response->assertStatus(422);
-    }
-
-    public function test_update_serial_number_serial_number_has_product_id()
-    {
-        $this->serialNumbers[1]->product_id = $this->products[0]->id;
-        $this->serialNumbers[1]->save();
-
-        $serialNumber = [
-            'id' => $this->serialNumbers[1]->id,
-            'product_id' => $this->products[1]->id,
-            'address_id' => $this->addresses[0]->id,
-            'order_position_id' => $this->orderPositions[0]->id,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/serial-numbers', $serialNumber);
-        $response->assertStatus(422);
-    }
-
-    public function test_update_serial_number_serial_number_has_order_position_id()
-    {
-        $this->serialNumbers[1]->order_position_id = $this->orderPositions[0]->id;
-        $this->serialNumbers[1]->save();
-
-        $serialNumber = [
-            'id' => $this->serialNumbers[1]->id,
-            'product_id' => $this->products[0]->id,
-            'address_id' => $this->addresses[0]->id,
-            'order_position_id' => $this->orderPositions[1]->id,
+            'id' => $this->serialNumbers[0]->id,
+            'serial_number' => null,
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);

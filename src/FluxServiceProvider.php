@@ -571,7 +571,6 @@ class FluxServiceProvider extends ServiceProvider
         Menu::register(route: 'portal.products', icon: 'square-3-stack-3d');
         Menu::register(route: 'portal.files', icon: 'folder-open');
         Menu::register(route: 'portal.orders', icon: 'shopping-bag');
-        Menu::register(route: 'portal.serial-numbers', icon: 'tag');
         Menu::register(route: 'portal.tickets', icon: 'wrench-screwdriver');
     }
 

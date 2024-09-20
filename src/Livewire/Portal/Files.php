@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Portal;
 
+use FluxErp\Models\Address;
 use FluxErp\Traits\Livewire\WithAddressAuth;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
@@ -21,13 +22,23 @@ class Files extends Component
 
     public function mount(): void
     {
-        $this->serialNumbers = Auth::user()
-            ->contact
-            ->serialNumbers()
-            ->whereHas('media')
-            ->with(['product', 'media'])
-            ->get()
+        $addresses = resolve_static(Address::class, 'query')
+            ->where('contact_id', Auth::user()?->contact_id)
+            ->with([
+                'serialNumbers' => fn ($query) => $query->whereHas('media')
+                    ->select(['serial_numbers.id', 'serial_numbers.serial_number']),
+                'serialNumbers.product:id,name',
+                'serialNumbers.media',
+            ])
+            ->get('id')
             ->toArray();
+
+        $serialNumbers = [];
+        foreach ($addresses as $address) {
+            $serialNumbers = array_merge($serialNumbers, data_get($address, 'serial_numbers', []));
+        }
+
+        $this->serialNumbers = array_unique(array_filter($serialNumbers));
     }
 
     public function render(): mixed

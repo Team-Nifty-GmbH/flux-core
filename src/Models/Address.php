@@ -298,9 +298,9 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         return $this->hasMany(Task::class);
     }
 
-    public function serialNumbers(): HasMany
+    public function serialNumbers(): BelongsToMany
     {
-        return $this->hasMany(SerialNumber::class);
+        return $this->belongsToMany(SerialNumber::class, 'address_serial_number');
     }
 
     public function settings(): MorphMany

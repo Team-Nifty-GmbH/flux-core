@@ -14,7 +14,7 @@ class SerialNumberList extends BaseDataTable
         'avatar',
         'product.name',
         'serial_number',
-        'customer',
+        'contacts',
     ];
 
     public array $formatters = [
@@ -24,9 +24,9 @@ class SerialNumberList extends BaseDataTable
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder->with([
-            'product:id,name',
+            'product:products.id,products.name',
             'product.media',
-            'address:id,firstname,lastname,company',
+            'addresses:id,name,address_serial_number.quantity',
         ]);
     }
 
@@ -34,7 +34,7 @@ class SerialNumberList extends BaseDataTable
     {
         $returnArray = parent::itemToArray($item);
         $returnArray['avatar'] = $item->product?->getAvatarUrl();
-        $returnArray['customer'] = $item->address?->getLabel();
+        $returnArray['contacts'] = $item->addresses->toSerialNumber()->pluck('quantity', 'name')->toArray() ?: null;
 
         return $returnArray;
     }

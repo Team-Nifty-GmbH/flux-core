@@ -3,7 +3,6 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\OrderType\CreateOrderType;
-use FluxErp\Actions\OrderType\DeleteOrderType;
 use FluxErp\Actions\OrderType\UpdateOrderType;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\DataTables\OrderTypeList;
@@ -45,7 +44,7 @@ class OrderTypes extends OrderTypeList
         ];
     }
 
-    public function getRowActions(): array
+    protected function getRowActions(): array
     {
         return [
             DataTableButton::make()
@@ -109,10 +108,7 @@ class OrderTypes extends OrderTypeList
     public function delete(): bool
     {
         try {
-            DeleteOrderType::make($this->orderType->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->orderType->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

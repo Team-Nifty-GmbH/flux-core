@@ -7,30 +7,47 @@
                         <x-input wire:model="orderType.name" :label="__('Order Type Name')"/>
                         <x-textarea wire:model="orderType.description" :label="__('Description')"/>
                         <x-select
-                            label="{{ __('Client') }}"
-                            placeholder="{{ __('Select a Client') }}"
+                            :label="__('Client')"
+                            :placeholder="__('Select a Client')"
                             wire:model="orderType.client_id"
                             :options="$clients"
                             option-label="name"
                             option-value="id"
                         />
                         <x-select
-                            label="{{ __('Order Type') }}"
+                            :label="__('Order Type')"
                             :disabled="(bool) $orderType->id"
-                            placeholder="{{ __('Select Order Type') }}"
+                            :placeholder="__('Select Order Type')"
                             wire:model="orderType.order_type_enum"
                             :options="$enum"
                         />
                         <x-select
-                            label="{{ __('Print Layouts') }}"
-                            placeholder="{{ __('Select a Print Layout') }}"
+                            :label="__('Print Layouts')"
+                            :placeholder="__('Select Print Layouts')"
                             wire:model="orderType.print_layouts"
                             multiselect
                             option-label="label"
                             option-value="value"
                             :options="$printViews"
                         />
-
+                        <x-select
+                            :label="__('Post stock')"
+                            :hint="__('Stock will be posted on creation of given documents')"
+                            wire:model="orderType.post_stock_print_layouts"
+                            multiselect
+                            option-label="label"
+                            option-value="value"
+                            :options="$printViews"
+                        />
+                        <x-select
+                            :label="__('Reserve stock')"
+                            :hint="__('Stock will be reserved on creation of given documents.') . ' ' . __('Stock posting has priority over stock reservation.')"
+                            wire:model="orderType.reserve_stock_print_layouts"
+                            multiselect
+                            option-label="label"
+                            option-value="value"
+                            :options="$printViews"
+                        />
                         <x-checkbox wire:model="orderType.is_active" :label="__('Is Active')"/>
                         <x-checkbox wire:model="orderType.is_hidden" :label="__('Is Hidden')"/>
                         <x-input wire:model="orderType.mail_subject" :label="__('Mail Subject')"/>

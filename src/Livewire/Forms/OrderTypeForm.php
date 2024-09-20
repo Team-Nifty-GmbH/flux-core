@@ -3,11 +3,11 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\OrderType\CreateOrderType;
+use FluxErp\Actions\OrderType\DeleteOrderType;
 use FluxErp\Actions\OrderType\UpdateOrderType;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
 
-class OrderTypeForm extends Form
+class OrderTypeForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -24,25 +24,31 @@ class OrderTypeForm extends Form
 
     public ?array $print_layouts = [];
 
+    public ?array $post_stock_print_layouts = [];
+
+    public ?array $reserve_stock_print_layouts = [];
+
     public ?string $order_type_enum = null;
 
     public bool $is_active = true;
 
     public bool $is_hidden = false;
 
-    public function save(): void
-    {
-        $action = $this->id ? UpdateOrderType::make($this->toArray()) : CreateOrderType::make($this->toArray());
-
-        $response = $action->checkPermission()->validate()->execute();
-
-        $this->fill($response);
-    }
-
     public function fill($values): void
     {
         parent::fill($values);
 
-        $this->print_layouts = $this->print_layouts ?? [];
+        $this->print_layouts ??= [];
+        $this->post_stock_print_layouts ??= [];
+        $this->reserve_stock_print_layouts ??= [];
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateOrderType::class,
+            'update' => UpdateOrderType::class,
+            'delete' => DeleteOrderType::class,
+        ];
     }
 }

@@ -158,7 +158,7 @@ class ProductTest extends BaseSetup
         $this->assertFalse($dbProduct->is_bundle);
         $this->assertFalse($dbProduct->is_service);
         $this->assertFalse($dbProduct->is_shipping_free);
-        $this->assertFalse($dbProduct->is_required_product_serial_number);
+        $this->assertFalse($dbProduct->has_serial_numbers);
         $this->assertFalse($dbProduct->is_nos);
         $this->assertFalse($dbProduct->is_active_export_to_web_shop);
     }
@@ -188,14 +188,14 @@ class ProductTest extends BaseSetup
             'seo_keywords' => Str::random(),
             'posting_account' => Str::random(),
             'warning_stock_amount' => rand(1, 999),
-            'is_active' => rand(0, 1),
-            'is_highlight' => rand(0, 1),
+            'is_active' => (bool) rand(0, 1),
+            'is_highlight' => (bool) rand(0, 1),
             'is_bundle' => true,
             'is_service' => false,
-            'is_shipping_free' => rand(0, 1),
-            'is_required_product_serial_number' => rand(0, 1),
-            'is_nos' => rand(0, 1),
-            'is_active_export_to_web_shop' => rand(0, 1),
+            'is_shipping_free' => (bool) rand(0, 1),
+            'has_serial_numbers' => (bool) rand(0, 1),
+            'is_nos' => (bool) rand(0, 1),
+            'is_active_export_to_web_shop' => (bool) rand(0, 1),
             'clients' => [$this->clients[0]->id],
             'bundle_products' => [
                 [
@@ -247,10 +247,7 @@ class ProductTest extends BaseSetup
         $this->assertEquals($product['is_bundle'], $dbProduct->is_bundle);
         $this->assertEquals($product['is_service'], $dbProduct->is_service);
         $this->assertEquals($product['is_shipping_free'], $dbProduct->is_shipping_free);
-        $this->assertEquals(
-            $product['is_required_product_serial_number'],
-            $dbProduct->is_required_product_serial_number
-        );
+        $this->assertEquals($product['has_serial_numbers'], $dbProduct->has_serial_numbers);
         $this->assertEquals($product['is_nos'], $dbProduct->is_nos);
         $this->assertEquals($product['is_active_export_to_web_shop'], $dbProduct->is_active_export_to_web_shop);
 
@@ -314,7 +311,7 @@ class ProductTest extends BaseSetup
             'is_bundle' => false,
             'is_service' => false,
             'is_shipping_free' => rand(0, 1),
-            'is_required_product_serial_number' => rand(0, 1),
+            'has_serial_numbers' => rand(0, 1),
             'is_nos' => rand(0, 1),
             'is_active_export_to_web_shop' => rand(0, 1),
         ];
@@ -357,10 +354,8 @@ class ProductTest extends BaseSetup
         $this->assertEquals($product['is_bundle'], $dbProduct->is_bundle);
         $this->assertEquals($product['is_service'], $dbProduct->is_service);
         $this->assertEquals($product['is_shipping_free'], $dbProduct->is_shipping_free);
-        $this->assertEquals($product['is_required_product_serial_number'],
-            $dbProduct->is_required_product_serial_number);
-        $this->assertEquals($product['is_nos'],
-            $dbProduct->is_nos);
+        $this->assertEquals($product['has_serial_numbers'], $dbProduct->has_serial_numbers);
+        $this->assertEquals($product['is_nos'], $dbProduct->is_nos);
         $this->assertEquals($product['is_active_export_to_web_shop'], $dbProduct->is_active_export_to_web_shop);
 
         $this->assertFalse($dbProduct->bundleProducts()->exists());
@@ -410,8 +405,8 @@ class ProductTest extends BaseSetup
         $this->assertEquals($this->products[0]->is_bundle, $responses[0]->data->is_bundle);
         $this->assertEquals($this->products[0]->is_service, $responses[0]->data->is_service);
         $this->assertEquals($this->products[0]->is_shipping_free, $responses[0]->data->is_shipping_free);
-        $this->assertEquals($this->products[0]->is_required_product_serial_number,
-            $responses[0]->data->is_required_product_serial_number);
+        $this->assertEquals($this->products[0]->has_serial_numbers,
+            $responses[0]->data->has_serial_numbers);
         $this->assertEquals($this->products[0]->is_nos,
             $responses[0]->data->is_nos);
         $this->assertEquals($this->products[0]->is_active_export_to_web_shop,
@@ -439,12 +434,12 @@ class ProductTest extends BaseSetup
         $this->assertEquals($this->products[1]->is_bundle, $responses[1]->data->is_bundle);
         $this->assertEquals($this->products[1]->is_service, $responses[1]->data->is_service);
         $this->assertEquals($this->products[1]->is_shipping_free, $responses[1]->data->is_shipping_free);
-        $this->assertEquals($this->products[1]->is_required_product_serial_number,
-            $responses[1]->data->is_required_product_serial_number);
-        $this->assertEquals($this->products[1]->is_nos,
-            $responses[1]->data->is_nos);
-        $this->assertEquals($this->products[1]->is_active_export_to_web_shop,
-            $responses[1]->data->is_active_export_to_web_shop);
+        $this->assertEquals($this->products[1]->has_serial_numbers, $responses[1]->data->has_serial_numbers);
+        $this->assertEquals($this->products[1]->is_nos, $responses[1]->data->is_nos);
+        $this->assertEquals(
+            $this->products[1]->is_active_export_to_web_shop,
+            $responses[1]->data->is_active_export_to_web_shop
+        );
     }
 
     public function test_delete_product()
