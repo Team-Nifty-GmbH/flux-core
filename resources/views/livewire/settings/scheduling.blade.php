@@ -31,15 +31,17 @@
                 autocomplete="off"
                 wire:model="schedule.cron.methods.basic"
             />
-            <div x-cloak x-show="[
-                        'hourlyAt',
-                        'everyOddHour',
-                        'everyTwoHours',
-                        'everyThreeHours',
-                        'everyFourHours',
-                        'everySixHours'
-                    ].indexOf($wire.schedule.cron.methods.basic) >= 0
-                ">
+            <div
+                x-cloak
+                x-show="[
+                    'hourlyAt',
+                    'everyOddHour',
+                    'everyTwoHours',
+                    'everyThreeHours',
+                    'everyFourHours',
+                    'everySixHours'
+                ].indexOf($wire.schedule.cron.methods.basic) >= 0"
+            >
                 <x-inputs.number :max="59" :min="0" wire:model="schedule.cron.parameters.basic.0" :label="__('Minute')" />
             </div>
             <div x-cloak x-show="['dailyAt', 'lastDayOfMonth'].indexOf($wire.schedule.cron.methods.basic) >= 0">
