@@ -8,7 +8,8 @@ export default function ($wire, $ref, lang) {
         isLoadingFiles: [],
         selectedCollection: null,
         pond: null,
-        setCollection(collectionName) {
+        async setCollection(collectionName) {
+            console.log(await $wire.hasMultipleFiles(collectionName));
             this.selectedCollection = collectionName;
         },
         loadFilePond() {
@@ -19,13 +20,14 @@ export default function ($wire, $ref, lang) {
                 return;
             }
             this.pond = create(inputElement, {
-                allowMultiple: true,
                 onaddfilestart: (file) => {
                     this.isLoadingFiles.push(file.id);
                 },
                 onremovefile: (error, file) => {
                     if (error) return;
+
                     const ids = this.pond.getFiles().map(f => f.serverId);
+
                     if (ids.length === 0) {
                         this.tempFilesId = [];
                     } else {
@@ -42,12 +44,10 @@ export default function ($wire, $ref, lang) {
                     this.isLoadingFiles = this.isLoadingFiles.filter((item) => {
                         return item !== file.id;
                     });
-
                 },
                 server: {
                     process: async (fieldName, file, metadata, load, error, progress, abort, transfer, options) => {
                         const onSuccess = async (tempFileId) => {
-                            console.log(this.selectedCollection)
                             if (await $wire.validateOnDemand(tempFileId, this.selectedCollection)) {
                                 this.tempFilesId.push(tempFileId);
                                 load(tempFileId);

@@ -52,14 +52,15 @@ class FolderTree extends Component
     public function getRules(): array
     {
         return [
-            'files.*' => 'required|file|max:1024',
+            'files.*' => 'required|file|max:' . config('livewire.temporary_file_upload.rules'),
         ];
     }
 
     public function getRulesSingleFile(int $index, string $collectionName): array
     {
         // get the base collection name - ignore subfolders
-        $baseCollection = str_contains($collectionName, '.') ? explode('.', $collectionName)[0] : $collectionName;
+        $baseCollection = str_contains($collectionName, '.') ?
+            explode('.', $collectionName)[0] : $collectionName;
 
         // get the validation rules for the model type
         $modelTypeValidationRules = app($this->modelType)
@@ -71,8 +72,10 @@ class FolderTree extends Component
 
         // merge the validation rules
         return [
-            'files.' . $index => is_null($modelTypeValidationRules) ? 'required|file|max:1024' : 'required|file|max:1024|mimetypes:'
-                . implode(',', $modelTypeValidationRules),
+            'files.' . $index =>  'required|file|max:' . config('livewire.temporary_file_upload.rules')
+                . (! is_null($modelTypeValidationRules) ?
+                    '|mimetypes:' . implode(',', $modelTypeValidationRules) : ''
+                ),
         ];
     }
 
@@ -139,6 +142,23 @@ class FolderTree extends Component
         }
 
         return true;
+    }
+    #[Renderless]
+    public function hasMultipleFiles(string $collectionName): bool
+    {
+        // get the base collection name - ignore subfolders
+        $baseCollection = str_contains($collectionName, '.') ?
+            explode('.', $collectionName)[0] : $collectionName;
+
+        // get the validation rules for the model type
+        $singleFile = app($this->modelType)
+            ->query()
+            ->whereKey($this->modelId)
+            ->first()
+            ?->getMediaCollection($baseCollection)
+            ?->singleFile;
+
+        return $singleFile ?? false;
     }
 
     public function mount(?string $modelType = null, ?int $modelId = null): void

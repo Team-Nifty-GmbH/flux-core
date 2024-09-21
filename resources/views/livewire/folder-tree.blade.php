@@ -22,23 +22,23 @@
             // on folder change, clear temp files - if confirmation is accepted
             if(this.tempFilesId.length !== 0) {
                 window.$wireui.confirmDialog({
-                title: '{{ __('Selected files not submitted') }}',
-                description: '{{ __('Selected files will be deleted on folder change') }}',
-                icon: 'warning',
-                accept: {
-                    label: '{{ __('Confirm') }}',
-                    execute: () => {
+                    title: '{{ __('Selected files not submitted') }}',
+                    description: '{{ __('Selected files will be deleted on folder change') }}',
+                    icon: 'warning',
+                    accept: {
+                        label: '{{ __('Confirm') }}',
+                        execute: () => {
                             this.clearFilesOnLeave();
                             this.selectionProxy = level;
                             this.selection = JSON.parse(JSON.stringify(level));
                             this.selected = true;
                             this.setCollection(this.selection?.collection_name);
+                        },
                     },
-                },
-                reject: {
-                    label: '{{ __('Cancel') }}',
-                }
-            }, $wire.__instance.id);
+                    reject: {
+                        label: '{{ __('Cancel') }}',
+                    }
+                }, $wire.__instance.id);
 
                 return;
             }
@@ -192,27 +192,27 @@
             <template x-for="(level, i) in levels" :key="level.id">
                 <li x-html="renderLevel(level, i)"></li>
             </template>
-            @can('action.media.upload')
+            @if(resolve_static(\FluxErp\Actions\Media\UploadMedia::class, 'canPerformAction', [false]))
                 <li>
                     <x-button class="w-full" outline :label="__('Add folder')" x-on:click="addFolder(levels, null)"/>
                 </li>
-            @endcan
+            @endif
         </ul>
     </div>
     <div class="w-1/2 flex flex-col gap-3">
         <div x-ref="upload" x-show="! selection.file_name && selected" class="flex flex-col gap-3" x-cloak>
             <div>
-                @can('action.media.upload')
+                @if(resolve_static(\FluxErp\Actions\Media\DeleteMediaCollection::class, 'canPerformAction', [false]))
                     <x-button x-show="! selection.is_static" negative :label="__('Delete')"
                               x-on:click="deleteFolder(selection)"/>
-                @endcan
-                @can('action.media.upload')
+                @endif
+                @if(resolve_static(\FluxErp\Actions\Media\UploadMedia::class, 'canPerformAction', [false]))
                     <x-button :label="__('Add folder')" x-on:click="addFolder(selectionProxy.children, selection)"/>
-                @endcan
+                @endif
                 <x-button spinner :label="__('Download folder')"
                           x-on:click="$wire.downloadCollection(selection.collection_name)"/>
             </div>
-            @can('action.media.update')
+            @if(resolve_static(\FluxErp\Actions\Media\UpdateMedia::class, 'canPerformAction', [false]))
                 <div class="flex flex-col space-y-3 md:flex-row  md:space-x-3 items-end justify-end">
                     <div class="md:flex-1 w-full p-0">
                         <x-input class="flex-1" x-bind:disabled="selection.is_static" :label="__('Name')"
@@ -220,8 +220,8 @@
                     </div>
                     <x-button x-cloak x-show="!selection.is_static" primary :label="__('Save')" x-on:click="save()"/>
                 </div>
-            @endcan
-            @can('action.media.upload')
+            @endif
+            @if(resolve_static(\FluxErp\Actions\Media\UploadMedia::class, 'canPerformAction', [false]))
                 <div class="flex flex-col items-end">
                     <div class="w-full mb-4">
                         <input x-init="loadFilePond()" id="filepond-drop" type="file"/>
@@ -231,30 +231,29 @@
                               primary
                               :label="__('Upload')"/>
                 </div>
-
-            @endcan
+            @endif
         </div>
         <div x-show="selection.file_name && selected" x-cloak class="flex flex-col gap-3">
             <div class="pb-1.5">
                 <x-button primary :label="__('Download')" x-on:click="$wire.download(selection.id)"/>
-                @can('action.media.delete')
+                @if(resolve_static(\FluxErp\Actions\Media\DeleteMedia::class, 'canPerformAction', [false]))
                     <x-button negative :label="__('Delete')" x-on:click="deleteFile(selection)"/>
-                @endcan
+                @endif
             </div>
             <div class="flex flex-col gap-1.5">
-                @can('action.media.update')
-                    <x-input :label="__('Name')" x-model="selection.name"/>
+                @if(resolve_static(\FluxErp\Actions\Media\UploadMedia::class, 'canPerformAction', [false]))
+                    <x-input :label="__('Name')" disabled x-model="selection.name"/>
                     <x-input :label="__('File type')" disabled x-bind:value="selection.file_name?.split('.').pop()"/>
                     <x-input :label="__('MIME-Type')" disabled x-bind:value="selection.mime_type"/>
                     <x-input :label="__('Size')" disabled x-bind:value="convertSize(selection?.size)"/>
                     <x-input :label="__('File')" disabled x-bind:value="selection.file_name"/>
                     <x-input :label="__('Disk')" disabled x-bind:value="selection.disk"/>
                     <x-input x-show="selection?.disk === 'public'"
-                             :label="__('Link')"
-                             readonly
-                             x-ref="originalLink"
-                             type="text"
-                             x-bind:value="selection.original_url"
+                         :label="__('Link')"
+                         readonly
+                         x-ref="originalLink"
+                         type="text"
+                         x-bind:value="selection.original_url"
                     >
                         <x-slot:append>
                             <div class="absolute inset-y-0 right-0 flex items-center p-0.5">
@@ -268,12 +267,12 @@
                             </div>
                         </x-slot:append>
                     </x-input>
-                @endcan
+                @endif
                 <object class="object-contain"
-                        x-bind:type="selection.mime_type"
-                        x-bind:data="selection.original_url + '#zoom=85&scrollbar=0&toolbar=0&navpanes=0'"
-                        width="100%"
-                        height="200px"
+                    x-bind:type="selection.mime_type"
+                    x-bind:data="selection.original_url + '#zoom=85&scrollbar=0&toolbar=0&navpanes=0'"
+                    width="100%"
+                    height="200px"
                 >
                     <div class="flex items-center justify-center w-full h-48 bg-gray-200 text-gray-400">
                         {{ __('Your browser does not support preview for this file.') }}
