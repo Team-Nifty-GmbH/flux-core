@@ -15,6 +15,7 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
+use FluxErp\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -26,7 +27,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\EloquentSortable\Sortable;
-use Spatie\EloquentSortable\SortableTrait;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 

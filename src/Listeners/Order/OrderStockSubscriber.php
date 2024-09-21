@@ -22,11 +22,12 @@ class OrderStockSubscriber
             ->first(['id', 'order_type_id']);
 
         if (! $order
+            || $event->printable->preview
             || ! in_array(
                 $event->getData('view'),
                 array_merge(
-                    $order->orderType->post_stock_print_layouts,
-                    $order->orderType->reserve_stock_print_layouts
+                    $order->orderType->post_stock_print_layouts ?? [],
+                    $order->orderType->reserve_stock_print_layouts ?? []
                 )
             )
         ) {
