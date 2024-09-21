@@ -22,7 +22,7 @@ class OrderStockSubscriber
             ->first(['id', 'order_type_id']);
 
         if (! $order
-            || $event->printable->preview
+            || $event->getData('preview')
             || ! in_array(
                 $event->getData('view'),
                 array_merge(
