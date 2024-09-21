@@ -5,6 +5,7 @@ import dashboard from './components/dashboard';
 import notifications from './components/wireui/notifications';
 import signature from './components/signature-pad.js';
 import addressMap from "./components/address-map";
+import sort from '@alpinejs/sort';
 
 window.folderTree = folderTree;
 window.setupEditor = setupEditor;
@@ -15,6 +16,7 @@ window.signature = signature;
 
 window.addEventListener('alpine:init', () => {
     window.Alpine.data('wireui_notifications', notifications);
+    window.Alpine.plugin(sort)
 })
 
 Alpine.directive('currency', (el, { expression }, { evaluate }) => {
