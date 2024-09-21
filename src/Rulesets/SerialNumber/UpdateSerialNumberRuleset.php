@@ -2,9 +2,6 @@
 
 namespace FluxErp\Rulesets\SerialNumber;
 
-use FluxErp\Models\Address;
-use FluxErp\Models\OrderPosition;
-use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;

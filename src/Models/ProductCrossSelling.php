@@ -5,12 +5,12 @@ namespace FluxErp\Models;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\EloquentSortable\Sortable;
-use Spatie\EloquentSortable\SortableTrait;
 
 class ProductCrossSelling extends Model implements Sortable
 {
