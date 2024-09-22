@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\Percentage;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
@@ -27,6 +28,7 @@ class PaymentType extends Model
     protected function casts(): array
     {
         return [
+            'payment_discount_percentage' => Percentage::class,
             'is_active' => 'boolean',
             'is_direct_debit' => 'boolean',
             'is_default' => 'boolean',

@@ -140,7 +140,7 @@ class CreateOrderRuleset extends FluxRuleset
             'payment_discount_target' => 'integer|min:0|nullable|lte:payment_target',
             'payment_discount_percent' => [
                 'nullable',
-                app(Numeric::class, ['min' => 0, 'max' => 1]),
+                app(Numeric::class, ['min' => 0, 'max' => 100]),
             ],
             'header_discount' => 'numeric|min:0|nullable',
             'shipping_costs_net_price' => 'numeric|nullable',

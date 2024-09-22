@@ -10,6 +10,7 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use TeamNiftyGmbH\DataTable\Casts\Percentage;
 
 class VatRate extends Model
 {
@@ -18,4 +19,11 @@ class VatRate extends Model
     protected $guarded = [
         'id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'rate_percentage' => Percentage::class,
+        ];
+    }
 }

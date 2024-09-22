@@ -36,7 +36,9 @@ class CreatePriceList extends FluxAction
                         'model_id' => $priceList->id,
                     ]
                 )
-            )->execute();
+            )
+                ->validate()
+                ->execute();
         }
 
         return $priceList->fresh($discount ? ['discount'] : []);

@@ -32,12 +32,12 @@ class CreateDiscount extends FluxAction
     {
         parent::validateData();
 
-        // Check discount is max 1 if is_percentage = true
+        // Check discount is max 100 if is_percentage = true
         if ($this->data['is_percentage']
-            && $this->data['discount'] > 1
+            && $this->data['discount'] > 100
         ) {
             throw ValidationException::withMessages([
-                'discount' => [__('validation.max', ['attribute' => 'discount', 'max' => 1])],
+                'discount' => [__('validation.max', ['attribute' => 'discount', 'max' => 100])],
             ])->errorBag('createDiscount');
         }
     }

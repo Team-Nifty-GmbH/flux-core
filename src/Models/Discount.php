@@ -2,6 +2,8 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Casts\Money;
+use FluxErp\Casts\Percentage;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -26,8 +28,28 @@ class Discount extends Model
     protected function casts(): array
     {
         return [
+            'discount' => $this->is_percentage ? Percentage::class : Money::class,
             'is_percentage' => 'boolean',
         ];
+    }
+
+    public static function booted(): void
+    {
+        static::retrieved(function (Discount $model) {
+            // this ensures that the right cast for discount is used
+            $model->is_percentage = (bool) $model->is_percentage;
+            $discount = $model->discount;
+            $model->reloadCasts();
+            $model->discount = $discount;
+        });
+
+        static::saving(function (Discount $model) {
+            // this ensures that the right cast for discount is used
+            $model->is_percentage = (bool) $model->is_percentage;
+            $discount = $model->discount;
+            $model->reloadCasts();
+            $model->discount = $discount;
+        });
     }
 
     public function contacts(): BelongsToMany
@@ -38,5 +60,10 @@ class Discount extends Model
     public function model(): MorphTo
     {
         return $this->morphTo('model');
+    }
+
+    public function reloadCasts(): void
+    {
+        $this->initializeHasAttributes();
     }
 }

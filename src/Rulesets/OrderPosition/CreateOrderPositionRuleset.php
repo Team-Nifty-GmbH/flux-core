@@ -107,7 +107,7 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'nullable',
             ],
             'discount_percentage' => [
-                app(Numeric::class, ['min' => 0, 'max' => 1]),
+                app(Numeric::class, ['min' => 0, 'max' => 100]),
                 'nullable',
             ],
             'margin' => [

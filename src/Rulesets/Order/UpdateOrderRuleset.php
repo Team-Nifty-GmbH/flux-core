@@ -8,6 +8,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
 use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rules\UniqueInFieldDependence;
 use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\Address\PostalAddressRuleset;
@@ -134,7 +135,10 @@ class UpdateOrderRuleset extends FluxRuleset
             ],
             'payment_target' => 'sometimes|required_with:payment_discount_target|integer|min:0',
             'payment_discount_target' => 'integer|min:0|nullable|lte:payment_target',
-            'payment_discount_percent' => 'numeric|min:0|nullable',
+            'payment_discount_percent' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 100]),
+            ],
             'header_discount' => 'numeric|min:0|nullable',
             'shipping_costs_net_price' => 'numeric|nullable',
             'margin' => 'sometimes|numeric|nullable',
