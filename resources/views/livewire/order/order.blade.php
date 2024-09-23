@@ -3,6 +3,8 @@
         init() {
             document.body.dataset.currencyCode = $wire.order.currency.iso;
         },
+        showOrderInformations: false,
+        showAdditionalAddresses: false,
         orderPositions: [],
         formatter: @js(resolve_static(\FluxErp\Models\Order::class, 'typeScriptAttributes')),
     }"
@@ -297,18 +299,11 @@
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 flex flex-col gap-4">
                     @section('contact-address-card')
-                        <x-card>
-                            <x-slot:header>
-                                <div class="flex items-center justify-between border-b px-4 p-2.5 dark:border-0">
-                                    <x-label>
-                                        {{ __('Contact') }}
-                                    </x-label>
-                                    <div class="pl-2">
-                                        <x-button outline icon="eye" href="{{ route('contacts.id?', $order->contact_id ?? '') }}">
-                                        </x-button>
-                                    </div>
-                                </div>
-                            </x-slot:header>
+                        <x-card :title="__('Contact')">
+                            <x-slot:action>
+                                <x-button outline icon="eye" href="{{ route('contacts.id?', $order->contact_id ?? '') }}">
+                                </x-button>
+                            </x-slot:action>
                             <div x-data="{
                                     updateContactId(id) {
                                         Alpine.$data(
@@ -359,18 +354,11 @@
                         </x-card>
                     @show
                     @section('invoice-address-card')
-                        <x-card>
-                            <x-slot:header>
-                                <div class="flex items-center justify-between border-b px-4 p-2.5 dark:border-0">
-                                    <x-label>
-                                        {{ __('Invoice Address') }}
-                                    </x-label>
-                                    <div class="pl-2">
-                                        <x-button outline icon="eye" href="{{ route('contacts.id?', $order->address_invoice['contact_id'] ?? '') }}">
-                                        </x-button>
-                                    </div>
-                                </div>
-                            </x-slot:header>
+                        <x-card :title="__('Invoice Address')">
+                            <x-slot:action>
+                                <x-button outline icon="eye" href="{{ route('contacts.id?', $order->address_invoice['contact_id'] ?? '') }}">
+                                </x-button>
+                            </x-slot:action>
                             <div id="order-invoice-address-id">
                                 <x-select
                                     :disabled="$order->is_locked"
@@ -404,18 +392,11 @@
                         </x-card>
                     @show
                     @section('delivery-address-card')
-                        <x-card>
-                            <x-slot:header>
-                                <div class="flex items-center justify-between border-b px-4 p-2.5 dark:border-0">
-                                    <x-label>
-                                        {{ __('Delivery Address') }}
-                                    </x-label>
-                                    <div class="pl-2">
-                                        <x-button outline icon="eye" href="{{ route('contacts.id?', $order->address_delivery['contact_id'] ?? '') }}">
-                                        </x-button>
-                                    </div>
-                                </div>
-                            </x-slot:header>
+                        <x-card :title="__('Delivery Address')">
+                            <x-slot:action>
+                                <x-button outline icon="eye" href="{{ route('contacts.id?', $order->address_delivery['contact_id'] ?? '') }}">
+                                </x-button>
+                            </x-slot:action>
                             <div id="order-delivery-address-id">
                                 <x-select
                                     :disabled="$order->is_locked"
@@ -449,8 +430,29 @@
                         </x-card>
                     @show
                     @section('general-card')
-                        <x-card>
-                            <div class="space-y-3">
+                        <x-card :title="__('Additional Addresses')" class="!px-0 !py-0">
+                            <x-slot:action>
+                                <x-button.circle
+                                    class="transition-transform"
+                                    x-bind:class="showAdditionalAddresses && '-rotate-90'"
+                                    icon="chevron-left"
+                                    x-on:click="showAdditionalAddresses = !showAdditionalAddresses"
+                                />
+                            </x-slot:action>
+                            <div class="space-y-3 px-2 py-5" x-collapse x-cloak x-show="showAdditionalAddresses">
+                                <livewire:order.additional-addresses :order-id="$order->id"/>
+                            </div>
+                        </x-card>
+                        <x-card :title="__('Order Informations')" class="!px-0 !py-0">
+                            <x-slot:action>
+                                <x-button.circle
+                                    class="transition-transform"
+                                    x-bind:class="showOrderInformations && '-rotate-90'"
+                                    icon="chevron-left"
+                                    x-on:click="showOrderInformations = !showOrderInformations"
+                                />
+                            </x-slot:action>
+                            <div class="space-y-3 px-2 py-5" x-collapse x-cloak x-show="showOrderInformations">
                                 @if(count($clients) > 1)
                                     <x-select
                                         disabled

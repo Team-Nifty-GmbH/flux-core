@@ -4,7 +4,7 @@
     x-on:mouseover.away="closeMenu()"
     x-on:mouseover="showMenu()"
     x-bind:class="menuOpen && '!w-full md:!w-72'"
-    class="z-10 bg-gray-700 fixed w-0 md:w-20 inset-y-0 md:block overflow-y-auto soft-scrollbar md:flex md:flex-col top-0 transition-all duration-500 ease-in-out"
+    class="z-10 bg-flux-secondary-500 fixed w-0 md:w-20 inset-y-0 md:block overflow-y-auto soft-scrollbar md:flex md:flex-col top-0 transition-all duration-500 ease-in-out"
 >
     <!-- Sidebar component, swap this element with another sidebar if you like -->
     <div class="soft-scrollbar flex flex-grow flex-col overflow-x-hidden">
