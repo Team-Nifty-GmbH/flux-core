@@ -8,8 +8,16 @@ export default function ($wire, $ref, lang) {
         isLoadingFiles: [],
         selectedCollection: null,
         pond: null,
+        multipleFileUpload: true,
         async setCollection(collectionName) {
-            console.log(await $wire.hasMultipleFiles(collectionName));
+            if (collectionName !== null) {
+                //  on selected - check if collection is single file upload
+                this.multipleFileUpload = !await $wire.hasSingleFile(collectionName);
+            } else {
+                // on deselect - reset to default on init
+                this.multipleFileUpload = true;
+            }
+            this.pond.setOptions({allowMultiple: this.multipleFileUpload});
             this.selectedCollection = collectionName;
         },
         loadFilePond() {
@@ -65,7 +73,8 @@ export default function ($wire, $ref, lang) {
                     },
                     revert: null,
                     remove: null,
-                }
+                },
+                allowMultiple: this.multipleFileUpload,
             });
 
             if (typeof lang === 'string' && lang.toLowerCase() === 'de') {
@@ -84,7 +93,7 @@ export default function ($wire, $ref, lang) {
             if (response && this.pond !== null) {
                 this.tempFilesId = [];
                 this.pond.removeFiles()
-                await (successCallback.bind(this))();
+                await (successCallback.bind(this))(this.multipleFileUpload);
             }
         }
     };

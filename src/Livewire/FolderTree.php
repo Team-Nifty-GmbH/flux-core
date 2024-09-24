@@ -23,7 +23,7 @@ class FolderTree extends Component
 {
     use Actions, WithFileUploads;
 
-    /** @var Model $this->modelType */
+    /** @var Model $this ->modelType */
     public ?string $modelType = null;
 
     public ?int $modelId = null;
@@ -46,13 +46,14 @@ class FolderTree extends Component
         $this->js(<<<'JS'
             selected = false;
             loadLevels();
-        JS);
+        JS
+        );
     }
 
     public function getRules(): array
     {
         return [
-            'files.*' => 'required|file|max:' . config('livewire.temporary_file_upload.rules'),
+            'files.*' => 'required|' . (config('livewire.temporary_file_upload.rules') ?? 'file|max:12288'),
         ];
     }
 
@@ -72,8 +73,8 @@ class FolderTree extends Component
 
         // merge the validation rules
         return [
-            'files.' . $index =>  'required|file|max:' . config('livewire.temporary_file_upload.rules')
-                . (! is_null($modelTypeValidationRules) ?
+            'files.' . $index => 'required|' . (config('livewire.temporary_file_upload.rules') ?? 'file|max:12288')
+                . (!is_null($modelTypeValidationRules) ?
                     '|mimetypes:' . implode(',', $modelTypeValidationRules) : ''
                 ),
         ];
@@ -143,8 +144,9 @@ class FolderTree extends Component
 
         return true;
     }
+
     #[Renderless]
-    public function hasMultipleFiles(string $collectionName): bool
+    public function hasSingleFile(string $collectionName): bool
     {
         // get the base collection name - ignore subfolders
         $baseCollection = str_contains($collectionName, '.') ?
@@ -174,7 +176,7 @@ class FolderTree extends Component
 
     public function getTree(): array
     {
-        if (! $this->modelType || ! $this->modelId) {
+        if (!$this->modelType || !$this->modelId) {
             return [];
         }
 

@@ -102,12 +102,19 @@
             return level.hasOwnProperty('children') && ! level.hasOwnProperty('file_name');
         },
         filesArray: $wire.entangle('filesArray', true),
-        async uploadSuccess() {
+        async uploadSuccess(multipleFileUpload) {
             this.showLevel(null, this.selectionProxy);
-            (await $wire.get('latestUploads')).forEach((file) => {
-                this.selectionProxy.children.push(file);
+            // on single file replace, replace selection - otherwise, add
+            const lastUploads = await $wire.get('latestUploads');
+            if(multipleFileUpload) {
+                lastUploads.forEach((file) => {
+                    this.selectionProxy.children.push(file);
+                    this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
+                },this);
+            } else {
+                this.selectionProxy.children = lastUploads;
                 this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
-            },this);
+            }
         },
         save() {
             $wire.save(this.selection).then(() => {
@@ -207,7 +214,7 @@
                               x-on:click="deleteFolder(selection)"/>
                 @endif
                 @if(resolve_static(\FluxErp\Actions\Media\UploadMedia::class, 'canPerformAction', [false]))
-                    <x-button :label="__('Add folder')" x-on:click="addFolder(selectionProxy.children, selection)"/>
+                    <x-button x-cloak x-show="multipleFileUpload" :label="__('Add folder')" x-on:click="addFolder(selectionProxy.children, selection)"/>
                 @endif
                 <x-button spinner :label="__('Download folder')"
                           x-on:click="$wire.downloadCollection(selection.collection_name)"/>
