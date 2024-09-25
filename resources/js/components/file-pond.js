@@ -1,12 +1,19 @@
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import {create, registerPlugin, setOptions} from 'filepond';
-import de_DE from 'filepond/locale/de-de.js';
 
-export default function ($wire, $ref, lang) {
+const BASE_LANGUAGE_PATH = '../../../../../node_modules/filepond/locale/';
+
+// load all available languages from filepond
+const availableLanguages = import.meta.glob('../../../../../node_modules/filepond/locale/*.js');
+
+//  TODO: error on tree refresh - renderLevel undefined - and is called several times
+
+export default function ($wire, $ref, lang, modalTranslations) {
     return {
         tempFilesId: [],
         isLoadingFiles: [],
         selectedCollection: null,
+        fileCount: null,
         pond: null,
         multipleFileUpload: true,
         async setCollection(collectionName) {
@@ -20,7 +27,13 @@ export default function ($wire, $ref, lang) {
             this.pond.setOptions({allowMultiple: this.multipleFileUpload});
             this.selectedCollection = collectionName;
         },
-        loadFilePond() {
+       async loadFilePond(fileCountGetter) {
+           // getitng specific  language path
+           const languageKey = lang === null  ? undefined : Object.keys(availableLanguages).find((key) => key.split('/').pop().includes(lang));
+           // fallback is english
+           const moduleLanguage= languageKey !== undefined ?  await availableLanguages[languageKey]() : await availableLanguages[`${BASE_LANGUAGE_PATH}en-en.js`]();
+           // return file-count for selected folder
+            this.fileCount = fileCountGetter.bind(this);
             registerPlugin(FilePondPluginImagePreview);
 
             const inputElement = $ref.querySelector('#filepond-drop');
@@ -52,6 +65,26 @@ export default function ($wire, $ref, lang) {
                     this.isLoadingFiles = this.isLoadingFiles.filter((item) => {
                         return item !== file.id;
                     });
+                    // if single file upload and error is null, show confirm dialog - to replace file
+                    if (!this.multipleFileUpload && error === null) {
+                        //  check if single file folder is not empty
+                        if (this.fileCount !== null && this.fileCount() !== undefined && this.fileCount() > 0) {
+                            window.$wireui.confirmDialog({
+                                title: modalTranslations.title,
+                                description: modalTranslations.description,
+                                icon: 'error',
+                                accept: {
+                                    label: modalTranslations.labelAccept,
+                                },
+                                reject: {
+                                    execute: () => {
+                                        this.pond.removeFile(file.id);
+                                    },
+                                    label: modalTranslations.labelReject,
+                                }
+                            }, $wire.__instance.id);
+                        }
+                    }
                 },
                 server: {
                     process: async (fieldName, file, metadata, load, error, progress, abort, transfer, options) => {
@@ -77,9 +110,9 @@ export default function ($wire, $ref, lang) {
                 allowMultiple: this.multipleFileUpload,
             });
 
-            if (typeof lang === 'string' && lang.toLowerCase() === 'de') {
+            if (moduleLanguage.default !== undefined) {
                 // set language to german
-                setOptions(de_DE);
+                setOptions(moduleLanguage.default);
             }
         },
         clearFilesOnLeave() {

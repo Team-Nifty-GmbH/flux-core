@@ -1,7 +1,13 @@
 <div
     x-data="{
         ...folderTree(),
-        ...filePond($wire,$refs.upload,'{{Auth::user()?->language?->language_code}}'),
+        ...filePond($wire,$refs.upload,'{{Auth::user()?->language?->language_code}}',{
+            title: '{{ __('File will be replaced') }}',
+            description: '{{ __('Do you want to proceed?') }}',
+            labelAccept: '{{ __('Accept') }}',
+            labelReject: '{{ __('Undo') }}',
+        },
+        ),
         async loadLevels() {
             this.levels = await $wire.getTree();
         },
@@ -14,6 +20,9 @@
         selectionProxy: {},
         selection: {},
         selected: false,
+        countChildren(){
+            return this.selectionProxy?.children?.length;
+        },
         treeSelect(level) {
             // during file upload, do not allow folder change
             if(this.isLoadingFiles.length !== 0){
@@ -231,7 +240,7 @@
             @if(resolve_static(\FluxErp\Actions\Media\UploadMedia::class, 'canPerformAction', [false]))
                 <div class="flex flex-col items-end">
                     <div class="w-full mb-4">
-                        <input x-init="loadFilePond()" id="filepond-drop" type="file"/>
+                        <input x-init="loadFilePond(countChildren)" id="filepond-drop" type="file"/>
                     </div>
                     <x-button x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0" x-cloak
                               x-on:click="submitFiles(selectionProxy.collection_name,uploadSuccess)"
