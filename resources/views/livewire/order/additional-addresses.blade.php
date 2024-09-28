@@ -14,11 +14,18 @@
                                 'api' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
                                 'params' => [
-                                  'fields' => [
+                                    'fields' => [
                                       'contact_id',
                                       'name',
-                                  ],
-                                  'with' => 'contact.media',
+                                    ],
+                                    'with' => 'contact.media',
+                                    'where' => [
+                                        [
+                                            'client_id',
+                                            '=',
+                                            $clientId
+                                        ],
+                                    ],
                                 ]
                             ]"
                         />
@@ -26,7 +33,7 @@
                             :label="__('Type')"
                             option-key-value
                             wire:model="address_type_id"
-                            :options="resolve_static(\FluxErp\Models\AddressType::class, 'query')->pluck('name', 'id')"
+                            :options="resolve_static(\FluxErp\Models\AddressType::class, 'query')->where('client_id', $clientId)->pluck('name', 'id')"
                         />
                     </div>
                     <x-slot:footer>
@@ -40,7 +47,7 @@
         @endteleport
     </div>
     @foreach($form->addresses as $address)
-        <x-card :title="$address['type']">
+        <x-card :title="$address['address_type']">
             <div class="text-sm">
                 {!! implode('<br>', $address['address']) !!}
             </div>

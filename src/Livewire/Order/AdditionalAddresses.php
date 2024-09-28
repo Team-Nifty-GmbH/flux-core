@@ -7,6 +7,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
 
 #[Lazy]
@@ -15,6 +16,8 @@ class AdditionalAddresses extends Component
     use Actions;
 
     public int $orderId;
+
+    public int $clientId;
 
     public OrderAddressesForm $form;
 
@@ -35,7 +38,6 @@ class AdditionalAddresses extends Component
                 'address_id' => $address->id,
                 'address' => $address->postal_address,
                 'address_type_id' => $address->pivot->address_type_id,
-                'type' => $address->pivot->addressType->name,
             ])
             ->toArray();
 
@@ -73,7 +75,7 @@ class AdditionalAddresses extends Component
 
         try {
             $this->form->save();
-        } catch (ValidationException $e) {
+        } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
             $this->form->addresses = $current;
 

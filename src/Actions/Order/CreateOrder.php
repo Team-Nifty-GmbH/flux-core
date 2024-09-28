@@ -54,7 +54,7 @@ class CreateOrder extends FluxAction
 
         if ($addresses) {
             $addresses = collect($addresses)
-                ->unique(fn ($address) => $address['address_id'] . $address['address_type_id'])
+                ->unique(fn ($address) => $address['address_id'] . '_' . $address['address_type_id'])
                 ->toArray();
 
             $order->addresses()->attach($addresses);

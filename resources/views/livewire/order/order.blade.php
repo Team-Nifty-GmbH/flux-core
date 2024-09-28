@@ -440,7 +440,7 @@
                                 />
                             </x-slot:action>
                             <div class="space-y-3 px-2 py-5" x-collapse x-cloak x-show="showAdditionalAddresses">
-                                <livewire:order.additional-addresses :order-id="$order->id"/>
+                                <livewire:order.additional-addresses :order-id="$order->id" :client-id="$order->client_id"/>
                             </div>
                         </x-card>
                         <x-card :title="__('Order Informations')" class="!px-0 !py-0">

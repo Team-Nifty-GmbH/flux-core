@@ -96,6 +96,8 @@ class AssetController extends Controller
 
     public function pwaIcon(string $file): BinaryFileResponse
     {
+        abort_if(! File::exists(flux_path('public/pwa/images/' . $file)), 404);
+
         return response()->file(flux_path('public/pwa/images/' . $file));
     }
 
