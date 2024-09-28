@@ -23,7 +23,7 @@
         </div>
     </x-card>
     <x-card :title="__('Additional columns')">
-        <x-additional-columns :model="\FluxErp\Models\SerialNumber::class" :id="$this->serialNumber->id ?? null" wire="serialNumber"/>
+        <x-flux::additional-columns :model="\FluxErp\Models\SerialNumber::class" :id="$this->serialNumber->id ?? null" wire="serialNumber"/>
     </x-card>
     <x-errors />
     @if($this->serialNumber->id ?? false)

@@ -202,7 +202,7 @@
         <x-card :title="__('Additional columns')">
             @section('additional-columns')
                 <div class="flex flex-col gap-4">
-                    <x-additional-columns :table="false" wire="product" :model="\FluxErp\Models\Product::class" :id="$this->product->id" />
+                    <x-flux::additional-columns :table="false" wire="product" :model="\FluxErp\Models\Product::class" :id="$this->product->id" />
                 </div>
             @show
         </x-card>
