@@ -15,7 +15,7 @@
                 :label="__('Signed Date')"
                 :without-time="true"
             />
-            <x-features.media.upload-form-object :label="__('Signed Sepa Mandate')" wire:model="signedMandate" :multiple="false" accept="application/pdf, image/jpeg, image/png, image/svg+xml"/>
+            <x-flux::features.media.upload-form-object :label="__('Signed Sepa Mandate')" wire:model="signedMandate" :multiple="false" accept="application/pdf, image/jpeg, image/png, image/svg+xml"/>
         </div>
         <x-slot:footer>
             <div class="flex gap-1.5 justify-end">

@@ -18,7 +18,7 @@
                         x-show="open.indexOf('{{ $treeItem['collection_name'] }}') !== -1"
                         style="display: none;"
                     >
-                        <x-folder-tree :tree="$treeItem['children']" />
+                        <x-flux::folder-tree :tree="$treeItem['children']" />
                     </ul>
             </li>
         @else

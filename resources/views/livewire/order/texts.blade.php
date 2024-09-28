@@ -1,10 +1,10 @@
 <div class="flex flex-col gap-4">
-    <x-editor
+    <x-flux::editor
         x-modelable="content"
         x-model="$wire.$parent.order.header"
         :label="__('Header')"
     />
-    <x-editor
+    <x-flux::editor
         x-modelable="content"
         x-model="$wire.$parent.order.footer"
         :label="__('Footer')"

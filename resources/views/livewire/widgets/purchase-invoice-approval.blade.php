@@ -4,7 +4,7 @@
     </div>
     <div class="flex-1 overflow-auto" x-data="{formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes'))}">
         @forelse($invoices as $invoice)
-            <x-list-item :item="$invoice">
+            <x-flux::list-item :item="$invoice">
                 <x-slot:avatar>
                     <x-avatar :src="$invoice->contact->getAvatarUrl()" />
                 </x-slot:avatar>
@@ -29,7 +29,7 @@
                         <div class="hidden sm:block">{{ __('View') }}</div>
                     </x-button>
                 </x-slot:actions>
-            </x-list-item>
+            </x-flux::list-item>
         @empty
             <div class="p-4 text-center text-gray-500 dark:text-gray-400">
                 {{ __('No invoices found') }}

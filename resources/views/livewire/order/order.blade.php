@@ -176,7 +176,7 @@
                     </div>
                     <div class="overflow-auto">
                         <template x-for="(position, index) in $wire.replicateOrder.order_positions">
-                            <x-list-item :item="[]">
+                            <x-flux::list-item :item="[]">
                                 <x-slot:value>
                                     <span x-text="position.name"></span>
                                 </x-slot:value>
@@ -193,7 +193,7 @@
                                         x-on:click="$wire.replicateOrder.order_positions.splice(index, 1); $wire.recalculateReplicateOrderPositions();"
                                     />
                                 </x-slot:actions>
-                            </x-list-item>
+                            </x-flux::list-item>
                         </template>
                     </div>
                 </div>

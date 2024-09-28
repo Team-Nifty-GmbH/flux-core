@@ -6,7 +6,7 @@
         @section('general')
         <x-input x-bind:readonly="!edit" label="{{ __('Product number') }}" wire:model="product.product_number" />
         <x-input x-bind:readonly="!edit" label="{{ __('Name') }}" wire:model="product.name" />
-        <x-editor x-model="edit" wire:model="product.description" :label="__('Description')" />
+        <x-flux::editor x-model="edit" wire:model="product.description" :label="__('Description')" />
         @show
     </x-card>
     <x-card class="space-y-2.5" :title="__('Attributes')">
@@ -210,7 +210,7 @@
     <x-card class="flex flex-col gap-4" :title="__('Suppliers')">
         @section('suppliers')
             <template x-for="(supplier, index) in $wire.product.suppliers">
-                <x-list-item :item="[]">
+                <x-flux::list-item :item="[]">
                     <x-slot:value>
                         <span x-text="supplier.main_address.name"></span>
                     </x-slot:value>
@@ -231,7 +231,7 @@
                             />
                         </div>
                     </x-slot:actions>
-                </x-list-item>
+                </x-flux::list-item>
             </template>
             <div x-show="edit" x-cloak x-transition>
                 <x-select :label="__('Contact')"

@@ -1,6 +1,5 @@
 @if($default)
     <div {{ $attributes }}>
-
         <svg class="relative m-auto h-full w-full" viewBox="0 0 351 377" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <style>.f {

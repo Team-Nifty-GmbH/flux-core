@@ -74,7 +74,7 @@
             @endCanAction
         </div>
     </div>
-    <x-tabs
+    <x-flux::tabs
         wire:model.live="tab"
         wire:loading="tab"
         :$tabs

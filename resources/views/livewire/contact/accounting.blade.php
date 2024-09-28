@@ -1,5 +1,5 @@
 <x-card>
-    <x-tabs
+    <x-flux::tabs
         wire:model.live="tab"
         :$tabs
         wire:ignore

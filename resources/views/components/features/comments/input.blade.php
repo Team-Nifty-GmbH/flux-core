@@ -29,7 +29,7 @@
         <div class="min-w-0 flex-1">
             <div>
                 <div x-ref="textarea">
-                    <x-editor class="comment-input" />
+                    <x-flux::editor class="comment-input" />
                 </div>
                 <div class="flex flex-wrap justify-between mt-3">
                     <div class="flex gap-1.5">
