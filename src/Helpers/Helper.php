@@ -13,18 +13,22 @@ use Illuminate\Validation\ValidationException;
 
 class Helper
 {
-    public static function checkCycle(string $model, object $item, int $parentId): bool
+    public static function checkCycle(string $model, object|int|string $item, int $parentId): bool
     {
-        $model = app($model);
-        $children[] = $item;
-        for ($i = 0; $i < count($children); $i++) {
-            $child = $model->query()
-                ->whereKey($children[$i]['id'])
-                ->first();
-            $children = array_merge($children, $child->children()->get()->toArray());
+        if (is_object($item)) {
+            $children[] = data_get($item, 'id');
+        } else {
+            $children[] = $item;
         }
 
-        return in_array($parentId, Arr::pluck($children, 'id'));
+        for ($i = 0; $i < count($children); $i++) {
+            $child = resolve_static($model, 'query')
+                ->whereKey($children[$i])
+                ->first();
+            $children = array_merge($children, $child?->children()->pluck('id')->toArray() ?? []);
+        }
+
+        return in_array($parentId, $children);
     }
 
     public static function classExists(string $classString,

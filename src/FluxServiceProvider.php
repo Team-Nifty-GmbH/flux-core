@@ -17,8 +17,11 @@ use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
+use FluxErp\Livewire\Features\Calendar\CalendarOverview;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
+use FluxErp\Models\Calendar;
+use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
 use FluxErp\Models\LedgerAccount;
@@ -101,6 +104,8 @@ class FluxServiceProvider extends ServiceProvider
         );
 
         app('livewire')->componentHook(SupportFormObjects::class);
+        $this->app->bind(\TeamNiftyGmbH\Calendar\Models\Calendar::class, Calendar::class);
+        $this->app->bind(\TeamNiftyGmbH\Calendar\Models\CalendarEvent::class, CalendarEvent::class);
     }
 
     /**
@@ -155,6 +160,8 @@ class FluxServiceProvider extends ServiceProvider
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
             ProductType::register(name: 'product', class: \FluxErp\Livewire\Product\Product::class, default: true);
         }
+
+        Livewire::component('calendar-overview', CalendarOverview::class);
     }
 
     protected function registerMarcos(): void
