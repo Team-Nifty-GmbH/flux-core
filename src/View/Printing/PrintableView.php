@@ -129,6 +129,7 @@ abstract class PrintableView extends Component
                     'localhost',
                     '127.0.0.1',
                     'fonts.googleapis.com',
+                    'fonts.gstatic.com',
                     Str::after(config('app.url'), '://'),
                     Str::after(config('app.asset_url'), '://'),
                     Str::after(config('app.frontend_url'), '://'),
