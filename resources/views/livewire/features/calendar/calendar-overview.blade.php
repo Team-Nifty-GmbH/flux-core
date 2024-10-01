@@ -13,13 +13,16 @@
         </div>
         <x-input wire:model="selectedCalendar.name" :label="__('Calendar Name')"/>
         <div x-cloak x-show="$wire.availableModels">
-            <x-select
-                wire:model="selectedCalendar.modelType"
-                :label="__('Model Type')"
-                :options="$this->availableModels"
-                option-label="label"
-                option-value="value"
-            />
+            <div x-bind:class="$wire.selectedCalendar.id && 'pointer-events-none'">
+                <x-select
+                    wire:model="selectedCalendar.modelType"
+                    :label="__('Model Type')"
+                    :options="$this->availableModels"
+                    option-label="label"
+                    option-value="value"
+                    x-bind:disabled="$wire.selectedCalendar.id"
+                />
+            </div>
         </div>
         <x-input
             class="p-0"

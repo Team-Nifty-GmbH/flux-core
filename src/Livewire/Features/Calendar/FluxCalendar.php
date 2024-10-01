@@ -238,20 +238,9 @@ class FluxCalendar extends CalendarComponent
             );
         }
 
-        data_set(
-            $eventInfo,
-            'event.extendedProps.calendar_id',
-            data_get(
-                collect($this->selectableCalendars)
-                    ->firstWhere('model_type', data_get($eventInfo, 'event.extendedProps.calendar_type')),
-                'id'
-            ),
-            false
-        );
-
         parent::onEventClick($eventInfo);
 
-        if (data_get($eventInfo, 'event.extendedProps.calendar_id') && ! $exists) {
+        if (data_get($eventInfo, 'event.calendar_id') && ! $exists) {
             $this->updatedCalendarEventCalendarId();
         }
     }

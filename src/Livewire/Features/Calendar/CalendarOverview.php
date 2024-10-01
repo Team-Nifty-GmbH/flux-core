@@ -13,9 +13,12 @@ use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\Calendar\Livewire\CalendarOverview as TallCalendarOverview;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
+use WireUi\Traits\Actions;
 
 class CalendarOverview extends TallCalendarOverview
 {
+    use Actions;
+
     public CalendarForm $calendar;
 
     public array $availableModels = [];
@@ -42,7 +45,7 @@ class CalendarOverview extends TallCalendarOverview
             'date' => __('Date'),
         ];
 
-        // Todo: add 'select' and 'datetime' to available field types
+        // Todo: add 'select', 'datetime', 'toggle' to available field types
     }
 
     public function render(): Factory|Application|View
@@ -59,7 +62,13 @@ class CalendarOverview extends TallCalendarOverview
         try {
             $this->calendar->reset();
             $this->calendar->fill($this->selectedCalendar);
-            $this->calendar->user_id = auth()->id();
+
+            if ($this->calendar->model_type) {
+                $this->calendar->user_id = null;
+            } else {
+                $this->calendar->user_id = auth()->id();
+            }
+
             $this->calendar->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);

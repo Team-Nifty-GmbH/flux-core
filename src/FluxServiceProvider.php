@@ -122,6 +122,7 @@ class FluxServiceProvider extends ServiceProvider
 
         // special case for calendar event to load into correct namespace
         Blade::component('flux::components.calendar.event-edit', 'tall-calendar::event-edit');
+        Blade::component('flux::components.calendar.calendar-list', 'tall-calendar::calendar-list');
 
         if (static::$registerFluxRoutes && ! $this->app->runningInConsole()) {
             $this->bootFluxMenu();
