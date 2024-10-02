@@ -45,17 +45,21 @@ class CalendarEvent extends BaseCalendarEvent implements HasMedia
         $attributes = array_merge(
             [
                 'calendar_type' => $this->calendar()->value('model_type'),
+                'extendedProps' => array_filter($this->extended_props ?? [], fn ($item) => ! is_array($item)),
             ],
             $attributes
         );
 
         $customProperties = array_map(
             fn ($item) => array_merge($item, ['value' => null]),
-            $this->calendar()->value('custom_properties')
+            $this->calendar()->value('custom_properties') ?? []
         );
 
         $calendarEventObject = parent::toCalendarEventObject($attributes);
-        $calendarEventObject['customProperties'] = Arr::keyBy($this->extended_props ?? [], 'name');
+        $calendarEventObject['customProperties'] = Arr::keyBy(
+            array_filter($this->extended_props ?? [], fn ($item) => is_array($item)),
+            'name'
+        );
 
         foreach ($customProperties as $customProperty) {
             if (! array_key_exists($customProperty['name'], $calendarEventObject['customProperties'])) {

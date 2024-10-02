@@ -92,8 +92,6 @@ class CalendarOverview extends TallCalendarOverview
 
     public function deleteCalendar(array $attributes): bool
     {
-        $attributes['confirm_option'] = ! $this->calendarEventWasRepeatable ? 'all' : $this->confirmDelete;
-
         try {
             $this->calendar->reset();
             $this->calendar->fill($attributes);
