@@ -62,7 +62,7 @@
             />
         </div>
     </div>
-    <x-tabs
+    <x-flux::tabs
         wire:model.live="tab"
         :$tabs
     />

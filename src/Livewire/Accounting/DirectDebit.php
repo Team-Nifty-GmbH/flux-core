@@ -34,7 +34,7 @@ class DirectDebit extends OrderList
                 ->label(__('Create Payment Run'))
                 ->attributes([
                     'wire:click' => 'createPaymentRun',
-                    'wire:confirm' => __('Create Payment Run|Do you really want to create the Payment Run?|Cancel|Yes'),
+                    'wire:flux-confirm' => __('Create Payment Run|Do you really want to create the Payment Run?|Cancel|Yes'),
                 ])
                 ->when(resolve_static(CreatePaymentRun::class, 'canPerformAction', [false])),
         ];

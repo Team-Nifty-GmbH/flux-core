@@ -24,7 +24,7 @@
         }
     }
 }" x-on:batch-id="window.Echo.channel('job-batch.' + $event.detail).listen('.FluxErp\\Events\\InstallProcessOutputEvent', (e) => {updateProgress(e)})">
-    <x-logo fill="#000000" class="h-24"/>
+    <x-flux::logo fill="#000000" class="h-24"/>
     <x-card :title="$this->title">
         <div class="flex flex-col gap-4">
             @include('flux::livewire.install-wizard.' . $this->steps[$step]['view'])

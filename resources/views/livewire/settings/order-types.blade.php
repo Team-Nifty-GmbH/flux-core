@@ -51,7 +51,7 @@
                         <x-checkbox wire:model="orderType.is_active" :label="__('Is Active')"/>
                         <x-checkbox wire:model="orderType.is_hidden" :label="__('Is Hidden')"/>
                         <x-input wire:model="orderType.mail_subject" :label="__('Mail Subject')"/>
-                        <x-editor wire:model="orderType.mail_body" :label="__('Mail Body')"/>
+                        <x-flux::editor wire:model="orderType.mail_body" :label="__('Mail Body')"/>
                     </div>
                 </div>
             </div>

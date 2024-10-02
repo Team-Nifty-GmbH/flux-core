@@ -3,6 +3,7 @@
 namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Address;
+use FluxErp\Models\AddressType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -42,5 +43,10 @@ class AddressAddressTypeOrder extends Pivot
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
+    }
+
+    public function addressType(): BelongsTo
+    {
+        return $this->belongsTo(AddressType::class);
     }
 }

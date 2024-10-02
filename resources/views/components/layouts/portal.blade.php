@@ -5,14 +5,14 @@
 <!DOCTYPE html>
 <HTML class="font-portal h-full" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <x-layouts.head.head>
+    <x-flux::layouts.head.head>
         <x-slot:title>
             {{ $client?->name . ' Portal' }}
         </x-slot:title>
         <style>
             {{ $setting['settings']['custom_css'] ?? '' }}
         </style>
-    </x-layouts.head.head>
+    </x-flux::layouts.head.head>
 </head>
 <body class="dark:bg-secondary-900 h-full bg-gray-50 text-xs">
     <x-notifications z-index="z-50"></x-notifications>

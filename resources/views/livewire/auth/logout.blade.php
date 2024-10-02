@@ -15,7 +15,7 @@
     @section('content')
         @section('content.logo')
             <div class="sm:mx-auto sm:w-full sm:max-w-md">
-                <x-logo fill="#000000" class="h-24"/>
+                <x-flux::logo fill="#0690FA" class="h-24"/>
             </div>
         @show
         @section('content.form')

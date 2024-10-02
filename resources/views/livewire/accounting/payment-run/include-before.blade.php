@@ -10,7 +10,7 @@
             <div class="flex grid grid-cols-1">
                 <div class="overflow-y-auto max-h-96">
                     <template x-for="order in $wire.paymentRunForm.orders">
-                        <x-list-item class="flex justify-between" :item="[]">
+                        <x-flux::list-item class="flex justify-between" :item="[]">
                             <x-slot:value>
                                 <div x-text="order.invoice_number"></div>
                             </x-slot:value>
@@ -33,7 +33,7 @@
                                     x-bind:href="getRoute(order)"
                                 />
                             </x-slot:actions>
-                        </x-list-item>
+                        </x-flux::list-item>
                     </template>
                 </div>
                 <div class="flex justify-end pt-4 gap-1.5">

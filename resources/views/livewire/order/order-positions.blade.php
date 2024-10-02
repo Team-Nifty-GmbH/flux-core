@@ -93,7 +93,7 @@
                             />
                         </div>
                     </div>
-                    <x-editor :label="__('Description')" wire:model="orderPosition.description" />
+                    <x-flux::editor :label="__('Description')" wire:model="orderPosition.description" />
                 </div>
                 <x-errors />
             </div>

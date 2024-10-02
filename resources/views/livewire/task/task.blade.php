@@ -57,7 +57,7 @@
             />
         </div>
     </div>
-    <x-tabs
+    <x-flux::tabs
         wire:model.live="taskTab"
         :$tabs
         wire:loading="taskTab"

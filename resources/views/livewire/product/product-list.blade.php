@@ -28,7 +28,7 @@
                         'method' => 'POST',
                     ]"
                 />
-                <x-editor wire:model="product.description" :label="__('Description')" />
+                <x-flux::editor wire:model="product.description" :label="__('Description')" />
             </section>
             <section class="flex flex-col gap-4">
                 <x-flux::product.prices :product="$product" />

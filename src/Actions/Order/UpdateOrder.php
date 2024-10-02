@@ -55,7 +55,11 @@ class UpdateOrder extends FluxAction
         $order->fill($this->data);
         $order->save();
 
-        if ($addresses) {
+        if (! is_null($addresses)) {
+            $addresses = collect($addresses)
+                ->unique(fn ($address) => $address['address_id'] . '_' . $address['address_type_id'])
+                ->toArray();
+
             $order->addresses()->sync($addresses);
         }
 

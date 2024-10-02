@@ -12,13 +12,13 @@
     </div>
     <x-modal max-width="6xl" name="edit-client">
         <x-card>
-            <x-tabs
+            <x-flux::tabs
                 :$tabs
                 wire:model="tab"
                 wire:loading
             >
                 @includeWhen($tab === 'general', 'flux::components.settings.client.general')
-            </x-tabs>
+            </x-flux::tabs>
             <x-slot:footer>
                 <div class="w-full">
                     <div class="flex justify-between gap-x-4">

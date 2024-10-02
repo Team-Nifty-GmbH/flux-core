@@ -79,12 +79,12 @@ class AssetController extends Controller
                         'sizes' => 'any',
                     ],
                     [
-                        'src' => '/flux/pwa/images/icons-192.png',
+                        'src' => '/pwa-icons/icons-192.png',
                         'type' => 'image/png',
                         'sizes' => '192x192',
                     ],
                     [
-                        'src' => '/flux/pwa/images/icons-512.png',
+                        'src' => '/pwa-icons/icons-512.png',
                         'type' => 'image/png',
                         'sizes' => '512x512',
                     ],
@@ -92,6 +92,13 @@ class AssetController extends Controller
             ],
             options: JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         );
+    }
+
+    public function pwaIcon(string $file): BinaryFileResponse
+    {
+        abort_if(! File::exists(flux_path('public/pwa/images/' . $file)), 404);
+
+        return response()->file(flux_path('public/pwa/images/' . $file));
     }
 
     public function pwaServiceWorker(): Response

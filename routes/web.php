@@ -33,5 +33,8 @@ Route::middleware('web')
                 ->name('pwa-service-worker');
             Route::get('/mail-pixel/{communication:uuid}', [AssetController::class, 'mailPixel'])
                 ->name('mail-pixel');
+            Route::get('/pwa-icons/{file}', [AssetController::class, 'pwaIcon'])
+                ->where('file', '.+')
+                ->name('pwa-icon');
         });
     });

@@ -81,7 +81,7 @@ class ProductForm extends FluxForm
 
     public ?bool $is_shipping_free = false;
 
-    public ?bool $is_required_product_serial_number = false;
+    public ?bool $has_serial_numbers = false;
 
     public ?bool $is_nos = false;
 

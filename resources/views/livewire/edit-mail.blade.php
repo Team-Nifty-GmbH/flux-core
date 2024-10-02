@@ -143,7 +143,7 @@
                 </label>
                 <input class="hidden" wire:model="files" id="files" type="file" multiple x-bind:disabled="$wire.multiple"/>
             </div>
-            <x-editor wire:model="mailMessage.html_body" />
+            <x-flux::editor wire:model="mailMessage.html_body" />
             <x-slot:footer>
                 <div class="flex justify-end">
                     <div class="flex gap-1">
