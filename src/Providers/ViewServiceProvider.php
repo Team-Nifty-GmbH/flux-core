@@ -92,8 +92,8 @@ class ViewServiceProvider extends ServiceProvider
             return '<?php endif; ?>';
         });
 
-        Blade::component(App::class, 'layouts.app');
-        Blade::component(Printing::class, 'layouts.print');
+        Blade::component(App::class, 'flux::layouts.app');
+        Blade::component(Printing::class, 'flux::layouts.print');
         config([
             'livewire.layout' => 'flux::layouts.app',
         ]);
