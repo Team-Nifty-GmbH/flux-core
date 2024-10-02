@@ -51,6 +51,7 @@ class AdditionalAddresses extends Component
 
     public function delete(int $id): void
     {
+        $current = $this->form->addresses;
         $this->form->addresses = array_filter(
             $this->form->addresses,
             fn (array $address) => $address['address_id'] !== $id
@@ -58,8 +59,9 @@ class AdditionalAddresses extends Component
 
         try {
             $this->form->save();
-        } catch (ValidationException $e) {
+        } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
+            $this->form->addresses = $current;
 
             return;
         }
