@@ -1,4 +1,9 @@
 <div class="whitespace-nowrap">
+    @if($group === 'my' && resolve_static(\FluxErp\Actions\Calendar\CreateCalendar::class, 'canPerformAction', [false]))
+        <x-button icon="plus" class="w-full" x-on:click="calendarItem = {}; $wire.editCalendar();">
+            {{ __('Create Calendar') }}
+        </x-button>
+    @endif
     <template x-for="calendarLoopItem in calendars.filter(calendar => calendar.group === '{{ $group }}');">
         <div class="rounded-md p-1 bg-primary-500 text-white dark:text-white"
              x-bind:class="{
@@ -47,9 +52,4 @@
             </div>
         </div>
     </template>
-    @if($group === 'my' && resolve_static(\FluxErp\Actions\Calendar\CreateCalendar::class, 'canPerformAction', [false]))
-        <x-button icon="plus" class="w-full" x-on:click="calendarItem = {}; $wire.editCalendar();">
-            {{ __('Create Calendar') }}
-        </x-button>
-    @endif
 </div>
