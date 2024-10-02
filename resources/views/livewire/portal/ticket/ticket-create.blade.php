@@ -69,7 +69,7 @@
                         class="text-portal-font-color sm:col-span-6">{{ __('Photos and videos help us analyze the errors') }}
                     </div>
                     <div class="sm:col-span-6">
-                        <x-features.media.upload wire:model.live="attachments"/>
+                        <x-flux::features.media.upload wire:model.live="attachments"/>
                     </div>
                 </div>
             </div>

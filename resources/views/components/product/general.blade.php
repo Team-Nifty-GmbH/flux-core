@@ -4,9 +4,9 @@
 >
     <x-card class="space-y-2.5" :title="__('General')">
         @section('general')
-            <x-input x-bind:readonly="!edit" label="{{ __('Product number') }}" wire:model="product.product_number" />
-            <x-input x-bind:readonly="!edit" label="{{ __('Name') }}" wire:model="product.name" />
-            <x-editor x-model="edit" wire:model="product.description" :label="__('Description')" />
+        <x-input x-bind:readonly="!edit" label="{{ __('Product number') }}" wire:model="product.product_number" />
+        <x-input x-bind:readonly="!edit" label="{{ __('Name') }}" wire:model="product.name" />
+        <x-flux::editor x-model="edit" wire:model="product.description" :label="__('Description')" />
         @show
     </x-card>
     <x-card class="space-y-2.5" :title="__('Attributes')">
@@ -19,9 +19,9 @@
                 <x-checkbox x-bind:disabled="!edit" label="{{ __('Is service') }}" wire:model="product.is_service" />
                 <div x-cloak x-show="$wire.product.is_service">
                     <x-select label="{{ __('Time unit') }}"
-                              option-key-value
-                              wire:model="product.time_unit_enum"
-                              :options="\FluxErp\Enums\TimeUnitEnum::valuesLocalized()"
+                        option-key-value
+                        wire:model="product.time_unit_enum"
+                        :options="\FluxErp\Enums\TimeUnitEnum::valuesLocalized()"
                     />
                 </div>
             @show
@@ -250,7 +250,7 @@
         <x-card :title="__('Additional columns')">
             @section('additional-columns')
                 <div class="flex flex-col gap-4">
-                    <x-additional-columns :table="false" wire="product" :model="\FluxErp\Models\Product::class" :id="$this->product->id" />
+                    <x-flux::additional-columns :table="false" wire="product" :model="\FluxErp\Models\Product::class" :id="$this->product->id" />
                 </div>
             @show
         </x-card>
@@ -258,7 +258,7 @@
     <x-card class="flex flex-col gap-4" :title="__('Suppliers')">
         @section('suppliers')
             <template x-for="(supplier, index) in $wire.product.suppliers">
-                <x-list-item :item="[]">
+                <x-flux::list-item :item="[]">
                     <x-slot:value>
                         <span x-text="supplier.main_address.name"></span>
                     </x-slot:value>
@@ -279,7 +279,7 @@
                             />
                         </div>
                     </x-slot:actions>
-                </x-list-item>
+                </x-flux::list-item>
             </template>
             <div x-show="edit" x-cloak x-transition>
                 <x-select :label="__('Contact')"

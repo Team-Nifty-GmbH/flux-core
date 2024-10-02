@@ -376,9 +376,7 @@ class FluxServiceProvider extends ServiceProvider
             Blade::component('flux::components.' . $relativePath, Str::remove('.index', $relativePath));
         }
 
-        foreach ($this->getViewClassAliasFromNamespace('FluxErp\\View\\Components') as $alias => $class) {
-            Blade::component($class, $alias);
-        }
+        Blade::componentNamespace('FluxErp\\View\\Components', 'flux');
     }
 
     protected function registerLivewireComponents(): void

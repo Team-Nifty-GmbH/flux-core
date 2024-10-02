@@ -5,7 +5,7 @@
     <div id="new-task-modal">
         <x-modal name="task-form-modal">
             <x-card>
-                <x-tabs
+                <x-flux::tabs
                     wire:model.live="taskTab"
                     wire:loading="taskTab"
                     :$tabs

@@ -47,13 +47,13 @@
         <x-modal name="install" max-width="7xl">
             <x-card :title="__('Install packages')">
                 <div class="flex flex-col gap-4">
-                    <x-features.media.upload-form-object wire:model="file" :multiple="true" accept=".zip,.rar,.7zip">
+                    <x-flux::features.media.upload-form-object wire:model="file" :multiple="true" accept=".zip,.rar,.7zip">
                         <x-slot:footer>
                             <div x-show="$wire.file.stagedFiles.length > 0" x-cloak x-transition class="flex justify-end">
-                                <x-button primary spinner="installUploaded" :label="__('Upload package')" wire:click="installUploaded" wire:confirm.icon.warning="{{ __('wire:confirm.install-uploaded-plugin') }}"/>
+                                <x-button primary spinner="installUploaded" :label="__('Upload package')" wire:click="installUploaded" wire:flux-confirm.icon.warning="{{ __('wire:confirm.install-uploaded-plugin') }}"/>
                             </div>
                         </x-slot:footer>
-                    </x-features.media.upload-form-object>
+                    </x-flux::features.media.upload-form-object>
                     <x-input type="search" wire:model.live.debounce="search" :placeholder="__('Search on packagist.org…')" />
                     <div class="flex flex-col gap-1.5 pt-4">
                         <template x-for="plugin in $wire.searchResult">

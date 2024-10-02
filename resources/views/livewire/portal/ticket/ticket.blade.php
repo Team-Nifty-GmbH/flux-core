@@ -32,8 +32,8 @@
                 </div>
             </div>
         </div>
-        <x-tabs wire:model.live="tab" :$tabs>
+        <x-flux::tabs wire:model.live="tab" :$tabs>
             <livewire:is wire:key="{{ uniqid() }}" :component="$tab" :model-id="$ticket['id']" />
-        </x-tabs>
+        </x-flux::tabs>
     </div>
 </div>

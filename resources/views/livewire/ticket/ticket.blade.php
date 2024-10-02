@@ -99,7 +99,7 @@
                                 @show
                             </x-card>
                             <x-card>
-                                <x-tabs
+                                <x-flux::tabs
                                     wire:model.live="tab"
                                     :$tabs
                                 >
@@ -108,7 +108,7 @@
                                         :component="$tab"
                                         :model-id="$ticket['id']"
                                     />
-                                </x-tabs>
+                                </x-flux::tabs>
                             </x-card>
                         </div>
                     </div>

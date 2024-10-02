@@ -60,10 +60,10 @@
         >
             <div class="dark:divide-secondary-700 divide-y divide-gray-200">
                 <template x-ref="textarea">
-                    <x-features.comments.input />
+                    <x-flux::features.comments.input />
                 </template>
                 @if(resolve_static(\FluxErp\Actions\Comment\CreateComment::class, 'canPerformAction', [false]) || $this->isPublic === false)
-                    <x-features.comments.input />
+                    <x-flux::features.comments.input />
                 @endcan
                 <div class="relative">
                     <x-spinner />
@@ -72,7 +72,7 @@
                             <h3 class="px-4 py-6 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50 sm:px-6">{{ __('Sticky comments') }}</h3>
                             <ul role="list">
                                 <template x-for="comment in stickyComments" >
-                                    <x-features.comments.comment />
+                                    <x-flux::features.comments.comment />
                                 </template>
                             </ul>
                             <h3 class="px-4 py-6 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50 sm:px-6">{{ __('All comments') }}</h3>
@@ -81,7 +81,7 @@
                     <div class="dark:divide-secondary-700 soft-scrollbar overflow-auto" x-ref="comments">
                         <ul role="list">
                             <template x-for="comment in comments.data" >
-                                <x-features.comments.comment />
+                                <x-flux::features.comments.comment />
                             </template>
                         </ul>
                     </div>

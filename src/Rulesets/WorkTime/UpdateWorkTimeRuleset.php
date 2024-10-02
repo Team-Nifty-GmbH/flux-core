@@ -26,6 +26,7 @@ class UpdateWorkTimeRuleset extends FluxRuleset
             ],
             'contact_id' => [
                 'nullable',
+                'required_if:is_billable,true',
                 'integer',
                 app(ModelExists::class, ['model' => Contact::class]),
             ],

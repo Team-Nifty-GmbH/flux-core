@@ -115,7 +115,7 @@
                     @endif
                 </div>
             </x-slot:action>
-            <x-tabs
+            <x-flux::tabs
                 wire:model.live="tab"
                 :$tabs
                 wire:ignore

@@ -22,7 +22,7 @@
             </div>
             <div class="overflow-auto">
                 <template x-for="(child, index) in $wire.transactionForm.children">
-                    <x-list-item :item="[]">
+                    <x-flux::list-item :item="[]">
                         <x-slot:value>
                             <span x-text="child.order?.invoice_number + ' (' + window.formatters.date(child.order?.invoice_date) + ')'"></span>
                         </x-slot:value>
@@ -37,7 +37,7 @@
                             <x-inputs.number x-model="child.amount" step="0.01" />
                             <x-button negative icon="trash" x-on:click="$wire.transactionForm.children.splice(index, 1); $wire.recalculateDifference();"/>
                         </x-slot:actions>
-                    </x-list-item>
+                    </x-flux::list-item>
                 </template>
                 <div class="flex justify-end gap-1.5">
                     <div>{{ __('Difference') }}</div>
