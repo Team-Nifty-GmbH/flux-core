@@ -50,7 +50,7 @@ class DeleteMedia extends FluxAction
         // check if the media collection is read-only
         if ($mediaItem->getCollection()?->readOnly === true && ! $this->force) {
             throw ValidationException::withMessages([
-                'id' => 'The media collection is read-only and cannot be modified.',
+                'collection_name' => __('The media collection is read-only and cannot be modified.'),
             ]);
         }
     }
