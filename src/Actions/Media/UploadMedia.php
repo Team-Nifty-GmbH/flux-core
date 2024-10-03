@@ -111,7 +111,7 @@ class UploadMedia extends FluxAction
         if (
             morph_to($this->data['model_type'], $this->data['model_id'])
                 ->getMediaCollection($this->data['collection_name'])
-                ?->readOnly === false
+                ?->readOnly === true
             && ! $this->force
         ) {
             throw ValidationException::withMessages([
