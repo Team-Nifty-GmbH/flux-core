@@ -13,6 +13,8 @@ use Illuminate\Validation\ValidationException;
 
 class UploadMedia extends FluxAction
 {
+    protected bool $force = false;
+
     protected function boot(array $data): void
     {
         parent::boot($data);
@@ -22,6 +24,13 @@ class UploadMedia extends FluxAction
     public static function models(): array
     {
         return [Media::class];
+    }
+
+    public function force($force = true): static
+    {
+        $this->force = $force;
+
+        return $this;
     }
 
     public function performAction(): Model
@@ -94,20 +103,20 @@ class UploadMedia extends FluxAction
         $this->data['collection_name'] ??= 'default';
     }
 
-    protected function validateData(): void
+    public function validateData(): void
     {
         parent::validateData();
 
-        if (resolve_static(Media::class, 'query')
-            ->where('model_type', $this->data['model_type'])
-            ->where('model_id', $this->data['model_id'])
-            ->where('collection_name', $this->data['collection_name'])
-            ->where('name', $this->data['name'])
-            ->exists()
+        // check if the media collection is read-only
+        if (
+            morph_to($this->data['model_type'], $this->data['model_id'])
+                ->getMediaCollection($this->data['collection_name'])
+                ->readOnly
+            && ! $this->force
         ) {
             throw ValidationException::withMessages([
-                'filename' => [__('File name already exists')],
-            ])->errorBag('uploadMedia');
+                'id' => 'The media collection is read-only and cannot be modified.',
+            ]);
         }
     }
 }

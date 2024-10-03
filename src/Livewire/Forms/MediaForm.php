@@ -49,6 +49,8 @@ class MediaForm extends FluxForm
 
     public array|TemporaryUploadedFile|null $uploadedFile = null;
 
+    protected bool $force = false;
+
     protected function getActions(): array
     {
         return [
@@ -110,6 +112,14 @@ class MediaForm extends FluxForm
         }
     }
 
+    public function force(): static
+    {
+        // this allows saving of media to read-only collections
+        $this->force = true;
+
+        return $this;
+    }
+
     public function replace(): void
     {
         $response = $this->makeAction('replace')
@@ -118,6 +128,11 @@ class MediaForm extends FluxForm
             ->execute();
 
         $this->fill($response);
+    }
+
+    protected function makeAction(string $name, ?array $data = null): FluxAction
+    {
+        return parent::makeAction($name, $data)->force($this->force);
     }
 
     public function __set(string $name, $value): void

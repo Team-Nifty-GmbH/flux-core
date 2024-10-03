@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Support\MediaLibrary\MediaCollection;
 use FluxErp\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -39,5 +40,10 @@ class Media extends BaseMedia
         // When using the base method from spatie media this method throws an exception.
         // Thats why we override the method here and return an empty BelongsTo.
         return new BelongsTo(static::query(), new static(), '', '', '');
+    }
+
+    public function getCollection(): MediaCollection
+    {
+        return $this->model->getMediaCollection($this->collection_name);
     }
 }

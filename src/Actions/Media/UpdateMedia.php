@@ -6,9 +6,12 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Media;
 use FluxErp\Rulesets\Media\UpdateMediaRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 class UpdateMedia extends FluxAction
 {
+    protected bool $force = false;
+
     protected function boot(array $data): void
     {
         parent::boot($data);
@@ -18,6 +21,13 @@ class UpdateMedia extends FluxAction
     public static function models(): array
     {
         return [Media::class];
+    }
+
+    public function force($force = true): static
+    {
+        $this->force = $force;
+
+        return $this;
     }
 
     public function performAction(): Model
@@ -30,5 +40,21 @@ class UpdateMedia extends FluxAction
         $media->save();
 
         return $media->withoutRelations();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        $mediaItem = resolve_static(Media::class, 'query')
+            ->whereKey($this->data['id'])
+            ->first();
+
+        // check if the media collection is read-only
+        if ($mediaItem->getCollection()->readOnly && ! $this->force) {
+            throw ValidationException::withMessages([
+                'id' => 'The media collection is read-only and cannot be modified.',
+            ]);
+        }
     }
 }
