@@ -221,6 +221,8 @@ class MediaTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->post('/api/media', $media);
         $response->assertStatus(422);
+
+        $response->assertJsonValidationErrorFor('collection_name');
     }
 
     public function test_upload_media_invalid_file()
