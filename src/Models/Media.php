@@ -42,7 +42,7 @@ class Media extends BaseMedia
         return new BelongsTo(static::query(), new static(), '', '', '');
     }
 
-    public function getCollection(): MediaCollection
+    public function getCollection(): ?MediaCollection
     {
         return $this->model->getMediaCollection($this->collection_name);
     }

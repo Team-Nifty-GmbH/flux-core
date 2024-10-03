@@ -126,7 +126,7 @@ class ReplaceMedia extends FluxAction
         $this->data['collection_name'] ??= 'default';
 
         // check if the media collection is read-only
-        if ($mediaItem->getCollection()->readOnly && ! $this->force) {
+        if ($mediaItem->getCollection()?->readOnly === false && ! $this->force) {
             throw ValidationException::withMessages([
                 'id' => 'The media collection is read-only and cannot be modified.',
             ]);
