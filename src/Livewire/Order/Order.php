@@ -6,7 +6,9 @@ use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\ToggleLock;
 use FluxErp\Actions\Order\UpdateOrder;
+use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
+use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
@@ -29,7 +31,9 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\Project;
 use FluxErp\Models\Schedule;
+use FluxErp\Models\Task;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
@@ -817,6 +821,41 @@ class Order extends OrderPositionList
         );
     }
 
+    #[Renderless]
+    public function createTasks(Project $project): void
+    {
+        // save the order first
+        $this->save();
+
+        foreach ($this->selected as $orderPositionIndex) {
+            // check if the task already exists or the selected order position is not a numeric value
+            if (! is_numeric($orderPositionIndex)
+                || resolve_static(Task::class, 'query')
+                    ->where('project_id', $project->id)
+                    ->where('model_type', morph_alias(OrderPosition::class))
+                    ->where('model_id', data_get($this->data, $orderPositionIndex . '.id'))
+                    ->exists()
+            ) {
+                continue;
+            }
+
+            try {
+                CreateTask::make([
+                    'project_id' => $project->id,
+                    'model_type' => morph_alias(OrderPosition::class),
+                    'model_id' => data_get($this->data, $orderPositionIndex . '.id'),
+                    'name' => data_get($this->data, $orderPositionIndex . '.name'),
+                    'description' => data_get($this->data, $orderPositionIndex . '.description'),
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+    }
+
     protected function getAvailableStates(array|string $fieldNames): void
     {
         $fieldNames = (array) $fieldNames;
@@ -1013,7 +1052,15 @@ class Order extends OrderPositionList
                 ->label(__('Delete'))
                 ->icon('trash')
                 ->color('negative')
-                ->wireClick('deleteSelectedOrderPositions(); showSelectedActions = false;'),
+                ->when(fn () => resolve_static(DeleteOrderPosition::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
+                    'wire:click' => 'deleteSelectedOrderPositions(); showSelectedActions = false;',
+                ]),
+            DataTableButton::make()
+                ->label(__('Create tasks'))
+                ->when(fn () => resolve_static(CreateTask::class, 'canPerformAction', [false]))
+                ->xOnClick('$openModal(\'create-tasks\')'),
         ];
     }
 
