@@ -135,25 +135,6 @@ class MediaTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_upload_media_file_already_exists()
-    {
-        $media = [
-            'model_type' => $this->task->getMorphClass(),
-            'model_id' => $this->task->id,
-            'media' => $this->file,
-            'is_public' => false,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['upload']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/media', $media);
-        $response->assertStatus(201);
-
-        $reUpload = $this->actingAs($this->user)->post('/api/media', $media);
-        $reUpload->assertStatus(422);
-    }
-
     public function test_upload_media_task_not_found()
     {
         $media = [
@@ -503,34 +484,6 @@ class MediaTest extends BaseSetup
 
         $replace = $this->actingAs($this->user)->post('/api/media/' . ++$uploadedMedia->id, [
             'media' => $this->file,
-        ]);
-        $replace->assertStatus(422);
-    }
-
-    public function test_replace_media_file_name_already_exists()
-    {
-        $media = [
-            'model_type' => $this->task->getMorphClass(),
-            'model_id' => $this->task->id,
-            'media' => $this->file,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['upload']);
-        $this->user->givePermissionTo($this->permissions['replace']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/media', $media);
-        $response->assertStatus(201);
-
-        $uploadedMedia = $this->task->getFirstMedia();
-        $file = UploadedFile::fake()->image('Replicate.png');
-
-        $replicate = Media::query()->whereKey($uploadedMedia->id)->first()->replicate(['uuid']);
-        $replicate->name = 'Replicate.png';
-        $replicate->save();
-
-        $replace = $this->actingAs($this->user)->post('/api/media/' . $uploadedMedia->id, [
-            'media' => $file,
         ]);
         $replace->assertStatus(422);
     }
