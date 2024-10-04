@@ -2,7 +2,7 @@
 
 namespace FluxErp\Tests\Livewire;
 
-use FluxErp\Livewire\Cart;
+use FluxErp\Livewire\Cart\Cart;
 use FluxErp\Models\Currency;
 use FluxErp\Models\PriceList;
 use Livewire\Livewire;
