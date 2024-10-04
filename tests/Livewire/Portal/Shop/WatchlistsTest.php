@@ -1,16 +1,18 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Portal\Shop;
+namespace Tests\Feature\Livewire\Portal\Shop;
 
 use FluxErp\Livewire\Portal\Shop\Watchlists;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class WatchlistTest extends TestCase
+class WatchlistsTest extends TestCase
 {
+    protected string $livewireComponent = Watchlists::class;
+
     public function test_renders_successfully()
     {
-        Livewire::test(Watchlists::class)
+        Livewire::test($this->livewireComponent)
             ->assertStatus(200);
     }
 }

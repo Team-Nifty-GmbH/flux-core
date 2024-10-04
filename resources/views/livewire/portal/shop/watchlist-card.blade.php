@@ -30,7 +30,7 @@
             </div>
         @endforeach
     </div>
-    @if(auth()->user()->getMorphClass() === 'user')
+    @if(auth()->user()?->getMorphClass() === 'user' && $cartForm->isUserOwned())
         <hr>
         <div class="p-4">
             <x-toggle :id="uniqid()" :label="__('Is Public')" wire:model.live="cartForm.is_public" />

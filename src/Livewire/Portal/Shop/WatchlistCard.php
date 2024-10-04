@@ -88,14 +88,14 @@ class WatchlistCard extends Component
                 ->cartItems()
                 ->with([
                     'product' => fn (BelongsTo $query) => $query
-                        ->when(auth()->user()->getMorphClass() !== 'user', fn () => $query->webshop()),
+                        ->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop()),
                 ])
                 ->get(['product_id', 'amount'])
                 ->filter(fn (CartItem $cartItem) => $cartItem->product)
                 ->map(fn (CartItem $cartItem) => ['id' => $cartItem->product_id, 'amount' => $cartItem->amount])
                 ->toArray()
         )
-            ->to(auth()->user()->getMorphClass() === 'user' ? 'cart.cart' : 'portal.shop.cart');
+            ->to(auth()->user()?->getMorphClass() === 'user' ? 'cart.cart' : 'portal.shop.cart');
     }
 
     public function updatedCartFormIsPublic(): void
