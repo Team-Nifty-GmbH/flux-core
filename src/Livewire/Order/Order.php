@@ -12,6 +12,7 @@ use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\DataTables\OrderPositionList;
@@ -624,6 +625,43 @@ class Order extends OrderPositionList
     }
 
     #[Renderless]
+    public function recalculateOrderPositions(): void
+    {
+        $products = resolve_static(Product::class, 'query')
+            ->whereIntegerInRaw('id', array_column($this->data, 'product_id'))
+            ->get()
+            ->keyBy('id');
+        $contact = resolve_static(Contact::class, 'query')
+            ->whereKey($this->order->contact_id)
+            ->first();
+        $priceList = resolve_static(PriceList::class, 'query')
+            ->whereKey($this->order->price_list_id)
+            ->first();
+
+        foreach ($this->data as &$item) {
+            if (data_get($item, 'is_bundle_position') || ! data_get($item, 'product_id')) {
+                continue;
+            }
+
+            $this->orderPosition->reset();
+            $this->orderPosition->fill($item);
+
+            $this->orderPosition->unit_price = PriceHelper::make($products[$item['product_id']])
+                ->setPriceList($priceList)
+                ->setContact($contact)
+                ->price()
+                ->price;
+
+            $this->orderPosition->calculate();
+
+            $item = array_merge($item, $this->orderPosition->toArray());
+        }
+
+        $this->orderPosition->reset();
+        $this->recalculateOrderTotals();
+    }
+
+    #[Renderless]
     public function recalculateReplicateOrderPositions(): void
     {
         $this->replicateOrder->order_positions = array_values($this->replicateOrder->order_positions);
@@ -1061,6 +1099,14 @@ class Order extends OrderPositionList
                 ->label(__('Create tasks'))
                 ->when(fn () => resolve_static(CreateTask::class, 'canPerformAction', [false]))
                 ->xOnClick('$openModal(\'create-tasks\')'),
+            DataTableButton::make()
+                ->label(__('Recalculate prices'))
+                ->attributes([
+                    'wire:flux-confirm.icon.warning' => __(
+                        'Recalculate prices|Are you sure you want to recalculate the prices?|Cancel|Confirm'
+                    ),
+                    'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
+                ])
         ];
     }
 
