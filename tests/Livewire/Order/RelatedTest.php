@@ -3,6 +3,7 @@
 namespace FluxErp\Tests\Livewire\Order;
 
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Order\Related;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -78,7 +79,10 @@ class RelatedTest extends BaseSetup
 
     public function test_renders_successfully()
     {
-        Livewire::test(Related::class, ['orderId' => $this->order->id])
+        $form = new OrderForm(Livewire::new(Related::class), 'order');
+        $form->fill($this->order);
+
+        Livewire::test(Related::class, ['order' => $form])
             ->assertStatus(200);
     }
 }
