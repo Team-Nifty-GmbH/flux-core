@@ -6,7 +6,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Carbon;
-use TeamNiftyGmbH\Calendar\CalendarComponent;
+use TeamNiftyGmbH\Calendar\Livewire\CalendarComponent;
 use TeamNiftyGmbH\Calendar\Models\Calendar;
 use TeamNiftyGmbH\Calendar\Models\CalendarEvent;
 

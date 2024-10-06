@@ -1,1 +1,1 @@
-@extends('tall-calendar::livewire.calendar')
+@extends('tall-calendar::livewire.calendar.calendar')

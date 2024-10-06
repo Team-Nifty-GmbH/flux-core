@@ -5,7 +5,11 @@ namespace FluxErp\Rulesets\CalendarEvent;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
+use FluxErp\Traits\HasCalendarEvents;
+use Illuminate\Validation\Rule;
 
 class CreateCalendarEventRuleset extends FluxRuleset
 {
@@ -19,12 +23,34 @@ class CreateCalendarEventRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Calendar::class]),
             ],
+            'model_type' => [
+                'required_with:model_id',
+                'string',
+                app(MorphClassExists::class, ['uses' => HasCalendarEvents::class]),
+            ],
+            'model_id' => [
+                'required_with:model_type',
+                'integer',
+                app(MorphExists::class),
+            ],
             'title' => 'required|string',
             'description' => 'string|nullable',
             'start' => 'required|date',
             'end' => 'required|date|after_or_equal:start',
             'is_all_day' => 'boolean',
             'extended_props' => 'array|nullable',
+            'extended_props.*.name' => 'required|string',
+            'extended_props.*.field_type' => [
+                'required',
+                'string',
+                Rule::in([
+                    'text',
+                    'textarea',
+                    'checkbox',
+                    'date',
+                ]),
+            ],
+            'extended_props.*.value' => 'nullable',
             'excluded' => 'array|nullable',
             'excluded.*' => 'date',
         ];

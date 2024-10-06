@@ -6,6 +6,7 @@ use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class UpdateCalendarEventRuleset extends FluxRuleset
 {
@@ -30,6 +31,18 @@ class UpdateCalendarEventRuleset extends FluxRuleset
             'end' => 'required_if:confirm_option,this|required_if:confirm_option,future|date|after_or_equal:start',
             'is_all_day' => 'boolean',
             'extended_props' => 'array|nullable',
+            'extended_props.*.name' => 'required|string',
+            'extended_props.*.field_type' => [
+                'required',
+                'string',
+                Rule::in([
+                    'text',
+                    'textarea',
+                    'checkbox',
+                    'date',
+                ]),
+            ],
+            'extended_props.*.value' => 'nullable',
             'confirm_option' => 'required|string|in:this,future,all',
             'original_start' => 'required_if:confirm_option,this|required_if:confirm_option,future|date',
         ];

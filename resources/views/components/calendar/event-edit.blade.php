@@ -63,6 +63,45 @@
                 />
             </div>
         @show
+        @section('event-edit.custom-properties')
+            <template x-for="(customProperty, propertyName) in $wire.calendarEvent.customProperties">
+                <div>
+                    <div x-cloak x-show="customProperty.field_type === 'text'">
+                        <x-label class="mb-1" x-bind:for="propertyName" x-text="propertyName" />
+                        <x-input
+                            x-model="customProperty.value"
+                            x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
+                            x-bind:id="propertyName"
+                        />
+                    </div>
+                    <div x-cloak x-show="customProperty.field_type === 'textarea'">
+                        <x-label class="mb-1" x-bind:for="propertyName" x-text="propertyName" />
+                        <x-textarea
+                            x-model="customProperty.value"
+                            x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
+                            x-bind:id="propertyName"
+                        />
+                    </div>
+                    <div x-cloak x-show="customProperty.field_type === 'checkbox'" class="flex gap-x-2">
+                        <x-checkbox
+                            x-model="customProperty.value"
+                            x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
+                            x-bind:id="propertyName"
+                        />
+                        <x-label x-bind:for="propertyName" x-text="propertyName" />
+                    </div>
+                    <div x-cloak x-show="customProperty.field_type === 'date'">
+                        <x-label class="mb-1" x-bind:for="propertyName" x-text="propertyName" />
+                        <x-input
+                            x-model="customProperty.value"
+                            x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
+                            x-bind:id="propertyName"
+                            type="date"
+                        />
+                    </div>
+                </div>
+            </template>
+        @show
         @section('event-edit.repeatable')
             <div class="mb-2" x-show="$wire.calendarEvent.is_repeatable">
                 <x-checkbox
