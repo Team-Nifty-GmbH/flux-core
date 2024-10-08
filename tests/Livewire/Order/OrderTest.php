@@ -14,6 +14,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 class OrderTest extends BaseSetup
@@ -82,5 +83,40 @@ class OrderTest extends BaseSetup
                 $component->assertSeeLivewire($tab->component);
             }
         }
+    }
+
+    public function test_update_locked_order()
+    {
+        $commission = Str::uuid()->toString();
+        $invoiceNumber = $this->order->invoice_number;
+        $this->order->update(['is_locked' => true]);
+
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->set('order.commission', $commission)
+            ->set('order.invoice_number', $commission)
+            ->assertSet('order.commission', $commission)
+            ->assertSet('order.invoice_number', $commission)
+            ->call('save')
+            ->assertStatus(200)
+            ->assertHasNoErrors();
+
+        $this->order->refresh();
+
+        // ensure that the commission changed but the invoice number didnt
+        $this->assertTrue($this->order->is_locked);
+        $this->assertEquals($commission, $this->order->commission);
+        $this->assertEquals($invoiceNumber, $this->order->invoice_number);
+    }
+
+    public function test_delete_locked_order_fails()
+    {
+        $this->order->update(['is_locked' => true]);
+
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->call('delete')
+            ->assertStatus(200)
+            ->assertNoRedirect()
+            ->assertHasErrors(['id'])
+            ->assertWireuiNotification(icon: 'error');
     }
 }

@@ -59,6 +59,7 @@ use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Scout\Builder;
 use Livewire\Component;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -195,6 +196,23 @@ class FluxServiceProvider extends ServiceProvider
                     return (new LengthAwarePaginator(
                         $this->forPage($page, $perPage), $this->count(), $perPage, $page, $options))
                         ->withPath($urlParams ? dirname(url()->full()) . $urlParams : url()->full());
+                });
+        }
+
+        if (! Testable::hasMacro('assertWireuiNotification') && $this->app->runningUnitTests()) {
+            Testable::macro('assertWireuiNotification',
+                function (?string $title = null, ?string $icon = null, ?string $description = null) {
+                    $this->assertDispatched(
+                        'wireui:notification',
+                        function (string $eventName, array $params) use ($title, $icon, $description) {
+                            $options = data_get($params, '0.options');
+
+                            return array_key_exists('componentId', $params[0])
+                                && (is_null($icon) || data_get($options, 'icon') === $icon)
+                                && (is_null($title) || data_get($options, 'title') === $title)
+                                && (is_null($description) || data_get($options, 'description') === $description);
+                        }
+                    );
                 });
         }
 
