@@ -28,7 +28,7 @@ class UpdateOrderRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => Order::class])->where('is_locked', false),
+                app(ModelExists::class, ['model' => Order::class]),
             ],
             'agent_id' => [
                 'integer',

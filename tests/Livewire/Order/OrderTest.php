@@ -116,7 +116,7 @@ class OrderTest extends BaseSetup
             ->call('delete')
             ->assertStatus(200)
             ->assertNoRedirect()
-            ->assertHasErrors(['id'])
+            ->assertHasErrors(['is_locked'])
             ->assertWireuiNotification(icon: 'error');
     }
 }
