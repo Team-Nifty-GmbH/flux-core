@@ -4,7 +4,7 @@
     $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
 @endphp
 @section('first-page-header')
-    <x-flux::print.first-page-header :address="$model->addressInvoice">
+    <x-flux::print.first-page-header :address="$model->addressInvoice"  :$model>
         <x-slot:right-block>
             <div class="inline-block">
                 @section('first-page-right-block')
