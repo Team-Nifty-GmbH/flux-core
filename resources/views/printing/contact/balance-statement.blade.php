@@ -63,7 +63,7 @@
                 @show
                 </thead>
                 @section('positions.body')
-                    @foreach ($model->orders()->whereNotNull('invoice_number')->whereNotState('payment_state', Paid::class)->whereNot('balance', 0)->get(['id', 'order_number', 'invoice_date', 'invoice_number', 'total_gross_price', 'balance']) as $order)
+                    @foreach ($model->orders()->unpaid()->get(['id', 'order_number', 'invoice_date', 'invoice_number', 'total_gross_price', 'balance']) as $order)
                         <x-flux::print.order.order :order="$order" :currency="$currency" :formatter="$formatter" />
                     @endforeach
                 @show
@@ -74,14 +74,14 @@
         @section('total')
             <table class="w-full">
                 <tbody class="break-inside-avoid">
-                    <tr>
-                        <td colspan="3" class="border-b border-black font-semibold">
-                            {{ __('Total') }}
-                        </td>
-                        <td class="border-b border-black text-right float-right font-semibold">
-                            {{ $formatter->formatCurrency($model->orders()->whereNot('balance', 0)->sum('balance'), $currency) }}
-                        </td>
-                    </tr>
+                <tr>
+                    <td colspan="3" class="border-b border-black font-semibold">
+                        {{ __('Total') }}
+                    </td>
+                    <td class="border-b border-black text-right float-right font-semibold">
+                        {{ $formatter->formatCurrency($model->orders()->unpaid()->sum('balance'), $currency) }}
+                    </td>
+                </tr>
                 </tbody>
             </table>
         @show
