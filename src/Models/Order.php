@@ -357,6 +357,16 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         );
     }
 
+    public function scopeUnpaid(Builder $query): Builder
+    {
+        return $query->whereNotNull('invoice_number')->whereNotState(Paid::class)->whereNot('balance', 0);
+    }
+
+    public function scopePaid(Builder $query): Builder
+    {
+        return $query->whereNotNull('invoice_number')->whereNotState(Open::class)->whereNot('balance', 0);
+    }
+
     public function newCollection(array $models = []): Collection
     {
         return app(OrderCollection::class, ['items' => $models]);
