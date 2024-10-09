@@ -104,7 +104,7 @@ class ViewServiceProvider extends ServiceProvider
         $this->loadViewsFrom($views, 'print');
 
         View::composer('*', function () {
-            Number::useCurrency(Currency::default()->iso);
+            Currency::default() && Number::useCurrency(Currency::default()->iso);
 
             try {
                 if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
