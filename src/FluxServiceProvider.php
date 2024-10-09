@@ -21,7 +21,6 @@ use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
-use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Order;
 use FluxErp\Models\Permission;
@@ -54,7 +53,6 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route as RouteFacade;
-use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
@@ -116,8 +114,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->bootRoutes();
         $this->registerLivewireComponents();
         $this->registerBladeComponents();
-
-        Number::useCurrency(Currency::default()->iso);
 
         // special case for calendar event to load into correct namespace
         Blade::component('flux::components.calendar.event-edit', 'tall-calendar::event-edit');
