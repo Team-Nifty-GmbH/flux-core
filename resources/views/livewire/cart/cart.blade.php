@@ -19,4 +19,11 @@
         :options="array_filter($watchlists, fn (array $watchlist) => $watchlist['id'] ?? false)"
         wire:model.live.numeric="loadWatchlist"
     />
+    <x-button
+        :label="__('Edit watchlists')"
+        :href="route('watchlists')"
+        wire:navigate
+        primary
+        class="w-full"
+    />
 @endsection

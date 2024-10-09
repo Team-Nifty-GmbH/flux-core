@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire;
+namespace FluxErp\Livewire\Cart;
 
 use FluxErp\Actions\Cart\CreateCart;
 use FluxErp\Actions\CartItem\CreateCartItem;
@@ -54,7 +54,7 @@ class Cart extends Component
 
     public function render(): View
     {
-        return view('flux::livewire.cart');
+        return view('flux::livewire.cart.cart');
     }
 
     public function refresh(): void
@@ -209,8 +209,9 @@ class Cart extends Component
                 ->with('products')
                 ->whereKey($this->loadWatchlist)
                 ->first()
-                ->products
-                ->pluck('id')
+                ->cartItems()
+                ->get(['product_id', 'amount'])
+                ->map(fn (CartItem $cartItem) => ['id' => $cartItem->product_id, 'amount' => $cartItem->amount])
                 ->toArray()
         );
 

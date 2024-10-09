@@ -4,7 +4,7 @@ namespace FluxErp\Livewire\Portal\Shop;
 
 use FluxErp\Actions\Cart\CreateCart;
 use FluxErp\Actions\CartItem\CreateCartItem;
-use FluxErp\Livewire\Cart as BaseCart;
+use FluxErp\Livewire\Cart\Cart as BaseCart;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
