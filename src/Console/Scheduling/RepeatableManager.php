@@ -22,6 +22,8 @@ class RepeatableManager
 
     protected Collection $repeatable;
 
+    protected static array $discoveries = [];
+
     public function __construct()
     {
         $this->repeatable = Collection::make();
@@ -98,6 +100,11 @@ class RepeatableManager
 
             $cacheKey = md5($directory . implode($namespaces));
 
+            static::$discoveries[$cacheKey] = [
+                'path' => $directory,
+                'namespace' => $namespaces,
+            ];
+
             // try to obtain the repeatables from cache
             // if the cache is not available, we will iterate over the directory
             try {
@@ -149,6 +156,11 @@ class RepeatableManager
                 // Ignore exceptions during cache put
             }
         }
+    }
+
+    public function getDiscoveries(): array
+    {
+        return static::$discoveries;
     }
 
     private function isJob(string $class): bool
