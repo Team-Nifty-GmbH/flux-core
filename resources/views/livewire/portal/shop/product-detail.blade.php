@@ -59,7 +59,7 @@
                     @section('price')
                         <div class="flex flex-col gap-1.5 text-center">
                             <div class="flex gap-4 content-center justify-center w-full">
-                                <div class="text-sm font-semibold">{{ Number::currency($productForm->buy_price ?? 0, $defaultCurrency->iso, app()->getLocale()) }} *</div>
+                                <div class="text-sm font-semibold">{{ Number::currency(number: $productForm->buy_price ?? 0, locale: app()->getLocale()) }} *</div>
                                 @if(bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
                                     <x-badge negative xs :label="__('%')" />
                                 @endif
@@ -67,7 +67,7 @@
                             @if(bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
                                 <div>
                                     <span class="line-through">
-                                        {{ Number::currency($productForm->root_price_flat ?? 0, $defaultCurrency->iso, app()->getLocale()) }} *
+                                        {{ Number::currency(number: $productForm->root_price_flat ?? 0, locale: app()->getLocale()) }} *
                                     </span>
                                     <span>
                                         {{ __('Total discount of :percentage %', ['percentage' => bcmul($productForm->root_discount_percentage, 100, 2)]) }}

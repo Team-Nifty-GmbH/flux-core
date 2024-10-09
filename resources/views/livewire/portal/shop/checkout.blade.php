@@ -84,17 +84,17 @@
         <div class="flex flex-col gap-1.5">
             <div class="flex justify-between gap-2">
                 <div>{{ __('Total Net') }}</div>
-                <div>{{ Number::currency($this->cart->cart_items_sum_total_net ?? 0, $defaultCurrency->iso, app()->getLocale()) }}</div>
+                <div>{{ Number::currency(number: $this->cart->cart_items_sum_total_net ?? 0, locale: app()->getLocale()) }}</div>
             </div>
             @foreach($this->cart->vatRates() as $vatRate)
                 <div class="flex justify-between gap-2">
                     <div>{{ __('Plus :percentage% VAT', ['percentage' => bcmul($vatRate['vat_rate_percentage'], 100, 2)]) }}</div>
-                    <div>{{ Number::currency($vatRate['vat_sum'], $defaultCurrency->iso, app()->getLocale()) }}</div>
+                    <div>{{ Number::currency(number: $vatRate['vat_sum'], locale: app()->getLocale()) }}</div>
                 </div>
             @endforeach
             <div class="flex justify-between gap-2 font-semibold">
                 <div>{{ __('Total Gross') }}</div>
-                <div>{{ Number::currency($this->cart->cart_items_sum_total_gross ?? 0, $defaultCurrency->iso, app()->getLocale()) }}</div>
+                <div>{{ Number::currency(number: $this->cart->cart_items_sum_total_gross ?? 0, locale: app()->getLocale()) }}</div>
             </div>
         </div>
         <x-slot:footer>

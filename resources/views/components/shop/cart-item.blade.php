@@ -8,7 +8,7 @@
     </div>
     <x-input type="number" min="0" step="1" :value="$cartItem->amount" x-on:input="($event) => $wire.updateAmount({{ $cartItem->id }}, parseFloat($event.target.value))" />
     <div class="flex flex-col text-right">
-        <div class="font-semibold">{{ Number::currency($cartItem->total, $defaultCurrency->iso, app()->getLocale()) }} *</div>
-        <div class="text-secondary-400">{{ Number::currency($cartItem->price, $defaultCurrency->iso, app()->getLocale()) }} / {{ __('Piece') }} *</div>
+        <div class="font-semibold">{{ Number::currency(number: $cartItem->total, locale: app()->getLocale()) }} *</div>
+        <div class="text-secondary-400">{{ Number::currency(number: $cartItem->price, locale: app()->getLocale()) }} / {{ __('Piece') }} *</div>
     </div>
 </div>
