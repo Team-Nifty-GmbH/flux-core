@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits;
 
+use FluxErp\Support\MediaLibrary\MediaCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Spatie\Image\Exceptions\InvalidManipulation;
@@ -105,5 +106,14 @@ trait InteractsWithMedia
             ->keepOriginalImageFormat()
             ->quality(80)
             ->optimize();
+    }
+
+    public function addMediaCollection(string $name): MediaCollection
+    {
+        $mediaCollection = MediaCollection::create($name);
+
+        $this->mediaCollections[$name] = $mediaCollection;
+
+        return $mediaCollection;
     }
 }

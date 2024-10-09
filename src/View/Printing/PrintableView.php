@@ -241,6 +241,7 @@ abstract class PrintableView extends Component
         ];
 
         return UploadMedia::make($data)
+            ->force()
             ->validate()
             ->execute();
     }
