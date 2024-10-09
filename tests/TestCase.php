@@ -5,6 +5,7 @@ namespace FluxErp\Tests;
 use Dotenv\Dotenv;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\BindingServiceProvider;
+use FluxErp\Providers\EventServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
@@ -71,6 +72,7 @@ abstract class TestCase extends BaseTestCase
             SanctumServiceProvider::class,
             WebPushServiceProvider::class,
             MorphMapServiceProvider::class,
+            EventServiceProvider::class,
         ];
     }
 

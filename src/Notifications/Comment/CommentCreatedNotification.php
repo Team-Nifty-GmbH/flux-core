@@ -76,21 +76,28 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
 
     public function toToastNotification(object $notifiable): ToastNotification
     {
+        $createdBy = method_exists($this->model, 'getCreatedBy')
+            ? $this->model->getCreatedBy()
+            : null;
+
         return ToastNotification::make()
             ->notifiable($notifiable)
             ->title(__(
                 ':username commented on :model',
                 [
-                    'username' => $this->model->createdBy?->getLabel() ?? __('Unknown'),
+                    'username' => $createdBy && method_exists($createdBy, 'getLabel') && $createdBy->getLabel()
+                        ? $createdBy->getLabel()
+                        : __('Unknown'),
                     'model' => __('your ' . $this->model->model->getMorphClass()),
                 ],
             ))
             ->icon('chat')
             ->when(
-                method_exists($this->model->createdBy, 'getAvatarUrl')
-                && $this->model->createdBy->getAvatarUrl(),
-                function (ToastNotification $toast) {
-                    return $toast->img($this->model->createdBy->getAvatarUrl());
+                $createdBy
+                && method_exists($createdBy, 'getAvatarUrl')
+                && $createdBy->getAvatarUrl(),
+                function (ToastNotification $toast) use ($createdBy) {
+                    return $toast->img($createdBy->getAvatarUrl());
                 }
             )
             ->description($this->model->comment)
