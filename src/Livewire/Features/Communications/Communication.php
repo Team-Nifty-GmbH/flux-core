@@ -10,7 +10,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Livewire\DataTables\CommunicationList;
 use FluxErp\Livewire\Forms\CommunicationForm;
-use FluxErp\Livewire\Forms\MediaForm;
+use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Mail\GenericMail;
 use FluxErp\Models\Address;
 use FluxErp\Models\Communication as CommunicationModel;
@@ -46,7 +46,7 @@ class Communication extends CommunicationList
 
     public CommunicationForm $communication;
 
-    public MediaForm $attachments;
+    public MediaUploadForm $attachments;
 
     protected function getTableActions(): array
     {

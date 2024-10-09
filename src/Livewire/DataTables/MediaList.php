@@ -2,14 +2,26 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\Media\DeleteMedia;
+use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use WireUi\Traits\Actions;
 
 class MediaList extends BaseDataTable
 {
+    use Actions;
+
     protected string $model = Media::class;
+
+    public ?string $includeBefore = 'flux::livewire.datatables.media.media-list';
+
+    public MediaForm $mediaForm;
 
     public array $enabledCols = [
         'file_name',
@@ -27,6 +39,7 @@ class MediaList extends BaseDataTable
 
     protected function itemToArray($item): array
     {
+        /** @var Media $item */
         $item->makeVisible('collection_name');
 
         $itemArray = parent::itemToArray($item);
@@ -43,6 +56,9 @@ class MediaList extends BaseDataTable
                 ->attributes([
                     'x-on:click' => '$wire.downloadMedia(record.id)',
                 ]),
+            DataTableButton::make(icon: 'pencil')
+                ->label(__('Edit'))
+                ->wireClick('edit(record.id)'),
             DataTableButton::make(icon: 'eye')
                 ->label(__('View'))
                 ->href('record.url')
@@ -53,11 +69,9 @@ class MediaList extends BaseDataTable
             DataTableButton::make(icon: 'trash')
                 ->color('negative')
                 ->label(__('Delete'))
+                ->when(fn () => resolve_static(DeleteMedia::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('Delete media') . '|' .
-                        __('Do you really want to delete this media?') . '|' .
-                        __('Cancel') . '|' .
-                        __('Delete'),
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Media')]),
                     'wire:click' => 'deleteMedia(record.id)',
                 ]),
         ];
@@ -81,5 +95,40 @@ class MediaList extends BaseDataTable
         }
 
         return response()->download($media->getPath(), $media->file_name);
+    }
+
+    public function save(): bool
+    {
+        try {
+            $this->mediaForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    #[Renderless]
+    public function edit(Media $media): void
+    {
+        $media->makeVisible([
+            'id',
+            'name',
+            'file_name',
+            'collection_name',
+            'disk',
+            'size',
+            'mime_type',
+            'created_at',
+        ]);
+        $this->mediaForm->fill($media);
+
+        $this->js(<<<JS
+            \$openModal('edit-media', { mediaId: $media->id });
+        JS);
     }
 }

@@ -7,7 +7,7 @@ use FluxErp\Actions\Plugins\ToggleActive;
 use FluxErp\Actions\Plugins\Uninstall;
 use FluxErp\Actions\Plugins\Update;
 use FluxErp\Actions\Plugins\Upload;
-use FluxErp\Livewire\Forms\MediaForm;
+use FluxErp\Livewire\Forms\MediaUploadForm;
 use Illuminate\Contracts\View\View;
 use Illuminate\Process\Exceptions\ProcessFailedException;
 use Illuminate\Support\Arr;
@@ -32,7 +32,7 @@ class Plugins extends Component
 
     public string $search = '';
 
-    public MediaForm $file;
+    public MediaUploadForm $file;
 
     public array $searchResult = [];
 

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Tests\Livewire\DataTables;
 
-use FluxErp\Livewire\DataTables\Products\MediaGrid;
+use FluxErp\Livewire\Product\MediaGrid;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;

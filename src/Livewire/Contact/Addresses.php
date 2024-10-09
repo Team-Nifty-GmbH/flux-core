@@ -223,6 +223,10 @@ class Addresses extends Component
                 ->label(__('Comments'))
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
+            TabButton::make('address.attachments')
+                ->label(__('Attachments'))
+                ->isLivewireComponent()
+                ->wireModel('address.id'),
             TabButton::make('address.communication')
                 ->label(__('Communication'))
                 ->isLivewireComponent()

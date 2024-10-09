@@ -7,7 +7,7 @@ use FluxErp\Actions\Client\UpdateClient;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\DataTables\ClientList;
 use FluxErp\Livewire\Forms\ClientForm;
-use FluxErp\Livewire\Forms\MediaForm;
+use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Client;
 use FluxErp\Models\Country;
@@ -31,9 +31,9 @@ class Clients extends ClientList
 
     public ClientForm $client;
 
-    public MediaForm $logo;
+    public MediaUploadForm $logo;
 
-    public MediaForm $logoSmall;
+    public MediaUploadForm $logoSmall;
 
     protected function getViewData(): array
     {

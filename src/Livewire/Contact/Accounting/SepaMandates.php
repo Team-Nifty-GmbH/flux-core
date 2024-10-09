@@ -8,7 +8,7 @@ use FluxErp\Actions\SepaMandate\UpdateSepaMandate;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\DataTables\SepaMandateList;
 use FluxErp\Livewire\Forms\ContactForm;
-use FluxErp\Livewire\Forms\MediaForm;
+use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\SepaMandateForm;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Media;
@@ -35,7 +35,7 @@ class SepaMandates extends SepaMandateList
 
     public SepaMandateForm $sepaMandate;
 
-    public MediaForm $signedMandate;
+    public MediaUploadForm $signedMandate;
 
     protected function getViewData(): array
     {

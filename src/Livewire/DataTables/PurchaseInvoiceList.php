@@ -3,7 +3,7 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Livewire\Forms\MediaForm;
+use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\PurchaseInvoiceForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
@@ -41,7 +41,7 @@ class PurchaseInvoiceList extends BaseDataTable
 
     public PurchaseInvoiceForm $purchaseInvoiceForm;
 
-    public MediaForm $mediaForm;
+    public MediaUploadForm $mediaForm;
 
     public function mountSupportsCache(): void
     {
