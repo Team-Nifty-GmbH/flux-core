@@ -111,6 +111,9 @@ class FluxServiceProvider extends ServiceProvider
         bcscale(9);
         $this->bootMiddleware();
         $this->bootCommands();
+
+        $this->optimizes('flux:optimize', 'flux:optimize:clear');
+
         $this->bootRoutes();
         $this->registerLivewireComponents();
         $this->registerBladeComponents();
