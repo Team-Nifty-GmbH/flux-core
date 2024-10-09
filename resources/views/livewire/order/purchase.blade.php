@@ -8,7 +8,7 @@
                 option-value="id"
                 option-label="label"
                 :clearable="false"
-                :disabled="$order->is_confirmed || (auth()->user()?->id !== $order->approval_user_id && $order->is_locked)"
+                :disabled="$order->is_confirmed || (auth()->user()?->id !== $order->approval_user_id && $order->is_locked && ! is_null($order->approval_user_id))"
                 :template="[
                     'name'   => 'user-option',
                 ]"
@@ -34,7 +34,7 @@
         <x-datetime-picker wire:model="order.system_delivery_date" :clearable="false" :without-time="true" :disabled="$order->is_locked" :label="__('Performance/Delivery date')" />
         <x-datetime-picker wire:model="order.system_delivery_date_end" :without-time="true" :disabled="$order->is_locked" :label="__('Performance/Delivery date end')" />
         <x-datetime-picker wire:model="order.order_date" :without-time="true" :disabled="$order->is_locked" :label="__('Order Date')" />
-        <x-input wire:model="order.commission" :disabled="$order->is_locked" :label="__('Commission')" />
+        <x-input wire:model="order.commission" :label="__('Commission')" />
     @endsection
     @section('content.right.invoice_preview')
         <x-card class="space-y-3">

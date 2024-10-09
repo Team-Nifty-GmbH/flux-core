@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Order;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\ToggleLock;
+use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Contracts\OffersPrinting;
@@ -366,7 +367,7 @@ class Order extends OrderPositionList
         $this->skipRender();
 
         try {
-            UpdateOrder::make([
+            UpdateLockedOrder::make([
                 'id' => $this->order->id,
                 'is_confirmed' => $this->order->is_confirmed,
             ])
@@ -417,7 +418,6 @@ class Order extends OrderPositionList
         }
 
         $this->fetchOrder($this->order->id);
-        $this->forceRender();
     }
 
     #[Renderless]
@@ -425,7 +425,11 @@ class Order extends OrderPositionList
     {
         $this->order->address_delivery = $this->order->address_delivery ?: [];
         try {
-            $action = UpdateOrder::make($this->order->toArray())->checkPermission()->validate();
+            $action = ($this->order->is_locked
+                    ? UpdateLockedOrder::make($this->order->toArray())
+                    : UpdateOrder::make($this->order->toArray())
+            )
+                ->checkPermission()->validate();
 
             $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
@@ -530,7 +534,7 @@ class Order extends OrderPositionList
             ->with('mainAddress:id,contact_id')
             ->first();
 
-        $this->{$orderVariable}->client_id = $contact->client_id;
+        $this->{$orderVariable}->client_id = $contact?->client_id ?? Client::default()->id;
         $this->{$orderVariable}->agent_id = $contact->agent_id ?: $this->{$orderVariable}->agent_id;
         $this->{$orderVariable}->address_invoice_id = $contact->invoice_address_id ?? $contact->mainAddress->id;
         $this->{$orderVariable}->address_delivery_id = $contact->delivery_address_id ?? $contact->mainAddress->id;
@@ -550,7 +554,7 @@ class Order extends OrderPositionList
     public function saveStates(): void
     {
         try {
-            UpdateOrder::make([
+            UpdateLockedOrder::make([
                 'id' => $this->order->id,
                 'state' => $this->order->state,
                 'payment_state' => $this->order->payment_state,
@@ -810,11 +814,15 @@ class Order extends OrderPositionList
 
     public function createDocuments(): null|MediaStream|Media
     {
-        return $this->createDocumentFromItems(
+        $createDocuments = $this->createDocumentFromItems(
             resolve_static(OrderModel::class, 'query')
                 ->whereKey($this->order->id)
                 ->first()
         );
+
+        $this->fetchOrder($this->order->id);
+
+        return $createDocuments;
     }
 
     protected function getAvailableStates(array|string $fieldNames): void

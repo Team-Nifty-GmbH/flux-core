@@ -283,7 +283,7 @@
                     wire:click="delete"
                 />
             @endif
-            @if(resolve_static(\FluxErp\Actions\Order\UpdateOrder::class, 'canPerformAction', [false]) && ! $order->is_locked)
+            @if((resolve_static(\FluxErp\Actions\Order\UpdateOrder::class, 'canPerformAction', [false]) && ! $order->is_locked) || resolve_static(\FluxErp\Actions\Order\UpdateLockedOrder::class, 'canPerformAction', [false]))
                 <x-button
                     primary
                     spinner="save"
@@ -592,15 +592,6 @@
                                     formatters="formatter.delivery_state"
                                     available="availableStates.delivery_state"
                                 />
-                                @if($order->is_locked)
-                                    <x-button
-                                        primary
-                                        class="w-full"
-                                        icon="document-text"
-                                        wire:click="saveStates()"
-                                        :label="__('Save')"
-                                    />
-                                @endif
                             </div>
                         </x-card>
                     @show
@@ -740,7 +731,7 @@
                                     <x-datetime-picker wire:model="order.system_delivery_date" :without-time="true" :disabled="$order->is_locked" :label="__('Performance/Delivery date')" />
                                     <x-datetime-picker wire:model="order.system_delivery_date_end" :without-time="true" :disabled="$order->is_locked" :label="__('Performance/Delivery date end')" />
                                     <x-datetime-picker wire:model="order.order_date" :without-time="true" :disabled="$order->is_locked" :label="__('Order Date')" />
-                                    <x-input wire:model="order.commission" :disabled="$order->is_locked" :label="__('Commission')" />
+                                    <x-input wire:model="order.commission" :label="__('Commission')" />
                                     <x-datetime-picker
                                         wire:model="order.payment_reminder_next_date"
                                         :without-time="true"
