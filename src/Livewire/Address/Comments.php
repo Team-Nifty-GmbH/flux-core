@@ -12,6 +12,4 @@ class Comments extends BaseComments
 
     #[Modelable]
     public int $modelId;
-
-    public bool $isPublic = false;
 }

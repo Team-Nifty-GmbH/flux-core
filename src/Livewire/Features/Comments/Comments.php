@@ -33,7 +33,7 @@ class Comments extends Component
      * Setting this to true means that the component is public used.
      * This means that the user has to decide if he wants non-users to see his comment.
      */
-    public bool $isPublic = false;
+    public bool $isPublic = true;
 
     public array $stickyComments = [];
 
