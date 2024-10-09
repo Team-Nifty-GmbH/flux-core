@@ -359,12 +359,17 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
 
     public function scopeUnpaid(Builder $query): Builder
     {
-        return $query->whereNotNull('invoice_number')->whereNotState(Paid::class)->whereNot('balance', 0);
+        return $query
+            ->whereNotNull('invoice_number')
+            ->whereNotState('payment_state', Paid::class)
+            ->whereNot('balance', 0);
     }
 
     public function scopePaid(Builder $query): Builder
     {
-        return $query->whereNotNull('invoice_number')->whereNotState(Open::class)->whereNot('balance', 0);
+        return $query
+            ->whereNotNull('invoice_number')
+            ->whereNotState('payment_state', Open::class);
     }
 
     public function newCollection(array $models = []): Collection
