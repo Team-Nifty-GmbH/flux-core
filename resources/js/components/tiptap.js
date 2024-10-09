@@ -2,7 +2,6 @@ import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Mention from '@tiptap/extension-mention';
 import axios from 'axios';
-import tippy from 'tippy.js';
 
 export default function (content, debounceDelay = 0, searchModel = ['user', 'role']) {
     return (() => {
@@ -42,7 +41,7 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
 
                                     return {
                                         onStart: props => {
-                                            suggestionPopup = tippy(element, {
+                                            suggestionPopup = window.tippy(element, {
                                                 content: suggestionElement,
                                                 showOnCreate: true,
                                                 interactive: true,
