@@ -3,7 +3,7 @@
         <x-slot:title>
             {{ __('Images') }}
         </x-slot:title>
-        <livewire:data-tables.products.media-grid
+        <livewire:product.media-grid
             :is-searchable="false"
             wire:model="product"
             :filters="[
