@@ -1,5 +1,5 @@
 <div class="cover-page h-auto overflow-auto z-10 bg-white">
-    @section('logo')
+    @section('first-page-logo')
         <div class="grid h-48 content-center">
             <div class="text-center m-auto max-h-72">
                 @if($client->logo)
