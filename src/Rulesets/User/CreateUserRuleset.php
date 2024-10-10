@@ -31,8 +31,16 @@ class CreateUserRuleset extends FluxRuleset
             'email' => 'required|email|unique:users,email',
             'firstname' => 'required|string',
             'lastname' => 'required|string',
-            'password' => ['required', Password::min(8)->mixedCase()->numbers()],
+            'phone' => 'nullable|string',
+            'password' => [
+                'required',
+                Password::min(8)->mixedCase()->numbers(),
+            ],
             'user_code' => 'required|string|unique:users,user_code',
+            'timezone' => [
+                'nullable',
+                'timezone',
+            ],
             'cost_per_hour' => [
                 'nullable',
                 app(Numeric::class),
