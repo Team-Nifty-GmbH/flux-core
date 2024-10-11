@@ -9,11 +9,9 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\Order;
-use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Models\VatRate;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -57,7 +55,7 @@ class OrderDetailTest extends BaseSetup
             ->count(1)
             ->hasOrderPositions(
                 1,
-                function($attributes, $order) {
+                function ($attributes, $order) {
                     return [
                         'client_id' => $order->client_id,
                         'name' => 'test orderposition',
