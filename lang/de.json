@@ -1451,6 +1451,7 @@
     "Sundays": "Sonntags",
     "Supplier": "Lieferant",
     "Supplier Contact Id": "Lieferantenkontakt-ID",
+    "Supplier Order": "Lieferantenbestellung",
     "Supplier Serial Number": "Hersteller-Seriennummer",
     "Suppliers": "Lieferanten",
     "Symbol": "Symbol",
@@ -1765,5 +1766,6 @@
     "Your watchlist is empty": "Ihre Merkliste ist leer",
     "Zip": "PLZ",
     "zip": "PLZ",
-    "Zip / City": "PLZ / Ort"
+    "Zip / City": "PLZ / Ort",
+    "supplier-order": "Lieferantenbestellung"
 }

@@ -6,7 +6,9 @@ use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\ToggleLock;
 use FluxErp\Actions\Order\UpdateOrder;
+use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
+use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
@@ -162,6 +164,7 @@ class Order extends OrderPositionList
             DataTableButton::make()
                 ->icon('pencil')
                 ->color('primary')
+                ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => <<<'JS'
                             editOrderPosition(index).then(() => $openModal('edit-order-position'));
@@ -1013,6 +1016,7 @@ class Order extends OrderPositionList
                 ->label(__('Delete'))
                 ->icon('trash')
                 ->color('negative')
+                ->when(fn () => resolve_static(DeleteOrderPosition::class, 'canPerformAction', [false]))
                 ->wireClick('deleteSelectedOrderPositions(); showSelectedActions = false;'),
         ];
     }

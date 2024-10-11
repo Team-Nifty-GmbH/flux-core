@@ -38,6 +38,7 @@ use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
 use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
+use FluxErp\View\Printing\Order\SupplierOrder;
 use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -593,7 +594,9 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function getPrintViews(): array
     {
         return $this->orderType?->order_type_enum->isPurchase()
-            ? []
+            ? [
+                'supplier-order' => SupplierOrder::class,
+            ]
             : [
                 'invoice' => Invoice::class,
                 'offer' => Offer::class,
