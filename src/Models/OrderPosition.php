@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -194,6 +195,18 @@ class OrderPosition extends Model implements InteractsWithDataTables, Sortable
     public function reservedStock(): BelongsToMany
     {
         return $this->belongsToMany(StockPosting::class, 'order_position_stock_posting')->withPivot('reserved_amount');
+    }
+
+    public function serialNumbers(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            SerialNumber::class,
+            StockPosting::class,
+            'order_position_id',
+            'id',
+            'id',
+            'serial_number_id'
+        );
     }
 
     public function siblings(): HasMany

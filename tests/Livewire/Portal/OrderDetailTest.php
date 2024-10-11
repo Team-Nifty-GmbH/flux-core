@@ -9,9 +9,11 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\Order;
+use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\VatRate;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -51,18 +53,29 @@ class OrderDetailTest extends BaseSetup
 
         $priceList = PriceList::factory()->create();
 
-        $this->orders = Order::factory()->count(1)->create([
-            'client_id' => $this->dbClient,
-            'language_id' => $language->id,
-            'order_type_id' => $orderType->id,
-            'payment_type_id' => $paymentType->id,
-            'price_list_id' => $priceList->id,
-            'currency_id' => $currency->id,
-            'contact_id' => $this->contact->id,
-            'address_invoice_id' => $this->address->id,
-            'address_delivery_id' => $this->address->id,
-            'is_locked' => true,
-        ]);
+        $this->orders = Order::factory()
+            ->count(1)
+            ->hasOrderPositions(
+                1,
+                function($attributes, $order) {
+                    return [
+                        'client_id' => $order->client_id,
+                        'name' => 'test orderposition',
+                    ];
+                }
+            )
+            ->create([
+                'client_id' => $this->dbClient,
+                'language_id' => $language->id,
+                'order_type_id' => $orderType->id,
+                'payment_type_id' => $paymentType->id,
+                'price_list_id' => $priceList->id,
+                'currency_id' => $currency->id,
+                'contact_id' => $this->contact->id,
+                'address_invoice_id' => $this->address->id,
+                'address_delivery_id' => $this->address->id,
+                'is_locked' => true,
+            ]);
 
         $this->orders[] = Order::factory()->create([
             'client_id' => $this->dbClient,
@@ -95,5 +108,12 @@ class OrderDetailTest extends BaseSetup
     {
         Livewire::test(OrderDetail::class, ['id' => $this->orders[1]->id])
             ->assertStatus(404);
+    }
+
+    public function test_select_order_position()
+    {
+        Livewire::test(OrderDetail::class, ['id' => $this->orders[0]->id])
+            ->call('selectPosition', $this->orders[0]->orderPositions->first()->id)
+            ->assertSet('positionDetails.id', $this->orders[0]->orderPositions->first()->id);
     }
 }
