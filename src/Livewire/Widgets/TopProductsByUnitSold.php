@@ -29,6 +29,7 @@ class TopProductsByUnitSold extends ValueList
                     )
                     ->revenue()
             )
+            ->whereHas('product')
             ->orderByDesc('total_amount')
             ->with('product:id,name')
             ->limit(5)
