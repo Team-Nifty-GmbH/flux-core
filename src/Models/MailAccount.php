@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Events\MailAccount\Connecting;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -20,6 +21,8 @@ use Webklex\PHPIMAP\Exceptions\RuntimeException;
 class MailAccount extends Model
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity;
+
+    public bool $supportsHierarchicalFolders = true;
 
     protected $guarded = [
         'id',
@@ -58,6 +61,8 @@ class MailAccount extends Model
      */
     public function connect(): Client
     {
+        event(new Connecting($this));
+
         return ImapClient::make([
             'host' => $this->host,
             'port' => $this->port,

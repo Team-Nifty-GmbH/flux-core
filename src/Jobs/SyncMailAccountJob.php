@@ -54,7 +54,7 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
     {
         $client = $this->mailAccount->connect();
 
-        $folders = $client->getFolders(soft_fail: true);
+        $folders = $client->getFolders($this->mailAccount->supportsHierarchicalFolders, soft_fail: true);
         foreach ($folders as $folder) {
             $this->folderIds = array_merge($this->folderIds, $this->createFolder($folder));
         }

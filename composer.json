@@ -10,7 +10,7 @@
         "ext-zip": "*",
         "barryvdh/laravel-dompdf": "^3.0",
         "laravel-notification-channels/webpush": "^9.0",
-        "laravel/framework": "^11.19",
+        "laravel/framework": "^11.27.2",
         "laravel/reverb": "^1.0.0",
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^10.0",

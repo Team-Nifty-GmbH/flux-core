@@ -31,11 +31,11 @@
                 @if($productForm->children_count === 0)
                     @can(route_to_permission('portal.checkout'))
                         <div class="flex flex-col gap-1.5 text-center text-gray-900 dark:text-gray-50">
-                            <div class="mt-3 text-sm font-semibold">{{ Number::currency($productForm->buy_price, $defaultCurrency->iso, app()->getLocale()) }}</div>
+                            <div class="mt-3 text-sm font-semibold">{{ Number::currency(number: $productForm->buy_price, locale: app()->getLocale()) }}</div>
                             @if(bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
                                 <div>
                                     <span class="line-through">
-                                        {{ Number::currency($productForm->root_price_flat, $defaultCurrency->iso, app()->getLocale()) }}
+                                        {{ Number::currency(number: $productForm->root_price_flat, locale: app()->getLocale()) }}
                                     </span>
                                     <span>
                                         {{ __('Total discount of :percentage %', ['percentage' => bcmul($productForm->root_discount_percentage, 100, 2)]) }}
