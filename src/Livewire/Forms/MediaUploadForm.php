@@ -57,6 +57,14 @@ class MediaUploadForm extends MediaForm
         }
     }
 
+    public function force(): static
+    {
+        // this allows saving of media to read-only collections
+        $this->force = true;
+
+        return $this;
+    }
+
     public function save(): void
     {
         $stagedFiles = collect($this->stagedFiles)->sortBy(fn ($file) => $file['shouldDelete'] ?? false);
