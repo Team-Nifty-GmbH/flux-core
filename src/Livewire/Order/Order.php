@@ -34,7 +34,6 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
-use FluxErp\Models\Project;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\Task;
 use FluxErp\Models\VatRate;
@@ -870,7 +869,7 @@ class Order extends OrderPositionList
     }
 
     #[Renderless]
-    public function createTasks(Project $project): void
+    public function createTasks(int $projectId): void
     {
         // save the order first
         $this->save();
@@ -879,7 +878,7 @@ class Order extends OrderPositionList
             // check if the task already exists or the selected order position is not a numeric value
             if (! is_numeric($orderPositionIndex)
                 || resolve_static(Task::class, 'query')
-                    ->where('project_id', $project->id)
+                    ->where('project_id', $projectId)
                     ->where('model_type', morph_alias(OrderPosition::class))
                     ->where('model_id', data_get($this->data, $orderPositionIndex . '.id'))
                     ->exists()
@@ -889,7 +888,7 @@ class Order extends OrderPositionList
 
             try {
                 CreateTask::make([
-                    'project_id' => $project->id,
+                    'project_id' => $projectId,
                     'model_type' => morph_alias(OrderPosition::class),
                     'model_id' => data_get($this->data, $orderPositionIndex . '.id'),
                     'name' => data_get($this->data, $orderPositionIndex . '.name'),
