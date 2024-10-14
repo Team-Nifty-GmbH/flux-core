@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Illuminate\Support\Collection all()
  * @method static array|null get(string $name)
  * @method static void autoDiscover(string|null $directory = null, string|null $namespace = null)
+ * @method static array getDiscoveries()
  *
  * @see RepeatableManager
  */
