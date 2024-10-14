@@ -10,8 +10,8 @@ class ActiveDailyWorkTimes extends ValueList
     public function calculateList(): void
     {
         $query = resolve_static(WorkTime::class, 'query')
-            ->where('is_locked', false)
             ->where('is_daily_work_time', true)
+            ->where('is_locked', false)
             ->where('is_pause', false)
             ->with('user:id,name')
             ->get();

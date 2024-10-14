@@ -35,7 +35,11 @@ class UpdateUserRuleset extends FluxRuleset
             'firstname' => 'sometimes|required|string',
             'lastname' => 'sometimes|required|string',
             'phone' => 'nullable|string',
-            'password' => ['sometimes', 'required', Password::min(8)->mixedCase()->numbers()],
+            'password' => [
+                'sometimes',
+                'required',
+                Password::min(8)->mixedCase()->numbers(),
+            ],
             'user_code' => 'sometimes|required|string|unique:users,user_code',
             'timezone' => [
                 'nullable',

@@ -10,9 +10,9 @@ class ActiveTaskTimes extends ValueList
     public function calculateList(): void
     {
         $query = resolve_static(WorkTime::class, 'query')
-            ->where('is_locked', false)
             ->where('is_daily_work_time', false)
-            ->with(['user:id,name', 'contact.invoiceAddress'])
+            ->where('is_locked', false)
+            ->with(['user:id,name', 'contact:id,invoice_address_id', 'contact.invoiceAddress'])
             ->get();
 
         $this->items = $query->map(fn ($item) => [

@@ -31,6 +31,7 @@ class TopProductsByRevenue extends ValueList
                     )
                     ->revenue()
             )
+            ->whereHas('product')
             ->orderByDesc('total_net_price')
             ->with('product:id,name')
             ->limit(5)
