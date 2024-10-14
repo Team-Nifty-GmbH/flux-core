@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables\Products;
+namespace FluxErp\Tests\Livewire\Product;
 
 use FluxErp\Livewire\Product\MediaGrid;
 use FluxErp\Tests\TestCase;

@@ -19,7 +19,7 @@ class MediaList extends BaseDataTable
 
     protected string $model = Media::class;
 
-    public ?string $includeBefore = 'flux::livewire.datatables.media.media-list';
+    public ?string $includeBefore = 'flux::livewire.datatables.media-list';
 
     public MediaForm $mediaForm;
 
@@ -127,8 +127,8 @@ class MediaList extends BaseDataTable
         ]);
         $this->mediaForm->fill($media);
 
-        $this->js(<<<JS
-            \$openModal('edit-media', { mediaId: $media->id });
+        $this->js(<<<'JS'
+            $openModal('edit-media');
         JS);
     }
 }

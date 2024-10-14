@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Media;
 use FluxErp\Rulesets\Media\UpdateMediaRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UpdateMedia extends FluxAction
@@ -43,10 +44,9 @@ class UpdateMedia extends FluxAction
         $media->fill($this->data);
         $media->save();
 
-        if ($paths) {
-            foreach ($paths as $path) {
-                rename($path, str_replace($currentFileName, Str::beforeLast($media->file_name, '.'), $path));
-            }
+        foreach ($paths as $path) {
+            Storage::disk($media->disk)
+                ->move($path, str_replace($currentFileName, Str::beforeLast($media->file_name, '.'), $path));
         }
 
         return $media->withoutRelations();

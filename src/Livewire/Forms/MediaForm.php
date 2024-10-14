@@ -2,11 +2,8 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\DeleteMedia;
-use FluxErp\Actions\Media\ReplaceMedia;
 use FluxErp\Actions\Media\UpdateMedia;
-use FluxErp\Actions\Media\UploadMedia;
 use Livewire\Attributes\Locked;
 
 class MediaForm extends FluxForm
@@ -41,10 +38,8 @@ class MediaForm extends FluxForm
     protected function getActions(): array
     {
         return [
-            'create' => UploadMedia::class,
             'update' => UpdateMedia::class,
             'delete' => DeleteMedia::class,
-            'replace' => ReplaceMedia::class,
         ];
     }
 
@@ -52,22 +47,8 @@ class MediaForm extends FluxForm
     {
         if ($this->id && $this->shouldDelete) {
             $this->delete();
-        } elseif ($this->id && $this->media) {
-            $this->replace();
-        } elseif ($this->id) {
-            $this->update();
         } else {
-            $this->create();
+            $this->update();
         }
-    }
-
-    public function replace(): void
-    {
-        $response = $this->makeAction('replace')
-            ->validate()
-            ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
-            ->execute();
-
-        $this->fill($response);
     }
 }

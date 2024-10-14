@@ -3,6 +3,8 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\Media\ReplaceMedia;
+use FluxErp\Actions\Media\UploadMedia;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -14,6 +16,17 @@ class MediaUploadForm extends MediaForm
     protected array|TemporaryUploadedFile|Media|null $file = null;
 
     public array|TemporaryUploadedFile|null $uploadedFile = null;
+
+    protected function getActions(): array
+    {
+        return array_merge(
+            parent::getActions(),
+            [
+                'create' => UploadMedia::class,
+                'replace' => ReplaceMedia::class,
+            ]
+        );
+    }
 
     public function generatePreviewUrls(): void
     {
@@ -54,7 +67,13 @@ class MediaUploadForm extends MediaForm
 
             $this->fill($file);
 
-            parent::save();
+            if ($this->id && $this->shouldDelete) {
+                $this->delete();
+            } elseif ($this->id) {
+                parent::save();
+            } else {
+                $this->create();
+            }
         }
     }
 
