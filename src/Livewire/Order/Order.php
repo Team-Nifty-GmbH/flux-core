@@ -2,14 +2,15 @@
 
 namespace FluxErp\Livewire\Order;
 
+use Exception;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\ToggleLock;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
-use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
+use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
@@ -474,7 +475,7 @@ class Order extends OrderPositionList
                 ->execute();
 
             $this->redirect(route('orders.orders'), true);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
         }
     }
