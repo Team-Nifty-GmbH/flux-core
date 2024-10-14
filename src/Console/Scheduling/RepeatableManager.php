@@ -102,7 +102,7 @@ class RepeatableManager
 
             static::$discoveries[$cacheKey] = [
                 'path' => $directory,
-                'namespace' => $namespaces,
+                'namespaces' => $namespaces,
             ];
 
             // try to obtain the repeatables from cache

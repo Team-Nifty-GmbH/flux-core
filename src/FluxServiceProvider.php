@@ -112,7 +112,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->bootMiddleware();
         $this->bootCommands();
 
-        $this->optimizes('flux:optimize', 'flux:optimize:clear');
+        $this->optimizes('flux:optimize', 'flux:optimize-clear');
 
         $this->bootRoutes();
         $this->registerLivewireComponents();

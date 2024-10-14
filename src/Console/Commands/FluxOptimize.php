@@ -13,25 +13,12 @@ use Illuminate\Support\Str;
 
 class FluxOptimize extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'flux:optimize';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Warms the cache for the Flux application';
 
     protected bool $forget = false;
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): void
     {
         $this->optimizeDefaultModels();
@@ -51,7 +38,6 @@ class FluxOptimize extends Command
                 continue;
             }
 
-            // query the default model to warm the cache
             /** @var Model $model */
             $this->forget ? Cache::forget('default_' . $alias) : $model::default();
         }
