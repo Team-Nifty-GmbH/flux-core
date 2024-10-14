@@ -28,7 +28,12 @@
             <hr/>
             <x-input x-bind:readonly="!edit" label="{{ __('EAN') }}" wire:model="product.ean" />
             <x-input x-bind:readonly="!edit" label="{{ __('Manufacturer product number') }}" wire:model="product.manufacturer_product_number" />
-            <x-select x-bind:readonly="!edit" label="{{ __('Unit') }}" option-key-value wire:model.number="product.unit_id" :options="resolve_static(\FluxErp\Models\Unit::class, 'query')->pluck('name', 'id')"/>
+            <x-select
+                x-bind:readonly="!edit" label="{{ __('Unit') }}"
+                option-key-value
+                wire:model.number="product.unit_id"
+                :options="resolve_static(\FluxErp\Models\Unit::class, 'query')->pluck('name', 'id')"
+            />
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-4" x-bind:class="!edit && 'pointer-events-none'">
                 <template id="unit-price-tooltip">
                     <div class="p-1.5">
@@ -46,7 +51,7 @@
                         </div>
                     </x-slot:cornerHint>
                 </x-inputs.number>
-                <x-inputs.number :corner-hint="__('mm')" x-bind:readonly="!edit" label="{{ __('Width') }}" wire:model.number="product.dimension_width_mm">
+                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Width') }}" wire:model.number="product.dimension_width_mm">
                     <x-slot:cornerHint>
                         <div class="flex gap-1.5 items-center">
                             <div class="text-secondary-400">
