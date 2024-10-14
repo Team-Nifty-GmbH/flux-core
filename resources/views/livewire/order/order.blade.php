@@ -13,7 +13,7 @@
         {{ $this->renderCreateDocumentsModal() }}
         @canAction(\FluxErp\Actions\Task\CreateTask::class)
             <x-modal name="create-tasks">
-                <livewire:order.create-tasks :order="$order->id" />
+                <livewire:order.order-project :order="$order->id" />
             </x-modal>
         @endCanAction
         <x-modal name="replicate-order">
