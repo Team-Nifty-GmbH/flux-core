@@ -640,6 +640,7 @@ class Order extends OrderPositionList
             ->whereKey($this->order->price_list_id)
             ->first([
                 'id',
+                'parent_id',
                 'rounding_method_enum',
                 'rounding_precision',
                 'rounding_number',

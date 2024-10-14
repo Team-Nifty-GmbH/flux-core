@@ -15,7 +15,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class CreateTasksTest extends TestCase
+class OrderProjectTest extends TestCase
 {
     protected string $livewireComponent = OrderProject::class;
 
