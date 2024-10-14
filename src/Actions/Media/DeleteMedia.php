@@ -38,7 +38,7 @@ class DeleteMedia extends FluxAction
         return $mediaItem->delete();
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
