@@ -9,7 +9,6 @@ use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\HasCalendarEvents;
-use Illuminate\Validation\Rule;
 
 class CreateCalendarEventRuleset extends FluxRuleset
 {
@@ -39,18 +38,6 @@ class CreateCalendarEventRuleset extends FluxRuleset
             'end' => 'required|date|after_or_equal:start',
             'is_all_day' => 'boolean',
             'extended_props' => 'array|nullable',
-            'extended_props.*.name' => 'required|string',
-            'extended_props.*.field_type' => [
-                'required',
-                'string',
-                Rule::in([
-                    'text',
-                    'textarea',
-                    'checkbox',
-                    'date',
-                ]),
-            ],
-            'extended_props.*.value' => 'nullable',
             'excluded' => 'array|nullable',
             'excluded.*' => 'date',
         ];
