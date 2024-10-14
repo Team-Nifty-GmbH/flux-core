@@ -3,7 +3,7 @@
 namespace Tests\Feature\Livewire\Order;
 
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Livewire\Order\CreateTasks;
+use FluxErp\Livewire\Order\OrderProject;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
@@ -17,7 +17,7 @@ use Livewire\Livewire;
 
 class CreateTasksTest extends TestCase
 {
-    protected string $livewireComponent = CreateTasks::class;
+    protected string $livewireComponent = OrderProject::class;
 
     private Order $order;
 

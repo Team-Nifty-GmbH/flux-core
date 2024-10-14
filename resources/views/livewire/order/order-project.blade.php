@@ -13,12 +13,6 @@
                 :async-data="[
                     'api' => route('search', \FluxErp\Models\Project::class),
                     'method' => 'POST',
-                    'params' => [
-                       'fields' => [
-                           'name',
-                           'project_id',
-                       ],
-                    ]
                 ]"
                 option-value="id"
                 option-label="name"

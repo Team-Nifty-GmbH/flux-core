@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Order;
 use FluxErp\Livewire\Forms\ProjectForm;
 use FluxErp\Models\Order;
 use FluxErp\Models\Project;
+use FluxErp\Rules\ModelExists;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Lazy;
@@ -13,7 +14,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
 
 #[Lazy]
-class CreateTasks extends Component
+class OrderProject extends Component
 {
     use Actions;
 
@@ -36,7 +37,7 @@ class CreateTasks extends Component
 
     public function render(): View
     {
-        return view('flux::livewire.order.create-tasks');
+        return view('flux::livewire.order.order-project');
     }
 
     public function placeholder(): View
@@ -49,7 +50,11 @@ class CreateTasks extends Component
         if ($this->existingProject && ! $this->projectId) {
             try {
                 $this->validate([
-                    'projectId' => 'required|integer',
+                    'projectId' => [
+                        'required',
+                        'integer',
+                        app(ModelExists::class, ['model' => Project::class]),
+                    ],
                 ]);
             } catch (ValidationException $e) {
                 exception_to_notifications($e, $this);

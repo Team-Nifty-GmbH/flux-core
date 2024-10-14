@@ -629,14 +629,21 @@ class Order extends OrderPositionList
     {
         $products = resolve_static(Product::class, 'query')
             ->whereIntegerInRaw('id', array_column($this->data, 'product_id'))
-            ->get()
+            ->get(['id', 'vat_rate_id'])
             ->keyBy('id');
         $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->order->contact_id)
-            ->first();
+            ->first(['id', 'price_list_id']);
         $priceList = resolve_static(PriceList::class, 'query')
             ->whereKey($this->order->price_list_id)
-            ->first();
+            ->first([
+                'id',
+                'rounding_method_enum',
+                'rounding_precision',
+                'rounding_number',
+                'rounding_mode',
+                'is_net',
+            ]);
 
         foreach ($this->data as &$item) {
             if (data_get($item, 'is_bundle_position') || ! data_get($item, 'product_id')) {
@@ -1106,7 +1113,7 @@ class Order extends OrderPositionList
                         'Recalculate prices|Are you sure you want to recalculate the prices?|Cancel|Confirm'
                     ),
                     'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
-                ])
+                ]),
         ];
     }
 
