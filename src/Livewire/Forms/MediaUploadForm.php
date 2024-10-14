@@ -67,8 +67,8 @@ class MediaUploadForm extends MediaForm
 
             $this->fill($file);
 
-            if ($this->id && $this->shouldDelete) {
-                $this->delete();
+            if ($this->id && $this->media && ! $this->shouldDelete) {
+                $this->replace();
             } elseif ($this->id) {
                 parent::save();
             } else {
