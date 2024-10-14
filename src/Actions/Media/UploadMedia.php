@@ -103,7 +103,7 @@ class UploadMedia extends FluxAction
         $this->data['collection_name'] ??= 'default';
     }
 
-    public function validateData(): void
+    protected function validateData(): void
     {
         parent::validateData();
 
@@ -115,7 +115,7 @@ class UploadMedia extends FluxAction
             && ! $this->force
         ) {
             throw ValidationException::withMessages([
-                'collection_name' => __('The media collection is read-only and cannot be modified.'),
+                'collection_name' => [__('The media collection is read-only and cannot be modified.')],
             ]);
         }
     }

@@ -115,7 +115,8 @@ class ReplaceMedia extends FluxAction
 
         $mediaItem = resolve_static(Media::class, 'query')
             ->whereKey($this->data['id'])
-            ->first();
+            ->with('model')
+            ->first(['id', 'model_type', 'model_id', 'collection_name']);
 
         $this->data['file_name'] = $this->data['file_name'] ?? (
             $this->data['media'] instanceof UploadedFile ?
@@ -128,7 +129,7 @@ class ReplaceMedia extends FluxAction
         // check if the media collection is read-only
         if ($mediaItem->getCollection()?->readOnly === true && ! $this->force) {
             throw ValidationException::withMessages([
-                'collection_name' => __('The media collection is read-only and cannot be modified.'),
+                'collection_name' => [__('The media collection is read-only and cannot be modified.')],
             ]);
         }
     }
