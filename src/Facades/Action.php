@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static array|null get(string $name)
  * @method static \Illuminate\Support\Collection getByModel(string $model)
  * @method static void autoDiscover(string|null $directory = null, string|null $namespace = null)
+ * @method static array getDiscoveries()
  *
  * @see ActionManager
  */

@@ -197,8 +197,8 @@ class OrderDetail extends Component
         $image = $position->product?->getFirstMedia('images')
             ?? $position->product?->parent?->getFirstMedia('images');
 
-        $serialNumber = $position->serialNumbers()->select(['id', 'serial_number'])->get()
-            ?: $position->origin?->serialNumbers()->select(['id', 'serial_number'])->get();
+        $serialNumber = $position->serialNumbers()->select(['serial_numbers.id', 'serial_number'])->get()
+            ?: $position->origin?->serialNumbers()->select(['serial_numbers.id', 'serial_number'])->get();
 
         $this->positionDetails = $position->toArray();
         $this->positionDetails['serial_number'] = $serialNumber->toArray();

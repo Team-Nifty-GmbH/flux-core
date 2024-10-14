@@ -10,6 +10,9 @@
     <x-card :title="__('Descending from this order')">
         <livewire:data-tables.order-list cache-key="order.related.order-list.children" :filters="[['parent_id', '=', $order->id]]" />
     </x-card>
+    <x-card :title="__('Projects')">
+        <livewire:order.projects :order-id="$order->id" />
+    </x-card>
     <x-card :title="__('Tickets')">
         <livewire:data-tables.ticket-list
             cache-key="order.related.ticket-list"

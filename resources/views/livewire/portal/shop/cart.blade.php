@@ -19,7 +19,7 @@
                 @section('cart-sidebar.total')
                     <div class="flex justify-between gap-2 font-semibold">
                         <div>{{ __('Total') }}</div>
-                        <div>{{ Number::currency($this->cart->cart_items_sum_total ?? 0, $defaultCurrency->iso, app()->getLocale()) }} *</div>
+                        <div>{{ Number::currency(number: $this->cart->cart_items_sum_total ?? 0, locale: app()->getLocale()) }} *</div>
                     </div>
                     <div class="text-2xs text-secondary-400">
                         @if(auth()->user()?->priceList?->is_net || \FluxErp\Models\PriceList::default()->is_net)

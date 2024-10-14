@@ -11,6 +11,11 @@
 >
     @section('modals')
         {{ $this->renderCreateDocumentsModal() }}
+        @canAction(\FluxErp\Actions\Task\CreateTask::class)
+            <x-modal name="create-tasks">
+                <livewire:order.order-project :order="$order->id" />
+            </x-modal>
+        @endCanAction
         <x-modal name="replicate-order">
             <x-card>
                 <section x-data="{

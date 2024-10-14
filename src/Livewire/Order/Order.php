@@ -2,14 +2,19 @@
 
 namespace FluxErp\Livewire\Order;
 
+use Exception;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\ToggleLock;
 use FluxErp\Actions\Order\UpdateOrder;
+use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
 use FluxErp\Actions\OrderPosition\FillOrderPositions;
+use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
+use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\DataTables\OrderPositionList;
@@ -30,6 +35,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Schedule;
+use FluxErp\Models\Task;
 use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
@@ -162,6 +168,7 @@ class Order extends OrderPositionList
             DataTableButton::make()
                 ->icon('pencil')
                 ->color('primary')
+                ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => <<<'JS'
                             editOrderPosition(index).then(() => $openModal('edit-order-position'));
@@ -467,7 +474,7 @@ class Order extends OrderPositionList
                 ->execute();
 
             $this->redirect(route('orders.orders'), true);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
         }
     }
@@ -617,6 +624,51 @@ class Order extends OrderPositionList
         $this->deleteSelectedOrderPositions();
 
         $this->selected = $selected;
+    }
+
+    #[Renderless]
+    public function recalculateOrderPositions(): void
+    {
+        $products = resolve_static(Product::class, 'query')
+            ->whereIntegerInRaw('id', array_column($this->data, 'product_id'))
+            ->get(['id', 'vat_rate_id'])
+            ->keyBy('id');
+        $contact = resolve_static(Contact::class, 'query')
+            ->whereKey($this->order->contact_id)
+            ->first(['id', 'price_list_id']);
+        $priceList = resolve_static(PriceList::class, 'query')
+            ->whereKey($this->order->price_list_id)
+            ->first([
+                'id',
+                'parent_id',
+                'rounding_method_enum',
+                'rounding_precision',
+                'rounding_number',
+                'rounding_mode',
+                'is_net',
+            ]);
+
+        foreach ($this->data as &$item) {
+            if (data_get($item, 'is_bundle_position') || ! data_get($item, 'product_id')) {
+                continue;
+            }
+
+            $this->orderPosition->reset();
+            $this->orderPosition->fill($item);
+
+            $this->orderPosition->unit_price = PriceHelper::make($products[$item['product_id']])
+                ->setPriceList($priceList)
+                ->setContact($contact)
+                ->price()
+                ->price;
+
+            $this->orderPosition->calculate();
+
+            $item = array_merge($item, $this->orderPosition->toArray());
+        }
+
+        $this->orderPosition->reset();
+        $this->recalculateOrderTotals();
     }
 
     #[Renderless]
@@ -817,6 +869,41 @@ class Order extends OrderPositionList
         );
     }
 
+    #[Renderless]
+    public function createTasks(int $projectId): void
+    {
+        // save the order first
+        $this->save();
+
+        foreach ($this->selected as $orderPositionIndex) {
+            // check if the task already exists or the selected order position is not a numeric value
+            if (! is_numeric($orderPositionIndex)
+                || resolve_static(Task::class, 'query')
+                    ->where('project_id', $projectId)
+                    ->where('model_type', morph_alias(OrderPosition::class))
+                    ->where('model_id', data_get($this->data, $orderPositionIndex . '.id'))
+                    ->exists()
+            ) {
+                continue;
+            }
+
+            try {
+                CreateTask::make([
+                    'project_id' => $projectId,
+                    'model_type' => morph_alias(OrderPosition::class),
+                    'model_id' => data_get($this->data, $orderPositionIndex . '.id'),
+                    'name' => data_get($this->data, $orderPositionIndex . '.name'),
+                    'description' => data_get($this->data, $orderPositionIndex . '.description'),
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+    }
+
     protected function getAvailableStates(array|string $fieldNames): void
     {
         $fieldNames = (array) $fieldNames;
@@ -1013,7 +1100,23 @@ class Order extends OrderPositionList
                 ->label(__('Delete'))
                 ->icon('trash')
                 ->color('negative')
-                ->wireClick('deleteSelectedOrderPositions(); showSelectedActions = false;'),
+                ->when(fn () => resolve_static(DeleteOrderPosition::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
+                    'wire:click' => 'deleteSelectedOrderPositions(); showSelectedActions = false;',
+                ]),
+            DataTableButton::make()
+                ->label(__('Create tasks'))
+                ->when(fn () => resolve_static(CreateTask::class, 'canPerformAction', [false]))
+                ->xOnClick('$openModal(\'create-tasks\')'),
+            DataTableButton::make()
+                ->label(__('Recalculate prices'))
+                ->attributes([
+                    'wire:flux-confirm.icon.warning' => __(
+                        'Recalculate prices|Are you sure you want to recalculate the prices?|Cancel|Confirm'
+                    ),
+                    'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
+                ]),
         ];
     }
 
