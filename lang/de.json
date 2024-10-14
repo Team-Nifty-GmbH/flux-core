@@ -1257,6 +1257,7 @@
     "Repeat password": "Passwort wiederholen",
     "Repeatable": "Wiederholbar",
     "Replicate": "Duplizieren",
+    "Required to calculate the product's unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.": "Notwendig für die Grundpreisberechnung. Der einzugebende Wert ist abhängig von der gewählten Maßeinheit.<br><br>Grundpreis = (Produktpreis * Grundeinheit) / Verkaufseinheit.<br><br>Der Grundpreis wird nicht angezeigt, wenn Verkaufseinheit und Grundeinheit den gleichen Wert haben.",
     "Requires Approval": "Freigabe erforderlich",
     "Requires Manual Transfer": "Erfordert manuelle Überweisung",
     "Reserve Stock": "Bestand reservieren",
