@@ -10,6 +10,7 @@ use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\FileViewFinder;
 
@@ -103,6 +104,8 @@ class ViewServiceProvider extends ServiceProvider
         $this->loadViewsFrom($views, 'print');
 
         View::composer('*', function () {
+            Currency::default() && Number::useCurrency(Currency::default()->iso);
+
             try {
                 if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
                     View::share(
