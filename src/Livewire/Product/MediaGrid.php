@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire\DataTables\Products;
+namespace FluxErp\Livewire\Product;
 
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\Product\UpdateProduct;
