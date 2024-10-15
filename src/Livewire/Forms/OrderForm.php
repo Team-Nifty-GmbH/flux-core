@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
+use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
@@ -149,6 +150,7 @@ class OrderForm extends FluxForm
         return [
             'create' => CreateOrder::class,
             'update' => UpdateOrder::class,
+            'update_locked' => UpdateLockedOrder::class,
             'delete' => DeleteOrder::class,
         ];
     }
@@ -168,6 +170,29 @@ class OrderForm extends FluxForm
                 'url' => $values->parent->getUrl(),
             ]
             : null;
+    }
+
+    public function save(): void
+    {
+        if ($this->{$this->getKey()} && ! $this->is_locked) {
+            $this->update();
+        } elseif ($this->{$this->getKey()} && $this->is_locked) {
+            $this->updateLocked();
+        } else {
+            $this->create();
+        }
+    }
+
+    public function updateLocked(): void
+    {
+        $response = $this->makeAction('update_locked')
+            ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
+            ->validate()
+            ->execute();
+
+        $this->actionResult = $response;
+
+        $this->fill($response);
     }
 
     protected function makeAction(string $name, ?array $data = null): FluxAction

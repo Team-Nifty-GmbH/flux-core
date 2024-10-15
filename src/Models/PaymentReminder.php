@@ -2,7 +2,7 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Actions\Order\UpdateOrder;
+use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
@@ -32,7 +32,7 @@ class PaymentReminder extends Model implements OffersPrinting
         });
 
         static::created(function (PaymentReminder $model) {
-            UpdateOrder::make([
+            UpdateLockedOrder::make([
                 'id' => $model->order_id,
                 'payment_reminder_current_level' => $model->reminder_level,
                 'payment_reminder_next_date' => $model->created_at

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use FluxErp\Actions\Order\UpdateOrder;
+use FluxErp\Actions\Order\UpdateLockedOrder;
 use Livewire\Attributes\Locked;
 
 class OrderAddressesForm extends FluxForm
@@ -15,7 +15,7 @@ class OrderAddressesForm extends FluxForm
     protected function getActions(): array
     {
         return [
-            'update' => UpdateOrder::class,
+            'update' => UpdateLockedOrder::class,
         ];
     }
 }
