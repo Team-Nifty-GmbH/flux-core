@@ -26,7 +26,7 @@
             </div>
         </a>
     </div>
-    <div class="md:text-portal-font-color absolute left-4 top-6 text-white">
+    <div class="md:text-portal-font-color absolute left-4 top-6 text-white max-h-80 max-w-80">
         {{ $client?->getFirstMedia('logo') }}
     </div>
     <div class="flex min-h-full justify-center">
