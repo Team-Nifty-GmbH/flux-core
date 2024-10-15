@@ -29,8 +29,6 @@ class UpdateLockedOrderRuleset extends FluxRuleset
                         'date_of_approval',
                         'is_confirmed',
                         'requires_approval',
-                        'addresses',
-                        'users',
                     ],
                     array_keys(resolve_static(AddressRuleset::class, 'getRules')),
                     array_keys(resolve_static(UserRuleset::class, 'getRules')),
