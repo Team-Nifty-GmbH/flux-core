@@ -23,12 +23,12 @@ class FolderTree extends Component
 {
     use Actions, WithFileUploads;
 
-    /** @var Model $this ->modelType */
+    /** @var Model $this->modelType */
     public ?string $modelType = null;
 
     public ?int $modelId = null;
 
-    public array $files = [];
+    public $files = [];
 
     public array $latestUploads = [];
 
@@ -43,10 +43,11 @@ class FolderTree extends Component
     {
         $this->fill($arguments);
 
-        $this->js(<<<'JS'
-            selected = false;
-            loadLevels();
-        JS
+        $this->js(
+            <<<'JS'
+                selected = false;
+                loadLevels();
+            JS
         );
     }
 
@@ -134,11 +135,11 @@ class FolderTree extends Component
                 modelId: $this->modelId,
                 modelType: morph_alias($this->modelType),
             );
+
             $this->latestUploads = $media;
             $this->files = [];
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
-
             return false;
         }
 
@@ -176,7 +177,7 @@ class FolderTree extends Component
 
     public function getTree(): array
     {
-        if (!$this->modelType || !$this->modelId) {
+        if (! $this->modelType || ! $this->modelId) {
             return [];
         }
 

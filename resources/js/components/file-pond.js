@@ -28,7 +28,7 @@ export default function ($wire, $ref, lang, modalTranslations) {
             this.selectedCollection = collectionName;
         },
        async loadFilePond(fileCountGetter) {
-           // getitng specific  language path
+           // getting specific language path - based on selected language
            const languageKey = lang === null  ? undefined : Object.keys(availableLanguages).find((key) => key.split('/').pop().includes(lang));
            // fallback is english
            const moduleLanguage= languageKey !== undefined ?  await availableLanguages[languageKey]() : await availableLanguages[`${BASE_LANGUAGE_PATH}en-en.js`]();
@@ -65,6 +65,7 @@ export default function ($wire, $ref, lang, modalTranslations) {
                     this.isLoadingFiles = this.isLoadingFiles.filter((item) => {
                         return item !== file.id;
                     });
+
                     // if single file upload and error is null, show confirm dialog - to replace file
                     if (!this.multipleFileUpload && error === null) {
                         //  check if single file folder is not empty
@@ -110,10 +111,8 @@ export default function ($wire, $ref, lang, modalTranslations) {
                 allowMultiple: this.multipleFileUpload,
             });
 
-            if (moduleLanguage.default !== undefined) {
-                // set language to german
+                // set language
                 setOptions(moduleLanguage.default);
-            }
         },
         clearFilesOnLeave() {
             if (this.pond !== null && this.tempFilesId.length > 0) {
