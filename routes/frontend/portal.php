@@ -79,8 +79,8 @@ Route::middleware(['web', PortalMiddleware::class])
                 ->name('tickets');
             Route::get('/tickets/{id}', Ticket::class)
                 ->name('tickets.id');
-            Route::get('/watchlist', Watchlists::class)
-                ->name('watchlist');
+            Route::get('/watchlists', Watchlists::class)
+                ->name('watchlists');
             Route::get('/checkout', Checkout::class)
                 ->name('checkout');
             Route::get('/checkout-finish', CheckoutFinish::class)

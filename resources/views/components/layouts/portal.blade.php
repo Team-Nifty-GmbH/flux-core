@@ -27,7 +27,7 @@
         </a>
         @auth('address')
             @can(route_to_permission('portal.checkout'))
-                <x-button icon="heart" wire:navigate :href="route('portal.watchlist')" />
+                <x-button icon="heart" wire:navigate :href="route('portal.watchlists')" />
                 @persist('cart')
                     <livewire:portal.shop.cart />
                 @endpersist

@@ -6,6 +6,7 @@ use FluxErp\Actions\CartItem\DeleteCartItem;
 use FluxErp\Livewire\Forms\CartForm;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -86,12 +87,14 @@ class WatchlistCard extends Component
                 ->whereKey($this->cartForm->id)
                 ->first()
                 ->cartItems()
+                ->whereHas('product', function (Builder $query) {
+                    $query->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop());
+                })
                 ->with([
                     'product' => fn (BelongsTo $query) => $query
                         ->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop()),
                 ])
                 ->get(['product_id', 'amount'])
-                ->filter(fn (CartItem $cartItem) => $cartItem->product)
                 ->map(fn (CartItem $cartItem) => ['id' => $cartItem->product_id, 'amount' => $cartItem->amount])
                 ->toArray()
         )

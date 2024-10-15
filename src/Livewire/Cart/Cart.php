@@ -67,6 +67,7 @@ class Cart extends Component
         $products = Arr::wrap(is_array($products) && ! array_is_list($products) ? [$products] : $products);
 
         foreach ($products as $product) {
+            $productModel = null;
             if ($productId = is_array($product) ? data_get($product, 'id') : $product) {
                 $productModel = resolve_static(Product::class, 'query')
                     ->whereKey($productId)
@@ -107,7 +108,6 @@ class Cart extends Component
             }
 
             unset($this->cart);
-
         }
 
         $this->notification()->success(count($products) > 1
@@ -206,11 +206,10 @@ class Cart extends Component
 
         $this->add(
             app(CartModel::class)
-                ->with('products')
+                ->with('cartItems:id,product_id,amount')
                 ->whereKey($this->loadWatchlist)
                 ->first()
-                ->cartItems()
-                ->get(['product_id', 'amount'])
+                ->cartItems
                 ->map(fn (CartItem $cartItem) => ['id' => $cartItem->product_id, 'amount' => $cartItem->amount])
                 ->toArray()
         );
