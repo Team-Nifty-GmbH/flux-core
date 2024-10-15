@@ -1,13 +1,15 @@
 <div
     x-data="{
         ...folderTree(),
-        ...filePond($wire,$refs.upload,'{{Auth::user()?->language?->language_code}}',{
+        ...filePond($wire,$refs.upload,'{{Auth::user()?->language?->language_code}}', {
             title: '{{ __('File will be replaced') }}',
             description: '{{ __('Do you want to proceed?') }}',
             labelAccept: '{{ __('Accept') }}',
             labelReject: '{{ __('Undo') }}',
         },
-        ),
+        {
+            uploadDisabled:'{{__('Upload not allowed - Read Only')}}',
+        },),
         async loadLevels() {
             this.levels = await $wire.getTree();
         },
@@ -223,7 +225,7 @@
                               x-on:click="deleteFolder(selection)"/>
                 @endif
                 @if(resolve_static(\FluxErp\Actions\Media\UploadMedia::class, 'canPerformAction', [false]))
-                    <x-button x-cloak x-show="multipleFileUpload" :label="__('Add folder')" x-on:click="addFolder(selectionProxy.children, selection)"/>
+                    <x-button x-cloak x-show="multipleFileUpload && !readOnly" :label="__('Add folder')" x-on:click="addFolder(selectionProxy.children, selection)"/>
                 @endif
                 <x-button spinner :label="__('Download folder')"
                           x-on:click="$wire.downloadCollection(selection.collection_name)"/>

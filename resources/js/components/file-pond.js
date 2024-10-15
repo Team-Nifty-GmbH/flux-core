@@ -8,23 +8,32 @@ const availableLanguages = import.meta.glob('../../../../../node_modules/filepon
 
 //  TODO: error on tree refresh - renderLevel undefined - and is called several times
 
-export default function ($wire, $ref, lang, modalTranslations) {
+export default function ($wire, $ref, lang, modalTranslations, inputTranslation){
     return {
         tempFilesId: [],
         isLoadingFiles: [],
+        uploadLabel: null,
         selectedCollection: null,
+        readOnly: false,
         fileCount: null,
         pond: null,
         multipleFileUpload: true,
         async setCollection(collectionName) {
+
             if (collectionName !== null) {
                 //  on selected - check if collection is single file upload
                 this.multipleFileUpload = !await $wire.hasSingleFile(collectionName);
+                this.readOnly = await $wire.readOnly(collectionName);
+                //  check if collection is read-only - disable file upload if true
             } else {
                 // on deselect - reset to default on init
                 this.multipleFileUpload = true;
+                this.readOnly = false;
             }
-            this.pond.setOptions({allowMultiple: this.multipleFileUpload});
+
+            this.pond.setOptions({allowMultiple: this.multipleFileUpload,
+                labelIdle: this.readOnly ? inputTranslation.uploadDisabled : this.uploadLabel,
+                disabled: this.readOnly});
             this.selectedCollection = collectionName;
         },
        async loadFilePond(fileCountGetter) {
@@ -113,6 +122,10 @@ export default function ($wire, $ref, lang, modalTranslations) {
 
                 // set language
                 setOptions(moduleLanguage.default);
+
+                // set initial label - on label change - translation will be discarded
+                // need to persist default label
+                this.uploadLabel = moduleLanguage.default.labelIdle;
         },
         clearFilesOnLeave() {
             if (this.pond !== null && this.tempFilesId.length > 0) {

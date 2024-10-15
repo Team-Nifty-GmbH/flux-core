@@ -164,6 +164,25 @@ class FolderTree extends Component
         return $singleFile ?? false;
     }
 
+    #[Renderless]
+    public function readOnly(string $collectionName): bool {
+
+        // get the base collection name - ignore subfolders
+        $baseCollection = str_contains($collectionName, '.') ?
+            explode('.', $collectionName)[0] : $collectionName;
+
+        $readOnly =  app($this->modelType)
+            ->query()
+            ->whereKey($this->modelId)
+            ->first()
+            ?->getMediaCollection($baseCollection)
+            ?->readOnly;
+
+        // in case there is no rule for the folder - $baseCollection
+        // enable upload
+        return  $readOnly ?? false;
+    }
+
     public function mount(?string $modelType = null, ?int $modelId = null): void
     {
         $this->modelType = $modelType;
