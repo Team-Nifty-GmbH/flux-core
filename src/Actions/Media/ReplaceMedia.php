@@ -13,6 +13,8 @@ use Illuminate\Validation\ValidationException;
 
 class ReplaceMedia extends FluxAction
 {
+    protected bool $force = false;
+
     protected function boot(array $data): void
     {
         parent::boot($data);
@@ -22,6 +24,13 @@ class ReplaceMedia extends FluxAction
     public static function models(): array
     {
         return [Media::class];
+    }
+
+    public function force($force = true): static
+    {
+        $this->force = $force;
+
+        return $this;
     }
 
     public function performAction(): Model
@@ -106,7 +115,8 @@ class ReplaceMedia extends FluxAction
 
         $mediaItem = resolve_static(Media::class, 'query')
             ->whereKey($this->data['id'])
-            ->first();
+            ->with('model')
+            ->first(['id', 'model_type', 'model_id', 'collection_name']);
 
         $this->data['file_name'] = $this->data['file_name'] ?? (
             $this->data['media'] instanceof UploadedFile ?
@@ -116,17 +126,11 @@ class ReplaceMedia extends FluxAction
         $this->data['name'] = $this->data['name'] ?? $this->data['file_name'];
         $this->data['collection_name'] ??= 'default';
 
-        if (resolve_static(Media::class, 'query')
-            ->where('model_type', $mediaItem->model_type)
-            ->where('model_id', $mediaItem->model_id)
-            ->where('collection_name', $mediaItem->collection_name)
-            ->where('name', $this->data['name'])
-            ->where('id', '!=', $this->data['id'])
-            ->exists()
-        ) {
+        // check if the media collection is read-only
+        if ($mediaItem->getCollection()?->readOnly === true && ! $this->force) {
             throw ValidationException::withMessages([
-                'filename' => [__('File name already exists')],
-            ])->errorBag('replaceMedia');
+                'collection_name' => [__('The media collection is read-only and cannot be modified.')],
+            ]);
         }
     }
 }

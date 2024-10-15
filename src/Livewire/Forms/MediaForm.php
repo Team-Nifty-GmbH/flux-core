@@ -35,6 +35,8 @@ class MediaForm extends FluxForm
 
     public bool $shouldDelete = false;
 
+    protected bool $force = false;
+
     protected function getActions(): array
     {
         return [

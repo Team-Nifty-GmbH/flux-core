@@ -53,7 +53,10 @@ class CreatePurchaseInvoice extends FluxAction
                 'model_id' => $purchaseInvoice->id,
                 'media' => $file,
                 'collection_name' => 'purchase_invoice',
-            ])->validate()->execute();
+            ])
+                ->force()
+                ->validate()
+                ->execute();
         }
 
         $purchaseInvoice->media_id = $media->id;

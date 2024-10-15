@@ -13,6 +13,8 @@ class MediaUploadForm extends MediaForm
 {
     public array $stagedFiles = [];
 
+    protected bool $force = false;
+
     protected array|TemporaryUploadedFile|Media|null $file = null;
 
     public array|TemporaryUploadedFile|null $uploadedFile = null;
@@ -26,6 +28,11 @@ class MediaUploadForm extends MediaForm
                 'replace' => ReplaceMedia::class,
             ]
         );
+    }
+
+    protected function makeAction(string $name, ?array $data = null): FluxAction
+    {
+        return parent::makeAction($name, $data)->force($this->force);
     }
 
     public function generatePreviewUrls(): void
@@ -55,6 +62,14 @@ class MediaUploadForm extends MediaForm
 
             $this->generatePreviewUrls();
         }
+    }
+
+    public function force(): static
+    {
+        // this allows saving of media to read-only collections
+        $this->force = true;
+
+        return $this;
     }
 
     public function save(): void

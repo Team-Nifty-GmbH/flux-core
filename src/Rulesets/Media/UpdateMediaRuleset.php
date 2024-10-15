@@ -25,7 +25,7 @@ class UpdateMediaRuleset extends FluxRuleset
             ],
             'name' => 'sometimes|required|string',
             'file_name' => 'sometimes|required|string',
-            'collection' => 'sometimes|required|string',
+            'collection_name' => 'sometimes|required|string',
             'categories' => 'sometimes|array',
             'custom_properties' => 'sometimes|array',
         ];
