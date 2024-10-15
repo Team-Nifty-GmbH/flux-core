@@ -10,6 +10,7 @@ use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\FileViewFinder;
 
@@ -92,8 +93,8 @@ class ViewServiceProvider extends ServiceProvider
             return '<?php endif; ?>';
         });
 
-        Blade::component(App::class, 'layouts.app');
-        Blade::component(Printing::class, 'layouts.print');
+        Blade::component(App::class, 'flux::layouts.app');
+        Blade::component(Printing::class, 'flux::layouts.print');
         config([
             'livewire.layout' => 'flux::layouts.app',
         ]);
@@ -103,6 +104,8 @@ class ViewServiceProvider extends ServiceProvider
         $this->loadViewsFrom($views, 'print');
 
         View::composer('*', function () {
+            Currency::default() && Number::useCurrency(Currency::default()->iso);
+
             try {
                 if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
                     View::share(

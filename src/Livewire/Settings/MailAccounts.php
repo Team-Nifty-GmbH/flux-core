@@ -28,7 +28,7 @@ use Webklex\PHPIMAP\Exceptions\RuntimeException;
 #[Renderless]
 class MailAccounts extends MailAccountList
 {
-    protected string $view = 'flux::livewire.settings.mail-accounts';
+    protected ?string $includeBefore = 'flux::livewire.settings.mail-accounts';
 
     public MailAccountForm $mailAccount;
 

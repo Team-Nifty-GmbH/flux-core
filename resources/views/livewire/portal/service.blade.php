@@ -24,7 +24,7 @@
                     {{ __('Photos and videos help us analyze the errors') }}
                 </div>
                 <div>
-                    <x-features.media.upload wire:model.live="attachments"/>
+                    <x-flux::features.media.upload wire:model.live="attachments"/>
                 </div>
                 <div class="text-portal-font-color pt-12 font-bold">
                     {{ __(':client_name is committed to protecting and respecting your privacy. We will only use your personal information to manage your account and to provide you with the products and services you have requested.', ['client_name' => $customerClient['name']]) }}

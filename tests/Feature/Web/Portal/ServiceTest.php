@@ -5,6 +5,8 @@ namespace FluxErp\Tests\Feature\Web\Portal;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
+use FluxErp\Models\StockPosting;
+use FluxErp\Models\Warehouse;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class ServiceTest extends PortalSetup
@@ -17,10 +19,16 @@ class ServiceTest extends PortalSetup
             ->hasAttached(factory: $this->dbClient, relationship: 'clients')
             ->create();
 
-        $serialNumber = SerialNumber::factory()->create([
+        $warehouse = Warehouse::factory()->create();
+        $serialNumber = SerialNumber::factory()->create();
+        StockPosting::factory()->create([
+            'warehouse_id' => $warehouse->id,
             'product_id' => $product->id,
-            'address_id' => $this->user->id,
+            'serial_number_id' => $serialNumber->id,
+            'posting' => 1,
         ]);
+
+        $serialNumber->addresses()->attach($this->user->id);
 
         $this->user->givePermissionTo(
             Permission::findOrCreate('service.{serialnumberid?}.get', 'address')

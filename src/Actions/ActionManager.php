@@ -15,6 +15,8 @@ class ActionManager
 
     protected Collection $actions;
 
+    protected static array $discoveries = [];
+
     public function __construct()
     {
         $this->actions = Collection::make();
@@ -63,6 +65,11 @@ class ActionManager
 
         $cacheKey = md5($path . $namespace);
 
+        static::$discoveries[$cacheKey] = [
+            'path' => $path,
+            'namespace' => $namespace,
+        ];
+
         try {
             $actions = Cache::get('flux.actions.' . $cacheKey);
         } catch (\Throwable) {
@@ -108,5 +115,10 @@ class ActionManager
         } catch (\Throwable) {
             // Ignore exceptions during cache put
         }
+    }
+
+    public function getDiscoveries(): array
+    {
+        return static::$discoveries;
     }
 }

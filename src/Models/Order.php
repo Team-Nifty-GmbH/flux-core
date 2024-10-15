@@ -38,6 +38,7 @@ use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
 use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
+use FluxErp\View\Printing\Order\SupplierOrder;
 use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -357,6 +358,21 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
         );
     }
 
+    public function scopeUnpaid(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('invoice_number')
+            ->whereNotState('payment_state', Paid::class)
+            ->whereNot('balance', 0);
+    }
+
+    public function scopePaid(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('invoice_number')
+            ->whereNotState('payment_state', Open::class);
+    }
+
     public function newCollection(array $models = []): Collection
     {
         return app(OrderCollection::class, ['items' => $models]);
@@ -409,14 +425,17 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     {
         $this->addMediaCollection('invoice')
             ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml'])
-            ->singleFile();
+            ->singleFile()
+            ->readOnly();
 
         $this->addMediaCollection('payment-reminders')
-            ->acceptsMimeTypes(['application/pdf']);
+            ->acceptsMimeTypes(['application/pdf'])
+            ->readOnly();
 
         $this->addMediaCollection('signature')
             ->acceptsMimeTypes(['image/jpeg', 'image/png'])
-            ->useDisk('local');
+            ->useDisk('local')
+            ->readOnly();
     }
 
     public function calculatePrices(): static
@@ -578,7 +597,9 @@ class Order extends Model implements HasMedia, InteractsWithDataTables, OffersPr
     public function getPrintViews(): array
     {
         return $this->orderType?->order_type_enum->isPurchase()
-            ? []
+            ? [
+                'supplier-order' => SupplierOrder::class,
+            ]
             : [
                 'invoice' => Invoice::class,
                 'offer' => Offer::class,

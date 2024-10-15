@@ -111,6 +111,9 @@ class FluxServiceProvider extends ServiceProvider
         bcscale(9);
         $this->bootMiddleware();
         $this->bootCommands();
+
+        $this->optimizes('flux:optimize', 'flux:optimize-clear');
+
         $this->bootRoutes();
         $this->registerLivewireComponents();
         $this->registerBladeComponents();
@@ -153,7 +156,7 @@ class FluxServiceProvider extends ServiceProvider
         Repeatable::autoDiscover();
 
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
-            ProductType::register('product', 'flux::livewire.product.product', true);
+            ProductType::register(name: 'product', class: \FluxErp\Livewire\Product\Product::class, default: true);
         }
     }
 
@@ -376,9 +379,7 @@ class FluxServiceProvider extends ServiceProvider
             Blade::component('flux::components.' . $relativePath, Str::remove('.index', $relativePath));
         }
 
-        foreach ($this->getViewClassAliasFromNamespace('FluxErp\\View\\Components') as $alias => $class) {
-            Blade::component($class, $alias);
-        }
+        Blade::componentNamespace('FluxErp\\View\\Components', 'flux');
     }
 
     protected function registerLivewireComponents(): void
@@ -393,6 +394,7 @@ class FluxServiceProvider extends ServiceProvider
                     Livewire::component($alias, $class);
                 }
             } catch (\Throwable) {
+                Cache::forget('flux.view-classes.' . Str::slug($livewireNamespace));
             }
         }
     }
@@ -570,7 +572,6 @@ class FluxServiceProvider extends ServiceProvider
         Menu::register(route: 'portal.products', icon: 'square-3-stack-3d');
         Menu::register(route: 'portal.files', icon: 'folder-open');
         Menu::register(route: 'portal.orders', icon: 'shopping-bag');
-        Menu::register(route: 'portal.serial-numbers', icon: 'tag');
         Menu::register(route: 'portal.tickets', icon: 'wrench-screwdriver');
     }
 

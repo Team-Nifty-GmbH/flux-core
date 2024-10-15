@@ -22,6 +22,7 @@ class CreateWorkTimeRuleset extends FluxRuleset
             'uuid' => 'nullable|string|uuid|unique:work_times,uuid',
             'contact_id' => [
                 'nullable',
+                'required_if:is_billable,true',
                 'integer',
                 app(ModelExists::class, ['model' => Contact::class]),
             ],

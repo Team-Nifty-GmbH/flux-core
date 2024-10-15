@@ -12,9 +12,10 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -31,24 +32,19 @@ class SerialNumber extends Model implements HasMedia, InteractsWithDataTables
 
     public static string $iconName = 'tag';
 
-    public function product(): BelongsTo
+    public function addresses(): BelongsToMany
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsToMany(Address::class, 'address_serial_number')->withPivot('quantity');
     }
 
-    public function orderPosition(): BelongsTo
+    public function product(): HasOneThrough
     {
-        return $this->belongsTo(OrderPosition::class);
+        return $this->hasOneThrough(Product::class, StockPosting::class, 'serial_number_id', 'id', 'id', 'product_id');
     }
 
-    public function address(): BelongsTo
+    public function stockPostings(): HasMany
     {
-        return $this->belongsTo(Address::class);
-    }
-
-    protected function makeAllSearchableUsing(Builder $query): Builder
-    {
-        return $query->with(['product', 'address']);
+        return $this->hasMany(StockPosting::class);
     }
 
     public function getLabel(): ?string

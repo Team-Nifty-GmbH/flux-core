@@ -34,7 +34,7 @@
             :label="__('Payment Reminder Subject')"
             wire:model="paymentReminderTextForm.reminder_subject"
         />
-        <x-editor
+        <x-flux::editor
             :label="__('Payment Reminder Text')"
             wire:model="paymentReminderTextForm.reminder_body"
         />
@@ -100,7 +100,7 @@
         <x-input :label="__('Payment Reminder Email Subject')"
              wire:model="paymentReminderTextForm.mail_subject"
         />
-        <x-editor :label="__('Payment Reminder Email Text')"
+        <x-flux::editor :label="__('Payment Reminder Email Text')"
               wire:model="paymentReminderTextForm.mail_body"
         />
         <x-slot:footer>

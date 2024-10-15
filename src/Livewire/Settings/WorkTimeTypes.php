@@ -17,7 +17,7 @@ class WorkTimeTypes extends WorkTimeTypeList
 {
     use Actions;
 
-    public string $view = 'flux::livewire.settings.work-time-types';
+    public ?string $includeBefore = 'flux::livewire.settings.work-time-types';
 
     public WorkTimeTypeForm $workTimeType;
 

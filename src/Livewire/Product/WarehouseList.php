@@ -39,6 +39,13 @@ class WarehouseList extends BaseWarehouseList
         return $this->enabledCols;
     }
 
+    public function getColLabels(?array $cols = null): array
+    {
+        return array_merge(parent::getColLabels($cols), [
+            'stock_postings_sum_posting' => __('Stock'),
+        ]);
+    }
+
     protected function getAggregatableRelationCols(): array
     {
         return [
@@ -51,13 +58,6 @@ class WarehouseList extends BaseWarehouseList
                 'posting'
             ),
         ];
-    }
-
-    public function getColLabels(?array $cols = null): array
-    {
-        return array_merge(parent::getColLabels($cols), [
-            'stock_postings_sum_posting' => __('Stock'),
-        ]);
     }
 
     protected function getRowAttributes(): ComponentAttributeBag

@@ -28,7 +28,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -84,6 +83,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
     public function agent(): BelongsTo
     {
         return $this->belongsTo(User::class, 'agent_id');
+    }
+
+    public function approvalUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approval_user_id');
     }
 
     public function client(): BelongsTo
@@ -160,11 +164,6 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
     public function sepaMandates(): HasMany
     {
         return $this->hasMany(SepaMandate::class);
-    }
-
-    public function serialNumbers(): HasManyThrough
-    {
-        return $this->hasManyThrough(SerialNumber::class, Address::class);
     }
 
     public function vatRate(): BelongsTo

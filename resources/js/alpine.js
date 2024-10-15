@@ -6,6 +6,7 @@ import notifications from './components/wireui/notifications';
 import signature from './components/signature-pad.js';
 import addressMap from "./components/address-map";
 import filePond from "./components/file-pond";
+import sort from '@alpinejs/sort';
 
 window.folderTree = folderTree;
 window.setupEditor = setupEditor;
@@ -17,6 +18,7 @@ window.filePond = filePond;
 
 window.addEventListener('alpine:init', () => {
     window.Alpine.data('wireui_notifications', notifications);
+    window.Alpine.plugin(sort)
 })
 
 Alpine.directive('currency', (el, { expression }, { evaluate }) => {

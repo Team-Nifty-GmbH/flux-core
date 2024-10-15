@@ -23,7 +23,7 @@ class FolderTree extends Component
 {
     use Actions, WithFileUploads;
 
-    /** @var Model $this->modelType */
+    /** @var class-string<Model> */
     public ?string $modelType = null;
 
     public ?int $modelId = null;
@@ -181,7 +181,10 @@ class FolderTree extends Component
             return [];
         }
 
-        return app($this->modelType)->query()->whereKey($this->modelId)->first()?->getMediaAsTree() ?: [];
+        return resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->first()
+            ?->getMediaAsTree() ?? [];
     }
 
     public function save(array $item): bool

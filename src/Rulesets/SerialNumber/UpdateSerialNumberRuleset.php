@@ -2,9 +2,6 @@
 
 namespace FluxErp\Rulesets\SerialNumber;
 
-use FluxErp\Models\Address;
-use FluxErp\Models\OrderPosition;
-use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
@@ -21,22 +18,8 @@ class UpdateSerialNumberRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => SerialNumber::class]),
             ],
-            'product_id' => [
-                'integer',
-                'nullable',
-                app(ModelExists::class, ['model' => Product::class]),
-            ],
-            'address_id' => [
-                'integer',
-                'nullable',
-                app(ModelExists::class, ['model' => Address::class]),
-            ],
-            'order_position_id' => [
-                'integer',
-                'nullable',
-                app(ModelExists::class, ['model' => OrderPosition::class]),
-            ],
             'serial_number' => 'sometimes|required|string',
+            'supplier_serial_number' => 'string|nullable',
         ];
     }
 }

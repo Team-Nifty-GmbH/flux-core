@@ -86,14 +86,16 @@
         ]) }}
     </h1>
     <div class="flex justify-end pb-5 gap-1.5">
-        @if($order['invoice_number'])
-            <x-button primary :label="__('Download invoice')" wire:click="downloadInvoice()" spinner="downloadInvoice"/>
-        @endif
+        @section('actions')
+            @if($order['invoice_number'])
+                <x-button primary :label="__('Download invoice')" wire:click="downloadInvoice()" spinner="downloadInvoice"/>
+            @endif
 
-        @if($order['parent_id'])
-            <x-button primary :href="route('portal.orders.id', data_get($order, 'parent_id'))">{{ __('Show parent') }}</x-button>
-        @endif
-        <x-button primary :label="__('New Ticket')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal').querySelector('[wireui-modal]')).open();" spinner="downloadInvoice"/>
+            @if($order['parent_id'])
+                <x-button primary :href="route('portal.orders.id', data_get($order, 'parent_id'))">{{ __('Show parent') }}</x-button>
+            @endif
+            <x-button primary :label="__('New Ticket')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal').querySelector('[wireui-modal]')).open();" spinner="downloadInvoice"/>
+        @show
     </div>
     <div class="space-y-5">
         <div class="flex gap-8">
@@ -137,50 +139,56 @@
                 </x-card>
             @endif
         @show
-        <x-card>
-            <div class="grid grid-cols-1 lg:grid-cols-2">
-                <div class="grid grid-cols-2 gap-5">
-                    <div class="text-right">
-                        {{ __('Commission') }}:
+        @section('attributes')
+            <x-card>
+                <div class="grid grid-cols-1 lg:grid-cols-2">
+                    <div class="grid grid-cols-2 gap-5">
+                        @section('attributes.left')
+                            <div class="text-right">
+                                {{ __('Commission') }}:
+                            </div>
+                            <div>
+                                {{ data_get($order, 'commission') }}
+                            </div>
+                            <div class="text-right">
+                                {{ __('Customer no.') }}:
+                            </div>
+                            <div>
+                                {{ data_get($order, 'address_invoice.contact.customer_number') }}
+                            </div>
+                            <div class="text-right">
+                                {{ __('Logistics note') }}:
+                            </div>
+                            <div>
+                                {{ data_get($order, 'logistic_note') }}
+                            </div>
+                        @show
                     </div>
-                    <div>
-                        {{ data_get($order, 'commission') }}
-                    </div>
-                    <div class="text-right">
-                        {{ __('Customer no.') }}:
-                    </div>
-                    <div>
-                        {{ data_get($order, 'address_invoice.contact.customer_number') }}
-                    </div>
-                    <div class="text-right">
-                        {{ __('Logistics note') }}:
-                    </div>
-                    <div>
-                        {{ data_get($order, 'logistic_note') }}
+                    <div class="grid grid-cols-2 gap-5">
+                        @section('attributes.right')
+                            <div class="text-right">
+                                {{ __('Clerk') }}:
+                            </div>
+                            <div>
+                                {{ data_get($order, 'user_created.name') }}
+                            </div>
+                            <div class="text-right">
+                                {{ __('Responsible representative') }}:
+                            </div>
+                            <div>
+                                {{ data_get($order, 'agent.name') }}
+                            </div>
+                            <div class="text-right">
+                                {{ __('Performance/Delivery date') }}:
+                            </div>
+                            <div>
+                                {{ data_get($order, 'system_delivery_date') }}
+                            </div>
+                        @show
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-5">
-                    <div class="text-right">
-                        {{ __('Clerk') }}:
-                    </div>
-                    <div>
-                        {{ data_get($order, 'user_created.name') }}
-                    </div>
-                    <div class="text-right">
-                        {{ __('Responsible representative') }}:
-                    </div>
-                    <div>
-                        {{ data_get($order, 'agent.name') }}
-                    </div>
-                    <div class="text-right">
-                        {{ __('Performance/Delivery date') }}:
-                    </div>
-                    <div>
-                        {{ data_get($order, 'system_delivery_date') }}
-                    </div>
-                </div>
-            </div>
-        </x-card>
+            </x-card>
+        @show
         @if($order['header'])
             <x-card>
                 {!! $order['header'] !!}
@@ -193,24 +201,22 @@
                     :filters="[['column' => 'order_id', 'operator' => '=', 'value' => $order['id']]]"
                 />
             </div>
-            @section('actions')
-            @show
             <div x-show="positionsSummary.length > 0" x-cloak>
-                <x-table>
+                <x-flux::table>
                     <x-slot name="title">
                         <h2 class="text-base font-bold uppercase">
                             {{ __('Summary') }}
                         </h2>
                     </x-slot>
                     <template x-for="item in positionsSummary">
-                        <x-table.row>
-                            <x-table.cell x-html="item.pos"/>
-                            <x-table.cell class="col-span-3" x-html="item.name"/>
-                            <x-table.cell
+                        <x-flux::table.row>
+                            <x-flux::table.cell x-html="item.pos"/>
+                            <x-flux::table.cell class="col-span-3" x-html="item.name"/>
+                            <x-flux::table.cell
                                 x-html="item.{{ auth()->user()->priceList?->is_net ? 'total_net_price' : 'total_gross_price' }}"/>
-                        </x-table.row>
+                        </x-flux::table.row>
                     </template>
-                </x-table>
+                </x-flux::table>
             </div>
             <x-card>
                 <div class="text-sm">

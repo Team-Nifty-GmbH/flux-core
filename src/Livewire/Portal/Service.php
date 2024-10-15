@@ -51,7 +51,7 @@ class Service extends Component
                 ->toArray();
             $this->contactData['serial_number'] = $this->serialNumber['serial_number'];
 
-            $this->ticket['model_type'] = app(SerialNumber::class)->getMorphClass();
+            $this->ticket['model_type'] = morph_alias(SerialNumber::class);
             $this->ticket['model_id'] = $this->serialNumber['id'];
         }
     }

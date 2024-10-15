@@ -106,7 +106,7 @@ export default function ($wire) {
                 }
             });
             // sync and save to db
-            await $wire.saveDashboard(newSnapshot);
+            await $wire.saveWidgets(newSnapshot);
             // stop edit mode
             this.editGridMode(false);
             // refresh id

@@ -1,7 +1,7 @@
-<x-layouts.app>
+<x-flux::layouts.app>
     <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8" x-data>
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <x-logo fill="#000000" class="h-24"/>
+            <x-flux::logo fill="#0690FA" class="h-24"/>
         </div>
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
             <x-card>
@@ -17,4 +17,4 @@
             </x-card>
         </div>
     </div>
-</x-layouts.app>
+</x-flux::layouts.app>

@@ -84,7 +84,7 @@ abstract class FluxForm extends BaseForm
 
     public function delete(): void
     {
-        $response = $this->getActions()['delete']::make($this->toArray())
+        $response = $this->makeAction('delete')
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
             ->validate()
             ->execute();

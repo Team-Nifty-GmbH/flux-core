@@ -14,7 +14,7 @@ class Currencies extends CurrencyList
 {
     use Actions;
 
-    protected string $view = 'flux::livewire.settings.currencies';
+    protected ?string $includeBefore = 'flux::livewire.settings.currencies';
 
     public CurrencyForm $selectedCurrency;
 

@@ -3,7 +3,7 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\OrderType\CreateOrderType;
-use FluxErp\Actions\OrderType\DeleteOrderType;
+use FluxErp\Actions\OrderType\UpdateOrderType;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\DataTables\OrderTypeList;
 use FluxErp\Livewire\Forms\OrderTypeForm;
@@ -19,7 +19,7 @@ class OrderTypes extends OrderTypeList
 {
     use Actions;
 
-    protected string $view = 'flux::livewire.settings.order-types';
+    protected ?string $includeBefore = 'flux::livewire.settings.order-types';
 
     public OrderTypeForm $orderType;
 
@@ -41,6 +41,20 @@ class OrderTypes extends OrderTypeList
                 ->attributes(
                     ['wire:click' => 'edit']
                 ),
+        ];
+    }
+
+    protected function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('Edit'))
+                ->color('primary')
+                ->icon('pencil')
+                ->attributes([
+                    'x-on:click' => '$wire.edit(record.id)',
+                ])
+                ->when(fn () => resolve_static(UpdateOrderType::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -94,10 +108,7 @@ class OrderTypes extends OrderTypeList
     public function delete(): bool
     {
         try {
-            DeleteOrderType::make($this->orderType->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->orderType->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

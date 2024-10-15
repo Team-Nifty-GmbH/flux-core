@@ -10,6 +10,7 @@ use FluxErp\Listeners\MailMessage\CreateMailExecutedSubscriber;
 use FluxErp\Listeners\MessageSendingEventSubscriber;
 use FluxErp\Listeners\NotificationEloquentEventSubscriber;
 use FluxErp\Listeners\Order\OrderInvoiceAddedSubscriber;
+use FluxErp\Listeners\Order\OrderStockSubscriber;
 use FluxErp\Listeners\SnapshotEventSubscriber;
 use FluxErp\Listeners\Ticket\CommentCreatedListener;
 use FluxErp\Listeners\Ticket\TicketCreatedNotificationListener;
@@ -54,6 +55,7 @@ class EventServiceProvider extends ServiceProvider
         NotificationEloquentEventSubscriber::class,
         SnapshotEventSubscriber::class,
         WebhookEventSubscriber::class,
+        OrderStockSubscriber::class,
         OrderInvoiceAddedSubscriber::class,
         MessageSendingEventSubscriber::class,
         CreateMailExecutedSubscriber::class,

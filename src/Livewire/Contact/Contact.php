@@ -67,7 +67,7 @@ class Contact extends Component
     #[Renderless]
     public function contactDeleted(): void
     {
-        $this->redirectRoute('contacts', navigate: true);
+        $this->redirectRoute('contacts.contacts', navigate: true);
     }
 
     public function render(): View|Factory|Application
@@ -92,6 +92,10 @@ class Contact extends Component
                 ->wireModel('contact.id'),
             TabButton::make('contact.projects')
                 ->label(__('Projects'))
+                ->isLivewireComponent()
+                ->wireModel('contact.id'),
+            TabButton::make('contact.attachments')
+                ->label(__('Attachments'))
                 ->isLivewireComponent()
                 ->wireModel('contact.id'),
             TabButton::make('contact.tickets')
@@ -122,7 +126,7 @@ class Contact extends Component
             return;
         }
 
-        $this->redirectRoute('contacts', navigate: true);
+        $this->redirectRoute('contacts.contacts', navigate: true);
     }
 
     #[Renderless]

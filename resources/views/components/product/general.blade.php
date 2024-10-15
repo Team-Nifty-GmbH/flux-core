@@ -6,7 +6,7 @@
         @section('general')
         <x-input x-bind:readonly="!edit" label="{{ __('Product number') }}" wire:model="product.product_number" />
         <x-input x-bind:readonly="!edit" label="{{ __('Name') }}" wire:model="product.name" />
-        <x-editor x-model="edit" wire:model="product.description" :label="__('Description')" />
+        <x-flux::editor x-model="edit" wire:model="product.description" :label="__('Description')" />
         @show
     </x-card>
     <x-card class="space-y-2.5" :title="__('Attributes')">
@@ -28,13 +28,66 @@
             <hr/>
             <x-input x-bind:readonly="!edit" label="{{ __('EAN') }}" wire:model="product.ean" />
             <x-input x-bind:readonly="!edit" label="{{ __('Manufacturer product number') }}" wire:model="product.manufacturer_product_number" />
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <x-input :suffix="__('mm')" x-bind:readonly="!edit" label="{{ __('Length') }}" wire:model.number="product.dimension_length_mm" />
-                <x-input :suffix="__('mm')" x-bind:readonly="!edit" label="{{ __('Width') }}" wire:model.number="product.dimension_width_mm" />
-                <x-input :suffix="__('mm')" x-bind:readonly="!edit" label="{{ __('Height') }}" wire:model.number="product.dimension_height_mm" />
-                <x-input :suffix="__('Gram')" x-bind:readonly="!edit" label="{{ __('Weight') }}" wire:model.number="product.weight_gram" />
-                <x-input x-bind:readonly="!edit" label="{{ __('Selling unit') }}" wire:model.number="product.selling_unit" />
-                <x-input x-bind:readonly="!edit" label="{{ __('Basic unit') }}" wire:model.number="product.basic_unit" />
+            <x-select
+                x-bind:readonly="!edit" label="{{ __('Unit') }}"
+                option-key-value
+                wire:model.number="product.unit_id"
+                :options="resolve_static(\FluxErp\Models\Unit::class, 'query')->pluck('name', 'id')"
+            />
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4" x-bind:class="!edit && 'pointer-events-none'">
+                <template id="unit-price-tooltip">
+                    <div class="p-1.5">
+                        <div class="p-1.5">
+                            {!! __('Required to calculate the product\'s unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.') !!}
+                        </div>
+                    </div>
+                </template>
+                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Length') }}" wire:model.number="product.dimension_length_mm">
+                    <x-slot:cornerHint>
+                        <div class="flex gap-1.5 items-center">
+                            <div class="text-secondary-400">
+                                {{ __('mm') }}
+                            </div>
+                        </div>
+                    </x-slot:cornerHint>
+                </x-inputs.number>
+                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Width') }}" wire:model.number="product.dimension_width_mm">
+                    <x-slot:cornerHint>
+                        <div class="flex gap-1.5 items-center">
+                            <div class="text-secondary-400">
+                                {{ __('mm') }}
+                            </div>
+                        </div>
+                    </x-slot:cornerHint>
+                </x-inputs.number>
+                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Height') }}" wire:model.number="product.dimension_height_mm">
+                    <x-slot:cornerHint>
+                        <div class="flex gap-1.5 items-center">
+                            <div class="text-secondary-400">
+                                {{ __('mm') }}
+                            </div>
+                        </div>
+                    </x-slot:cornerHint>
+                </x-inputs.number>
+                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Weight') }}" wire:model.number="product.weight_gram">
+                    <x-slot:cornerHint>
+                        <div class="flex gap-1.5 items-center">
+                            <div class="text-secondary-400">
+                                {{ __('Gram') }}
+                            </div>
+                        </div>
+                    </x-slot:cornerHint>
+                </x-inputs.number>
+                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Selling unit') }}" wire:model.number="product.selling_unit">
+                    <x-slot:cornerHint>
+                        <x-button.circle xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
+                    </x-slot:cornerHint>
+                </x-inputs.number>
+                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Basic unit') }}" wire:model.number="product.basic_unit">
+                    <x-slot:cornerHint>
+                        <x-button.circle xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
+                    </x-slot:cornerHint>
+                </x-inputs.number>
             </div>
         @show
     </x-card>
@@ -169,7 +222,7 @@
                             </x-slot:title>
                             <template x-for="(displayedProperties, propertyType) in propertyTypes">
                                 <div>
-                                    <div class="flex space-x-1.5" x-cloak x-show="propertyType === 'option'">
+                                    <div class="flex flex-wrap gap-1.5" x-cloak x-show="propertyType === 'option'">
                                         <template x-for="displayedProperty in displayedProperties">
                                             <x-badge x-text="displayedProperty.name" />
                                         </template>
@@ -202,7 +255,7 @@
         <x-card :title="__('Additional columns')">
             @section('additional-columns')
                 <div class="flex flex-col gap-4">
-                    <x-additional-columns :table="false" wire="product" :model="\FluxErp\Models\Product::class" :id="$this->product->id" />
+                    <x-flux::additional-columns :table="false" wire="product" :model="\FluxErp\Models\Product::class" :id="$this->product->id" />
                 </div>
             @show
         </x-card>
@@ -210,7 +263,7 @@
     <x-card class="flex flex-col gap-4" :title="__('Suppliers')">
         @section('suppliers')
             <template x-for="(supplier, index) in $wire.product.suppliers">
-                <x-list-item :item="[]">
+                <x-flux::list-item :item="[]">
                     <x-slot:value>
                         <span x-text="supplier.main_address.name"></span>
                     </x-slot:value>
@@ -231,7 +284,7 @@
                             />
                         </div>
                     </x-slot:actions>
-                </x-list-item>
+                </x-flux::list-item>
             </template>
             <div x-show="edit" x-cloak x-transition>
                 <x-select :label="__('Contact')"

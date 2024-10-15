@@ -89,7 +89,7 @@ class PurchaseInvoiceForm extends FluxForm
         $this->currency_id = Currency::default()?->id;
     }
 
-    public function findLastLedgerAccountId(): void
+    public function findMostUsedLedgerAccountId(): void
     {
         $this->lastLedgerAccountId = resolve_static(OrderPosition::class, 'query')
             ->whereHas(
@@ -97,7 +97,8 @@ class PurchaseInvoiceForm extends FluxForm
                 fn ($query) => $query->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense)
             )
             ->whereHas('order', fn ($query) => $query->where('contact_id', $this->contact_id))
-            ->orderByDesc('id')
+            ->groupBy('ledger_account_id')
+            ->orderByRaw('COUNT(ledger_account_id) DESC')
             ->value('ledger_account_id');
     }
 }

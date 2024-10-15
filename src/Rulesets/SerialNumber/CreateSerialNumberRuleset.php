@@ -2,9 +2,6 @@
 
 namespace FluxErp\Rulesets\SerialNumber;
 
-use FluxErp\Models\Address;
-use FluxErp\Models\OrderPosition;
-use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Rules\ModelExists;
@@ -19,22 +16,14 @@ class CreateSerialNumberRuleset extends FluxRuleset
         return [
             'uuid' => 'nullable|string|uuid|unique:serial_numbers,uuid',
             'serial_number_range_id' => [
+                'exclude_if:use_supplier_serial_number,true',
                 'integer',
+                'nullable',
                 app(ModelExists::class, ['model' => SerialNumberRange::class]),
             ],
-            'product_id' => [
-                'integer',
-                app(ModelExists::class, ['model' => Product::class]),
-            ],
-            'address_id' => [
-                'integer',
-                app(ModelExists::class, ['model' => Address::class]),
-            ],
-            'order_position_id' => [
-                'integer',
-                app(ModelExists::class, ['model' => OrderPosition::class]),
-            ],
-            'serial_number' => 'required|string',
+            'serial_number' => 'required|string|unique:serial_numbers,serial_number',
+            'supplier_serial_number' => 'required_if_accepted:use_supplier_serial_number|string|nullable',
+            'use_supplier_serial_number' => 'boolean',
         ];
     }
 }

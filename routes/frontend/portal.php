@@ -11,9 +11,7 @@ use FluxErp\Livewire\Portal\Dashboard;
 use FluxErp\Livewire\Portal\Files;
 use FluxErp\Livewire\Portal\OrderDetail;
 use FluxErp\Livewire\Portal\Orders;
-use FluxErp\Livewire\Portal\Product;
 use FluxErp\Livewire\Portal\Profile;
-use FluxErp\Livewire\Portal\SerialNumbers;
 use FluxErp\Livewire\Portal\Service;
 use FluxErp\Livewire\Portal\Shop\Checkout;
 use FluxErp\Livewire\Portal\Shop\CheckoutFinish;
@@ -73,12 +71,8 @@ Route::middleware(['web', PortalMiddleware::class])
                 ->name('orders.id');
             Route::get('/orders', Orders::class)
                 ->name('orders');
-            Route::get('/product/{id}', Product::class)
-                ->name('product');
             Route::get('/profiles/{id?}', Profile::class)
                 ->name('profiles.id?');
-            Route::get('/serial-numbers', SerialNumbers::class)
-                ->name('serial-numbers');
             Route::get('/service/{serialNumberId?}', Service::class)
                 ->name('service');
             Route::get('/tickets', Tickets::class)

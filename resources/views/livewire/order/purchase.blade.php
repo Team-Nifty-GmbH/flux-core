@@ -8,7 +8,7 @@
                 option-value="id"
                 option-label="label"
                 :clearable="false"
-                :disabled="$order->is_locked || $order->is_confirmed || auth()->user()?->id !== $order->approval_user_id"
+                :disabled="$order->is_confirmed || (auth()->user()?->id !== $order->approval_user_id && $order->is_locked)"
                 :template="[
                     'name'   => 'user-option',
                 ]"
@@ -16,7 +16,7 @@
                     'api' => route('search', \FluxErp\Models\User::class),
                 ]"
             />
-            <x-checkbox wire:model="order.is_confirmed" :label="__('Confirmed')" :disabled="auth()->user()?->id !== $order->approval_user_id || $order->is_locked" />
+            <x-checkbox wire:model.live="order.is_confirmed" :label="__('Confirmed')" :disabled="auth()->user()?->id !== $order->approval_user_id" />
             <x-inputs.number min="1" step="1" wire:model="order.payment_target" :label="__('Payment target')" :disabled="$order->is_locked" class="w-full"/>
             <x-inputs.number min="1" step="1" wire:model="order.payment_discount_target" :label="__('Payment discount target')" :disabled="$order->is_locked" class="w-full"/>
             <x-inputs.number step="0.01" min="0.01" max="99.99" wire:model="order.payment_discount_percent" :label="__('Payment discount')" :disabled="$order->is_locked" class="w-full"/>

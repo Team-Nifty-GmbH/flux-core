@@ -6,6 +6,7 @@
         "build": "vite build"
     },
     "devDependencies": {
+        "@alpinejs/sort": "^3.14.1",
         "@floating-ui/dom": "^1.5.3",
         "@fontsource/inter": "^5.0.18",
         "@fullcalendar/core": "^6.1.11",

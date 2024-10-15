@@ -4,12 +4,12 @@
     x-on:mouseover.away="closeMenu()"
     x-on:mouseover="showMenu()"
     x-bind:class="menuOpen && '!w-full md:!w-72'"
-    class="z-10 bg-gray-700 fixed w-0 md:w-20 inset-y-0 md:block overflow-y-auto soft-scrollbar md:flex md:flex-col top-0 transition-all duration-500 ease-in-out"
+    class="z-10 bg-flux-secondary-500 fixed w-0 md:w-20 inset-y-0 md:block overflow-y-auto soft-scrollbar md:flex md:flex-col top-0 transition-all duration-500 ease-in-out"
 >
     <!-- Sidebar component, swap this element with another sidebar if you like -->
     <div class="soft-scrollbar flex flex-grow flex-col overflow-x-hidden">
         <div class="flex relative flex h-16 shrink-0 justify-center p-2 px-4">
-            <x-logo fill="#FFFFFF" />
+            <x-flux::logo fill="#D7E3EC" />
             <x-button.circle icon="x" x-on:click="closeMenu(true)" class="absolute top-6 right-6 block md:hidden" />
         </div>
         <!-- User Menu -->

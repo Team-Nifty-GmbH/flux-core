@@ -2,14 +2,19 @@
 
 namespace FluxErp\Tests\Feature\Api;
 
+use FluxErp\Models\Address;
 use FluxErp\Models\Comment;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
+use FluxErp\Models\Ticket;
 use FluxErp\Models\Unit;
 use FluxErp\Models\User;
+use FluxErp\Notifications\Comment\CommentCreatedNotification;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
 
 class CommentTest extends BaseSetup
@@ -288,5 +293,57 @@ class CommentTest extends BaseSetup
         $this->assertFalse($this->user->is($dbComment->getCreatedBy()));
         $this->assertNotNull($dbComment->deleted_at);
         $this->assertTrue($this->user->is($dbComment->getDeletedBy()));
+    }
+
+    public function test_create_comment_sends_notification()
+    {
+        Notification::fake();
+        $user = new User([
+            'language_id' => $this->user->language_id,
+            'email' => 'notification_user@example.com',
+            'firstname' => 'firstname_notification_user',
+            'lastname' => 'lastname',
+            'password' => 'password',
+        ]);
+        $user->save();
+
+        $contact = Contact::factory()->create([
+            'client_id' => $this->dbClient->id,
+        ]);
+        $address = Address::factory()->create([
+            'client_id' => $this->dbClient->id,
+            'contact_id' => $contact->id,
+            'is_main_address' => true,
+        ]);
+
+        $ticket = Ticket::factory()->create([
+            'authenticatable_type' => morph_alias(Address::class),
+            'authenticatable_id' => $address->id,
+        ]);
+
+        $comment = [
+            'model_id' => $ticket->id,
+            'model_type' => morph_alias(Ticket::class),
+            'comment' => 'test comment <span class="mention" data-type="mention" data-id="user:'
+                . $user->id . '">@firstname_notification_user lastname</span>',
+            'is_internal' => false,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/comments', $comment);
+        $response->assertStatus(201);
+
+        $this->assertDatabaseHas('event_subscriptions', [
+            'event' => 'eloquent.created: ' . Comment::class,
+            'model_type' => morph_alias(Ticket::class),
+            'model_id' => $ticket->id,
+            'subscribable_type' => morph_alias(User::class),
+            'subscribable_id' => $user->id,
+        ]);
+
+        Notification::assertSentTo($user, CommentCreatedNotification::class);
+        Notification::assertNothingSentTo($this->user);
     }
 }

@@ -15,6 +15,7 @@ use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Lockable;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\MonitorsQueue;
@@ -40,17 +41,19 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\UnauthorizedException;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\Traits\CausesActivity;
+use Spatie\MediaLibrary\HasMedia;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Address extends Authenticatable implements HasLocalePreference, InteractsWithDataTables
+class Address extends Authenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, CausesActivity, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens,
         HasCalendars, HasCart, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags,
-        HasUserModification, HasUuid, Lockable, LogsActivity, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
+        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Searchable,
+        SoftDeletes;
 
     protected $hidden = [
         'password',
@@ -298,9 +301,9 @@ class Address extends Authenticatable implements HasLocalePreference, InteractsW
         return $this->hasMany(Task::class);
     }
 
-    public function serialNumbers(): HasMany
+    public function serialNumbers(): BelongsToMany
     {
-        return $this->hasMany(SerialNumber::class);
+        return $this->belongsToMany(SerialNumber::class, 'address_serial_number');
     }
 
     public function settings(): MorphMany

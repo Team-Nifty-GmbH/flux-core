@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire\Features;
 
-use FluxErp\Livewire\Forms\MediaForm;
+use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\View\Printing\PrintableView;
@@ -23,7 +23,7 @@ class SignaturePublicLink extends Component
 {
     use Actions, WithFileUploads;
 
-    public MediaForm $signature;
+    public MediaUploadForm $signature;
 
     #[Locked]
     public ?string $uuid;
@@ -84,7 +84,7 @@ class SignaturePublicLink extends Component
             ]);
 
             try {
-                $this->signature->save();
+                $this->signature->force()->save();
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
                 $this->skipRender();

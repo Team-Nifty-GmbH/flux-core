@@ -243,7 +243,7 @@
                          x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
                 />
             </div>
-            <x-editor wire:model="communication.html_body" :label="__('Content')"/>
+            <x-flux::editor wire:model="communication.html_body" :label="__('Content')"/>
             <x-select
                 :label="__('Tags')"
                 multiselect
@@ -272,7 +272,7 @@
                     </div>
                 </x-slot:beforeOptions>
             </x-select>
-            <x-features.media.upload-form-object :label="__('Attachments')" wire:model="attachments" :multiple="true" x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"/>
+            <x-flux::features.media.upload-form-object :label="__('Attachments')" wire:model="attachments" :multiple="true" x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"/>
             <x-slot:footer>
                 <div class="flex gap-1.5 justify-end">
                     <x-button

@@ -29,10 +29,10 @@ class OrderFactory extends Factory
             'tracking_email' => $this->faker->email(),
             'payment_texts' => [$this->faker->text(300)],
 
-            'order_date' => $this->faker->date(),
-            'system_delivery_date' => $this->faker->date(),
-            'customer_delivery_date' => $this->faker->date(),
-            'date_of_approval' => $this->faker->date(),
+            'order_date' => $this->faker->dateTimeBetween('-1 year', '+1 year'),
+            'system_delivery_date' => $this->faker->dateTimeBetween('-1 year', '+1 year'),
+            'customer_delivery_date' => $this->faker->dateTimeBetween('-1 year', '+1 year'),
+            'date_of_approval' => $this->faker->dateTimeBetween('-1 year', '+1 year'),
 
             'has_logistic_notify_phone_number' => $this->faker->boolean(),
             'has_logistic_notify_number' => $this->faker->boolean(),

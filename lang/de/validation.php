@@ -394,7 +394,7 @@ return [
         'is_public' => 'Öffentlich',
         'is_purchase' => 'Kauf',
         'is_required_manufacturer_serial_number' => 'Hersteller-Seriennummer erforderlich',
-        'is_required_product_serial_number' => 'Produkt-Seriennummer erforderlich',
+        'has_serial_numbers' => 'Produkt-Seriennummer erforderlich',
         'is_sales' => 'Verkauf',
         'is_seen' => 'Gesehen',
         'is_service' => 'Dienstleistung',

@@ -22,7 +22,7 @@ class Scheduling extends ScheduleList
 {
     use Actions;
 
-    public string $view = 'flux::livewire.settings.scheduling';
+    public ?string $includeBefore = 'flux::livewire.settings.scheduling';
 
     public ScheduleForm $schedule;
 

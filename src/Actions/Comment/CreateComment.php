@@ -30,6 +30,7 @@ class CreateComment extends FluxAction
             return morph_to($mention);
         })
             ->add(auth()->user())
+            ->filter() // filter null values if morph was not possible
             ->filter(fn (Model $notifiable) => in_array(Notifiable::class, class_uses_recursive($notifiable)));
 
         foreach ($mentions as $mention) {

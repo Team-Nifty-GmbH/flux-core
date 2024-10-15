@@ -59,8 +59,8 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
     protected function casts(): array
     {
         return [
-            'start_date' => 'date',
-            'due_date' => 'date',
+            'start_date' => 'date:Y-m-d',
+            'due_date' => 'date:Y-m-d',
             'state' => TaskState::class,
             'time_budget' => TimeDuration::class,
             'total_cost' => Money::class,

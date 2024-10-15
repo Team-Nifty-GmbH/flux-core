@@ -11,6 +11,7 @@ class StockPostingList extends BaseDataTable
     public array $enabledCols = [
         'warehouse.name',
         'posting',
+        'description',
         'stock',
         'created_at',
         'created_by',

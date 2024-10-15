@@ -1,15 +1,5 @@
-<div class="py-6">
-    <div class="px-4 sm:px-6 lg:px-8">
-        <div class="sm:flex sm:items-center">
-            <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold dark:text-white">{{ __('Currencies') }}</h1>
-                <div class="mt-2 text-sm text-gray-300">{{ __('A list of all the currencies') }}</div>
-            </div>
-        </div>
-        @include('tall-datatables::livewire.data-table')
-    </div>
-
-    <x-modal.card :title="($selectedCurrency->id ?? false) ? __('Edit Currency') : __('Create Currency')" wire:model="editModal">
+<x-modal wire:model="editModal">
+    <x-card :title="($selectedCurrency->id ?? false) ? __('Edit Currency') : __('Create Currency')">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
@@ -18,6 +8,7 @@
                             <x-input wire:model="selectedCurrency.name" :label="__('Currency Name')"/>
                             <x-input wire:model="selectedCurrency.iso" :label="__('ISO')"/>
                             <x-input wire:model="selectedCurrency.symbol" :label="__('Symbol')"/>
+                            <x-toggle wire:model.boolean="selectedCurrency.is_default" :label="__('Is Default')"/>
                         </div>
                     </div>
                 </div>
@@ -42,5 +33,5 @@
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
-</div>
+    </x-card>
+</x-modal>

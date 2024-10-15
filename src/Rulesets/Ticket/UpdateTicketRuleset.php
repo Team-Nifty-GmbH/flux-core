@@ -7,10 +7,10 @@ use FluxErp\Models\TicketType;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
+use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\Ticket\TicketState;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Spatie\ModelStates\Validation\ValidStateRule;
 
 class UpdateTicketRuleset extends FluxRuleset
 {

@@ -4,6 +4,7 @@
             <x-input :label="__('Firstname')" wire:model="user.firstname"/>
             <x-input :label="__('Lastname')" wire:model="user.lastname"/>
             <x-input :label="__('Email')" wire:model="user.email"/>
+            <x-input :label="__('Phone')" wire:model="user.phone"/>
             <x-input :label="__('User code')" wire:model="user.user_code"/>
             <x-inputs.number
                 :prefix="\FluxErp\Models\Currency::default()?->symbol"
@@ -17,6 +18,11 @@
             :options="$languages"
             option-label="name"
             option-value="id"
+        />
+        <x-select
+            wire:model="user.timezone"
+            :label="__('Timezone')"
+            :options="timezone_identifiers_list()"
         />
         <x-select
             wire:model="user.parent_id"

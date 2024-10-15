@@ -5,18 +5,21 @@
 <!DOCTYPE html>
 <HTML class="font-portal h-full" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <x-layouts.head.head>
+    <x-flux::layouts.head.head>
         <x-slot:title>
             {{ $client?->name . ' Portal' }}
         </x-slot:title>
         <style>
             {{ $setting['settings']['custom_css'] ?? '' }}
         </style>
-    </x-layouts.head.head>
+    </x-flux::layouts.head.head>
 </head>
 <body class="dark:bg-secondary-900 h-full bg-gray-50 text-xs">
     <x-notifications z-index="z-50"></x-notifications>
     <x-dialog z-index="z-40" blur="md" align="center"/>
+    <x-dialog z-index="z-40" blur="md" align="center" id="prompt">
+        <x-input id="prompt-value" />
+    </x-dialog>
     <x-flux::flash />
     <div class="absolute right-4 top-6 flex gap-1.5">
         <a href="{{ $client?->website }}" target="_blank" class="flex items-center dark:text-gray-50">
