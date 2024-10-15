@@ -23,6 +23,7 @@
         :label="__('Edit watchlists')"
         :href="route('watchlists')"
         wire:navigate
+        x-on:click="show = false"
         primary
         class="w-full"
     />
