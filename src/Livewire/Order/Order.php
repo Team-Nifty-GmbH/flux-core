@@ -425,7 +425,8 @@ class Order extends OrderPositionList
     {
         $this->order->address_delivery = $this->order->address_delivery ?: [];
         try {
-            $action = ($this->order->is_locked
+            $action = (
+                resolve_static(OrderModel::class, 'query')->whereKey($this->order->id)->value('is_locked')
                     ? UpdateLockedOrder::make($this->order->toArray())
                     : UpdateOrder::make($this->order->toArray())
             )
@@ -535,11 +536,11 @@ class Order extends OrderPositionList
             ->first();
 
         $this->{$orderVariable}->client_id = $contact?->client_id ?? Client::default()->id;
-        $this->{$orderVariable}->agent_id = $contact->agent_id ?: $this->{$orderVariable}->agent_id;
-        $this->{$orderVariable}->address_invoice_id = $contact->invoice_address_id ?? $contact->mainAddress->id;
-        $this->{$orderVariable}->address_delivery_id = $contact->delivery_address_id ?? $contact->mainAddress->id;
-        $this->{$orderVariable}->price_list_id = $contact->price_list_id;
-        $this->{$orderVariable}->payment_type_id = $contact->payment_type_id;
+        $this->{$orderVariable}->agent_id = $contact?->agent_id ?: $this->{$orderVariable}->agent_id;
+        $this->{$orderVariable}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress->id;
+        $this->{$orderVariable}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress->id;
+        $this->{$orderVariable}->price_list_id = $contact?->price_list_id;
+        $this->{$orderVariable}->payment_type_id = $contact?->payment_type_id;
 
         if (! $replicate) {
             $this->order->address_invoice = resolve_static(Address::class, 'query')

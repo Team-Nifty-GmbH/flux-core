@@ -176,7 +176,7 @@ class OrderForm extends FluxForm
     {
         if ($this->{$this->getKey()} && ! $this->is_locked) {
             $this->update();
-        } elseif (! $this->{$this->getKey()} && $this->is_locked) {
+        } elseif ($this->{$this->getKey()} && $this->is_locked) {
             $this->updateLocked();
         } else {
             $this->create();

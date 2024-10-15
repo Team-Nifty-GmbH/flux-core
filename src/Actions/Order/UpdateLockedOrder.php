@@ -15,6 +15,11 @@ class UpdateLockedOrder extends FluxAction
         $this->rules = resolve_static(UpdateLockedOrderRuleset::class, 'getRules');
     }
 
+    public static function description(): ?string
+    {
+        return 'Update an order regardless of its locked state.';
+    }
+
     public static function models(): array
     {
         return [Order::class];

@@ -17,19 +17,17 @@ class UpdateLockedOrderRuleset extends FluxRuleset
             Arr::only(
                 resolve_static(UpdateOrderRuleset::class, 'getRules'),
                 [
-                    'state',
-                    'delivery_state',
-                    'payment_state',
                     'approval_user_id',
                     'responsible_user_id',
+                    'state',
+                    'payment_state',
+                    'delivery_state',
                     'payment_reminder_current_level',
                     'payment_reminder_next_date',
                     'date_of_approval',
                     'is_confirmed',
                     'requires_approval',
-
                     'commission',
-
                     'addresses',
                     'users',
                 ]
