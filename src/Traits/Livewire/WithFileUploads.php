@@ -134,6 +134,7 @@ trait WithFileUploads
         }
 
         $this->filesArray = [];
+        $this->filesArrayDirty = false;
 
         $this->cleanupOldUploads();
 

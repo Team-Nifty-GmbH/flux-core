@@ -12,6 +12,8 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -41,19 +43,45 @@ class FolderTree extends Component
     {
         $this->fill($arguments);
 
-        $this->js(<<<'JS'
-            selected = false;
-            loadLevels();
-        JS);
+        $this->js(
+            <<<'JS'
+                selected = false;
+                loadLevels();
+            JS
+        );
     }
 
     public function getRules(): array
     {
         return [
-            'files.*' => 'required|file|max:10240',
+            'files.*' => 'required|' . (config('livewire.temporary_file_upload.rules') ?? 'file|max:12288'),
         ];
     }
 
+    public function getRulesSingleFile(int $index, string $collectionName): array
+    {
+        // get the base collection name - ignore subfolders
+        $baseCollection = str_contains($collectionName, '.') ?
+            explode('.', $collectionName)[0] : $collectionName;
+
+        // get the validation rules for the model type
+        $modelTypeValidationRules = app($this->modelType)
+            ->query()
+            ->whereKey($this->modelId)
+            ->first()
+            ?->getMediaCollection($baseCollection)
+            ?->acceptsMimeTypes;
+
+        // merge the validation rules
+        return [
+            'files.' . $index => 'required|' . (config('livewire.temporary_file_upload.rules') ?? 'file|max:12288')
+                . (!is_null($modelTypeValidationRules) ?
+                    '|mimetypes:' . implode(',', $modelTypeValidationRules) : ''
+                ),
+        ];
+    }
+
+    #[Renderless]
     public function updatedFiles(): void
     {
         try {
@@ -63,9 +91,44 @@ class FolderTree extends Component
 
             return;
         }
+    }
 
-        $this->validate($this->getRules());
+    #[Renderless]
+    public function validateOnDemand(string $fileId, string $collectionName): bool
+    {
+        // find the index of the file in the files array - which invokes the validation
+        $index = array_search($fileId, array_map(function ($item) {
+            return $item->getFilename();
+        }, $this->files));
 
+        if ($index === false) {
+            return false;
+        }
+
+        try {
+            $this->validate($this->getRulesSingleFile($index, $collectionName));
+        } catch (ValidationException $e) {
+            // Handle the validation exception
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    #[Renderless]
+    public function submitFiles(string $collection, array $tempFileNames): bool
+    {
+        // set the folder name
+        $this->collection = $collection;
+        // filter out files array by deleted files on front end
+        $this->files = array_filter($this->files, function ($file) use ($tempFileNames) {
+            return in_array($file->getFilename(), $tempFileNames);
+        });
+
+        // validation took place in updatedFiles method
+        // so we can safely save the files
         try {
             $media = $this->saveFileUploadsToMediaLibrary(
                 name: 'files',
@@ -74,9 +137,50 @@ class FolderTree extends Component
             );
 
             $this->latestUploads = $media;
+            $this->files = [];
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
+            return false;
         }
+
+        return true;
+    }
+
+    #[Renderless]
+    public function hasSingleFile(string $collectionName): bool
+    {
+        // get the base collection name - ignore subfolders
+        $baseCollection = str_contains($collectionName, '.') ?
+            explode('.', $collectionName)[0] : $collectionName;
+
+        // get the validation rules for the model type
+        $singleFile = app($this->modelType)
+            ->query()
+            ->whereKey($this->modelId)
+            ->first()
+            ?->getMediaCollection($baseCollection)
+            ?->singleFile;
+
+        return $singleFile ?? false;
+    }
+
+    #[Renderless]
+    public function readOnly(string $collectionName): bool {
+
+        // get the base collection name - ignore subfolders
+        $baseCollection = str_contains($collectionName, '.') ?
+            explode('.', $collectionName)[0] : $collectionName;
+
+        $readOnly =  app($this->modelType)
+            ->query()
+            ->whereKey($this->modelId)
+            ->first()
+            ?->getMediaCollection($baseCollection)
+            ?->readOnly;
+
+        // in case there is no rule for the folder - $baseCollection
+        // enable upload
+        return  $readOnly ?? false;
     }
 
     public function mount(?string $modelType = null, ?int $modelId = null): void
