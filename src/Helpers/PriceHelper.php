@@ -298,7 +298,9 @@ class PriceHelper
             $this->price->rootPrice->price = $rootPrice;
 
             if (bccomp($this->price->price, 0) !== 0) {
-                $this->price->rootDiscountPercentage = diff_percentage($rootPrice, $this->price->price);
+                $this->price->rootDiscountPercentage = $rootPrice != 0
+                    ? diff_percentage($rootPrice, $this->price->price)
+                    : '0';
             }
 
             $this->price->rootDiscountFlat = bcsub($rootPrice, $this->price->price);
