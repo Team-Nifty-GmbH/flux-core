@@ -2,15 +2,15 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class Widget extends Model
+class Dashboard extends Model
 {
-    use HasPackageFactory, HasUuid;
+    use HasUuid, SortableTrait;
 
     protected $guarded = [
         'id',
@@ -21,8 +21,8 @@ class Widget extends Model
         return $this->morphTo();
     }
 
-    public function dashboard(): BelongsTo
+    public function widgets(): HasMany
     {
-        return $this->belongsTo(Dashboard::class);
+        return $this->hasMany(Widget::class);
     }
 }
