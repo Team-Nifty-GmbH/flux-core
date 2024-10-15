@@ -38,7 +38,7 @@
                     </div>
                     <x-slot:footer>
                         <div class="flex justify-end gap-x-4">
-                            <x-button flat :label="__('Cancel')" x-on:click="$closeModal('edit-address-assignment')" />
+                            <x-button flat :label="__('Cancel')" x-on:click="close()" />
                             <x-button primary spinner x-on:click="$wire.save().then((success) => {if(success) close();})" :label="__('Save')" />
                         </div>
                     </x-slot:footer>

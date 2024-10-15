@@ -16,21 +16,28 @@ class UpdateLockedOrderRuleset extends FluxRuleset
         return array_merge(
             Arr::only(
                 resolve_static(UpdateOrderRuleset::class, 'getRules'),
-                [
-                    'approval_user_id',
-                    'responsible_user_id',
-                    'state',
-                    'payment_state',
-                    'delivery_state',
-                    'payment_reminder_current_level',
-                    'payment_reminder_next_date',
-                    'date_of_approval',
-                    'is_confirmed',
-                    'requires_approval',
-                    'commission',
-                    'addresses',
-                    'users',
-                ]
+                array_merge(
+                    [
+                        'approval_user_id',
+                        'responsible_user_id',
+                        'state',
+                        'payment_state',
+                        'delivery_state',
+                        'payment_reminder_current_level',
+                        'payment_reminder_next_date',
+                        'date_of_approval',
+                        'is_confirmed',
+                        'requires_approval',
+                        'commission',
+                        'addresses',
+                        'users',
+
+                        'addresses',
+                        'users',
+                    ],
+                    array_keys(resolve_static(AddressRuleset::class, 'getRules')),
+                    array_keys(resolve_static(UserRuleset::class, 'getRules')),
+                )
             ),
             [
                 'id' => [

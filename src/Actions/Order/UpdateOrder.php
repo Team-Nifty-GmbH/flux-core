@@ -58,6 +58,7 @@ class UpdateOrder extends FluxAction
         if (! is_null($addresses)) {
             $addresses = collect($addresses)
                 ->unique(fn ($address) => $address['address_id'] . '_' . $address['address_type_id'])
+                ->keyBy('address_id')
                 ->toArray();
 
             $order->addresses()->sync($addresses);
