@@ -28,7 +28,7 @@ class UpdateLockedOrder extends FluxAction
 
     public function performAction(): Model
     {
-        $addresses = Arr::pull($this->data, 'addresses', []);
+        $addresses = Arr::pull($this->data, 'addresses');
         $users = Arr::pull($this->data, 'users');
 
         $order = resolve_static(Order::class, 'query')
