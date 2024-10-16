@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Mail\MagicLoginLink;
+use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Support\Collection\AddressCollection;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
@@ -246,6 +247,13 @@ class Address extends Authenticatable implements HasLocalePreference, HasMedia, 
         }
 
         return $enum->salutation($this);
+    }
+
+    public function addressTypeOrders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class, 'address_address_type_order')
+            ->using(AddressAddressTypeOrder::class)
+            ->withPivot('address_type_id');
     }
 
     public function addressTypes(): BelongsToMany
