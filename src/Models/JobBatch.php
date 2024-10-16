@@ -6,12 +6,11 @@ use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use FluxErp\Models\Pivots\JobBatchable;
 use Illuminate\Bus\Batch;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Facades\Bus;
 
-class JobBatch extends Model
+class JobBatch extends FluxModel
 {
     public $incrementing = false;
 

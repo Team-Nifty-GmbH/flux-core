@@ -3,10 +3,9 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasUuid;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CartItem extends Model
+class CartItem extends FluxModel
 {
     use HasUuid;
 

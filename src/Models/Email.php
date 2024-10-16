@@ -7,13 +7,12 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @deprecated
  */
-class Email extends Model
+class Email extends FluxModel
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 

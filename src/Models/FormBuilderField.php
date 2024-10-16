@@ -4,12 +4,11 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class FormBuilderField extends Model
+class FormBuilderField extends FluxModel
 {
     use HasPackageFactory, HasUuid, SoftDeletes;
 

@@ -4,9 +4,8 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\Notifiable;
-use Illuminate\Database\Eloquent\Model;
 
-class NotificationSetting extends Model
+class NotificationSetting extends FluxModel
 {
     use HasPackageFactory, Notifiable;
 

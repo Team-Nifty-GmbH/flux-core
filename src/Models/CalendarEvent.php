@@ -6,6 +6,7 @@ use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\HasMedia;
@@ -14,7 +15,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class CalendarEvent extends BaseCalendarEvent implements HasMedia
 {
-    use BroadcastsEvents, HasUserModification, InteractsWithMedia, LogsActivity;
+    use BroadcastsEvents, HasUserModification, InteractsWithMedia, LogsActivity, ResolvesRelationsThroughContainer;
 
     protected $guarded = [
         'id',

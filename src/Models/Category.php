@@ -13,7 +13,6 @@ use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -23,7 +22,7 @@ use Spatie\EloquentSortable\Sortable;
 use Spatie\ModelInfo\ModelInfo;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Category extends Model implements InteractsWithDataTables, Sortable
+class Category extends FluxModel implements InteractsWithDataTables, Sortable
 {
     use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
         Searchable, SortableTrait;

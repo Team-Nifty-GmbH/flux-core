@@ -4,13 +4,14 @@ namespace FluxErp\Models;
 
 use FluxErp\Support\MediaLibrary\MediaCollection;
 use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
 
 class Media extends BaseMedia
 {
-    use LogsActivity;
+    use LogsActivity, ResolvesRelationsThroughContainer;
 
     protected $hidden = [
         'model_type',

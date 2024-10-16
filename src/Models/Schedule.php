@@ -6,10 +6,9 @@ use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Schedule extends Model
+class Schedule extends FluxModel
 {
     use BroadcastsEvents, HasUserModification, HasUuid, SoftDeletes;
 

@@ -7,10 +7,9 @@ use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\Scout\Searchable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class LedgerAccount extends Model
+class LedgerAccount extends FluxModel
 {
     use CacheModelQueries, HasPackageFactory, HasUuid, Searchable;
 

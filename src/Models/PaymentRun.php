@@ -8,11 +8,10 @@ use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class PaymentRun extends Model
+class PaymentRun extends FluxModel
 {
     use HasFrontendAttributes, HasUserModification, HasUuid, LogsActivity;
 

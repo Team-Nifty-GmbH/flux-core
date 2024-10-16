@@ -9,10 +9,9 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CountryRegion extends Model
+class CountryRegion extends FluxModel
 {
     use Commentable, Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
         SoftDeletes;

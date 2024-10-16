@@ -15,7 +15,6 @@ use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\View\Printing\Communication\CommunicationView;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -24,7 +23,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Communication extends Model implements HasMedia, OffersPrinting
+class Communication extends FluxModel implements HasMedia, OffersPrinting
 {
     use BroadcastsEvents, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         Printable, Searchable, SoftDeletes;

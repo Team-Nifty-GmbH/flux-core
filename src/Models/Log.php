@@ -3,10 +3,9 @@
 namespace FluxErp\Models;
 
 use Illuminate\Database\Eloquent\MassPrunable;
-use Illuminate\Database\Eloquent\Model;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Log extends Model
+class Log extends FluxModel
 {
     use BroadcastsEvents, MassPrunable;
 
