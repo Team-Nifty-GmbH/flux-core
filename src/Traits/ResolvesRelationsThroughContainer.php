@@ -2,8 +2,6 @@
 
 namespace FluxErp\Traits;
 
-use Illuminate\Database\Eloquent\Model;
-
 trait ResolvesRelationsThroughContainer
 {
     protected function newRelatedInstance($class)
