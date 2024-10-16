@@ -63,7 +63,7 @@
                     </x-card>
                 </div>
             @show
-            <x-slot:footer>
+            <x-slot name="footer">
                 <div class="flex justify-between gap-x-4">
                     <div>
                         <x-button
@@ -78,7 +78,7 @@
                         <x-button primary :label="__('Save')" x-on:click="saveCalendar()" />
                     </div>
                 </div>
-            </x-slot:footer>
+            </x-slot>
         </x-card>
     </x-modal>
 @endsection
