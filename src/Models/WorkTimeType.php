@@ -7,9 +7,8 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 
-class WorkTimeType extends Model
+class WorkTimeType extends FluxModel
 {
     use CacheModelQueries, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 

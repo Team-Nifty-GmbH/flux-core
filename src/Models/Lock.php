@@ -5,11 +5,10 @@ namespace FluxErp\Models;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Auth;
 
-class Lock extends Model
+class Lock extends FluxModel
 {
     use HasPackageFactory, HasUserModification, LogsActivity;
 

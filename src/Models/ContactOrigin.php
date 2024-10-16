@@ -6,10 +6,9 @@ use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ContactOrigin extends Model
+class ContactOrigin extends FluxModel
 {
     use CacheModelQueries, HasPackageFactory, HasUserModification, LogsActivity;
 

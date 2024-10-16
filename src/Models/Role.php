@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\Notifiable;
+use FluxErp\Traits\ResolvesRelationsThroughContainer;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Permission\Models\Role as SpatieRole;
@@ -12,7 +13,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Role extends SpatieRole implements InteractsWithDataTables
 {
-    use Filterable, HasPackageFactory, Notifiable, Searchable;
+    use Filterable, HasPackageFactory, Notifiable, ResolvesRelationsThroughContainer, Searchable;
 
     protected $guarded = [
         'id',

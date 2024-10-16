@@ -15,7 +15,6 @@ use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,7 +23,7 @@ use Laravel\Scout\EngineManager;
 use Laravel\Scout\Engines\Engine;
 use Spatie\MediaLibrary\HasMedia;
 
-class Client extends Model implements HasMedia
+class Client extends FluxModel implements HasMedia
 {
     use CacheModelQueries, Commentable, Filterable, HasClientAssignment, HasDefault, HasPackageFactory,
         HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;

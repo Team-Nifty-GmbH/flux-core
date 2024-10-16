@@ -4,10 +4,9 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class Setting extends Model
+class Setting extends FluxModel
 {
     use HasPackageFactory, HasUuid;
 

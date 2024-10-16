@@ -33,7 +33,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Contact extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
+class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use BroadcastsEvents, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,

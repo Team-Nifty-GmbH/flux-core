@@ -16,7 +16,6 @@ use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\MonitorsQueue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -28,7 +27,7 @@ use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 use Throwable;
 
-class QueueMonitor extends Model
+class QueueMonitor extends FluxModel
 {
     use BroadcastsEvents, HasFrontendAttributes, HasStates, MassPrunable;
 

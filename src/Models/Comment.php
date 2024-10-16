@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Comment extends Model implements HasMedia
+class Comment extends FluxModel implements HasMedia
 {
     use BroadcastsEvents, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         SoftDeletes;

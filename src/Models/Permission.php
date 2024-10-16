@@ -3,13 +3,14 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\ResolvesRelationsThroughContainer;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 
 class Permission extends SpatiePermission
 {
-    use Filterable, Searchable;
+    use Filterable, ResolvesRelationsThroughContainer, Searchable;
 
     protected $guarded = [
         'id',

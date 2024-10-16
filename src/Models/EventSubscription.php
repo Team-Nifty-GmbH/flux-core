@@ -4,10 +4,9 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class EventSubscription extends Model
+class EventSubscription extends FluxModel
 {
     use Filterable, HasPackageFactory;
 
