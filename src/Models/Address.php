@@ -249,16 +249,16 @@ class Address extends Authenticatable implements HasLocalePreference, HasMedia, 
         return $enum->salutation($this);
     }
 
-    public function addressTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(AddressType::class);
-    }
-
-    public function addressTypeOrder(): BelongsToMany
+    public function addressTypeOrders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class, 'address_address_type_order')
             ->using(AddressAddressTypeOrder::class)
             ->withPivot('address_type_id');
+    }
+
+    public function addressTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(AddressType::class);
     }
 
     public function client(): BelongsTo
