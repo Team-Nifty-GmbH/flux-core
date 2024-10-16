@@ -6,7 +6,6 @@ use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
-use Illuminate\Validation\Rule;
 
 class UpdateCalendarEventRuleset extends FluxRuleset
 {
