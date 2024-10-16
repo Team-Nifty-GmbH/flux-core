@@ -21,6 +21,7 @@ class UpdateCalendarRuleset extends FluxRuleset
             ],
             'parent_id' => [
                 'integer',
+                'nullable',
                 (app(ModelExists::class, ['model' => Calendar::class]))->whereNull('parent_id'),
             ],
             'name' => 'sometimes|required|string',

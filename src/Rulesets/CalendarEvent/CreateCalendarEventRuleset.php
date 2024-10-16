@@ -24,11 +24,13 @@ class CreateCalendarEventRuleset extends FluxRuleset
             ],
             'model_type' => [
                 'required_with:model_id',
+                'nullable',
                 'string',
                 app(MorphClassExists::class, ['uses' => HasCalendarEvents::class]),
             ],
             'model_id' => [
                 'required_with:model_type',
+                'nullable',
                 'integer',
                 app(MorphExists::class),
             ],
