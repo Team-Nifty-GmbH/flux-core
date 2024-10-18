@@ -143,7 +143,7 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     {
         return [
             'id' => Str::uuid()->toString(),
-            'model_type' => app(static::class)->getMorphClass(),
+            'modelType' => morph_alias(static::class),
             'name' => __('Tasks'),
             'color' => '#813d9c',
             'resourceEditable' => false,
@@ -152,6 +152,7 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'isShared' => false,
             'permission' => 'owner',
             'group' => 'my',
+            'isVirtual' => true,
         ];
     }
 

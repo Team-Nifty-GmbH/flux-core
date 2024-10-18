@@ -27,13 +27,6 @@ class Calendar extends BaseCalendar
         });
     }
 
-    protected function casts(): array
-    {
-        return [
-            'is_public' => 'boolean',
-        ];
-    }
-
     public function calendarEvents(): HasMany
     {
         return $this->hasMany(CalendarEvent::class);

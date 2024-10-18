@@ -3,9 +3,11 @@
 namespace FluxErp\Actions\Calendar;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Helpers\Helper;
 use FluxErp\Models\Calendar;
 use FluxErp\Rulesets\Calendar\UpdateCalendarRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 class UpdateCalendar extends FluxAction
 {
@@ -30,5 +32,19 @@ class UpdateCalendar extends FluxAction
         $calendar->save();
 
         return $calendar->withoutRelations()->fresh();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (
+            data_get($this->data, 'parent_id')
+            && Helper::checkCycle(Calendar::class, $this->data['id'], $this->data['parent_id'])
+        ) {
+            throw ValidationException::withMessages([
+                'parent_id' => ['Cycle detected'],
+            ])->errorBag('updateCalendar');
+        }
     }
 }

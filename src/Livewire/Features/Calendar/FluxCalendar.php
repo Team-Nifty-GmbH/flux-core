@@ -6,8 +6,8 @@ use FluxErp\Contracts\Calendarable;
 use FluxErp\Facades\Action;
 use FluxErp\Helpers\Helper;
 use FluxErp\Livewire\Forms\CalendarEventForm;
-use FluxErp\Livewire\Forms\CalendarForm;
 use FluxErp\Models\Address;
+use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\User;
 use Illuminate\Contracts\View\View;
@@ -26,8 +26,6 @@ class FluxCalendar extends CalendarComponent
     public string $search = '';
 
     public array $searchResults = [];
-
-    public CalendarForm $calendar;
 
     public CalendarEventForm $event;
 
@@ -48,55 +46,16 @@ class FluxCalendar extends CalendarComponent
     #[Renderless]
     public function getEvents(array $info, array $calendarAttributes): array
     {
-        if ($calendarAttributes['model_type'] ?? false) {
-            return morphed_model($calendarAttributes['model_type'])::query()
+        if (($calendarAttributes['modelType'] ?? false)
+            && data_get($calendarAttributes, 'isVirtual', false)
+        ) {
+            return morphed_model($calendarAttributes['modelType'])::query()
                 ->get()
                 ->map(fn (Model $model) => $model->toCalendarEvent())
                 ->toArray();
         }
 
         return parent::getEvents($info, $calendarAttributes);
-    }
-
-    public function saveCalendar(array $attributes): array|false
-    {
-        if ($attributes['model_type'] ?? false) {
-            return false;
-        }
-
-        try {
-            $this->calendar->reset();
-            $this->calendar->fill($attributes);
-            $this->calendar->user_id = auth()->id();
-            $this->calendar->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $result = $this->calendar->getActionResult()?->toArray();
-
-        if (! $result) {
-            return false;
-        }
-
-        $calendar = array_merge(
-            $result,
-            [
-                'resourceEditable' => $result['is_editable'] ?? false,
-                'hasRepeatableEvents' => $result['has_repeatable_events'] ?? false,
-            ]
-        );
-        $index = collect($this->selectableCalendars)->search(fn ($item) => $item['id'] === $result['id']);
-
-        if ($index === false) {
-            $this->selectableCalendars[] = $calendar;
-        } else {
-            $this->selectableCalendars[$index] = $calendar;
-        }
-
-        return $calendar;
     }
 
     #[Renderless]
@@ -144,6 +103,7 @@ class FluxCalendar extends CalendarComponent
             $result = $result->toCalendarEvent();
         } else {
             try {
+                $attributes['extended_props'] = array_values(data_get($attributes, 'customProperties'));
                 $this->event->reset();
                 $this->event->fill($attributes);
                 $this->event->original_start = data_get($this->oldCalendarEvent, 'start');
@@ -178,27 +138,6 @@ class FluxCalendar extends CalendarComponent
         );
 
         return $result ?: false;
-    }
-
-    public function deleteCalendar(array $attributes): bool
-    {
-        $attributes['confirm_option'] = ! $this->calendarEventWasRepeatable ? 'all' : $this->confirmDelete;
-
-        try {
-            $this->calendar->reset();
-            $this->calendar->fill($attributes);
-            $this->calendar->delete();
-        } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->selectableCalendars = collect($this->selectableCalendars)
-            ->reject(fn ($item) => $item['id'] === data_get($attributes, 'id'))
-            ->all();
-
-        return true;
     }
 
     #[Renderless]
@@ -268,6 +207,18 @@ class FluxCalendar extends CalendarComponent
         $this->searchResults = [];
     }
 
+    public function updatedCalendarEventCalendarId(): void
+    {
+        $this->calendarEvent['customProperties'] = Arr::mapWithKeys(
+            resolve_static(Calendar::class, 'query')
+                ->whereKey($this->calendarEvent['calendar_id'])
+                ->value('custom_properties') ?? [],
+            fn ($item) => [$item['name'] => array_merge(['value' => null], $item)]
+        );
+
+        $this->skipRender();
+    }
+
     #[Renderless]
     public function addInvitedRecord(int $id): void
     {
@@ -279,18 +230,19 @@ class FluxCalendar extends CalendarComponent
     #[Renderless]
     public function onEventClick(array $eventInfo): void
     {
-        data_set(
-            $eventInfo,
-            'event.extendedProps.calendar_id',
-            data_get(
-                collect($this->selectableCalendars)
-                    ->firstWhere('model_type', data_get($eventInfo, 'event.extendedProps.calendar_type')),
-                'id'
-            ),
-            false
-        );
+        if ($exists = data_get($eventInfo, 'event.id', false)) {
+            $this->selectableCalendars = array_filter(
+                $this->allCalendars,
+                fn ($calendar) => data_get($calendar, 'modelType') ===
+                    data_get($eventInfo, 'event.extendedProps.calendar_type')
+            );
+        }
 
         parent::onEventClick($eventInfo);
+
+        if (data_get($eventInfo, 'event.calendar_id') && ! $exists) {
+            $this->updatedCalendarEventCalendarId();
+        }
     }
 
     public function render(): View

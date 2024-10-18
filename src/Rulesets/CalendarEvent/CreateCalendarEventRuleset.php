@@ -5,7 +5,10 @@ namespace FluxErp\Rulesets\CalendarEvent;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\MorphClassExists;
+use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
+use FluxErp\Traits\HasCalendarEvents;
 
 class CreateCalendarEventRuleset extends FluxRuleset
 {
@@ -18,6 +21,18 @@ class CreateCalendarEventRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Calendar::class]),
+            ],
+            'model_type' => [
+                'required_with:model_id',
+                'nullable',
+                'string',
+                app(MorphClassExists::class, ['uses' => HasCalendarEvents::class]),
+            ],
+            'model_id' => [
+                'required_with:model_type',
+                'nullable',
+                'integer',
+                app(MorphExists::class),
             ],
             'title' => 'required|string',
             'description' => 'string|nullable',
