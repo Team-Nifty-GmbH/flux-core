@@ -13,11 +13,17 @@ class CalendarForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public ?int $parent_id = null;
+
+    public ?string $model_type = null;
+
     public ?string $name = null;
 
     public ?string $description = null;
 
     public ?string $color = null;
+
+    public ?array $custom_properties = null;
 
     public bool $has_notifications = true;
 

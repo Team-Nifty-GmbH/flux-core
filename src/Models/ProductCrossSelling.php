@@ -7,12 +7,11 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\EloquentSortable\Sortable;
 
-class ProductCrossSelling extends Model implements Sortable
+class ProductCrossSelling extends FluxModel implements Sortable
 {
     use HasPackageFactory, HasUuid, SortableTrait;
 

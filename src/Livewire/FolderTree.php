@@ -183,12 +183,6 @@ class FolderTree extends Component
         return  $readOnly ?? false;
     }
 
-    public function mount(?string $modelType = null, ?int $modelId = null): void
-    {
-        $this->modelType = $modelType;
-        $this->modelId = $modelId;
-    }
-
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.folder-tree');

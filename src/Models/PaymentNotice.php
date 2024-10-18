@@ -8,13 +8,12 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @deprecated
  */
-class PaymentNotice extends Model
+class PaymentNotice extends FluxModel
 {
     use HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
         SoftDeletes;

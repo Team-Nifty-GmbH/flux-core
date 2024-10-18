@@ -64,7 +64,7 @@ class ProductList extends BaseProductList
     #[Renderless]
     public function addSelectedToCart(): void
     {
-        $this->dispatch('cart:add', $this->selected)->to('cart');
+        $this->dispatch('cart:add', $this->selected)->to('cart.cart');
         $this->reset('selected');
     }
 

@@ -4,21 +4,21 @@ namespace FluxErp\Models;
 
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 
-class Cart extends Model
+class Cart extends FluxModel
 {
-    use BroadcastsEvents, HasUuid, SoftDeletes;
+    use BroadcastsEvents, HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',

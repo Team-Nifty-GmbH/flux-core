@@ -227,7 +227,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex gap-1.5">
-                        <div @canAction(\FluxErp\Actions\Order\ToggleLock::class) wire:click="toggleLock()" class="cursor-pointer" wire:flux-confirm.icon.warning="{{  __('Unlock Order') }}|{{ __('Unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}" @endCanAction>
+                        <div @canAction(\FluxErp\Actions\Order\ToggleLock::class) wire:click="toggleLock()" class="cursor-pointer" wire:flux-confirm.icon.warning="{{  __('Change order lock state') }}|{{ __('Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}" @endCanAction>
                             <x-heroicons x-cloak x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
                             <x-heroicons x-cloak x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
                         </div>
@@ -288,7 +288,7 @@
                     wire:click="delete"
                 />
             @endif
-            @if(resolve_static(\FluxErp\Actions\Order\UpdateOrder::class, 'canPerformAction', [false]) && ! $order->is_locked)
+            @if((resolve_static(\FluxErp\Actions\Order\UpdateOrder::class, 'canPerformAction', [false]) && ! $order->is_locked) || resolve_static(\FluxErp\Actions\Order\UpdateLockedOrder::class, 'canPerformAction', [false]))
                 <x-button
                     primary
                     spinner="save"
@@ -597,15 +597,6 @@
                                     formatters="formatter.delivery_state"
                                     available="availableStates.delivery_state"
                                 />
-                                @if($order->is_locked)
-                                    <x-button
-                                        primary
-                                        class="w-full"
-                                        icon="document-text"
-                                        wire:click="saveStates()"
-                                        :label="__('Save')"
-                                    />
-                                @endif
                             </div>
                         </x-card>
                     @show
@@ -745,7 +736,7 @@
                                     <x-datetime-picker wire:model="order.system_delivery_date" :without-time="true" :disabled="$order->is_locked" :label="__('Performance/Delivery date')" />
                                     <x-datetime-picker wire:model="order.system_delivery_date_end" :without-time="true" :disabled="$order->is_locked" :label="__('Performance/Delivery date end')" />
                                     <x-datetime-picker wire:model="order.order_date" :without-time="true" :disabled="$order->is_locked" :label="__('Order Date')" />
-                                    <x-input wire:model="order.commission" :disabled="$order->is_locked" :label="__('Commission')" />
+                                    <x-input wire:model="order.commission" :label="__('Commission')" />
                                     <x-datetime-picker
                                         wire:model="order.payment_reminder_next_date"
                                         :without-time="true"

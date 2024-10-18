@@ -4,13 +4,11 @@ namespace FluxErp\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-class Token extends Authenticatable
+class Token extends FluxAuthenticatable
 {
-    use HasApiTokens, HasRoles, MassPrunable;
+    use HasRoles, MassPrunable;
 
     protected $guarded = [
         'id',

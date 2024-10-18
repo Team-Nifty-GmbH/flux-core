@@ -6,10 +6,9 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CommissionRate extends Model
+class CommissionRate extends FluxModel
 {
     use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 

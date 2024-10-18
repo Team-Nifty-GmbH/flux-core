@@ -20,6 +20,10 @@ class CalendarEventForm extends FluxForm
     #[Locked]
     public int|string|null $calendar_id = null;
 
+    public ?string $model_type = null;
+
+    public ?int $model_id = null;
+
     public ?string $start = null;
 
     public ?string $end = null;
@@ -35,6 +39,8 @@ class CalendarEventForm extends FluxForm
     public ?int $recurrences = null;
 
     public bool $is_all_day = false;
+
+    public ?array $extended_props = null;
 
     public ?string $confirm_option = null;
 

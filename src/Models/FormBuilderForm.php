@@ -5,12 +5,11 @@ namespace FluxErp\Models;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class FormBuilderForm extends Model
+class FormBuilderForm extends FluxModel
 {
     use Filterable, HasPackageFactory, HasUuid, SoftDeletes;
 

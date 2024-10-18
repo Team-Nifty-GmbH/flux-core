@@ -11,11 +11,10 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Price extends Model
+class Price extends FluxModel
 {
     use HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 

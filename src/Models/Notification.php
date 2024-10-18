@@ -2,12 +2,13 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Notifications\DatabaseNotification;
 
 class Notification extends DatabaseNotification
 {
-    use MassPrunable;
+    use MassPrunable, ResolvesRelationsThroughContainer;
 
     protected $guarded = [
         'id',

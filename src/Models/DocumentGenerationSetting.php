@@ -7,13 +7,12 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @deprecated
  */
-class DocumentGenerationSetting extends Model
+class DocumentGenerationSetting extends FluxModel
 {
     use HasClientAssignment, HasPackageFactory, HasUuid, LogsActivity, SoftDeletes;
 

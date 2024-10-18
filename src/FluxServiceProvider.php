@@ -17,8 +17,11 @@ use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
+use FluxErp\Livewire\Features\Calendar\CalendarOverview;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
+use FluxErp\Models\Calendar;
+use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
 use FluxErp\Models\LedgerAccount;
@@ -59,6 +62,7 @@ use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Scout\Builder;
 use Livewire\Component;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -101,6 +105,8 @@ class FluxServiceProvider extends ServiceProvider
         );
 
         app('livewire')->componentHook(SupportFormObjects::class);
+        $this->app->bind(\TeamNiftyGmbH\Calendar\Models\Calendar::class, Calendar::class);
+        $this->app->bind(\TeamNiftyGmbH\Calendar\Models\CalendarEvent::class, CalendarEvent::class);
     }
 
     /**
@@ -120,6 +126,7 @@ class FluxServiceProvider extends ServiceProvider
 
         // special case for calendar event to load into correct namespace
         Blade::component('flux::components.calendar.event-edit', 'tall-calendar::event-edit');
+        Blade::component('flux::components.calendar.calendar-list', 'tall-calendar::calendar-list');
 
         if (static::$registerFluxRoutes && ! $this->app->runningInConsole()) {
             $this->bootFluxMenu();
@@ -158,6 +165,8 @@ class FluxServiceProvider extends ServiceProvider
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
             ProductType::register(name: 'product', class: \FluxErp\Livewire\Product\Product::class, default: true);
         }
+
+        Livewire::component('calendar-overview', CalendarOverview::class);
     }
 
     protected function registerMarcos(): void
@@ -198,6 +207,23 @@ class FluxServiceProvider extends ServiceProvider
                     return (new LengthAwarePaginator(
                         $this->forPage($page, $perPage), $this->count(), $perPage, $page, $options))
                         ->withPath($urlParams ? dirname(url()->full()) . $urlParams : url()->full());
+                });
+        }
+
+        if (! Testable::hasMacro('assertWireuiNotification') && $this->app->runningUnitTests()) {
+            Testable::macro('assertWireuiNotification',
+                function (?string $title = null, ?string $icon = null, ?string $description = null) {
+                    $this->assertDispatched(
+                        'wireui:notification',
+                        function (string $eventName, array $params) use ($title, $icon, $description) {
+                            $options = data_get($params, '0.options');
+
+                            return array_key_exists('componentId', $params[0])
+                                && (is_null($icon) || data_get($options, 'icon') === $icon)
+                                && (is_null($title) || data_get($options, 'title') === $title)
+                                && (is_null($description) || data_get($options, 'description') === $description);
+                        }
+                    );
                 });
         }
 

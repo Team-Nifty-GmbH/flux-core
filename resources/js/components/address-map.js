@@ -147,13 +147,15 @@ export default function ($wire, propertyName, autoload = true, userIcon = null, 
             navigator.geolocation.getCurrentPosition((position) => {
                 let icon = null;
                 let options = {};
-                console.log(userIcon);
                 if (userIcon) {
-                    icon = L.divIcon({
-                        className: 'custom-icon',
-                        html: userIcon,
+                    options.icon = L.divIcon({
+                        className: '', // Remove default class styling for full customization
+                        html: `<div class="shrink-0 inline-flex items-center justify-center overflow-hidden rounded-full border border-gray-200 dark:border-secondary-500">
+                                <img class="shrink-0 object-cover object-center rounded-full w-12 h-12 text-lg" src="${userIcon}">
+                            </div>`,
+                        iconSize: [48, 48], // Set to match overall size of the div
+                        iconAnchor: [24, 24] // Center anchor
                     });
-                    options.icon = icon;
                 }
 
                 this.userMarker = L.marker([position.coords.latitude, position.coords.longitude], options)

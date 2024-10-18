@@ -4,9 +4,8 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
-use Illuminate\Database\Eloquent\Model;
 
-class Widget extends Model
+class Widget extends FluxModel
 {
     use HasPackageFactory, HasUuid;
 

@@ -31,7 +31,7 @@ use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTables
+class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
 {
     use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
         HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
@@ -143,7 +143,7 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
     {
         return [
             'id' => Str::uuid()->toString(),
-            'model_type' => app(static::class)->getMorphClass(),
+            'modelType' => morph_alias(static::class),
             'name' => __('Tasks'),
             'color' => '#813d9c',
             'resourceEditable' => false,
@@ -152,6 +152,7 @@ class Task extends Model implements Calendarable, HasMedia, InteractsWithDataTab
             'isShared' => false,
             'permission' => 'owner',
             'group' => 'my',
+            'isVirtual' => true,
         ];
     }
 

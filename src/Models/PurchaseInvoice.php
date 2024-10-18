@@ -9,12 +9,11 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 
-class PurchaseInvoice extends Model implements HasMedia
+class PurchaseInvoice extends FluxModel implements HasMedia
 {
     use Commentable, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes;
 

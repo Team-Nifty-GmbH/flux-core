@@ -2,8 +2,10 @@
 
 namespace FluxErp\Livewire\Portal\Shop;
 
+use FluxErp\Actions\CartItem\UpdateCartItem;
 use FluxErp\Livewire\Forms\Portal\ProductForm;
 use Illuminate\Contracts\View\View;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
@@ -11,6 +13,8 @@ use Livewire\Component;
 class ProductListCard extends Component
 {
     public ProductForm $productForm;
+
+    public ?int $cartItemId = null;
 
     public function mount(array $product): void
     {
@@ -32,5 +36,21 @@ class ProductListCard extends Component
                 @include('flux::livewire.placeholders.horizontal-bar')
             </x-card>
         Blade;
+    }
+
+    public function updatedProductFormAmount(): void
+    {
+        try {
+            UpdateCartItem::make([
+                'id' => $this->cartItemId,
+                'amount' => $this->productForm->amount,
+            ])->validate()->execute();
+
+            $this->skipRender();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
     }
 }

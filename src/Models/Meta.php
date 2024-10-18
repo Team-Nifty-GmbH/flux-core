@@ -5,11 +5,10 @@ namespace FluxErp\Models;
 use FluxErp\DataType\Registry;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class Meta extends Model
+class Meta extends FluxModel
 {
     use HasTimestamps;
 

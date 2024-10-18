@@ -5,12 +5,11 @@ namespace FluxErp\Models;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
-class ContactOption extends Model
+class ContactOption extends FluxModel
 {
     use HasPackageFactory, HasUserModification, LogsActivity;
 

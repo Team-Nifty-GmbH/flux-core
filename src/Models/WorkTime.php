@@ -7,12 +7,11 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class WorkTime extends Model
+class WorkTime extends FluxModel
 {
     use BroadcastsEvents, Filterable, HasPackageFactory, HasUuid, SoftDeletes;
 
