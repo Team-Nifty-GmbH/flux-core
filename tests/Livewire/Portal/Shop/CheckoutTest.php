@@ -16,6 +16,10 @@ use Livewire\Livewire;
 
 class CheckoutTest extends BaseSetup
 {
+    private OrderType $orderType;
+
+    private PaymentType $paymentType;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -26,12 +30,13 @@ class CheckoutTest extends BaseSetup
         Currency::factory()->create([
             'is_default' => true,
         ]);
-        OrderType::factory()->create([
+
+        $this->orderType = OrderType::factory()->create([
             'client_id' => $this->dbClient->id,
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
         ]);
-        PaymentType::factory()->create([
+        $this->paymentType = PaymentType::factory()->create([
             'client_id' => $this->dbClient->id,
             'is_active' => true,
             'is_sales' => true,
@@ -108,10 +113,8 @@ class CheckoutTest extends BaseSetup
             'contact_id' => $this->address->contact_id,
             'address_invoice_id' => $this->address->id,
             'address_delivery_id' => $this->address->id,
-            'order_type_id' => OrderType::query()
-                ->where('order_type_enum', OrderTypeEnum::Order)
-                ->first()
-                ->id,
+            'order_type_id' => $this->orderType->id,
+            'payment_type_id' => $this->paymentType->id,
             'commission' => $commission,
         ]);
     }

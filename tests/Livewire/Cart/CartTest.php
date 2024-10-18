@@ -48,7 +48,8 @@ class CartTest extends BaseSetup
                 'is_watchlist' => true,
             ]);
 
-        Livewire::test(Cart::class)
+        Livewire::actingAs($this->user)
+            ->test(Cart::class)
             ->set('loadWatchlist', $watchList->id)
             ->assertSet('loadWatchlist', null)
             ->assertStatus(200)
@@ -58,7 +59,7 @@ class CartTest extends BaseSetup
 
     public function test_can_save_cart_to_watchlist()
     {
-        $cart = $this->createFilledCartFactory()
+        $this->createFilledCartFactory()
             ->create([
                 'authenticatable_type' => $this->user->getMorphClass(),
                 'authenticatable_id' => $this->user->id,
