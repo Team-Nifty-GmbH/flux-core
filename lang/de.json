@@ -340,6 +340,7 @@
     "Can Create Purchase Invoice": "Kann Eingangsrechnung erstellen",
     "Can Create Ticket": "Kann Ticket erstellen",
     "Can Login": "Kann sich einloggen",
+    "Cannot delete a calendar that has children.": "Ein Kalender mit untergeordneten Kalendern kann nicht gelöscht werden.",
     "Cancel": "Abbrechen",
     "Canceled": "Storniert",
     "canceled": "storniert",
