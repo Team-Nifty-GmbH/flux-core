@@ -17,7 +17,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\Calendar\CalendarComponent;
+use TeamNiftyGmbH\Calendar\Livewire\CalendarComponent;
 
 class FluxCalendar extends CalendarComponent
 {

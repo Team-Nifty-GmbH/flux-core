@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Support\Arrayable;
@@ -17,7 +18,7 @@ use Illuminate\Support\Collection;
 
 class Cart extends FluxModel
 {
-    use BroadcastsEvents, HasUuid, SoftDeletes;
+    use BroadcastsEvents, HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',

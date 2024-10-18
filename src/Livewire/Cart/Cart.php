@@ -210,8 +210,8 @@ class Cart extends Component
         }
 
         $this->add(
-            app(CartModel::class)
-                ->with('cartItems:id,product_id,amount')
+            resolve_static(CartModel::class, 'query')
+                ->with('cartItems:id,cart_id,product_id,vat_rate_id,amount')
                 ->whereKey($this->loadWatchlist)
                 ->first()
                 ->cartItems

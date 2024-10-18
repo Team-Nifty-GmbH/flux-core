@@ -59,7 +59,7 @@
                 <x-button xs x-on:click="$openModal('edit-delivery-address')" :label="__('Edit delivery address')" />
             </x-slot:action>
             <p>
-                {!! implode('</p><p>', $this->deliveryAddress->postal_address ?? [])  !!}
+                {!! implode('</p><p>', $this->deliveryAddress->postalAddress() ?? [])  !!}
             </p>
         </x-card>
     </div>

@@ -1,4 +1,4 @@
-@extends('tall-calendar::livewire.calendar')
+@extends('tall-calendar::livewire.calendar.calendar')
 @section('calendar-data')
     attendEvent() {
         $wire.attendEvent(this.calendarEvent.id).then(() => {
