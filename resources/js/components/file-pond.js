@@ -1,10 +1,10 @@
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import {create, registerPlugin, setOptions} from 'filepond';
 
-const BASE_LANGUAGE_PATH = '../../../../../node_modules/filepond/locale/';
+const BASE_LANGUAGE_PATH = '/node_modules/filepond/locale/';
 
 // load all available languages from filepond
-const availableLanguages = import.meta.glob('../../../../../node_modules/filepond/locale/*.js');
+const availableLanguages = import.meta.glob('/node_modules/filepond/locale/*.js');
 
 //  TODO: error on tree refresh - renderLevel undefined - and is called several times
 
