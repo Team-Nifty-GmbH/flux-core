@@ -1,37 +1,42 @@
 <div
     x-data="{
         ...folderTree(),
-        ...filePond($wire,$refs.upload,'{{Auth::user()?->language?->language_code}}', {
-            title: '{{ __('File will be replaced') }}',
-            description: '{{ __('Do you want to proceed?') }}',
-            labelAccept: '{{ __('Accept') }}',
-            labelReject: '{{ __('Undo') }}',
-        },
-        {
-            uploadDisabled:'{{__('Upload not allowed - Read Only')}}',
-        },),
+        ...filePond(
+            $wire,$refs.upload,'{{ Auth::user()?->language?->language_code }}',
+            {
+                title: '{{ __('File will be replaced') }}',
+                description: '{{ __('Do you want to proceed?') }}',
+                labelAccept: '{{ __('Accept') }}',
+                labelReject: '{{ __('Undo') }}',
+            },
+            {
+                uploadDisabled:'{{ __('Upload not allowed - Read Only') }}',
+            }
+        ),
         async loadLevels() {
             this.levels = await $wire.getTree();
         },
         async loadModel(modelType, modelId) {
             await Promise.all([
-            $wire.set('modelType', modelType, true),
-            $wire.set('modelId', modelId, true),
-            this.loadLevels()]);
+                $wire.set('modelType', modelType, true),
+                $wire.set('modelId', modelId, true),
+                this.loadLevels()
+            ]);
         },
         selectionProxy: {},
         selection: {},
         selected: false,
-        countChildren(){
+        countChildren() {
             return this.selectionProxy?.children?.length;
         },
         treeSelect(level) {
             // during file upload, do not allow folder change
-            if(this.isLoadingFiles.length !== 0){
+            if (this.isLoadingFiles.length !== 0){
                 return;
             }
+
             // on folder change, clear temp files - if confirmation is accepted
-            if(this.tempFilesId.length !== 0) {
+            if (this.tempFilesId.length !== 0) {
                 window.$wireui.confirmDialog({
                     title: '{{ __('Selected files not submitted') }}',
                     description: '{{ __('Selected files will be deleted on folder change') }}',
@@ -102,10 +107,11 @@
             return 'x-bind:class=\u0022isSelected(level) ? \'bg-primary-600 text-white fill-white\' : \'\'\u0022';
         },
         recursiveRemove (list, id) {
-            return list.map ( item => { return {...item} }).filter ( item => {
-                if ( 'children' in item ) {
-                    item.children = this.recursiveRemove ( item.children, id );
+            return list.map(item => { return {...item} }).filter(item => {
+                if ('children' in item) {
+                    item.children = this.recursiveRemove(item.children, id);
                 }
+
                 return item.id !== id;
             });
         },
@@ -117,11 +123,12 @@
             this.showLevel(null, this.selectionProxy);
             // on single file replace, replace selection - otherwise, add
             const lastUploads = await $wire.get('latestUploads');
+
             if(multipleFileUpload) {
                 lastUploads.forEach((file) => {
                     this.selectionProxy.children.push(file);
                     this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
-                },this);
+                }, this);
             } else {
                 this.selectionProxy.children = lastUploads;
                 this.selection = JSON.parse(JSON.stringify(this.selectionProxy));
@@ -139,7 +146,7 @@
             let name = '{{ __('new_folder') }}' + '_' + target.length;
             let collectionName = parent ? parent.collection_name + '.' + name : name;
 
-            if(parent) {
+            if (parent) {
                 this.showLevel(null, parent);
             }
 
@@ -162,7 +169,7 @@
                 accept: {
                     label: '{{ __('Delete') }}',
                     execute: async () => {
-                         try{
+                         try {
                             await $wire.delete(level.id);
                             this.selected = false;
                             this.selection = {};
@@ -221,20 +228,37 @@
         <div x-ref="upload" x-show="! selection.file_name && selected" class="flex flex-col gap-3" x-cloak>
             <div>
                 @if(resolve_static(\FluxErp\Actions\Media\DeleteMediaCollection::class, 'canPerformAction', [false]))
-                    <x-button x-show="! selection.is_static" negative :label="__('Delete')"
-                              x-on:click="deleteFolder(selection)"/>
+                    <x-button
+                        x-cloak
+                        x-show="! selection.is_static"
+                        :label="__('Delete')"
+                        negative
+                        x-on:click="deleteFolder(selection)"
+                    />
                 @endif
                 @if(resolve_static(\FluxErp\Actions\Media\UploadMedia::class, 'canPerformAction', [false]))
-                    <x-button x-cloak x-show="multipleFileUpload && !readOnly" :label="__('Add folder')" x-on:click="addFolder(selectionProxy.children, selection)"/>
+                    <x-button
+                        x-cloak
+                        x-show="multipleFileUpload && !readOnly"
+                        :label="__('Add folder')"
+                        x-on:click="addFolder(selectionProxy.children, selection)"
+                    />
                 @endif
-                <x-button spinner :label="__('Download folder')"
-                          x-on:click="$wire.downloadCollection(selection.collection_name)"/>
+                <x-button
+                    spinner
+                    :label="__('Download folder')"
+                    x-on:click="$wire.downloadCollection(selection.collection_name)"
+                />
             </div>
             @if(resolve_static(\FluxErp\Actions\Media\UpdateMedia::class, 'canPerformAction', [false]))
                 <div class="flex flex-col space-y-3 md:flex-row  md:space-x-3 items-end justify-end">
                     <div class="md:flex-1 w-full p-0">
-                        <x-input class="flex-1" x-bind:disabled="selection.is_static" :label="__('Name')"
-                                 x-model="selection.name"/>
+                        <x-input
+                            class="flex-1"
+                            x-bind:disabled="selection.is_static"
+                            :label="__('Name')"
+                            x-model="selection.name"
+                        />
                     </div>
                     <x-button x-cloak x-show="!selection.is_static" primary :label="__('Save')" x-on:click="save()"/>
                 </div>
@@ -244,10 +268,13 @@
                     <div class="w-full mb-4">
                         <input x-init="loadFilePond(countChildren)" id="filepond-drop" type="file"/>
                     </div>
-                    <x-button x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0" x-cloak
-                              x-on:click="submitFiles(selectionProxy.collection_name,uploadSuccess)"
-                              primary
-                              :label="__('Upload')"/>
+                    <x-button
+                        x-cloak
+                        x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0"
+                        :label="__('Upload')"
+                        primary
+                        x-on:click="submitFiles(selectionProxy.collection_name, uploadSuccess)"
+                    />
                 </div>
             @endif
         </div>
@@ -266,12 +293,13 @@
                     <x-input :label="__('Size')" disabled x-bind:value="convertSize(selection?.size)"/>
                     <x-input :label="__('File')" disabled x-bind:value="selection.file_name"/>
                     <x-input :label="__('Disk')" disabled x-bind:value="selection.disk"/>
-                    <x-input x-show="selection?.disk === 'public'"
-                         :label="__('Link')"
-                         readonly
-                         x-ref="originalLink"
-                         type="text"
-                         x-bind:value="selection.original_url"
+                    <x-input
+                        x-show="selection?.disk === 'public'"
+                        :label="__('Link')"
+                        readonly
+                        x-ref="originalLink"
+                        type="text"
+                        x-bind:value="selection.original_url"
                     >
                         <x-slot:append>
                             <div class="absolute inset-y-0 right-0 flex items-center p-0.5">
@@ -286,7 +314,8 @@
                         </x-slot:append>
                     </x-input>
                 @endif
-                <object class="object-contain"
+                <object
+                    class="object-contain"
                     x-bind:type="selection.mime_type"
                     x-bind:data="selection.original_url + '#zoom=85&scrollbar=0&toolbar=0&navpanes=0'"
                     width="100%"

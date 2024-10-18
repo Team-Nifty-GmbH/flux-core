@@ -8,7 +8,7 @@ const availableLanguages = import.meta.glob('../../../../../node_modules/filepon
 
 //  TODO: error on tree refresh - renderLevel undefined - and is called several times
 
-export default function ($wire, $ref, lang, modalTranslations, inputTranslation){
+export default function ($wire, $ref, lang, modalTranslations, inputTranslation) {
     return {
         tempFilesId: [],
         isLoadingFiles: [],
@@ -19,7 +19,6 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
         pond: null,
         multipleFileUpload: true,
         async setCollection(collectionName) {
-
             if (collectionName !== null) {
                 //  on selected - check if collection is single file upload
                 this.multipleFileUpload = !await $wire.hasSingleFile(collectionName);
@@ -31,24 +30,28 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
                 this.readOnly = false;
             }
 
-            this.pond.setOptions({allowMultiple: this.multipleFileUpload,
+            this.pond.setOptions({
+                allowMultiple: this.multipleFileUpload,
                 labelIdle: this.readOnly ? inputTranslation.uploadDisabled : this.uploadLabel,
-                disabled: this.readOnly});
+                disabled: this.readOnly
+            });
             this.selectedCollection = collectionName;
         },
-       async loadFilePond(fileCountGetter) {
-           // getting specific language path - based on selected language
-           const languageKey = lang === null  ? undefined : Object.keys(availableLanguages).find((key) => key.split('/').pop().includes(lang));
-           // fallback is english
-           const moduleLanguage= languageKey !== undefined ?  await availableLanguages[languageKey]() : await availableLanguages[`${BASE_LANGUAGE_PATH}en-en.js`]();
-           // return file-count for selected folder
+        async loadFilePond(fileCountGetter) {
+            // getting specific language path - based on selected language
+            const languageKey = lang === null ? undefined : Object.keys(availableLanguages).find((key) => key.split('/').pop().includes(lang));
+            // fallback is english
+            const moduleLanguage = languageKey !== undefined ? await availableLanguages[languageKey]() : await availableLanguages[`${BASE_LANGUAGE_PATH}en-en.js`]();
+            // return file-count for selected folder
             this.fileCount = fileCountGetter.bind(this);
             registerPlugin(FilePondPluginImagePreview);
 
             const inputElement = $ref.querySelector('#filepond-drop');
+
             if (!inputElement) {
                 return;
             }
+
             this.pond = create(inputElement, {
                 onaddfilestart: (file) => {
                     this.isLoadingFiles.push(file.id);
@@ -120,12 +123,12 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
                 allowMultiple: this.multipleFileUpload,
             });
 
-                // set language
-                setOptions(moduleLanguage.default);
+            // set language
+            setOptions(moduleLanguage.default);
 
-                // set initial label - on label change - translation will be discarded
-                // need to persist default label
-                this.uploadLabel = moduleLanguage.default.labelIdle;
+            // set initial label - on label change - translation will be discarded
+            // need to persist default label
+            this.uploadLabel = moduleLanguage.default.labelIdle;
         },
         clearFilesOnLeave() {
             if (this.pond !== null && this.tempFilesId.length > 0) {
@@ -135,6 +138,7 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
         },
         async submitFiles(collectionName, successCallback) {
             const response = await $wire.submitFiles(collectionName, this.tempFilesId);
+
             if (response && this.pond !== null) {
                 this.tempFilesId = [];
                 this.pond.removeFiles()

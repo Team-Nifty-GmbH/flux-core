@@ -2,8 +2,8 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\User;
 use FluxErp\Models\Contact;
+use FluxErp\Models\User;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use Illuminate\Database\Seeder;
