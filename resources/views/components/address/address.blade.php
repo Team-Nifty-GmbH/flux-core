@@ -95,7 +95,11 @@
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
                 <x-label :label="__('Date Of Birth')" for="{{ md5('address.date_of_birth') }}" />
                 <div class="col-span-2">
-                    <x-datetime-picker wire:model="address.date_of_birth" :without-time="true" x-bind:disabled="!$wire.edit" />
+                    <x-datetime-picker
+                        wire:model="address.date_of_birth"
+                        :without-time="true"
+                        x-bind:disabled="!$wire.edit"
+                    />
                 </div>
             </div>
         @endif

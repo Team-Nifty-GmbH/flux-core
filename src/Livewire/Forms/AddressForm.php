@@ -121,9 +121,7 @@ class AddressForm extends FluxForm
         parent::fill($values);
 
         if (! is_null($this->date_of_birth)) {
-            $this->date_of_birth = Carbon::create($this->date_of_birth)
-                ->locale(app()->getLocale())
-                ->isoFormat('L');
+            $this->date_of_birth = Carbon::create($this->date_of_birth)->isoFormat('YYYY-MM-DD');
         }
     }
 
