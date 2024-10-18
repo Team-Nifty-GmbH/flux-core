@@ -53,6 +53,7 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
             }
 
             this.pond = create(inputElement, {
+                credits: false,
                 onaddfilestart: (file) => {
                     this.isLoadingFiles.push(file.id);
                 },
