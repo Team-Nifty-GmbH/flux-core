@@ -217,17 +217,17 @@
             <template x-for="(level, i) in levels" :key="level.id">
                 <li x-html="renderLevel(level, i)"></li>
             </template>
-            @if(resolve_static(\FluxErp\Actions\Media\UploadMedia::class, 'canPerformAction', [false]))
+            @canAction(\FluxErp\Actions\Media\UploadMedia::class)
                 <li>
                     <x-button class="w-full" outline :label="__('Add folder')" x-on:click="addFolder(levels, null)"/>
                 </li>
-            @endif
+            @endCanAction
         </ul>
     </div>
     <div class="w-1/2 flex flex-col gap-3">
         <div x-ref="upload" x-show="! selection.file_name && selected" class="flex flex-col gap-3" x-cloak>
             <div>
-                @if(resolve_static(\FluxErp\Actions\Media\DeleteMediaCollection::class, 'canPerformAction', [false]))
+                @canAction(\FluxErp\Actions\Media\DeleteMediaCollection::class)
                     <x-button
                         x-cloak
                         x-show="! selection.is_static"
@@ -235,22 +235,22 @@
                         negative
                         x-on:click="deleteFolder(selection)"
                     />
-                @endif
-                @if(resolve_static(\FluxErp\Actions\Media\UploadMedia::class, 'canPerformAction', [false]))
+                @endCanAction
+                @canAction(\FluxErp\Actions\Media\UploadMedia::class)
                     <x-button
                         x-cloak
                         x-show="multipleFileUpload && !readOnly"
                         :label="__('Add folder')"
                         x-on:click="addFolder(selectionProxy.children, selection)"
                     />
-                @endif
+                @endCanAction
                 <x-button
                     spinner
                     :label="__('Download folder')"
                     x-on:click="$wire.downloadCollection(selection.collection_name)"
                 />
             </div>
-            @if(resolve_static(\FluxErp\Actions\Media\UpdateMedia::class, 'canPerformAction', [false]))
+            @canAction(\FluxErp\Actions\Media\UpdateMedia::class)
                 <div class="flex flex-col space-y-3 md:flex-row  md:space-x-3 items-end justify-end">
                     <div class="md:flex-1 w-full p-0">
                         <x-input
@@ -262,8 +262,8 @@
                     </div>
                     <x-button x-cloak x-show="!selection.is_static" primary :label="__('Save')" x-on:click="save()"/>
                 </div>
-            @endif
-            @if(resolve_static(\FluxErp\Actions\Media\UploadMedia::class, 'canPerformAction', [false]))
+            @endCanAction
+            @canAction(\FluxErp\Actions\Media\UploadMedia::class)
                 <div class="flex flex-col items-end">
                     <div class="w-full mb-4">
                         <input x-init="loadFilePond(countChildren)" id="filepond-drop" type="file"/>
@@ -271,12 +271,12 @@
                     <x-button
                         x-cloak
                         x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0"
-                        :label="__('Upload')"
+                        :label="__('Save')"
                         primary
                         x-on:click="submitFiles(selectionProxy.collection_name, uploadSuccess)"
                     />
                 </div>
-            @endif
+            @endCanAction
         </div>
         <div x-show="selection.file_name && selected" x-cloak class="flex flex-col gap-3">
             <div class="pb-1.5">
@@ -286,7 +286,7 @@
                 @endif
             </div>
             <div class="flex flex-col gap-1.5">
-                @if(resolve_static(\FluxErp\Actions\Media\UploadMedia::class, 'canPerformAction', [false]))
+                @canAction(\FluxErp\Actions\Media\UploadMedia::class)
                     <x-input :label="__('Name')" disabled x-model="selection.name"/>
                     <x-input :label="__('File type')" disabled x-bind:value="selection.file_name?.split('.').pop()"/>
                     <x-input :label="__('MIME-Type')" disabled x-bind:value="selection.mime_type"/>
@@ -313,7 +313,7 @@
                             </div>
                         </x-slot:append>
                     </x-input>
-                @endif
+                @endCanAction
                 <object
                     class="object-contain"
                     x-bind:type="selection.mime_type"
