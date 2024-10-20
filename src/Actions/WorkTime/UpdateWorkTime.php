@@ -85,6 +85,10 @@ class UpdateWorkTime extends FluxAction
             $workTime->total_time_ms =
                 $workTime->ended_at->diffInSeconds($workTime->started_at) * 1000 -
                 $workTime->paused_time_ms;
+
+            if ($workTime->is_pause) {
+                $workTime->total_time_ms = $workTime->total_time_ms * -1;
+            }
         }
 
         $workTime->save();
