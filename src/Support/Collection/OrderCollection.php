@@ -9,11 +9,11 @@ class OrderCollection extends Collection
 {
     public function printLayouts(): array
     {
-        return array_keys($this->reduce(
+        return $this->reduce(
             fn (?array $carry, Order $order) => array_merge(
                 $carry ?? [],
                 $order->resolvePrintViews()
             )
-        ));
+        );
     }
 }

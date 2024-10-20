@@ -39,6 +39,31 @@ abstract class PrintableView extends Component
 
     abstract public function getSubject(): string;
 
+    public static function shouldForceRecreate(): bool
+    {
+        return false;
+    }
+
+    public static function shouldForceEmail(): bool
+    {
+        return false;
+    }
+
+    public static function shouldForceDownload(): bool
+    {
+        return false;
+    }
+
+    public static function shouldForcePrint(): bool
+    {
+        return false;
+    }
+
+    public function shouldStore(): bool
+    {
+        return true;
+    }
+
     public function preview(bool $preview = true): static
     {
         $this->preview = $preview;
@@ -56,57 +81,6 @@ abstract class PrintableView extends Component
         return static::$layout;
     }
 
-    protected function hydrateSharedData(): void
-    {
-        $model = $this->getModel();
-
-        $client = $model?->client ?? Client::query()->first();
-
-        $logo = $client->getFirstMedia('logo');
-        $logoSmall = $client->getFirstMedia('logo_small');
-
-        if ($logoPath = $logo?->getPath()) {
-            $mimeTypeLogo = File::mimeType($logo->getPath());
-            if ($mimeTypeLogo === 'image/svg+xml') {
-                $logoPath = $logo->getPath('png');
-                $mimeTypeLogo = 'image/png';
-            }
-
-            $logoContent = file_get_contents($logoPath);
-            $client->logo = 'data:image/' . $mimeTypeLogo . ';base64,' . base64_encode($logoContent);
-        }
-
-        if ($logoSmallPath = $logoSmall?->getPath()) {
-            $mimeTypeLogoSmall = File::mimeType($logoSmall->getPath());
-            if ($mimeTypeLogoSmall === 'image/svg+xml') {
-                $logoSmallPath = $logoSmall->getPath('png');
-                $mimeTypeLogoSmall = 'image/png';
-            }
-
-            $logoSmallContent = file_get_contents($logoSmallPath);
-            $client->logo_small = 'data:image/' . $mimeTypeLogoSmall . ';base64,' . base64_encode($logoSmallContent);
-        }
-
-        $signaturePath = null;
-        if (is_a(static::class, SignablePrintView::class, true)) {
-            $viewAlias = data_get(array_flip($model->resolvePrintViews()), static::class);
-            $signaturePath = $model->media()
-                ->where('collection_name', 'signature')
-                ->where('name', 'signature-' . $viewAlias)
-                ->first()
-                ?->getPath();
-        }
-
-        View::share('signaturePath', $signaturePath);
-        View::share('client', $client);
-        View::share('subject', $this->getSubject());
-        View::share('printView', Str::kebab(class_basename($this)));
-        View::share('printLayout', static::$layout);
-
-        $this->imagick?->clear();
-        $this->imagick?->destroy();
-    }
-
     public function print(): static
     {
         if (method_exists($this, 'beforePrinting')) {
@@ -120,7 +94,8 @@ abstract class PrintableView extends Component
             ->setOption('isFontSubsettingEnabled', true)
             ->setOption('isPhpEnabled', true)
             ->setOption('isRemoteEnabled', true)
-            ->setOption('defaultMediaType', 'print');
+            ->setOption('defaultMediaType', 'print')
+            ->setPaper($this->getPaperSize(), $this->getPaperOrientation());
 
         if (! config('dompdf.options.allowed_remote_hosts')) {
             $this->pdf->setOption(
@@ -189,11 +164,6 @@ abstract class PrintableView extends Component
         return $this;
     }
 
-    protected function renderWithLayout(): \Illuminate\View\View
-    {
-        return is_null(static::$layout) ? $this->render() : view(static::$layout, ['slot' => $this->render()]);
-    }
-
     public function renderAndHydrate(): \Illuminate\View\View|string
     {
         $this->hydrateSharedData();
@@ -209,11 +179,6 @@ abstract class PrintableView extends Component
     public function savePDF(?string $fileName = null, ?string $disk = null): PDF
     {
         return $this->pdf->save(Str::finish($fileName ?? $this->getFileName(), '.pdf'), $disk);
-    }
-
-    protected function getCollectionName(): string
-    {
-        return Str::kebab(class_basename($this));
     }
 
     public function attachToModel(?Model $model = null): ?Media
@@ -244,5 +209,101 @@ abstract class PrintableView extends Component
             ->force()
             ->validate()
             ->execute();
+    }
+
+    protected function renderWithLayout(): \Illuminate\View\View
+    {
+        return is_null(static::$layout)
+            ? $this->render()
+            : view(
+                static::$layout,
+                [
+                    'slot' => $this->render(),
+                    'pageCss' => $this->getPageCss(),
+                    'hasHeader' => $this->renderHeader(),
+                    'hasFooter' => $this->renderFooter(),
+                ]
+            );
+    }
+
+    protected function hydrateSharedData(): void
+    {
+        $model = $this->getModel();
+
+        $client = $model?->client ?? Client::query()->first();
+
+        $logo = $client->getFirstMedia('logo');
+        $logoSmall = $client->getFirstMedia('logo_small');
+
+        if ($logoPath = $logo?->getPath()) {
+            $mimeTypeLogo = File::mimeType($logo->getPath());
+            if ($mimeTypeLogo === 'image/svg+xml') {
+                $logoPath = $logo->getPath('png');
+                $mimeTypeLogo = 'image/png';
+            }
+
+            $logoContent = file_get_contents($logoPath);
+            $client->logo = 'data:image/' . $mimeTypeLogo . ';base64,' . base64_encode($logoContent);
+        }
+
+        if ($logoSmallPath = $logoSmall?->getPath()) {
+            $mimeTypeLogoSmall = File::mimeType($logoSmall->getPath());
+            if ($mimeTypeLogoSmall === 'image/svg+xml') {
+                $logoSmallPath = $logoSmall->getPath('png');
+                $mimeTypeLogoSmall = 'image/png';
+            }
+
+            $logoSmallContent = file_get_contents($logoSmallPath);
+            $client->logo_small = 'data:image/' . $mimeTypeLogoSmall . ';base64,' . base64_encode($logoSmallContent);
+        }
+
+        $signaturePath = null;
+        if (is_a(static::class, SignablePrintView::class, true)) {
+            $viewAlias = data_get(array_flip($model->resolvePrintViews()), static::class);
+            $signaturePath = $model->media()
+                ->where('collection_name', 'signature')
+                ->where('name', 'signature-' . $viewAlias)
+                ->first()
+                ?->getPath();
+        }
+
+        View::share('signaturePath', $signaturePath);
+        View::share('client', $client);
+        View::share('subject', $this->getSubject());
+        View::share('printView', Str::kebab(class_basename($this)));
+        View::share('printLayout', static::$layout);
+
+        $this->imagick?->clear();
+        $this->imagick?->destroy();
+    }
+
+    protected function getCollectionName(): string
+    {
+        return Str::kebab(class_basename($this));
+    }
+
+    protected function getPaperSize(): array|string
+    {
+        return 'A4';
+    }
+
+    protected function getPaperOrientation(): string
+    {
+        return 'portrait';
+    }
+
+    protected function getPageCss(): array
+    {
+        return ['margin' => ['32mm', '20mm', '28mm', '18mm']];
+    }
+
+    protected function renderHeader(): bool
+    {
+        return true;
+    }
+
+    protected function renderFooter(): bool
+    {
+        return true;
     }
 }

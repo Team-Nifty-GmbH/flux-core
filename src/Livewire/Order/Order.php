@@ -1160,13 +1160,11 @@ class Order extends OrderPositionList
 
     protected function getPrintLayouts(): array
     {
-        return array_keys(
-            resolve_static(OrderModel::class, 'query')
-                ->whereKey($this->order->id)
-                ->with('orderType')
-                ->first(['id', 'order_type_id'])
-                ->resolvePrintViews()
-        );
+        return resolve_static(OrderModel::class, 'query')
+            ->whereKey($this->order->id)
+            ->with('orderType')
+            ->first(['id', 'order_type_id'])
+            ->resolvePrintViews();
     }
 
     protected function supportsDocumentPreview(): bool

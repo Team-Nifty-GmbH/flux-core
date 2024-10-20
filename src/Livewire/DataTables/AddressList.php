@@ -3,21 +3,31 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Contact\CreateContact;
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
+use FluxErp\Models\Media;
+use FluxErp\Traits\Livewire\CreatesDocuments;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
+use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class AddressList extends BaseDataTable
 {
+    use CreatesDocuments;
+
     protected ?string $includeBefore = 'flux::livewire.contact.contacts';
 
     protected string $model = Address::class;
+
+    public bool $isSelectable = true;
 
     public array $enabledCols = [
         'avatar',
@@ -55,6 +65,21 @@ class AddressList extends BaseDataTable
                     'x-on:click' => '$wire.show()',
                 ])
                 ->when(fn () => resolve_static(CreateContact::class, 'canPerformAction', [false])),
+        ];
+    }
+
+    protected function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->icon('document-text')
+                ->label(__('Create Documents'))
+                ->color('primary')
+                ->wireClick('openCreateDocumentsModal'),
+            DataTableButton::make()
+                ->label(__('Send Mail'))
+                ->color('primary')
+                ->wireClick('createMailMessage'),
         ];
     }
 
@@ -146,5 +171,57 @@ class AddressList extends BaseDataTable
             ->get()
             ->toMap()
             ->toArray();
+    }
+
+    public function createMailMessage(): void
+    {
+        $mailMessages = [];
+        foreach ($this->getSelectedModels() as $model) {
+            $mailMessages[] = [
+                'to' => $this->getTo($model, []),
+                'cc' => $this->getCc($model),
+                'bcc' => $this->getBcc($model),
+                'subject' => null,
+                'html_body' => null,
+                'communicatable_type' => $this->getCommunicatableType($model),
+                'communicatable_id' => $this->getCommunicatableId($model),
+            ];
+        }
+
+        $sessionKey = 'mail_' . Str::uuid()->toString();
+        session()->put($sessionKey, $mailMessages);
+
+        $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
+    }
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        return Arr::wrap(
+            $item->email_primary ?? $item->contactOptions->where('type', 'email')->first()?->value ?? []
+        );
+    }
+
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return __('Address Label');
+    }
+
+    protected function getHtmlBody(OffersPrinting $item): string
+    {
+        return '';
+    }
+
+    protected function getPrintLayouts(): array
+    {
+        return app(Address::class)->getPrintViews();
+    }
+
+    public function createDocuments(): null|MediaStream|Media
+    {
+        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
+        $this->loadData();
+        $this->selected = [];
+
+        return $response;
     }
 }
