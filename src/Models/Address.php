@@ -228,7 +228,7 @@ class Address extends FluxAuthenticatable implements HasLocalePreference, HasMed
                 $this->company,
                 trim($this->firstname . ' ' . $this->lastname),
                 $this->street,
-                trim($this->country?->iso_alpha2 . ' ' .$this->zip . ' ' . $this->city),
+                trim($this->country?->iso_alpha2 . ' ' . $this->zip . ' ' . $this->city),
                 $this->country?->name,
             ])
         );
