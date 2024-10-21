@@ -34,6 +34,14 @@ trait CreatesDocuments
     ];
 
     #[Locked]
+    public array $forcedPrintLayouts = [
+        'print' => [],
+        'email' => [],
+        'download' => [],
+        'force' => [],
+    ];
+
+    #[Locked]
     public array $previewData = [];
 
     abstract protected function getTo(OffersPrinting $item, array $documents): array;
@@ -59,8 +67,30 @@ trait CreatesDocuments
     {
         $this->printLayouts = array_map(
             fn (string $layout) => ['layout' => $layout, 'label' => __($layout)],
-            $this->getPrintLayouts()
+            array_keys($this->getPrintLayouts())
         );
+
+        foreach ($this->getPrintLayouts() as $alias => $className) {
+            if (resolve_static($className, 'shouldForceRecreate')) {
+                $this->forcedPrintLayouts['force'][] = $alias;
+                $this->selectedPrintLayouts['force'][] = $alias;
+            }
+
+            if (resolve_static($className, 'shouldForceDownload')) {
+                $this->forcedPrintLayouts['download'][] = $alias;
+                $this->selectedPrintLayouts['download'][] = $alias;
+            }
+
+            if (resolve_static($className, 'shouldForcePrint')) {
+                $this->forcedPrintLayouts['print'][] = $alias;
+                $this->selectedPrintLayouts['print'][] = $alias;
+            }
+
+            if (resolve_static($className, 'shouldForceEmail')) {
+                $this->forcedPrintLayouts['email'][] = $alias;
+                $this->selectedPrintLayouts['email'][] = $alias;
+            }
+        }
 
         $this->js(<<<'JS'
             $openModal('create-documents');
@@ -128,6 +158,7 @@ trait CreatesDocuments
         }
 
         $downloadIds = [];
+        $downloadItems = [];
         $printIds = [];
         $mailMessages = [];
         foreach ($items as $item) {
@@ -169,7 +200,24 @@ trait CreatesDocuments
                             ->validate()
                             ->execute();
 
-                        $media = $file->attachToModel($item);
+                        if ($file->shouldStore()) {
+                            $media = $file->attachToModel($item);
+                        } else {
+                            $fileName = tempnam(sys_get_temp_dir(), 'flux-print-') . '.pdf';
+                            $file->savePDF($fileName);
+
+                            $media = app(Media::class, ['attributes' => [
+                                'name' => $file->getFileName(),
+                                'file_name' => $file->getFileName() . '.pdf',
+                                'mime_type' => 'application/pdf',
+                                'disk' => 'local',
+                                'conversions_disk' => 'local',
+                            ]])
+                                ->setPath($fileName)
+                                ->setIsTemporary()
+                                ->setKeyType('string');
+                            $media->id = Str::uuid()->toString();
+                        }
                     } catch (ValidationException|UnauthorizedException $e) {
                         exception_to_notifications($e, $this);
 
@@ -178,7 +226,11 @@ trait CreatesDocuments
                 }
 
                 if ($isDownload) {
-                    $downloadIds[] = $media->getKey();
+                    if ($media->getKey() && ! $media->isTemporary) {
+                        $downloadIds[] = $media->getKey();
+                    } else {
+                        $downloadItems[] = $media;
+                    }
                 }
 
                 if ($isPrint) {
@@ -187,7 +239,7 @@ trait CreatesDocuments
                 }
 
                 if ($isEmail) {
-                    if ($media) {
+                    if ($media && ! $media->isTemporary) {
                         $mailAttachments[] = [
                             'name' => $media->file_name,
                             'id' => $media->getKey(),
@@ -230,10 +282,15 @@ trait CreatesDocuments
             $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
         }
 
-        if ($downloadIds) {
+        if ($downloadIds || $downloadItems) {
+            /** @var \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection $files */
             $files = resolve_static(Media::class, 'query')
                 ->whereIntegerInRaw('id', $downloadIds)
                 ->get();
+
+            foreach ($downloadItems as $downloadItem) {
+                $files->add($downloadItem);
+            }
 
             if ($files->count() === 1) {
                 return $files->first();

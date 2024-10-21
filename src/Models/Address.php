@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
@@ -21,8 +22,10 @@ use FluxErp\Traits\Lockable;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\MonitorsQueue;
 use FluxErp\Traits\Notifiable;
+use FluxErp\Traits\Printable;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
+use FluxErp\View\Printing\Address\AddressLabel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -46,11 +49,11 @@ use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Address extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
+class Address extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart,
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid,
-        InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
+        InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'password',
@@ -413,5 +416,12 @@ class Address extends FluxAuthenticatable implements HasLocalePreference, HasMed
 
         // dont queue mail as the address isnt used as auth in the regular app url
         Mail::to($this->email)->send(MagicLoginLink::make($login['token'], $login['expires']));
+    }
+
+    public function getPrintViews(): array
+    {
+        return [
+            'address-label' => AddressLabel::class,
+        ];
     }
 }

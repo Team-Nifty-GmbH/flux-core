@@ -94,6 +94,18 @@ class Client extends FluxModel implements HasMedia
         return $this->morphMany(Setting::class, 'model');
     }
 
+    public function getPostalAddressOneLineAttribute(): string
+    {
+        return implode(
+            ' | ',
+            array_filter([
+                $this->name,
+                $this->street,
+                $this->postcode . ' ' . $this->city,
+            ])
+        );
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('logo')

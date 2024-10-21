@@ -11,6 +11,11 @@ class BalanceStatement extends PrintableView
 {
     public Contact $model;
 
+    public static function shouldForceRecreate(): bool
+    {
+        return true;
+    }
+
     public function __construct(Contact $contact)
     {
         $this->model = $contact;

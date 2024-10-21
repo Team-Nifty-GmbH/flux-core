@@ -14,7 +14,7 @@
     @show
     @section('client-address')
         <div class="-mt-2 w-full pb-1 text-2xs">
-            {{ $client->name . ' | ' . $client->street . ' | ' . $client->postcode . ' ' . $client->city }}
+            {{ $client->postal_address_one_line }}
         </div>
     @show
     <div class="black-bar"></div>
