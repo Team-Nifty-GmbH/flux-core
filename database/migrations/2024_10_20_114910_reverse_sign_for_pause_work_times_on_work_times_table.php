@@ -18,7 +18,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        DB::statement('UPDATE work_times SET total_time_ms = total_time_ms * -1 WHERE is_pause = true');
+        DB::statement('UPDATE work_times SET total_time_ms = ABS(total_time_ms) WHERE is_pause = true');
 
         Schema::table('work_times', function (Blueprint $table) {
             $table->unsignedBigInteger('total_time_ms')->default(0)->change();
