@@ -2,8 +2,24 @@
     <x-modal name="edit-dashboard">
         <x-card>
             <div class="flex flex-col gap-4">
-                <x-input :label="__('Name')" wire:model="dashboardForm.name" />
-                <x-toggle :label="__('Public')" wire:model="dashboardForm.is_public" />
+                @canAction(\FluxErp\Actions\Dashboard\CreateDashboard::class)
+                    <x-toggle :label="__('Create my own dashboard')" wire:model="dashboardForm.createOwn"/>
+                @endCanAction
+                <div class="flex flex-col gap-4" x-cloak x-show="$wire.dashboardForm.createOwn">
+                    <x-input :label="__('Name')" wire:model="dashboardForm.name" />
+                    <x-toggle :label="__('Public')" wire:model="dashboardForm.is_public" />
+                </div>
+                <div class="flex flex-col gap-4" x-cloak x-show="! $wire.dashboardForm.createOwn">
+                    <template x-for="publicDashboard in $wire.publicDashboards">
+                        <div
+                            x-on:click="$wire.selectPublicDashboard(publicDashboard.id).then((success) => {if(success) close()})"
+                            class="w-full cursor-pointer mb-2 p-2 border rounded hover:bg-gray-100 dark:hover:bg-secondary-900"
+                        >
+                            <span x-text="publicDashboard.name"></span>
+                        </div>
+                    </template>
+                    <x-toggle wire:model="dashboardForm.copyPublic" :label="__('Copy public dashboard')"/>
+                </div>
             </div>
             <x-slot:footer>
                 <div class="flex justify-between gap-1.5">
@@ -11,11 +27,23 @@
                         label="{{ __('Cancel') }}"
                         x-on:click="close()"
                     />
-                    <x-button
-                        primary
-                        label="{{ __('Save') }}"
-                        wire:click="save"
-                    />
+                    <div>
+                        @canAction(\FluxErp\Actions\Dashboard\DeleteDashboard::class)
+                            <x-button
+                                negative
+                                label="{{ __('Delete') }}"
+                                wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => 'Dashboard']) }}"
+                                wire:click="delete($wire.dashboardForm.id).then((success) => { if(success) close(); })"
+                                x-cloak
+                                x-show="$wire.dashboardForm.id"
+                            />
+                        @endCanAction
+                        <x-button
+                            primary
+                            label="{{ __('Save') }}"
+                            wire:click="save().then((success) => {if(success) close();})"
+                        />
+                    </div>
                 </div>
             </x-slot:footer>
         </x-card>
@@ -33,25 +61,34 @@
     <div class="pb-2.5">
         <div class="dark:border-secondary-700 border-b border-gray-200 flex justify-between">
             <nav class="soft-scrollbar flex overflow-x-auto" x-ref="tabButtons">
-                @foreach($dashboards as $dashboardItem)
+                <template x-for="dashboard in $wire.dashboards">
                     <x-button
-                        :label="$dashboardItem['name']"
                         flat
                         class="border-b-2 border-b-transparent focus:!ring-0 focus:!ring-offset-0"
-                        wire:click="$set('dashboardId', {{ $dashboardItem['id'] ?? 'null' }}, true)"
-                        x-bind:class="{'!border-b-primary-600 rounded-b-none': $wire.dashboardId === {{ $dashboardItem['id'] ?? 'null' }} }"
+                        x-on:click="edit ? $wire.edit(dashboard.id) : $wire.$set('dashboardId', dashboard.id, true)"
+                        x-bind:class="{'!border-b-primary-600 rounded-b-none': $wire.dashboardId === dashboard.id }"
+                    >
+                        <x-slot:label>
+                            <span x-text="dashboard.name"></span>
+                        </x-slot:label>
+                    </x-button>
+                </template>
+                @canAction(\FluxErp\Actions\Dashboard\CreateDashboard::class)
+                    <x-button
+                        flat
+                        x-cloak
+                        x-show="edit"
+                        icon="plus"
+                        wire:click="edit"
                     />
-                @endforeach
-                <x-button
-                    x-cloak
-                    x-show="edit"
-                    icon="plus"
-                    wire:click="edit"
-                />
+                @endCanAction
             </nav>
-            <div>
-                <x-button icon="pencil" x-on:click="edit = ! edit"/>
-            </div>
+            @canAction(\FluxErp\Actions\Dashboard\UpdateDashboard::class)
+                <div>
+                    <x-button icon="pencil" x-cloak x-show="! edit" x-on:click="edit = true"/>
+                    <x-button :label="__('Done')" x-cloak x-show="edit" x-on:click="edit = false"/>
+                </div>
+            @endCanAction
         </div>
     </div>
     <div class="w-full container">

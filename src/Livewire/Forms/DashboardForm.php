@@ -14,6 +14,15 @@ class DashboardForm extends FluxForm
 
     public ?string $name = null;
 
+    public bool $is_public = false;
+
+    #[Locked]
+    public ?int $copy_from_dashboard_id = null;
+
+    public bool $createOwn = true;
+
+    public bool $copyPublic = false;
+
     protected function getActions(): array
     {
         return [

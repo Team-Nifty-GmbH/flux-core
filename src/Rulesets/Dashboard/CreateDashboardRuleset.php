@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\Dashboard;
 
 use FluxErp\Models\Dashboard;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
@@ -27,8 +28,15 @@ class CreateDashboardRuleset extends FluxRuleset
                 'integer',
                 app(MorphExists::class, ['modelAttribute' => 'authenticatable_type']),
             ],
-            'name' => 'required|string',
-            'is_public' => 'boolean',
+            'copy_from_dashboard_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Dashboard::class])
+                    ->where('is_public', true)
+                    ->where('authenticatable_type', auth()->user()->getMorphClass()),
+            ],
+            'name' => 'required_without:copy_from_dashboard_id|string',
+            'is_public' => 'exclude_if:copy_from_dashboard_id,boolean',
         ];
     }
 }

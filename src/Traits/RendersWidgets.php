@@ -80,7 +80,10 @@ trait RendersWidgets
                 ->user()
                 ->widgets()
                 ->updateOrCreate(
-                    ['id' => $widget['id'], 'dashboard_id' => $this->dashboardId],
+                    [
+                        'id' => $widget['id'],
+                        'dashboard_id' => $this->dashboardId,
+                    ],
                     array_merge(
                         $widget,
                         ['dashboard_id' => $this->dashboardId]

@@ -13,7 +13,7 @@ return new class() extends Migration
             $table->uuid();
             $table->nullableMorphs('authenticatable');
             $table->string('name');
-            $table->string('component');
+            $table->string('component')->nullable();
             $table->unsignedInteger('order_column')->nullable();
             $table->boolean('is_public')->default(false);
             $table->timestamps();

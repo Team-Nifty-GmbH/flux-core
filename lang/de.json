@@ -439,8 +439,6 @@
     "Country Name": "Name",
     "Cover image": "Titelbild",
     "Cover Media Id": "Cover-Medien-ID",
-    "File type": "Dateityp",
-    "Size": "Größe",
     "Create": "Neu",
     "Create Additional Column": "Zusätzliche Spalte anlegen",
     "Create Calendar": "Kalender erstellen",
@@ -451,6 +449,7 @@
     "Create Currency": "Währung anlegen",
     "Create Documents": "Dokumente erstellen",
     "Create Language": "Sprache anlegen",
+    "Create my own dashboard": "Eigenes Dashboard erstellen",
     "Create Orders": "Aufträge erstellen",
     "Create Payment Reminder": "Zahlungserinnerung erstellen",
     "Create Payment Run": "Zahlungslauf erstellen",
@@ -675,6 +674,7 @@
     "Field Id": "Feld-ID",
     "Field Type": "Art des Feldes",
     "File Name": "Dateiname",
+    "File type": "Dateityp",
     "Files": "Dateien",
     "files.get": "Dateien anzeigen",
     "Filter by path": "Nach Pfad filtern",
@@ -1414,6 +1414,7 @@
     "Signed Sepa Mandate": "Unterzeichnetes Sepa Mandat",
     "Simulate": "Simulieren",
     "Single Booking": "Einzelbuchung",
+    "Size": "Größe",
     "Slug": "Slug",
     "Slug Position": "Pos.",
     "Smtp Email": "SMTP-E-Mail",
@@ -1463,6 +1464,7 @@
     "Supplier Contact Id": "Lieferantenkontakt-ID",
     "Supplier Order": "Lieferantenbestellung",
     "Supplier Serial Number": "Hersteller-Seriennummer",
+    "supplier-order": "Lieferantenbestellung",
     "Suppliers": "Lieferanten",
     "Symbol": "Symbol",
     "Sync": "Synchronisieren",
@@ -1777,6 +1779,5 @@
     "Your watchlist is empty": "Ihre Merkliste ist leer",
     "Zip": "PLZ",
     "zip": "PLZ",
-    "Zip / City": "PLZ / Ort",
-    "supplier-order": "Lieferantenbestellung"
+    "Zip / City": "PLZ / Ort"
 }
