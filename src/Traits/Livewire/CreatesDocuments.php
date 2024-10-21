@@ -226,7 +226,7 @@ trait CreatesDocuments
                 }
 
                 if ($isDownload) {
-                    if ($media->getKey() && $media->isTemporary) {
+                    if ($media->getKey() && ! $media->isTemporary) {
                         $downloadIds[] = $media->getKey();
                     } else {
                         $downloadItems[] = $media;
@@ -239,7 +239,7 @@ trait CreatesDocuments
                 }
 
                 if ($isEmail) {
-                    if ($media && $media->isTemporary) {
+                    if ($media && ! $media->isTemporary) {
                         $mailAttachments[] = [
                             'name' => $media->file_name,
                             'id' => $media->getKey(),
@@ -287,6 +287,7 @@ trait CreatesDocuments
             $files = resolve_static(Media::class, 'query')
                 ->whereIntegerInRaw('id', $downloadIds)
                 ->get();
+
             foreach ($downloadItems as $downloadItem) {
                 $files->add($downloadItem);
             }

@@ -67,9 +67,9 @@
                             <x-checkbox
                                 class="truncate"
                                 wire:model="selectedPrintLayouts.force"
+                                x-bind:value="printLayout.layout"
                                 x-bind:checked="$wire.forcedPrintLayouts.force.includes(printLayout.layout)"
                                 x-bind:disabled="$wire.forcedPrintLayouts.force.includes(printLayout.layout)"
-                                x-bind:value="printLayout.layout"
                             >
                                 <x-slot:label>
                                     <div x-text="printLayout.label"></div>
