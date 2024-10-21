@@ -35,8 +35,15 @@ class UpdateLockedWorkTime extends FluxAction
                 $workTime->total_time_ms = 0;
                 $workTime->is_locked = false;
             } else {
-                $workTime->total_time_ms = Carbon::parse($this->data['ended_at'])
-                    ->diffInMilliseconds(Carbon::parse($workTime->started_at)) - $workTime->paused_time_ms;
+                $workTime->total_time_ms = bcsub(
+                    Carbon::parse($this->data['ended_at'])->diffInMilliseconds(Carbon::parse($workTime->started_at)),
+                    $workTime->paused_time_ms,
+                    0
+                );
+
+                if ($workTime->is_pause) {
+                    $workTime->total_time_ms = bcmul($workTime->total_time_ms, -1, 0);
+                }
             }
         }
 
