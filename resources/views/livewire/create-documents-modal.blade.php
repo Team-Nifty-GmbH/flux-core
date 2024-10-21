@@ -27,8 +27,8 @@
                         <div class="text-ellipsis overflow-hidden whitespace-nowrap">
                             <x-checkbox
                                 class="truncate"
-                                x-bind:value="printLayout.layout"
                                 wire:model="selectedPrintLayouts.print"
+                                x-bind:value="printLayout.layout"
                                 x-bind:checked="$wire.forcedPrintLayouts.print.includes(printLayout.layout)"
                                 x-bind:disabled="$wire.forcedPrintLayouts.print.includes(printLayout.layout)"
                             >
@@ -40,8 +40,8 @@
                         <div class="text-ellipsis overflow-hidden whitespace-nowrap">
                             <x-checkbox
                                 class="truncate"
-                                x-bind:value="printLayout.layout"
                                 wire:model="selectedPrintLayouts.email"
+                                x-bind:value="printLayout.layout"
                                 x-bind:checked="$wire.forcedPrintLayouts.email.includes(printLayout.layout)"
                                 x-bind:disabled="$wire.forcedPrintLayouts.email.includes(printLayout.layout)"
                             >
@@ -53,8 +53,8 @@
                         <div class="text-ellipsis overflow-hidden whitespace-nowrap">
                             <x-checkbox
                                 class="truncate"
-                                x-bind:value="printLayout.layout"
                                 wire:model="selectedPrintLayouts.download"
+                                x-bind:value="printLayout.layout"
                                 x-bind:checked="$wire.forcedPrintLayouts.download.includes(printLayout.layout)"
                                 x-bind:disabled="$wire.forcedPrintLayouts.download.includes(printLayout.layout)"
                             >
@@ -66,10 +66,10 @@
                         <div class="text-ellipsis overflow-hidden whitespace-nowrap">
                             <x-checkbox
                                 class="truncate"
+                                wire:model="selectedPrintLayouts.force"
                                 x-bind:checked="$wire.forcedPrintLayouts.force.includes(printLayout.layout)"
                                 x-bind:disabled="$wire.forcedPrintLayouts.force.includes(printLayout.layout)"
                                 x-bind:value="printLayout.layout"
-                                wire:model="selectedPrintLayouts.force"
                             >
                                 <x-slot:label>
                                     <div x-text="printLayout.label"></div>

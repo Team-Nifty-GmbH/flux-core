@@ -214,6 +214,7 @@ trait CreatesDocuments
                                 'conversions_disk' => 'local',
                             ]])
                                 ->setPath($fileName)
+                                ->setIsTemporary()
                                 ->setKeyType('string');
                             $media->id = Str::uuid()->toString();
                         }
@@ -225,7 +226,7 @@ trait CreatesDocuments
                 }
 
                 if ($isDownload) {
-                    if ($media->getKey() && is_int($media->getKey())) {
+                    if ($media->getKey() && $media->isTemporary) {
                         $downloadIds[] = $media->getKey();
                     } else {
                         $downloadItems[] = $media;
@@ -238,7 +239,7 @@ trait CreatesDocuments
                 }
 
                 if ($isEmail) {
-                    if ($media && is_int($media->getKey())) {
+                    if ($media && $media->isTemporary) {
                         $mailAttachments[] = [
                             'name' => $media->file_name,
                             'id' => $media->getKey(),

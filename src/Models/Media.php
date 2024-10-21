@@ -33,6 +33,8 @@ class Media extends BaseMedia
 
     public ?string $path = null;
 
+    public bool $isTemporary = false;
+
     public function category(): MorphToMany
     {
         return $this->morphToMany(Category::class, 'categorizable');
@@ -53,6 +55,13 @@ class Media extends BaseMedia
     public function setPath(string $path): static
     {
         $this->path = $path;
+
+        return $this;
+    }
+
+    public function setIsTemporary(bool $isTemporary = true): static
+    {
+        $this->isTemporary = $isTemporary;
 
         return $this;
     }

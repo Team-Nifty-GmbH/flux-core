@@ -194,6 +194,15 @@ class AddressList extends BaseDataTable
         $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
     }
 
+    public function createDocuments(): null|MediaStream|Media
+    {
+        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
+        $this->loadData();
+        $this->selected = [];
+
+        return $response;
+    }
+
     protected function getTo(OffersPrinting $item, array $documents): array
     {
         return Arr::wrap(
@@ -214,14 +223,5 @@ class AddressList extends BaseDataTable
     protected function getPrintLayouts(): array
     {
         return app(Address::class)->getPrintViews();
-    }
-
-    public function createDocuments(): null|MediaStream|Media
-    {
-        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
-        $this->loadData();
-        $this->selected = [];
-
-        return $response;
     }
 }

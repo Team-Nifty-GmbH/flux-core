@@ -9,12 +9,12 @@ use Illuminate\View\View;
 
 class AddressLabel extends PrintableView
 {
+    public function __construct(public Address $address) {}
+
     public static function shouldForceRecreate(): bool
     {
         return true;
     }
-
-    public function __construct(public Address $address) {}
 
     public function shouldStore(): bool
     {
@@ -45,12 +45,14 @@ class AddressLabel extends PrintableView
 
     protected function getPageCss(): array
     {
-        return ['margin' => [
-            'top' => 5,
-            'right' => 15,
-            'bottom' => 5,
-            'left' => 15,
-        ]];
+        return [
+            'margin' => [
+                'top' => 5,
+                'right' => 15,
+                'bottom' => 5,
+                'left' => 15,
+            ],
+        ];
     }
 
     protected function getPaperSize(): array
