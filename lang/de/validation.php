@@ -142,6 +142,8 @@ return [
     ],
     'starts_with' => ':Attribute muss mit einem der folgenden Anfänge aufweisen: :values',
     'string' => ':Attribute muss ein String sein.',
+    'string_or_integer' => ':Attribute muss ein String oder eine Zahl sein.',
+    'string_or_integer_unsigned' => ':Attribute muss ein String oder eine positive Zahl sein.',
     'timezone' => ':Attribute muss eine gültige Zeitzone sein.',
     'ulid' => 'Die :attribute muss eine gültige ULID sein.',
     'unique' => ':Attribute ist bereits vergeben.',
