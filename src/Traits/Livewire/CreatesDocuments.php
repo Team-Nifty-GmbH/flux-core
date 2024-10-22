@@ -100,7 +100,7 @@ trait CreatesDocuments
     #[Renderless]
     public function openPreview(string $printView, string $modelType, int|string $modelId): void
     {
-        if (! in_array($printView, $this->getPrintLayouts())) {
+        if (! in_array($printView, array_keys($this->getPrintLayouts()))) {
             throw new \InvalidArgumentException('Invalid print view');
         }
 
