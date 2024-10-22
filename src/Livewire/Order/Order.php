@@ -961,7 +961,7 @@ class Order extends OrderPositionList
 
         $this->printLayouts = array_map(
             fn (string $layout) => ['layout' => $layout, 'label' => __($layout)],
-            $this->getPrintLayouts()
+            array_keys($this->getPrintLayouts())
         );
 
         $invoice = $order->invoice();
