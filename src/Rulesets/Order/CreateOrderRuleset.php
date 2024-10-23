@@ -100,7 +100,11 @@ class CreateOrderRuleset extends FluxRuleset
             'payment_type_id' => [
                 'integer',
                 'nullable',
-                app(ExistsWithForeign::class, ['foreignAttribute' => 'client_id', 'table' => 'payment_types']),
+                app(ExistsWithForeign::class, [
+                    'foreignAttribute' => 'client_id',
+                    'table' => 'client_payment_type',
+                    'column' => 'payment_type_id',
+                ]),
             ],
             'responsible_user_id' => [
                 'integer',

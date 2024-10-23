@@ -129,7 +129,7 @@ class PaymentTypeTest extends BaseSetup
     public function test_create_payment_type()
     {
         $paymentType = [
-            'client_id' => $this->paymentTypes[0]->client_id,
+            'client_id' => $this->dbClient->id,
             'name' => 'Payment Type Name',
         ];
 
@@ -162,7 +162,7 @@ class PaymentTypeTest extends BaseSetup
     public function test_create_payment_type_maximum()
     {
         $paymentType = [
-            'client_id' => $this->paymentTypes[0]->client_id,
+            'client_id' => $this->dbClient->id,
             'name' => 'Payment Type Name',
             'description' => 'New description text for further information',
             'payment_reminder_days_1' => 42,
@@ -203,8 +203,8 @@ class PaymentTypeTest extends BaseSetup
     public function test_create_payment_type_validation_fails()
     {
         $paymentType = [
-            'client_id' => 'client_id',
             'name' => 'Payment Type Name',
+            'clients' => 'client_id',
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -290,8 +290,8 @@ class PaymentTypeTest extends BaseSetup
     {
         $paymentType = [
             'id' => $this->paymentTypes[0]->id,
-            'client_id' => 'client_id',
             'name' => 'Payment Type Name',
+            'clients' => 'client_id',
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);

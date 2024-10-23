@@ -75,6 +75,7 @@ class ProductForm extends FluxForm
 
     public ?bool $is_highlight = false;
 
+    #[Locked]
     public ?bool $is_bundle = false;
 
     public ?bool $is_service = false;
@@ -154,10 +155,11 @@ class ProductForm extends FluxForm
                 'url' => $values->parent->getUrl(),
             ]
             : null;
+
         $this->bundle_products = array_map(function ($bundleProduct) {
             return [
+                'id' => $bundleProduct['id'] ?? null,
                 'count' => $bundleProduct['pivot']['count'] ?? 0,
-                'id' => $bundleProduct['pivot']['product_id'] ?? null,
             ];
         }, $this->bundle_products);
     }
