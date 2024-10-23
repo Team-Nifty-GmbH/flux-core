@@ -37,10 +37,13 @@
                         <div>
                             {{ trim(($address->zip ?? '') . ' ' . ($address->city ?? '')) }}
                         </div>
+                        <div>
+                            {{ $address->country->name ?? '' }}
+                        </div>
                     </address>
                 @endif
             @show
-            <div class="inline-block float-right items-end float-right align-top">
+            <div class="inline-block items-end float-right align-top">
                 @section('recipient-address.right-block')
                     <div>
                         {{ $rightBlock ?? '' }}
