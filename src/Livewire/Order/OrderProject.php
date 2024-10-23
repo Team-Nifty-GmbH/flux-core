@@ -9,6 +9,7 @@ use FluxErp\Rules\ModelExists;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
@@ -45,6 +46,7 @@ class OrderProject extends Component
         return view('flux::livewire.placeholders.box');
     }
 
+    #[Renderless]
     public function save(): bool
     {
         if ($this->existingProject && ! $this->projectId) {
@@ -86,7 +88,7 @@ class OrderProject extends Component
             return false;
         }
 
-        $id = $this->projectId;
+        $id = $this->form->id;
         $this->js(<<<JS
             \$wire.\$parent.createTasks($id);
         JS);
