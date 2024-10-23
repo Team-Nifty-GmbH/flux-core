@@ -31,4 +31,16 @@ class UpdateVatRate extends FluxAction
 
         return $vatRate->withoutRelations()->fresh();
     }
+
+    protected function prepareForValidation(): void
+    {
+        if (($this->data['is_default'] ?? false)
+            && ! resolve_static(VatRate::class, 'query')
+                ->whereKeyNot($this->data['id'] ?? 0)
+                ->where('is_default', true)
+                ->exists()
+        ) {
+            $this->rules['is_default'] .= '|accepted';
+        }
+    }
 }

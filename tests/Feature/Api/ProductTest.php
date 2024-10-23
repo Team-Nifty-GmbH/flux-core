@@ -113,6 +113,11 @@ class ProductTest extends BaseSetup
 
     public function test_create_product()
     {
+        $defaultVatRate = VatRate::factory()
+            ->create([
+                'is_default' => true,
+            ]);
+
         $product = [
             'name' => Str::random(),
             'clients' => [$this->clients[0]->id],
@@ -133,7 +138,7 @@ class ProductTest extends BaseSetup
         $this->assertEquals($product['name'], $dbProduct->name);
         $this->assertEquals($product['clients'], $dbProduct->clients->pluck('id')->toArray());
         $this->assertNull($dbProduct->parent_id);
-        $this->assertNull($dbProduct->vat_rate_id);
+        $this->assertEquals($defaultVatRate->id, $dbProduct->vat_rate_id);
         $this->assertNull($dbProduct->unit_id);
         $this->assertNull($dbProduct->purchase_unit_id);
         $this->assertNull($dbProduct->reference_unit_id);

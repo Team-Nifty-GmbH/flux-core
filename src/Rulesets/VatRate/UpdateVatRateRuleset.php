@@ -21,6 +21,7 @@ class UpdateVatRateRuleset extends FluxRuleset
             'name' => 'required|string',
             'rate_percentage' => 'required|numeric|lt:1|min:0',
             'footer_text' => 'string|nullable',
+            'is_default' => 'boolean',
         ];
     }
 }
