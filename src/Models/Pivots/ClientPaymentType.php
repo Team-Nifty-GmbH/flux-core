@@ -3,16 +3,16 @@
 namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Client;
-use FluxErp\Models\Product;
+use FluxErp\Models\PaymentType;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class ClientProduct extends FluxPivot
+class ClientPaymentType extends FluxPivot
 {
     use BroadcastsEvents;
 
-    protected $table = 'client_product';
+    protected $table = 'client_payment_type';
 
     public $timestamps = false;
 
@@ -20,9 +20,9 @@ class ClientProduct extends FluxPivot
 
     protected $primaryKey = 'pivot_id';
 
-    public function product(): BelongsTo
+    public function paymentType(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(PaymentType::class, 'payment_type_id');
     }
 
     public function client(): BelongsTo
@@ -32,6 +32,6 @@ class ClientProduct extends FluxPivot
 
     public function siblings(): HasMany
     {
-        return $this->hasMany(ClientProduct::class, 'product_id', 'product_id');
+        return $this->hasMany(ClientPaymentType::class, 'payment_type_id', 'payment_type_id');
     }
 }

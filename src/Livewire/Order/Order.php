@@ -282,7 +282,7 @@ class Order extends OrderPositionList
                     ->get(['id', 'name'])
                     ->toArray(),
                 'paymentTypes' => resolve_static(PaymentType::class, 'query')
-                    ->where('client_id', $this->order->client_id)
+                    ->whereRelation('clients', 'id', $this->order->client_id)
                     ->get(['id', 'name'])
                     ->toArray(),
                 'languages' => resolve_static(Language::class, 'query')

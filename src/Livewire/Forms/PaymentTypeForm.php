@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\PaymentType\CreatePaymentType;
 use FluxErp\Actions\PaymentType\DeletePaymentType;
 use FluxErp\Actions\PaymentType\UpdatePaymentType;
+use FluxErp\Models\PaymentType;
 use Livewire\Attributes\Locked;
 
 class PaymentTypeForm extends FluxForm
@@ -47,6 +48,8 @@ class PaymentTypeForm extends FluxForm
 
     public bool $requires_manual_transfer = false;
 
+    public ?array $clients = [];
+
     protected function getActions(): array
     {
         return [
@@ -68,6 +71,13 @@ class PaymentTypeForm extends FluxForm
 
     public function fill($values)
     {
+        if ($values instanceof PaymentType) {
+            $values->loadMissing(['clients:id']);
+
+            $values = $values->toArray();
+            $values['clients'] = array_column($values['clients'] ?? [], 'id');
+        }
+
         parent::fill($values);
         $this->payment_discount_percentage = bcmul($this->payment_discount_percentage, 100);
     }

@@ -66,9 +66,10 @@ class OrderTest extends BaseSetup
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 
-        $this->paymentTypes = PaymentType::factory()->count(2)->create([
-            'client_id' => $this->clients[0]->id,
-        ]);
+        $this->paymentTypes = PaymentType::factory()
+            ->count(2)
+            ->hasAttached(factory: $this->clients[0], relationship: 'clients')
+            ->create();
 
         $priceLists = PriceList::factory()->count(2)->create();
 

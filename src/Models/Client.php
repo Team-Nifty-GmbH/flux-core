@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\ClientPaymentType;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -82,6 +83,12 @@ class Client extends FluxModel implements HasMedia
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
+    }
+
+    public function paymentTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(PaymentType::class, 'client_payment_type')
+            ->using(ClientPaymentType::class);
     }
 
     public function projects(): HasMany

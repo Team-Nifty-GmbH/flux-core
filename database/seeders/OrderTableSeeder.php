@@ -37,7 +37,7 @@ class OrderTableSeeder extends Seeder
                 ->get(['id']);
 
             $paymentTypes = PaymentType::query()
-                ->where('client_id', $client->id)
+                ->whereRelation('clients', 'id', $client->id)
                 ->get(['id']);
 
             $orders = Order::query()

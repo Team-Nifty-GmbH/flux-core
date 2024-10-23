@@ -12,10 +12,12 @@ class PaymentTypeTableSeeder extends Seeder
     {
         $clients = Client::all(['id']);
 
+        $paymentTypes = PaymentType::factory()
+            ->count(5)
+            ->create();
+
         foreach ($clients as $client) {
-            PaymentType::factory()->count(2)->create([
-                'client_id' => $client->id,
-            ]);
+            $client->paymentTypes()->attach($paymentTypes->random(3));
         }
     }
 }

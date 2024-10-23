@@ -37,10 +37,13 @@ class OrderProjectTest extends TestCase
         $priceList = PriceList::factory()->create([
             'is_default' => true,
         ]);
-        $paymentType = PaymentType::factory()->create([
-            'is_default' => true,
-            'client_id' => $client->id,
-        ]);
+
+        $paymentType = PaymentType::factory()
+            ->hasAttached(factory: $client, relationship: 'clients')
+            ->create([
+                'is_default' => true,
+            ]);
+
         $orderType = OrderType::factory()->create([
             'client_id' => $client->id,
             'order_type_enum' => OrderTypeEnum::Order->value,

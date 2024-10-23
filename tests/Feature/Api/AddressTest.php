@@ -51,12 +51,10 @@ class AddressTest extends BaseSetup
             'is_default' => true,
         ]);
 
-        $paymentTypes = PaymentType::factory()->count(2)->create([
-            'client_id' => $dbClients[0]->id,
-        ]);
-        $paymentTypes[] = PaymentType::factory()->create([
-            'client_id' => $dbClients[1]->id,
-        ]);
+        $paymentTypes = PaymentType::factory()->count(3)->create();
+        $dbClients[0]->paymentTypes()->attach([$paymentTypes[0]->id, $paymentTypes[1]->id]);
+        $dbClients[1]->paymentTypes()->attach($paymentTypes[2]->id);
+
 
         $this->contacts = Contact::factory()->count(2)->create([
             'client_id' => $dbClients[0]->id,

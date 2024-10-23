@@ -22,9 +22,10 @@ class PaymentTypeTest extends BaseSetup
     {
         parent::setUp();
 
-        $this->paymentTypes = PaymentType::factory()->count(2)->create([
-            'client_id' => $this->dbClient->id,
-        ]);
+        $this->paymentTypes = PaymentType::factory()
+            ->count(2)
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
 
         $this->permissions = [
             'show' => Permission::findOrCreate('api.payment-types.{id}.get'),

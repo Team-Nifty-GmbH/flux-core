@@ -33,9 +33,9 @@ class SepaMandateTest extends BaseSetup
 
         $dbClients = Client::factory()->count(2)->create();
 
-        $paymentType = PaymentType::factory()->create([
-            'client_id' => $dbClients[0]->id,
-        ]);
+        $paymentType = PaymentType::factory()
+            ->hasAttached(factory: $dbClients[0], relationship: 'clients')
+            ->create();
 
         $this->contacts = Contact::factory()->count(2)->create([
             'client_id' => $dbClients[0]->id,

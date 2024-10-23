@@ -18,10 +18,11 @@ class ContactsTest extends BaseSetup
     {
         parent::setUp();
 
-        $paymentType = PaymentType::factory()->create([
-            'client_id' => $this->dbClient->id,
-            'is_default' => false,
-        ]);
+        $paymentType = PaymentType::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create([
+                'is_default' => false,
+            ]);
 
         $this->contact = Contact::factory()->create([
             'client_id' => $this->dbClient->id,
