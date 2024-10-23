@@ -16,35 +16,39 @@
         <div class="-mt-2 w-full pb-1 text-2xs">
             {{ $client->postal_address_one_line }}
         </div>
+        <div class="black-bar"></div>
     @show
-    <div class="black-bar"></div>
-    <div class="block pt-20 ">
-        @if($slot->isNotEmpty())
-            {!! $slot !!}
-        @else
-            <address class="inline-block not-italic float-left align-top">
-                <div class="font-semibold">
-                    {{ $address->company ?? '' }}
-                </div>
-                <div>
-                    {{ trim(($address->firstname ?? '') . ' ' . ($address->lastname ?? '')) }}
-                </div>
-                <div>
-                    {{ $address->street ?? '' }}
-                </div>
-                <div>
-                    {{ trim(($address->zip ?? '') . ' ' . ($address->city ?? '')) }}
-                </div>
-            </address>
-        @endif
-        <div class="inline-block float-right items-end float-right align-top">
-            @section('right-block')
-                <div>
-                    {{ $rightBlock ?? '' }}
-                </div>
+    @section('recipient-address')
+        <div class="block pt-20">
+            @section('recipient-address.left-block')
+                @if($slot->isNotEmpty())
+                    {!! $slot !!}
+                @else
+                    <address class="inline-block not-italic float-left align-top">
+                        <div class="font-semibold">
+                            {{ $address->company ?? '' }}
+                        </div>
+                        <div>
+                            {{ trim(($address->firstname ?? '') . ' ' . ($address->lastname ?? '')) }}
+                        </div>
+                        <div>
+                            {{ $address->street ?? '' }}
+                        </div>
+                        <div>
+                            {{ trim(($address->zip ?? '') . ' ' . ($address->city ?? '')) }}
+                        </div>
+                    </address>
+                @endif
             @show
+            <div class="inline-block float-right items-end float-right align-top">
+                @section('recipient-address.right-block')
+                    <div>
+                        {{ $rightBlock ?? '' }}
+                    </div>
+                @show
+            </div>
         </div>
-    </div>
+    @show
     @section('first-page-subject')
         <h1 class="pt-32 text-xl font-semibold">
             {{ $subject ?? '' }}

@@ -213,7 +213,8 @@ class FluxServiceProvider extends ServiceProvider
 
         if ($this->app->runningUnitTests()) {
             if (! Testable::hasMacro('assertWireuiNotification')) {
-                Testable::macro('assertWireuiNotification',
+                Testable::macro(
+                    'assertWireuiNotification',
                     function (?string $title = null, ?string $icon = null, ?string $description = null) {
                         $this->assertDispatched(
                             'wireui:notification',
@@ -228,7 +229,8 @@ class FluxServiceProvider extends ServiceProvider
                         );
 
                         return $this;
-                    });
+                    }
+                );
             }
 
             if (! Testable::hasMacro('assertExecutesJs')) {
@@ -241,7 +243,8 @@ class FluxServiceProvider extends ServiceProvider
                         );
 
                         return $this;
-                    });
+                    }
+                );
             }
         }
 
