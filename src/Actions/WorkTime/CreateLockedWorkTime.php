@@ -23,8 +23,10 @@ class CreateLockedWorkTime extends CreateWorkTime
         $workTime->is_billable ??= $workTime->workTimeType?->is_billable ?? false;
 
         if ($workTime->ended_at) {
-            $workTime->total_time_ms = $workTime->ended_at->diffInMilliseconds($workTime->started_at)
-                - $workTime->paused_time_ms;
+            $workTime->total_time_ms = bcsub(
+                $workTime->ended_at->diffInMilliseconds($workTime->started_at),
+                $workTime->paused_time_ms
+            );
         } else {
             $workTime->is_locked = false;
         }

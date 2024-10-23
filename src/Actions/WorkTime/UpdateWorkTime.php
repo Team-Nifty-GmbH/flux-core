@@ -83,8 +83,15 @@ class UpdateWorkTime extends FluxAction
 
         if ($this->data['is_locked']) {
             $workTime->total_time_ms =
-                $workTime->ended_at->diffInSeconds($workTime->started_at) * 1000 -
-                $workTime->paused_time_ms;
+                bcsub(
+                    bcmul($workTime->ended_at->diffInSeconds($workTime->started_at), 1000, 0),
+                    $workTime->paused_time_ms,
+                    0
+                );
+
+            if ($workTime->is_pause) {
+                $workTime->total_time_ms = bcmul($workTime->total_time_ms, -1, 0);
+            }
         }
 
         $workTime->save();

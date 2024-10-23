@@ -87,7 +87,7 @@ class CheckoutTest extends BaseSetup
             ->assertSet('deliveryAddress.phone', $newAddress->phone)
             ->assertSet('deliveryAddress.department', $newAddress->department)
             ->assertSet('deliveryAddress.email', $newAddress->email)
-            ->assertSee($newAddress->postal_address);
+            ->assertSee($newAddress->postal_address, false);
     }
 
     public function test_cant_create_order_without_legal_accepted()

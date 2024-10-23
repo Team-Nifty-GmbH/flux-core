@@ -135,8 +135,6 @@ class Order extends OrderPositionList
 
         $this->getAvailableStates(['payment_state', 'delivery_state', 'state']);
 
-        $this->isSelectable = ! $this->order->is_locked;
-
         if (in_array($value, [OrderTypeEnum::PurchaseSubscription->value, OrderTypeEnum::Subscription->value])) {
             $this->fillSchedule();
         }
@@ -169,15 +167,16 @@ class Order extends OrderPositionList
             DataTableButton::make()
                 ->icon('pencil')
                 ->color('primary')
-                ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false]))
+                ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
+                    && ! $this->order->is_locked
+                )
                 ->attributes([
                     'wire:click' => <<<'JS'
                             editOrderPosition(index).then(() => $openModal('edit-order-position'));
                         JS,
                     'x-show' => '! record.is_bundle_position',
                     'x-cloak' => true,
-                ])
-                ->when(! $this->order->is_locked),
+                ]),
             DataTableButton::make()
                 ->icon('eye')
                 ->attributes([
@@ -961,7 +960,7 @@ class Order extends OrderPositionList
 
         $this->printLayouts = array_map(
             fn (string $layout) => ['layout' => $layout, 'label' => __($layout)],
-            $this->getPrintLayouts()
+            array_keys($this->getPrintLayouts())
         );
 
         $invoice = $order->invoice();
@@ -1109,7 +1108,9 @@ class Order extends OrderPositionList
                 ->label(__('Delete'))
                 ->icon('trash')
                 ->color('negative')
-                ->when(fn () => resolve_static(DeleteOrderPosition::class, 'canPerformAction', [false]))
+                ->when(fn () => resolve_static(DeleteOrderPosition::class, 'canPerformAction', [false])
+                    && ! $this->order->is_locked
+                )
                 ->attributes([
                     'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
                     'wire:click' => 'deleteSelectedOrderPositions(); showSelectedActions = false;',
@@ -1120,6 +1121,9 @@ class Order extends OrderPositionList
                 ->xOnClick('$openModal(\'create-tasks\')'),
             DataTableButton::make()
                 ->label(__('Recalculate prices'))
+                ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
+                    && ! $this->order->is_locked
+                )
                 ->attributes([
                     'wire:flux-confirm.icon.warning' => __(
                         'Recalculate prices|Are you sure you want to recalculate the prices?|Cancel|Confirm'
@@ -1160,13 +1164,11 @@ class Order extends OrderPositionList
 
     protected function getPrintLayouts(): array
     {
-        return array_keys(
-            resolve_static(OrderModel::class, 'query')
-                ->whereKey($this->order->id)
-                ->with('orderType')
-                ->first(['id', 'order_type_id'])
-                ->resolvePrintViews()
-        );
+        return resolve_static(OrderModel::class, 'query')
+            ->whereKey($this->order->id)
+            ->with('orderType')
+            ->first(['id', 'order_type_id'])
+            ->resolvePrintViews();
     }
 
     protected function supportsDocumentPreview(): bool

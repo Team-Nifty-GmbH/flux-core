@@ -156,6 +156,7 @@ class EditMail extends Component
     #[Renderless]
     public function send(): bool
     {
+        $editedMailMessage = $this->mailMessage->toArray();
         if (! $this->mailMessages && ! $this->sessionKey) {
             $this->mailMessages = [$this->mailMessage];
         } else {
@@ -163,6 +164,9 @@ class EditMail extends Component
         }
 
         $single = count($this->mailMessages) === 1;
+        if (! $single) {
+            unset($editedMailMessage['to']);
+        }
 
         $bcc = $this->mailMessage->bcc;
         $cc = $this->mailMessage->cc;
@@ -176,6 +180,7 @@ class EditMail extends Component
 
                 $this->mailMessage->fill(array_merge(
                     $mailMessage,
+                    array_filter($editedMailMessage),
                     [
                         'bcc' => $bcc,
                     ]

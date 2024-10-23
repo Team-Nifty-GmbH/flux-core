@@ -247,7 +247,7 @@ class AddressTest extends BaseSetup
             'mailbox' => Str::random(),
             'latitude' => 37.88953,
             'longitude' => 41.12802,
-            'zip' => Str::random(),
+            'zip' => 123456,
             'city' => Str::random(),
             'street' => Str::random(),
             'url' => Str::random(),
@@ -299,6 +299,7 @@ class AddressTest extends BaseSetup
         $address = [
             'client_id' => $this->addresses[2]->client_id,
             'contact_id' => ++$this->addresses[3]->contact_id,
+            'zip' => -123456,
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -306,6 +307,11 @@ class AddressTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->post('/api/addresses', $address);
         $response->assertStatus(422);
+
+        $response->assertJsonValidationErrors([
+            'contact_id',
+            'zip',
+        ]);
     }
 
     public function test_update_address()

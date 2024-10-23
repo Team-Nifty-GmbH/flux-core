@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\Address;
 
 use FluxErp\Models\Address;
+use FluxErp\Rules\StringOrInteger;
 use FluxErp\Rulesets\FluxRuleset;
 
 class PostalAddressRuleset extends FluxRuleset
@@ -31,7 +32,10 @@ class PostalAddressRuleset extends FluxRuleset
                 'nullable',
                 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))(\.\d+)?)|(180(\.0+)?))$/',
             ],
-            'zip' => 'string|nullable',
+            'zip' => [
+                'nullable',
+                app(StringOrInteger::class),
+            ],
             'city' => 'string|nullable',
             'street' => 'string|nullable',
 

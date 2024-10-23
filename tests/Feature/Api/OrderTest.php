@@ -302,7 +302,7 @@ class OrderTest extends BaseSetup
         $order = [
             'id' => $this->orders[0]->id,
             'address_delivery' => [
-                'zip' => 12345,
+                'zip' => -12345,
             ],
         ];
 

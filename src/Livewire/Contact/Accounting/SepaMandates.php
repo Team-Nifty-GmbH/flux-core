@@ -183,11 +183,9 @@ class SepaMandates extends SepaMandateList
 
     protected function getPrintLayouts(): array
     {
-        return array_keys(
-            resolve_static(SepaMandate::class, 'query')
-                ->whereKey($this->sepaMandate->id)
-                ->first(['id'])
-                ->resolvePrintViews()
-        );
+        return resolve_static(SepaMandate::class, 'query')
+            ->whereKey($this->sepaMandate->id)
+            ->first(['id'])
+            ->resolvePrintViews();
     }
 }

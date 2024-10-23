@@ -194,7 +194,7 @@ class Contact extends Component
 
     protected function getPrintLayouts(): array
     {
-        return array_keys(app(ContactModel::class)->resolvePrintViews());
+        return app(ContactModel::class)->resolvePrintViews();
     }
 
     public function createDocuments(): null|MediaStream|Media

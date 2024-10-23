@@ -25,28 +25,52 @@
                 <template x-for="printLayout in $wire.printLayouts">
                     <div class="w-full grid grid-cols-4 gap-4 py-2">
                         <div class="text-ellipsis overflow-hidden whitespace-nowrap">
-                            <x-checkbox x-bind:value="printLayout.layout" wire:model="selectedPrintLayouts.print">
+                            <x-checkbox
+                                class="truncate"
+                                wire:model="selectedPrintLayouts.print"
+                                x-bind:value="printLayout.layout"
+                                x-bind:checked="$wire.forcedPrintLayouts.print.includes(printLayout.layout)"
+                                x-bind:disabled="$wire.forcedPrintLayouts.print.includes(printLayout.layout)"
+                            >
                                 <x-slot:label>
                                     <div x-text="printLayout.label"></div>
                                 </x-slot:label>
                             </x-checkbox>
                         </div>
                         <div class="text-ellipsis overflow-hidden whitespace-nowrap">
-                            <x-checkbox class="truncate" x-bind:value="printLayout.layout" wire:model="selectedPrintLayouts.email">
+                            <x-checkbox
+                                class="truncate"
+                                wire:model="selectedPrintLayouts.email"
+                                x-bind:value="printLayout.layout"
+                                x-bind:checked="$wire.forcedPrintLayouts.email.includes(printLayout.layout)"
+                                x-bind:disabled="$wire.forcedPrintLayouts.email.includes(printLayout.layout)"
+                            >
                                 <x-slot:label>
                                     <div x-text="printLayout.label"></div>
                                 </x-slot:label>
                             </x-checkbox>
                         </div>
                         <div class="text-ellipsis overflow-hidden whitespace-nowrap">
-                            <x-checkbox class="truncate" x-bind:value="printLayout.layout" wire:model="selectedPrintLayouts.download">
+                            <x-checkbox
+                                class="truncate"
+                                wire:model="selectedPrintLayouts.download"
+                                x-bind:value="printLayout.layout"
+                                x-bind:checked="$wire.forcedPrintLayouts.download.includes(printLayout.layout)"
+                                x-bind:disabled="$wire.forcedPrintLayouts.download.includes(printLayout.layout)"
+                            >
                                 <x-slot:label>
                                     <div x-text="printLayout.label"></div>
                                 </x-slot:label>
                             </x-checkbox>
                         </div>
                         <div class="text-ellipsis overflow-hidden whitespace-nowrap">
-                            <x-checkbox class="truncate" x-bind:value="printLayout.layout" wire:model="selectedPrintLayouts.force">
+                            <x-checkbox
+                                class="truncate"
+                                wire:model="selectedPrintLayouts.force"
+                                x-bind:value="printLayout.layout"
+                                x-bind:checked="$wire.forcedPrintLayouts.force.includes(printLayout.layout)"
+                                x-bind:disabled="$wire.forcedPrintLayouts.force.includes(printLayout.layout)"
+                            >
                                 <x-slot:label>
                                     <div x-text="printLayout.label"></div>
                                 </x-slot:label>
