@@ -29,8 +29,8 @@ class CreateProductRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Product::class]),
             ],
             'vat_rate_id' => [
+                'required',
                 'integer',
-                'nullable',
                 app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'unit_id' => [
