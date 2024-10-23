@@ -64,6 +64,7 @@ use Laravel\Scout\Builder;
 use Livewire\Component;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use PHPUnit\Framework\Assert;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
@@ -210,21 +211,41 @@ class FluxServiceProvider extends ServiceProvider
                 });
         }
 
-        if (! Testable::hasMacro('assertWireuiNotification') && $this->app->runningUnitTests()) {
-            Testable::macro('assertWireuiNotification',
-                function (?string $title = null, ?string $icon = null, ?string $description = null) {
-                    $this->assertDispatched(
-                        'wireui:notification',
-                        function (string $eventName, array $params) use ($title, $icon, $description) {
-                            $options = data_get($params, '0.options');
+        if ($this->app->runningUnitTests()) {
+            if (! Testable::hasMacro('assertWireuiNotification')) {
+                Testable::macro(
+                    'assertWireuiNotification',
+                    function (?string $title = null, ?string $icon = null, ?string $description = null) {
+                        $this->assertDispatched(
+                            'wireui:notification',
+                            function (string $eventName, array $params) use ($title, $icon, $description) {
+                                $options = data_get($params, '0.options');
 
-                            return array_key_exists('componentId', $params[0])
-                                && (is_null($icon) || data_get($options, 'icon') === $icon)
-                                && (is_null($title) || data_get($options, 'title') === $title)
-                                && (is_null($description) || data_get($options, 'description') === $description);
-                        }
-                    );
-                });
+                                return array_key_exists('componentId', $params[0])
+                                    && (is_null($icon) || data_get($options, 'icon') === $icon)
+                                    && (is_null($title) || data_get($options, 'title') === $title)
+                                    && (is_null($description) || data_get($options, 'description') === $description);
+                            }
+                        );
+
+                        return $this;
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('assertExecutesJs')) {
+                Testable::macro(
+                    'assertExecutesJs',
+                    function (string $js) {
+                        Assert::assertStringContainsString(
+                            $js,
+                            implode(' ', data_get($this->lastState->getEffects(), 'xjs', []))
+                        );
+
+                        return $this;
+                    }
+                );
+            }
         }
 
         Route::macro('getPermissionName',
