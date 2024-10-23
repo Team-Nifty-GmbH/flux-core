@@ -50,7 +50,6 @@ class PaymentTypeTest extends BaseSetup
         // Check if controller returns the test payment type.
         $this->assertNotEmpty($jsonPaymentType);
         $this->assertEquals($this->paymentTypes[0]->id, $jsonPaymentType->id);
-        $this->assertEquals($this->paymentTypes[0]->client_id, $jsonPaymentType->client_id);
         $this->assertEquals($this->paymentTypes[0]->name, $jsonPaymentType->name);
         $this->assertEquals($this->paymentTypes[0]->description, $jsonPaymentType->description);
         $this->assertEquals($this->paymentTypes[0]->payment_reminder_days_1, $jsonPaymentType->payment_reminder_days_1);
@@ -112,7 +111,6 @@ class PaymentTypeTest extends BaseSetup
         foreach ($this->paymentTypes as $paymentType) {
             $jsonPaymentTypes->contains(function ($jsonPaymentType) use ($paymentType) {
                 return $jsonPaymentType->id === $paymentType->id &&
-                    $jsonPaymentType->client_id === $paymentType->client_id &&
                     $jsonPaymentType->name === $paymentType->name &&
                     $jsonPaymentType->description === $paymentType->description &&
                     $jsonPaymentType->payment_reminder_days_1 === $paymentType->payment_reminder_days_1 &&
@@ -147,7 +145,7 @@ class PaymentTypeTest extends BaseSetup
             ->first();
 
         $this->assertNotEmpty($dbPaymentType);
-        $this->assertEquals($paymentType['client_id'], $dbPaymentType->client_id);
+        $this->assertEquals([$paymentType['client_id']], $dbPaymentType->clients()->pluck('id')->toArray());
         $this->assertEquals($paymentType['name'], $dbPaymentType->name);
         $this->assertNull($dbPaymentType->description);
         $this->assertNull($dbPaymentType->payment_reminder_days_1);
@@ -188,7 +186,7 @@ class PaymentTypeTest extends BaseSetup
             ->first();
 
         $this->assertNotEmpty($dbPaymentType);
-        $this->assertEquals($paymentType['client_id'], $dbPaymentType->client_id);
+        $this->assertEquals([$paymentType['client_id']], $dbPaymentType->clients()->pluck('id')->toArray());
         $this->assertEquals($paymentType['name'], $dbPaymentType->name);
         $this->assertEquals($paymentType['description'], $dbPaymentType->description);
         $this->assertEquals($paymentType['payment_reminder_days_1'], $dbPaymentType->payment_reminder_days_1);
