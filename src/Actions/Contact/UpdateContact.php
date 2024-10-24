@@ -101,7 +101,7 @@ class UpdateContact extends FluxAction
 
         $clientPaymentTypeExists = resolve_static(PaymentType::class, 'query')
             ->whereKey($this->data['payment_type_id'])
-            ->where('client_id', $this->data['client_id'])
+            ->whereRelation('clients', 'id', $this->data['client_id'])
             ->exists();
 
         if (! $clientPaymentTypeExists) {

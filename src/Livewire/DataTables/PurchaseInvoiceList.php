@@ -106,7 +106,9 @@ class PurchaseInvoiceList extends BaseDataTable
                 'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->whereIn('order_type_enum', $purchaseOrderTypes)
                     ->pluck('name', 'id'),
-                'paymentTypes' => resolve_static(PaymentType::class, 'query')->where('is_purchase', true)->pluck('name', 'id'),
+                'paymentTypes' => resolve_static(PaymentType::class, 'query')
+                    ->where('is_purchase', true)
+                    ->pluck('name', 'id'),
                 'vatRates' => resolve_static(VatRate::class, 'query')->pluck('name', 'id'),
             ]
         );

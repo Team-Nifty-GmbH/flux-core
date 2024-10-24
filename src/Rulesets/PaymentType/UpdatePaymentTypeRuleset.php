@@ -2,7 +2,6 @@
 
 namespace FluxErp\Rulesets\PaymentType;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\PaymentType;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
@@ -19,10 +18,6 @@ class UpdatePaymentTypeRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => PaymentType::class]),
-            ],
-            'client_id' => [
-                'integer',
-                app(ModelExists::class, ['model' => Client::class]),
             ],
             'name' => 'string',
             'description' => 'string|nullable',
@@ -44,5 +39,13 @@ class UpdatePaymentTypeRuleset extends FluxRuleset
             'is_sales' => 'boolean',
             'requires_manual_transfer' => 'boolean',
         ];
+    }
+
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(ClientRuleset::class, 'getRules'),
+        );
     }
 }

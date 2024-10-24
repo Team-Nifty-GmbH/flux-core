@@ -35,10 +35,13 @@ class OrderProjectTest extends BaseSetup
         $priceList = PriceList::factory()->create([
             'is_default' => true,
         ]);
-        $paymentType = PaymentType::factory()->create([
-            'is_default' => true,
-            'client_id' => $this->dbClient->id,
-        ]);
+
+        $paymentType = PaymentType::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create([
+                'is_default' => true,
+            ]);
+
         $orderType = OrderType::factory()->create([
             'client_id' => $this->dbClient->id,
             'order_type_enum' => OrderTypeEnum::Order->value,

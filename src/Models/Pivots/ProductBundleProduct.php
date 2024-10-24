@@ -5,10 +5,9 @@ namespace FluxErp\Models\Pivots;
 use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class ProductBundleProduct extends Pivot
+class ProductBundleProduct extends FluxPivot
 {
     use BroadcastsEvents;
 

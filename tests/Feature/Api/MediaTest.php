@@ -172,9 +172,11 @@ class MediaTest extends BaseSetup
         ]);
         $priceList = PriceList::factory()->create();
         $currency = Currency::factory()->create();
-        $paymentType = PaymentType::factory()->create([
-            'client_id' => $client->id,
-        ]);
+
+        $paymentType = PaymentType::factory()
+            ->hasAttached(factory: $client, relationship: 'clients')
+            ->create();
+
         $contact = Contact::factory()->create([
             'client_id' => $client->id,
         ]);

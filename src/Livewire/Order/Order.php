@@ -281,7 +281,7 @@ class Order extends OrderPositionList
                     ->get(['id', 'name'])
                     ->toArray(),
                 'paymentTypes' => resolve_static(PaymentType::class, 'query')
-                    ->where('client_id', $this->order->client_id)
+                    ->whereRelation('clients', 'id', $this->order->client_id)
                     ->get(['id', 'name'])
                     ->toArray(),
                 'languages' => resolve_static(Language::class, 'query')
@@ -978,12 +978,14 @@ class Order extends OrderPositionList
         $indent = (str_word_count($slugPrefix, 0, '.') + 1) * 20;
 
         foreach ($product->bundleProducts ?? [] as $index => $bundleProduct) {
+            $slugPosition = $slugPrefix . '.' . Str::padLeft($index + 1, $padLength, '0');
+
             $this->editOrderPosition();
             $this->orderPosition->fillFormProduct($bundleProduct);
             $this->orderPosition->amount = bcmul($bundleProduct->pivot->count, $this->orderPosition->amount);
             $this->orderPosition->amount_bundle = $bundleProduct->pivot->count;
             $this->orderPosition->is_bundle_position = true;
-            $this->orderPosition->slug_position = $slugPrefix . '.' . Str::padLeft($index + 1, $padLength, '0');
+            $this->orderPosition->slug_position = $slugPosition;
             $this->orderPosition->indentation = <<<HTML
                     <div class="text-right indent-icon" style="width:{$indent}px;">
                     </div>
@@ -995,7 +997,7 @@ class Order extends OrderPositionList
             }
 
             if ($bundleProduct->bundleProducts->count() > 0) {
-                $this->addBundlePositions($bundleProduct, $this->orderPosition->slug_position);
+                $this->addBundlePositions($bundleProduct, $slugPosition);
             }
         }
     }

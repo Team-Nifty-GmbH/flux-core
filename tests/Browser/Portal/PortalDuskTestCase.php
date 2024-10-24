@@ -48,13 +48,14 @@ class PortalDuskTestCase extends DuskTestCase
             'is_default' => true,
         ]);
 
-        $paymentType = PaymentType::factory()->create([
-            'client_id' => $this->dbClient->id,
-            'is_active' => true,
-            'is_default' => true,
-            'is_sales' => true,
-            'is_purchase' => true,
-        ]);
+        $paymentType = PaymentType::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create([
+                'is_active' => true,
+                'is_default' => true,
+                'is_sales' => true,
+                'is_purchase' => true,
+            ]);
 
         $priceList = PriceList::factory()->create([
             'is_default' => true,
