@@ -6,6 +6,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Number;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Commission extends FluxModel implements InteractsWithDataTables
@@ -21,6 +22,11 @@ class Commission extends FluxModel implements InteractsWithDataTables
         return [
             'commission_rate' => 'array',
         ];
+    }
+
+    public function creditNoteOrderPosition(): BelongsTo
+    {
+        return $this->belongsTo(OrderPosition::class, 'credit_note_order_position_id');
     }
 
     public function order(): BelongsTo
@@ -40,12 +46,26 @@ class Commission extends FluxModel implements InteractsWithDataTables
 
     public function getLabel(): ?string
     {
-        return null;
+        return $this->order->addressInvoice->name . ' (' .
+            $this->order->invoice_number . ' ' .
+            $this->order->invoice_date
+                ->locale($this->user->contact->country?->iso_alpha2 ?? Country::default()->iso_alpha2)
+                ->isoFormat('L') . ')';
     }
 
     public function getDescription(): ?string
     {
-        return null;
+        return $this->orderPosition->name . ' ' .
+            Number::currency(
+                number: $this->orderPosition->total_net_price,
+                in: Currency::default()->iso,
+                locale: $this->user->contact->country?->iso_alpha2 ?? Country::default()->iso_alpha2
+            ) . ' - ' .
+            Number::percentage(
+                number: bcmul($this->commission_rate['commission_rate'], 100),
+                maxPrecision: 2,
+                locale: $this->user->contact->country?->iso_alpha2 ?? Country::default()->iso_alpha2
+            );
     }
 
     public function getUrl(): ?string
