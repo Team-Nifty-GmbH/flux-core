@@ -54,15 +54,17 @@ document.addEventListener('livewire:init', () => {
 })
 
 function wireNavigation() {
-    let links = [...document.querySelectorAll('a[href]')].filter(link => {
+    let links = [...document.querySelectorAll('a[href]:not([wire\\:navigate]):not([target="_blank"])')].filter(link => {
         let hrefValue = link.getAttribute('href').trim();
-        return hrefValue !== '' && hrefValue !== '#' && (hrefValue.startsWith(window.location.origin) || hrefValue.startsWith('/'));
+        return hrefValue !== '' && hrefValue !== '#' &&
+            (hrefValue.startsWith(window.location.origin) || hrefValue.startsWith('/'));
     });
 
     links.forEach(link => {
         link.setAttribute('wire:navigate', 'true');
     });
 }
+
 
 Livewire.directive('flux-confirm', ({ el, directive }) => {
     let icon = directive.modifiers.includes('icon')

@@ -141,7 +141,7 @@ class QueueMonitorManager
         }
 
         if (! is_null($exception)) {
-            $attributes['exception'] = serialize($exception);
+            $attributes['exception'] = $exception;
             $attributes['exception_message'] = $exception->getMessage();
             $attributes['exception_class'] = get_class($exception);
         }

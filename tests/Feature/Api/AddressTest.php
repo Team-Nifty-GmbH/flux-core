@@ -55,7 +55,6 @@ class AddressTest extends BaseSetup
         $dbClients[0]->paymentTypes()->attach([$paymentTypes[0]->id, $paymentTypes[1]->id]);
         $dbClients[1]->paymentTypes()->attach($paymentTypes[2]->id);
 
-
         $this->contacts = Contact::factory()->count(2)->create([
             'client_id' => $dbClients[0]->id,
             'payment_type_id' => $paymentTypes[0]->id,

@@ -53,6 +53,12 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         static::addGlobalScope('withChildren', function ($builder) {
             $builder->with('children');
         });
+
+        static::deleted(function (OrderPosition $orderPosition) {
+            $orderPosition->workTime()->update(['order_position_id' => null]);
+            $orderPosition->creditNoteCommission()->update(['credit_note_order_position_id' => null]);
+            $orderPosition->commission()->delete();
+        });
     }
 
     protected function casts(): array
@@ -132,6 +138,11 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function commission(): HasOne
     {
         return $this->hasOne(Commission::class);
+    }
+
+    public function creditNoteCommission(): HasOne
+    {
+        return $this->hasOne(Commission::class, 'credit_note_order_position_id');
     }
 
     public function currency(): HasOneThrough
