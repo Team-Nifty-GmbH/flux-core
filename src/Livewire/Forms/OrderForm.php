@@ -40,6 +40,9 @@ class OrderForm extends FluxForm
 
     public ?int $price_list_id = null;
 
+    #[Locked]
+    public ?int $schedule_id = null;
+
     public ?int $payment_type_id = null;
 
     public ?int $responsible_user_id = null;

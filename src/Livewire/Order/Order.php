@@ -823,8 +823,7 @@ class Order extends OrderPositionList
     public function fillSchedule(): void
     {
         $schedule = resolve_static(Schedule::class, 'query')
-            ->where('class', ProcessSubscriptionOrder::class)
-            ->whereJsonContains('parameters->orderId', $this->order->id)
+            ->whereKey($this->order->schedule_id)
             ->first();
 
         if ($schedule) {
@@ -855,6 +854,15 @@ class Order extends OrderPositionList
 
         try {
             $this->schedule->save();
+
+            $this->order->schedule_id = UpdateLockedOrder::make([
+                'id' => $this->order->id,
+                'schedule_id' => $this->schedule->id,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute()
+                ->schedule_id;
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
