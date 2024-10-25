@@ -8,7 +8,6 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\PriceList;
-use FluxErp\Models\Schedule;
 use FluxErp\Models\User;
 use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
@@ -92,11 +91,6 @@ class CreateOrderRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => PriceList::class]),
-            ],
-            'schedule_id' => [
-                'integer',
-                'nullable',
-                app(ModelExists::class, ['model' => Schedule::class]),
             ],
             'unit_price_price_list_id' => [
                 'integer',

@@ -19,7 +19,6 @@ class UpdateLockedOrderRuleset extends FluxRuleset
                 array_merge(
                     [
                         'approval_user_id',
-                        'schedule_id',
                         'responsible_user_id',
                         'state',
                         'payment_state',

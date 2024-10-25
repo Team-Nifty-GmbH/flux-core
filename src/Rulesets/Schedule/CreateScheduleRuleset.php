@@ -4,8 +4,10 @@ namespace FluxErp\Rulesets\Schedule;
 
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Facades\Repeatable;
+use FluxErp\Models\Order;
 use FluxErp\Models\Schedule;
 use FluxErp\Rules\Frequency;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 use Illuminate\Validation\Rule;
 
@@ -55,6 +57,13 @@ class CreateScheduleRuleset extends FluxRuleset
             'ends_at' => 'date|nullable',
             'recurrences' => 'exclude_unless:ends_at,null|nullable|integer|min:1',
             'is_active' => 'boolean',
+
+            'orders' => 'array',
+            'orders.*' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Order::class]),
+            ],
         ];
     }
 }

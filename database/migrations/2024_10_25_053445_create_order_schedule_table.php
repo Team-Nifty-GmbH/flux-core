@@ -3,7 +3,6 @@
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -11,12 +10,10 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->foreignId('schedule_id')
-                ->after('price_list_id')
-                ->nullable()
-                ->constrained('schedules')
-                ->nullOnDelete();
+        Schema::create('order_schedule', function (Blueprint $table) {
+            $table->id('pivot_id');
+            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('schedule_id')->constrained()->cascadeOnDelete();
         });
 
         $this->migrateSchedules();
@@ -24,9 +21,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('schedule_id');
-        });
+        Schema::dropIfExists('order_schedule');
     }
 
     protected function migrateSchedules(): void
@@ -41,9 +36,10 @@ return new class() extends Migration
             $orderId = data_get(json_decode($orderSchedule->parameters, true), 'orderId');
 
             if ($orderId) {
-                DB::table('orders')
-                    ->where('id', $orderId)
-                    ->update(['schedule_id' => $orderSchedule->id]);
+                DB::table('order_schedule')->insert([
+                    'order_id' => $orderId,
+                    'schedule_id' => $orderSchedule->id,
+                ]);
             }
         }
     }

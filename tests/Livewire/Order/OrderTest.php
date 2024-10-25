@@ -144,10 +144,8 @@ class OrderTest extends BaseSetup
             ->assertReturned(true)
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->get('schedule.id');
+            ->assertNotSet('schedule.id', null);
 
-        $this->assertNotNull($scheduleId);
-        $this->assertSame($scheduleId, $this->order->refresh()->schedule_id);
         $this->assertDatabaseHas(
             'schedules',
             [
