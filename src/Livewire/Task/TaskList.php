@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Task;
 
 use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
+use FluxErp\Models\Category;
 use FluxErp\Models\Task;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -32,6 +33,19 @@ class TaskList extends BaseTaskList
                 'name' => $state,
             ];
         })->toArray();
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'categories' => resolve_static(Category::class, 'query')
+                    ->where('model_type', morph_alias(Task::class))
+                    ->pluck('name', 'id')
+                    ->toArray(),
+            ]
+        );
     }
 
     protected function getTableActions(): array

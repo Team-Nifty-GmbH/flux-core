@@ -58,6 +58,15 @@
         />
         <x-inputs.number x-bind:readonly="!edit" :label="__('Priority')" wire:model="task.priority" min="0" />
         <x-textarea x-bind:readonly="!edit" wire:model="task.description" label="{{ __('Description') }}" />
+        <div x-cloak x-show="$wire.categories">
+            <x-select
+                :label="__('Categories')"
+                wire:model="task.categories"
+                multiselect
+                :options="$categories"
+                option-key-value
+            />
+        </div>
         <x-select
             :label="__('Assigned')"
             option-value="id"
