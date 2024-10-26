@@ -13,6 +13,7 @@ class CreateCommissionCreditNotesRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
+            '*' => 'required|array',
             '*.id' => [
                 'required',
                 'integer',

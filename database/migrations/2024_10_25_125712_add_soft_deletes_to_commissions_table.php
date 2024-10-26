@@ -9,18 +9,15 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('commissions', function (Blueprint $table) {
-            $table->foreignId('credit_note_order_position_id')
-                ->after('order_position_id')
-                ->nullable()
-                ->constrained('order_positions')
-                ->nullOnDelete();
+            $table->timestamp('deleted_at')->nullable()->after('updated_by');
+            $table->string('deleted_by')->nullable()->after('deleted_at');
         });
     }
 
     public function down(): void
     {
         Schema::table('commissions', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('credit_note_order_position_id');
+            $table->dropColumn(['deleted_at', 'deleted_by']);
         });
     }
 };

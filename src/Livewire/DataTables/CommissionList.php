@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Actions\Commission\CreateCommissionCreditNotes;
 use FluxErp\Jobs\Accounting\CreateCommissionCreditNotesJob;
 use FluxErp\Models\Commission;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -48,17 +48,16 @@ class CommissionList extends BaseDataTable
     public function createCreditNotes(): bool
     {
         $selected = $this->getSelectedModelsQuery()
-            ->whereHas('user', function (Builder $query) {
-                $query->whereHas('contact');
-            })
+            ->whereHas('user')
             ->whereDoesntHave('creditNoteOrderPosition')
             ->get(['id'])
             ->toArray();
 
         try {
             CreateCommissionCreditNotes::make($selected)
+                ->checkPermission()
                 ->validate();
-        } catch (ValidationException $e) {
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return false;
