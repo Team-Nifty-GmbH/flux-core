@@ -4,14 +4,11 @@ namespace FluxErp\Actions\MailMessage;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
-use FluxErp\Models\Address;
 use FluxErp\Models\Communication;
-use FluxErp\Models\ContactOption;
-use FluxErp\Models\Order;
+use FluxErp\Models\MailAccount;
 use FluxErp\Rulesets\Communication\CreateCommunicationRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Meilisearch\Endpoints\Indexes;
 
 class CreateMailMessage extends FluxAction
 {
@@ -45,6 +42,9 @@ class CreateMailMessage extends FluxAction
             $mailMessage->syncTags($tags);
         }
 
+        // the maximum file size for mail messages should be managed on the mail server
+        $maxFileSize = config('media-library.max_file_size');
+        config(['media-library.max_file_size' => 1024 * 1024 * 500]);
         foreach ($attachments as $attachment) {
             $attachment['model_id'] = $mailMessage->id;
             $attachment['model_type'] = app(Communication::class)->getMorphClass();
@@ -55,45 +55,18 @@ class CreateMailMessage extends FluxAction
                 ->validate()
                 ->execute();
         }
+        config(['media-library.max_file_size' => $maxFileSize]);
 
         if ($mailMessage->mailAccount->is_auto_assign) {
-            if ($mailMessage->from_mail && $mailMessage->mailAccount->email !== $mailMessage->from_mail) {
-                $addresses = resolve_static(Address::class, 'query')
-                    ->where('email', $mailMessage->from_mail)
-                    ->get()
-                    ->each(
-                        fn (Address $address) => $address->mailMessages()->attach($mailMessage->id)
-                    );
+            $connectedMailAddresses = resolve_static(MailAccount::class, 'query')
+                ->pluck('email')
+                ->toArray();
+            $mailAddresses = array_diff(
+                (array) $mailMessage->mail_addresses,
+                $connectedMailAddresses
+            );
 
-                resolve_static(ContactOption::class, 'query')
-                    ->where('value', $mailMessage->from_mail)
-                    ->whereIntegerNotInRaw('address_id', $addresses->pluck('id')->toArray())
-                    ->with('address')
-                    ->get()
-                    ->each(
-                        fn (ContactOption $contactOption) => $contactOption
-                            ->address
-                            ->mailMessages()
-                            ->attach($mailMessage->id)
-                    );
-            }
-
-            resolve_static(
-                Order::class,
-                'search',
-                [
-                    'query' => $mailMessage->subject,
-                    'callback' => function (Indexes $meilisearch, string $query, array $options) {
-                        return $meilisearch->search(
-                            $query,
-                            $options + ['attributesToSearchOn' => ['invoice_number', 'order_number', 'commission']]
-                        );
-                    },
-                ]
-            )
-                ->first()
-                ?->communications()
-                ->attach($mailMessage->id);
+            $mailMessage->autoAssign('email', $mailAddresses);
         }
 
         return $mailMessage->withoutRelations()->fresh();
