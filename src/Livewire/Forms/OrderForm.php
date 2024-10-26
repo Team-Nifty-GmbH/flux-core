@@ -145,6 +145,9 @@ class OrderForm extends FluxForm
     #[Locked]
     public bool $isPurchase = false;
 
+    #[Locked]
+    public bool $hasContactDeliveryLock = false;
+
     protected function getActions(): array
     {
         return [
@@ -164,6 +167,7 @@ class OrderForm extends FluxForm
 
         parent::fill($values);
 
+        $this->hasContactDeliveryLock = $values->contact->has_delivery_lock;
         $this->parent = $this->parent
             ? [
                 'label' => $values->parent->getLabel(),
