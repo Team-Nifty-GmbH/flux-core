@@ -8,10 +8,9 @@ use FluxErp\Rulesets\BankConnection\CreateBankConnectionRuleset;
 
 class CreateBankConnection extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateBankConnectionRuleset::class, 'getRules');
+        return CreateBankConnectionRuleset::class;
     }
 
     public static function models(): array

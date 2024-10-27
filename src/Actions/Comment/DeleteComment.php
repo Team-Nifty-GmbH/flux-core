@@ -10,10 +10,9 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteComment extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteCommentRuleset::class, 'getRules');
+        return DeleteCommentRuleset::class;
     }
 
     public static function models(): array

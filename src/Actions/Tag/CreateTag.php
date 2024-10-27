@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Tag\CreateTagRuleset;
 
 class CreateTag extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateTagRuleset::class, 'getRules');
+        return CreateTagRuleset::class;
     }
 
     public static function models(): array

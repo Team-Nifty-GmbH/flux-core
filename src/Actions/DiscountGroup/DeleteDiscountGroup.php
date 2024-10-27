@@ -8,10 +8,9 @@ use FluxErp\Rulesets\DiscountGroup\DeleteDiscountGroupRuleset;
 
 class DeleteDiscountGroup extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteDiscountGroupRuleset::class, 'getRules');
+        return DeleteDiscountGroupRuleset::class;
     }
 
     public static function models(): array

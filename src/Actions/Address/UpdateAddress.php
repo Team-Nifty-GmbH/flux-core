@@ -20,10 +20,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateAddress extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateAddressRuleset::class, 'getRules');
+        return UpdateAddressRuleset::class;
     }
 
     public static function models(): array

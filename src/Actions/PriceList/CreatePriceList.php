@@ -10,10 +10,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreatePriceList extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreatePriceListRuleset::class, 'getRules');
+        return CreatePriceListRuleset::class;
     }
 
     public static function models(): array

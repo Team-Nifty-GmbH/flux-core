@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Transaction\CreateTransactionRuleset;
 
 class CreateTransaction extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateTransactionRuleset::class, 'getRules');
+        return CreateTransactionRuleset::class;
     }
 
     public static function models(): array

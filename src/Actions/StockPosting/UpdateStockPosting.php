@@ -8,10 +8,9 @@ use FluxErp\Rulesets\StockPosting\UpdateStockPostingRuleset;
 
 class UpdateStockPosting extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateStockPostingRuleset::class, 'getRules');
+        return UpdateStockPostingRuleset::class;
     }
 
     public static function models(): array

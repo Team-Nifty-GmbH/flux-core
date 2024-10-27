@@ -15,10 +15,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateAddress extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateAddressRuleset::class, 'getRules');
+        return CreateAddressRuleset::class;
     }
 
     public static function models(): array

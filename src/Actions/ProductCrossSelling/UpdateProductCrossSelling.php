@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateProductCrossSelling extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateProductCrossSellingRuleset::class, 'getRules');
+        return UpdateProductCrossSellingRuleset::class;
     }
 
     public static function models(): array

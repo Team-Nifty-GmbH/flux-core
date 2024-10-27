@@ -14,10 +14,9 @@ use Illuminate\Support\Carbon;
 
 class UpdateCommunication extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateCommunicationRuleset::class, 'getRules');
+        return UpdateCommunicationRuleset::class;
     }
 
     public static function models(): array

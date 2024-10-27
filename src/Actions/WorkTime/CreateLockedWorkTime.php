@@ -9,10 +9,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreateLockedWorkTime extends CreateWorkTime
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateLockedWorkTimeRuleset::class, 'getRules');
+        return CreateLockedWorkTimeRuleset::class;
     }
 
     public function performAction(): WorkTime

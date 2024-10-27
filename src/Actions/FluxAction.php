@@ -3,11 +3,13 @@
 namespace FluxErp\Actions;
 
 use FluxErp\Models\Permission;
+use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Events\NullDispatcher;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -67,6 +69,14 @@ abstract class FluxAction
     protected function boot(array $data): void
     {
         $this->setData($data, $this->keepEmptyStrings ?? false);
+    }
+
+    /**
+     * @return class-string<FluxRuleset>|array<int, class-string<FluxRuleset>>
+     */
+    public static function getRulesets(): string|array
+    {
+        return [];
     }
 
     public static function canPerformAction(bool $throwException = true): bool
@@ -152,6 +162,10 @@ abstract class FluxAction
 
     public function getRules(): array
     {
+        foreach (Arr::wrap(static::getRulesets()) as $ruleset) {
+            $this->mergeRules(resolve_static($ruleset, 'getRules'));
+        }
+
         return $this->rules;
     }
 
@@ -195,6 +209,7 @@ abstract class FluxAction
         $this->prepareForValidation();
 
         if ($this->fireActionEvent(event: 'validating') !== false) {
+            $this->getRules();
             $this->validateData();
 
             $this->fireActionEvent(event: 'validated', halt: false);
@@ -210,7 +225,7 @@ abstract class FluxAction
 
     protected function validateData(): void
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        $this->data = Validator::validate($this->data, $this->getRules());
     }
 
     final public function when(callable|bool $condition, callable $callback): static

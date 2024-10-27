@@ -11,10 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateSepaMandate extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateSepaMandateRuleset::class, 'getRules');
+        return UpdateSepaMandateRuleset::class;
     }
 
     public static function models(): array

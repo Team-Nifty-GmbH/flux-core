@@ -10,10 +10,9 @@ use Illuminate\Support\Arr;
 
 class CreatePaymentRun extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreatePaymentRunRuleset::class, 'getRules');
+        return CreatePaymentRunRuleset::class;
     }
 
     public static function models(): array

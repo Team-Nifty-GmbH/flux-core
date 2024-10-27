@@ -12,10 +12,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateUser extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateUserRuleset::class, 'getRules');
+        return UpdateUserRuleset::class;
     }
 
     public static function models(): array

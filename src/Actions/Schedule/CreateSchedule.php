@@ -9,10 +9,9 @@ use FluxErp\Rulesets\Schedule\CreateScheduleRuleset;
 
 class CreateSchedule extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateScheduleRuleset::class, 'getRules');
+        return CreateScheduleRuleset::class;
     }
 
     public static function models(): array

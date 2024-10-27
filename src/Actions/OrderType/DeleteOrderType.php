@@ -8,10 +8,9 @@ use FluxErp\Rulesets\OrderType\DeleteOrderTypeRuleset;
 
 class DeleteOrderType extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteOrderTypeRuleset::class, 'getRules');
+        return DeleteOrderTypeRuleset::class;
     }
 
     public static function models(): array

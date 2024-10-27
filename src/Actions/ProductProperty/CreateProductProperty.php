@@ -8,10 +8,9 @@ use FluxErp\Rulesets\ProductProperty\CreateProductPropertyRuleset;
 
 class CreateProductProperty extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateProductPropertyRuleset::class, 'getRules');
+        return CreateProductPropertyRuleset::class;
     }
 
     public static function models(): array

@@ -9,10 +9,9 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteCalendar extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteCalendarRuleset::class, 'getRules');
+        return DeleteCalendarRuleset::class;
     }
 
     public static function models(): array

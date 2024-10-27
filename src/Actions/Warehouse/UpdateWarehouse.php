@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateWarehouse extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateWarehouseRuleset::class, 'getRules');
+        return UpdateWarehouseRuleset::class;
     }
 
     public static function models(): array

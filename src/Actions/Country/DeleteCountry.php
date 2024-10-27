@@ -11,10 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteCountry extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteCountryRuleset::class, 'getRules');
+        return DeleteCountryRuleset::class;
     }
 
     public static function models(): array

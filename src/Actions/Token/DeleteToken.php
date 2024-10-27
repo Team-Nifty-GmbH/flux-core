@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Token\DeleteTokenRuleset;
 
 class DeleteToken extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteTokenRuleset::class, 'getRules');
+        return DeleteTokenRuleset::class;
     }
 
     public static function models(): array

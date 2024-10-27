@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Tag\UpdateTagRuleset;
 
 class UpdateTag extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateTagRuleset::class, 'getRules');
+        return UpdateTagRuleset::class;
     }
 
     public static function models(): array

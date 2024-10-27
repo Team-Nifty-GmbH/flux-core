@@ -10,10 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateWorkTimeType extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateWorkTimeTypeRuleset::class, 'getRules');
+        return UpdateWorkTimeTypeRuleset::class;
     }
 
     public static function models(): array

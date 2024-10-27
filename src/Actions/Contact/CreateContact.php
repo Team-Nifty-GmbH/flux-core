@@ -15,10 +15,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateContact extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateContactRuleset::class, 'getRules');
+        return CreateContactRuleset::class;
     }
 
     public static function models(): array

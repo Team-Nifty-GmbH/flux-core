@@ -9,10 +9,9 @@ use Illuminate\Support\Str;
 
 class Upload extends BasePluginAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UploadPluginRuleset::class, 'getRules');
+        return UploadPluginRuleset::class;
     }
 
     public function performAction(): true

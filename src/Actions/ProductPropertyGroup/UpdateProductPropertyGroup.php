@@ -14,10 +14,9 @@ use Illuminate\Support\Arr;
 
 class UpdateProductPropertyGroup extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateProductPropertyGroupRuleset::class, 'getRules');
+        return UpdateProductPropertyGroupRuleset::class;
     }
 
     public static function models(): array

@@ -11,10 +11,9 @@ class DeleteMedia extends FluxAction
 {
     protected bool $force = false;
 
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteMediaRuleset::class, 'getRules');
+        return DeleteMediaRuleset::class;
     }
 
     public static function models(): array

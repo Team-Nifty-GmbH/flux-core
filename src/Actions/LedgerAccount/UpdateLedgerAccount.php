@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateLedgerAccount extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateLedgerAccountRuleset::class, 'getRules');
+        return UpdateLedgerAccountRuleset::class;
     }
 
     public static function models(): array

@@ -10,10 +10,9 @@ use Illuminate\Support\Arr;
 
 class CreateUser extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateUserRuleset::class, 'getRules');
+        return CreateUserRuleset::class;
     }
 
     public static function models(): array

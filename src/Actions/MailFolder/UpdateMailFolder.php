@@ -11,10 +11,9 @@ class UpdateMailFolder extends FluxAction
 {
     protected static bool $hasPermission = false;
 
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateMailFolderRuleset::class, 'getRules');
+        return UpdateMailFolderRuleset::class;
     }
 
     public static function models(): array

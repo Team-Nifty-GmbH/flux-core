@@ -9,10 +9,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateLanguage extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateLanguageRuleset::class, 'getRules');
+        return CreateLanguageRuleset::class;
     }
 
     public static function models(): array

@@ -12,10 +12,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class CreateComment extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateCommentRuleset::class, 'getRules');
+        return CreateCommentRuleset::class;
     }
 
     public static function models(): array

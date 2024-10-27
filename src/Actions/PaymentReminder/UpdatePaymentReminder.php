@@ -12,10 +12,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdatePaymentReminder extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdatePaymentReminderRuleset::class, 'getRules');
+        return UpdatePaymentReminderRuleset::class;
     }
 
     public static function name(): string

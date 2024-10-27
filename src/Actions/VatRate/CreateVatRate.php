@@ -8,10 +8,9 @@ use FluxErp\Rulesets\VatRate\CreateVatRateRuleset;
 
 class CreateVatRate extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateVatRateRuleset::class, 'getRules');
+        return CreateVatRateRuleset::class;
     }
 
     public static function models(): array

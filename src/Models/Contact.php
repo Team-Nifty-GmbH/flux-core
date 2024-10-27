@@ -171,6 +171,11 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return $this->belongsTo(VatRate::class);
     }
 
+    public function workTimes(): HasMany
+    {
+        return $this->hasMany(WorkTime::class);
+    }
+
     public function getAllDiscountsQuery(): Builder
     {
         $directDiscountsQuery = $this->discounts()

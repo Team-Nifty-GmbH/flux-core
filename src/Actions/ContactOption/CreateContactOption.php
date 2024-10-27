@@ -8,10 +8,9 @@ use FluxErp\Rulesets\ContactOption\CreateContactOptionRuleset;
 
 class CreateContactOption extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateContactOptionRuleset::class, 'getRules');
+        return CreateContactOptionRuleset::class;
     }
 
     public static function models(): array

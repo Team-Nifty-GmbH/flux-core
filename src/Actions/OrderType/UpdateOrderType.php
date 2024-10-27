@@ -10,10 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateOrderType extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateOrderTypeRuleset::class, 'getRules');
+        return UpdateOrderTypeRuleset::class;
     }
 
     public static function models(): array

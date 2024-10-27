@@ -9,10 +9,9 @@ use Illuminate\Support\Arr;
 
 class CreateDiscountGroup extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateDiscountGroupRuleset::class, 'getRules');
+        return CreateDiscountGroupRuleset::class;
     }
 
     public static function models(): array

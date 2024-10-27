@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Transaction\DeleteTransactionRuleset;
 
 class DeleteTransaction extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteTransactionRuleset::class, 'getRules');
+        return DeleteTransactionRuleset::class;
     }
 
     public static function models(): array

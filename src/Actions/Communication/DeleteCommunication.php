@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Communication\DeleteCommunicationRuleset;
 
 class DeleteCommunication extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteCommunicationRuleset::class, 'getRules');
+        return DeleteCommunicationRuleset::class;
     }
 
     public static function models(): array

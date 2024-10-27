@@ -12,10 +12,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreateEventSubscription extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateEventSubscriptionRuleset::class, 'getRules');
+        return CreateEventSubscriptionRuleset::class;
     }
 
     public static function models(): array
