@@ -206,10 +206,10 @@ abstract class FluxAction
     final public function validate(): static
     {
         $this->fireActionEvent(event: 'preparingForValidation');
+        $this->getRules();
         $this->prepareForValidation();
 
         if ($this->fireActionEvent(event: 'validating') !== false) {
-            $this->getRules();
             $this->validateData();
 
             $this->fireActionEvent(event: 'validated', halt: false);
