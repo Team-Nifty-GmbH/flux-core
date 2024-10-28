@@ -8,9 +8,9 @@ use Throwable;
 
 class Numeric implements ValidationRule
 {
-    private string|int|null $min;
+    private string|int|float|null $min;
 
-    private string|int|null $max;
+    private string|int|float|null $max;
 
     public function __construct(string|int|null $min = null, string|int|null $max = null)
     {
