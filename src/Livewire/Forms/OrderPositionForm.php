@@ -116,7 +116,7 @@ class OrderPositionForm extends Form
             $this->product_id = $product->id;
         }
 
-        $product = $product ?: resolve_static(Product::class, 'query')
+        $product ??= resolve_static(Product::class, 'query')
             ->whereKey($this->product_id)
             ->first();
 
@@ -128,8 +128,6 @@ class OrderPositionForm extends Form
         $this->unit_gram_weight = $product->weight_gram;
         $this->purchase_price = $product->purchasePrice($this->amount)?->price ?? 0;
 
-        $this->calculate();
-
         $this->warehouse_id ??= Warehouse::default()?->id;
     }
 
@@ -140,17 +138,5 @@ class OrderPositionForm extends Form
             : CreateOrderPosition::make($this->toArray());
 
         $action->validate();
-    }
-
-    public function calculate(): void
-    {
-        $this->vat_rate_percentage = resolve_static(VatRate::class, 'query')
-            ->whereKey($this->vat_rate_id)
-            ->value('rate_percentage');
-
-        PriceCalculation::fill($this, [
-            'vat_rate_percentage' => $this->vat_rate_percentage,
-            'discount_percentage' => $this->discount_percentage,
-        ]);
     }
 }

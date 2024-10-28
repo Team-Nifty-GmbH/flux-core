@@ -9,7 +9,6 @@ use FluxErp\Actions\Order\ToggleLock;
 use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
-use FluxErp\Actions\OrderPosition\FillOrderPositions;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Contracts\OffersPrinting;
@@ -60,8 +59,6 @@ class Order extends OrderPositionList
 
     protected string $view = 'flux::livewire.order.order';
 
-    protected ?string $selectValue = 'index';
-
     public OrderForm $order;
 
     public OrderReplicateForm $replicateOrder;
@@ -69,8 +66,6 @@ class Order extends OrderPositionList
     public OrderPositionForm $orderPosition;
 
     public ScheduleForm $schedule;
-
-    public ?int $orderPositionIndex = null;
 
     public array $availableStates = [];
 
@@ -172,7 +167,7 @@ class Order extends OrderPositionList
                 )
                 ->attributes([
                     'wire:click' => <<<'JS'
-                            editOrderPosition(index).then(() => $openModal('edit-order-position'));
+                            editOrderPosition(record.id);
                         JS,
                     'x-show' => '! record.is_bundle_position',
                     'x-cloak' => true,
@@ -436,7 +431,8 @@ class Order extends OrderPositionList
                     ? UpdateLockedOrder::make($this->order->toArray())
                     : UpdateOrder::make($this->order->toArray())
             )
-                ->checkPermission()->validate();
+                ->checkPermission()
+                ->validate();
 
             $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
@@ -445,25 +441,8 @@ class Order extends OrderPositionList
             return false;
         }
 
-        $order = $action->execute();
+        $action->execute();
         $this->notification()->success(__('Order saved successfully!'));
-
-        if ($this->initialized) {
-            try {
-                FillOrderPositions::make([
-                    'order_id' => $order->id,
-                    'order_positions' => array_filter($this->data, fn ($item) => ! $item['is_bundle_position']),
-                    'simulate' => false,
-                ])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
-
-                return false;
-            }
-        }
 
         return true;
     }
@@ -620,17 +599,6 @@ class Order extends OrderPositionList
     }
 
     #[Renderless]
-    public function deleteOrderPosition(): void
-    {
-        $selected = $this->selected;
-        $this->selected = [$this->orderPositionIndex];
-
-        $this->deleteSelectedOrderPositions();
-
-        $this->selected = $selected;
-    }
-
-    #[Renderless]
     public function recalculateOrderPositions(): void
     {
         $products = resolve_static(Product::class, 'query')
@@ -682,73 +650,28 @@ class Order extends OrderPositionList
     }
 
     #[Renderless]
-    public function editOrderPosition(?int $index = null): void
+    public function editOrderPosition(?OrderPosition $orderPosition = null): void
     {
-        if (! is_null($index)) {
-            $this->orderPositionIndex = $index;
-            $this->orderPosition->fill($this->data[$index]);
-        }
+        $this->orderPosition->fill($orderPosition);
 
-        $this->orderPosition->order_id = $this->order->id;
-        $this->orderPosition->client_id = $this->orderPosition->client_id ?: $this->order->client_id;
-        $this->orderPosition->price_list_id = $this->orderPosition->price_list_id ?: $this->order->price_list_id;
-        $this->orderPosition->contact_id = $this->orderPosition->contact_id ?: $this->order->contact_id;
-
-        if (is_null($index) && $this->orderPosition->product_id) {
-            $this->changedProductId();
-        }
+        $this->js(<<<JS
+            \$openModal('edit-order-position');
+        JS);
     }
 
     #[Renderless]
     public function addOrderPosition(): bool
     {
-        $this->orderPosition->calculate();
-
         try {
-            $this->orderPosition->validate();
+            $this->orderPosition->save();
         } catch (ValidationException $e) {
             exception_to_notifications($e, $this);
 
             return false;
         }
 
-        $this->orderPosition->alternative_tag = $this->orderPosition->is_alternative ? __('Alternative') : null;
-
-        if (is_null($this->orderPositionIndex)) {
-            if (! $this->orderPosition->slug_position ?? false) {
-                $slugPositions = array_column($this->data, 'slug_position');
-                $this->orderPosition->slug_position = (int) Str::before(array_pop($slugPositions), '.') + 1;
-            }
-            $this->data[] = $this->itemToArray($this->orderPosition);
-
-            // if product has bundle products, add them to the order
-            if ($this->orderPosition->product_id) {
-                app(Product::class)->addGlobalScope('bundleProducts', function (Builder $builder) {
-                    $builder->with('bundleProducts');
-                });
-                $product = resolve_static(Product::class, 'query')
-                    ->whereHas('bundleProducts')
-                    ->whereKey($this->orderPosition->product_id)
-                    ->first();
-                if ($product) {
-                    $this->addBundlePositions($product, $this->orderPosition->slug_position);
-                }
-            }
-
-        } else {
-            $this->data[$this->orderPositionIndex] = $this->itemToArray($this->orderPosition);
-        }
-
-        $this->order->total_net_price = bcadd(
-            $this->order->total_net_price,
-            data_get($this->orderPosition, 'total_net_price', 0)
-        );
-        $this->order->total_gross_price = bcadd(
-            $this->order->total_gross_price,
-            data_get($this->orderPosition, 'total_gross_price', 0)
-        );
-
         $this->recalculateOrderTotals();
+        $this->loadData();
         $this->orderPosition->reset();
 
         return true;
@@ -769,25 +692,15 @@ class Order extends OrderPositionList
     }
 
     #[Renderless]
-    public function changedProductId(?Product $product = null): void
-    {
-        $this->orderPosition->fillFormProduct($product);
-    }
-
-    #[Renderless]
     public function resetOrderPosition(): void
     {
-        $this->orderPositionIndex = null;
         $this->orderPosition->reset();
     }
 
     #[Renderless]
     public function quickAdd(): bool
     {
-        $productId = $this->orderPosition->product_id;
-        $this->editOrderPosition();
-        $this->orderPosition->product_id = $productId;
-        $this->changedProductId();
+        $this->orderPosition->fillFormProduct();
 
         return $this->addOrderPosition();
     }
@@ -795,26 +708,18 @@ class Order extends OrderPositionList
     #[Renderless]
     public function deleteSelectedOrderPositions(): void
     {
-        if (($wildcardIndex = array_search('*', $this->selected)) !== false) {
-            unset($this->selected[$wildcardIndex]);
+        try {
+            $this->getSelectedModelsQuery()->pluck('id')->each(function (int $id) {
+                DeleteOrderPosition::make(['id' => $id])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            });
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
         }
 
-        $slugPositions = [];
-        foreach ($this->selected as $index) {
-            $slugPositions[] = $this->data[$index]['slug_position'];
-            unset($this->data[$index]);
-        }
-
-        // remove all children
-        if ($slugPositions) {
-            foreach ($this->data as $index => $item) {
-                if (Str::startsWith($item['slug_position'] . '.', $slugPositions)) {
-                    unset($this->data[$index]);
-                }
-            }
-        }
-
-        $this->data = array_values($this->data);
+        $this->loadData();
         $this->recalculateOrderTotals();
 
         $this->reset('selected');
@@ -880,16 +785,12 @@ class Order extends OrderPositionList
     #[Renderless]
     public function createTasks(int $projectId): void
     {
-        // save the order first
-        $this->save();
-
-        foreach ($this->selected as $orderPositionIndex) {
+        foreach ($this->getSelectedModelsQuery()->get(['id', 'name', 'description']) as $orderPosition) {
             // check if the task already exists or the selected order position is not a numeric value
-            if (! is_numeric($orderPositionIndex)
-                || resolve_static(Task::class, 'query')
+            if (resolve_static(Task::class, 'query')
                     ->where('project_id', $projectId)
                     ->where('model_type', morph_alias(OrderPosition::class))
-                    ->where('model_id', data_get($this->data, $orderPositionIndex . '.id'))
+                    ->where('model_id', $orderPosition->getKey())
                     ->exists()
             ) {
                 continue;
@@ -899,9 +800,9 @@ class Order extends OrderPositionList
                 CreateTask::make([
                     'project_id' => $projectId,
                     'model_type' => morph_alias(OrderPosition::class),
-                    'model_id' => data_get($this->data, $orderPositionIndex . '.id'),
-                    'name' => data_get($this->data, $orderPositionIndex . '.name'),
-                    'description' => data_get($this->data, $orderPositionIndex . '.description'),
+                    'model_id' => $orderPosition->getKey(),
+                    'name' => $orderPosition->name,
+                    'description' => $orderPosition->description,
                 ])
                     ->checkPermission()
                     ->validate()
@@ -1009,32 +910,13 @@ class Order extends OrderPositionList
         $this->order->total_vats = [];
         $this->order->total_base_net_price = 0;
 
-        foreach ($this->data as $item) {
-            $vatRatePercentage = bcadd($item['vat_rate_percentage'], 0);
+        $order = resolve_static(OrderModel::class, 'query')
+            ->whereKey($this->order->id)
+            ->first('id');
 
-            // calculate total net price
-            $this->order->total_net_price = bcadd($this->order->total_net_price, $item['total_net_price'] ?? 0);
+        $order->calculatePrices()->save();
 
-            // calculate total gross price
-            $this->order->total_gross_price = bcadd(
-                $this->order->total_gross_price,
-                $item['total_gross_price'] ?? 0
-            );
-
-            // calculate total base net price
-            $this->order->total_base_net_price = bcadd(
-                $this->order->total_base_net_price,
-                $item['total_base_net_price'] ?? 0
-            );
-
-            // calculate sum of vats
-            $this->order->total_vats[$vatRatePercentage]['total_vat_price'] = bcadd(
-                $this->order->total_vats[$vatRatePercentage]['total_vat_price'] ?? 0,
-                $item['vat_price'] ?? 0
-            );
-            $this->order->total_vats[$vatRatePercentage]['vat_rate_percentage'] = $item['vat_rate_percentage'];
-        }
-
+        $this->order->fill($order->toArray());
         $this->isDirtyData = true;
     }
 
