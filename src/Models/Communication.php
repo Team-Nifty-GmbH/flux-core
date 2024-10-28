@@ -177,9 +177,9 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting
     public function autoAssign(string $type, array|string $matchAgainst): void
     {
         $matchAgainst = Arr::wrap($matchAgainst);
-        $typeColumn = match($type) {
-            'email' => 'email_primary',
-            default => 'phone',
+        $typeColumn = match ($type) {
+            'phone' => 'phone',
+            default => 'email_primary',
         };
 
         if ($matchAgainst) {
