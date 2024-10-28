@@ -53,7 +53,8 @@ class Commission extends FluxModel implements InteractsWithDataTables
                 $this->order->invoice_date
                     ->locale(
                         $this->user->contact?->country?->iso_alpha2
-                        ?? Country::default()?->iso_alpha2 ?? app()->getLocale()
+                        ?? Country::default()?->iso_alpha2
+                        ?? app()->getLocale()
                     )
                     ->isoFormat('L') . ')'
             : Number::percentage(
@@ -70,7 +71,7 @@ class Commission extends FluxModel implements InteractsWithDataTables
         return ($this->order_position_id ? $this->orderPosition?->name . ' ' : null) .
             Number::currency(
                 number: $this->total_net_price,
-                in: Currency::default()->iso,
+                in: Currency::default()?->iso ?? '',
                 locale: $this->user->contact?->country?->iso_alpha2
                     ?? Country::default()?->iso_alpha2
                     ?? app()->getLocale()

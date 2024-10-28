@@ -42,6 +42,18 @@ class CreateCommissionCreditNotes extends FluxAction
         $orderIds = [];
         foreach ($this->agents as $agentId => $agentData) {
             foreach (data_get($agentData, 'client_ids') as $clientId) {
+                $order = CreateOrder::make([
+                    'order_type_id' => resolve_static(OrderType::class, 'query')
+                        ->where('client_id', $clientId)
+                        ->where('order_type_enum', OrderTypeEnum::Refund)
+                        ->value('id'),
+                    'client_id' => $clientId,
+                    'contact_id' => data_get($agentData, 'contact_id'),
+                ])
+                    ->validate()
+                    ->execute();
+                $orderIds[] = $order->id;
+
                 $commissions = resolve_static(Commission::class, 'query')
                     ->where('user_id', $agentId)
                     ->whereIntegerInRaw('id', $this->data)
@@ -66,18 +78,6 @@ class CreateCommissionCreditNotes extends FluxAction
                         'user.contact.invoiceAddress.country:id,iso_alpha2',
                     ])
                     ->get();
-
-                $order = CreateOrder::make([
-                    'order_type_id' => resolve_static(OrderType::class, 'query')
-                        ->where('client_id', $clientId)
-                        ->where('order_type_enum', OrderTypeEnum::Refund)
-                        ->value('id'),
-                    'client_id' => $clientId,
-                    'contact_id' => data_get($agentData, 'contact_id'),
-                ])
-                    ->validate()
-                    ->execute();
-                $orderIds[] = $order->id;
 
                 foreach ($commissions as $commission) {
                     $orderPosition = CreateOrderPosition::make([
@@ -113,7 +113,7 @@ class CreateCommissionCreditNotes extends FluxAction
         $errors = [];
         $agents = resolve_static(User::class, 'query')
             ->whereHas('commissions', fn (Builder $query) => $query->whereIntegerInRaw('id', $this->data))
-            ->get(['id', 'name', 'email', 'contact_id']);
+            ->get(['id', 'name', 'contact_id']);
 
         $clientIds = [];
         foreach ($agents as $agent) {
@@ -132,7 +132,7 @@ class CreateCommissionCreditNotes extends FluxAction
 
             if (! $agent->contact) {
                 $errors += [
-                    'agent' => [__('No contact found for :agent', ['agent' => $agent->name])],
+                    'agent' => [__('No contact found for agent :agent', ['agent' => $agent->name])],
                 ];
             }
         }
@@ -148,19 +148,26 @@ class CreateCommissionCreditNotes extends FluxAction
                 ->value('id')
             ) {
                 $errors += [
-                    'order_type_id' => [__('No refund order type found for :client', ['client' => $client->name])],
+                    'order_type_id' => [__('No refund order type found for client :client', ['client' => $client->name])],
                 ];
             }
         }
 
-        if (! $this->vatRateId = VatRate::default()?->id) {
+        $this->vatRateId = $this->getData('vat_rate_id')
+            ? resolve_static(VatRate::class, 'query')
+                ->whereKey(data_get($this->data, 'vat_rate_id'))
+                ->value('id')
+            : VatRate::default()?->id;
+
+        if (! $this->vatRateId) {
             $errors += [
                 'vat_rate_id' => [__('No default VAT rate found')],
             ];
         }
 
         if ($errors) {
-            throw ValidationException::withMessages($errors)->errorBag('createCommissionCreditNote');
+            throw ValidationException::withMessages($errors)
+                ->errorBag('createCommissionCreditNote');
         }
     }
 }

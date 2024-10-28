@@ -14,17 +14,17 @@ class CreateCommissionCreditNotesJob implements ShouldBeMonitored, ShouldBeUniqu
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
-    public function __construct(public array $commissionIds) {}
+    public function __construct(public array $commissions) {}
 
     public function handle(): void
     {
-        CreateCommissionCreditNotes::make($this->commissionIds)
+        CreateCommissionCreditNotes::make($this->commissions)
             ->validate()
             ->execute();
     }
 
     public function uniqueId(): string
     {
-        return md5(serialize($this->commissionIds));
+        return md5(serialize($this->commissions));
     }
 }

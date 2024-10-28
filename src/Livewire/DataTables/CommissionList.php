@@ -54,7 +54,7 @@ class CommissionList extends BaseDataTable
             ->toArray();
 
         try {
-            CreateCommissionCreditNotes::make($selected)
+            CreateCommissionCreditNotes::make(['commissions' => $selected])
                 ->checkPermission()
                 ->validate();
         } catch (ValidationException|UnauthorizedException $e) {
@@ -64,7 +64,7 @@ class CommissionList extends BaseDataTable
         }
 
         $this->selected = [];
-        CreateCommissionCreditNotesJob::dispatch($selected);
+        CreateCommissionCreditNotesJob::dispatch(['commissions' => $selected]);
 
         return true;
     }
