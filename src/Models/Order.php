@@ -150,7 +150,10 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         });
 
         static::deleted(function (Order $order) {
-            $order->orderPositions()->delete();
+            foreach ($order->orderPositions()->get('id') as $orderPosition) {
+                $orderPosition->delete();
+            }
+
             $order->purchaseInvoice()->update(['order_id' => null]);
         });
     }
