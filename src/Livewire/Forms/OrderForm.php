@@ -168,13 +168,17 @@ class OrderForm extends FluxForm
             ]);
             $values = array_merge(
                 $values->toArray(),
+                $values->parent
+                    ? [
+                        'parent' => [
+                            'label' => $values->parent->getLabel(),
+                            'url' => $values->parent->getUrl(),
+                        ],
+                    ]
+                    : [],
                 [
-                    'parent' => [
-                        'label' => $values->parent->getLabel(),
-                        'url' => $values->parent->getUrl(),
-                    ],
                     'isPurchase' => $values->orderType->order_type_enum->isPurchase(),
-                ]
+                ],
             );
         }
 
