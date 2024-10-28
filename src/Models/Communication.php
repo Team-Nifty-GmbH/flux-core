@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Meilisearch\Endpoints\Indexes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\Tags\HasTags;
@@ -179,8 +180,13 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting
         $matchAgainst = Arr::wrap($matchAgainst);
         $typeColumn = match ($type) {
             'phone' => 'phone',
-            default => 'email_primary',
+            'email' => 'email_primary',
+            default => null,
         };
+
+        if (is_null($typeColumn)) {
+            throw new InvalidArgumentException('Invalid type: ' . $type);
+        }
 
         if ($matchAgainst) {
             $addresses = resolve_static(Address::class, 'query')
