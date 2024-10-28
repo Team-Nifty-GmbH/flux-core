@@ -7,6 +7,7 @@ use FluxErp\Casts\Percentage;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
+use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
 use FluxErp\States\Order\PaymentState\Open;
@@ -306,6 +307,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function responsibleUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
+    public function schedules(): BelongsToMany
+    {
+        return $this->belongsToMany(Schedule::class)->using(OrderSchedule::class);
     }
 
     public function tasks(): HasManyThrough

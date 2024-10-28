@@ -44,6 +44,8 @@ class ScheduleForm extends Form
 
     public ?string $end_radio = null;
 
+    public ?array $orders = null;
+
     public function save(): void
     {
         $data = $this->toArray();
