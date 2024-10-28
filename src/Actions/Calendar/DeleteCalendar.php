@@ -9,7 +9,7 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteCalendar extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteCalendarRuleset::class;
     }

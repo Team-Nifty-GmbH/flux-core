@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateLanguage extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateLanguageRuleset::class;
     }

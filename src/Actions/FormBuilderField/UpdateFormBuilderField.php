@@ -8,7 +8,7 @@ use FluxErp\Rulesets\FormBuilderField\UpdateFormBuilderFieldRuleset;
 
 class UpdateFormBuilderField extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateFormBuilderFieldRuleset::class;
     }

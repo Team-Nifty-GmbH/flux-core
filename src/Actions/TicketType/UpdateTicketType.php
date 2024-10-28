@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateTicketType extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateTicketTypeRuleset::class;
     }

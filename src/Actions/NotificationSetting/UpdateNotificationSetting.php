@@ -15,7 +15,11 @@ class UpdateNotificationSetting extends FluxAction
     {
         parent::boot($data);
         $this->setData(array_merge(['is_anonymous' => false], $this->data));
-        $this->rules = $this->data['is_anonymous'] ?
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return $this->getData('is_anonymous') ?
             resolve_static(UpdateNotificationSettingRuleset::class, 'getRules') :
             resolve_static(UpdateUserNotificationSettingRuleset::class, 'getRules');
     }

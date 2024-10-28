@@ -20,7 +20,7 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateAddress extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateAddressRuleset::class;
     }

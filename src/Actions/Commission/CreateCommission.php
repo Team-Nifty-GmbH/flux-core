@@ -10,7 +10,7 @@ use FluxErp\Rulesets\Commission\CreateCommissionRuleset;
 
 class CreateCommission extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateCommissionRuleset::class;
     }

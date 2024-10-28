@@ -8,7 +8,7 @@ use FluxErp\Rulesets\Transaction\CreateTransactionRuleset;
 
 class CreateTransaction extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateTransactionRuleset::class;
     }

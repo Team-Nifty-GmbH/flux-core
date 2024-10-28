@@ -8,7 +8,7 @@ use FluxErp\Rulesets\FormBuilderFieldResponse\DeleteFormBuilderFieldResponseRule
 
 class DeleteFormBuilderFieldResponse extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteFormBuilderFieldResponseRuleset::class;
     }

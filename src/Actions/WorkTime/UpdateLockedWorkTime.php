@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateLockedWorkTime extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateLockedWorkTimeRuleset::class;
     }

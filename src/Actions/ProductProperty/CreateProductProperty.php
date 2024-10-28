@@ -8,7 +8,7 @@ use FluxErp\Rulesets\ProductProperty\CreateProductPropertyRuleset;
 
 class CreateProductProperty extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateProductPropertyRuleset::class;
     }

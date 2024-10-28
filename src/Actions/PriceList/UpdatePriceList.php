@@ -14,7 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 class UpdatePriceList extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdatePriceListRuleset::class;
     }

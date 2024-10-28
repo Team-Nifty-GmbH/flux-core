@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateTask extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateTaskRuleset::class;
     }

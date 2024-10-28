@@ -14,7 +14,7 @@ use Illuminate\Support\Arr;
 
 class UpdateProductPropertyGroup extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateProductPropertyGroupRuleset::class;
     }

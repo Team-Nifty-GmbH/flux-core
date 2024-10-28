@@ -8,7 +8,7 @@ use FluxErp\Rulesets\BankConnection\CreateBankConnectionRuleset;
 
 class CreateBankConnection extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateBankConnectionRuleset::class;
     }

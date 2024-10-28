@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 
 class SyncCalendarEventInvites extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return SyncCalendarEventInvitesRuleset::class;
     }

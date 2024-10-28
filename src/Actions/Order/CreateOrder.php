@@ -21,7 +21,7 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrder extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateOrderRuleset::class;
     }

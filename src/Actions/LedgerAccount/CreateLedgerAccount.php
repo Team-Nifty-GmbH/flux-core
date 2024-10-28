@@ -8,7 +8,7 @@ use FluxErp\Rulesets\LedgerAccount\CreateLedgerAccountRuleset;
 
 class CreateLedgerAccount extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateLedgerAccountRuleset::class;
     }

@@ -10,7 +10,7 @@ class DeleteMailFolder extends FluxAction
 {
     protected static bool $hasPermission = false;
 
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteMailFolderRuleset::class;
     }

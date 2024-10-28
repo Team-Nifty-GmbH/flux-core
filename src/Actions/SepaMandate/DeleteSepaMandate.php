@@ -8,7 +8,7 @@ use FluxErp\Rulesets\SepaMandate\DeleteSepaMandateRuleset;
 
 class DeleteSepaMandate extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteSepaMandateRuleset::class;
     }

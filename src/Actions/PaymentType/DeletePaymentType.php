@@ -8,7 +8,7 @@ use FluxErp\Rulesets\PaymentType\DeletePaymentTypeRuleset;
 
 class DeletePaymentType extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeletePaymentTypeRuleset::class;
     }

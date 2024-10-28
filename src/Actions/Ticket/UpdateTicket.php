@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateTicket extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateTicketRuleset::class;
     }

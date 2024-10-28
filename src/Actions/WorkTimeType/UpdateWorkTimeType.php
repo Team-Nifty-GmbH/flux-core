@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateWorkTimeType extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateWorkTimeTypeRuleset::class;
     }

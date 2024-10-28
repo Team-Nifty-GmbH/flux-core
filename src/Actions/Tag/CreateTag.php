@@ -8,7 +8,7 @@ use FluxErp\Rulesets\Tag\CreateTagRuleset;
 
 class CreateTag extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateTagRuleset::class;
     }

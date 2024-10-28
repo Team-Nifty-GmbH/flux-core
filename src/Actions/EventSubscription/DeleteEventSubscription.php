@@ -8,7 +8,7 @@ use FluxErp\Rulesets\EventSubscription\DeleteEventSubscriptionRuleset;
 
 class DeleteEventSubscription extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteEventSubscriptionRuleset::class;
     }

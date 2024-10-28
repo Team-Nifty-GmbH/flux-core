@@ -8,7 +8,7 @@ use FluxErp\Rulesets\CountryRegion\DeleteCountryRegionRuleset;
 
 class DeleteCountryRegion extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteCountryRegionRuleset::class;
     }

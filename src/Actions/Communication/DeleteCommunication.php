@@ -8,7 +8,7 @@ use FluxErp\Rulesets\Communication\DeleteCommunicationRuleset;
 
 class DeleteCommunication extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteCommunicationRuleset::class;
     }

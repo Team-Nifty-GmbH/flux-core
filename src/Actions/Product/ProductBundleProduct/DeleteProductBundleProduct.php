@@ -8,7 +8,7 @@ use FluxErp\Rulesets\Product\ProductBundleProduct\DeleteProductBundleProductRule
 
 class DeleteProductBundleProduct extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteProductBundleProductRuleset::class;
     }

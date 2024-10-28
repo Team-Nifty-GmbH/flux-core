@@ -8,7 +8,7 @@ use FluxErp\Rulesets\PaymentRun\DeletePaymentRunRuleset;
 
 class DeletePaymentRun extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeletePaymentRunRuleset::class;
     }

@@ -11,7 +11,7 @@ use Illuminate\Support\Arr;
 
 class UpdateCalendarEvent extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateCalendarEventRuleset::class;
     }

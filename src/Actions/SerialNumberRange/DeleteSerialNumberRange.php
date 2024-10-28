@@ -8,7 +8,7 @@ use FluxErp\Rulesets\SerialNumberRange\DeleteSerialNumberRangeRuleset;
 
 class DeleteSerialNumberRange extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteSerialNumberRangeRuleset::class;
     }

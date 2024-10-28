@@ -25,9 +25,15 @@ class CreateOrdersFromWorkTimesRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => OrderType::class]),
             ],
-            'round_to_minute' => 'required_if:round,ceil|required_if:round,floor|nullable|integer',
-            'add_non_billable_work_times' => 'boolean',
             'round' => 'in:floor,ceil,round',
+            'round_to_minute' => [
+                'required_if:round,ceil',
+                'required_if:round,floor',
+                'nullable',
+                'integer',
+                'min:1',
+            ],
+            'add_non_billable_work_times' => 'boolean',
             'work_times' => 'required|array',
             'work_times.*.id' => [
                 'required',

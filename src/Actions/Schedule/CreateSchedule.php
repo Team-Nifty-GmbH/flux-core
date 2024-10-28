@@ -9,7 +9,7 @@ use FluxErp\Rulesets\Schedule\CreateScheduleRuleset;
 
 class CreateSchedule extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateScheduleRuleset::class;
     }

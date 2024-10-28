@@ -8,7 +8,7 @@ use FluxErp\Rulesets\Ticket\ToggleTicketUserRuleset;
 
 class ToggleTicketUser extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return ToggleTicketUserRuleset::class;
     }

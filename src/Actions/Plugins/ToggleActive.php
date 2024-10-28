@@ -6,7 +6,7 @@ use FluxErp\Rulesets\Plugin\TogglePluginRuleset;
 
 class ToggleActive extends BasePluginAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return TogglePluginRuleset::class;
     }

@@ -8,7 +8,7 @@ use FluxErp\Rulesets\Setting\CreateSettingRuleset;
 
 class CreateSetting extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateSettingRuleset::class;
     }

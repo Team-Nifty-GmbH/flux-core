@@ -8,7 +8,7 @@ use Spatie\TranslationLoader\LanguageLine;
 
 class CreateTranslation extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateTranslationRuleset::class;
     }

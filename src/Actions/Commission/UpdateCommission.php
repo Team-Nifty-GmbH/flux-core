@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateCommission extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateCommissionRuleset::class;
     }

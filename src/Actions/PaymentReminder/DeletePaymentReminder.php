@@ -8,7 +8,7 @@ use FluxErp\Rulesets\PaymentReminder\DeletePaymentReminderRuleset;
 
 class DeletePaymentReminder extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeletePaymentReminderRuleset::class;
     }

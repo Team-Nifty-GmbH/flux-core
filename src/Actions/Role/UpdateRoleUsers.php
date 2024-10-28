@@ -13,12 +13,16 @@ class UpdateRoleUsers extends FluxAction
     {
         parent::boot($data);
         $this->setData($this->data ? array_merge(['assign' => true], $this->data) : []);
-        $this->rules = resolve_static(UpdateRoleUsersRuleset::class, 'getRules');
     }
 
     public static function name(): string
     {
         return 'role.update-users';
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateRoleUsersRuleset::class;
     }
 
     public static function models(): array

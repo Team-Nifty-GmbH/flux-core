@@ -12,12 +12,13 @@ use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
 use FluxErp\Models\WorkTime;
 use FluxErp\Rulesets\WorkTime\CreateOrdersFromWorkTimesRuleset;
+use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
 use Illuminate\Validation\ValidationException;
 
 class CreateOrdersFromWorkTimes extends DispatchableFluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateOrdersFromWorkTimesRuleset::class;
     }
@@ -69,17 +70,15 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                 ->execute();
             $createdOrderIds[] = $order->getKey();
 
-            $smallestStartedAt = null;
-            $greatestEndedAt = null;
+            $earliestStartedAt = null;
+            $latestEndedAt = null;
             foreach ($contact->workTimes as $workTime) {
-                if ($this->getData('round') == 'ceil') {
-                    $time = bcmul(bcceil(bcdiv($workTime->total_time_ms, $roundMs)), $roundMs);
-                } elseif ($this->getData('round') == 'floor') {
-                    $time = bcmul(bcfloor(bcdiv($workTime->total_time_ms, $roundMs)), $roundMs);
-                } else {
-                    $time = bcmul(bcround(bcdiv($workTime->total_time_ms, 60000)), 60000);
-                }
-
+                $time = Rounding::nearest(
+                    number: (int) $roundMs,
+                    value: $workTime->total_time_ms,
+                    precision: 0,
+                    mode: $this->getData('round') ?? 1
+                );
                 $billingAmount = bcround($product->time_unit_enum->convertFromMilliseconds($time), 2);
 
                 try {
@@ -105,7 +104,9 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                         'product_id' => $product->getKey(),
                         'amount' => $billingAmount,
                         'discount_percentage' => ! $workTime->is_billable ? 1 : null,
-                    ])->validate()->execute();
+                    ])
+                        ->validate()
+                        ->execute();
                 } catch (ValidationException) {
                     continue;
                 }
@@ -114,28 +115,30 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                     UpdateLockedWorkTime::make([
                         'id' => $workTime->getKey(),
                         'order_position_id' => $orderPosition->getKey(),
-                    ])->validate()->execute();
+                    ])
+                        ->validate()
+                        ->execute();
                 } catch (ValidationException) {
                     continue;
                 }
 
                 // Check and update the smallest started_at
-                if (is_null($smallestStartedAt) || $workTime->started_at->lt($smallestStartedAt)) {
-                    $smallestStartedAt = $workTime->started_at->startOfDay();
+                if (is_null($earliestStartedAt) || $workTime->started_at->lt($earliestStartedAt)) {
+                    $earliestStartedAt = $workTime->started_at->startOfDay();
                 }
 
                 // Check and update the greatest ended_at
-                if (is_null($greatestEndedAt) || $workTime->ended_at->gt($greatestEndedAt)) {
-                    $greatestEndedAt = $workTime->ended_at->startOfDay();
+                if (is_null($latestEndedAt) || $workTime->ended_at->gt($latestEndedAt)) {
+                    $latestEndedAt = $workTime->ended_at->startOfDay();
                 }
             }
 
-            if ($smallestStartedAt->lt($greatestEndedAt)) {
+            if ($earliestStartedAt->lt($latestEndedAt)) {
                 try {
                     UpdateOrder::make([
                         'id' => $order->getKey(),
-                        'system_delivery_date' => $smallestStartedAt,
-                        'system_delivery_date_end' => ($greatestEndedAt ?? now())->format('Y-m-d'),
+                        'system_delivery_date' => $earliestStartedAt,
+                        'system_delivery_date_end' => ($latestEndedAt ?? now())->format('Y-m-d'),
                     ])->validate()->execute();
                 } catch (ValidationException) {
                     continue;

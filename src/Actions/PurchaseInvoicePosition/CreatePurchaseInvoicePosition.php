@@ -8,7 +8,7 @@ use FluxErp\Rulesets\PurchaseInvoicePosition\CreatePurchaseInvoicePositionRulese
 
 class CreatePurchaseInvoicePosition extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreatePurchaseInvoicePositionRuleset::class;
     }

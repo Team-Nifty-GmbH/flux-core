@@ -6,7 +6,7 @@ use FluxErp\Rulesets\Plugin\UpdatePluginRuleset;
 
 class Update extends BasePluginAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdatePluginRuleset::class;
     }

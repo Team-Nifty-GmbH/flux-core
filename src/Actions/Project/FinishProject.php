@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinishProject extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return FinishProjectRuleset::class;
     }

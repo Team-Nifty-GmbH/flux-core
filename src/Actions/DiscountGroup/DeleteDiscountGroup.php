@@ -8,7 +8,7 @@ use FluxErp\Rulesets\DiscountGroup\DeleteDiscountGroupRuleset;
 
 class DeleteDiscountGroup extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteDiscountGroupRuleset::class;
     }

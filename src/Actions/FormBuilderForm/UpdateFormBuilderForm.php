@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class UpdateFormBuilderForm extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateFormBuilderFormRuleset::class;
     }

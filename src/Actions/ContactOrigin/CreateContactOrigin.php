@@ -8,7 +8,7 @@ use FluxErp\Rulesets\ContactOrigin\CreateContactOriginRuleset;
 
 class CreateContactOrigin extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateContactOriginRuleset::class;
     }

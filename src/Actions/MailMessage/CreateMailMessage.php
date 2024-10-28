@@ -15,7 +15,7 @@ use Meilisearch\Endpoints\Indexes;
 
 class CreateMailMessage extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateCommunicationRuleset::class;
     }

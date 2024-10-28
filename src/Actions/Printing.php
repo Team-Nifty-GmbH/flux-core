@@ -18,12 +18,16 @@ class Printing extends FluxAction
     public function boot($data): void
     {
         parent::boot($data);
-        $this->rules = resolve_static(PrintingRuleset::class, 'getRules');
 
         $this->validate();
         $this->model = morphed_model($this->data['model_type'])::query()
             ->whereKey($this->data['model_id'])
             ->first();
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return PrintingRuleset::class;
     }
 
     public static function models(): array

@@ -8,7 +8,7 @@ use FluxErp\Rulesets\Ticket\DeleteTicketRuleset;
 
 class DeleteTicket extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteTicketRuleset::class;
     }

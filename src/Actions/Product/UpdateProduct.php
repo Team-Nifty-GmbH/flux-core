@@ -20,7 +20,7 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateProduct extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateProductRuleset::class;
     }

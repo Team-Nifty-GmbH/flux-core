@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateSchedule extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateScheduleRuleset::class;
     }

@@ -8,7 +8,7 @@ use FluxErp\Rulesets\ContactBankConnection\DeleteContactBankConnectionRuleset;
 
 class DeleteContactBankConnection extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteContactBankConnectionRuleset::class;
     }

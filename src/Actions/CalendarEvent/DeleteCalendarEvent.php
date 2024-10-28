@@ -8,7 +8,7 @@ use FluxErp\Rulesets\CalendarEvent\DeleteCalendarEventRuleset;
 
 class DeleteCalendarEvent extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteCalendarEventRuleset::class;
     }

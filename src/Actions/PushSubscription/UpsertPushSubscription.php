@@ -8,7 +8,7 @@ use NotificationChannels\WebPush\PushSubscription;
 
 class UpsertPushSubscription extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpsertPushSubscriptionRuleset::class;
     }

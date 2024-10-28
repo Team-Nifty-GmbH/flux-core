@@ -8,7 +8,7 @@ use FluxErp\Rulesets\Order\ToggleLockRuleset;
 
 class ToggleLock extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return ToggleLockRuleset::class;
     }

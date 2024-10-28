@@ -8,7 +8,7 @@ use FluxErp\Rulesets\Price\CreatePriceRuleset;
 
 class CreatePrice extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreatePriceRuleset::class;
     }

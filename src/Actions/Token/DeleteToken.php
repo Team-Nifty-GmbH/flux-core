@@ -8,7 +8,7 @@ use FluxErp\Rulesets\Token\DeleteTokenRuleset;
 
 class DeleteToken extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteTokenRuleset::class;
     }

@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateAddress extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateAddressRuleset::class;
     }

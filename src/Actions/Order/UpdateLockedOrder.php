@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 
 class UpdateLockedOrder extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateLockedOrderRuleset::class;
     }

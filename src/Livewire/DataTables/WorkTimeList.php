@@ -102,8 +102,10 @@ class WorkTimeList extends BaseDataTable
     {
         try {
             CreateOrdersFromWorkTimes::make(
-                $this->createOrdersFromWorkTimes->toArray() +
-                ['work_times' => $this->getSelectedModelsQuery()->get('id')->toArray()]
+                array_merge(
+                    $this->createOrdersFromWorkTimes->toArray(),
+                    ['work_times' => $this->getSelectedModelsQuery()->get('id')->toArray()]
+                )
             )
                 ->checkPermission()
                 ->validate()

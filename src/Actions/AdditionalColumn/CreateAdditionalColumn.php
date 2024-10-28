@@ -8,7 +8,7 @@ use FluxErp\Rulesets\AdditionalColumn\CreateAdditionalColumnRuleset;
 
 class CreateAdditionalColumn extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateAdditionalColumnRuleset::class;
     }

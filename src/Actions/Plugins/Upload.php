@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class Upload extends BasePluginAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UploadPluginRuleset::class;
     }

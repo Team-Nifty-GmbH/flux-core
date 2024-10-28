@@ -11,7 +11,7 @@ class UpdateMailFolder extends FluxAction
 {
     protected static bool $hasPermission = false;
 
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return UpdateMailFolderRuleset::class;
     }

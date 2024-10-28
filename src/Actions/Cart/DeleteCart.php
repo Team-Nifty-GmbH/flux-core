@@ -8,7 +8,7 @@ use FluxErp\Rulesets\Cart\DeleteCartRuleset;
 
 class DeleteCart extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return DeleteCartRuleset::class;
     }

@@ -12,7 +12,7 @@ use FluxErp\Rulesets\CartItem\CreateCartItemRuleset;
 
 class CreateCartItem extends FluxAction
 {
-    public static function getRulesets(): string|array
+    protected function getRulesets(): string|array
     {
         return CreateCartItemRuleset::class;
     }
