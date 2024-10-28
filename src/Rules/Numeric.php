@@ -12,7 +12,7 @@ class Numeric implements ValidationRule
 
     private string|int|float|null $max;
 
-    public function __construct(string|int|null $min = null, string|int|null $max = null)
+    public function __construct(string|int|float|null $min = null, string|int|float|null $max = null)
     {
         $this->min = $min;
         $this->max = $max;

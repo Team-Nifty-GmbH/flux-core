@@ -8,7 +8,6 @@ use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Models\Order;
-use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 
 class OrderForm extends FluxForm
@@ -161,22 +160,27 @@ class OrderForm extends FluxForm
 
     public function fill($values): void
     {
-        if ($values instanceof Model) {
-            $values->loadMissing('parent');
-            $this->isPurchase = $values->orderType->order_type_enum->isPurchase();
+        if ($values instanceof Order) {
+            $values->loadMissing([
+                'parent',
+                'orderType:id,order_type_enum',
+                'contact:id,has_delivery_lock',
+            ]);
+            $values = array_merge(
+                $values->toArray(),
+                [
+                    'parent' => [
+                        'label' => $values->parent->getLabel(),
+                        'url' => $values->parent->getUrl(),
+                    ],
+                    'isPurchase' => $values->orderType->order_type_enum->isPurchase(),
+                ]
+            );
         }
 
         parent::fill($values);
 
-        if ($values instanceof Order) {
-            $this->hasContactDeliveryLock = $values->contact->has_delivery_lock;
-            $this->parent = $this->parent
-                ? [
-                    'label' => $values->parent->getLabel(),
-                    'url' => $values->parent->getUrl(),
-                ]
-                : null;
-        }
+        $this->hasContactDeliveryLock = data_get($values, 'contact.has_delivery_lock', false);
     }
 
     public function save(): void
