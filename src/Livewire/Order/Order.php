@@ -823,7 +823,7 @@ class Order extends OrderPositionList
     public function fillSchedule(): void
     {
         $schedule = resolve_static(Schedule::class, 'query')
-            ->whereHas('orders', fn (Builder $query) => $query->where('id', $this->order->id))
+            ->whereRelation('orders', 'id', $this->order->id)
             ->where('class', ProcessSubscriptionOrder::class)
             ->first();
 

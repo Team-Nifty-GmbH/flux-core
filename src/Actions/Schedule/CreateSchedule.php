@@ -34,8 +34,8 @@ class CreateSchedule extends FluxAction
         $schedule = app(Schedule::class, ['attributes' => $this->data]);
         $schedule->save();
 
-        if (! is_null($orders)) {
-            $schedule->orders()->sync($orders);
+        if ($orders) {
+            $schedule->orders()->attach($orders);
         }
 
         return $schedule->fresh();

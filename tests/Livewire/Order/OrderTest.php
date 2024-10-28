@@ -131,7 +131,7 @@ class OrderTest extends BaseSetup
         ]);
         $this->order->update(['order_type_id' => $orderType->id]);
 
-        $scheduleId = Livewire::test(OrderView::class, ['id' => $this->order->id])
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
             ->set([
                 'schedule.parameters.orderTypeId' => $this->orderType->id,
                 'schedule.parameters.orderId' => $this->order->id,

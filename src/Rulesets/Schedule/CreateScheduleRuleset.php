@@ -58,7 +58,7 @@ class CreateScheduleRuleset extends FluxRuleset
             'recurrences' => 'exclude_unless:ends_at,null|nullable|integer|min:1',
             'is_active' => 'boolean',
 
-            'orders' => 'array',
+            'orders' => 'array|nullable',
             'orders.*' => [
                 'required',
                 'integer',

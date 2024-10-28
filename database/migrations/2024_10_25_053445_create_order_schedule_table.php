@@ -30,7 +30,7 @@ return new class() extends Migration
             ->whereJsonContainsKey('parameters->orderId')
             ->whereJsonContainsKey('parameters->orderTypeId')
             ->where('class', ProcessSubscriptionOrder::class)
-            ->get();
+            ->get(['id', 'parameters']);
 
         foreach ($orderSchedules as $orderSchedule) {
             $orderId = data_get(json_decode($orderSchedule->parameters, true), 'orderId');

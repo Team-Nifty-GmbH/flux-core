@@ -52,7 +52,7 @@ class UpdateSchedule extends FluxAction
         $schedule->save();
 
         if (! is_null($orders)) {
-            $schedule->orders()->attach($orders);
+            $schedule->orders()->sync($orders);
         }
 
         return $schedule->withoutRelations()->fresh();
