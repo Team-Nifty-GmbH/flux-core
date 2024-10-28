@@ -3,6 +3,7 @@
 namespace FluxErp\Tests\Livewire\Order;
 
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Order\Order as OrderView;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -25,6 +26,8 @@ class OrderTest extends BaseSetup
 
     private Order $order;
 
+    private OrderType $orderType;
+
     public function setUp(): void
     {
         parent::setUp();
@@ -44,7 +47,7 @@ class OrderTest extends BaseSetup
 
         $language = Language::factory()->create();
 
-        $orderType = OrderType::factory()->create([
+        $this->orderType = OrderType::factory()->create([
             'client_id' => $this->dbClient->id,
             'order_type_enum' => OrderTypeEnum::Order,
             'print_layouts' => ['invoice'],
@@ -69,7 +72,7 @@ class OrderTest extends BaseSetup
             ->create([
                 'client_id' => $this->dbClient->id,
                 'language_id' => $language->id,
-                'order_type_id' => $orderType->id,
+                'order_type_id' => $this->orderType->id,
                 'payment_type_id' => $paymentType->id,
                 'price_list_id' => $priceList->id,
                 'currency_id' => $currency->id,
@@ -135,6 +138,45 @@ class OrderTest extends BaseSetup
             ->assertNoRedirect()
             ->assertHasErrors(['is_locked'])
             ->assertWireuiNotification(icon: 'error');
+    }
+
+    public function test_add_schedule_to_order()
+    {
+        $orderType = OrderType::factory()->create([
+            'client_id' => $this->dbClient->id,
+            'order_type_enum' => OrderTypeEnum::Subscription,
+        ]);
+        $this->order->update(['order_type_id' => $orderType->id]);
+
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->set([
+                'schedule.parameters.orderTypeId' => $this->orderType->id,
+                'schedule.parameters.orderId' => $this->order->id,
+                'schedule.cron.methods.basic' => 'monthlyOn',
+                'schedule.cron.parameters.basic' => ['1', '00:00', null],
+            ])
+            ->assertSet('schedule.id', null)
+            ->assertSet('order.schedule_id', null)
+            ->call('saveSchedule')
+            ->assertReturned(true)
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertNotSet('schedule.id', null);
+
+        $this->assertDatabaseHas(
+            'schedules',
+            [
+                'class' => ProcessSubscriptionOrder::class,
+                'type' => 'invokable',
+                'parameters->orderId' => $this->order->id,
+                'parameters->orderTypeId' => $this->orderType->id,
+                'cron_expression' => null,
+                'due_at' => null,
+                'last_success' => null,
+                'last_run' => null,
+                'is_active' => 1,
+            ]
+        );
     }
 
     public function test_create_invoice()

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\User;
 
+use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
@@ -21,6 +22,11 @@ class UpdateUserRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => User::class]),
+            ],
+            'contact_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Contact::class]),
             ],
             'language_id' => [
                 'integer',

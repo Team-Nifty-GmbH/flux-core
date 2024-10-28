@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -103,6 +104,18 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     public function contactOrigin(): BelongsTo
     {
         return $this->belongsTo(ContactOrigin::class);
+    }
+
+    public function country(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Country::class,
+            Address::class,
+            'id',
+            'id',
+            'main_address_id',
+            'country_id'
+        );
     }
 
     public function currency(): BelongsTo
