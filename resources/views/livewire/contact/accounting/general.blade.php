@@ -77,6 +77,11 @@
     </x-card>
     <x-card>
         <div class="flex flex-col gap-1.5">
+            <x-toggle
+                x-bind:disabled="! $wire.$parent.$parent.edit"
+                wire:model="contact.has_delivery_lock"
+                :label="__('Has Delivery Lock')"
+            />
             <x-inputs.number
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 wire:model="contact.credit_line"
