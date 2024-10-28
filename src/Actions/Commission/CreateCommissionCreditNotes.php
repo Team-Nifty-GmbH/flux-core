@@ -148,16 +148,14 @@ class CreateCommissionCreditNotes extends FluxAction
                 ->value('id')
             ) {
                 $errors += [
-                    'order_type_id' => [__('No refund order type found for client :client', ['client' => $client->name])],
+                    'order_type_id' => [
+                        __('No refund order type found for client :client', ['client' => $client->name]),
+                    ],
                 ];
             }
         }
 
-        $this->vatRateId = $this->getData('vat_rate_id')
-            ? resolve_static(VatRate::class, 'query')
-                ->whereKey(data_get($this->data, 'vat_rate_id'))
-                ->value('id')
-            : VatRate::default()?->id;
+        $this->vatRateId = $this->getData('vat_rate_id') ?? VatRate::default()?->id;
 
         if (! $this->vatRateId) {
             $errors += [
