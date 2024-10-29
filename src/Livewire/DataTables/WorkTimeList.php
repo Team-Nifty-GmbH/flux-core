@@ -13,7 +13,6 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Traits\Trackable;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -110,7 +109,7 @@ class WorkTimeList extends BaseDataTable
                 ->checkPermission()
                 ->validate()
                 ->executeAsync();
-        } catch (ModelNotFoundException|ValidationException|UnauthorizedException $e) {
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return;

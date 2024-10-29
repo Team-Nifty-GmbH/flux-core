@@ -35,7 +35,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
             ->whereKey($this->getData('product_id'))
             ->first();
 
-        $roundMs = bcmul($this->getData('round_to_minute'), 60 * 1000);
+        $roundMs = bcmul($this->getData('round_to_minute') ?? 1, 60 * 1000);
 
         $selectedIds = array_column($this->getData('work_times'), 'id');
 
@@ -77,7 +77,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                     number: (int) $roundMs,
                     value: $workTime->total_time_ms,
                     precision: 0,
-                    mode: $this->getData('round') ?? 1
+                    mode: $this->getData('round')
                 );
                 $billingAmount = bcround($product->time_unit_enum->convertFromMilliseconds($time), 2);
 
@@ -122,24 +122,26 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                     continue;
                 }
 
-                // Check and update the smallest started_at
+                // Check and update the earliest started_at
                 if (is_null($earliestStartedAt) || $workTime->started_at->lt($earliestStartedAt)) {
                     $earliestStartedAt = $workTime->started_at->startOfDay();
                 }
 
-                // Check and update the greatest ended_at
+                // Check and update the latest ended_at
                 if (is_null($latestEndedAt) || $workTime->ended_at->gt($latestEndedAt)) {
                     $latestEndedAt = $workTime->ended_at->startOfDay();
                 }
             }
 
-            if ($earliestStartedAt->lt($latestEndedAt)) {
+            if ($earliestStartedAt->lte($latestEndedAt)) {
                 try {
                     UpdateOrder::make([
                         'id' => $order->getKey(),
                         'system_delivery_date' => $earliestStartedAt,
                         'system_delivery_date_end' => ($latestEndedAt ?? now())->format('Y-m-d'),
-                    ])->validate()->execute();
+                    ])
+                        ->validate()
+                        ->execute();
                 } catch (ValidationException) {
                     continue;
                 }

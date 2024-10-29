@@ -20,8 +20,8 @@ class UpdateNotificationSetting extends FluxAction
     protected function getRulesets(): string|array
     {
         return $this->getData('is_anonymous') ?
-            resolve_static(UpdateNotificationSettingRuleset::class, 'getRules') :
-            resolve_static(UpdateUserNotificationSettingRuleset::class, 'getRules');
+            UpdateNotificationSettingRuleset::class :
+            UpdateUserNotificationSettingRuleset::class;
     }
 
     public static function models(): array

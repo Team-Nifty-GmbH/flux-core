@@ -19,14 +19,14 @@ class UpdateUserPermissions extends FluxAction
         return 'user.update-permissions';
     }
 
-    protected function getRulesets(): string|array
-    {
-        return UpdateUserPermissionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [User::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateUserPermissionRuleset::class;
     }
 
     public function performAction(): array

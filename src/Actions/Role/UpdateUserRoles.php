@@ -20,14 +20,14 @@ class UpdateUserRoles extends FluxAction
         return 'user.update-roles';
     }
 
-    protected function getRulesets(): string|array
-    {
-        return UpdateUserRolesRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Role::class, User::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateUserRolesRuleset::class;
     }
 
     public function performAction(): array

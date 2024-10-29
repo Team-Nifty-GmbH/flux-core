@@ -71,14 +71,6 @@ abstract class FluxAction
         $this->setData($data, $this->keepEmptyStrings ?? false);
     }
 
-    /**
-     * @return class-string<FluxRuleset>|array<int, class-string<FluxRuleset>>
-     */
-    protected function getRulesets(): string|array
-    {
-        return [];
-    }
-
     public static function canPerformAction(bool $throwException = true): bool
     {
         try {
@@ -153,6 +145,14 @@ abstract class FluxAction
         return $key ? data_get($this->data, $key) : $this->data;
     }
 
+    /**
+     * @return class-string<FluxRuleset>|array<int, class-string<FluxRuleset>>
+     */
+    protected function getRulesets(): string|array
+    {
+        return [];
+    }
+
     public function setRules(array $rules): static
     {
         $this->rules = $rules;
@@ -201,7 +201,10 @@ abstract class FluxAction
 
     final public function validate(): static
     {
-        $this->setRulesFromRulesets();
+        if (! $this->rules) {
+            $this->setRulesFromRulesets();
+        }
+
         $this->fireActionEvent(event: 'preparingForValidation');
         $this->prepareForValidation();
 
@@ -216,10 +219,8 @@ abstract class FluxAction
 
     protected function setRulesFromRulesets(): void
     {
-        if (! $this->rules) {
-            foreach (Arr::wrap($this->getRulesets()) as $ruleset) {
-                $this->mergeRules(resolve_static($ruleset, 'getRules'));
-            }
+        foreach (Arr::wrap($this->getRulesets()) as $ruleset) {
+            $this->mergeRules(resolve_static($ruleset, 'getRules'));
         }
     }
 

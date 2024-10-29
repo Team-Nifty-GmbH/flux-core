@@ -19,14 +19,14 @@ class UpdateRolePermissions extends FluxAction
         return 'role.update-permissions';
     }
 
-    protected function getRulesets(): string|array
-    {
-        return UpdateRolePermissionsRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Role::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateRolePermissionsRuleset::class;
     }
 
     public function performAction(): array
