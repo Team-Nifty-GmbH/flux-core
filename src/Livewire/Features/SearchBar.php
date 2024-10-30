@@ -37,8 +37,11 @@ class SearchBar extends Component
     {
         if ($this->searchModel === '') {
             $this->searchModel = model_info_all()
-                ->filter(fn ($model) => in_array(Searchable::class, $model->traits->toArray()))
-                ->map(fn ($model) => $model->class)
+                ->filter(fn ($modelInfo) => in_array(
+                    Searchable::class,
+                    class_uses_recursive($modelInfo->class)
+                ))
+                ->map(fn ($modelInfo) => $modelInfo->class)
                 ->toArray();
         }
 
