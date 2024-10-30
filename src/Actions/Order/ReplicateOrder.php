@@ -71,7 +71,8 @@ class ReplicateOrder extends FluxAction
         if (! $getOrderPositionsFromOrigin) {
             $replicateOrderPositions = collect($this->data['order_positions']);
             $orderPositions = resolve_static(OrderPosition::class, 'query')
-                ->whereIntegerInRaw('id', array_column($this->data['order_positions'], 'id'))
+                ->whereKey(array_column($this->data['order_positions'], 'id'))
+                ->where('is_bundle_position', false)
                 ->get()
                 ->map(function (OrderPosition $orderPosition) use ($replicateOrderPositions) {
                     $position = $replicateOrderPositions->first(fn ($item) => $item['id'] === $orderPosition->id);

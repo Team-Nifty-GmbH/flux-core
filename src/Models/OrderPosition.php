@@ -33,7 +33,10 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortable
 {
     use Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
-        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, LogsActivity, SoftDeletes, SortableTrait;
+        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, LogsActivity, SoftDeletes,
+        SortableTrait {
+            SortableTrait::setHighestOrderNumber as protected parentSetHighestOrderNumber;
+        }
 
     protected $appends = [
         'unit_price',
@@ -53,6 +56,14 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         static::addGlobalScope('withChildren', function ($builder) {
             $builder->with('children');
         });
+    }
+
+    public function setHighestOrderNumber(): void
+    {
+        $this->parentSetHighestOrderNumber();
+
+        $this->slug_position = ($this->parent ?
+            $this->parent?->slug_position . '.' : null) . $this->{$this->determineOrderColumnName()};
     }
 
     protected function casts(): array
@@ -259,7 +270,8 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function buildSortQuery(): Builder
     {
         return static::query()
-            ->where('order_id', $this->order_id);
+            ->where('order_id', $this->order_id)
+            ->where('parent_id', $this->parent_id);
     }
 
     public function getLabel(): ?string

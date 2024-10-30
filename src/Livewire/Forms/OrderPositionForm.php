@@ -3,10 +3,8 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
-use FluxErp\Actions\OrderPosition\PriceCalculation;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Models\Product;
-use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
@@ -25,6 +23,8 @@ class OrderPositionForm extends Form
     public ?int $origin_position_id = null;
 
     public ?int $price_id = null;
+
+    public ?int $parent_id = null;
 
     public ?int $price_list_id = null;
 
@@ -99,6 +99,8 @@ class OrderPositionForm extends Form
 
     public ?string $alternative_tag = null;
 
+    protected Product $product;
+
     public function save(): void
     {
         $action = $this->id
@@ -119,16 +121,22 @@ class OrderPositionForm extends Form
         $product ??= resolve_static(Product::class, 'query')
             ->whereKey($this->product_id)
             ->first();
+        $this->product = $product;
 
-        $this->vat_rate_id = $product->vat_rate_id;
-        $this->name = $product->name;
-        $this->description = $product->description;
-        $this->product_number = $product->product_number;
-        $this->ean_code = $product->ean;
-        $this->unit_gram_weight = $product->weight_gram;
-        $this->purchase_price = $product->purchasePrice($this->amount)?->price ?? 0;
+        $this->vat_rate_id = $this->product->vat_rate_id;
+        $this->name = $this->product->name;
+        $this->description = $this->product->description;
+        $this->product_number = $this->product->product_number;
+        $this->ean_code = $this->product->ean;
+        $this->unit_gram_weight = $this->product->weight_gram;
+        $this->purchase_price = $this->product->purchasePrice($this->amount)?->price ?? 0;
 
         $this->warehouse_id ??= Warehouse::default()?->id;
+    }
+
+    public function getProduct(): Product
+    {
+        return $this->product;
     }
 
     public function validate($rules = null, $messages = [], $attributes = []): void
