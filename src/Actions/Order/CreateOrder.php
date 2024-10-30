@@ -21,10 +21,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrder extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateOrderRuleset::class, 'getRules');
+        return CreateOrderRuleset::class;
     }
 
     public static function models(): array

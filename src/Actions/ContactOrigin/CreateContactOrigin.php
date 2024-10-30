@@ -8,10 +8,9 @@ use FluxErp\Rulesets\ContactOrigin\CreateContactOriginRuleset;
 
 class CreateContactOrigin extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateContactOriginRuleset::class, 'getRules');
+        return CreateContactOriginRuleset::class;
     }
 
     public static function models(): array

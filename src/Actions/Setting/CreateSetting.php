@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Setting\CreateSettingRuleset;
 
 class CreateSetting extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateSettingRuleset::class, 'getRules');
+        return CreateSettingRuleset::class;
     }
 
     public static function models(): array

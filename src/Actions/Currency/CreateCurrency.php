@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Currency\CreateCurrencyRuleset;
 
 class CreateCurrency extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateCurrencyRuleset::class, 'getRules');
+        return CreateCurrencyRuleset::class;
     }
 
     public static function models(): array

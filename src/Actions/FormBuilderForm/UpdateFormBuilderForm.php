@@ -9,10 +9,9 @@ use Illuminate\Support\Str;
 
 class UpdateFormBuilderForm extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateFormBuilderFormRuleset::class, 'getRules');
+        return UpdateFormBuilderFormRuleset::class;
     }
 
     public static function models(): array

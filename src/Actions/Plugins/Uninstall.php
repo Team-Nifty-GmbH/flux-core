@@ -7,10 +7,9 @@ use Illuminate\Validation\ValidationException;
 
 class Uninstall extends BasePluginAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UninstallPluginRuleset::class, 'getRules');
+        return UninstallPluginRuleset::class;
     }
 
     public function performAction(): bool

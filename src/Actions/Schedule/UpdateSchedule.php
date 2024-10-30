@@ -11,10 +11,9 @@ use Illuminate\Support\Arr;
 
 class UpdateSchedule extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateScheduleRuleset::class, 'getRules');
+        return UpdateScheduleRuleset::class;
     }
 
     public static function models(): array

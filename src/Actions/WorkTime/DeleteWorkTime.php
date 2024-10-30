@@ -9,10 +9,9 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteWorkTime extends FluxAction
 {
-    public function __construct(array $data)
+    protected function getRulesets(): string|array
     {
-        parent::__construct($data);
-        $this->rules = resolve_static(DeleteWorkTimeRuleset::class, 'getRules');
+        return DeleteWorkTimeRuleset::class;
     }
 
     public static function models(): array

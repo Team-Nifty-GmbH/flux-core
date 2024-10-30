@@ -6,10 +6,9 @@ use FluxErp\Rulesets\Plugin\UpdatePluginRuleset;
 
 class Update extends BasePluginAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdatePluginRuleset::class, 'getRules');
+        return UpdatePluginRuleset::class;
     }
 
     public function performAction(): mixed

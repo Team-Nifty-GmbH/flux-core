@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Token\CreateTokenRuleset;
 
 class CreateToken extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateTokenRuleset::class, 'getRules');
+        return CreateTokenRuleset::class;
     }
 
     public static function models(): array

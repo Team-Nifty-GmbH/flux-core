@@ -8,10 +8,9 @@ use FluxErp\Rulesets\LedgerAccount\CreateLedgerAccountRuleset;
 
 class CreateLedgerAccount extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateLedgerAccountRuleset::class, 'getRules');
+        return CreateLedgerAccountRuleset::class;
     }
 
     public static function models(): array

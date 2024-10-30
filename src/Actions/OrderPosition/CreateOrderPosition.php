@@ -19,28 +19,28 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrderPosition extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = array_merge(
-            resolve_static(CreateOrderPositionRuleset::class, 'getRules'),
-            [
-                'vat_rate_percentage' => [
-                    Rule::excludeIf(
-                        data_get($this->data, 'is_free_text', false)
-                        || data_get($this->data, 'is_bundle_position', false)
-                        || data_get($this->data, 'vat_rate_id', false)
-                    ),
-                    Rule::requiredIf(
-                        ! data_get($this->data, 'is_free_text', false)
-                        && ! data_get($this->data, 'is_bundle_position', false)
-                        && ! data_get($this->data, 'vat_rate_id', false)
-                        && ! data_get($this->data, 'product_id', false)
-                    ),
-                    app(Numeric::class),
-                ],
-            ]
-        );
+        return CreateOrderPositionRuleset::class;
+    }
+
+    protected function setRulesFromRulesets(): void
+    {
+        parent::setRulesFromRulesets();
+        $this->rules['vat_rate_percentage'] = [
+            Rule::excludeIf(
+                data_get($this->data, 'is_free_text', false)
+                || data_get($this->data, 'is_bundle_position', false)
+                || data_get($this->data, 'vat_rate_id', false)
+            ),
+            Rule::requiredIf(
+                ! data_get($this->data, 'is_free_text', false)
+                && ! data_get($this->data, 'is_bundle_position', false)
+                && ! data_get($this->data, 'vat_rate_id', false)
+                && ! data_get($this->data, 'product_id', false)
+            ),
+            app(Numeric::class),
+        ];
     }
 
     public static function models(): array

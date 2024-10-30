@@ -11,10 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateLockedWorkTime extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateLockedWorkTimeRuleset::class, 'getRules');
+        return UpdateLockedWorkTimeRuleset::class;
     }
 
     public static function models(): array

@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateCurrency extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateCurrencyRuleset::class, 'getRules');
+        return UpdateCurrencyRuleset::class;
     }
 
     public static function models(): array
