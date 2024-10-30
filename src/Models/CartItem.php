@@ -4,11 +4,14 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\SortableTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\EloquentSortable\Sortable;
 
-class CartItem extends FluxModel
+class CartItem extends FluxModel implements Sortable
 {
-    use HasPackageFactory, HasUuid;
+    use HasPackageFactory, HasUuid, SortableTrait;
 
     protected $guarded = [
         'id',
@@ -36,6 +39,11 @@ class CartItem extends FluxModel
             // it also triggers the broadcasting of the cart update
             $cartItem->cart->touch();
         });
+    }
+
+    public function buildSortQuery(): Builder
+    {
+        return static::query()->where('cart_id', $this->cart_id);
     }
 
     public function cart(): BelongsTo

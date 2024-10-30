@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Portal\Shop;
 
 use FluxErp\Actions\CartItem\DeleteCartItem;
+use FluxErp\Actions\CartItem\UpdateCartItem;
 use FluxErp\Livewire\Forms\CartForm;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
@@ -22,7 +23,7 @@ class WatchlistCard extends Component
 
     public function mount(Cart $cart): void
     {
-        $cart->loadMissing('cartItems');
+        $cart->loadMissing(['cartItems' => fn (BelongsTo $query) => $query->ordered()]);
 
         $this->cartForm->fill($cart);
     }
@@ -30,6 +31,25 @@ class WatchlistCard extends Component
     public function render(): View
     {
         return view('flux::livewire.portal.shop.watchlist-card');
+    }
+
+    #[Renderless]
+    public function reOrder(CartItem $cartItem, int $index): void
+    {
+        if (! $this->cartForm->isUserOwned()) {
+            return;
+        }
+
+        try {
+            UpdateCartItem::make([
+                'id' => $cartItem->id,
+                'order_column' => $index + 1,
+            ])
+                ->validate()
+                ->execute();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     public function removeProduct(int $productId): void

@@ -2,18 +2,54 @@
 
 namespace FluxErp\Traits;
 
+use FluxErp\Models\Scopes\OrderedScope;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\EloquentSortable\SortableTrait as BaseSortableTrait;
 
 trait SortableTrait
 {
-    use BaseSortableTrait;
+    private bool $isSorted = false;
+
+    use BaseSortableTrait {
+        BaseSortableTrait::bootSortableTrait as bootParentSortableTrait;
+    }
+
+    protected static function bootSortableTrait(): void
+    {
+        static::addGlobalScope(OrderedScope::class);
+
+        static::bootParentSortableTrait();
+
+        static::saving(function (Model $model) {
+            $orderColumn = $model->determineOrderColumnName();
+
+            if ($model->isDirty($orderColumn) && ! $model->getIsSorted()) {
+                $newPosition = $model->$orderColumn;
+                $model->$orderColumn = $model->getRawOriginal($orderColumn);
+
+                $model->moveToPosition($newPosition);
+            }
+        });
+    }
+
+    public function setIsSorted(bool $isSorted = true): static
+    {
+        $this->isSorted = $isSorted;
+
+        return $this;
+    }
+
+    public function getIsSorted(): bool
+    {
+        return $this->isSorted;
+    }
 
     public function moveToPosition(int $newPosition): static
     {
         $orderColumnName = $this->determineOrderColumnName();
 
         $maxOrder = $this->getHighestOrderNumber();
-        $currentOrder = $this->$orderColumnName;
+        $currentOrder = $this->$orderColumnName ?? $maxOrder + 1;
         $newPosition = max(1, min($newPosition, $maxOrder)); // Ensure the new position is valid
 
         if ($currentOrder === $newPosition) {
@@ -36,7 +72,7 @@ trait SortableTrait
 
         // Set the model's order column to the new position
         $this->$orderColumnName = $newPosition;
-        $this->save();
+        $this->setIsSorted()->save();
 
         return $this;
     }
