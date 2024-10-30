@@ -23,7 +23,7 @@ class WatchlistCard extends Component
 
     public function mount(Cart $cart): void
     {
-        $cart->loadMissing(['cartItems' => fn (BelongsTo $query) => $query->ordered()]);
+        $cart->loadMissing('cartItems');
 
         $this->cartForm->fill($cart);
     }

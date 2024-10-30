@@ -19,10 +19,6 @@ class UpdateCartItemRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => CartItem::class]),
             ],
-            'order_column' => [
-                'nullable',
-                'integer',
-            ],
             'amount' => [
                 'sometimes',
                 'required',
@@ -32,6 +28,11 @@ class UpdateCartItemRuleset extends FluxRuleset
                 'sometimes',
                 'required',
                 app(Numeric::class),
+            ],
+            'order_column' => [
+                'nullable',
+                'integer',
+                'min:1',
             ],
         ];
     }

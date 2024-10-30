@@ -30,10 +30,6 @@ class CreateCartItemRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => VatRate::class]),
             ],
-            'order_column' => [
-                'nullable',
-                'integer',
-            ],
             'name' => [
                 'required_without:product_id',
                 'nullable',
@@ -46,6 +42,11 @@ class CreateCartItemRuleset extends FluxRuleset
             'price' => [
                 'nullable',
                 app(Numeric::class),
+            ],
+            'order_column' => [
+                'nullable',
+                'integer',
+                'min:1',
             ],
         ];
     }

@@ -6,7 +6,6 @@ use FluxErp\Livewire\Portal\Shop\Watchlists as BaseWatchlist;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
@@ -34,7 +33,7 @@ class Watchlists extends BaseWatchlist
                     ->orWhere('is_public', true);
             })
             ->with([
-                'cartItems' => fn (HasMany $query) => $query->ordered(),
+                'cartItems',
                 'cartItems.product',
                 'cartItems.product.coverMedia',
                 'cartItems.product.parent.coverMedia',

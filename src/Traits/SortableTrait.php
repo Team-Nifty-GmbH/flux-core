@@ -24,7 +24,7 @@ trait SortableTrait
             $orderColumn = $model->determineOrderColumnName();
 
             if ($model->isDirty($orderColumn) && ! $model->getIsSorted()) {
-                $newPosition = $model->$orderColumn;
+                $newPosition = $model->$orderColumn ?? $model->getHighestOrderNumber() + 1;
                 $model->$orderColumn = $model->getRawOriginal($orderColumn);
 
                 $model->moveToPosition($newPosition);
@@ -32,7 +32,7 @@ trait SortableTrait
         });
     }
 
-    public function setIsSorted(bool $isSorted = true): static
+    protected function setIsSorted(bool $isSorted = true): static
     {
         $this->isSorted = $isSorted;
 

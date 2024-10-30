@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('cart_items', function (Blueprint $table) {
-            $table->unsignedInteger('order_column')->after('vat_rate_id')->nullable()->index();
+            $table->unsignedInteger('order_column')->after('total')->nullable()->index();
         });
     }
 
