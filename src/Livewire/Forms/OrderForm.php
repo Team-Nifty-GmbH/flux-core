@@ -7,7 +7,7 @@ use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
-use Illuminate\Database\Eloquent\Model;
+use FluxErp\Models\Order;
 use Livewire\Attributes\Locked;
 
 class OrderForm extends FluxForm
@@ -145,6 +145,9 @@ class OrderForm extends FluxForm
     #[Locked]
     public bool $isPurchase = false;
 
+    #[Locked]
+    public bool $hasContactDeliveryLock = false;
+
     protected function getActions(): array
     {
         return [
@@ -157,19 +160,31 @@ class OrderForm extends FluxForm
 
     public function fill($values): void
     {
-        if ($values instanceof Model) {
-            $values->loadMissing('parent');
-            $this->isPurchase = $values->orderType->order_type_enum->isPurchase();
+        if ($values instanceof Order) {
+            $values->loadMissing([
+                'parent',
+                'orderType:id,order_type_enum',
+                'contact:id,has_delivery_lock',
+            ]);
+            $values = array_merge(
+                $values->toArray(),
+                $values->parent
+                    ? [
+                        'parent' => [
+                            'label' => $values->parent->getLabel(),
+                            'url' => $values->parent->getUrl(),
+                        ],
+                    ]
+                    : [],
+                [
+                    'isPurchase' => $values->orderType->order_type_enum->isPurchase(),
+                ],
+            );
         }
 
         parent::fill($values);
 
-        $this->parent = $this->parent
-            ? [
-                'label' => $values->parent->getLabel(),
-                'url' => $values->parent->getUrl(),
-            ]
-            : null;
+        $this->hasContactDeliveryLock = data_get($values, 'contact.has_delivery_lock', false);
     }
 
     public function save(): void

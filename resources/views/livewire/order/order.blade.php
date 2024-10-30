@@ -263,6 +263,14 @@
                                     />
                             @endswitch
                         @endif
+
+                        @if($order->hasContactDeliveryLock)
+                            <x-badge
+                                :label="__('Has Delivery Lock')"
+                                negative
+                                rounded
+                            />
+                        @endif
                     </div>
                 </h1>
                 <a wire:navigate class="flex gap-1.5 font-semibold opacity-40 dark:text-gray-200" x-bind:href="$wire.order.parent?.url" x-cloak x-show="$wire.order.parent?.url">
