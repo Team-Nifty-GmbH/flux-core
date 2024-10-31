@@ -23,7 +23,10 @@ class Categories extends CategoryList
     {
         return array_merge(parent::getViewData(), [
             'models' => model_info_all()
-                ->filter(fn ($modelInfo) => in_array(Categorizable::class, $modelInfo->traits->toArray()))
+                ->filter(fn ($modelInfo) => in_array(
+                    Categorizable::class,
+                    class_uses_recursive($modelInfo->class)
+                ))
                 ->unique('morphClass')
                 ->map(fn ($modelInfo) => [
                     'label' => __(Str::headline($modelInfo->morphClass)),

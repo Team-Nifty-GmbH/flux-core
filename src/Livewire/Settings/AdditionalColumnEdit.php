@@ -77,7 +77,10 @@ class AdditionalColumnEdit extends Component
 
         $this->models = model_info_all()
             ->unique('morphClass')
-            ->filter(fn ($model) => in_array(HasAdditionalColumns::class, $model->traits->toArray()))
+            ->filter(fn ($modelInfo) => in_array(
+                HasAdditionalColumns::class,
+                class_uses_recursive($modelInfo->class)
+            ))
             ->map(fn ($modelInfo) => [
                 'label' => __(Str::headline($modelInfo->morphClass)),
                 'value' => $modelInfo->morphClass,
