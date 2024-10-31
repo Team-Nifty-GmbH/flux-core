@@ -9,6 +9,7 @@ use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Renderless;
@@ -23,7 +24,7 @@ class WatchlistCard extends Component
 
     public function mount(Cart $cart): void
     {
-        $cart->loadMissing(['cartItems' => fn (BelongsTo $query) => $query->ordered()]);
+        $cart->loadMissing(['cartItems' => fn (HasMany $query) => $query->ordered()]);
 
         $this->cartForm->fill($cart);
     }
