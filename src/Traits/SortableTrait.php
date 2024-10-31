@@ -2,7 +2,6 @@
 
 namespace FluxErp\Traits;
 
-use FluxErp\Models\Scopes\OrderedScope;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\EloquentSortable\SortableTrait as BaseSortableTrait;
 
@@ -16,8 +15,6 @@ trait SortableTrait
 
     protected static function bootSortableTrait(): void
     {
-        static::addGlobalScope(OrderedScope::class);
-
         static::bootParentSortableTrait();
 
         static::saving(function (Model $model) {
