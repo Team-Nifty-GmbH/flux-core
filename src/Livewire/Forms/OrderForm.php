@@ -8,10 +8,9 @@ use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Order;
 use FluxErp\Models\PriceList;
 use FluxErp\Support\Livewire\Attributes\ExcludeFromActionData;
-use Illuminate\Database\Eloquent\Model;
-use FluxErp\Models\Order;
 use Livewire\Attributes\Locked;
 
 class OrderForm extends FluxForm

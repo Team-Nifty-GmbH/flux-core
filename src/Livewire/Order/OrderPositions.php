@@ -256,7 +256,7 @@ class OrderPositions extends OrderPositionList
             $item['unit_price'] = $item['is_net'] ? ($item['unit_net_price'] ?? 0) : ($item['unit_gross_price'] ?? 0);
             $item['alternative_tag'] = $item['is_alternative'] ? __('Alternative') : '';
 
-            if ($depth = str_word_count($item['slug_position'], 0, '.') > 0) {
+            if (($depth = str_word_count($item['slug_position'], 0, '.')) > 0) {
                 $indent = $depth * 20;
                 $item['indentation'] = <<<HTML
                     <div class="text-right indent-icon" style="width:{$indent}px;">

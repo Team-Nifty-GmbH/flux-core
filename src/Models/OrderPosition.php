@@ -68,8 +68,8 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     {
         $this->parentSetHighestOrderNumber();
 
-        $this->slug_position = ($this->parent ?
-            $this->parent?->slug_position . '.' : null) . $this->{$this->determineOrderColumnName()};
+        $this->slug_position = ($this->parent ? $this->parent->slug_position . '.' : null)
+            . $this->sort_number;
     }
 
     protected function casts(): array

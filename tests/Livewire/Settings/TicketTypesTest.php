@@ -6,7 +6,6 @@ use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\TicketType;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class TicketTypesTest extends BaseSetup

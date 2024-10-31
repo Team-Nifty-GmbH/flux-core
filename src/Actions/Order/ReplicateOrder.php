@@ -7,6 +7,8 @@ use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Rulesets\Order\ReplicateOrderRuleset;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\ValidationException;
 
 class ReplicateOrder extends FluxAction
@@ -27,7 +29,13 @@ class ReplicateOrder extends FluxAction
 
         $originalOrder = resolve_static(Order::class, 'query')
             ->whereKey($this->data['id'])
-            ->when($getOrderPositionsFromOrigin, fn ($query) => $query->with('orderPositions'))
+            ->when(
+                $getOrderPositionsFromOrigin,
+                fn (Builder $query) => $query->with([
+                    'orderPositions' => fn (HasMany $query) => $query
+                        ->where('is_bundle_position', false),
+                ])
+            )
             ->first()
             ->toArray();
 
@@ -62,6 +70,10 @@ class ReplicateOrder extends FluxAction
             unset($orderData['parent_id']);
         }
 
+        if ($originalOrder['contact_id'] === $orderData['contact_id']) {
+            $orderData['parent_id'] = data_get($originalOrder, 'id');
+        }
+
         $order = CreateOrder::make($orderData)
             ->checkPermission()
             ->validate()
@@ -86,16 +98,21 @@ class ReplicateOrder extends FluxAction
             $orderPositions = $originalOrder['order_positions'] ?? [];
         }
 
+        $newOrderPosition = null;
         foreach ($orderPositions as $orderPosition) {
             $orderPosition['order_id'] = $order->id;
+            $orderPosition['parent_id'] = $orderPosition['parent_id'] && $newOrderPosition
+                ? $newOrderPosition->getKey()
+                : null;
 
             unset(
                 $orderPosition['id'],
                 $orderPosition['uuid'],
+                $orderPosition['sort_number'],
                 $orderPosition['amount_packed_products'],
             );
 
-            CreateOrderPosition::make($orderPosition)
+            $newOrderPosition = CreateOrderPosition::make($orderPosition)
                 ->checkPermission()
                 ->validate()
                 ->execute();
