@@ -8,10 +8,9 @@ use Spatie\TranslationLoader\LanguageLine;
 
 class DeleteTranslation extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteTranslationRuleset::class, 'getRules');
+        return DeleteTranslationRuleset::class;
     }
 
     public static function models(): array

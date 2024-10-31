@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class CreatePermission extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreatePermissionRuleset::class, 'getRules');
+        return CreatePermissionRuleset::class;
     }
 
     public static function models(): array

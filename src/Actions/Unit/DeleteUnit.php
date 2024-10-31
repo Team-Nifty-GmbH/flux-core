@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Unit\DeleteUnitRuleset;
 
 class DeleteUnit extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteUnitRuleset::class, 'getRules');
+        return DeleteUnitRuleset::class;
     }
 
     public static function models(): array

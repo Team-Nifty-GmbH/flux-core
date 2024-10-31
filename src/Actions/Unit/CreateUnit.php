@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Unit\CreateUnitRuleset;
 
 class CreateUnit extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateUnitRuleset::class, 'getRules');
+        return CreateUnitRuleset::class;
     }
 
     public static function models(): array

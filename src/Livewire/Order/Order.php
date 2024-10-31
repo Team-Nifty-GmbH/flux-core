@@ -475,8 +475,8 @@ class Order extends Component
     public function fillSchedule(): void
     {
         $schedule = resolve_static(Schedule::class, 'query')
+            ->whereRelation('orders', 'id', $this->order->id)
             ->where('class', ProcessSubscriptionOrder::class)
-            ->whereJsonContains('parameters->orderId', $this->order->id)
             ->first();
 
         if ($schedule) {
@@ -499,6 +499,7 @@ class Order extends Component
     #[Renderless]
     public function saveSchedule(): bool
     {
+        $this->schedule->orders = [$this->order->id];
         $this->schedule->name = ProcessSubscriptionOrder::name();
         $this->schedule->parameters = [
             'orderId' => $this->order->id,

@@ -18,10 +18,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateProduct extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateProductRuleset::class, 'getRules');
+        return CreateProductRuleset::class;
     }
 
     public static function models(): array

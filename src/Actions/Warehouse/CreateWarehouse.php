@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Warehouse\CreateWarehouseRuleset;
 
 class CreateWarehouse extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateWarehouseRuleset::class, 'getRules');
+        return CreateWarehouseRuleset::class;
     }
 
     public static function models(): array

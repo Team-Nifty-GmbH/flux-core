@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdatePaymentRun extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdatePaymentRunRuleset::class, 'getRules');
+        return UpdatePaymentRunRuleset::class;
     }
 
     public static function models(): array

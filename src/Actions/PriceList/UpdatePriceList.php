@@ -14,10 +14,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdatePriceList extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdatePriceListRuleset::class, 'getRules');
+        return UpdatePriceListRuleset::class;
     }
 
     public static function models(): array

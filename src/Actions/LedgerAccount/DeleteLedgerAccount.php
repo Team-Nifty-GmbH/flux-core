@@ -8,10 +8,9 @@ use FluxErp\Rulesets\LedgerAccount\DeleteLedgerAccountRuleset;
 
 class DeleteLedgerAccount extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteLedgerAccountRuleset::class, 'getRules');
+        return DeleteLedgerAccountRuleset::class;
     }
 
     public static function models(): array

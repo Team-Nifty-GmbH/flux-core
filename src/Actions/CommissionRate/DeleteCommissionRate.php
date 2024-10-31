@@ -8,10 +8,9 @@ use FluxErp\Rulesets\CommissionRate\DeleteCommissionRateRuleset;
 
 class DeleteCommissionRate extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteCommissionRateRuleset::class, 'getRules');
+        return DeleteCommissionRateRuleset::class;
     }
 
     public static function models(): array

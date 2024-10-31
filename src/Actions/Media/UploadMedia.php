@@ -15,10 +15,9 @@ class UploadMedia extends FluxAction
 {
     protected bool $force = false;
 
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UploadMediaRuleset::class, 'getRules');
+        return UploadMediaRuleset::class;
     }
 
     public static function models(): array

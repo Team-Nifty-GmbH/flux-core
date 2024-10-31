@@ -16,10 +16,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateOrderPosition extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateOrderPositionRuleset::class, 'getRules');
+        return UpdateOrderPositionRuleset::class;
     }
 
     public static function models(): array

@@ -19,10 +19,9 @@ use Illuminate\Validation\ValidationException;
 
 class FillOrderPositions extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(FillOrderPositionsRuleset::class, 'getRules');
+        return FillOrderPositionsRuleset::class;
     }
 
     public static function name(): string

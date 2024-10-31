@@ -7,6 +7,8 @@ use FluxErp\Casts\Percentage;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
+use FluxErp\Models\Pivots\OrderSchedule;
+use FluxErp\Rules\Numeric;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
 use FluxErp\States\Order\PaymentState\Open;
@@ -47,6 +49,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Validator;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -57,6 +61,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         HasCustomEvents, HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates,
         HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes, Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;
+            HasSerialNumberRange::getSerialNumber as protected hasSerialNumberRangeGetSerialNumber;
         }
 
     protected $with = [
@@ -149,7 +154,10 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         });
 
         static::deleted(function (Order $order) {
-            $order->orderPositions()->delete();
+            foreach ($order->orderPositions()->get('id') as $orderPosition) {
+                $orderPosition->delete();
+            }
+
             $order->purchaseInvoice()->update(['order_id' => null]);
         });
     }
@@ -193,6 +201,31 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             'is_paid' => 'boolean',
             'requires_approval' => 'boolean',
         ];
+    }
+
+    public function getSerialNumber(string|array $types, ?int $clientId = null): static
+    {
+        if (in_array('invoice_number', Arr::wrap($types))) {
+            $rules = [
+                'has_contact_delivery_lock' => 'declined',
+            ];
+            $data = [
+                'has_contact_delivery_lock' => $this->contact->has_delivery_lock,
+            ];
+            $messages = [
+                'has_contact_delivery_lock.declined' => __('The contact has a delivery lock'),
+            ];
+
+            if (! is_null($creditLine = $this->contact->credit_line)) {
+                $rules['balance'] = app(Numeric::class, ['max' => $creditLine]);
+                $data['balance'] = bcadd($this->contact->orders()->unpaid()->sum('balance'), $this->total_gross_price);
+                $messages['balance'][get_class($rules['balance'])] = __('The credit line of the contact is exceeded');
+            }
+
+            Validator::make($data, $rules, $messages)->validate();
+        }
+
+        return $this->hasSerialNumberRangeGetSerialNumber($types, $clientId);
     }
 
     public function addresses(): BelongsToMany
@@ -306,6 +339,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function responsibleUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
+    public function schedules(): BelongsToMany
+    {
+        return $this->belongsToMany(Schedule::class)->using(OrderSchedule::class);
     }
 
     public function tasks(): HasManyThrough

@@ -12,10 +12,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreateCalendarEvent extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateCalendarEventRuleset::class, 'getRules');
+        return CreateCalendarEventRuleset::class;
     }
 
     public static function models(): array

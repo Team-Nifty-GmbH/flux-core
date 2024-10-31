@@ -10,10 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateProductOption extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateProductOptionRuleset::class, 'getRules');
+        return UpdateProductOptionRuleset::class;
     }
 
     public static function models(): array

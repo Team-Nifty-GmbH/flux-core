@@ -8,10 +8,9 @@ use FluxErp\Rulesets\OrderPosition\DeleteOrderPositionRuleset;
 
 class DeleteOrderPosition extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteOrderPositionRuleset::class, 'getRules');
+        return DeleteOrderPositionRuleset::class;
     }
 
     public static function models(): array

@@ -12,7 +12,6 @@ class UpdateUserPermissions extends FluxAction
     {
         parent::boot($data);
         $this->data = $this->data ? array_merge(['give' => true, 'sync' => false], $this->data) : [];
-        $this->rules = resolve_static(UpdateUserPermissionRuleset::class, 'getRules');
     }
 
     public static function name(): string
@@ -23,6 +22,11 @@ class UpdateUserPermissions extends FluxAction
     public static function models(): array
     {
         return [User::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateUserPermissionRuleset::class;
     }
 
     public function performAction(): array

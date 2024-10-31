@@ -12,6 +12,8 @@ class UserForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public ?int $contact_id = null;
+
     public ?int $language_id = null;
 
     public ?int $currency_id = null;

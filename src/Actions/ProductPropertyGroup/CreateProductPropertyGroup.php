@@ -10,10 +10,9 @@ use Illuminate\Support\Arr;
 
 class CreateProductPropertyGroup extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateProductPropertyGroupRuleset::class, 'getRules');
+        return CreateProductPropertyGroupRuleset::class;
     }
 
     public static function models(): array

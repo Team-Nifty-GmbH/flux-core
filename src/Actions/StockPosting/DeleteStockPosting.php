@@ -8,10 +8,9 @@ use FluxErp\Rulesets\StockPosting\DeleteStockPostingRuleset;
 
 class DeleteStockPosting extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteStockPostingRuleset::class, 'getRules');
+        return DeleteStockPostingRuleset::class;
     }
 
     public static function models(): array

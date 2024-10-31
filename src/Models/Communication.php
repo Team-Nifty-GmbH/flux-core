@@ -14,11 +14,15 @@ use FluxErp\Traits\Printable;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\View\Printing\Communication\CommunicationView;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
+use Meilisearch\Endpoints\Indexes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
@@ -80,6 +84,41 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting
         );
     }
 
+    protected function toMail(): Attribute
+    {
+        return Attribute::get(
+            fn ($value) => array_column($this->to ?? [], 'mail') ?: $this->to ?: []
+        );
+    }
+
+    protected function ccMail(): Attribute
+    {
+        return Attribute::get(
+            fn ($value) => array_column($this->cc ?? [], 'mail') ?: $this->cc ?: []
+        );
+    }
+
+    protected function bccMail(): Attribute
+    {
+        return Attribute::get(
+            fn ($value) => array_column($this->bcc ?? [], 'mail') ?: $this->bcc ?: []
+        );
+    }
+
+    protected function mailAddresses(): Attribute
+    {
+        return Attribute::get(
+            fn ($value) => array_unique(
+                array_merge(
+                    [$this->from_mail],
+                    $this->to_mail ?? [],
+                    $this->cc_mail ?? [],
+                    $this->bcc_mail ?? [],
+                )
+            )
+        );
+    }
+
     public function addresses(): MorphToMany
     {
         return $this->morphedByMany(Address::class, 'communicatable', 'communicatable');
@@ -134,5 +173,61 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting
         return [
             'communication' => CommunicationView::class,
         ];
+    }
+
+    public function autoAssign(string $type, array|string $matchAgainst): void
+    {
+        $matchAgainst = Arr::wrap($matchAgainst);
+        $typeColumn = match ($type) {
+            'phone' => 'phone',
+            'email' => 'email_primary',
+            default => null,
+        };
+
+        if (is_null($typeColumn)) {
+            throw new InvalidArgumentException('Invalid type: ' . $type);
+        }
+
+        if ($matchAgainst) {
+            $addresses = resolve_static(Address::class, 'query')
+                ->where(function (Builder $query) use ($matchAgainst, $typeColumn) {
+                    $query->whereIn($typeColumn, $matchAgainst)
+                        ->orWhereHas('contactOptions', function (Builder $query) use ($matchAgainst) {
+                            $query->whereIn('value', $matchAgainst);
+                        });
+                })
+                ->with('contact:id')
+                ->get(['id', 'contact_id'])
+                ->each(
+                    fn (Address $address) => $address->communications()->attach($this->id)
+                );
+
+            $contacts = $addresses->pluck('contact')->unique();
+
+            if ($contacts->isNotEmpty()) {
+                $contacts->each(
+                    fn (Contact $contact) => $contact->communications()->attach($this->id)
+                );
+            }
+        }
+
+        if (is_string($this->subject) && ! empty($this->subject) && $type === 'email') {
+            resolve_static(
+                Order::class,
+                'search',
+                [
+                    'query' => $this->subject,
+                    'callback' => function (Indexes $meilisearch, string $query, array $options) {
+                        return $meilisearch->search(
+                            $query,
+                            $options + ['attributesToSearchOn' => ['invoice_number', 'order_number', 'commission']]
+                        );
+                    },
+                ]
+            )
+                ->first()
+                ?->communications()
+                ->attach($this->id);
+        }
     }
 }

@@ -14,10 +14,9 @@ class UpdateMedia extends FluxAction
 {
     protected bool $force = false;
 
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateMediaRuleset::class, 'getRules');
+        return UpdateMediaRuleset::class;
     }
 
     public static function models(): array

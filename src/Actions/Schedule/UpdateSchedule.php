@@ -7,13 +7,13 @@ use FluxErp\Facades\Repeatable;
 use FluxErp\Models\Schedule;
 use FluxErp\Rulesets\Schedule\UpdateScheduleRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 class UpdateSchedule extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateScheduleRuleset::class, 'getRules');
+        return UpdateScheduleRuleset::class;
     }
 
     public static function models(): array
@@ -26,6 +26,7 @@ class UpdateSchedule extends FluxAction
         $schedule = resolve_static(Schedule::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
+        $orders = Arr::pull($this->data, 'orders');
 
         if ($this->data['parameters'] ?? []) {
             $repeatable = Repeatable::get($schedule->name);
@@ -48,6 +49,10 @@ class UpdateSchedule extends FluxAction
 
         $schedule->fill($this->data);
         $schedule->save();
+
+        if (! is_null($orders)) {
+            $schedule->orders()->sync($orders);
+        }
 
         return $schedule->withoutRelations()->fresh();
     }

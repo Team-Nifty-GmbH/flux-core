@@ -13,10 +13,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateContact extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateContactRuleset::class, 'getRules');
+        return UpdateContactRuleset::class;
     }
 
     public static function models(): array

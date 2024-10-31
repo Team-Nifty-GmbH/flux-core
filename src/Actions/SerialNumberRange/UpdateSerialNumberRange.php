@@ -11,10 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateSerialNumberRange extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateSerialNumberRangeRuleset::class, 'getRules');
+        return UpdateSerialNumberRangeRuleset::class;
     }
 
     public static function models(): array

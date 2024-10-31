@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateContactOrigin extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateContactOriginRuleset::class, 'getRules');
+        return UpdateContactOriginRuleset::class;
     }
 
     public static function models(): array

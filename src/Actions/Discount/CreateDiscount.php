@@ -9,10 +9,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreateDiscount extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateDiscountRuleset::class, 'getRules');
+        return CreateDiscountRuleset::class;
     }
 
     public static function models(): array
