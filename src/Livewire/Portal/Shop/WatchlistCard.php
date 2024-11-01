@@ -108,6 +108,7 @@ class WatchlistCard extends Component
                 ->whereKey($this->cartForm->id)
                 ->first()
                 ->cartItems()
+                ->ordered()
                 ->whereHas('product', function (Builder $query) {
                     $query->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop());
                 })
@@ -115,7 +116,7 @@ class WatchlistCard extends Component
                     'product' => fn (BelongsTo $query) => $query
                         ->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop()),
                 ])
-                ->get(['product_id', 'amount'])
+                ->get(['product_id', 'amount', 'order_column'])
                 ->map(fn (CartItem $cartItem) => ['id' => $cartItem->product_id, 'amount' => $cartItem->amount])
                 ->toArray()
         )

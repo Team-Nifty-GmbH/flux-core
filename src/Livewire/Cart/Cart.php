@@ -13,6 +13,7 @@ use FluxErp\Models\CartItem;
 use FluxErp\Models\Product;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -199,7 +200,7 @@ class Cart extends Component
     {
         $this->dispatch(
             'order:add-products',
-            $this->cart()->cartItems()->select(['product_id', 'amount'])->get()->toArray()
+            $this->cart()->cartItems()->select(['product_id', 'amount', 'order_column'])->ordered()->get()->toArray()
         );
     }
 
@@ -211,7 +212,17 @@ class Cart extends Component
 
         $this->add(
             resolve_static(CartModel::class, 'query')
-                ->with('cartItems:id,cart_id,product_id,vat_rate_id,amount')
+                ->with([
+                    'cartItems' => fn (HasMany $query) => $query->ordered()
+                        ->select([
+                            'id',
+                            'cart_id',
+                            'product_id',
+                            'vat_rate_id',
+                            'amount',
+                            'order_column',
+                        ]),
+                ])
                 ->whereKey($this->loadWatchlist)
                 ->first()
                 ->cartItems

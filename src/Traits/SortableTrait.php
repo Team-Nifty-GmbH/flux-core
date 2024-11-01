@@ -20,7 +20,7 @@ trait SortableTrait
         static::saving(function (Model $model) {
             $orderColumn = $model->determineOrderColumnName();
 
-            if ($model->isDirty($orderColumn) && ! $model->getIsSorted()) {
+            if ($model->isDirty($orderColumn) && ! $model->getIsSorted() && $model->exists) {
                 $newPosition = $model->$orderColumn ?? $model->getHighestOrderNumber() + 1;
                 $model->$orderColumn = $model->getRawOriginal($orderColumn);
 
