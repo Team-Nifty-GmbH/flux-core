@@ -1,32 +1,18 @@
 <div x-data="{
-    get modal() {
-        return Alpine.$data($el.querySelector('[wireui-modal]'))
+    setCategorySearch() {
+        let component = Alpine.$data(document.getElementById('category-parent-id').querySelector('[x-data]'));
+        component.asyncData.params.where[0][2] = $wire.category.model_type;
+        component.asyncData.params.where[1][2] = $wire.category.id;
     },
-    create() {
-        $wire.edit().then(() => {
-            this.modal.open();
-        });
-    },
-    edit(record) {
-        $wire.edit(record).then(() => {
-            this.modal.open();
-        });
-    },
-    save() {
-        $wire.save().then((success) => {
-            if (success) {
-                this.modal.close();
-            }
-        });
-    },
-    category: $wire.$entangle('category'),
 }">
-    <div id="category-modal">
-        <x-modal.card :title="$category->id ? __('Edit Category') : __('Create Category')">
+    <x-modal name="edit-category" x-on:open="setCategorySearch()">
+        <x-card :title="$category->id ? __('Edit Category') : __('Create Category')">
             <div class="flex flex-col gap-4">
                 <x-input wire:model="category.name" :label="__('Name')"></x-input>
                 <x-toggle wire:model="category.is_active" :label="__('Active')"></x-toggle>
-                <x-select
+                <div x-bind:class="$wire.category.id && 'pointer-events-none'">
+                    <x-select
+                        x-bind:disabled="$wire.category.id"
                         label="{{ __('Model') }}"
                         placeholder="{{ __('Model') }}"
                         wire:model="category.model_type"
@@ -34,10 +20,12 @@
                         option-label="label"
                         option-value="value"
                         :clearable="false"
-                />
-                <x-select
+                    />
+                </div>
+                <div id="category-parent-id">
+                    <x-select
                         wire:model="category.parent_id"
-                        :label="__('Categories')"
+                        :label="__('Parent')"
                         option-value="id"
                         option-label="label"
                         option-description="description"
@@ -50,34 +38,24 @@
                                         'model_type',
                                         '=',
                                         $category->model_type,
-                                    ]
+                                    ],
+                                    [
+                                        'id',
+                                        '!=',
+                                        $category->id,
+                                    ],
                                 ],
                             ],
                         ]"
-                />
+                    />
+                </div>
             </div>
             <x-slot:footer>
-                <div class="flex justify-between gap-x-4">
-                    @if(resolve_static(\FluxErp\Actions\Category\DeleteCategory::class, 'canPerformAction', [false]))
-                        <div x-bind:class="$wire.category.id > 0 || 'invisible'">
-                            <x-button
-                                flat
-                                negative
-                                :label="__('Delete')"
-                                wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Category')]) }}"
-                                wire:click="delete().then((success) => {if(success) close();});"
-                            />
-                        </div>
-                    @endif
-                    <div class="flex">
-                        <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="save().then((success) => {if(success) close();});"/>
-                    </div>
+                <div class="flex justify-end gap-x-4">
+                    <x-button flat :label="__('Cancel')" x-on:click="close"/>
+                    <x-button primary :label="__('Save')" wire:click="save().then((success) => {if(success) close();});"/>
                 </div>
             </x-slot:footer>
-        </x-modal.card>
-    </div>
-    <div wire:ignore>
-        @include('tall-datatables::livewire.data-table')
-    </div>
+        </x-card>
+    </x-modal>
 </div>

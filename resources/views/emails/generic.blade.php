@@ -10,7 +10,7 @@
         </x-mail::header>
     </x-slot:header>
     {{-- Body --}}
-    {!! $mailMessageForm->html_body !!}
+    {!! data_get($mailMessageForm, 'html_body') !!}
 
     {{-- Subcopy --}}
     @isset($subcopy)
