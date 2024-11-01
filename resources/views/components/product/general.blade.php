@@ -199,7 +199,7 @@
                             />
                             <x-button
                                 primary
-                                :label="__('Edit')"
+                                :label="__('Save')"
                                 wire:click="addProductProperties().then(() => { close(); })"
                             />
                         </div>
