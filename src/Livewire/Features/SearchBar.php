@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Features;
 
+use Exception;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -9,6 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
@@ -84,7 +86,7 @@ class SearchBar extends Component
                         if (count($result)) {
                             $return[$model] = collect($result)->toArray();
                         }
-                    } catch (\Exception $e) {
+                    } catch (Exception) {
                         // ignore
                     }
 
@@ -112,9 +114,10 @@ class SearchBar extends Component
         $this->skipRender();
     }
 
+    #[Renderless]
     public function showDetail(string $model, int $id): void
     {
-        /** @var \Illuminate\Database\Eloquent\Model $model */
+        /** @var Model $model */
         $modelInstance = resolve_static($model, 'query')->whereKey($id)->first();
 
         if (! $modelInstance) {
