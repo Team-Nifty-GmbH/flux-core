@@ -50,8 +50,10 @@
                 <ul class="sm:basis-1/2">
                     <template x-for="(items, model) in result">
                         <li>
-                            <div class="dark:bg-secondary-600 w-full bg-gray-100 py-2.5 px-4 text-xs font-semibold text-gray-900 dark:text-gray-50"
-                                     x-text="modelLabels[model].label">
+                            <div
+                                class="dark:bg-secondary-600 w-full bg-gray-100 py-2.5 px-4 text-xs font-semibold text-gray-900 dark:text-gray-50"
+                                x-text="modelLabels[model].label"
+                            >
                             </div>
                             <ul class="mt-2 text-sm text-gray-800" role="none">
                                 <template x-for="item in items">
@@ -59,7 +61,7 @@
                                         class="hover:bg-primary-600 flex cursor-pointer select-none items-center space-x-1.5 px-4 py-2 hover:text-white"
                                         x-on:click="show = false; $wire.showDetail(model, item.id)"
                                     >
-                                        <x-avatar src="#" xs x-bind:src="item.src" />
+                                        <x-avatar src="#" xs x-bind:src="item.src" x-cloak x-show="item.src" />
                                         <div class="inline-block align-middle hover:text-white dark:text-gray-50" x-text="item.label">
                                         </div>
                                     </li>

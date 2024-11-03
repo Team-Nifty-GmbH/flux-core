@@ -58,7 +58,7 @@ class ProductDetailTest extends TestCase
             ])
             ->create();
 
-        $component = Livewire::test(ProductDetail::class, ['product' => $product])
+        Livewire::test(ProductDetail::class, ['product' => $product])
             ->assertStatus(200)
             ->assertSet('productForm.id', $product->id)
             ->assertSet('productForm.parent_id', $product->parent_id)
