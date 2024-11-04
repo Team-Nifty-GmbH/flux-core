@@ -9,7 +9,7 @@
         <img @class([
                 'shrink-0 object-cover object-center',
                 'rounded-sm'   =>  $squared,
-                'rounded-full' => !$squared,
+                'rounded-full' => ! $squared,
                 $size,
             ])
              {{ $attributes->whereStartsWith('x-bind:src') }}
@@ -17,7 +17,7 @@
         />
     @endif
 
-    @if (!$src && !$label)
+    @if (! $src && ! $label)
         <svg
             class="shrink-0 text-gray-300 bg-gray-100 dark:bg-gray-600"
             fill="currentColor"

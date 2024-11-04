@@ -70,7 +70,7 @@ class SearchBar extends Component
                 $return = [];
                 foreach ($this->searchModel as $model) {
                     try {
-                        $result = app($model)->search($this->search)
+                        $result = resolve_static($model, 'search', ['query' => $this->search])
                             ->toEloquentBuilder()
                             ->latest()
                             ->limit(5)

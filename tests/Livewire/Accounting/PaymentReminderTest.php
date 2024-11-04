@@ -32,7 +32,10 @@ class PaymentReminderTest extends BaseSetup
             ->state(['client_id' => $this->dbClient->id])
             ->create();
         $address = Address::factory()
-            ->state(['client_id' => $this->dbClient->id, 'contact_id' => $contact->id])
+            ->state([
+                'client_id' => $this->dbClient->id,
+                'contact_id' => $contact->id,
+            ])
             ->for($contact, 'contact')
             ->create();
 
@@ -43,7 +46,10 @@ class PaymentReminderTest extends BaseSetup
             ->for(PaymentType::factory()->state(['is_direct_debit' => false]), 'paymentType')
             ->for(
                 OrderType::factory()
-                    ->state(['order_type_enum' => OrderTypeEnum::Order, 'is_active' => true])
+                    ->state([
+                        'order_type_enum' => OrderTypeEnum::Order,
+                        'is_active' => true,
+                    ])
                     ->for(factory: $this->dbClient, relationship: 'client'),
                 'orderType'
             )
