@@ -24,23 +24,25 @@ class CreateOrderPosition extends FluxAction
         return CreateOrderPositionRuleset::class;
     }
 
-    protected function setRulesFromRulesets(): void
+    public function setRulesFromRulesets(): static
     {
-        parent::setRulesFromRulesets();
-        $this->rules['vat_rate_percentage'] = [
-            Rule::excludeIf(
-                data_get($this->data, 'is_free_text', false)
-                || data_get($this->data, 'is_bundle_position', false)
-                || data_get($this->data, 'vat_rate_id', false)
-            ),
-            Rule::requiredIf(
-                ! data_get($this->data, 'is_free_text', false)
-                && ! data_get($this->data, 'is_bundle_position', false)
-                && ! data_get($this->data, 'vat_rate_id', false)
-                && ! data_get($this->data, 'product_id', false)
-            ),
-            app(Numeric::class),
-        ];
+        return parent::setRulesFromRulesets()
+            ->mergeRules([
+                'vat_rate_percentage' => [
+                    Rule::excludeIf(
+                        data_get($this->data, 'is_free_text', false)
+                        || data_get($this->data, 'is_bundle_position', false)
+                        || data_get($this->data, 'vat_rate_id', false)
+                    ),
+                    Rule::requiredIf(
+                        ! data_get($this->data, 'is_free_text', false)
+                        && ! data_get($this->data, 'is_bundle_position', false)
+                        && ! data_get($this->data, 'vat_rate_id', false)
+                        && ! data_get($this->data, 'product_id', false)
+                    ),
+                    app(Numeric::class),
+                ],
+            ]);
     }
 
     public static function models(): array
