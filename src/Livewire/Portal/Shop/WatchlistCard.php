@@ -3,11 +3,13 @@
 namespace FluxErp\Livewire\Portal\Shop;
 
 use FluxErp\Actions\CartItem\DeleteCartItem;
+use FluxErp\Actions\CartItem\UpdateCartItem;
 use FluxErp\Livewire\Forms\CartForm;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Renderless;
@@ -22,7 +24,7 @@ class WatchlistCard extends Component
 
     public function mount(Cart $cart): void
     {
-        $cart->loadMissing('cartItems');
+        $cart->loadMissing(['cartItems' => fn (HasMany $query) => $query->ordered()]);
 
         $this->cartForm->fill($cart);
     }
@@ -30,6 +32,25 @@ class WatchlistCard extends Component
     public function render(): View
     {
         return view('flux::livewire.portal.shop.watchlist-card');
+    }
+
+    #[Renderless]
+    public function reOrder(CartItem $cartItem, int $index): void
+    {
+        if (! $this->cartForm->isUserOwned()) {
+            return;
+        }
+
+        try {
+            UpdateCartItem::make([
+                'id' => $cartItem->id,
+                'order_column' => $index + 1,
+            ])
+                ->validate()
+                ->execute();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     public function removeProduct(int $productId): void
@@ -87,6 +108,7 @@ class WatchlistCard extends Component
                 ->whereKey($this->cartForm->id)
                 ->first()
                 ->cartItems()
+                ->ordered()
                 ->whereHas('product', function (Builder $query) {
                     $query->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop());
                 })
@@ -94,7 +116,7 @@ class WatchlistCard extends Component
                     'product' => fn (BelongsTo $query) => $query
                         ->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop()),
                 ])
-                ->get(['product_id', 'amount'])
+                ->get(['product_id', 'amount', 'order_column'])
                 ->map(fn (CartItem $cartItem) => ['id' => $cartItem->product_id, 'amount' => $cartItem->amount])
                 ->toArray()
         )

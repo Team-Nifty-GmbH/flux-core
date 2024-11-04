@@ -7,12 +7,21 @@
     <x-slot:action>
         <x-button icon="chevron-down" x-on:click="showCart = showCart === {{ $cartForm->id ?? 'null' }} ? null : {{ $cartForm->id ?? 'null' }}" />
     </x-slot:action>
-    <div class="flex gap-4 px-2 py-5 md:px-4" x-cloak x-show="showCart === {{ $cartForm->id ?? 'null' }}" x-collapse>
+    <div
+        class="flex gap-4 px-2 py-5 md:px-4"
+         @if($cartForm->isUserOwned()) x-sort="$wire.reOrder($item, $position);" @endif
+        x-cloak
+        x-show="showCart === {{ $cartForm->id ?? 'null' }}"
+        x-collapse
+    >
         @foreach($cartForm->cart_items ?? [] as $cartFormItem)
             @if(is_null($cartFormItem))
                 @continue
             @endif
-            <div class="max-w-96 relative z-0">
+            <div
+                class="max-w-96 relative z-0"
+                @if($cartForm->isUserOwned()) x-sort:item="{{ $cartFormItem['cart_item_id'] }}" @endif
+            >
                 @if($cartForm->isUserOwned())
                     <x-button.circle
                         xs
