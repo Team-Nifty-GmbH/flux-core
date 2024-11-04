@@ -61,12 +61,12 @@ class CreateOrderPosition extends FluxAction
         $this->data['client_id'] ??= data_get(
             $order,
             'client_id',
-            Client::default()
+            Client::default()?->id
         );
         $this->data['price_list_id'] ??= data_get(
             $order,
             'price_list_id',
-            PriceList::default()
+            PriceList::default()?->id
         );
 
         if (is_int($this->data['sort_number'] ?? false)) {

@@ -22,9 +22,9 @@ class OrderPositionForm extends Form
 
     public ?int $origin_position_id = null;
 
-    public ?int $price_id = null;
-
     public ?int $parent_id = null;
+
+    public ?int $price_id = null;
 
     public ?int $price_list_id = null;
 
