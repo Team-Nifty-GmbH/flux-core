@@ -113,10 +113,9 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     public function toSearchableArray(): array
     {
-        return $this->with('project:id,project_number,name')
-            ->whereKey($this->id)
-            ->first()
-            ?->toArray() ?? [];
+        $this->loadMissing('project:id,project_number,name');
+
+        return $this->toArray();
     }
 
     public function getLabel(): ?string
