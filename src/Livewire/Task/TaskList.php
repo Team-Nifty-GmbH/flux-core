@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Task;
 use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -30,7 +31,7 @@ class TaskList extends BaseTaskList
             ->getStatesFor('state')
             ->map(function ($state) {
                 return [
-                    'label' => __(ucfirst(str_replace('_', ' ', $state))),
+                    'label' => __(Str::headline($state)),
                     'name' => $state,
                 ];
             })

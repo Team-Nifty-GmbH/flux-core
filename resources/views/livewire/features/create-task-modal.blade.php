@@ -114,10 +114,10 @@
                         primary
                         :label="__('Save')"
                         x-on:click="$wire.save().then((task) => {
-                        if (task) {
-                            close();
-                        }
-                    });"
+                            if (task) {
+                                close();
+                            }
+                        });"
                     />
                 </div>
             </x-slot:footer>

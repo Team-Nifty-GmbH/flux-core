@@ -7,6 +7,7 @@ use FluxErp\Models\Task;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
@@ -36,7 +37,7 @@ class CreateTaskModal extends Component
             ->getStatesFor('state')
             ->map(function ($state) {
                 return [
-                    'label' => __(ucfirst(str_replace('_', ' ', $state))),
+                    'label' => __(Str::headline($state)),
                     'name' => $state,
                 ];
             })
