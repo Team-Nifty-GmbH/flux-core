@@ -17,9 +17,9 @@ class CreateTaskModal extends Component
 {
     use Actions;
 
-    public ?string $modelType;
+    public ?string $modelType = null;
 
-    public ?int $modelId;
+    public ?int $modelId = null;
 
     public TaskForm $task;
 
@@ -46,8 +46,14 @@ class CreateTaskModal extends Component
     public function save(): bool
     {
         try {
-            $this->task->model_type = morph_alias(morphed_model($this->modelType) ?? $this->modelType);
-            $this->task->model_id = $this->modelId;
+            if (! is_null($this->modelType)) {
+                $this->task->model_type = morph_alias(morphed_model($this->modelType) ?? $this->modelType);
+                $this->task->model_id = $this->modelId;
+            } else {
+                $this->task->model_type = null;
+                $this->task->model_id = null;
+            }
+
             $this->task->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
