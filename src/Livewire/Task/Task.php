@@ -6,7 +6,6 @@ use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\TaskForm;
-use FluxErp\Models\Category;
 use FluxErp\Models\Task as TaskModel;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
@@ -27,8 +26,6 @@ class Task extends Component
     public string $taskTab = 'task.general';
 
     public array $availableStates = [];
-
-    public array $categories = [];
 
     public function mount(string $id): void
     {
@@ -54,11 +51,6 @@ class Task extends Component
                     'name' => $state,
                 ];
             })
-            ->toArray();
-
-        $this->categories = resolve_static(Category::class, 'query')
-            ->where('model_type', morph_alias(TaskModel::class))
-            ->pluck('name', 'id')
             ->toArray();
     }
 

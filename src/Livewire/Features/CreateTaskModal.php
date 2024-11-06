@@ -1,17 +1,25 @@
 <?php
 
-namespace FluxErp\Livewire\Task;
+namespace FluxErp\Livewire\Features;
 
-use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
+use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
+use WireUi\Traits\Actions;
 
-class TaskList extends BaseTaskList
+class CreateTaskModal extends Component
 {
-    protected string $view = 'flux::livewire.task.task-list';
+    use Actions;
+
+    public ?string $modelType;
+
+    public ?int $modelId;
 
     public TaskForm $task;
 
@@ -19,8 +27,6 @@ class TaskList extends BaseTaskList
 
     public function mount(): void
     {
-        parent::mount();
-
         $this->task->additionalColumns = array_fill_keys(
             resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
             null
@@ -37,21 +43,11 @@ class TaskList extends BaseTaskList
             ->toArray();
     }
 
-    protected function getTableActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('New'))
-                ->color('primary')
-                ->attributes([
-                    'x-on:click' => "\$dispatch('new-task')",
-                ]),
-        ];
-    }
-
     public function save(): bool
     {
         try {
+            $this->task->model_type = morph_alias(morphed_model($this->modelType) ?? $this->modelType);
+            $this->task->model_id = $this->modelId;
             $this->task->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
@@ -59,19 +55,24 @@ class TaskList extends BaseTaskList
             return false;
         }
 
-        $this->loadData();
+        $this->task->reset();
 
         return true;
     }
 
-    public function resetForm(): void
+    public function render(): View|Factory|Application
+    {
+        return view('flux::livewire.features.create-task-modal');
+    }
+
+    #[Renderless]
+    public function resetTask(): void
     {
         $this->task->reset();
+
         $this->task->additionalColumns = array_fill_keys(
             resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
             null
         );
-
-        $this->skipRender();
     }
 }
