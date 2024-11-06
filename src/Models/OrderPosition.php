@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -53,10 +54,6 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
 
     protected static function booted(): void
     {
-        static::addGlobalScope('withChildren', function ($builder) {
-            $builder->with('children');
-        });
-
         static::deleted(function (OrderPosition $orderPosition) {
             $orderPosition->workTime()->update(['order_position_id' => null]);
             $orderPosition->creditNoteCommission()->update(['credit_note_order_position_id' => null]);
@@ -107,6 +104,20 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function getTagsAttribute(): Collection
     {
         return $this->tags()->get();
+    }
+
+    protected function slugPosition(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => array_reduce(
+                explode('.', $value),
+                fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . ltrim($item, '0')
+            ),
+            set: fn ($value) => array_reduce(
+                explode('.', $value),
+                fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . Str::padLeft($item, 8, '0')
+            ),
+        );
     }
 
     protected function totalNetPrice(): Attribute
@@ -215,7 +226,8 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
 
     public function reservedStock(): BelongsToMany
     {
-        return $this->belongsToMany(StockPosting::class, 'order_position_stock_posting')->withPivot('reserved_amount');
+        return $this->belongsToMany(StockPosting::class, 'order_position_stock_posting')
+            ->withPivot('reserved_amount');
     }
 
     public function serialNumbers(): HasManyThrough

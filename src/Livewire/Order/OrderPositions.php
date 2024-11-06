@@ -360,7 +360,7 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function quickAdd(): bool
     {
-        $this->orderPosition->fillFormProduct();
+        $this->orderPosition->fillFromProduct();
 
         $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
             ->setPriceList($this->order->getPriceList())
