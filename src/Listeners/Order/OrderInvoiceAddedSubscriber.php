@@ -48,6 +48,7 @@ class OrderInvoiceAddedSubscriber
         $orderPositions = $order->orderPositions()
             ->where('is_free_text', false)
             ->where('is_bundle_position', false)
+            ->whereDoesntHave('commission')
             ->get();
 
         foreach ($orderPositions as $orderPosition) {
@@ -99,7 +100,9 @@ class OrderInvoiceAddedSubscriber
                         'user_id' => $agent->id,
                         'commission_rate_id' => $commissionRateId,
                         'order_position_id' => $orderPosition->id,
-                    ])->validate()->execute();
+                    ])
+                        ->validate()
+                        ->execute();
                 } catch (ValidationException) {
                 }
             }

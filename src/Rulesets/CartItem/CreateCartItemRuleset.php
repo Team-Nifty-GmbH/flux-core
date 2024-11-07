@@ -43,6 +43,11 @@ class CreateCartItemRuleset extends FluxRuleset
                 'nullable',
                 app(Numeric::class),
             ],
+            'order_column' => [
+                'nullable',
+                'integer',
+                'min:1',
+            ],
         ];
     }
 }

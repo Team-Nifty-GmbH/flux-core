@@ -89,7 +89,10 @@ if (! function_exists('cart')) {
             ->user()
             ?->carts()
             ->current()
-            ->with(['cartItems', 'cartItems.product.coverMedia'])
+            ->with([
+                'cartItems' => fn (\Illuminate\Database\Eloquent\Relations\HasMany $query) => $query->ordered(),
+                'cartItems.product.coverMedia',
+            ])
             ->withSum('cartItems', 'total')
             ->withSum('cartItems', 'total_net')
             ->withSum('cartItems', 'total_gross')

@@ -29,6 +29,11 @@ class UpdateCartItemRuleset extends FluxRuleset
                 'required',
                 app(Numeric::class),
             ],
+            'order_column' => [
+                'nullable',
+                'integer',
+                'min:1',
+            ],
         ];
     }
 }

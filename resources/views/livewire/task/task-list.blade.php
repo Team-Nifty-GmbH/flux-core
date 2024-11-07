@@ -55,6 +55,26 @@
                         <x-inputs.number :label="__('Priority')" wire:model="task.priority" min="0" />
                         <x-textarea wire:model="task.description" label="{{ __('Description') }}" />
                         <x-select
+                            :label="__('Categories')"
+                            wire:model="task.categories"
+                            multiselect
+                            option-value="id"
+                            option-label="label"
+                            :async-data="[
+                                'api' => route('search', \FluxErp\Models\Category::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'where' => [
+                                        [
+                                            'model_type',
+                                            '=',
+                                            morph_alias(\FluxErp\Models\Task::class),
+                                        ],
+                                    ],
+                                ],
+                            ]"
+                        />
+                        <x-select
                             :label="__('Assigned')"
                             option-value="id"
                             option-label="label"

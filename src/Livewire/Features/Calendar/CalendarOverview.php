@@ -30,7 +30,10 @@ class CalendarOverview extends TallCalendarOverview
         $this->selectedCalendar = app(Calendar::class)->toCalendarObject();
 
         $this->availableModels = model_info_all()
-            ->filter(fn (ModelInfo $modelInfo) => $modelInfo->traits->contains(HasCalendarEvents::class))
+            ->filter(fn (ModelInfo $modelInfo) => in_array(
+                HasCalendarEvents::class,
+                class_uses_recursive($modelInfo->class)
+            ))
             ->unique('morphClass')
             ->map(fn ($modelInfo) => [
                 'label' => __(Str::headline($modelInfo->morphClass)),

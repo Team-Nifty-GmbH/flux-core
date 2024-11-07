@@ -231,10 +231,12 @@ class Addresses extends Component
                 ->label(__('Communication'))
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
+            TabButton::make('address.tasks')
+                ->label(__('Tasks'))
+                ->isLivewireComponent()
+                ->wireModel('address.id'),
             TabButton::make('address.permissions')
                 ->label(__('Permissions')),
-            TabButton::make('address.additional-columns')
-                ->label(__('Additional columns')),
             TabButton::make('address.activities')
                 ->label(__('Activities'))
                 ->isLivewireComponent()

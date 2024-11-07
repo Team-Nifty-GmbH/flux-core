@@ -153,6 +153,15 @@ abstract class FluxAction
         return [];
     }
 
+    public function setRulesFromRulesets(): static
+    {
+        foreach (Arr::wrap($this->getRulesets()) as $ruleset) {
+            $this->mergeRules(resolve_static($ruleset, 'getRules'));
+        }
+
+        return $this;
+    }
+
     public function setRules(array $rules): static
     {
         $this->rules = $rules;
@@ -215,13 +224,6 @@ abstract class FluxAction
         }
 
         return $this;
-    }
-
-    protected function setRulesFromRulesets(): void
-    {
-        foreach (Arr::wrap($this->getRulesets()) as $ruleset) {
-            $this->mergeRules(resolve_static($ruleset, 'getRules'));
-        }
     }
 
     protected function prepareForValidation(): void

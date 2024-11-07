@@ -2,11 +2,16 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use FluxErp\Actions\Category\CreateCategory;
+use FluxErp\Actions\Category\DeleteCategory;
+use FluxErp\Actions\Category\UpdateCategory;
 use FluxErp\Livewire\DataTables\CategoryList;
 use FluxErp\Livewire\Forms\CategoryForm;
+use FluxErp\Models\Category;
 use FluxErp\Traits\Categorizable;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use WireUi\Traits\Actions;
@@ -15,7 +20,7 @@ class Categories extends CategoryList
 {
     use Actions;
 
-    protected string $view = 'flux::livewire.settings.categories';
+    protected ?string $includeBefore = 'flux::livewire.settings.categories';
 
     public CategoryForm $category;
 
@@ -23,7 +28,10 @@ class Categories extends CategoryList
     {
         return array_merge(parent::getViewData(), [
             'models' => model_info_all()
-                ->filter(fn ($modelInfo) => in_array(Categorizable::class, $modelInfo->traits->toArray()))
+                ->filter(fn ($modelInfo) => in_array(
+                    Categorizable::class,
+                    class_uses_recursive($modelInfo->class)
+                ))
                 ->unique('morphClass')
                 ->map(fn ($modelInfo) => [
                     'label' => __(Str::headline($modelInfo->morphClass)),
@@ -40,9 +48,8 @@ class Categories extends CategoryList
                 ->label(__('Create'))
                 ->color('primary')
                 ->icon('plus')
-                ->attributes([
-                    'x-on:click' => 'create()',
-                ]),
+                ->when(resolve_static(CreateCategory::class, 'canPerformAction', [false]))
+                ->wireClick('edit()'),
         ];
     }
 
@@ -53,23 +60,32 @@ class Categories extends CategoryList
                 ->label(__('Edit'))
                 ->color('primary')
                 ->icon('pencil')
+                ->when(resolve_static(UpdateCategory::class, 'canPerformAction', [false]))
+                ->wireClick('edit(record.id)'),
+            DataTableButton::make()
+                ->label(__('Delete'))
+                ->color('negative')
+                ->icon('trash')
+                ->when(resolve_static(DeleteCategory::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'x-on:click' => 'edit(record)',
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Category')]),
                 ]),
         ];
     }
 
-    public function edit(?array $record = null): void
+    #[Renderless]
+    public function edit(Category $category): void
     {
-        if ($record) {
-            $this->category->fill(app($this->model)->query()->whereKey($record['id'])->firstOrFail());
-        } else {
-            $this->category->reset();
-        }
+        $this->category->reset();
+        $this->category->fill($category);
 
-        $this->forceRender();
+        $this->js(<<<'JS'
+            $openModal('edit-category');
+        JS);
     }
 
+    #[Renderless]
     public function save(): bool
     {
         try {
@@ -85,8 +101,12 @@ class Categories extends CategoryList
         return true;
     }
 
-    public function delete(): bool
+    #[Renderless]
+    public function delete(Category $category): bool
     {
+        $this->category->reset();
+        $this->category->fill($category);
+
         try {
             $this->category->delete();
         } catch (ValidationException|UnauthorizedException $e) {

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Accounting;
 
+use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\PaymentReminder\CreatePaymentReminder;
 use FluxErp\Contracts\OffersPrinting;
@@ -213,7 +214,7 @@ class PaymentReminder extends OrderList
     {
         foreach ($this->getSelectedValues() as $selectedValue) {
             try {
-                UpdateOrder::make([
+                UpdateLockedOrder::make([
                     'id' => $selectedValue,
                     'payment_state' => Paid::class,
                 ])
