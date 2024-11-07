@@ -611,7 +611,6 @@
                 </div>
             </section>
         </x-slot:prepend>
-        @includeWhen($tab === 'order.order-positions', 'flux::livewire.order.order-positions')
         <x-slot:append>
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">

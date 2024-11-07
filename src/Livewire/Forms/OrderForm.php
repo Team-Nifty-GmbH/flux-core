@@ -7,7 +7,10 @@ use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
+use FluxErp\Models\PriceList;
+use FluxErp\Support\Livewire\Attributes\ExcludeFromActionData;
 use Livewire\Attributes\Locked;
 
 class OrderForm extends FluxForm
@@ -64,10 +67,10 @@ class OrderForm extends FluxForm
 
     public ?string $total_base_gross_price = null;
 
-    #[Locked]
+    #[ExcludeFromActionData]
     public ?float $gross_profit = 0;
 
-    #[Locked]
+    #[ExcludeFromActionData]
     public ?float $margin = 0;
 
     public ?string $total_net_price = null;
@@ -210,9 +213,31 @@ class OrderForm extends FluxForm
         $this->fill($response);
     }
 
+    public function getContact(): ?Contact
+    {
+        return resolve_static(Contact::class, 'query')
+            ->whereKey($this->contact_id)
+            ->first(['id', 'price_list_id']);
+    }
+
+    public function getPriceList(): ?PriceList
+    {
+        return resolve_static(PriceList::class, 'query')
+            ->whereKey($this->price_list_id)
+            ->first([
+                'id',
+                'parent_id',
+                'rounding_method_enum',
+                'rounding_precision',
+                'rounding_number',
+                'rounding_mode',
+                'is_net',
+            ]);
+    }
+
     protected function makeAction(string $name, ?array $data = null): FluxAction
     {
-        $data = $this->toArray();
+        $data = $this->toActionData();
 
         if (! $this->id) {
             unset(

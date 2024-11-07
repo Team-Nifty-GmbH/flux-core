@@ -63,12 +63,12 @@ class CreateOrderPosition extends FluxAction
         $this->data['client_id'] ??= data_get(
             $order,
             'client_id',
-            Client::default()
+            Client::default()?->id
         );
         $this->data['price_list_id'] ??= data_get(
             $order,
             'price_list_id',
-            PriceList::default()
+            PriceList::default()?->id
         );
 
         if (is_int($this->data['sort_number'] ?? false)) {
@@ -120,13 +120,10 @@ class CreateOrderPosition extends FluxAction
 
         $orderPosition->save();
 
-        if ($product?->bundlePositions?->isNotEmpty()) {
+        if ($product?->bundleProducts?->isNotEmpty()) {
             $product = $orderPosition->product()->with('bundleProducts')->first();
-            $sortNumber = $orderPosition->sort_number;
             $product->bundleProducts
-                ->map(function (Product $bundleProduct) use ($orderPosition, &$sortNumber) {
-                    $sortNumber++;
-
+                ->map(function (Product $bundleProduct) use ($orderPosition) {
                     return [
                         'client_id' => $orderPosition->client_id,
                         'order_id' => $orderPosition->order_id,
@@ -138,7 +135,6 @@ class CreateOrderPosition extends FluxAction
                         'amount_bundle' => $bundleProduct->pivot->count,
                         'name' => $bundleProduct->name,
                         'product_number' => $bundleProduct->product_number,
-                        'sort_number' => $sortNumber,
                         'purchase_price' => 0,
                         'vat_rate_percentage' => 0,
                         'is_net' => $orderPosition->is_net,
