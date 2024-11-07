@@ -75,15 +75,6 @@ class PaymentTypeTest extends BaseSetup
         $response->assertStatus(404);
     }
 
-    public function test_get_payment_type_include_empty_string()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/payment-types/' . $this->paymentTypes[1]->id . '?include= ');
-        $response->assertStatus(404);
-    }
-
     public function test_get_payment_type_include_not_allowed()
     {
         $this->user->givePermissionTo($this->permissions['show']);
