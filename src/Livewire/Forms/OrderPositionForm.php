@@ -7,9 +7,8 @@ use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
 
-class OrderPositionForm extends Form
+class OrderPositionForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -22,9 +21,9 @@ class OrderPositionForm extends Form
 
     public ?int $origin_position_id = null;
 
-    public ?int $price_id = null;
-
     public ?int $parent_id = null;
+
+    public ?int $price_id = null;
 
     public ?int $price_list_id = null;
 
@@ -101,18 +100,15 @@ class OrderPositionForm extends Form
 
     protected Product $product;
 
-    public function save(): void
+    protected function getActions(): array
     {
-        $action = $this->id
-            ? UpdateOrderPosition::make($this->toArray())
-            : CreateOrderPosition::make($this->toArray());
-
-        $response = $action->checkPermission()->validate()->execute();
-
-        $this->fill($response);
+        return [
+            'create' => CreateOrderPosition::class,
+            'update' => UpdateOrderPosition::class,
+        ];
     }
 
-    public function fillFormProduct(?Product $product = null): void
+    public function fillFromProduct(?Product $product = null): void
     {
         if ($product instanceof Product) {
             $this->product_id = $product->id;
@@ -137,14 +133,5 @@ class OrderPositionForm extends Form
     public function getProduct(): Product
     {
         return $this->product;
-    }
-
-    public function validate($rules = null, $messages = [], $attributes = []): void
-    {
-        $action = $this->id
-            ? UpdateOrderPosition::make($this->toArray())
-            : CreateOrderPosition::make($this->toArray());
-
-        $action->validate();
     }
 }

@@ -53,7 +53,7 @@ return new class() extends Migration
         DB::table('order_positions')
             ->whereNull('parent_id')
             ->update([
-                'slug_position' => DB::raw('sort_number'),
+                'slug_position' => DB::raw("LPAD(sort_number, 8, '0')"),
             ]);
 
         // Then, iteratively update each level based on their parent positions.
@@ -65,7 +65,9 @@ return new class() extends Migration
                 ->whereNotNull('parent.slug_position')
                 ->whereNull('child.slug_position')
                 ->update([
-                    'child.slug_position' => DB::raw("CONCAT(parent.slug_position, '.', child.sort_number)"),
+                    'child.slug_position' => DB::raw(
+                        "CONCAT(parent.slug_position, '.', LPAD(child.sort_number, 8, '0'))"
+                    ),
                 ]);
         }
     }

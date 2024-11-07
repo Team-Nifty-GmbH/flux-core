@@ -33,7 +33,8 @@ class ReplicateOrder extends FluxAction
                 $getOrderPositionsFromOrigin,
                 fn (Builder $query) => $query->with([
                     'orderPositions' => fn (HasMany $query) => $query
-                        ->where('is_bundle_position', false),
+                        ->where('is_bundle_position', false)
+                        ->orderBy('slug_position'),
                 ])
             )
             ->first()
@@ -84,6 +85,7 @@ class ReplicateOrder extends FluxAction
             $orderPositions = resolve_static(OrderPosition::class, 'query')
                 ->whereKey(array_column($this->data['order_positions'], 'id'))
                 ->where('is_bundle_position', false)
+                ->orderBy('slug_position')
                 ->get()
                 ->map(function (OrderPosition $orderPosition) use ($replicateOrderPositions) {
                     $position = $replicateOrderPositions->first(fn ($item) => $item['id'] === $orderPosition->id);
@@ -95,15 +97,25 @@ class ReplicateOrder extends FluxAction
                 })
                 ->toArray();
         } else {
-            $orderPositions = $originalOrder['order_positions'] ?? [];
+            $orderPositions = array_map(
+                function ($position) {
+                    $position['origin_position_id'] = $position['id'];
+
+                    return $position;
+                },
+                $originalOrder['order_positions'] ?? []
+            );
         }
 
-        $newOrderPosition = null;
+        $newOrderPositions = collect();
         foreach ($orderPositions as $orderPosition) {
             $orderPosition['order_id'] = $order->id;
-            $orderPosition['parent_id'] = $orderPosition['parent_id'] && $newOrderPosition
-                ? $newOrderPosition->getKey()
-                : null;
+
+            if (data_get($orderPosition, 'parent_id')) {
+                $orderPosition['parent_id'] = $newOrderPositions
+                    ->firstWhere('origin_position_id', $orderPosition['parent_id'])
+                    ?->getKey();
+            }
 
             unset(
                 $orderPosition['id'],
@@ -112,10 +124,12 @@ class ReplicateOrder extends FluxAction
                 $orderPosition['amount_packed_products'],
             );
 
-            $newOrderPosition = CreateOrderPosition::make($orderPosition)
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $newOrderPositions->push(
+                CreateOrderPosition::make($orderPosition)
+                    ->checkPermission()
+                    ->validate()
+                    ->execute()
+            );
         }
 
         $order->calculatePrices()->save();
