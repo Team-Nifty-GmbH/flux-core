@@ -1,10 +1,10 @@
-const defaultTheme = require('tailwindcss/defaultTheme')
-const fluxConfig = require('.{{ relative_path }}/tailwind.config.js')
-const wireuiConfig = require('./vendor/wireui/wireui/tailwind.config.js')
-const tallCalendar = require('./vendor/team-nifty-gmbh/tall-calendar/tailwind.config.js')
-const dataTablesConfig = require('./vendor/team-nifty-gmbh/tall-datatables/tailwind.config.js')
+/** @type {import('tailwindcss').Config} */
+import fluxConfig from '.{{ relative_path }}/tailwind.config.mjs';
+import wireuiConfig from './vendor/wireui/wireui/tailwind.config.js';
+import tallCalendar from './vendor/team-nifty-gmbh/tall-calendar/tailwind.config.mjs';
+import dataTablesConfig from './vendor/team-nifty-gmbh/tall-datatables/tailwind.config.mjs';
 
-module.exports = {
+export default {
     presets: [
         wireuiConfig,
         dataTablesConfig,
