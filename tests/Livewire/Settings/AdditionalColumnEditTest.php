@@ -16,4 +16,21 @@ class AdditionalColumnEditTest extends TestCase
         Livewire::test(AdditionalColumnEdit::class)
             ->assertStatus(200);
     }
+
+    public function test_create_additional_column()
+    {
+        Livewire::test(AdditionalColumnEdit::class)
+            ->call('show')
+            ->assertSet('isNew', true)
+            ->assertSet('hideModel', false)
+            ->set('additionalColumn.name', 'Test')
+            ->set('additionalColumn.field_type', 'text')
+            ->set('additionalColumn.label', 'Test label')
+            ->set('additionalColumn.model_type', 'order')
+            ->call('save')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertDispatched('closeModal')
+            ->assertWireuiNotification(icon: 'success');
+    }
 }
