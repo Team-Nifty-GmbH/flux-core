@@ -86,16 +86,6 @@ class UserEdit extends Component
         );
     }
 
-    public function getRules(): array
-    {
-        $action = ($this->user['id'] ?? false) ? UpdateUser::make($this->user) : CreateUser::make($this->user);
-        $rules = $action->getRules();
-
-        $rules['password'][] = 'confirmed';
-
-        return $rules;
-    }
-
     public function show(?int $id = null): void
     {
         $user = resolve_static(User::class, 'query')
@@ -141,7 +131,7 @@ class UserEdit extends Component
             $user = $action::make($this->user)
                 ->checkPermission()
                 ->setRulesFromRulesets()
-                ->mergeRules($this->getRules())
+                ->addRules(['password' => 'confirmed'])
                 ->validate()
                 ->execute();
         } catch (\Exception $e) {

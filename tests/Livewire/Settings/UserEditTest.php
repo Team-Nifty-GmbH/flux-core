@@ -7,6 +7,7 @@ use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 
 class UserEditTest extends BaseSetup
@@ -24,7 +25,8 @@ class UserEditTest extends BaseSetup
             ->for(Language::factory())
             ->create();
 
-        Livewire::actingAs($this->user)
+        /** @var Testable $component */
+        $component = Livewire::actingAs($this->user)
             ->test(UserEdit::class)
             ->call('show', $user->id)
             ->assertSuccessful()
@@ -36,12 +38,26 @@ class UserEditTest extends BaseSetup
             ->assertSet('user.user_code', $user->user_code)
             ->assertSet('user.is_active', $user->is_active)
             ->assertSet('user.password', null)
-            ->assertHasNoErrors()
-            ->set('user.firstname', $newFirstName = Str::uuid()->toString())
+            ->assertHasNoErrors();
+
+        $component->set('user.firstname', $newFirstName = Str::uuid()->toString())
+            ->set('user.password', 'invalid')
+            ->call('save')
+            ->assertHasErrors(['password']);
+        $this->assertEquals(4, count(data_get($component->errors()->messages(), 'password', [])));
+
+        $component
+            ->set('user.password', 'Password123!')
+            ->call('save')
+            ->assertHasErrors(['password'])
+            ->set('user.password_confirmation', 'Password123!')
             ->call('save')
             ->assertHasNoErrors()
+            ->assertDispatched('closeModal')
+            ->assertDispatchedTo('data-tables.user-list', 'loadData')
             ->assertWireuiNotification(icon: 'success');
 
         $this->assertEquals($newFirstName, $user->fresh()->firstname);
+        $this->assertNotEquals($user->password, $user->fresh()->password);
     }
 }

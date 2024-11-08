@@ -181,6 +181,18 @@ abstract class FluxAction
         return $this;
     }
 
+    public function addRules(array $rules): static
+    {
+        foreach ($rules as $key => $value) {
+            data_set($this->rules, $key, array_merge(
+                data_get($this->rules, $key, []),
+                Arr::wrap($value)
+            ));
+        }
+
+        return $this;
+    }
+
     public function setResult(mixed $result): static
     {
         $this->result = $result;
