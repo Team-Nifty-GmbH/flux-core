@@ -104,8 +104,8 @@
                             flat
                             negative
                             :label="__('Delete')"
-                            wire:click="deleteOrderPosition(); close();"
-                            wire:flux-confirm.icon.error="{{  __('wire:confirm.delete', ['model' => __('Order Position')]) }}"
+                            wire:click="deleteOrderPosition().then((success) => {if(success) close();})"
+                            wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order Position')]) }}"
                         />
                     </div>
                     <div class="flex w-full justify-end">

@@ -433,18 +433,20 @@ class OrderPositions extends OrderPositionList
     }
 
     #[Renderless]
-    public function deleteOrderPosition(): void
+    public function deleteOrderPosition(): bool
     {
         try {
             $this->orderPosition->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return;
+            return false;
         }
 
         $this->loadData();
         $this->recalculateOrderTotals();
+
+        return true;
     }
 
     protected function recalculateOrderTotals(): void
