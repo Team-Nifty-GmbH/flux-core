@@ -185,7 +185,7 @@ abstract class FluxAction
     {
         foreach ($rules as $key => $value) {
             data_set($this->rules, $key, array_merge(
-                data_get($this->rules, $key, []),
+                Arr::wrap(data_get($this->rules, $key, [])),
                 Arr::wrap($value)
             ));
         }
