@@ -15,15 +15,12 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 class OrderTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Order $order;
 
     private OrderType $orderType;

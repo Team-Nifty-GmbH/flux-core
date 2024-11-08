@@ -100,7 +100,13 @@
             <x-slot:footer>
                 <div class="flex justify-between gap-x-4">
                     <div x-show="$wire.orderPosition.id">
-                        <x-button flat negative :label="__('Delete')" x-on:click="$wire.deleteOrderPosition(); close();" />
+                        <x-button
+                            flat
+                            negative
+                            :label="__('Delete')"
+                            wire:click="deleteOrderPosition(); close();"
+                            wire:flux-confirm.icon.error="{{  __('wire:confirm.delete', ['model' => __('Order Position')]) }}"
+                        />
                     </div>
                     <div class="flex w-full justify-end">
                         <x-button flat :label="__('Cancel')" x-on:click="close" />

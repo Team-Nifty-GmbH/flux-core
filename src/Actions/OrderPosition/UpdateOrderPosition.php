@@ -133,7 +133,14 @@ class UpdateOrderPosition extends FluxAction
             $errors = [];
             $orderPosition = resolve_static(OrderPosition::class, 'query')
                 ->whereKey($this->data['id'])
+                ->with('order:id,is_locked')
                 ->first();
+
+            if ($orderPosition->order->is_locked) {
+                $errors += [
+                    'is_locked' => [__('Order is locked')],
+                ];
+            }
 
             // Check if new parent causes a cycle
             if (($this->data['parent_id'] ?? false)
