@@ -340,8 +340,6 @@ class Order extends Component
                 $this->replicateOrder->order_type_id = $this->replicateOrderTypes[0]['id'];
             }
 
-            $this->forceRender();
-
             $this->js(<<<'JS'
                 $openModal('create-child-order');
             JS);
@@ -380,9 +378,9 @@ class Order extends Component
             ->first();
 
         $this->{$orderVariable}->client_id = $contact?->client_id ?? Client::default()->id;
-        $this->{$orderVariable}->agent_id = $contact?->agent_id ?: $this->{$orderVariable}->agent_id;
-        $this->{$orderVariable}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress->id;
-        $this->{$orderVariable}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress->id;
+        $this->{$orderVariable}->agent_id = $contact?->agent_id ?? $this->{$orderVariable}->agent_id;
+        $this->{$orderVariable}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderVariable}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
         $this->{$orderVariable}->price_list_id = $contact?->price_list_id;
         $this->{$orderVariable}->payment_type_id = $contact?->payment_type_id;
 
@@ -391,7 +389,7 @@ class Order extends Component
                 ->whereKey($this->order->address_invoice_id)
                 ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
                 ->first()
-                ->toArray();
+                ?->toArray();
         }
     }
 
