@@ -14,16 +14,14 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\VatRate;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 class OrderTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Order $order;
 
     private OrderType $orderType;
@@ -61,7 +59,11 @@ class OrderTest extends BaseSetup
 
         $this->order = Order::factory()
             ->has(OrderPosition::factory()
+                ->for(VatRate::factory())
                 ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 100,
+                    'unit_gross_price' => 119,
                     'total_gross_price' => 119,
                     'total_net_price' => 100,
                     'client_id' => $this->dbClient->id,
@@ -250,5 +252,32 @@ class OrderTest extends BaseSetup
 
         $this->assertNull($this->order->refresh()->invoice_number);
         $this->assertNull($this->order->invoice());
+    }
+
+    public function test_replicate_order()
+    {
+        OrderType::factory()->create([
+            'client_id' => $this->dbClient->id,
+            'order_type_enum' => OrderTypeEnum::Order,
+            'is_active' => true,
+            'is_hidden' => false,
+        ]);
+
+        $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->call('replicate')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertSet('replicateOrderTypes', [])
+            ->assertExecutesJs(<<<'JS'
+                $openModal('replicate-order')
+             JS)
+            ->call('saveReplicate')
+            ->assertStatus(200)
+            ->assertHasNoErrors();
+
+        $component->assertRedirectToRoute(
+            'orders.id',
+            ['id' => $component->get('replicateOrder.id')]
+        );
     }
 }
