@@ -262,6 +262,12 @@ class OrderTest extends BaseSetup
             'is_active' => true,
             'is_hidden' => false,
         ]);
+        $this->order->update([
+            'is_locked' => true,
+            'invoice_number' => Str::uuid(),
+        ]);
+
+        $this->order->calculatePrices()->save();
 
         $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
             ->call('replicate')
@@ -279,5 +285,13 @@ class OrderTest extends BaseSetup
             'orders.id',
             ['id' => $component->get('replicateOrder.id')]
         );
+        $replicatedOrder = Order::query()->whereKey($component->get('replicateOrder.id'))->first();
+
+        $this->assertEquals($this->order->orderPositions()->count(), $replicatedOrder->orderPositions()->count());
+        $this->assertEquals(null, $replicatedOrder->invoice_number);
+        $this->assertEquals(false, $replicatedOrder->is_locked);
+        $this->assertEquals($this->order->id, $replicatedOrder->parent_id);
+        $this->assertNotEquals($replicatedOrder->order_number, $this->order->order_number);
+        $this->assertNotEquals($replicatedOrder->uuid, $this->order->uuid);
     }
 }
