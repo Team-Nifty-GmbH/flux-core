@@ -168,6 +168,7 @@ class OrderForm extends FluxForm
                 'parent',
                 'orderType:id,order_type_enum',
                 'contact:id,has_delivery_lock',
+                'currency:id,symbol',
             ]);
             $values = array_merge(
                 $values->toArray(),

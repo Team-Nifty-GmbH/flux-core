@@ -318,6 +318,12 @@ class OrderPositions extends OrderPositionList
     }
 
     #[Renderless]
+    public function changedProductId(Product $product): void
+    {
+        $this->orderPosition->fillFromProduct($product);
+    }
+
+    #[Renderless]
     public function addOrderPosition(): bool
     {
         $this->orderPosition->order_id = $this->order->id;
@@ -401,6 +407,7 @@ class OrderPositions extends OrderPositionList
         }
 
         $this->loadData();
+        $this->recalculateOrderTotals();
 
         $this->orderPosition->reset();
     }
@@ -423,6 +430,23 @@ class OrderPositions extends OrderPositionList
         $this->recalculateOrderTotals();
 
         $this->reset('selected');
+    }
+
+    #[Renderless]
+    public function deleteOrderPosition(): bool
+    {
+        try {
+            $this->orderPosition->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+        $this->recalculateOrderTotals();
+
+        return true;
     }
 
     protected function recalculateOrderTotals(): void
