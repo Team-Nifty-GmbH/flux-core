@@ -61,7 +61,7 @@
                     <div class="sm:col-span-6">
                         <x-button.circle class="mr-2" primary icon="plus" wire:click="addEntry" />
                     </div>
-                    @foreach($additionalColumn['values'] as $index => $value)
+                    @foreach($additionalColumn->values ?? [] as $index => $value)
                         <div class="sm:col-span-5">
                             <x-input wire:model.live="additionalColumn.values.{{$index}}" />
                         </div>
