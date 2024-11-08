@@ -21,6 +21,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
 use WireUi\Traits\Actions;
 
 class UserEdit extends Component
@@ -121,14 +122,17 @@ class UserEdit extends Component
 
     public function save(): void
     {
-        if (
-            in_array(
-                resolve_static(Role::class, 'findByName', ['name' => 'Super Admin'])->id,
-                $this->user['roles']
-            )
-            && ! auth()->user()->hasRole('Super Admin')
-        ) {
-            return;
+        try {
+            if (
+                in_array(
+                    resolve_static(Role::class, 'findByName', ['name' => 'Super Admin'])->id,
+                    $this->user['roles']
+                )
+                && ! auth()->user()->hasRole('Super Admin')
+            ) {
+                return;
+            }
+        } catch (RoleDoesNotExist) {
         }
 
         $action = ($this->user['id'] ?? false) ? UpdateUser::class : CreateUser::class;
@@ -136,7 +140,8 @@ class UserEdit extends Component
         try {
             $user = $action::make($this->user)
                 ->checkPermission()
-                ->setRules($this->getRules())
+                ->setRulesFromRulesets()
+                ->mergeRules($this->getRules())
                 ->validate()
                 ->execute();
         } catch (\Exception $e) {
@@ -217,14 +222,19 @@ class UserEdit extends Component
     {
         $this->skipRender();
 
-        if (in_array(
-            resolve_static(Role::class, 'findByName', ['name' => 'Super Admin'])->id,
-            $this->user['roles']
-        )) {
-            $this->lockedPermissions = app(Permission::class)->all(['id'])->pluck('id')->toArray();
-            $this->isSuperAdmin = true;
+        try {
+            if (in_array(
+                resolve_static(Role::class, 'findByName', ['name' => 'Super Admin'])->id,
+                $this->user['roles']
+            )) {
+                $this->lockedPermissions = app(Permission::class)->all(['id'])->pluck('id')->toArray();
+                $this->isSuperAdmin = true;
 
-            return;
+                return;
+            }
+        } catch (RoleDoesNotExist) {
+            $this->lockedPermissions = [];
+            $this->isSuperAdmin = false;
         }
 
         $lockedPermissions = resolve_static(Role::class, 'query')
