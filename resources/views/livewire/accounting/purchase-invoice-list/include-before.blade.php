@@ -62,42 +62,62 @@
                         ]"
                     />
                 </div>
-                @if(count($currencies ?? []) > 1)
-                    <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                <div class="flex w-full gap-1.5">
+                    @if(count($currencies ?? []) > 1)
+                        <div class="flex-1" x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                            <x-select
+                                x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                                wire:model="purchaseInvoiceForm.currency_id"
+                                option-key-value
+                                :options="$currencies"
+                                :label="__('Currency')"
+                            />
+                        </div>
+                    @endif
+                    <div class="flex-1" x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
                         <x-select
                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                            wire:model="purchaseInvoiceForm.currency_id"
+                            wire:model="purchaseInvoiceForm.order_type_id"
                             option-key-value
-                            :options="$currencies"
-                            :label="__('Currency')"
+                            :options="$orderTypes"
+                            :label="__('Order Type')"
                         />
                     </div>
-                @endif
-                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
-                    <x-select
-                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                        wire:model="purchaseInvoiceForm.order_type_id"
-                        option-key-value
-                        :options="$orderTypes"
-                        :label="__('Order Type')"
-                    />
-                </div>
-                <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
-                    <x-select
-                        x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                        wire:model="purchaseInvoiceForm.payment_type_id"
-                        option-key-value
-                        :options="$paymentTypes"
-                        :label="__('Payment Type')"
-                    />
+                    <div class="flex-1" x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                        <x-select
+                            :label="__('Approval User')"
+                            wire:model="purchaseInvoiceForm.approval_user_id"
+                            option-value="id"
+                            option-label="label"
+                            :template="[
+                                'name'   => 'user-option',
+                            ]"
+                            :async-data="[
+                                'api' => route('search', \FluxErp\Models\User::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'with' => 'media',
+                                ]
+                            ]"
+                        />
+                    </div>
+                    <div class="flex-1" x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                        <x-select
+                            x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                            wire:model="purchaseInvoiceForm.payment_type_id"
+                            option-key-value
+                            :options="$paymentTypes"
+                            :label="__('Payment Type')"
+                        />
+                    </div>
                 </div>
                 <div class="flex gap-1.5 w-full">
-                    <x-input
+                    <x-input class="flex-1"
                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                         wire:model="purchaseInvoiceForm.invoice_number"
                         :label="__('Invoice Number')"
                     />
-                    <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
+                    <div class="flex-1" x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
                         <x-datetime-picker
                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                             without-time

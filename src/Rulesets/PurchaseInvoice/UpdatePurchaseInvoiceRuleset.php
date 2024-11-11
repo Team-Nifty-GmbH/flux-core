@@ -26,6 +26,11 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PurchaseInvoice::class]),
             ],
+            'approval_user_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => User::class])->where('is_active', true),
+            ],
             'client_id' => [
                 'nullable',
                 'integer',

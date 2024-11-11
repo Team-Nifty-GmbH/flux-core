@@ -210,6 +210,7 @@ class PurchaseInvoiceList extends BaseDataTable
     #[Renderless]
     public function fillFromSelectedContact(Contact $contact): void
     {
+        $this->purchaseInvoiceForm->approval_user_id ??= $contact->approval_user_id;
         $this->purchaseInvoiceForm->payment_type_id ??= $contact->purchase_payment_type_id ?? $contact->payment_type_id;
         $this->purchaseInvoiceForm->currency_id = $contact->currency_id ?? Currency::default()?->id;
         $this->purchaseInvoiceForm->client_id = $contact->client_id;
