@@ -212,10 +212,18 @@ class PurchaseInvoiceList extends BaseDataTable
     #[Renderless]
     public function fillFromSelectedContact(Contact $contact): void
     {
+        $bankConnection = $contact->contactBankConnections()->latest()->first();
         $this->purchaseInvoiceForm->approval_user_id ??= $contact->approval_user_id;
         $this->purchaseInvoiceForm->payment_type_id ??= $contact->purchase_payment_type_id ?? $contact->payment_type_id;
         $this->purchaseInvoiceForm->currency_id = $contact->currency_id ?? Currency::default()?->id;
         $this->purchaseInvoiceForm->client_id = $contact->client_id;
+
+        $this->purchaseInvoiceForm->lay_out_user_id = null;
+        $this->purchaseInvoiceForm->account_holder = $bankConnection?->account_holder;
+        $this->purchaseInvoiceForm->bank_name = $bankConnection?->bank_name;
+        $this->purchaseInvoiceForm->bic = $bankConnection?->bic;
+        $this->purchaseInvoiceForm->iban = $bankConnection?->iban;
+
         $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
     }
 }
