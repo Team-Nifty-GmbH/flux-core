@@ -80,7 +80,8 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
         return array_merge(
             parent::getRules(),
             resolve_static(BankConnectionRuleset::class, 'getRules'),
-            resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules')
+            resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules'),
+            resolve_static(TagRuleset::class, 'getRules'),
         );
     }
 }

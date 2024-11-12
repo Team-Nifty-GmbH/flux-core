@@ -33,6 +33,8 @@ class PurchaseInvoiceList extends BaseDataTable
     public array $enabledCols = [
         'url',
         'media.file_name',
+        'contact.invoice_address.name',
+        'tags.name',
     ];
 
     public array $formatters = [
