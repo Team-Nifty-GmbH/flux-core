@@ -13,8 +13,6 @@ class UpdateUserRoles extends FluxAction
     {
         parent::boot($data);
         $this->data = $this->data ? array_merge(['assign' => true], $this->data) : [];
-
-        $this->rules = resolve_static(UpdateUserRolesRuleset::class, 'getRules');
     }
 
     public static function name(): string
@@ -25,6 +23,11 @@ class UpdateUserRoles extends FluxAction
     public static function models(): array
     {
         return [Role::class, User::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateUserRolesRuleset::class;
     }
 
     public function performAction(): array

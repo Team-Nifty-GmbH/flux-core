@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Accounting;
 
+use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\PaymentReminder\CreatePaymentReminder;
 use FluxErp\Contracts\OffersPrinting;
@@ -13,6 +14,7 @@ use FluxErp\Models\PaymentReminder as PaymentReminderModel;
 use FluxErp\Models\PaymentReminderText;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\Traits\Livewire\CreatesDocuments;
+use FluxErp\View\Printing\PaymentReminder\PaymentReminderView;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
@@ -147,7 +149,7 @@ class PaymentReminder extends OrderList
     protected function getPrintLayouts(): array
     {
         return [
-            'payment-reminder',
+            'payment-reminder' => PaymentReminderView::class,
         ];
     }
 
@@ -212,7 +214,7 @@ class PaymentReminder extends OrderList
     {
         foreach ($this->getSelectedValues() as $selectedValue) {
             try {
-                UpdateOrder::make([
+                UpdateLockedOrder::make([
                     'id' => $selectedValue,
                     'payment_state' => Paid::class,
                 ])

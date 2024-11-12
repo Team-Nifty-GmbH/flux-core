@@ -117,13 +117,15 @@ trait RendersWidgets
                 $name = $widget['component_name'];
 
                 try {
-                    $permissionExists = resolve_static(
-                        Permission::class,
-                        'findByName',
-                        [
-                            'name' => 'widget.' . $name,
-                        ]
-                    )->exists;
+                    $permissionExists = ! is_null(
+                        resolve_static(
+                            Permission::class,
+                            'findByName',
+                            [
+                                'name' => 'widget.' . $name,
+                            ]
+                        )
+                    );
                 } catch (PermissionDoesNotExist) {
                     $permissionExists = false;
                 }

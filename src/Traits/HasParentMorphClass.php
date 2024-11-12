@@ -3,13 +3,10 @@
 namespace FluxErp\Traits;
 
 use Illuminate\Database\ClassMorphViolationException;
-use Illuminate\Database\Eloquent\Concerns\HasRelationships;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 trait HasParentMorphClass
 {
-    use HasRelationships;
-
     public function getMorphClass(): string
     {
         try {

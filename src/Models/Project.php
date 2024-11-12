@@ -15,7 +15,6 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\ModelStates\HasStates;
@@ -24,7 +23,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Project extends Model implements InteractsWithDataTables
+class Project extends FluxModel implements InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
         HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, LogsActivity,

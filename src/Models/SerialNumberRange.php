@@ -11,13 +11,12 @@ use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Translation\Translator;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Arr;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
-class SerialNumberRange extends Model
+class SerialNumberRange extends FluxModel
 {
     use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 

@@ -8,10 +8,9 @@ use FluxErp\Rulesets\FormBuilderResponse\CreateFormBuilderResponseRuleset;
 
 class CreateFormBuilderResponse extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateFormBuilderResponseRuleset::class, 'getRules');
+        return CreateFormBuilderResponseRuleset::class;
     }
 
     public static function models(): array

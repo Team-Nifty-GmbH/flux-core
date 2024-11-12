@@ -16,10 +16,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateOrderPosition extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateOrderPositionRuleset::class, 'getRules');
+        return UpdateOrderPositionRuleset::class;
     }
 
     public static function models(): array
@@ -134,7 +133,14 @@ class UpdateOrderPosition extends FluxAction
             $errors = [];
             $orderPosition = resolve_static(OrderPosition::class, 'query')
                 ->whereKey($this->data['id'])
+                ->with('order:id,is_locked')
                 ->first();
+
+            if ($orderPosition->order->is_locked) {
+                $errors += [
+                    'is_locked' => [__('Order is locked')],
+                ];
+            }
 
             // Check if new parent causes a cycle
             if (($this->data['parent_id'] ?? false)

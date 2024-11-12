@@ -8,10 +8,9 @@ use FluxErp\Rulesets\EventSubscription\DeleteEventSubscriptionRuleset;
 
 class DeleteEventSubscription extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteEventSubscriptionRuleset::class, 'getRules');
+        return DeleteEventSubscriptionRuleset::class;
     }
 
     public static function models(): array

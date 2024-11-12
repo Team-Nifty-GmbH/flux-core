@@ -1,8 +1,6 @@
 import {defineConfig} from 'vite';
 import laravel from 'laravel-vite-plugin';
 import path from 'path';
-import tailwindcss from 'tailwindcss';
-import autoprefixer from 'autoprefixer';
 
 export default defineConfig({
     plugins: [

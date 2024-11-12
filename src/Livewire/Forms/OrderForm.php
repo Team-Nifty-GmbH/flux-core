@@ -5,8 +5,12 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
+use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
-use Illuminate\Database\Eloquent\Model;
+use FluxErp\Models\Contact;
+use FluxErp\Models\Order;
+use FluxErp\Models\PriceList;
+use FluxErp\Support\Livewire\Attributes\ExcludeFromActionData;
 use Livewire\Attributes\Locked;
 
 class OrderForm extends FluxForm
@@ -63,10 +67,10 @@ class OrderForm extends FluxForm
 
     public ?string $total_base_gross_price = null;
 
-    #[Locked]
+    #[ExcludeFromActionData]
     public ?float $gross_profit = 0;
 
-    #[Locked]
+    #[ExcludeFromActionData]
     public ?float $margin = 0;
 
     public ?string $total_net_price = null;
@@ -144,35 +148,97 @@ class OrderForm extends FluxForm
     #[Locked]
     public bool $isPurchase = false;
 
+    #[Locked]
+    public bool $hasContactDeliveryLock = false;
+
     protected function getActions(): array
     {
         return [
             'create' => CreateOrder::class,
             'update' => UpdateOrder::class,
+            'update_locked' => UpdateLockedOrder::class,
             'delete' => DeleteOrder::class,
         ];
     }
 
     public function fill($values): void
     {
-        if ($values instanceof Model) {
-            $values->loadMissing('parent');
-            $this->isPurchase = $values->orderType->order_type_enum->isPurchase();
+        if ($values instanceof Order) {
+            $values->loadMissing([
+                'parent',
+                'orderType:id,order_type_enum',
+                'contact:id,has_delivery_lock',
+                'currency:id,symbol',
+            ]);
+            $values = array_merge(
+                $values->toArray(),
+                $values->parent
+                    ? [
+                        'parent' => [
+                            'label' => $values->parent->getLabel(),
+                            'url' => $values->parent->getUrl(),
+                        ],
+                    ]
+                    : [],
+                [
+                    'isPurchase' => $values->orderType->order_type_enum->isPurchase(),
+                ],
+            );
         }
 
         parent::fill($values);
 
-        $this->parent = $this->parent
-            ? [
-                'label' => $values->parent->getLabel(),
-                'url' => $values->parent->getUrl(),
-            ]
-            : null;
+        $this->hasContactDeliveryLock = data_get($values, 'contact.has_delivery_lock', false);
+    }
+
+    public function save(): void
+    {
+        if ($this->{$this->getKey()} && ! $this->is_locked) {
+            $this->update();
+        } elseif ($this->{$this->getKey()} && $this->is_locked) {
+            $this->updateLocked();
+        } else {
+            $this->create();
+        }
+    }
+
+    public function updateLocked(): void
+    {
+        $response = $this->makeAction('update_locked')
+            ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
+            ->validate()
+            ->execute();
+
+        $this->actionResult = $response;
+
+        $this->fill($response);
+    }
+
+    public function getContact(): ?Contact
+    {
+        return resolve_static(Contact::class, 'query')
+            ->whereKey($this->contact_id)
+            ->first(['id', 'price_list_id']);
+    }
+
+    public function getPriceList(): ?PriceList
+    {
+        return resolve_static(PriceList::class, 'query')
+            ->whereKey($this->price_list_id)
+            ->first([
+                'id',
+                'parent_id',
+                'rounding_method_enum',
+                'rounding_precision',
+                'rounding_number',
+                'rounding_mode',
+                'is_net',
+            ]);
     }
 
     protected function makeAction(string $name, ?array $data = null): FluxAction
     {
-        $data = $this->toArray();
+        $data = $this->toActionData();
 
         if (! $this->id) {
             unset(

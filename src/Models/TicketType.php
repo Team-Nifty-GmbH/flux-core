@@ -10,11 +10,10 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class TicketType extends Model
+class TicketType extends FluxModel
 {
     use CacheModelQueries, HasAdditionalColumns, HasCustomEvents, HasPackageFactory, HasUserModification, HasUuid,
         LogsActivity, SoftDeletes;

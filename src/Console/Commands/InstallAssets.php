@@ -110,7 +110,7 @@ class InstallAssets extends Command
             ? $files
             : [
                 'package.json',
-                'tailwind.config.js',
+                'tailwind.config.mjs',
                 'postcss.config.js',
                 'vite.config.js',
             ];

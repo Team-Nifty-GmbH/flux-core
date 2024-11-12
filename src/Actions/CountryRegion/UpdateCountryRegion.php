@@ -10,10 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateCountryRegion extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateCountryRegionRuleset::class, 'getRules');
+        return UpdateCountryRegionRuleset::class;
     }
 
     public static function models(): array

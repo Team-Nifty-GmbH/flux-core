@@ -2,7 +2,7 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Actions\Order\UpdateOrder;
+use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
@@ -11,11 +11,10 @@ use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Printable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\View\Printing\PaymentReminder\PaymentReminderView;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class PaymentReminder extends Model implements OffersPrinting
+class PaymentReminder extends FluxModel implements OffersPrinting
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity, Printable, SoftDeletes;
 
@@ -32,7 +31,7 @@ class PaymentReminder extends Model implements OffersPrinting
         });
 
         static::created(function (PaymentReminder $model) {
-            UpdateOrder::make([
+            UpdateLockedOrder::make([
                 'id' => $model->order_id,
                 'payment_reminder_current_level' => $model->reminder_level,
                 'payment_reminder_next_date' => $model->created_at

@@ -64,7 +64,10 @@ class WorkTime extends Component
                 ->toArray(),
             'trackableTypes' => model_info_all()
                 ->unique('morphClass')
-                ->filter(fn (ModelInfo $modelInfo) => in_array(Trackable::class, $modelInfo->traits->toArray()))
+                ->filter(fn (ModelInfo $modelInfo) => in_array(
+                    Trackable::class,
+                    class_uses_recursive($modelInfo->class)
+                ))
                 ->map(fn ($modelInfo) => [
                     'label' => __(Str::headline($modelInfo->morphClass)),
                     'value' => $modelInfo->morphClass,

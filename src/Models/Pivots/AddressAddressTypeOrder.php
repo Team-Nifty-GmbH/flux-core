@@ -7,9 +7,8 @@ use FluxErp\Models\AddressType;
 use FluxErp\Models\Order;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class AddressAddressTypeOrder extends Pivot
+class AddressAddressTypeOrder extends FluxPivot
 {
     protected $table = 'address_address_type_order';
 

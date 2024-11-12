@@ -19,12 +19,15 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrderPosition extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = array_merge(
-            resolve_static(CreateOrderPositionRuleset::class, 'getRules'),
-            [
+        return CreateOrderPositionRuleset::class;
+    }
+
+    public function setRulesFromRulesets(): static
+    {
+        return parent::setRulesFromRulesets()
+            ->mergeRules([
                 'vat_rate_percentage' => [
                     Rule::excludeIf(
                         data_get($this->data, 'is_free_text', false)
@@ -39,8 +42,7 @@ class CreateOrderPosition extends FluxAction
                     ),
                     app(Numeric::class),
                 ],
-            ]
-        );
+            ]);
     }
 
     public static function models(): array
@@ -61,12 +63,12 @@ class CreateOrderPosition extends FluxAction
         $this->data['client_id'] ??= data_get(
             $order,
             'client_id',
-            Client::default()
+            Client::default()?->id
         );
         $this->data['price_list_id'] ??= data_get(
             $order,
             'price_list_id',
-            PriceList::default()
+            PriceList::default()?->id
         );
 
         if (is_int($this->data['sort_number'] ?? false)) {
@@ -118,13 +120,10 @@ class CreateOrderPosition extends FluxAction
 
         $orderPosition->save();
 
-        if ($product?->bundlePositions?->isNotEmpty()) {
+        if ($product?->bundleProducts?->isNotEmpty()) {
             $product = $orderPosition->product()->with('bundleProducts')->first();
-            $sortNumber = $orderPosition->sort_number;
             $product->bundleProducts
-                ->map(function (Product $bundleProduct) use ($orderPosition, &$sortNumber) {
-                    $sortNumber++;
-
+                ->map(function (Product $bundleProduct) use ($orderPosition) {
                     return [
                         'client_id' => $orderPosition->client_id,
                         'order_id' => $orderPosition->order_id,
@@ -136,7 +135,6 @@ class CreateOrderPosition extends FluxAction
                         'amount_bundle' => $bundleProduct->pivot->count,
                         'name' => $bundleProduct->name,
                         'product_number' => $bundleProduct->product_number,
-                        'sort_number' => $sortNumber,
                         'purchase_price' => 0,
                         'vat_rate_percentage' => 0,
                         'is_net' => $orderPosition->is_net,
@@ -158,24 +156,31 @@ class CreateOrderPosition extends FluxAction
 
     protected function validateData(): void
     {
+        $errors = [];
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(app(OrderPosition::class));
 
         $this->data = $validator->validate();
+        $order = resolve_static(Order::class, 'query')
+            ->whereKey($this->data['order_id'])
+            ->first();
+
+        if ($order->is_locked) {
+            $errors += [
+                'is_locked' => [__('Order is locked')],
+            ];
+        }
 
         // Only allow creation of order_position if exists in parent order and amount not greater than totalAmount
         if (! ($this->data['is_free_text'] ?? false)) {
-            $order = resolve_static(Order::class, 'query')
-                ->whereKey($this->data['order_id'])
-                ->first();
-
             if ($order?->parent_id
                 && in_array($order->orderType->order_type_enum, [OrderTypeEnum::Retoure, OrderTypeEnum::SplitOrder])
             ) {
                 if (! $originPositionId = data_get($this->data, 'origin_position_id')) {
-                    throw ValidationException::withMessages([
+
+                    $errors += [
                         'origin_position_id' => [__('validation.required', ['attribute' => 'origin_position_id'])],
-                    ])->errorBag('createOrderPosition');
+                    ];
                 }
 
                 if (! resolve_static(OrderPosition::class, 'query')
@@ -183,9 +188,9 @@ class CreateOrderPosition extends FluxAction
                     ->where('order_id', $order->parent_id)
                     ->exists()
                 ) {
-                    throw ValidationException::withMessages([
-                        'origin_position_id' => ['Order position does not exists in parent order.'],
-                    ]);
+                    $errors += [
+                        'origin_position_id' => [__('Order position does not exists in parent order.')],
+                    ];
                 }
 
                 $originPosition = resolve_static(OrderPosition::class, 'query')
@@ -198,11 +203,15 @@ class CreateOrderPosition extends FluxAction
                 );
 
                 if (bccomp($this->data['amount'] ?? 1, $maxAmount) > 0) {
-                    throw ValidationException::withMessages([
+                    $errors += [
                         'amount' => [__('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount])],
-                    ])->errorBag('createOrderPosition');
+                    ];
                 }
             }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)->errorBag('createOrderPosition');
         }
     }
 }

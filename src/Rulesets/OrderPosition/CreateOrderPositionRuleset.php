@@ -28,6 +28,7 @@ class CreateOrderPositionRuleset extends FluxRuleset
             'uuid' => 'nullable|string|uuid|unique:order_positions,uuid',
             'client_id' => [
                 'required_without:order_id',
+                'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Client::class]),
             ],

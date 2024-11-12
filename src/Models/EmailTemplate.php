@@ -7,12 +7,11 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @deprecated
  */
-class EmailTemplate extends Model
+class EmailTemplate extends FluxModel
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 

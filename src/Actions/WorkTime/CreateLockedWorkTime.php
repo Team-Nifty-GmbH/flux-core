@@ -9,10 +9,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreateLockedWorkTime extends CreateWorkTime
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateLockedWorkTimeRuleset::class, 'getRules');
+        return CreateLockedWorkTimeRuleset::class;
     }
 
     public function performAction(): WorkTime
@@ -23,8 +22,10 @@ class CreateLockedWorkTime extends CreateWorkTime
         $workTime->is_billable ??= $workTime->workTimeType?->is_billable ?? false;
 
         if ($workTime->ended_at) {
-            $workTime->total_time_ms = $workTime->ended_at->diffInMilliseconds($workTime->started_at)
-                - $workTime->paused_time_ms;
+            $workTime->total_time_ms = bcsub(
+                $workTime->ended_at->diffInMilliseconds($workTime->started_at),
+                $workTime->paused_time_ms
+            );
         } else {
             $workTime->is_locked = false;
         }

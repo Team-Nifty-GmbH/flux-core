@@ -14,6 +14,7 @@ use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Auth\Logout;
 use FluxErp\Livewire\Auth\ResetPassword;
 use FluxErp\Livewire\Calendars\Calendar;
+use FluxErp\Livewire\Cart\Watchlists;
 use FluxErp\Livewire\Contact\CommunicationList;
 use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
@@ -200,6 +201,9 @@ Route::middleware('web')
 
                 Route::get('/media', MediaGrid::class)
                     ->name('media-grid');
+
+                Route::get('/watchlists', Watchlists::class)
+                    ->name('watchlists');
             });
 
             Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);

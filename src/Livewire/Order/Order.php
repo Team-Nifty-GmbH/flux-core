@@ -6,20 +6,14 @@ use Exception;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\ToggleLock;
+use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
-use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
-use FluxErp\Actions\OrderPosition\FillOrderPositions;
-use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
-use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
-use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\Forms\OrderForm;
-use FluxErp\Livewire\Forms\OrderPositionForm;
 use FluxErp\Livewire\Forms\OrderReplicateForm;
 use FluxErp\Livewire\Forms\ScheduleForm;
 use FluxErp\Models\Address;
@@ -33,43 +27,32 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Models\Product;
 use FluxErp\Models\Schedule;
-use FluxErp\Models\Task;
-use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\ComponentAttributeBag;
+use Illuminate\View\View;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
+use Livewire\Component;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 use WireUi\Traits\Actions;
 
-class Order extends OrderPositionList
+class Order extends Component
 {
     use Actions, CreatesDocuments, WithTabs;
 
     protected string $view = 'flux::livewire.order.order';
 
-    protected ?string $selectValue = 'index';
-
     public OrderForm $order;
 
     public OrderReplicateForm $replicateOrder;
 
-    public OrderPositionForm $orderPosition;
-
     public ScheduleForm $schedule;
-
-    public ?int $orderPositionIndex = null;
 
     public array $availableStates = [];
 
@@ -79,22 +62,6 @@ class Order extends OrderPositionList
 
     public array $states = [];
 
-    public bool $isSelectable = true;
-
-    public bool $isDirtyData = false;
-
-    public array $enabledCols = [
-        'slug_position',
-        'name',
-        'unit_net_price',
-        'amount',
-        'total_net_price',
-    ];
-
-    public ?bool $isSearchable = false;
-
-    public bool $isFilterable = false;
-
     public array $selectedOrderPositions = [];
 
     public array $replicateOrderTypes = [];
@@ -102,28 +69,8 @@ class Order extends OrderPositionList
     #[Url]
     public string $tab = 'order.order-positions';
 
-    public function getListeners(): array
-    {
-        return array_merge(
-            parent::getListeners(),
-            [
-                'order:add-products' => 'addProducts',
-            ]
-        );
-    }
-
     public function mount(?string $id = null): void
     {
-        parent::mount();
-
-        $this->filters = [
-            [
-                'column' => 'order_id',
-                'operator' => '=',
-                'value' => $id,
-            ],
-        ];
-
         $this->fetchOrder($id);
 
         $orderType = resolve_static(OrderType::class, 'query')
@@ -134,57 +81,62 @@ class Order extends OrderPositionList
 
         $this->getAvailableStates(['payment_state', 'delivery_state', 'state']);
 
-        $this->isSelectable = ! $this->order->is_locked;
-
         if (in_array($value, [OrderTypeEnum::PurchaseSubscription->value, OrderTypeEnum::Subscription->value])) {
             $this->fillSchedule();
         }
     }
 
-    public function getSelectAttributes(): ComponentAttributeBag
+    public function render(): View
     {
-        return new ComponentAttributeBag([
-            'x-show' => '! record.is_bundle_position && ! record.is_locked',
-        ]);
-    }
-
-    protected function getRowAttributes(): DataTableRowAttributes
-    {
-        return DataTableRowAttributes::make()
-            ->bind(
-                'class',
-                "{
-                    'bg-gray-200 dark:bg-secondary-700 font-bold': (record.is_free_text && record.depth === 0 && record.has_children),
-                    'opacity-90': record.is_alternative,
-                    'opacity-50 sortable-filter': record.is_bundle_position,
-                    'font-semibold': record.is_free_text
-                }"
-            );
-    }
-
-    protected function getRowActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->icon('pencil')
-                ->color('primary')
-                ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => <<<'JS'
-                            editOrderPosition(index).then(() => $openModal('edit-order-position'));
-                        JS,
-                    'x-show' => '! record.is_bundle_position',
-                    'x-cloak' => true,
-                ])
-                ->when(! $this->order->is_locked),
-            DataTableButton::make()
-                ->icon('eye')
-                ->attributes([
-                    'x-cloak' => 'true',
-                    'x-show' => 'record.product_id',
-                    'wire:click' => 'showProduct(record.product_id)',
-                ]),
-        ];
+        return view(
+            $this->view,
+            [
+                'additionalModelActions' => $this->getAdditionalModelActions(),
+                'priceLists' => resolve_static(PriceList::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'paymentTypes' => resolve_static(PaymentType::class, 'query')
+                    ->whereRelation('clients', 'id', $this->order->client_id)
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'languages' => resolve_static(Language::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'clients' => resolve_static(Client::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'orderTypes' => resolve_static(OrderType::class, 'query')
+                    ->where('is_hidden', false)
+                    ->where('is_active', true)
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'frequencies' => array_map(
+                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
+                    array_intersect(
+                        FrequenciesEnum::getBasicFrequencies(),
+                        [
+                            'daily',
+                            'dailyAt',
+                            'weekly',
+                            'weeklyOn',
+                            'monthly',
+                            'monthlyOn',
+                            'twiceMonthly',
+                            'lastDayOfMonth',
+                            'quarterly',
+                            'quarterlyOn',
+                            'yearly',
+                            'yearlyOn',
+                        ]
+                    )
+                ),
+                'contactBankConnections' => resolve_static(ContactBankConnection::class, 'query')
+                    ->where('contact_id', $this->order->contact_id)
+                    ->select(['id', 'contact_id', 'iban'])
+                    ->pluck('iban', 'id')
+                    ?->toArray() ?? [],
+            ]
+        );
     }
 
     public function getAdditionalModelActions(): array
@@ -236,99 +188,13 @@ class Order extends OrderPositionList
         ];
     }
 
-    public function getFormatters(): array
-    {
-        return array_merge(
-            parent::getFormatters(),
-            [
-                'slug_position' => 'string',
-                'alternative_tag' => ['state', [__('Alternative') => 'negative']],
-            ]
-        );
-    }
-
-    protected function getLeftAppends(): array
-    {
-        return [
-            'name' => 'indentation',
-        ];
-    }
-
-    protected function getRightAppends(): array
-    {
-        return [
-            'name' => 'alternative_tag',
-        ];
-    }
-
-    protected function getTopAppends(): array
-    {
-        return [
-            'name' => 'product_number',
-        ];
-    }
-
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'additionalModelActions' => $this->getAdditionalModelActions(),
-                'vatRates' => resolve_static(VatRate::class, 'query')
-                    ->get(['id', 'name', 'rate_percentage'])
-                    ->toArray(),
-                'priceLists' => resolve_static(PriceList::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'paymentTypes' => resolve_static(PaymentType::class, 'query')
-                    ->where('client_id', $this->order->client_id)
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'languages' => resolve_static(Language::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'clients' => resolve_static(Client::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'orderTypes' => resolve_static(OrderType::class, 'query')
-                    ->where('is_hidden', false)
-                    ->where('is_active', true)
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'frequencies' => array_map(
-                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
-                    array_intersect(
-                        FrequenciesEnum::getBasicFrequencies(),
-                        [
-                            'daily',
-                            'dailyAt',
-                            'weekly',
-                            'weeklyOn',
-                            'monthly',
-                            'monthlyOn',
-                            'twiceMonthly',
-                            'lastDayOfMonth',
-                            'quarterly',
-                            'quarterlyOn',
-                            'yearly',
-                            'yearlyOn',
-                        ]
-                    )
-                ),
-                'contactBankConnections' => resolve_static(ContactBankConnection::class, 'query')
-                    ->where('contact_id', $this->order->contact_id)
-                    ->select(['id', 'contact_id', 'iban'])
-                    ->pluck('iban', 'id')
-                    ?->toArray() ?? [],
-            ]
-        );
-    }
-
     public function getTabs(): array
     {
         return [
             TabButton::make('order.order-positions')
-                ->label(__('Order positions')),
+                ->label(__('Order positions'))
+                ->isLivewireComponent()
+                ->wireModel('order'),
             TabButton::make('order.attachments')
                 ->label(__('Attachments'))
                 ->isLivewireComponent()
@@ -356,24 +222,12 @@ class Order extends OrderPositionList
         ];
     }
 
-    public function loadData(): void
-    {
-        if (! $this->isDirtyData) {
-            parent::loadData();
-        }
-    }
-
-    public function updatedTab(): void
-    {
-        $this->forceRender();
-    }
-
     public function updatedOrderIsConfirmed(): void
     {
         $this->skipRender();
 
         try {
-            UpdateOrder::make([
+            UpdateLockedOrder::make([
                 'id' => $this->order->id,
                 'is_confirmed' => $this->order->is_confirmed,
             ])
@@ -424,7 +278,6 @@ class Order extends OrderPositionList
         }
 
         $this->fetchOrder($this->order->id);
-        $this->forceRender();
     }
 
     #[Renderless]
@@ -432,7 +285,13 @@ class Order extends OrderPositionList
     {
         $this->order->address_delivery = $this->order->address_delivery ?: [];
         try {
-            $action = UpdateOrder::make($this->order->toArray())->checkPermission()->validate();
+            $action = (
+                resolve_static(OrderModel::class, 'query')->whereKey($this->order->id)->value('is_locked')
+                    ? UpdateLockedOrder::make($this->order->toActionData())
+                    : UpdateOrder::make($this->order->toActionData())
+            )
+                ->checkPermission()
+                ->validate();
 
             $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
@@ -441,25 +300,8 @@ class Order extends OrderPositionList
             return false;
         }
 
-        $order = $action->execute();
+        $action->execute();
         $this->notification()->success(__('Order saved successfully!'));
-
-        if ($this->initialized) {
-            try {
-                FillOrderPositions::make([
-                    'order_id' => $order->id,
-                    'order_positions' => array_filter($this->data, fn ($item) => ! $item['is_bundle_position']),
-                    'simulate' => false,
-                ])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
-
-                return false;
-            }
-        }
 
         return true;
     }
@@ -498,8 +340,6 @@ class Order extends OrderPositionList
                 $this->replicateOrder->order_type_id = $this->replicateOrderTypes[0]['id'];
             }
 
-            $this->forceRender();
-
             $this->js(<<<'JS'
                 $openModal('create-child-order');
             JS);
@@ -537,19 +377,19 @@ class Order extends OrderPositionList
             ->with('mainAddress:id,contact_id')
             ->first();
 
-        $this->{$orderVariable}->client_id = $contact->client_id;
-        $this->{$orderVariable}->agent_id = $contact->agent_id ?: $this->{$orderVariable}->agent_id;
-        $this->{$orderVariable}->address_invoice_id = $contact->invoice_address_id ?? $contact->mainAddress->id;
-        $this->{$orderVariable}->address_delivery_id = $contact->delivery_address_id ?? $contact->mainAddress->id;
-        $this->{$orderVariable}->price_list_id = $contact->price_list_id;
-        $this->{$orderVariable}->payment_type_id = $contact->payment_type_id;
+        $this->{$orderVariable}->client_id = $contact?->client_id ?? Client::default()->id;
+        $this->{$orderVariable}->agent_id = $contact?->agent_id ?? $this->{$orderVariable}->agent_id;
+        $this->{$orderVariable}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderVariable}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
+        $this->{$orderVariable}->price_list_id = $contact?->price_list_id;
+        $this->{$orderVariable}->payment_type_id = $contact?->payment_type_id;
 
         if (! $replicate) {
             $this->order->address_invoice = resolve_static(Address::class, 'query')
                 ->whereKey($this->order->address_invoice_id)
                 ->select(['id', 'company', 'firstname', 'lastname', 'zip', 'city', 'street'])
                 ->first()
-                ->toArray();
+                ?->toArray();
         }
     }
 
@@ -557,7 +397,7 @@ class Order extends OrderPositionList
     public function saveStates(): void
     {
         try {
-            UpdateOrder::make([
+            UpdateLockedOrder::make([
                 'id' => $this->order->id,
                 'state' => $this->order->state,
                 'payment_state' => $this->order->payment_state,
@@ -571,14 +411,6 @@ class Order extends OrderPositionList
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
         }
-    }
-
-    #[Renderless]
-    public function showProduct(Product $product): void
-    {
-        $this->js(<<<JS
-            \$openDetailModal('{$product->getUrl()}');
-        JS);
     }
 
     public function takeOrderPositions(array $positionIds): void
@@ -616,59 +448,20 @@ class Order extends OrderPositionList
     }
 
     #[Renderless]
-    public function deleteOrderPosition(): void
+    public function recalculateOrderTotals(): void
     {
-        $selected = $this->selected;
-        $this->selected = [$this->orderPositionIndex];
+        $this->order->total_net_price = 0;
+        $this->order->total_gross_price = 0;
+        $this->order->total_vats = [];
+        $this->order->total_base_net_price = 0;
 
-        $this->deleteSelectedOrderPositions();
+        $order = resolve_static(OrderModel::class, 'query')
+            ->whereKey($this->order->id)
+            ->first('id');
 
-        $this->selected = $selected;
-    }
+        $order->calculatePrices()->save();
 
-    #[Renderless]
-    public function recalculateOrderPositions(): void
-    {
-        $products = resolve_static(Product::class, 'query')
-            ->whereIntegerInRaw('id', array_column($this->data, 'product_id'))
-            ->get(['id', 'vat_rate_id'])
-            ->keyBy('id');
-        $contact = resolve_static(Contact::class, 'query')
-            ->whereKey($this->order->contact_id)
-            ->first(['id', 'price_list_id']);
-        $priceList = resolve_static(PriceList::class, 'query')
-            ->whereKey($this->order->price_list_id)
-            ->first([
-                'id',
-                'parent_id',
-                'rounding_method_enum',
-                'rounding_precision',
-                'rounding_number',
-                'rounding_mode',
-                'is_net',
-            ]);
-
-        foreach ($this->data as &$item) {
-            if (data_get($item, 'is_bundle_position') || ! data_get($item, 'product_id')) {
-                continue;
-            }
-
-            $this->orderPosition->reset();
-            $this->orderPosition->fill($item);
-
-            $this->orderPosition->unit_price = PriceHelper::make($products[$item['product_id']])
-                ->setPriceList($priceList)
-                ->setContact($contact)
-                ->price()
-                ->price;
-
-            $this->orderPosition->calculate();
-
-            $item = array_merge($item, $this->orderPosition->toArray());
-        }
-
-        $this->orderPosition->reset();
-        $this->recalculateOrderTotals();
+        $this->order->fill($order->toArray());
     }
 
     #[Renderless]
@@ -677,150 +470,11 @@ class Order extends OrderPositionList
         $this->replicateOrder->order_positions = array_values($this->replicateOrder->order_positions);
     }
 
-    #[Renderless]
-    public function editOrderPosition(?int $index = null): void
-    {
-        if (! is_null($index)) {
-            $this->orderPositionIndex = $index;
-            $this->orderPosition->fill($this->data[$index]);
-        }
-
-        $this->orderPosition->order_id = $this->order->id;
-        $this->orderPosition->client_id = $this->orderPosition->client_id ?: $this->order->client_id;
-        $this->orderPosition->price_list_id = $this->orderPosition->price_list_id ?: $this->order->price_list_id;
-        $this->orderPosition->contact_id = $this->orderPosition->contact_id ?: $this->order->contact_id;
-
-        if (is_null($index) && $this->orderPosition->product_id) {
-            $this->changedProductId();
-        }
-    }
-
-    #[Renderless]
-    public function addOrderPosition(): bool
-    {
-        $this->orderPosition->calculate();
-
-        try {
-            $this->orderPosition->validate();
-        } catch (ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->orderPosition->alternative_tag = $this->orderPosition->is_alternative ? __('Alternative') : null;
-
-        if (is_null($this->orderPositionIndex)) {
-            if (! $this->orderPosition->slug_position ?? false) {
-                $slugPositions = array_column($this->data, 'slug_position');
-                $this->orderPosition->slug_position = (int) Str::before(array_pop($slugPositions), '.') + 1;
-            }
-            $this->data[] = $this->itemToArray($this->orderPosition);
-
-            // if product has bundle products, add them to the order
-            if ($this->orderPosition->product_id) {
-                app(Product::class)->addGlobalScope('bundleProducts', function (Builder $builder) {
-                    $builder->with('bundleProducts');
-                });
-                $product = resolve_static(Product::class, 'query')
-                    ->whereHas('bundleProducts')
-                    ->whereKey($this->orderPosition->product_id)
-                    ->first();
-                if ($product) {
-                    $this->addBundlePositions($product, $this->orderPosition->slug_position);
-                }
-            }
-
-        } else {
-            $this->data[$this->orderPositionIndex] = $this->itemToArray($this->orderPosition);
-        }
-
-        $this->order->total_net_price = bcadd(
-            $this->order->total_net_price,
-            data_get($this->orderPosition, 'total_net_price', 0)
-        );
-        $this->order->total_gross_price = bcadd(
-            $this->order->total_gross_price,
-            data_get($this->orderPosition, 'total_gross_price', 0)
-        );
-
-        $this->recalculateOrderTotals();
-        $this->orderPosition->reset();
-
-        return true;
-    }
-
-    #[Renderless]
-    public function addProducts(array|int $products): void
-    {
-        foreach (Arr::wrap($products) as $product) {
-            if (is_array($product)) {
-                $this->orderPosition->fill($product);
-            } else {
-                $this->orderPosition->product_id = $product;
-            }
-
-            $this->quickAdd();
-        }
-    }
-
-    #[Renderless]
-    public function changedProductId(?Product $product = null): void
-    {
-        $this->orderPosition->fillFormProduct($product);
-    }
-
-    #[Renderless]
-    public function resetOrderPosition(): void
-    {
-        $this->orderPositionIndex = null;
-        $this->orderPosition->reset();
-    }
-
-    #[Renderless]
-    public function quickAdd(): bool
-    {
-        $productId = $this->orderPosition->product_id;
-        $this->editOrderPosition();
-        $this->orderPosition->product_id = $productId;
-        $this->changedProductId();
-
-        return $this->addOrderPosition();
-    }
-
-    #[Renderless]
-    public function deleteSelectedOrderPositions(): void
-    {
-        if (($wildcardIndex = array_search('*', $this->selected)) !== false) {
-            unset($this->selected[$wildcardIndex]);
-        }
-
-        $slugPositions = [];
-        foreach ($this->selected as $index) {
-            $slugPositions[] = $this->data[$index]['slug_position'];
-            unset($this->data[$index]);
-        }
-
-        // remove all children
-        if ($slugPositions) {
-            foreach ($this->data as $index => $item) {
-                if (Str::startsWith($item['slug_position'] . '.', $slugPositions)) {
-                    unset($this->data[$index]);
-                }
-            }
-        }
-
-        $this->data = array_values($this->data);
-        $this->recalculateOrderTotals();
-
-        $this->reset('selected');
-    }
-
     public function fillSchedule(): void
     {
         $schedule = resolve_static(Schedule::class, 'query')
+            ->whereRelation('orders', 'id', $this->order->id)
             ->where('class', ProcessSubscriptionOrder::class)
-            ->whereJsonContains('parameters->orderId', $this->order->id)
             ->first();
 
         if ($schedule) {
@@ -843,6 +497,7 @@ class Order extends OrderPositionList
     #[Renderless]
     public function saveSchedule(): bool
     {
+        $this->schedule->orders = [$this->order->id];
         $this->schedule->name = ProcessSubscriptionOrder::name();
         $this->schedule->parameters = [
             'orderId' => $this->order->id,
@@ -862,46 +517,15 @@ class Order extends OrderPositionList
 
     public function createDocuments(): null|MediaStream|Media
     {
-        return $this->createDocumentFromItems(
+        $createDocuments = $this->createDocumentFromItems(
             resolve_static(OrderModel::class, 'query')
                 ->whereKey($this->order->id)
                 ->first()
         );
-    }
 
-    #[Renderless]
-    public function createTasks(int $projectId): void
-    {
-        // save the order first
-        $this->save();
+        $this->fetchOrder($this->order->id);
 
-        foreach ($this->selected as $orderPositionIndex) {
-            // check if the task already exists or the selected order position is not a numeric value
-            if (! is_numeric($orderPositionIndex)
-                || resolve_static(Task::class, 'query')
-                    ->where('project_id', $projectId)
-                    ->where('model_type', morph_alias(OrderPosition::class))
-                    ->where('model_id', data_get($this->data, $orderPositionIndex . '.id'))
-                    ->exists()
-            ) {
-                continue;
-            }
-
-            try {
-                CreateTask::make([
-                    'project_id' => $projectId,
-                    'model_type' => morph_alias(OrderPosition::class),
-                    'model_id' => data_get($this->data, $orderPositionIndex . '.id'),
-                    'name' => data_get($this->data, $orderPositionIndex . '.name'),
-                    'description' => data_get($this->data, $orderPositionIndex . '.description'),
-                ])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
-            }
-        }
+        return $createDocuments;
     }
 
     protected function getAvailableStates(array|string $fieldNames): void
@@ -952,7 +576,7 @@ class Order extends OrderPositionList
 
         $this->printLayouts = array_map(
             fn (string $layout) => ['layout' => $layout, 'label' => __($layout)],
-            $this->getPrintLayouts()
+            array_keys($this->getPrintLayouts())
         );
 
         $invoice = $order->invoice();
@@ -962,168 +586,6 @@ class Order extends OrderPositionList
                 'mime_type' => $invoice->mime_type,
             ];
         }
-    }
-
-    protected function addBundlePositions(Product $product, string $slugPrefix): void
-    {
-        $padLength = strlen((string) $product->bundleProducts->count());
-        $indent = (str_word_count($slugPrefix, 0, '.') + 1) * 20;
-
-        foreach ($product->bundleProducts ?? [] as $index => $bundleProduct) {
-            $this->editOrderPosition();
-            $this->orderPosition->fillFormProduct($bundleProduct);
-            $this->orderPosition->amount = bcmul($bundleProduct->pivot->count, $this->orderPosition->amount);
-            $this->orderPosition->amount_bundle = $bundleProduct->pivot->count;
-            $this->orderPosition->is_bundle_position = true;
-            $this->orderPosition->slug_position = $slugPrefix . '.' . Str::padLeft($index + 1, $padLength, '0');
-            $this->orderPosition->indentation = <<<HTML
-                    <div class="text-right indent-icon" style="width:{$indent}px;">
-                    </div>
-                    HTML;
-            try {
-                $this->addOrderPosition();
-            } catch (ValidationException $e) {
-                exception_to_notifications($e, $this);
-            }
-
-            if ($bundleProduct->bundleProducts->count() > 0) {
-                $this->addBundlePositions($bundleProduct, $this->orderPosition->slug_position);
-            }
-        }
-    }
-
-    protected function recalculateOrderTotals(): void
-    {
-        $this->order->total_net_price = 0;
-        $this->order->total_gross_price = 0;
-        $this->order->total_vats = [];
-        $this->order->total_base_net_price = 0;
-
-        foreach ($this->data as $item) {
-            $vatRatePercentage = bcadd($item['vat_rate_percentage'], 0);
-
-            // calculate total net price
-            $this->order->total_net_price = bcadd($this->order->total_net_price, $item['total_net_price'] ?? 0);
-
-            // calculate total gross price
-            $this->order->total_gross_price = bcadd(
-                $this->order->total_gross_price,
-                $item['total_gross_price'] ?? 0
-            );
-
-            // calculate total base net price
-            $this->order->total_base_net_price = bcadd(
-                $this->order->total_base_net_price,
-                $item['total_base_net_price'] ?? 0
-            );
-
-            // calculate sum of vats
-            $this->order->total_vats[$vatRatePercentage]['total_vat_price'] = bcadd(
-                $this->order->total_vats[$vatRatePercentage]['total_vat_price'] ?? 0,
-                $item['vat_price'] ?? 0
-            );
-            $this->order->total_vats[$vatRatePercentage]['vat_rate_percentage'] = $item['vat_rate_percentage'];
-        }
-
-        $this->isDirtyData = true;
-    }
-
-    protected function getReturnKeys(): array
-    {
-        return array_merge(
-            parent::getReturnKeys(),
-            [
-                'client_id',
-                'ledger_account_id',
-                'order_id',
-                'parent_id',
-                'price_id',
-                'price_list_id',
-                'product_id',
-                'vat_rate_id',
-                'warehouse_id',
-                'amount',
-                'amount_bundle',
-                'discount_percentage',
-                'purchase_price',
-                'total_base_gross_price',
-                'total_base_net_price',
-                'total_gross_price',
-                'vat_price',
-                'unit_net_price',
-                'unit_gross_price',
-                'vat_rate_percentage',
-                'description',
-                'name',
-                'product_number',
-                'sort_number',
-                'is_alternative',
-                'is_net',
-                'is_free_text',
-                'is_bundle_position',
-                'depth',
-                'has_children',
-                'unit_price',
-                'alternative_tag',
-                'indentation',
-            ]
-        );
-    }
-
-    protected function getResultFromQuery(Builder $query): array
-    {
-        $tree = to_flat_tree($query->get()->toArray());
-        $returnKeys = $this->getReturnKeys();
-
-        foreach ($tree as &$item) {
-            $item = Arr::only(Arr::dot($item), $returnKeys);
-            $item['indentation'] = '';
-            $item['unit_price'] = $item['is_net'] ? ($item['unit_net_price'] ?? 0) : ($item['unit_gross_price'] ?? 0);
-            $item['alternative_tag'] = $item['is_alternative'] ? __('Alternative') : '';
-
-            if ($item['depth'] > 0) {
-                $indent = $item['depth'] * 20;
-                $item['indentation'] = <<<HTML
-                    <div class="text-right indent-icon" style="width:{$indent}px;">
-                    </div>
-                    HTML;
-            }
-        }
-
-        return $tree;
-    }
-
-    protected function getSelectedActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('Delete'))
-                ->icon('trash')
-                ->color('negative')
-                ->when(fn () => resolve_static(DeleteOrderPosition::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
-                    'wire:click' => 'deleteSelectedOrderPositions(); showSelectedActions = false;',
-                ]),
-            DataTableButton::make()
-                ->label(__('Create tasks'))
-                ->when(fn () => resolve_static(CreateTask::class, 'canPerformAction', [false]))
-                ->xOnClick('$openModal(\'create-tasks\')'),
-            DataTableButton::make()
-                ->label(__('Recalculate prices'))
-                ->attributes([
-                    'wire:flux-confirm.icon.warning' => __(
-                        'Recalculate prices|Are you sure you want to recalculate the prices?|Cancel|Confirm'
-                    ),
-                    'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
-                ]),
-        ];
-    }
-
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->whereNull('parent_id')
-            ->reorder('sort_number');
     }
 
     protected function getSubject(OffersPrinting $item): string
@@ -1151,13 +613,11 @@ class Order extends OrderPositionList
 
     protected function getPrintLayouts(): array
     {
-        return array_keys(
-            resolve_static(OrderModel::class, 'query')
-                ->whereKey($this->order->id)
-                ->with('orderType')
-                ->first(['id', 'order_type_id'])
-                ->resolvePrintViews()
-        );
+        return resolve_static(OrderModel::class, 'query')
+            ->whereKey($this->order->id)
+            ->with('orderType')
+            ->first(['id', 'order_type_id'])
+            ->resolvePrintViews();
     }
 
     protected function supportsDocumentPreview(): bool

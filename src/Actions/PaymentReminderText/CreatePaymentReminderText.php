@@ -8,10 +8,9 @@ use FluxErp\Rulesets\PaymentReminderText\CreatePaymentReminderTextRuleset;
 
 class CreatePaymentReminderText extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreatePaymentReminderTextRuleset::class, 'getRules');
+        return CreatePaymentReminderTextRuleset::class;
     }
 
     public static function models(): array

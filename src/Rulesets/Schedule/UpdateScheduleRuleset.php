@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\Schedule;
 
 use FluxErp\Enums\FrequenciesEnum;
+use FluxErp\Models\Order;
 use FluxErp\Models\Schedule;
 use FluxErp\Rules\Frequency;
 use FluxErp\Rules\ModelExists;
@@ -54,6 +55,12 @@ class UpdateScheduleRuleset extends FluxRuleset
             'ends_at' => 'date|nullable',
             'recurrences' => 'exclude_unless:ends_at,null|nullable|integer|min:1',
             'is_active' => 'boolean',
+
+            'orders' => 'array|nullable',
+            'orders.*' => [
+                'integer',
+                app(ModelExists::class, ['model' => Order::class]),
+            ],
         ];
     }
 }

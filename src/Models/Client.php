@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\ClientPaymentType;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -15,7 +16,6 @@ use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,7 +24,7 @@ use Laravel\Scout\EngineManager;
 use Laravel\Scout\Engines\Engine;
 use Spatie\MediaLibrary\HasMedia;
 
-class Client extends Model implements HasMedia
+class Client extends FluxModel implements HasMedia
 {
     use CacheModelQueries, Commentable, Filterable, HasClientAssignment, HasDefault, HasPackageFactory,
         HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
@@ -85,6 +85,12 @@ class Client extends Model implements HasMedia
         return $this->belongsTo(Country::class);
     }
 
+    public function paymentTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(PaymentType::class, 'client_payment_type')
+            ->using(ClientPaymentType::class);
+    }
+
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
@@ -93,6 +99,18 @@ class Client extends Model implements HasMedia
     public function settings(): MorphMany
     {
         return $this->morphMany(Setting::class, 'model');
+    }
+
+    public function getPostalAddressOneLineAttribute(): string
+    {
+        return implode(
+            ' | ',
+            array_filter([
+                $this->name,
+                $this->street,
+                $this->postcode . ' ' . $this->city,
+            ])
+        );
     }
 
     public function registerMediaCollections(): void

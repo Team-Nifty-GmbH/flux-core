@@ -5,9 +5,8 @@ namespace FluxErp\Models\Pivots;
 use FluxErp\Models\QueueMonitor;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class QueueMonitorable extends Pivot
+class QueueMonitorable extends FluxPivot
 {
     protected $table = 'queue_monitorables';
 

@@ -27,11 +27,11 @@ class AccountingTest extends BaseSetup
         parent::setUp();
 
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient,
+            'client_id' => $this->dbClient->id,
         ]);
 
         $address = Address::factory()->create([
-            'client_id' => $this->dbClient,
+            'client_id' => $this->dbClient->id,
             'contact_id' => $contact->id,
         ]);
 
@@ -40,19 +40,20 @@ class AccountingTest extends BaseSetup
         $language = Language::factory()->create();
 
         $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient,
+            'client_id' => $this->dbClient->id,
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 
-        $paymentType = PaymentType::factory()->create([
-            'client_id' => $this->dbClient,
-            'is_active' => true,
-        ]);
+        $paymentType = PaymentType::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create([
+                'is_active' => true,
+            ]);
 
         $priceList = PriceList::factory()->create();
 
         $this->order = Order::factory()->create([
-            'client_id' => $this->dbClient,
+            'client_id' => $this->dbClient->id,
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
             'payment_type_id' => $paymentType->id,

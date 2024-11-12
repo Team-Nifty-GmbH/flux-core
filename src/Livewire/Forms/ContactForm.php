@@ -52,6 +52,8 @@ class ContactForm extends FluxForm
 
     public ?string $vat_id = null;
 
+    public bool $has_delivery_lock = false;
+
     public array $main_address = [
         'client_id' => null,
         'country_id' => null,

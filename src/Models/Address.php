@@ -2,8 +2,10 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Mail\MagicLoginLink;
+use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Support\Collection\AddressCollection;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
@@ -20,8 +22,10 @@ use FluxErp\Traits\Lockable;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\MonitorsQueue;
 use FluxErp\Traits\Notifiable;
+use FluxErp\Traits\Printable;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
+use FluxErp\View\Printing\Address\AddressLabel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -31,7 +35,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -39,8 +42,6 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\UnauthorizedException;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Tags\HasTags;
@@ -48,12 +49,11 @@ use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Address extends Authenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
+class Address extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use BroadcastsEvents, CausesActivity, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasApiTokens,
-        HasCalendars, HasCart, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags,
-        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Searchable,
-        SoftDeletes;
+    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart,
+        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid,
+        InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'password',
@@ -231,7 +231,7 @@ class Address extends Authenticatable implements HasLocalePreference, HasMedia, 
                 $this->company,
                 trim($this->firstname . ' ' . $this->lastname),
                 $this->street,
-                trim($this->zip . ' ' . $this->city),
+                trim($this->country?->iso_alpha2 . ' ' . $this->zip . ' ' . $this->city),
                 $this->country?->name,
             ])
         );
@@ -246,6 +246,13 @@ class Address extends Authenticatable implements HasLocalePreference, HasMedia, 
         }
 
         return $enum->salutation($this);
+    }
+
+    public function addressTypeOrders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class, 'address_address_type_order')
+            ->using(AddressAddressTypeOrder::class)
+            ->withPivot('address_type_id');
     }
 
     public function addressTypes(): BelongsToMany
@@ -409,5 +416,12 @@ class Address extends Authenticatable implements HasLocalePreference, HasMedia, 
 
         // dont queue mail as the address isnt used as auth in the regular app url
         Mail::to($this->email)->send(MagicLoginLink::make($login['token'], $login['expires']));
+    }
+
+    public function getPrintViews(): array
+    {
+        return [
+            'address-label' => AddressLabel::class,
+        ];
     }
 }

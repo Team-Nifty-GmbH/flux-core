@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Contact\DeleteContactRuleset;
 
 class DeleteContact extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteContactRuleset::class, 'getRules');
+        return DeleteContactRuleset::class;
     }
 
     public static function models(): array

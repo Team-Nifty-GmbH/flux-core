@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-class PriceList extends Model
+class PriceList extends FluxModel
 {
     use CacheModelQueries, HasDefault, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 

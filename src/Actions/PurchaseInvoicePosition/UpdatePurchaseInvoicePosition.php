@@ -8,10 +8,9 @@ use FluxErp\Rulesets\PurchaseInvoicePosition\UpdatePurchaseInvoicePositionRulese
 
 class UpdatePurchaseInvoicePosition extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdatePurchaseInvoicePositionRuleset::class, 'getRules');
+        return UpdatePurchaseInvoicePositionRuleset::class;
     }
 
     public static function models(): array

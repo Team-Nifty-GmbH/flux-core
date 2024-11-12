@@ -37,8 +37,9 @@ class UpdateProductRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Product::class]),
             ],
             'vat_rate_id' => [
+                'sometimes',
+                'required',
                 'integer',
-                'nullable',
                 app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'unit_id' => [

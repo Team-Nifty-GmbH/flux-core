@@ -6,10 +6,10 @@ use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Schedule extends Model
+class Schedule extends FluxModel
 {
     use BroadcastsEvents, HasUserModification, HasUuid, SoftDeletes;
 
@@ -29,5 +29,10 @@ class Schedule extends Model
             'last_run' => 'datetime',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class);
     }
 }

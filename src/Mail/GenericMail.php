@@ -119,7 +119,7 @@ class GenericMail extends Mailable
                     ->validate()
                     ->execute();
 
-                if (is_a($model, HasMedia::class)) {
+                if (is_a($model, HasMedia::class) && $action->shouldStore()) {
                     $attachment = $action->attachToModel($model);
                 } else {
                     return Attachment::fromData(fn () => $action->pdf->output(), $action->getFileName());

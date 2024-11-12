@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire;
+namespace FluxErp\Livewire\Cart;
 
 use FluxErp\Actions\Cart\CreateCart;
 use FluxErp\Actions\CartItem\CreateCartItem;
@@ -13,6 +13,7 @@ use FluxErp\Models\CartItem;
 use FluxErp\Models\Product;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -20,6 +21,7 @@ use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
+use Throwable;
 use WireUi\Traits\Actions;
 
 #[Lazy]
@@ -54,7 +56,7 @@ class Cart extends Component
 
     public function render(): View
     {
-        return view('flux::livewire.cart');
+        return view('flux::livewire.cart.cart');
     }
 
     public function refresh(): void
@@ -67,26 +69,31 @@ class Cart extends Component
         $products = Arr::wrap(is_array($products) && ! array_is_list($products) ? [$products] : $products);
 
         foreach ($products as $product) {
+            $productModel = null;
             if ($productId = is_array($product) ? data_get($product, 'id') : $product) {
                 $productModel = resolve_static(Product::class, 'query')
                     ->whereKey($productId)
                     ->first();
             }
 
-            $data = [
-                'cart_id' => $this->cart()->id,
-                'product_id' => data_get($product, 'id', $productModel?->id),
-                'name' => data_get($product, 'name', $productModel?->name),
-                'amount' => $product['amount'] ?? 1,
-                'price' => $product['price']
-                    ?? PriceHelper::make($productModel)
-                        ->when(
-                            auth()->user() instanceof Address,
-                            fn ($price) => $price->setContact(auth()->user()->contact)
-                        )
-                        ->price()
-                        ->price,
-            ];
+            try {
+                $data = [
+                    'cart_id' => $this->cart()->id,
+                    'product_id' => data_get($product, 'id', $productModel?->id),
+                    'name' => data_get($product, 'name', $productModel?->name),
+                    'amount' => $product['amount'] ?? 1,
+                    'price' => $product['price']
+                        ?? PriceHelper::make($productModel)
+                            ->when(
+                                auth()->user() instanceof Address,
+                                fn ($price) => $price->setContact(auth()->user()->contact)
+                            )
+                            ->price()
+                            ->price,
+                ];
+            } catch (Throwable) {
+                continue;
+            }
 
             // check if a product with the same id is already in the cart
             if ($cartItem = $this->cart()->cartItems()->where('product_id', $productId)->first()) {
@@ -107,7 +114,6 @@ class Cart extends Component
             }
 
             unset($this->cart);
-
         }
 
         $this->notification()->success(count($products) > 1
@@ -194,7 +200,7 @@ class Cart extends Component
     {
         $this->dispatch(
             'order:add-products',
-            $this->cart()->cartItems()->select(['product_id', 'amount'])->get()->toArray()
+            $this->cart()->cartItems()->select(['product_id', 'amount', 'order_column'])->ordered()->get()->toArray()
         );
     }
 
@@ -205,12 +211,22 @@ class Cart extends Component
         }
 
         $this->add(
-            app(CartModel::class)
-                ->with('products')
+            resolve_static(CartModel::class, 'query')
+                ->with([
+                    'cartItems' => fn (HasMany $query) => $query->ordered()
+                        ->select([
+                            'id',
+                            'cart_id',
+                            'product_id',
+                            'vat_rate_id',
+                            'amount',
+                            'order_column',
+                        ]),
+                ])
                 ->whereKey($this->loadWatchlist)
                 ->first()
-                ->products
-                ->pluck('id')
+                ->cartItems
+                ->map(fn (CartItem $cartItem) => ['id' => $cartItem->product_id, 'amount' => $cartItem->amount])
                 ->toArray()
         );
 

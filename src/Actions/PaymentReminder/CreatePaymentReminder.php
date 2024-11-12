@@ -11,10 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreatePaymentReminder extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreatePaymentReminderRuleset::class, 'getRules');
+        return CreatePaymentReminderRuleset::class;
     }
 
     public static function models(): array

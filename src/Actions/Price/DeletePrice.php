@@ -9,10 +9,9 @@ use Illuminate\Validation\ValidationException;
 
 class DeletePrice extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeletePriceRuleset::class, 'getRules');
+        return DeletePriceRuleset::class;
     }
 
     public static function models(): array

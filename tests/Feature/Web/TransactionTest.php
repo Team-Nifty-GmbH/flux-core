@@ -48,10 +48,11 @@ class TransactionTest extends BaseSetup
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 
-        $paymentType = PaymentType::factory()->create([
-            'client_id' => $this->dbClient->id,
-            'is_default' => false,
-        ]);
+        $paymentType = PaymentType::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create([
+                'is_default' => false,
+            ]);
 
         $bankConnections = BankConnection::factory()->count(3)->create([
             'currency_id' => $currencies->random()->id,

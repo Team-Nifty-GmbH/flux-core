@@ -12,6 +12,8 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -37,23 +39,55 @@ class FolderTree extends Component
         ];
     }
 
+    public function render(): View|Factory|Application
+    {
+        return view('flux::livewire.folder-tree');
+    }
+
     public function loadModel(array $arguments): void
     {
         $this->fill($arguments);
 
-        $this->js(<<<'JS'
-            selected = false;
-            loadLevels();
-        JS);
+        $this->js(
+            <<<'JS'
+                selected = false;
+                loadLevels();
+            JS
+        );
     }
 
     public function getRules(): array
     {
         return [
-            'files.*' => 'required|file|max:10240',
+            'files.*' => 'required|' . (config('livewire.temporary_file_upload.rules') ?? 'file|max:12288'),
         ];
     }
 
+    public function getRulesSingleFile(int $index, string $collectionName): array
+    {
+        // get the base collection name - ignore subfolders
+        $baseCollection = str_contains($collectionName, '.') ?
+            explode('.', $collectionName)[0] : $collectionName;
+
+        // get the validation rules for the model type
+        $mimeTypes = data_get(
+            resolve_static($this->modelType, 'query')
+                ->whereKey($this->modelId)
+                ->first()
+                ?->getMediaCollection($baseCollection),
+            'acceptsMimeTypes'
+        );
+
+        // merge the validation rules
+        return [
+            'files.' . $index => 'required|' . (config('livewire.temporary_file_upload.rules') ?? 'file|max:12288')
+                . (! is_null($mimeTypes) ?
+                    '|mimetypes:' . implode(',', $mimeTypes) : ''
+                ),
+        ];
+    }
+
+    #[Renderless]
     public function updatedFiles(): void
     {
         try {
@@ -63,9 +97,44 @@ class FolderTree extends Component
 
             return;
         }
+    }
 
-        $this->validate($this->getRules());
+    #[Renderless]
+    public function validateOnDemand(string $fileId, string $collectionName): bool
+    {
+        // find the index of the file in the files array - which invokes the validation
+        $index = array_search($fileId, array_map(function ($item) {
+            return $item->getFilename();
+        }, $this->files));
 
+        if ($index === false) {
+            return false;
+        }
+
+        try {
+            $this->validate($this->getRulesSingleFile($index, $collectionName));
+        } catch (ValidationException $e) {
+            // Handle the validation exception
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    #[Renderless]
+    public function submitFiles(string $collection, array $tempFileNames): bool
+    {
+        // set the folder name
+        $this->collection = $collection;
+        // filter out files array by deleted files on front end
+        $this->files = array_filter($this->files, function ($file) use ($tempFileNames) {
+            return in_array($file->getFilename(), $tempFileNames);
+        });
+
+        // validation took place in updatedFiles method
+        // so we can safely save the files
         try {
             $media = $this->saveFileUploadsToMediaLibrary(
                 name: 'files',
@@ -74,20 +143,50 @@ class FolderTree extends Component
             );
 
             $this->latestUploads = $media;
+            $this->files = [];
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
+
+            return false;
         }
+
+        return true;
     }
 
-    public function mount(?string $modelType = null, ?int $modelId = null): void
+    #[Renderless]
+    public function hasSingleFile(string $collectionName): bool
     {
-        $this->modelType = $modelType;
-        $this->modelId = $modelId;
+        // get the base collection name - ignore subfolders
+        $baseCollection = str_contains($collectionName, '.') ?
+            explode('.', $collectionName)[0] : $collectionName;
+
+        return data_get(
+            resolve_static($this->modelType, 'query')
+                ->whereKey($this->modelId)
+                ->first()
+                ?->getMediaCollection($baseCollection),
+            'singleFile',
+            false
+        );
     }
 
-    public function render(): View|Factory|Application
+    #[Renderless]
+    public function readOnly(string $collectionName): bool
     {
-        return view('flux::livewire.folder-tree');
+        // get the base collection name - ignore subfolders
+        $baseCollection = str_contains($collectionName, '.') ?
+            explode('.', $collectionName)[0] : $collectionName;
+
+        // in case there is no rule for the folder - $baseCollection
+        // enable upload
+        return data_get(
+            resolve_static($this->modelType, 'query')
+                ->whereKey($this->modelId)
+                ->first()
+                ?->getMediaCollection($baseCollection),
+            'readOnly',
+            false
+        );
     }
 
     public function getTree(): array
@@ -124,7 +223,9 @@ class FolderTree extends Component
             ->snake();
         $newCollectionName = implode('.', $newCollectionName);
 
-        $model = app($this->modelType)->query()->whereKey($this->modelId)->first();
+        $model = resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->first();
 
         resolve_static(MediaModel::class, 'query')
             ->where('model_type', app($this->modelType)->getMorphClass())
@@ -161,7 +262,7 @@ class FolderTree extends Component
     {
         try {
             DeleteMediaCollection::make([
-                'model_type' => app($this->modelType)->getMorphClass(),
+                'model_type' => morph_alias($this->modelType),
                 'model_id' => $this->modelId,
                 'collection_name' => $collection,
             ])

@@ -2,7 +2,11 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\Commission\CreateCommissionCreditNotes;
+use FluxErp\Jobs\Accounting\CreateCommissionCreditNotesJob;
 use FluxErp\Models\Commission;
+use Illuminate\Validation\UnauthorizedException;
+use Illuminate\Validation\ValidationException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class CommissionList extends BaseDataTable
@@ -20,6 +24,8 @@ class CommissionList extends BaseDataTable
     ];
 
     public bool $hasNoRedirect = true;
+
+    public bool $isSelectable = true;
 
     public array $columnLabels = [
         'user.name' => 'Commission Agent',
@@ -39,6 +45,30 @@ class CommissionList extends BaseDataTable
         );
     }
 
+    public function createCreditNotes(): bool
+    {
+        $selected = $this->getSelectedModelsQuery()
+            ->whereHas('user')
+            ->whereDoesntHave('creditNoteOrderPosition')
+            ->get(['id'])
+            ->toArray();
+
+        try {
+            CreateCommissionCreditNotes::make(['commissions' => $selected])
+                ->checkPermission()
+                ->validate();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->selected = [];
+        CreateCommissionCreditNotesJob::dispatch(['commissions' => $selected]);
+
+        return true;
+    }
+
     protected function itemToArray($item): array
     {
         $item->commission_rate = $item->commission_rate['commission_rate'];
@@ -54,6 +84,19 @@ class CommissionList extends BaseDataTable
                 'order_id',
             ]
         );
+    }
+
+    protected function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->color('primary')
+                ->label(__('Create credit notes'))
+                ->attributes([
+                    'wire:click' => 'createCreditNotes',
+                    'wire:flux-confirm' => __('wire:confirm.commission-credit-notes'),
+                ]),
+        ];
     }
 
     protected function getRowActions(): array

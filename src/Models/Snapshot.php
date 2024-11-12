@@ -6,9 +6,8 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\Model;
 
-class Snapshot extends Model
+class Snapshot extends FluxModel
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity;
 

@@ -8,10 +8,9 @@ use FluxErp\Rulesets\CalendarEvent\DeleteCalendarEventRuleset;
 
 class DeleteCalendarEvent extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteCalendarEventRuleset::class, 'getRules');
+        return DeleteCalendarEventRuleset::class;
     }
 
     public static function models(): array

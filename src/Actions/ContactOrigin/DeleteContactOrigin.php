@@ -8,10 +8,9 @@ use FluxErp\Rulesets\ContactOrigin\DeleteContactOriginRuleset;
 
 class DeleteContactOrigin extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteContactOriginRuleset::class, 'getRules');
+        return DeleteContactOriginRuleset::class;
     }
 
     public static function models(): array

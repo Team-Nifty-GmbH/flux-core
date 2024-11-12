@@ -5,6 +5,7 @@ import dashboard from './components/dashboard';
 import notifications from './components/wireui/notifications';
 import signature from './components/signature-pad.js';
 import addressMap from "./components/address-map";
+import filePond from "./components/file-pond";
 import sort from '@alpinejs/sort';
 
 window.folderTree = folderTree;
@@ -13,6 +14,7 @@ window.workTime = workTime;
 window.dashboard = dashboard;
 window.addressMap = addressMap;
 window.signature = signature;
+window.filePond = filePond;
 
 window.addEventListener('alpine:init', () => {
     window.Alpine.data('wireui_notifications', notifications);
@@ -52,9 +54,10 @@ document.addEventListener('livewire:init', () => {
 })
 
 function wireNavigation() {
-    let links = [...document.querySelectorAll('a[href]')].filter(link => {
+    let links = [...document.querySelectorAll('a[href]:not([wire\\:navigate]):not([target="_blank"])')].filter(link => {
         let hrefValue = link.getAttribute('href').trim();
-        return hrefValue !== '' && hrefValue !== '#' && (hrefValue.startsWith(window.location.origin) || hrefValue.startsWith('/'));
+        return hrefValue !== '' && hrefValue !== '#' &&
+            (hrefValue.startsWith(window.location.origin) || hrefValue.startsWith('/'));
     });
 
     links.forEach(link => {

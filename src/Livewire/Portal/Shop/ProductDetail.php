@@ -203,7 +203,10 @@ class ProductDetail extends Component
             $this->productForm->bundle_products[$product->id] = [
                 'id' => $product->id,
                 'name' => $product->name,
-                'count' => bcadd($this->productForm->bundle_products[$product->id] ?? 0, $product->pivot->count),
+                'count' => bcadd(
+                    data_get($this->productForm->bundle_products, $product->id . '.count', 0),
+                    $product->pivot->count
+                ),
             ];
 
             foreach ($product->media as $media) {

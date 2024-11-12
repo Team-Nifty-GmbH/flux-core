@@ -12,10 +12,9 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateTask extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateTaskRuleset::class, 'getRules');
+        return UpdateTaskRuleset::class;
     }
 
     public static function models(): array

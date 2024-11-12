@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\ClientPaymentType;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
@@ -11,11 +12,9 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class PaymentType extends Model
+class PaymentType extends FluxModel
 {
     use CacheModelQueries, Filterable, HasClientAssignment, HasDefault, HasPackageFactory, HasUserModification, HasUuid,
         LogsActivity, SoftDeletes;
@@ -36,13 +35,9 @@ class PaymentType extends Model
         ];
     }
 
-    public function client(): BelongsTo
+    public function clients(): BelongsToMany
     {
-        return $this->belongsTo(Client::class);
-    }
-
-    public function paymentNotices(): HasMany
-    {
-        return $this->hasMany(PaymentNotice::class, 'payment_type_id');
+        return $this->belongsToMany(Client::class, 'client_payment_type')
+            ->using(ClientPaymentType::class);
     }
 }

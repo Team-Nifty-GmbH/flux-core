@@ -1,5 +1,6 @@
 @use('\FluxErp\Enums\SalutationEnum')
 <div>
+    {{ $this->renderCreateDocumentsModal() }}
     @can('action.contact.create')
         <x-modal :name="'new-contact'">
             <x-card>

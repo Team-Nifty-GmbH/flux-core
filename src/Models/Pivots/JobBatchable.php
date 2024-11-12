@@ -5,9 +5,8 @@ namespace FluxErp\Models\Pivots;
 use FluxErp\Models\JobBatch;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class JobBatchable extends Pivot
+class JobBatchable extends FluxPivot
 {
     protected $table = 'job_batchables';
 

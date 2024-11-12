@@ -15,10 +15,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateOrder extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateOrderRuleset::class, 'getRules');
+        return UpdateOrderRuleset::class;
     }
 
     public static function models(): array
@@ -28,7 +27,7 @@ class UpdateOrder extends FluxAction
 
     public function performAction(): Model
     {
-        $addresses = Arr::pull($this->data, 'addresses', []);
+        $addresses = Arr::pull($this->data, 'addresses');
         $users = Arr::pull($this->data, 'users');
 
         $order = resolve_static(Order::class, 'query')
@@ -58,6 +57,7 @@ class UpdateOrder extends FluxAction
         if (! is_null($addresses)) {
             $addresses = collect($addresses)
                 ->unique(fn ($address) => $address['address_id'] . '_' . $address['address_type_id'])
+                ->keyBy('address_id')
                 ->toArray();
 
             $order->addresses()->sync($addresses);
@@ -72,6 +72,7 @@ class UpdateOrder extends FluxAction
 
     protected function validateData(): void
     {
+        $errors = [];
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(app(Order::class));
 
@@ -80,6 +81,12 @@ class UpdateOrder extends FluxAction
         $order = resolve_static(Order::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
+
+        if ($order->is_locked) {
+            $errors += [
+                'is_locked' => [__('Order is locked')],
+            ];
+        }
 
         $updatedOrderType = false;
         if ($this->data['order_type_id'] ?? false) {
@@ -102,10 +109,14 @@ class UpdateOrder extends FluxAction
                 ->when($isPurchase, fn (Builder $query) => $query->where('contact_id', $order->contact_id))
                 ->exists()
             ) {
-                throw ValidationException::withMessages([
-                    'invoice_number' => [__('validation.unique', ['attribute' => 'invoice_number'])],
-                ])->errorBag('createOrder');
+                $errors += [
+                    'invoice_number' => [__('Invoice number already exists')],
+                ];
             }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors)->errorBag('updateOrder');
         }
     }
 }

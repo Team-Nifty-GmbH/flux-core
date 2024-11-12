@@ -28,12 +28,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
-class Contact extends Model implements HasMedia, InteractsWithDataTables, OffersPrinting
+class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use BroadcastsEvents, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
@@ -105,6 +106,18 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
         return $this->belongsTo(ContactOrigin::class);
     }
 
+    public function country(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Country::class,
+            Address::class,
+            'id',
+            'id',
+            'main_address_id',
+            'country_id'
+        );
+    }
+
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
@@ -169,6 +182,11 @@ class Contact extends Model implements HasMedia, InteractsWithDataTables, Offers
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
+    }
+
+    public function workTimes(): HasMany
+    {
+        return $this->hasMany(WorkTime::class);
     }
 
     public function getAllDiscountsQuery(): Builder

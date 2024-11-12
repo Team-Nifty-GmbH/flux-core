@@ -2,6 +2,4 @@
 
 namespace FluxErp\Models\Pivots;
 
-use Illuminate\Database\Eloquent\Relations\Pivot;
-
-class ContactDiscountGroup extends Pivot {}
+class ContactDiscountGroup extends FluxPivot {}

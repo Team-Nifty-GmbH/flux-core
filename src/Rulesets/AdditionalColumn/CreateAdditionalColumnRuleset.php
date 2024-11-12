@@ -47,13 +47,14 @@ class CreateAdditionalColumnRuleset extends FluxRuleset
                 Rule::in(Helper::getHtmlInputFieldTypes()),
             ],
             'label' => 'string|nullable',
-            'validations' => 'array',
+            'validations' => 'nullable|array',
             'validations.*' => [
                 'required',
                 'string',
                 app(AvailableValidationRule::class),
             ],
             'values' => [
+                'nullable',
                 'array',
                 app(ArrayIsList::class),
             ],

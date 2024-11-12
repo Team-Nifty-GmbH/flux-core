@@ -347,11 +347,9 @@ class Communication extends CommunicationList
 
     protected function getPrintLayouts(): array
     {
-        return array_keys(
-            resolve_static(CommunicationModel::class, 'query')
-                ->whereKey($this->communication->id)
-                ->first(['id'])
-                ->resolvePrintViews()
-        );
+        return resolve_static(CommunicationModel::class, 'query')
+            ->whereKey($this->communication->id)
+            ->first(['id'])
+            ->resolvePrintViews();
     }
 }

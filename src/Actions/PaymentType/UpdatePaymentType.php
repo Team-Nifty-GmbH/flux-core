@@ -6,14 +6,14 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\PaymentType;
 use FluxErp\Rulesets\PaymentType\UpdatePaymentTypeRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
 class UpdatePaymentType extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdatePaymentTypeRuleset::class, 'getRules');
+        return UpdatePaymentTypeRuleset::class;
     }
 
     public static function models(): array
@@ -23,12 +23,18 @@ class UpdatePaymentType extends FluxAction
 
     public function performAction(): Model
     {
+        $clients = Arr::pull($this->data, 'clients');
+
         $paymentType = resolve_static(PaymentType::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
         $paymentType->fill($this->data);
         $paymentType->save();
+
+        if (! is_null($clients)) {
+            $paymentType->clients()->sync($clients);
+        }
 
         return $paymentType->withoutRelations()->fresh();
     }

@@ -21,10 +21,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrder extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateOrderRuleset::class, 'getRules');
+        return CreateOrderRuleset::class;
     }
 
     public static function models(): array
@@ -55,6 +54,7 @@ class CreateOrder extends FluxAction
         if ($addresses) {
             $addresses = collect($addresses)
                 ->unique(fn ($address) => $address['address_id'] . '_' . $address['address_type_id'])
+                ->keyBy('address_id')
                 ->toArray();
 
             $order->addresses()->attach($addresses);
@@ -163,7 +163,8 @@ class CreateOrder extends FluxAction
                 'payment_type_id' => [
                     'required',
                     'integer',
-                    (new ModelExists(PaymentType::class))->where('client_id', $this->data['client_id']),
+                    (new ModelExists(PaymentType::class))
+                        ->whereRelation('clients', 'id', $this->data['client_id']),
                 ],
             ]
         );

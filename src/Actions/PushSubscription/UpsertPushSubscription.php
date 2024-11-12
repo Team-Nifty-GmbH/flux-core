@@ -8,10 +8,9 @@ use NotificationChannels\WebPush\PushSubscription;
 
 class UpsertPushSubscription extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpsertPushSubscriptionRuleset::class, 'getRules');
+        return UpsertPushSubscriptionRuleset::class;
     }
 
     public static function models(): array

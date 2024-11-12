@@ -66,7 +66,7 @@
                 {{ __('Commission Rates') }}
             </div>
         </nav>
-        @if(resolve_static(\FluxErp\Actions\Role\UpdateUserRoles::class, 'canPerformAction', [false]))
+        @canAction(\FluxErp\Actions\Role\UpdateUserRoles::class)
             <div x-show="active === 'roles'">
                 <div class="max-h-96 space-y-3 overflow-y-auto">
                     @php
@@ -86,8 +86,8 @@
                     @endforeach
                 </div>
             </div>
-        @endif
-        @if(resolve_static(\FluxErp\Actions\Permission\UpdateUserPermissions::class, 'canPerformAction', [false]))
+        @endCanAction
+        @canAction(\FluxErp\Actions\Permission\UpdateUserPermissions::class)
             <div x-show="active === 'permissions'">
                 <div class="pb-3">
                     <x-input wire:model.live.debounce.500ms="searchPermission" icon="search"/>
@@ -108,8 +108,8 @@
                     {{ $permissions->links() }}
                 </div>
             </div>
-        @endif
-        @if(resolve_static(\FluxErp\Actions\User\UpdateUserClients::class, 'canPerformAction', [false]))
+        @endCanAction
+        @canAction(\FluxErp\Actions\User\UpdateUserClients::class)
             <div x-cloak x-show="active === 'clients'">
                 <div class="max-h-96 space-y-3 overflow-y-auto">
                     @foreach($clients as $client)
@@ -123,8 +123,39 @@
                     @endforeach
                 </div>
             </div>
-        @endif
+        @endCanAction
         <div x-show="active === 'commission-rates'">
+            <x-select
+                :label="__('Commission credit contact')"
+                class="pb-4"
+                wire:model="user.contact_id"
+                option-value="contact_id"
+                option-label="label"
+                option-description="description"
+                template="user-option"
+                :async-data="[
+                    'api' => route('search', \FluxErp\Models\Address::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'option-value' => 'contact_id',
+                        'fields' => [
+                            'name',
+                            'contact_id',
+                            'firstname',
+                            'lastname',
+                            'company',
+                        ],
+                        'where' => [
+                            [
+                                'is_main_address',
+                                '=',
+                                true,
+                            ]
+                        ],
+                        'with' => ['contact.media', 'country:id,name'],
+                    ]
+                ]"
+            />
             <livewire:features.commission-rates :userId="$user['id'] ?? null" :contactId="null" cache-key="settings.users.commission-rates"/>
         </div>
     </div>

@@ -17,7 +17,7 @@ use FluxErp\Livewire\Portal\Shop\Checkout;
 use FluxErp\Livewire\Portal\Shop\CheckoutFinish;
 use FluxErp\Livewire\Portal\Shop\ProductDetail;
 use FluxErp\Livewire\Portal\Shop\ProductList;
-use FluxErp\Livewire\Portal\Shop\Watchlist;
+use FluxErp\Livewire\Portal\Shop\Watchlists;
 use FluxErp\Livewire\Portal\Ticket\Ticket;
 use FluxErp\Livewire\Portal\Ticket\Tickets;
 use Illuminate\Support\Facades\Route;
@@ -79,8 +79,8 @@ Route::middleware(['web', PortalMiddleware::class])
                 ->name('tickets');
             Route::get('/tickets/{id}', Ticket::class)
                 ->name('tickets.id');
-            Route::get('/watchlist', Watchlist::class)
-                ->name('watchlist');
+            Route::get('/watchlists', Watchlists::class)
+                ->name('watchlists');
             Route::get('/checkout', Checkout::class)
                 ->name('checkout');
             Route::get('/checkout-finish', CheckoutFinish::class)

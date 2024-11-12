@@ -3,14 +3,15 @@
 namespace FluxErp\Livewire\Forms;
 
 use Carbon\Carbon;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Task\CreateTask;
+use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Models\Task;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
 
-class TaskForm extends Form
+class TaskForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -43,31 +44,41 @@ class TaskForm extends Form
 
     public array $additionalColumns = [];
 
+    public array $categories = [];
+
     public array $tags = [];
 
-    public function save(): void
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateTask::class,
+            'update' => UpdateTask::class,
+            'delete' => DeleteTask::class,
+        ];
+    }
+
+    protected function makeAction(string $name, ?array $data = null): FluxAction
     {
         if (! is_null($this->time_budget) && preg_match('/[0-9]*/', $this->time_budget)) {
             $this->time_budget = $this->time_budget . ':00';
         }
 
-        $data = $this->toArray();
-        $data = array_merge(Arr::pull($data, 'additionalColumns', []), $data);
+        if (is_null($data)) {
+            $data = $this->toArray();
+            $data = array_merge(Arr::pull($data, 'additionalColumns', []), $data);
+        }
 
-        $action = $this->id ? UpdateTask::make($data) : CreateTask::make($data);
-
-        $response = $action->validate()->execute();
-
-        $this->fill($response);
+        return parent::makeAction($name, $data);
     }
 
     public function fill($values): void
     {
         if ($values instanceof Task) {
-            $values->loadMissing(['tags:id']);
+            $values->loadMissing(['tags:id', 'categories:id']);
 
             $values = $values->toArray();
             $values['tags'] = array_column($values['tags'] ?? [], 'id');
+            $values['categories'] = array_column($values['categories'] ?? [], 'id');
         }
 
         $values['start_date'] = ! is_null($values['start_date'] ?? null) ?

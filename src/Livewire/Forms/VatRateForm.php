@@ -19,6 +19,8 @@ class VatRateForm extends FluxForm
 
     public ?string $footer_text = null;
 
+    public bool $is_default = false;
+
     #[Validate(['required', 'numeric', 'min:0', 'max:99.99'])]
     public ?float $rate_percentage_frontend = null;
 

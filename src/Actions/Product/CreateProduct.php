@@ -6,19 +6,21 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Price\CreatePrice;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Facades\ProductType;
+use FluxErp\Models\Client;
+use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Price;
 use FluxErp\Models\Product;
 use FluxErp\Models\Tag;
+use FluxErp\Models\VatRate;
 use FluxErp\Rulesets\Product\CreateProductRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
 class CreateProduct extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateProductRuleset::class, 'getRules');
+        return CreateProductRuleset::class;
     }
 
     public static function models(): array
@@ -107,6 +109,29 @@ class CreateProduct extends FluxAction
                 ->where('product_id', data_get($this->data, 'parent_id'))
                 ->get()
                 ->toArray();
+        }
+
+        if (! data_get($this->data, 'clients')) {
+            if (data_get($this->data, 'parent_id')) {
+                $this->data['clients'] = resolve_static(ClientProduct::class, 'query')
+                    ->where('product_id', data_get($this->data, 'parent_id'))
+                    ->pluck('client_id')
+                    ->toArray();
+            } else {
+                $this->data['clients'] = [
+                    resolve_static(Client::class, 'default')?->id,
+                ];
+            }
+        }
+
+        if (! data_get($this->data, 'vat_rate_id')) {
+            if (data_get($this->data, 'parent_id')) {
+                $this->data['vat_rate_id'] = resolve_static(Product::class, 'query')
+                    ->whereKey(data_get($this->data, 'parent_id'))
+                    ->value('vat_rate_id');
+            } else {
+                $this->data['vat_rate_id'] = resolve_static(VatRate::class, 'default')?->id;
+            }
         }
     }
 }

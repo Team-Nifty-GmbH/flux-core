@@ -16,10 +16,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreatePurchaseInvoice extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreatePurchaseInvoiceRuleset::class, 'getRules');
+        return CreatePurchaseInvoiceRuleset::class;
     }
 
     public static function models(): array

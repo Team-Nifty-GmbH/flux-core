@@ -15,11 +15,10 @@ use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Printable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\View\Printing\SepaMandate\SepaMandateView;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 
-class SepaMandate extends Model implements HasMedia, OffersPrinting
+class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
 {
     use Communicatable, Filterable, HasClientAssignment, HasPackageFactory, HasSerialNumberRange, HasUserModification,
         HasUuid, InteractsWithMedia, LogsActivity, Printable, SoftDeletes;
