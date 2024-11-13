@@ -2,8 +2,10 @@
 
 namespace FluxErp\Rulesets\Client;
 
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\Country;
+use FluxErp\Models\OrderType;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -23,6 +25,12 @@ class UpdateClientRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => Country::class]),
+            ],
+            'commission_credit_note_order_type_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => OrderType::class])
+                    ->where('order_type_enum', OrderTypeEnum::Refund),
             ],
             'name' => 'sometimes|required|string',
             'client_code' => 'sometimes|required|string|unique:clients,client_code',
