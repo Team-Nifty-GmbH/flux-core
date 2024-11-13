@@ -32,8 +32,8 @@ class Dashboard extends Component
         $this->dashboards = resolve_static(DashboardModel::class, 'query')
             ->where('authenticatable_id', auth()->id())
             ->where('authenticatable_type', auth()->user()->getMorphClass())
-            ->get(['id', 'name'])
-            ->prepend(['id' => null, 'name' => __('Default')])
+            ->ordered()
+            ->get(['id', 'name', 'is_public'])
             ->toArray();
 
         $this->publicDashboards = resolve_static(DashboardModel::class, 'query')
@@ -88,6 +88,14 @@ class Dashboard extends Component
 
         if (! $existing) {
             $this->dashboards[] = ['id' => $this->dashboardForm->id, 'name' => $this->dashboardForm->name];
+            $this->dashboardId = $this->dashboardForm->id;
+        } else {
+            $this->dashboards = array_map(
+                fn (array $dashboardItem) => $dashboardItem['id'] === $this->dashboardForm->id
+                    ? ['id' => $this->dashboardForm->id, 'name' => $this->dashboardForm->name]
+                    : $dashboardItem,
+                $this->dashboards
+            );
         }
 
         return true;
@@ -116,5 +124,11 @@ class Dashboard extends Component
         }
 
         return true;
+    }
+
+    #[Renderless]
+    public function reOrder(DashboardModel $dashboard, int $index): void
+    {
+        $dashboard->moveToPosition($index);
     }
 }

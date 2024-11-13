@@ -61,18 +61,29 @@
     <div class="pb-2.5">
         <div class="dark:border-secondary-700 border-b border-gray-200 flex justify-between">
             <nav class="soft-scrollbar flex overflow-x-auto" x-ref="tabButtons">
-                <template x-for="dashboard in $wire.dashboards">
-                    <x-button
-                        flat
-                        class="border-b-2 border-b-transparent focus:!ring-0 focus:!ring-offset-0"
-                        x-on:click="edit ? $wire.edit(dashboard.id) : $wire.$set('dashboardId', dashboard.id, true)"
-                        x-bind:class="{'!border-b-primary-600 rounded-b-none': $wire.dashboardId === dashboard.id }"
-                    >
-                        <x-slot:label>
-                            <span x-text="dashboard.name"></span>
-                        </x-slot:label>
-                    </x-button>
-                </template>
+                <x-button
+                    :label="__('Default')"
+                    flat
+                    class="border-b-2 border-b-transparent focus:!ring-0 focus:!ring-offset-0"
+                    x-on:click="$wire.$set('dashboardId', null, true)"
+                    x-bind:class="{'!border-b-primary-600 rounded-b-none': $wire.dashboardId === null}"
+                />
+                <div x-sort="$wire.reOrder($item, $position);">
+                    <template x-for="dashboard in $wire.dashboards">
+                        <x-button
+                            x-sort:item="dashboard.id"
+                            flat
+                            class="border-b-2 border-b-transparent focus:!ring-0 focus:!ring-offset-0"
+                            x-on:click="edit ? $wire.edit(dashboard.id) : $wire.$set('dashboardId', dashboard.id, true)"
+                            x-bind:class="{'!border-b-primary-600 rounded-b-none': $wire.dashboardId === dashboard.id }"
+                        >
+                            <x-slot:label>
+                                <i x-show="dashboard.is_public" x-cloak class="ph ph-rss"></i>
+                                <span x-text="dashboard.name"></span>
+                            </x-slot:label>
+                        </x-button>
+                    </template>
+                </div>
                 @canAction(\FluxErp\Actions\Dashboard\CreateDashboard::class)
                     <x-button
                         flat
@@ -91,7 +102,7 @@
             @endCanAction
         </div>
     </div>
-    <div class="w-full container">
+    <div class="w-full">
         <livewire:features.dashboard :dashboard-id="$dashboardId" wire:key="{{ uniqid() }}"/>
     </div>
 </div>
