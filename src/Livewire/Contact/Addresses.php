@@ -221,24 +221,30 @@ class Addresses extends Component
                 ->label(__('Address')),
             TabButton::make('address.comments')
                 ->label(__('Comments'))
+                ->attributes(['x-show' => '$wire.address.id'])
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
             TabButton::make('address.attachments')
                 ->label(__('Attachments'))
+                ->attributes(['x-show' => '$wire.address.id'])
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
             TabButton::make('address.communication')
                 ->label(__('Communication'))
+                ->attributes(['x-show' => '$wire.address.id'])
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
             TabButton::make('address.tasks')
                 ->label(__('Tasks'))
+                ->attributes(['x-show' => '$wire.address.id'])
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
             TabButton::make('address.permissions')
-                ->label(__('Permissions')),
+                ->label(__('Permissions'))
+                ->attributes(['x-show' => '$wire.address.id']),
             TabButton::make('address.activities')
                 ->label(__('Activities'))
+                ->attributes(['x-show' => '$wire.address.id'])
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
         ];
