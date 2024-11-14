@@ -65,7 +65,7 @@ class TicketTypeEditTest extends TestCase
             ->assertDispatchedTo(
                 'settings.ticket-types',
                 'closeModal',
-                [$ticketType->id]
+                ['id' => $ticketType->id]
             );
 
         $this->assertSoftDeleted('ticket_types', [

@@ -97,7 +97,7 @@ class TicketTypeEdit extends Component
     #[Renderless]
     public function delete(): void
     {
-        $ticketType = [$this->ticketType->id];
+        $ticketType = ['id' => $this->ticketType->id];
         try {
             $this->ticketType->delete();
         } catch (ValidationException|UnauthorizedException $e) {
