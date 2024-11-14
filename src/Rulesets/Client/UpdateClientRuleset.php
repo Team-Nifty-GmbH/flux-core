@@ -30,7 +30,8 @@ class UpdateClientRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => OrderType::class])
-                    ->where('order_type_enum', OrderTypeEnum::Refund),
+                    ->where('order_type_enum', OrderTypeEnum::Refund)
+                    ->where('is_active', true),
             ],
             'name' => 'sometimes|required|string',
             'client_code' => 'sometimes|required|string|unique:clients,client_code',

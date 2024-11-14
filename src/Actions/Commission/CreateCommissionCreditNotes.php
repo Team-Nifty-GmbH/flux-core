@@ -45,7 +45,11 @@ class CreateCommissionCreditNotes extends FluxAction
                 $order = CreateOrder::make([
                     'order_type_id' => resolve_static(Client::class, 'query')
                         ->whereKey($clientId)
-                        ->value('commission_credit_note_order_type_id'),
+                        ->value('commission_credit_note_order_type_id')
+                        ?? resolve_static(OrderType::class, 'query')
+                            ->where('client_id', $clientId)
+                            ->where('order_type_enum', OrderTypeEnum::Refund)
+                            ->value('id'),
                     'client_id' => $clientId,
                     'contact_id' => data_get($agentData, 'contact_id'),
                 ])
