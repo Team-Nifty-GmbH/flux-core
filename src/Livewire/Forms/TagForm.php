@@ -28,4 +28,13 @@ class TagForm extends FluxForm
             'delete' => DeleteTag::class,
         ];
     }
+
+    public function fill($values): void
+    {
+        $valueArray = is_array($values) ? $values : $values->toArray();
+        $valueArray['name'] = $values->name;
+        $valueArray['slug'] = $values->slug;
+
+        parent::fill($valueArray);
+    }
 }
