@@ -23,6 +23,12 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:purchase_invoices,uuid',
+            'approval_user_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => User::class])
+                    ->where('is_active', true),
+            ],
             'client_id' => [
                 'nullable',
                 'integer',
@@ -75,7 +81,8 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
         return array_merge(
             parent::getRules(),
             resolve_static(BankConnectionRuleset::class, 'getRules'),
-            resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules')
+            resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules'),
+            resolve_static(TagRuleset::class, 'getRules'),
         );
     }
 }

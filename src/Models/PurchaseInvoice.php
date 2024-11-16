@@ -12,10 +12,12 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\Tags\HasTags;
 
 class PurchaseInvoice extends FluxModel implements HasMedia
 {
-    use Commentable, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes;
+    use Commentable, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+        SoftDeletes;
 
     protected $guarded = ['id'];
 
