@@ -129,4 +129,21 @@ class OrderPositionsTest extends BaseSetup
                 $wire.$parent.recalculateOrderTotals();
             JS);
     }
+
+    public function test_can_show_related_columns()
+    {
+        $form = new OrderForm(Livewire::new(OrderPositions::class), 'order');
+        $form->fill($this->order);
+
+        $component = Livewire::test(OrderPositions::class, ['order' => $form]);
+
+        $component->set('enabledCols', array_merge($component->get('enabledCols'), ['order.uuid']))
+            ->call('loadData')
+            ->assertStatus(200)
+            ->assertHasNoErrors();
+
+        $this->assertContains('order.uuid', $component->get('enabledCols'));
+        $this->assertArrayHasKey('order.uuid', $component->get('data.data.0'));
+        $this->assertEquals($this->order->uuid, $component->get('data.data.0')['order.uuid']);
+    }
 }
