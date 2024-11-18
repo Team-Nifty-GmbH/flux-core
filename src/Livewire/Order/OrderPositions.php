@@ -228,44 +228,25 @@ class OrderPositions extends OrderPositionList
         );
     }
 
-    protected function getResultFromQuery(Builder $query): array
+    protected function itemToArray($item): array
     {
-        $returnKeys = $this->getReturnKeys();
-        $tree = $query->addSelect(
-            array_filter(
-                $returnKeys,
-                fn (string $key) => ! in_array(
-                    $key,
-                    [
-                        'href',
-                        'depth',
-                        'has_children',
-                        'unit_price',
-                        'alternative_tag',
-                        'indentation',
-                    ]
-                )
-            )
-        )
-            ->get()
-            ->toArray();
+        $item = parent::itemToArray($item);
 
-        foreach ($tree as &$item) {
-            $item = Arr::only(Arr::dot($item), $returnKeys);
-            $item['indentation'] = '';
-            $item['unit_price'] = $item['is_net'] ? ($item['unit_net_price'] ?? 0) : ($item['unit_gross_price'] ?? 0);
-            $item['alternative_tag'] = $item['is_alternative'] ? __('Alternative') : '';
+        $item['indentation'] = '';
+        $item['unit_price'] = data_get($item, 'is_net')
+            ? data_get($item, 'unit_net_price', 0)
+            : data_get($item, 'unit_gross_price', 0);
+        $item['alternative_tag'] = data_get($item, 'is_alternative') ? __('Alternative') : '';
 
-            if (($depth = str_word_count($item['slug_position'], 0, '.')) > 0) {
-                $indent = $depth * 20;
-                $item['indentation'] = <<<HTML
+        if (($depth = str_word_count(data_get($item, 'slug_position', ''), 0, '.')) > 0) {
+            $indent = $depth * 20;
+            $item['indentation'] = <<<HTML
                     <div class="text-right indent-icon" style="width:{$indent}px;">
                     </div>
                     HTML;
-            }
         }
 
-        return $tree;
+        return $item;
     }
 
     #[Renderless]
