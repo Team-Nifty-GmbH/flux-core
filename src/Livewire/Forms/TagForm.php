@@ -32,8 +32,8 @@ class TagForm extends FluxForm
     public function fill($values): void
     {
         $valueArray = is_array($values) ? $values : $values->toArray();
-        $valueArray['name'] = $values->name;
-        $valueArray['slug'] = $values->slug;
+        $valueArray['name'] = data_get($values, 'name');
+        $valueArray['slug'] = data_get($values, 'slug');
 
         parent::fill($valueArray);
     }
