@@ -129,7 +129,7 @@
             <div>
                 @include('tall-datatables::livewire.data-table')
                 @section('order-positions-footer-card')
-                    <div x-show="! $wire.order.is_locked" x-cloak class="sticky bottom-6 pt-6">
+                    <div x-show="! $wire.order.is_locked" x-cloak class="sticky bottom-6 pt-6 z-10">
                         <x-card class="flex gap-4">
                             <div class="flex gap-4 max-w-md w-full">
                                 @section('order-positions-footer-card.inputs')
