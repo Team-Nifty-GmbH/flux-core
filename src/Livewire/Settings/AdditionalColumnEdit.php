@@ -105,7 +105,7 @@ class AdditionalColumnEdit extends Component
         }
 
         $this->notification()->success(__('Additional Column saved successful.'));
-        $this->dispatch('closeModal');
+        $this->dispatch('closeModal', $this->additionalColumn->toArray());
     }
 
     #[Renderless]

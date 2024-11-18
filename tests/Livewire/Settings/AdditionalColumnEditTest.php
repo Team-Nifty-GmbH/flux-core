@@ -42,7 +42,7 @@ class AdditionalColumnEditTest extends TestCase
             'model_type' => morph_alias(TicketType::class),
         ]);
 
-        Livewire::test(AdditionalColumnEdit::class)
+        $component = Livewire::test(AdditionalColumnEdit::class)
             ->call('show', $additionalColumn->toArray())
             ->assertSet('isNew', false)
             ->assertSet('hideModel', false)
@@ -50,11 +50,12 @@ class AdditionalColumnEditTest extends TestCase
             ->assertSet('additionalColumn.field_type', 'text')
             ->assertSet('additionalColumn.label', null)
             ->assertSet('additionalColumn.model_type', $additionalColumn->model_type)
-            ->set('additionalColumn.name', 'Test 2')
-            ->call('save')
+            ->set('additionalColumn.name', 'Test 2');
+
+        $component->call('save')
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertDispatched('closeModal')
+            ->assertDispatched('closeModal', $component->get('additionalColumn')->toArray())
             ->assertWireuiNotification(icon: 'success');
     }
 }
