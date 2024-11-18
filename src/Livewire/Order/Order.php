@@ -34,6 +34,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Laravel\SerializableClosure\SerializableClosure;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -46,7 +47,8 @@ class Order extends Component
 {
     use Actions, CreatesDocuments, WithTabs;
 
-    protected string $view = 'flux::livewire.order.order';
+    #[Locked]
+    public string $view = 'flux::livewire.order.order';
 
     public OrderForm $order;
 
