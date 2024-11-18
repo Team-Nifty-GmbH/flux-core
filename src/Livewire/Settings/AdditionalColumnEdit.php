@@ -68,6 +68,13 @@ class AdditionalColumnEdit extends Component
 
     public function show(array $additionalColumn = []): void
     {
+        $additionalColumn['values'] ??= [];
+        $additionalColumn['validations'] ??= [];
+        $additionalColumn['field_type'] ??= 'text';
+        $additionalColumn['is_translatable'] ??= false;
+        $additionalColumn['is_customer_editable'] ??= false;
+        $additionalColumn['is_frontend_visible'] ??= true;
+
         $this->additionalColumn->reset();
         $this->additionalColumn->fill($additionalColumn);
 

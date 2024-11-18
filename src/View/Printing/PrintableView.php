@@ -108,6 +108,7 @@ abstract class PrintableView extends Component
                     Str::after(config('app.url'), '://'),
                     Str::after(config('app.asset_url'), '://'),
                     Str::after(config('app.frontend_url'), '://'),
+                    Str::after(config('flux.flux_url'), '://'),
                 ])
             );
         }
