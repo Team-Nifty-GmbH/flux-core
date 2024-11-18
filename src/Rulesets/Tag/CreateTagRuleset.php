@@ -14,6 +14,7 @@ class CreateTagRuleset extends FluxRuleset
         return [
             'name' => 'required|string|max:255',
             'slug' => [
+                'nullable',
                 'string',
                 'max:255',
             ],
