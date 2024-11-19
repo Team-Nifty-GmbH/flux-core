@@ -18,6 +18,7 @@ use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
 
 #[Lazy]
@@ -64,7 +65,7 @@ class Cart extends Component
     {
         try {
             $this->cart()->addItems($products);
-        } catch (ValidationException $e) {
+        } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 
             return;

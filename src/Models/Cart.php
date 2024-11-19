@@ -122,7 +122,7 @@ class Cart extends FluxModel
                 $action = CreateCartItem::make($data);
             }
 
-            $action->validate()->execute();
+            $action->validate()->checkPermission()->execute();
         }
 
         return $this;
