@@ -2,11 +2,9 @@
 
 namespace Tests\Feature\Livewire;
 
-use FluxErp\Events\InstallProcessOutputEvent;
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\InstallWizard;
 use FluxErp\Tests\TestCase;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -39,6 +37,7 @@ class InstallWizardTest extends TestCase
     {
         // Set the configuration value
         Config::set('flux.install_done', false);
+        Config::set('queue.default', 'sync');
 
         $component = Livewire::test(InstallWizard::class)
             ->assertStatus(200)
