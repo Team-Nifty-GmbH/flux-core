@@ -12,9 +12,11 @@ use FluxErp\Rulesets\CartItem\CreateCartItemRuleset;
 
 class CreateCartItem extends FluxAction
 {
-    protected Cart $cart;
+    protected ?Cart $cart;
 
     protected ?Product $product = null;
+
+    protected static bool $hasPermission = false;
 
     protected function getRulesets(): string|array
     {
@@ -40,8 +42,8 @@ class CreateCartItem extends FluxAction
     {
         $this->cart = resolve_static(Cart::class, 'query')
             ->with('authenticatable')
-            ->whereKey($this->data['cart_id'])
-            ->sole();
+            ->whereKey(data_get($this->data, 'cart_id'))
+            ->first();
 
         if ($productId = data_get($this->data, 'product_id')) {
             $this->product = Product::query()
@@ -52,7 +54,7 @@ class CreateCartItem extends FluxAction
         }
 
         if (
-            $this->cart->authenticatable instanceof Address
+            $this->cart?->authenticatable instanceof Address
             && is_null(data_get($this->data, 'price'))
             && $this->product
         ) {
