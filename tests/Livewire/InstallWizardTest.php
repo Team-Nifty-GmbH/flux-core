@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Livewire;
 
+use FluxErp\Events\InstallProcessOutputEvent;
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\InstallWizard;
 use FluxErp\Tests\TestCase;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -48,8 +50,16 @@ class InstallWizardTest extends TestCase
             ->assertSet('requestRefresh', false)
             ->call('start')
             ->assertDispatched('batch-id')
+            ->assertNotSet('batchId', null)
             ->call('continue')
             ->assertSet('step', 1);
+
+        $this->assertDatabaseHas('job_batches', [
+            'id' => $component->get('batchId'),
+            'total_jobs' => 8,
+            'pending_jobs' => 0,
+            'failed_jobs' => 0,
+        ]);
 
         $component->assertSee('Language')
             ->set('languageForm.name', Str::uuid())

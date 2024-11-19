@@ -19,6 +19,7 @@ use FluxErp\Livewire\Forms\VatRateForm;
 use FluxErp\Models\Language;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use FluxErp\Models\Warehouse;
 use Illuminate\Bus\Batch;
@@ -310,7 +311,12 @@ class InstallWizard extends Component
         resolve_static(User::class, 'query')
             ->whereKey($this->userForm->id)
             ->first()
-            ->assignRole('Super Admin');
+            ->assignRole(
+                resolve_static(Role::class, 'query')
+                    ->where('name', 'admin')
+                    ->where('guard_name', 'web')
+                    ->first()
+            );
 
         if ($this->languageForm->language_code !== 'en' && resolve_static(Language::class, 'query')->where('language_code', 'en')->doesntExist()) {
             $this->languageForm->reset();
