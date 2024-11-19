@@ -16,7 +16,11 @@ use FluxErp\Livewire\Forms\LanguageForm;
 use FluxErp\Livewire\Forms\PaymentTypeForm;
 use FluxErp\Livewire\Forms\UserForm;
 use FluxErp\Livewire\Forms\VatRateForm;
+use FluxErp\Models\Language;
+use FluxErp\Models\OrderType;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
+use FluxErp\Models\Warehouse;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Str;
@@ -129,8 +133,8 @@ class InstallWizard extends Component
                 'property' => 'paymentTypeForm',
                 'title' => __('Payment Type'),
                 'rules' => function () {
-                    $rules = CreatePaymentType::make([])->getRules();
-                    $rules['client_id'] = 'nullable';
+                    $rules = CreatePaymentType::make([])->setRulesFromRulesets()->getRules();
+                    $rules['clients'] = 'nullable';
 
                     return $rules;
                 },
@@ -308,7 +312,7 @@ class InstallWizard extends Component
             ->first()
             ->assignRole('Super Admin');
 
-        if ($this->languageForm->language_code !== 'en') {
+        if ($this->languageForm->language_code !== 'en' && resolve_static(Language::class, 'query')->where('language_code', 'en')->doesntExist()) {
             $this->languageForm->reset();
 
             $this->languageForm->name = 'English';
@@ -323,27 +327,33 @@ class InstallWizard extends Component
             $this->vatRateForm->setCheckPermission(false)->save();
         }
 
-        $this->paymentTypeForm->client_id = $this->clientForm->id;
+        $this->paymentTypeForm->clients = [$this->clientForm->id];
         $this->paymentTypeForm->setCheckPermission(false)->save();
 
         foreach (OrderTypeEnum::cases() as $orderType) {
-            CreateOrderType::make([
-                'client_id' => $this->clientForm->id,
-                'name' => __($orderType->name),
-                'order_type_enum' => $orderType,
+            if (resolve_static(OrderType::class, 'query')->where('order_type_enum', $orderType)->doesntExist()) {
+                CreateOrderType::make([
+                    'client_id' => $this->clientForm->id,
+                    'name' => __($orderType->name),
+                    'order_type_enum' => $orderType,
+                ])->execute();
+            }
+        }
+
+        if (resolve_static(PriceList::class, 'query')->where('price_list_code', 'default')->doesntExist()) {
+            CreatePriceList::make([
+                'name' => __('Default'),
+                'price_list_code' => 'default',
+                'is_net' => true,
+                'is_default' => true,
             ])->execute();
         }
 
-        CreatePriceList::make([
-            'name' => __('Default'),
-            'price_list_code' => 'default',
-            'is_net' => true,
-            'is_default' => true,
-        ])->execute();
-
-        CreateWarehouse::make([
-            'name' => __('Default'),
-            'is_default' => true,
-        ])->execute();
+        if (resolve_static(Warehouse::class, 'query')->where('name', 'Default')->doesntExist()) {
+            CreateWarehouse::make([
+                'name' => __('Default'),
+                'is_default' => true,
+            ])->execute();
+        }
     }
 }
