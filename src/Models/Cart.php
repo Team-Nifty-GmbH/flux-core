@@ -2,8 +2,11 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Actions\CartItem\CreateCartItem;
+use FluxErp\Actions\CartItem\UpdateCartItem;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
+use FluxErp\Helpers\PriceHelper;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
@@ -14,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class Cart extends FluxModel
@@ -80,6 +84,48 @@ class Cart extends FluxModel
     public function broadcastWith(): array
     {
         return ['id' => $this->id];
+    }
+
+    public function addItems(array|int $products): static
+    {
+        $products = Arr::wrap(is_array($products) && ! array_is_list($products) ? [$products] : $products);
+
+        foreach ($products as $product) {
+            $productModel = null;
+            if ($productId = is_array($product) ? data_get($product, 'id') : $product) {
+                $productModel = resolve_static(Product::class, 'query')
+                    ->whereKey($productId)
+                    ->first();
+            }
+
+            $data = [
+                'cart_id' => $this->id,
+                'product_id' => data_get($product, 'id', $productModel?->id),
+                'name' => data_get($product, 'name', $productModel?->name),
+                'amount' => $product['amount'] ?? 1,
+                'price' => $product['price']
+                    ?? PriceHelper::make($productModel)
+                        ->when(
+                            auth()->user() instanceof Address,
+                            fn (PriceHelper $price) => $price->setContact(auth()->user()->contact)
+                        )
+                        ->price()
+                        ?->price,
+            ];
+
+            if ($cartItem = $this->cartItems()->where('product_id', $productId)->first()) {
+                $data['id'] = $cartItem->id;
+                $data['amount'] = bcadd($cartItem->amount, $data['amount']);
+
+                $action = UpdateCartItem::make($data);
+            } else {
+                $action = CreateCartItem::make($data);
+            }
+
+            $action->validate()->execute();
+        }
+
+        return $this;
     }
 
     public function createOrder(
