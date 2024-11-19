@@ -3,6 +3,7 @@
 namespace Tests\Feature\Livewire\Order;
 
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\Order\OrderPositions;
 use FluxErp\Livewire\Order\OrderProject;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -14,6 +15,7 @@ use FluxErp\Models\PriceList;
 use FluxErp\Models\Project;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 
 class OrderProjectTest extends BaseSetup
@@ -81,6 +83,7 @@ class OrderProjectTest extends BaseSetup
     public function test_can_create_project_from_order()
     {
         $projectName = Str::uuid();
+        /** @var Testable $component */
         $component = Livewire::withoutLazyLoading()
             ->test($this->livewireComponent, ['order' => $this->order])
             ->set('existingProject', false)
@@ -95,9 +98,7 @@ class OrderProjectTest extends BaseSetup
             ->call('save');
 
         $component
-            ->assertExecutesJs(<<<JS
-                \$wire.\$parent.createTasks({$component->get('form.id')})
-            JS)
+            ->assertDispatchedTo(OrderPositions::class, 'create-tasks', $component->get('form.id'))
             ->assertReturned(true)
             ->assertStatus(200)
             ->assertHasNoErrors();
