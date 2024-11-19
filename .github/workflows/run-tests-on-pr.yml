@@ -82,7 +82,6 @@ jobs:
       - name: Run Livewire Tests
         run: composer test-livewire
         env:
-          QUEUE_CONNECTION: sync
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
@@ -90,7 +89,6 @@ jobs:
       - name: Run Feature Tests
         run: composer test-feature
         env:
-          QUEUE_CONNECTION: sync
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
