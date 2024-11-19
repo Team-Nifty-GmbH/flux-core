@@ -98,7 +98,7 @@ class OrderProjectTest extends BaseSetup
             ->call('save');
 
         $component
-            ->assertDispatchedTo(OrderPositions::class, 'create-tasks', $component->get('form.id'))
+            ->assertDispatchedTo('order.order-positions', 'create-tasks', $component->get('form.id'))
             ->assertReturned(true)
             ->assertStatus(200)
             ->assertHasNoErrors();
