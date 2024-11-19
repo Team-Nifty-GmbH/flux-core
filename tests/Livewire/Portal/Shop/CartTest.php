@@ -34,9 +34,9 @@ class CartTest extends BaseSetup
 
     public function test_can_add_cart_item()
     {
-        /** @var Collection $product */
-        $product = Product::factory()
-            ->count(3)
+        /** @var Collection $products */
+        $products = Product::factory()
+            ->count(2)
             ->hasAttached($this->dbClient, relationship: 'clients')
             ->for(VatRate::factory(), relationship: 'vatRate')
             ->has(
@@ -47,17 +47,17 @@ class CartTest extends BaseSetup
             ->create();
 
         Livewire::test(Cart::class)
-            ->fireEvent('cart:add', $product->first()->id)
+            ->fireEvent('cart:add', $products->first()->id)
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertWireuiNotification(icon: 'success')
             ->assertCount('cart.cartItems', 1)
-            ->fireEvent('cart:add', [$product->get(1)->id])
+            ->fireEvent('cart:add', [$products->get(1)->id])
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertWireuiNotification(icon: 'success')
             ->assertCount('cart.cartItems', 2)
-            ->fireEvent('cart:add', ['id' => $product->get(1)->id, 'amount' => 2])
+            ->fireEvent('cart:add', ['id' => $products->get(1)->id, 'amount' => 2])
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertWireuiNotification(icon: 'success')
