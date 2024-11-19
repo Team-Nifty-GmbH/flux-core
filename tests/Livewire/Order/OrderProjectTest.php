@@ -142,9 +142,7 @@ class OrderProjectTest extends BaseSetup
             ->call('save')
             ->assertReturned(true)
             ->assertStatus(200)
-            ->assertExecutesJs(<<<JS
-                \$wire.\$parent.createTasks({$component->get('form.id')})
-            JS);
+            ->assertDispatchedTo('order.order-positions', 'create-tasks', $component->get('form.id'));
 
         $this->assertEquals($currentProjectCount, Project::query()->count());
     }
