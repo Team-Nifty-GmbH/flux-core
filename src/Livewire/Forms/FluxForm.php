@@ -111,7 +111,9 @@ abstract class FluxForm extends BaseForm
         parent::validate(
             array_intersect_key(
                 array_merge(
-                    $this->makeAction($this->{$this->getKey()} ? 'update' : 'create')->getRules(),
+                    $this->makeAction($this->{$this->getKey()} ? 'update' : 'create')
+                        ->setRulesFromRulesets()
+                        ->getRules(),
                     $rules ?? []
                 ),
                 $this->toActionData()
