@@ -10,6 +10,7 @@ use FluxErp\Providers\EventServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Laravel\Scout\ScoutServiceProvider;
@@ -44,6 +45,8 @@ abstract class TestCase extends BaseTestCase
         }
 
         parent::setUp();
+        // copy the schema from the package to the testbench skeleton
+        copy(__DIR__ . '/../../database/schema/mysql-schema.sql', database_path('migrations'));
 
         if (! file_exists(public_path('flux'))) {
             symlink(package_path('public'), public_path('flux'));
