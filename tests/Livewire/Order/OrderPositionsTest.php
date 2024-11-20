@@ -143,7 +143,9 @@ class OrderPositionsTest extends BaseSetup
 
     public function test_quick_add_order_position()
     {
-        PriceList::query()->where('is_default', false)->update(['is_default' => false]);
+        PriceList::query()
+            ->where('is_default', true)
+            ->update(['is_default' => false]);
         $product = Product::factory()
             ->for(VatRate::factory())
             ->has(
