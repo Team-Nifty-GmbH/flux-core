@@ -143,6 +143,7 @@ class OrderPositionsTest extends BaseSetup
 
     public function test_quick_add_order_position()
     {
+        PriceList::query()->update(['is_default' => false]);
         $product = Product::factory()
             ->for(VatRate::factory())
             ->has(
@@ -156,8 +157,9 @@ class OrderPositionsTest extends BaseSetup
                 'prices'
             )
             ->create();
-
+        $this->order->update(['price_list_id' => $product->prices->first()->price_list_id]);
         $orderPositionCount = $this->order->orderPositions()->count();
+
         Livewire::test(OrderPositions::class, ['order' => $this->orderPositionForm])
             ->set('orderPosition.product_id', $product->id)
             ->call('quickAdd')
@@ -166,14 +168,15 @@ class OrderPositionsTest extends BaseSetup
             ->assertReturned(true);
 
         $this->assertEquals($orderPositionCount + 1, $this->order->orderPositions()->count());
-        $newOrderPosition = $this->order->orderPositions()->latest()->first();
+        $newOrderPosition = $this->order->orderPositions()->where('product_id', $product->id)->first();
+
         $this->assertNotEquals(
             $product->prices->first()->getNet($product->vatRate->rate_percentage),
             $product->prices->first()->getGross($product->vatRate->rate_percentage),
         );
         $this->assertEquals(
             $product->prices->first()->getNet($product->vatRate->rate_percentage),
-            $newOrderPosition->unit_net_price
+            $newOrderPosition->unit_net_price,
         );
         $this->assertEquals(
             $product->prices->first()->getGross($product->vatRate->rate_percentage),
