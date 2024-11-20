@@ -24,7 +24,7 @@ class OrderPositionsTest extends BaseSetup
 {
     protected string $livewireComponent = OrderPositions::class;
 
-    protected $orderPositionForm;
+    protected OrderForm $orderForm;
 
     protected function setUp(): void
     {
@@ -83,13 +83,13 @@ class OrderPositionsTest extends BaseSetup
 
         $this->order->calculatePrices()->save();
 
-        $this->orderPositionForm = new OrderForm(Livewire::new(OrderPositions::class), 'order');
-        $this->orderPositionForm->fill($this->order);
+        $this->orderForm = new OrderForm(Livewire::new(OrderPositions::class), 'order');
+        $this->orderForm->fill($this->order);
     }
 
     public function test_renders_successfully()
     {
-        Livewire::test(OrderPositions::class, ['order' => $this->orderPositionForm])
+        Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
             ->assertStatus(200);
     }
 
@@ -97,7 +97,7 @@ class OrderPositionsTest extends BaseSetup
     {
         $orderPosition = $this->order->orderPositions->first();
 
-        Livewire::test(OrderPositions::class, ['order' => $this->orderPositionForm])
+        Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
             ->call('editOrderPosition', $orderPosition->id)
             ->assertStatus(200)
             ->assertHasNoErrors()
@@ -117,7 +117,7 @@ class OrderPositionsTest extends BaseSetup
 
     public function test_recalculate_prices()
     {
-        Livewire::test(OrderPositions::class, ['order' => $this->orderPositionForm])
+        Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
             ->set('selected', ['*'])
             ->call('recalculateOrderPositions')
             ->assertStatus(200)
@@ -129,7 +129,7 @@ class OrderPositionsTest extends BaseSetup
 
     public function test_can_show_related_columns()
     {
-        $component = Livewire::test(OrderPositions::class, ['order' => $this->orderPositionForm]);
+        $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm]);
 
         $component->set('enabledCols', array_merge($component->get('enabledCols'), ['order.uuid']))
             ->call('loadData')
@@ -143,7 +143,7 @@ class OrderPositionsTest extends BaseSetup
 
     public function test_quick_add_order_position()
     {
-        PriceList::query()->update(['is_default' => false]);
+        PriceList::query()->where('is_default', false)->update(['is_default' => false]);
         $product = Product::factory()
             ->for(VatRate::factory())
             ->has(
@@ -160,7 +160,7 @@ class OrderPositionsTest extends BaseSetup
         $this->order->update(['price_list_id' => $product->prices->first()->price_list_id]);
         $orderPositionCount = $this->order->orderPositions()->count();
 
-        Livewire::test(OrderPositions::class, ['order' => $this->orderPositionForm])
+        Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
             ->set('orderPosition.product_id', $product->id)
             ->call('quickAdd')
             ->assertStatus(200)
@@ -169,18 +169,11 @@ class OrderPositionsTest extends BaseSetup
 
         $this->assertEquals($orderPositionCount + 1, $this->order->orderPositions()->count());
         $newOrderPosition = $this->order->orderPositions()->where('product_id', $product->id)->first();
+        $productNetPrice = $product->prices->first()->getNet($product->vatRate->rate_percentage);
+        $productGrossPrice = $product->prices->first()->getGross($product->vatRate->rate_percentage);
 
-        $this->assertNotEquals(
-            $product->prices->first()->getNet($product->vatRate->rate_percentage),
-            $product->prices->first()->getGross($product->vatRate->rate_percentage),
-        );
-        $this->assertEquals(
-            $product->prices->first()->getNet($product->vatRate->rate_percentage),
-            $newOrderPosition->unit_net_price,
-        );
-        $this->assertEquals(
-            $product->prices->first()->getGross($product->vatRate->rate_percentage),
-            $newOrderPosition->unit_gross_price
-        );
+        $this->assertNotEquals($productNetPrice, $productGrossPrice);
+        $this->assertEquals($productNetPrice, $newOrderPosition->unit_net_price);
+        $this->assertEquals($productGrossPrice, $newOrderPosition->unit_gross_price);
     }
 }
