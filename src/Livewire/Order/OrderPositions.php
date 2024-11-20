@@ -58,6 +58,7 @@ class OrderPositions extends OrderPositionList
         return array_merge(
             parent::getListeners(),
             [
+                'create-tasks' => 'createTasks',
                 'order:add-products' => 'addProducts',
             ]
         );
