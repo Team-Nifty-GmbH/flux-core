@@ -3,7 +3,6 @@
 namespace Tests\Feature\Livewire\Order;
 
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Livewire\Order\OrderPositions;
 use FluxErp\Livewire\Order\OrderProject;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
