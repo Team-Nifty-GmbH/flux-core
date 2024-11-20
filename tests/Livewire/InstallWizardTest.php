@@ -11,16 +11,10 @@ use Livewire\Livewire;
 
 class InstallWizardTest extends TestCase
 {
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        // Set the configuration value
-        Config::set('flux.install_done', false);
-    }
-
     public function test_renders_successfully()
     {
+        Config::set('flux.install_done', false);
+
         Livewire::test(InstallWizard::class)
             ->assertStatus(200);
     }
