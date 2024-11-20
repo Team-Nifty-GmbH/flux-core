@@ -129,7 +129,7 @@ class OrderPositionsTest extends BaseSetup
 
     public function test_can_show_related_columns()
     {
-        $component = Livewire::test(OrderPositions::class, ['order' => $this->form]);
+        $component = Livewire::test(OrderPositions::class, ['order' => $this->orderPositionForm]);
 
         $component->set('enabledCols', array_merge($component->get('enabledCols'), ['order.uuid']))
             ->call('loadData')
