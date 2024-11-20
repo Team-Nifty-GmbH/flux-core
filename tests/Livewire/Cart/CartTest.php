@@ -72,6 +72,7 @@ class CartTest extends BaseSetup
             ->assertCount('cart.cartItems', 3)
             ->set('watchlistName', $watchListName = Str::uuid())
             ->call('saveToWatchlist')
+            ->assertHasNoErrors()
             ->assertReturned(true)
             ->assertWireuiNotification(icon: 'success');
 

@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateCartItem extends FluxAction
 {
+    protected static bool $hasPermission = false;
+
     protected function getRulesets(): string|array
     {
         return UpdateCartItemRuleset::class;
